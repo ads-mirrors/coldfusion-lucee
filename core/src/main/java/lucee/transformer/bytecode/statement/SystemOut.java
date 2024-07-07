@@ -49,7 +49,7 @@ public final class SystemOut extends StatementBaseNoFinal {
 	}
 
 	/**
-	 * @see lucee.transformer.bytecode.statement.StatementBase#_writeOut(org.objectweb.asm.commons.GeneratorAdapter)
+	 * @see lucee.transformer.bytecode.statement.StatementBase#_writeOut(lucee.transformer.bytecode.BytecodeContext)
 	 */
 	@Override
 	public void _writeOut(BytecodeContext bc) throws TransformerException {

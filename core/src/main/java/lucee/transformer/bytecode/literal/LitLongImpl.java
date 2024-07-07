@@ -87,7 +87,7 @@ public final class LitLongImpl extends ExpressionBase implements LitLong {
 	}
 
 	/**
-	 * @see lucee.transformer.expression.Expression#_writeOut(org.objectweb.asm.commons.GeneratorAdapter,
+	 * lucee.transformer.expression.Expression#_writeOut(lucee.transformer.bytecode.BytecodeContext,
 	 *      int)
 	 */
 	@Override
