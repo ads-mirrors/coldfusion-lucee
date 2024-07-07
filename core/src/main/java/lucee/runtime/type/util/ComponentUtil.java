@@ -638,7 +638,7 @@ public final class ComponentUtil {
 	 * 
 	 * @param access access type
 	 * @return int access type
-	 * @throws ExpressionException
+	 * @throws ApplicationException
 	 */
 	public static int toIntAccess(String access) throws ApplicationException {
 		access = StringUtil.toLowerCase(access.trim());
@@ -664,7 +664,7 @@ public final class ComponentUtil {
 	 * 
 	 * @param access
 	 * @return String access type
-	 * @throws ExpressionException
+	 * @throws ApplicationException
 	 */
 	public static String toStringAccess(int access) throws ApplicationException {
 		String res = toStringAccess(access, null);

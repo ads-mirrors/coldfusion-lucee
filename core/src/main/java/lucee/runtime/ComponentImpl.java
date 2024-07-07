@@ -805,9 +805,7 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 	/**
 	 * list of keys
 	 * 
-	 * @param c
 	 * @param access
-	 * @param doBase
 	 * @return key set
 	 */
 	@Override
@@ -918,10 +916,10 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 	/**
 	 * get entry matching key
 	 * 
-	 * @param access
-	 * @param keyLowerCase key lower case (case sensitive)
-	 * @param doBase do check also base component
-	 * @param dataMember do also check if key super
+	 * @param pc
+	 * @param key
+	 * @param dataMember
+	 * @param superAccess
 	 * @return matching entry if exists otherwise null
 	 */
 	protected Member getMember(PageContext pc, Collection.Key key, boolean dataMember, boolean superAccess) {

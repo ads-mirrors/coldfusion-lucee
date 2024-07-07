@@ -66,7 +66,6 @@ public final class ClassUtil {
 	 * @param className
 	 * @return
 	 * @throws ClassException
-	 * @throws PageException
 	 */
 	public static Class toClass(PageContext pc, String className) throws ClassException {
 		return loadClass(pc, className);

@@ -1448,8 +1448,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	/**
 	 * sets the Schedule Directory
 	 * 
+	 * @param engine
 	 * @param scheduleDirectory sets the schedule Directory
-	 * @param logger
 	 * @throws PageException
 	 */
 	protected void setScheduler(CFMLEngine engine, Array scheduledTasks, boolean refresh) throws PageException {
@@ -1735,7 +1735,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	/**
-	 * @param searchEngine The searchEngine to set.
+	 * @param cd
+	 * @param directory
 	 */
 	protected void setSearchEngine(ClassDefinition cd, String directory) {
 		if (this.searchEngineClassDef == null || !this.searchEngineClassDef.equals(cd)) {
@@ -2047,7 +2048,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	/**
-	 * @param mailDefaultEncoding the mailDefaultCharset to set
+	 * @param mailDefaultCharset the mailDefaultCharset to set
 	 */
 	protected void setMailDefaultEncoding(String mailDefaultCharset) {
 		this.mailDefaultCharset = CharsetUtil.toCharSet(mailDefaultCharset, this.mailDefaultCharset);

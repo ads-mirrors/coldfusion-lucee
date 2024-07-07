@@ -48,7 +48,7 @@ public final class ConstructorInstance {
 	/**
 	 * constructor of the class
 	 * 
-	 * @param constructor
+	 * @param clazz
 	 * @param args
 	 */
 	public ConstructorInstance(Class clazz, Object[] args, boolean convertComparsion) {
