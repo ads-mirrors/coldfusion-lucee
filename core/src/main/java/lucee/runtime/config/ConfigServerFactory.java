@@ -66,7 +66,7 @@ public final class ConfigServerFactory extends ConfigFactory {
 	 * @param configDir
 	 * @return new Instance
 	 * @throws SAXException
-	 * @throws ClassNotFoundException
+	 * @throws ClassException
 	 * @throws PageException
 	 * @throws IOException
 	 * @throws TagLibException
@@ -213,8 +213,7 @@ public final class ConfigServerFactory extends ConfigFactory {
 	 * reloads the Config Object
 	 * 
 	 * @param configServer
-	 * @throws SAXException
-	 * @throws ClassNotFoundException
+	 * @throws ClassException
 	 * @throws PageException
 	 * @throws IOException
 	 * @throws TagLibException

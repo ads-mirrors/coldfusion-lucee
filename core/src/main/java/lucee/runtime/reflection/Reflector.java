@@ -309,8 +309,8 @@ public final class Reflector {
 	 * convert Object from src to trg Type, if possible
 	 * 
 	 * @param src Object to convert
-	 * @param srcClass Source Class
 	 * @param trgClass Target Class
+	 * @param rating
 	 * @return converted Object
 	 * @throws PageException
 	 */
@@ -985,11 +985,7 @@ public final class Reflector {
 	 * @param prop Name of the Method without get
 	 * @param value Value to set to the Method
 	 * @return MethodInstance
-	 * @throws NoSuchMethodException
 	 * @throws PageException
-	 * @throws UnmodifiableClassException
-	 * @throws IOException
-	 * @throws ClassNotFoundException
 	 */
 	public static MethodInstance getSetter(Object obj, String prop, Object value, boolean nameCaseSensitive) throws PageException {
 		prop = "set" + StringUtil.ucFirst(prop);

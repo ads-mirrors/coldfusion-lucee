@@ -39,7 +39,7 @@ public final class MemoryClassLoader extends ClassLoader implements ExtendableCl
 	/**
 	 * Constructor of the class
 	 * 
-	 * @param directory
+	 * @param config
 	 * @param parent
 	 * @throws IOException
 	 */

@@ -436,7 +436,6 @@ public final class SystemUtil {
 	 * returns the Temp Directory of the System
 	 * 
 	 * @return temp directory
-	 * @throws IOException
 	 */
 	public static Resource getTempDirectory() {
 		return ResourcesImpl.getFileResourceProvider().getResource(CFMLEngineFactory.getTempDirectory().getAbsolutePath());
@@ -801,7 +800,6 @@ public final class SystemUtil {
 	 * 
 	 * @param lock
 	 * @param timeout
-	 * @throws InterruptedException
 	 */
 	public static void wait(Object lock, long timeout) {
 		try {
@@ -827,7 +825,6 @@ public final class SystemUtil {
 	 * locks the object (synchronized) before calling wait (no timeout)
 	 * 
 	 * @param lock
-	 * @throws InterruptedException
 	 */
 	public static void wait(Object lock) {
 		try {
@@ -843,8 +840,6 @@ public final class SystemUtil {
 	 * locks the object (synchronized) before calling notify
 	 * 
 	 * @param lock
-	 * @param timeout
-	 * @throws InterruptedException
 	 */
 	public static void notify(Object lock) {
 		synchronized (lock) {
@@ -856,8 +851,6 @@ public final class SystemUtil {
 	 * locks the object (synchronized) before calling notifyAll
 	 * 
 	 * @param lock
-	 * @param timeout
-	 * @throws InterruptedException
 	 */
 	public static void notifyAll(Object lock) {
 		synchronized (lock) {

@@ -314,11 +314,12 @@ public final class XMLUtil {
 	 * parse XML/HTML String to a XML DOM representation
 	 *
 	 * @param xml XML InputSource
+	 * @param validator
+	 * @param entRes
 	 * @param isHtml is a HTML or XML Object
 	 * @return parsed Document
 	 * @throws SAXException
 	 * @throws IOException
-	 * @throws ParserConfigurationException
 	 */
 	public static final Document parse(InputSource xml, Object validator, EntityResolver entRes, boolean isHtml) throws SAXException, IOException {
 
@@ -1361,8 +1362,6 @@ public final class XMLUtil {
 	 * @param xsl xsl used to convert
 	 * @return resulting string
 	 * @throws TransformerException
-	 * @throws SAXException
-	 * @throws IOException
 	 */
 	public static String transform(Document doc, InputSource xsl) throws TransformerException {
 		return transform(doc, xsl, null);
@@ -1376,8 +1375,6 @@ public final class XMLUtil {
 	 * @param parameters parameters used to convert
 	 * @return resulting string
 	 * @throws TransformerException
-	 * @throws SAXException
-	 * @throws IOException
 	 */
 	public static String transform(Document doc, InputSource xsl, Map<String, Object> parameters) throws TransformerException {
 		StringWriter sw = new StringWriter();

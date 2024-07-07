@@ -486,7 +486,7 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 	 * 
 	 * @param name
 	 * @return
-	 * @throws IOException
+	 * @throws ApplicationException
 	 */
 	public static String substractAppendix(String name) throws ApplicationException {
 		if (name.endsWith("$cf")) return name;
