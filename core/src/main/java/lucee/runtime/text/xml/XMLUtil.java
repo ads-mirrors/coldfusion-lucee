@@ -478,13 +478,13 @@ public final class XMLUtil {
 					Class<DocumentBuilderFactory> clazz = null;
 					try {
 						Class c = ClassUtil.loadClass("com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl");
-						ClassUtil.loadInstance(clazz); // make sure we can also load it
+						// ClassUtil.loadInstance(clazz); // make sure we can also load it
 						clazz = c;
 					}
 					catch (Exception e) {
 						try {
 							Class c = ClassUtil.loadClass("org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl");
-							ClassUtil.loadInstance(clazz); // make sure we can also load it
+							// ClassUtil.loadInstance(clazz); // make sure we can also load it
 							clazz = c;
 						}
 						catch (Exception ee) {
