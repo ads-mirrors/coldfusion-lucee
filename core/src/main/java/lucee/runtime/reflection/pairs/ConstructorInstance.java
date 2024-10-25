@@ -60,10 +60,22 @@ public final class ConstructorInstance {
 		}
 		catch (IncompatibleClassChangeError | ClassFormatError | IllegalStateException e) {
 			if (!Clazz.allowReflection()) throw e;
-			LogUtil.log("direct", e);
-			DynamicInvoker di = DynamicInvoker.getExistingInstance();
-			lucee.transformer.dynamic.meta.Constructor constr = Clazz.getConstructorMatch(di.getClazz(clazz, true), args, true);
-			return ((LegacyConstuctor) constr).getConstructor().newInstance(args);
+
+			// fallback to reflection
+			boolean failed = false;
+			try {
+				DynamicInvoker di = DynamicInvoker.getExistingInstance();
+				lucee.transformer.dynamic.meta.Constructor constr = Clazz.getConstructorMatch(di.getClazz(clazz, true), args, true);
+				return ((LegacyConstuctor) constr).getConstructor().newInstance(args);
+			}
+			catch (IncompatibleClassChangeError | ClassFormatError | IllegalStateException ex) {
+				failed = true;
+				throw e;
+			}
+			finally {
+				// we only log the exception from direct invocation, in case reflection does not fail
+				if (!failed) LogUtil.log("direct", e);
+			}
 		}
 	}
 
