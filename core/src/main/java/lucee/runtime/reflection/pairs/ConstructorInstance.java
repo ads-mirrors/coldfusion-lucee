@@ -22,7 +22,9 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.BiFunction;
 
+import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
+import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.Pair;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
@@ -74,7 +76,7 @@ public final class ConstructorInstance {
 			}
 			finally {
 				// we only log the exception from direct invocation, in case reflection does not fail
-				if (!failed) LogUtil.log("direct", e);
+				if (!failed) LogUtil.log(Log.LEVEL_DEBUG, "direct", ExceptionUtil.getStacktrace(e, true));
 			}
 		}
 	}
