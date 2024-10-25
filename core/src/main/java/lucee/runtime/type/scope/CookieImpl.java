@@ -20,9 +20,9 @@ package lucee.runtime.type.scope;
 
 import java.lang.reflect.Method;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -61,7 +61,7 @@ public final class CookieImpl extends ScopeSupport implements Cookie, ScriptProt
 
 	private HttpServletResponse rsp;
 	private int scriptProtected = ScriptProtected.UNDEFINED;
-	private Map<String, String> raw = new HashMap<String, String>();
+	private Map<String, String> raw = new ConcurrentHashMap<String, String>();
 	private String charset;
 
 	private static final Class<?>[] IS_HTTP_ONLY_ARGS_CLASSES = new Class[] {};
@@ -136,11 +136,11 @@ public final class CookieImpl extends ScopeSupport implements Cookie, ScriptProt
 	}
 
 	@Override
-	public synchronized void clear() {
-		raw.clear();
+	public void clear() {
 		for (Collection.Key key: keys()) {
-			removeEL(key, false);
+			super.removeEL(key);
 		}
+		raw.clear();
 	}
 
 	@Override
