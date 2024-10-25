@@ -144,6 +144,13 @@ public final class XMLUtil {
 
 	private static boolean disableXmlFeatureOverride = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.xmlfeatures.override.disable", "false"), false);
 
+	private static Class<DocumentBuilderFactory> dbf;
+	private static boolean initDbf = false;
+
+	private static URL documentBuilderFactoryResource;
+
+	private static URL saxParserFactoryResource;
+
 	public static String unescapeXMLString(String str) {
 
 		StringBuffer rtn = new StringBuffer();
@@ -424,34 +431,6 @@ public final class XMLUtil {
 		return factory;
 	}
 
-	private static Class<DocumentBuilderFactory> dbf;
-
-	private static URL documentBuilderFactoryResource;
-
-	private static URL saxParserFactoryResource;
-
-	private static Class<DocumentBuilderFactory> _newDocumentBuilderFactoryClass() {
-		if (dbf == null) {
-			Thread.currentThread().setContextClassLoader(EnvClassLoader.getInstance((ConfigPro) ThreadLocalPageContext.getConfig()));
-			Class<DocumentBuilderFactory> clazz = null;
-			try {
-				clazz = ClassUtil.loadClass("com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl");
-			}
-			catch (Exception e) {
-				try {
-					clazz = ClassUtil.loadClass("org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl");
-				}
-				catch (Exception ee) {
-				}
-			}
-			if (clazz != null) {
-				dbf = clazz;
-				LogUtil.log(Log.LEVEL_INFO, "application", "xml", clazz.getName() + " is used as DocumentBuilderFactory");
-			}
-		}
-		return dbf;
-	}
-
 	public static String getXMLParserConfigurationName() {
 		String value = "org.apache.xerces.parsers.XIncludeAwareParserConfiguration";
 		System.setProperty("org.apache.xerces.xni.parser.XMLParserConfiguration", value);
@@ -483,10 +462,44 @@ public final class XMLUtil {
 				factory = (DocumentBuilderFactory) ClassUtil.loadInstance(clazz);
 			}
 			catch (Exception e) {
+				LogUtil.log(Log.LEVEL_DEBUG, "application", "xml", ExceptionUtil.getStacktrace(e, true));
 			}
 		}
 		if (factory == null) factory = DocumentBuilderFactory.newInstance();
 		return factory;
+	}
+
+	private static Class<DocumentBuilderFactory> _newDocumentBuilderFactoryClass() {
+		if (!initDbf) {
+			synchronized (SystemUtil.createToken("XMLUtil", "newDocumentBuilderFactoryClass")) {
+				if (!initDbf) {
+
+					Thread.currentThread().setContextClassLoader(EnvClassLoader.getInstance((ConfigPro) ThreadLocalPageContext.getConfig()));
+					Class<DocumentBuilderFactory> clazz = null;
+					try {
+						Class c = ClassUtil.loadClass("com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl");
+						ClassUtil.loadInstance(clazz); // make sure we can also load it
+						clazz = c;
+					}
+					catch (Exception e) {
+						try {
+							Class c = ClassUtil.loadClass("org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl");
+							ClassUtil.loadInstance(clazz); // make sure we can also load it
+							clazz = c;
+						}
+						catch (Exception ee) {
+						}
+					}
+					initDbf = true; // we only try once to load it, because this comes from the main classloader that will not change
+									// his mind
+					if (clazz != null) {
+						dbf = clazz;
+						LogUtil.log(Log.LEVEL_INFO, "application", "xml", clazz.getName() + " is used as DocumentBuilderFactory");
+					}
+				}
+			}
+		}
+		return dbf;
 	}
 
 	private static SAXParserFactory newSAXParserFactory() {
