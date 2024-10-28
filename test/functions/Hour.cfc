@@ -1,6 +1,13 @@
 component extends="org.lucee.cfml.test.LuceeTestCase" {
 	function run( testResults , testBox ) {
 		describe( "testcase for Hour()", function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it(title="Checking with Hour() function", body=function( currentSpec ) {
 				var dt = createDateTime(2018, 07, 30, 06, 15, 45);
 				setLocale("english (us)");

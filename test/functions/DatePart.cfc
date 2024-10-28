@@ -1,6 +1,13 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function run( testResults , testBox ) {
 		describe( "test case for DatePart", function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it(title = "Checking with DatePartMember", body = function( currentSpec ) {
 				d1=CreateDateTime(2001, 12, 1, 4, 10, 1);
 				assertEquals("12", "#d1.part("m")#");

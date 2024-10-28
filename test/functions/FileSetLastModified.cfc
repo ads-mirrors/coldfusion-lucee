@@ -11,6 +11,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 	function run( testResults , testBox ) {
 		describe( title="Testcase for fileSetLastModified", body=function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it(title="Checking with fileSetLastModified function", body=function( currentSpec ) {
 				fileSetLastModified(uri&"\testfile.txt", dateAdd("d", 1, CreateDateTime(2023, 05, 04, 1, 1, 1)));
 				expect( getFileInfo(uri&"\testfile.txt").lastmodified ).toBe("{ts '2023-05-05 01:01:01'}");

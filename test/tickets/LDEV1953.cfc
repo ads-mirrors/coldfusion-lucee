@@ -10,6 +10,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase"  labels="mysql" {
 
 	function run( testResults , testBox ) {
 		describe( title="Test suite for LDEV-1953", body=function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it( title='Checking mysql with zeroDateTimeBehavior as convertToNull',skip=isMySqlNotSupported(),body=function( currentSpec ) {
 				var uri = createURI("LDEV1953");
 				var result = _InternalRequest(

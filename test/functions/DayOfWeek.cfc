@@ -1,6 +1,13 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function run( testResults , testBox ) {
 		describe( title="Test suite for DayOfWeek()", body=function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it(title="checking DayOfWeek() function", body = function( currentSpec ) {
 				d1=CreateDateTime(2001, 12, 1, 4, 10, 1); 
 				assertEquals("7", "#dayOfWeek(d1)#");

@@ -1,6 +1,13 @@
 component extends="org.lucee.cfml.test.LuceeTestCase" {
 	function run( testResults , testBox ) {
 		describe( title="Testcase for lsWeek()", body=function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it(title="checking lsWeek() with locale argument", body = function( currentSpec ) {
 				var date = createDateTime(2022,01,17,12,0,0,0,"UTC"); 
 				

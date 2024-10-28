@@ -1,6 +1,13 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function run( testResults , testBox ) {
 		describe( title="Test suite for CreateDateTime()", body=function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it(title="checking CreateDateTime() function", body = function( currentSpec ) {
 				assertEquals("{ts '2000-12-11 00:00:00'}x","#CreateDateTime(2000, 12, 11)#x");
 				assertEquals("{ts '2000-12-01 00:00:00'}x","#CreateDateTime(2000, 12)#x");

@@ -2,6 +2,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
     function run( testResults , testBox ) {
         describe( "Test suite for LDEV-2315", function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 
             it( title='Checking getLocaleInfo() function', body=function( currentSpec ) {
 

@@ -14,6 +14,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 
 
 		describe( "Check the Scheduled Task Service", function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 
 			it(title="check next calculation for daily", body=function(){
 				var now=createDateTime(2021,1,1,11,1,1,0,"CET").getTime();

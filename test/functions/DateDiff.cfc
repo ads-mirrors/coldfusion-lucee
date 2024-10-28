@@ -1,6 +1,13 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function run( testResults , testBox ) {
 		describe( "test case for DateDiff", function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it(title="Checking with DateDiff", body=function( currentSpec ) {
 
 				setTimeZone("CET");<!--- this timezone is used for DST tests --->

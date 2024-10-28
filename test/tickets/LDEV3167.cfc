@@ -1,6 +1,13 @@
 component extends = "org.lucee.cfml.test.LuceeTestCase" {
 	function run ( testResults , testbox ){
-		describe( title="Testcase for LDEV-3167", body=function(){
+		describe( title="Testcase for LDEV-3167", body=function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it( title = "Check with invalid struct member function", body = function( currentSpec ){
 				str = { one : "one",two : "two" };
 				try{

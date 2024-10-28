@@ -2,6 +2,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="java" {
 
 	function run( testResults , testBox ) {
 		describe( title='LDEV-2793' , body=function(){
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it( title='test parseDateTime ' , body=function() {
 				var projects = [
 					{

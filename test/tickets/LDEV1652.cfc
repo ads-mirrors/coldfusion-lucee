@@ -1,6 +1,13 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function run( testResults , testBox ) {
 		describe( title="Test suite for LDEV-1652", body=function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it( title='Checking parseDateTime(), with input as invalid dateFormat',body=function( currentSpec ) {
 				try{
 					var ts = "2018-01-04-23.40.56";

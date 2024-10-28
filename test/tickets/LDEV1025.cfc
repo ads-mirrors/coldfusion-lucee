@@ -20,6 +20,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 		setTimeZone("CEST");
 		describe( "Test suite for LDEV-1025", function() {
 			describe("checking 'DateFormat' function with all mask", function() {
+				beforeEach( function(){
+					variables.startingTZ=getTimeZone();
+					setTimeZone("UTC");
+				});
+				afterEach( function(){
+					setTimeZone(variables.startingTZ?:"UTC");
+				});
 				it("checking 'date' mask parsing", function() {
 					ds_date = {
 						df_d      : DateFormat(dateandtime, "d"),
@@ -110,6 +117,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			});
 			
 			describe("checking 'DateTimeFormat' function with all mask", function() {
+				beforeEach( function(){
+					variables.startingTZ=getTimeZone();
+					setTimeZone("UTC");
+				});
+				afterEach( function(){
+					setTimeZone(variables.startingTZ?:"UTC");
+				});
 				it("checking 'date' mask parsing", function() {
 					ds_date = {
 						df_d      : DateTimeFormat(dateandtime, "d"),

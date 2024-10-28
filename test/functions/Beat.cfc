@@ -1,6 +1,13 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function run( testResults , testBox ) {
 		describe( title="Test suite for Beat()", body=function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it(title="Checking Beat() function", body = function( currentSpec ) {
 				assertEquals("500", beat(createDateTime(2000,1,1,12,0,0,0,"CET")));
 				assertEquals("true", beat() GTE 0);

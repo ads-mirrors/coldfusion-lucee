@@ -1,6 +1,13 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function run( testResults , testBox ) {
 		describe( title="Test suite for DayOfYear()", body=function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it(title="checking DayOfYear() function", body = function( currentSpec ) {
 				d1 = CreateDateTime(2001, 12, 1, 4, 10, 1);
 				assertEquals("335", "#dayOfYear(d1)#");

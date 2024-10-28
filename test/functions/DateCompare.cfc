@@ -1,6 +1,13 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function run( testResults , testBox ) {
 		describe( "test case for DateCompare", function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it(title="Checking with DateCompare", body=function( currentSpec ) {
 				assertEquals("1" , "#DateCompare("{ts '2007-10-10 00:00:00'}","{ts '2007-10-09 23:59:59'}","d")#");
 					

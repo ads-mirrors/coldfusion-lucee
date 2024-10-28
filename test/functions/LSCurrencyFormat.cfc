@@ -12,6 +12,13 @@
 
 	function run( testResults , testBox ) {
 		describe( title="Test suite for LSCurrencyFormat()", body=function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it(title="checking LSCurrencyFormat() function, English (Australian)", body = function( currentSpec ) {
 
 				<!---

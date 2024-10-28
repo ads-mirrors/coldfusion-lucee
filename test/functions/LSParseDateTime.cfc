@@ -11,6 +11,13 @@
 
 	function run( testResults , testBox ) {
 		describe( title="Test suite for LSparseDateTime()", body=function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 
 			it( title="checking LSparseDateTime() function", body = function( currentSpec ) {
 

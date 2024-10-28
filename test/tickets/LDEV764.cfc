@@ -2,6 +2,15 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="java" {
 
 	function run( testResults , testBox ) {
 		describe( title='LDEV-764' , body=function(){
+			
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
+			
 			it( title='test parseDateTime with Timezone' , body=function() {
 				var src = "Mon Feb 29 2016 00:00:00 GMT+0530 (IST)";
 				var date = parseDateTime( date:src,timezone:"IST");

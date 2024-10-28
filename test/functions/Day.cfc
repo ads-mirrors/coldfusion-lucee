@@ -1,6 +1,13 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function run( testResults , testBox ) {
 		describe( "test case for Day", function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it(title = "Checking with Day", body = function( currentSpec ) {
 				d1=CreateDateTime(2001, 12, 1, 4, 10, 1);
 				assertEquals("1", "#day(d1)#");

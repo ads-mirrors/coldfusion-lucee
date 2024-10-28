@@ -1,6 +1,13 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function run( testResults , testBox ) {
 		describe( "Test suite for LDEV-1553", function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it( title='checking createTimeSpan() as boolean', body=function( currentSpec ) {
 				var ts = createTimeSpan(0, 0, 0, 1);
 				assertEquals(1, ts?1:0);

@@ -10,6 +10,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 
 	function run( testResults , testBox ) {
 		describe( title="Test suite for LDEV-1761", body=function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it(title = "Checking evaluate() with datetime", skip =getJavaVersion()>8/* TODO improve test case, current version no longer supported because of access restrictions */, body = function( currentSpec ) {
 				
 

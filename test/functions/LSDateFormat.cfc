@@ -33,7 +33,6 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 		testcase.testFunction();
 	}
 
-
 	function run( testResults , testBox ) {
 		describe( "test case for LSDateFormat", function() {
 			it(title = "Checking with LSDateFormat", body = function( currentSpec ) {

@@ -3,6 +3,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="date" {
 	function run( testResults , testBox ) {
 
 		describe( "Test case for LDEV-4774", function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it( title="string format 'dd/mm/yyyy' should be treated as a date(set the date to the variable)", body=function( currentSpec ) {
 				expect(function() {
 					var fromDate = "01/01/2024";

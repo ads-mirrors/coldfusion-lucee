@@ -2,6 +2,13 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function run( testResults , testBox ) {
 		describe( title="Test suite for LSEuroCurrencyFormat()", body=function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it(title="checking LSEuroCurrencyFormat() function", body = function( currentSpec ) {
 				<!--- begin old test code --->
 				orgLocale=getLocale();

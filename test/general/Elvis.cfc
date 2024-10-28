@@ -9,6 +9,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 
 	function run( testResults , testBox ) {
 		describe( "test suite for the elvis operator", function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 
 			it(title="test not existing variable", body=function() {
 				expect(not_.existing_.var_?:'NotExisting').toBe("NotExisting");

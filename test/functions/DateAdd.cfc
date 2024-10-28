@@ -1,6 +1,13 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function run( testResults , testBox ) {
 		describe( title="Test suite for DateAdd()", body=function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it(title="checking DateAdd() function with testDateAddMember", body = function( currentSpec ) {
 				fixDate=CreateDateTime(2001, 11, 1, 4, 10, 4);
 				assertEquals("{ts '2002-11-01 04:10:04'}","#fixDate.Add("yyyy", 1)#");

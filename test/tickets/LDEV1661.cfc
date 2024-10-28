@@ -9,6 +9,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="mysql" {
 	}
 	function run( testResults , testBox ) {
 		describe( title="Test suite for LDEV-1661", body=function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it(title = "Checking timestamp with createDateTime()",skip=true, body = function( currentSpec ) {
 				local.result = _InternalRequest(
 					template:"#variables.uri#/test.cfm",

@@ -1,6 +1,13 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function run(  testResults , testBox ) {
 		describe( title="Test suite for LDEV-1570",  body=function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it(title="checking Mask in dateTimeFormat()", body = function( currentSpec ) {
 				var time = parseDateTime(date:"{ts '2017-11-01 13:35:08'}",timezone:"America/Chicago");
 				assertEquals(

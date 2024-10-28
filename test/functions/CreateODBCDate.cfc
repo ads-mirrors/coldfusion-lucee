@@ -29,8 +29,6 @@
 <cfset assertEquals("{d '2001-11-01'}",CreateODBCDate(fixDate))>
 <cfset assertEquals("{d '2001-11-01'}",toString(CreateODBCDate(fixDate)))>
 <cfset assertEquals(0,hour(CreateODBCDate(fixDate)))>
-	
-		
 		<!--- <cfset assertEquals("","")> --->
 	</cffunction>
 	

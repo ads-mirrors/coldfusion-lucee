@@ -9,6 +9,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 
 	function run( testResults , testBox ) {
 		describe( title="Test suite for LDEV-1539", skip=true, body=function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it(title="checking locales", body = function( currentSpec ) {
 				cfloop( list = "#Server.Coldfusion.SupportedLocales#", index = "locale", delimiters = ","){
 					try{
@@ -24,7 +31,14 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 
 		describe( title="Test suite for LSparseDateTime()", skip=true, body=function() { 
 			cfloop( list=#Server.Coldfusion.SupportedLocales#, index="locale"){
-				describe(title="test LSparseDateTime locale format: [#locale#]", body=function(){
+				describe(title="test LSparseDateTime locale format: [#locale#]", body=function() {
+					beforeEach( function(){
+						variables.startingTZ=getTimeZone();
+						setTimeZone("UTC");
+					});
+					afterEach( function(){
+						setTimeZone(variables.startingTZ?:"UTC");
+					});
 					it( title="test LSparseDateTime round trip with locale: [#locale#], ",
 							data={ locale=locale },
 							body=function( data ) {

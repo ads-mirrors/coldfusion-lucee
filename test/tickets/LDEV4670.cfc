@@ -8,6 +8,14 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 
 	function run( testResults , testBox ) {
 		describe( title="Test suite for LDEV-4670", body=function() {
+			
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it( title='Checking datasource session expiry, timezone UTC',skip=isMySqlNotSupported(),body=function( currentSpec ) {
 				var remainingSessions = testSessionTimezone( "UTC", "datasource" );
 				dumpResult( remainingSessions, "UTC" );

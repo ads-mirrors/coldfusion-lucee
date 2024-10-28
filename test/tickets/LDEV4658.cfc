@@ -2,6 +2,14 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" labels="datetime" {
 
 	function run( testResults, testBox ) {
 		describe( "Testcase for LDEV-4725", function() {
+			
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it( title="checking unicode compat", body=function( currentSpec ) {
 				var d = CreateDateTime(2000,1,2,3,4,5,0,"UTC");
 				var full = d.dateTimeFormat( "full","UTC" );

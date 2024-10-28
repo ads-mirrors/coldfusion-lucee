@@ -1,6 +1,13 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
     function run( testResults, testBox ) {
         describe("Testcase for LDEV-3789", function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
             it( title="Checking member-functions with named arguments", body=function( currentSpec ){
                 // dateTime functions
                 dateValue = now(); 

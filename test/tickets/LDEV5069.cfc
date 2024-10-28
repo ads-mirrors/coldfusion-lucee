@@ -3,6 +3,13 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" label="json" {
 	function run( testResults, testBox ){
 		describe( "LDEV-5069", function(){
 
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it( "isJson allows json", function(){
 				var zoneId      = createObject( "java", "java.time.ZoneId" );
 				var chronoField = createObject( "java", "java.time.temporal.ChronoField" );

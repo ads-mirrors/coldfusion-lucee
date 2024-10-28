@@ -2,6 +2,13 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" labels="mssql" skip="tru
 
 	function run( testResults , testBox ) {
 		describe( "Test case for LDEV-1680", function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it(title="Checking the MSSQL datetimeoffset field value", skip="#notHasMssql()#", body=function( currentSpec ) {
 				var result = _internalRequest(
 					template = "#createURI("LDEV1680")#/LDEV1680.cfm"

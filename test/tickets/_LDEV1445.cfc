@@ -12,6 +12,15 @@ component extends="org.lucee.cfml.test.LuceeTestCase"  labels="mysql" {
 
 	function run( testResults , testBox ) {
 		describe( title="Test suite for LDEV-1445", skip=isNotSupported(),  body=function() {
+			
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
+			
 			it(title="checking connectionLimit set to default", body = function( currentSpec ) {
 				dsnname = 'testdsn';
 				dbhost = '#mySQL.server#';

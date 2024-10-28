@@ -11,6 +11,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 	function run( testResults, testBox ) {
 		describe("Testcase for LDEV-2131", function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it( title="dateTimeFormat with mask 'isoms' and aliases", body=function( currentSpec ) {
 				expect(dateTimeFormat("2022/01/02 11:22:33.444", "isoMs")).toBe("2022-01-02T11:22:33.444+01:00");
 				expect(dateTimeFormat("2022/01/02 11:22:33.444", "isoMillis")).toBe("2022-01-02T11:22:33.444+01:00");

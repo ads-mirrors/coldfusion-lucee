@@ -1,6 +1,13 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function run( testResults , testBox ) {
 		describe( title="Test suite for lsDayOfWeek()", body=function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it(title="checking lsDayOfWeek() function for sunday", body = function( currentSpec ) {
 				//UTC noon is the same day in the US and CH
 				var date=createDateTime(2022,11,20,12,0,0,0,"UTC"); // a sunday

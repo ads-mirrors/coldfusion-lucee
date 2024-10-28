@@ -1,6 +1,13 @@
 component extends="org.lucee.cfml.test.LuceeTestCase" {
     function run( testResults , testBox ) {
         describe( 'LDEV-28' , function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
             it( 'Create date object from member function.' , function() {
                 dateAsString = "2011-03-24";
   				actual = dateAsString.parseDateTime();

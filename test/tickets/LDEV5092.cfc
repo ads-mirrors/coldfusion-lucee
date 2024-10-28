@@ -2,6 +2,15 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 	function run( testResults , testBox ) {
 		describe( title='LDEV-5092', body=function(){
+			
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
+			
 			it( title='trigger the NPE', body=function() {
 				var a = [];
 				ArraySet(a,1,1000,"");

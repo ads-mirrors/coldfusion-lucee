@@ -1,6 +1,13 @@
 component extends="org.lucee.cfml.test.LuceeTestCase" {
 	public function run( testResults, testBox ) {
 		describe( title="Testcase for firstDayOfMonth() function", body=function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 			it(title="Checking the firstDayOfMonth() function", body=function( currentSpec ) {
 				expect(firstDayOfMonth('03/05/2018')).toBe("60");
 			});

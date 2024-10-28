@@ -1,6 +1,13 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function run( testResults , testBox ) {
 		describe( title="checking dateAndTimeFormat()", body=function() {
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
 
 			it(title='dateAndTimeFormat() function with arguments', body=function( currentSpec ) {
 				var d = CreateDateTime(2000,1,2,3,4,5,0,"CET");
