@@ -68,6 +68,16 @@ public class Hash {
 	}
 
 	// SHA
+	public static String sha1(Resource res) throws IOException {
+		InputStream is = res.getInputStream();
+		try {
+			return DigestUtils.sha1Hex(is);
+		}
+		finally {
+			IOUtil.close(is);
+		}
+	}
+
 	public static String sha(byte[] data) throws NoSuchAlgorithmException {
 		return hash(data, ALGORITHM_SHA, ENCODING_HEX);
 	}
@@ -81,6 +91,16 @@ public class Hash {
 	}
 
 	// SHA256
+	public static String sha256(Resource res) throws IOException {
+		InputStream is = res.getInputStream();
+		try {
+			return DigestUtils.sha256Hex(is);
+		}
+		finally {
+			IOUtil.close(is);
+		}
+	}
+
 	public static String sha256(byte[] data) throws NoSuchAlgorithmException {
 		return hash(data, ALGORITHM_SHA_256, ENCODING_HEX);
 	}
@@ -106,7 +126,17 @@ public class Hash {
 		return hash(str, ALGORITHM_SHA_384, ENCODING_HEX, charset);
 	}
 
-	// SHA384
+	// SHA512
+	public static String sha512(Resource res) throws IOException {
+		InputStream is = res.getInputStream();
+		try {
+			return DigestUtils.sha512Hex(is);
+		}
+		finally {
+			IOUtil.close(is);
+		}
+	}
+
 	public static String sha512(byte[] data) throws NoSuchAlgorithmException {
 		return hash(data, ALGORITHM_SHA_512, ENCODING_HEX);
 	}

@@ -28,13 +28,20 @@ import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+
+import lucee.commons.digest.Hash;
 import lucee.commons.io.IOUtil;
+import lucee.commons.io.res.Resource;
 import lucee.commons.lang.StringList;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.lang.mimetype.ContentType;
@@ -80,6 +87,16 @@ public final class HTTPUtil {
 	// private static final String NO_MIMETYPE="Unable to determine MIME type of file.";
 
 	public static final int MAX_REDIRECT = 15;
+
+	private static String[] VALIDATION_HEADERS = new String[] { "Digest" };
+
+	private static Map<String, String[]> headerNames = new ConcurrentHashMap<>();
+	static {
+		headerNames.put("md5", new String[] { "X-Checksum-MD5", "Content-MD5" });
+		headerNames.put("sha1", new String[] { "X-Checksum-SHA1" });
+		headerNames.put("sha256", new String[] { "X-Checksum-SHA256", "X-Checksum-SHA-256" });
+		headerNames.put("sha512", new String[] { "X-Checksum-SHA512", "X-Checksum-SHA-512" });
+	}
 
 	/**
 	 * cast a string to a url
@@ -672,5 +689,90 @@ public final class HTTPUtil {
 
 	public static boolean isSecure(URL url) {
 		return StringUtil.indexOfIgnoreCase(url.getProtocol(), "https") != -1;
+	}
+
+	public static void validateDownload(HttpResponse response, Resource res, boolean deleteFileWhenInvalid) throws IOException {
+		Header[] headers;
+		Header h;
+		String label, name;
+		// validate alogirtm specific headers
+		for (Entry<String, String[]> e: headerNames.entrySet()) {
+			name = e.getKey();
+			label = name.toUpperCase();
+			for (String hn: e.getValue()) {
+				headers = response.getHeaders(hn);
+				if (headers != null && headers.length > 0) {
+					h = headers[0];
+					if (!StringUtil.isEmpty(h.getValue(), true)) {
+						String fileHash;
+						if ("md5".equalsIgnoreCase(name)) fileHash = Hash.md5(res);
+						else if ("sha1".equalsIgnoreCase(name)) fileHash = Hash.sha1(res);
+						else if ("sha256".equalsIgnoreCase(name)) fileHash = Hash.sha256(res);
+						else if ("sha512".equalsIgnoreCase(name)) fileHash = Hash.sha512(res);
+						else continue;
+						if (!fileHash.equalsIgnoreCase(h.getValue())) {
+							if (deleteFileWhenInvalid) {
+								res.remove(true);
+							}
+							throw new IOException(String.format(label + " validation failed: The " + label + " hash in the response header '%s' [%s] does not match the computed "
+									+ label + " hash [%s] based on the downloaded file. File integrity might be compromised.", hn, h.getValue(), fileHash));
+						}
+						return;
+					}
+				}
+			}
+		}
+
+		// Digest validation
+		for (String hn: VALIDATION_HEADERS) {
+			headers = response.getHeaders(hn);
+			if (headers != null && headers.length > 0) {
+				h = headers[0];
+				String raw = h.getValue();
+				if (!StringUtil.isEmpty(raw, true)) {
+					// Split by commas for multiple algorithm/hash pairs
+					String[] digestEntries = ListUtil.listToStringArray(raw, ',');
+					for (String digestEntry: digestEntries) {
+						String[] pair = ListUtil.listToStringArray(digestEntry, '=');
+						if (pair.length == 2) {
+							name = pair[0].trim().toLowerCase();
+							label = name.toUpperCase();
+							String expectedHash = pair[1].trim();
+							String fileHash;
+
+							switch (name) {
+							case "md5":
+							case "md-5":
+								fileHash = Hash.md5(res);
+								break;
+							case "sha1":
+							case "sha-1":
+								fileHash = Hash.sha1(res);
+								break;
+							case "sha256":
+							case "sha-256":
+								fileHash = Hash.sha256(res);
+								break;
+							case "sha512":
+							case "sha-512":
+								fileHash = Hash.sha512(res);
+								break;
+							default:
+								continue; // Unknown algorithm, skip it
+							}
+
+							if (!fileHash.equalsIgnoreCase(expectedHash)) {
+								if (deleteFileWhenInvalid) {
+									res.remove(true);
+								}
+								throw new IOException(String.format(
+										"%s validation failed: The %s hash in the response header '%s' [%s] does not match the computed %s hash [%s] based on the downloaded file. File integrity might be compromised.",
+										label, label, hn, expectedHash, label, fileHash));
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 }

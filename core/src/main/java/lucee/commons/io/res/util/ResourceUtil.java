@@ -1507,6 +1507,17 @@ public final class ResourceUtil {
 
 	}
 
+	public static void deleteEmptyFoldersInside(Resource res) throws IOException {
+		if (res.isDirectory()) {
+			Resource[] children = res.listResources();
+			if (children != null) {
+				for (int i = 0; i < children.length; i++) {
+					deleteEmptyFolders(children[i]);
+				}
+			}
+		}
+	}
+
 	public static void deleteEmptyFolders(Resource res) throws IOException {
 		if (res.isDirectory()) {
 			Resource[] children = res.listResources();
