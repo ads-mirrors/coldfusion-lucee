@@ -1,7 +1,17 @@
 component extends="org.lucee.cfml.test.LuceeTestCase" labels="java" {
 
 	function run( testResults , testBox ) {
-		describe( title='LDEV-536' , body=function(){
+		describe( title='LDEV-536' , body=function() {
+
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+            });
+			afterEach( function(){
+                setTimeZone(variables.startingTZ?:"UTC");
+            });
+
+
 			it( title='test parseDateTime ' , body=function() {
 				
 				var src = 'Tue, 20 Jan 2015 00:00:00 Z';
