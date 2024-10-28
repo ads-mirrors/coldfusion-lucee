@@ -13,7 +13,7 @@
 		describe( title="Test suite for LSparseDateTime()", body=function() {
 			beforeEach( function(){
 				variables.startingTZ=getTimeZone();
-				setTimeZone("UTC");
+				setTimeZone("CET");
             });
 			afterEach( function(){
                 setTimeZone(variables.startingTZ?:"UTC");

@@ -119,7 +119,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			describe("checking 'DateTimeFormat' function with all mask", function() {
 				beforeEach( function(){
 					variables.startingTZ=getTimeZone();
-					setTimeZone("UTC");
+					setTimeZone("CET");
 				});
 				afterEach( function(){
 					setTimeZone(variables.startingTZ?:"UTC");

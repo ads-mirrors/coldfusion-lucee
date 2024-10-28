@@ -13,7 +13,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 		describe("Testcase for LDEV-2131", function() {
 			beforeEach( function(){
 				variables.startingTZ=getTimeZone();
-				setTimeZone("UTC");
+				setTimeZone("CET");
             });
 			afterEach( function(){
                 setTimeZone(variables.startingTZ?:"UTC");
