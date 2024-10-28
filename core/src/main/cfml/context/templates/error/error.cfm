@@ -163,7 +163,6 @@
 
 
 <cfif LuceeAIHas('default:exception')>
-	
 	<cftry>
 		<script>
 			var val= "";
@@ -178,11 +177,14 @@
 				index = (index + 1) % dotCycle.length;
 				setTimeout(luceeSpinner, 200, index)
 			}
+
+			function l(msg) {
+				document.getElementById('ai-response-cell').innerText+=msg;
+			}
 			luceeSpinner();
 		
 		</script>
 <cfflush throwonerror=false>
-
 
 		<cfscript>
 			path=catch.TagContext[1].template?:"";
@@ -206,12 +208,17 @@ Avoid repeating exception details, as those will be presented elsewhere. Keep yo
 			}
 			structDelete(catchi, "TagContext",false);
 			structDelete(catchi, "ErrorCode",false);
+			variables.aiFirst=true;
 			answer=LuceeInquiryAISession(ais,serializeJSON(catchi),function(msg) {
 				echo('<script>');
-				echo('spinner=false;');
-				echo('val+=#serializeJson(msg)#;');
-				echo("document.getElementById('ai-response-cell').innerText = val;");	
-				echo('</script>');
+				if(variables.aiFirst) {
+					echo('spinner=false;');
+					echo('document.getElementById("ai-response-cell").innerText="";');
+					variables.aiFirst=false;
+				}
+				echo("l(#serializeJson(msg)#);");	
+				echo('</script>
+');
 				cfflush(throwonerror=false);
 				
 			});
@@ -224,6 +231,5 @@ Avoid repeating exception details, as those will be presented elsewhere. Keep yo
 		<cfcatch></cfcatch>
 	</cftry>
 </cfif>
-
 <br>
 </cfoutput>
