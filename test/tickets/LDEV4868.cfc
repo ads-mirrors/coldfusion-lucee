@@ -6,7 +6,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="query" {
 
 
 	function afterAll(){
-		application enableNullSupport=true;
+		application enableNullSupport=false;
 	}
 
 	function run( testResults , testBox ) {
