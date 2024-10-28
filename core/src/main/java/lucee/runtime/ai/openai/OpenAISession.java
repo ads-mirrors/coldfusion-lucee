@@ -7,6 +7,7 @@ import java.net.URL;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -115,6 +116,11 @@ public class OpenAISession extends AISessionSupport {
 
 				StringEntity entity = new StringEntity(str, openaiEngine.charset);
 				post.setEntity(entity);
+
+				int timeout = Caster.toIntValue(getTimeout());
+				RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout) // Timeout for establishing the connection
+						.setSocketTimeout(timeout).build();
+				post.setConfig(config);
 
 				// Execute the request
 				try (CloseableHttpResponse response = httpClient.execute(post)) {
