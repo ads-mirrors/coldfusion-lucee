@@ -166,7 +166,6 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 			}
 			catch (PageException pe) {
 			}
-
 			throw new ApplicationException("the property [model] is required for a OpenAI Engine!." + appendix);
 		}
 		// temperature
@@ -177,6 +176,7 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 
 		// message
 		systemMessage = Caster.toString(properties.get(KeyConstants._message, null), null);
+		AIUtil.valdate(this);
 		return this;
 	}
 

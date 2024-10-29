@@ -38,6 +38,11 @@ public class AIUtil {
 		return ae;
 	}
 
+	public static void valdate(AIEngine aie) throws PageException {
+		AISession session = aie.createSession("keep the answer short", aie.getTimeout());
+		session.inquiry("ping");
+	}
+
 	public static List<String> getModelNames(AIEngine aie) throws PageException {
 		List<AIModel> models = aie.getModels();
 		List<String> names = new ArrayList<>();
