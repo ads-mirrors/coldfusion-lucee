@@ -10,6 +10,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 		expect( Val( "1" ) ).toBe( 1 );
 		expect( Val( "one" ) ).toBe( 0 );
 		expect( Val( "123T456" ) ).toBe( 123 );
+		expect( Val( "0.F" ) ).toBe( 0 );
+		expect( Val( ".F" ) ).toBe( 0 );
+		expect( Val( "1.F" ) ).toBe( 1 );
 	}
 
 }
