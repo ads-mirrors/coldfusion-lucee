@@ -109,7 +109,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 					if ( srcRow > q1.recordcount ) 
 						srcRow=1;
 				}
-				systemOutput("q2 has #q2.recordcount# rows", true);
+				//systemOutput("q2 has #q2.recordcount# rows", true);
 
 				var q1check = QueryExecute(
 					sql = 'SELECT q1.id FROM q1 where id in (select id from q1 )',

@@ -32,6 +32,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 	function afterAll(){
 		application action="update" mappings=variables.oldMappings;
+		systemOutput(variables.oldMappings, true);
 
 		// delete test folder
 		var curr=getDirectoryFromPath(getCurrentTemplatePath());
