@@ -322,11 +322,155 @@
 	
 	
 	</cfscript>
-	
 	<cfoutput>
+		<style>
+			h1.lucee, h2.lucee, h3.lucee, h4.lucee, h5.lucee, h6.lucee {
+				color: ##4e7620 !important;
+			}
+			h1.lucee {
+				font-size: 32px !important;
+				margin-top: 20px !important; 
+			}
+			h2.lucee {font-size: 28px !important;}
+			h3.lucee {font-size: 22px !important;}
+			p.lucee {
+				xmax-width: 100% !important; /* Ensure it doesn't overflow the container */
+				font-size: 16px !important;
+				align:center;
+				color: ##333 !important;
+			}
+				/* Style for inline code */
+				code.lucee {
+					 background-color: ##EEE !important;
+					 color: ##333 !important;
+					 padding: 2px 4px !important;
+					 font-family: 'Courier New', Courier, monospace !important;
+			
+					 border: solid 1px ##333 !important; 
+					 border-radius: 5px !important;
+					 white-space: nowrap !important; /* Prevent line breaks within the code */
+			
+				 }
+			
+				 /* Style for block code */
+				 pre code##lucee {
+					 display: block !important;
+					 background-color: ##333 !important;
+					 padding: 25px 25px 25px 25px !important;
+					 border: solid 1px ##eee !important; 
+					 border-radius: 1em !important;
+					 color: ##ccffff !important;
+					 margin: 1px !important;
+					 white-space: pre !important; /* Preserve whitespace and formatting */
+					 overflow-x: auto !important;
+					 word-wrap: break-word !important;
+					 xmax-width: 90% !important; /* Ensure it doesn't overflow the container */
+					 font-weight: normal !important;
+					 font-family: "Courier New", Courier, monospace, sans-serif !important;
+					 font-size: 16px !important;
+					 white-space: pre-wrap !important;
+					 word-break: break-all !important;
+					 word-wrap: break-word !important; 
+					 tab-size: 2 !important;
+				 }
+				 blockquote.lucee {
+					 display: block !important;
+					 background-color: ##EEE !important;
+					 padding: 15px !important;
+					 border: solid 1px ##333 !important; 
+					 border-radius: 1em !important;
+					 color: ##4e7620 !important;
+					 margin: 1px !important;
+					 white-space: pre !important; /* Preserve whitespace and formatting */
+					 overflow-x: auto !important;
+					 word-wrap: break-word !important;
+					xmax-width: 90% !important; /* Ensure it doesn't overflow the container */
+					 font-weight: normal !important;
+					 font-family: "Courier New", Courier, monospace, sans-serif !important;
+					 font-size: 16px !important;
+					 white-space: pre-wrap !important;
+					 word-break: break-all !important;
+					 word-wrap: break-word !important; 
+					 tab-size: 2 !important;
+				 }
+			
+				 .lucee_execute_result {
+					background-color: white !important;
+					border: solid 1px ##333 !important;
+					border-radius: 1em !important;
+					padding: 10px !important;
+					margin-top: 30px !important; /* Increase margin-top to accommodate the overlapping text */
+					margin-bottom: 10px !important; /* Increase margin-top to accommodate the overlapping text */
+					xmax-width: 90% !important; /* Ensure it doesn't overflow the container */
+					font-size: 16px !important;
+					position: relative !important; /* Needed for the absolute positioning of the label */
+				}
+			
+				.lucee_execute_result::before {
+					content: "Generated Output from the example above" !important;
+					position: absolute !important;
+					top: -10px !important; /* Adjust this value to position the text correctly */
+					left: 30px !important; /* Indent the text 20 pixels from the left */
+					background-color: white !important;
+					padding: 0 5px !important; /* Add some padding to the label */
+					font-size: 16px !important;
+					color: ##333 !important;
+					font-weight: bold !important;
+				}
+			
+				.language-lucee .nf {color: ##569cd6; !important}
+				.language-lucee .nv {color: ##9cdcfe; !important}
+				.language-lucee .syntaxFunc {color: ##dcdcaa; !important}
+				.language-lucee .syntaxType {color: ##4ec9b0; !important}
+				.language-lucee .p {color: ##d4d4d4; !important}
+				.language-lucee .nt {color: ##569cd6; !important}
+				.language-lucee .na {color: ##9cdcfe; !important}
+				.language-lucee .s {color: ##ce9178; !important}
+				.language-lucee .err {color: ##d4d4d4; !important}
+				.language-lucee .syntaxAttr { color: ##dcdcaa; !important}
+			
+			
+			 </style>
 	<cfif isNull(type)>
-		<div class="section-title">no matching tag,function or component found 
-			for <b>#htmleditFormat(reReplace( form.search, '[^a-zA-Z0-9]', ' ', 'all' ))#</b></div>
+		
+			<cfscript>systemOutput(form.search,1,1);
+				endpoint='default:exception';
+				if(LuceeAIHas(endpoint)) {
+					if(!structKeyExists(session, "documentationAISession")) {
+						ais=LuceeCreateAISession(endpoint, 
+			"You are a Lucee expert and documentation guide. Users will ask specific questions about Lucee functions, tags, or configurations. Respond concisely in plain markdown format (no starting ```markdown) without mentioning the origin of the data. Structure your response in a clear, brief format, suitable for direct HTML integration.");
+						session.documentationAISession=ais;
+					}
+					else {
+						ais=session.documentationAISession;
+					}
+					echo("<!-- start pre --><pre>");
+					md=LuceeInquiryAISession(ais,form.search,function(msg) {
+						echo(msg);
+						cfflush(throwonerror=false);
+						
+					});
+					echo("</pre><!-- end pre -->");
+					//md=LuceeInquiryAISession(ais,form.search);
+					md=executeCodeFragments(md);
+					code=enhanceHTML(markdownToHTML(md));
+					
+					
+					echo(code);
+					
+
+					try {
+						meta=LuceeAIGetMetaData('default:exception');
+						echo('AI (#meta.label?:""#)');
+					}
+					catch(e) {dump(e);}	
+				}
+				else {
+					echo('<div class="section-title">no matching tag,function or component found ');
+					echo('for <b>#htmleditFormat(reReplace( form.search, '[^a-zA-Z0-9]', ' ', 'all' ))#</b></div>');
+			
+				}
+			</cfscript>
 		<cfabort>
 	</cfif>
 	<cfif "recipes" NEQ type>
@@ -347,114 +491,7 @@
 		</span>
 	</cfif>
 
-<style>
-	h1.lucee, h2.lucee, h3.lucee, h4.lucee, h5.lucee, h6.lucee {
-		color: ##4e7620 !important;
-	}
-	h1.lucee {
-		font-size: 32px !important;
-		margin-top: 20px !important; 
-	}
-	h2.lucee {font-size: 28px !important;}
-	h3.lucee {font-size: 22px !important;}
-	p.lucee {
-		xmax-width: 100% !important; /* Ensure it doesn't overflow the container */
-		font-size: 16px !important;
-		align:center;
-		color: ##333 !important;
-	}
-		/* Style for inline code */
-		code.lucee {
-			 background-color: ##EEE !important;
-			 color: ##333 !important;
-			 padding: 2px 4px !important;
-			 font-family: 'Courier New', Courier, monospace !important;
-	
-			 border: solid 1px ##333 !important; 
-			 border-radius: 5px !important;
-			 white-space: nowrap !important; /* Prevent line breaks within the code */
-	
-		 }
-	
-		 /* Style for block code */
-		 pre code##lucee {
-			 display: block !important;
-			 background-color: ##333 !important;
-			 padding: 25px 25px 25px 25px !important;
-			 border: solid 1px ##eee !important; 
-			 border-radius: 1em !important;
-			 color: ##ccffff !important;
-			 margin: 1px !important;
-			 white-space: pre !important; /* Preserve whitespace and formatting */
-			 overflow-x: auto !important;
-			 word-wrap: break-word !important;
-			 xmax-width: 90% !important; /* Ensure it doesn't overflow the container */
-			 font-weight: normal !important;
-			 font-family: "Courier New", Courier, monospace, sans-serif !important;
-			 font-size: 16px !important;
-			 white-space: pre-wrap !important;
-			 word-break: break-all !important;
-			 word-wrap: break-word !important; 
-			 tab-size: 2 !important;
-		 }
-		 blockquote.lucee {
-			 display: block !important;
-			 background-color: ##EEE !important;
-			 padding: 15px !important;
-			 border: solid 1px ##333 !important; 
-			 border-radius: 1em !important;
-			 color: ##4e7620 !important;
-			 margin: 1px !important;
-			 white-space: pre !important; /* Preserve whitespace and formatting */
-			 overflow-x: auto !important;
-			 word-wrap: break-word !important;
-			xmax-width: 90% !important; /* Ensure it doesn't overflow the container */
-			 font-weight: normal !important;
-			 font-family: "Courier New", Courier, monospace, sans-serif !important;
-			 font-size: 16px !important;
-			 white-space: pre-wrap !important;
-			 word-break: break-all !important;
-			 word-wrap: break-word !important; 
-			 tab-size: 2 !important;
-		 }
-	
-		 .lucee_execute_result {
-			background-color: white !important;
-			border: solid 1px ##333 !important;
-			border-radius: 1em !important;
-			padding: 10px !important;
-			margin-top: 30px !important; /* Increase margin-top to accommodate the overlapping text */
-			margin-bottom: 10px !important; /* Increase margin-top to accommodate the overlapping text */
-			xmax-width: 90% !important; /* Ensure it doesn't overflow the container */
-			font-size: 16px !important;
-			position: relative !important; /* Needed for the absolute positioning of the label */
-		}
-	
-		.lucee_execute_result::before {
-			content: "Generated Output from the example above" !important;
-			position: absolute !important;
-			top: -10px !important; /* Adjust this value to position the text correctly */
-			left: 30px !important; /* Indent the text 20 pixels from the left */
-			background-color: white !important;
-			padding: 0 5px !important; /* Add some padding to the label */
-			font-size: 16px !important;
-			color: ##333 !important;
-			font-weight: bold !important;
-		}
-	
-		.language-lucee .nf {color: ##569cd6; !important}
-		.language-lucee .nv {color: ##9cdcfe; !important}
-		.language-lucee .syntaxFunc {color: ##dcdcaa; !important}
-		.language-lucee .syntaxType {color: ##4ec9b0; !important}
-		.language-lucee .p {color: ##d4d4d4; !important}
-		.language-lucee .nt {color: ##569cd6; !important}
-		.language-lucee .na {color: ##9cdcfe; !important}
-		.language-lucee .s {color: ##ce9178; !important}
-		.language-lucee .err {color: ##d4d4d4; !important}
-		.language-lucee .syntaxAttr { color: ##dcdcaa; !important}
-	
-	
-	 </style>
+
 	<!----------------------------------------
 	------------------- Recipes -------------
 	------------------------------------------>
@@ -737,5 +774,6 @@
 		<cfcatch>
 			<p style="color:red">An error occurred; see application log for more details</p>
 			<cflog log="application" exception="#cfcatch#">
+			<cfdump var="#cfcatch#">
 		</cfcatch>
 	</cftry>

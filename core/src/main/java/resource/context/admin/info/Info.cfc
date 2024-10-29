@@ -215,11 +215,12 @@ function loadRef() {
 			luceeRefData=JSON.parse(this.responseText.trim());
     	}
   	};
-  	xhttp.open("GET", "/lucee/debug/modern/reference.cfm", true);
+  	xhttp.open("GET", "/debug/modern/reference.cfm", true);
   	xhttp.send();
 }
-function luceeSearchSugestions(val,force) {
-
+function luceeSearchSugestions(val,event) {
+	var isEnter=event && event.key=="Enter";
+		
 	var src=document.getElementById("-lucee-docs-search-input");
 	var allFunctions=false;
 	var allTags=false;
@@ -323,7 +324,11 @@ function luceeSearchSugestions(val,force) {
 	html+='</tr></tbody></table>';
 
 	var el=document.getElementById("-lucee-search-result");
-	if(count==0)el.innerHTML="";
+	
+	if(isEnter) { // count==0 && 
+		el.innerHTML="";
+		luceeSearchAI(val);
+	}
 	else if(count==1 && match==val) {
 		src.innerHTML=match;
 		luceeSearch(match);
@@ -352,9 +357,43 @@ function luceeSearch(val,type) {
     		el.innerHTML= this.responseText;
     	}
   	};
-  	xhttp.open("POST", "/lucee/debug/modern/reference.cfm", true);
+  	xhttp.open("POST", "/debug/modern/reference.cfm", true);
   	xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
   	xhttp.send("search=" + val + "&typ=" + type);
+}
+
+function luceeSearchAI(val) {
+	var src=document.getElementById("-lucee-docs-search-input");
+	
+	if(val==null) {// TODO check if exists
+		var val=src.value;
+	}
+	else {
+		src.value=val;
+	}
+	
+	var el=document.getElementById("-lucee-search-result");
+	
+	var xhttp = new XMLHttpRequest();
+  	
+	xhttp.onprogress = function() {
+		el.innerHTML = this.responseText; // Append partial response data
+	};
+	
+	xhttp.onreadystatechange = function() {
+    	if (this.readyState == 4 && this.status == 200) {
+    		var start=this.responseText.indexOf("<!-- start pre -->");
+    		var end=this.responseText.indexOf("<!-- end pre -->");
+			if(start>-1 && start<end) {
+				//el.innerText= this.responseText;
+				el.innerHTML= this.responseText.substring(0,start)+this.responseText.substring(end+16);
+			}
+    	}
+  	};
+
+  	xhttp.open("POST", "/debug/modern/reference.cfm", true);
+  	xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+  	xhttp.send("search=" + encodeURIComponent(val) + "&typ=ai");
 }
 
 
@@ -624,8 +663,8 @@ loop array=enabledKeys index="local.i" item="local.k" {
 ---><fieldset id="-lucee-ref" class="ldTabContent">
 		<br><br>
 		<div class="pad">
-		<form autocomplete="off">
-			<a class="large" onclick="luceeSearchSugestions('functions')">Functions | </a><a onclick="luceeSearchSugestions('tags')" class="large">Tags | </a><a onclick="luceeSearchSugestions('recipes')" class="large">Recipes | </a><input onkeyup="luceeSearchSugestions();" 
+		<form id="luceeSearchForm" autocomplete="off">
+			<a class="large" onclick="luceeSearchSugestions('functions')">Functions | </a><a onclick="luceeSearchSugestions('tags')" class="large">Tags | </a><a onclick="luceeSearchSugestions('recipes')" class="large">Recipes | </a><input onkeyup="luceeSearchSugestions(null,event);" 
 				id="-lucee-docs-search-input" 
 				name="luceesearchvalue"
 					placeholder="Search Tag or Function" 
@@ -633,6 +672,11 @@ loop array=enabledKeys index="local.i" item="local.k" {
 			<!---<input onclick="luceeSearch()" type="button" name="go" value="go">--->
 				
 		</form>
+		<script>
+			document.getElementById("luceeSearchForm").addEventListener("submit", function(event) {
+				event.preventDefault(); // Blocks the form submission
+			});
+			</script>
 		</div>
 		<div id="-lucee-search-result"></div>
 		<br><Br>
