@@ -1387,6 +1387,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				});
 
 				it(title="checking updateRestMapping()", body=function( currentSpec ) {
+					// first cleanout any existing rest mappings
+					var restMappings = adminWeb.getRestMappings();
+					for (var r in restMappings)
+						adminWeb.removeRestMapping(r.virtual);
 
 					var curr=getDirectoryFromPath(GetCurrentTemplatePath());
 					var tmpStrt = {};
@@ -1394,7 +1398,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 					tmpStrt.virtual = "/testRestMapping";
 					tmpStrt.physical = curr&('/testRestMapping');
 					adminWeb.updateRestMapping(argumentCollection=tmpStrt);
-					var restMappings = adminWeb.getRestMappings();
+					restMappings = adminWeb.getRestMappings();
 					assertEquals((isquery(restMappings) && findNocase( "/testRestMapping", valueList(restMappings.virtual)) EQ 1) ,true);
 				});
 
