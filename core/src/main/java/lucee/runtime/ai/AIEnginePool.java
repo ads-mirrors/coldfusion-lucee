@@ -9,7 +9,6 @@ import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
-import lucee.runtime.op.Caster;
 
 public class AIEnginePool {
 
@@ -48,7 +47,9 @@ public class AIEnginePool {
 			if (aie != null) return aie;
 		}
 		catch (Exception e) {
-			throw Caster.toPageException(e);
+			ApplicationException ae = new ApplicationException("Cannot create and instance of the AI engine [" + name + "]; " + e.getMessage());
+			ExceptionUtil.initCauseEL(ae, e);
+			throw ae;
 		}
 		throw new ApplicationException("there is no matching engine for the name [" + name + "] found");
 	}
