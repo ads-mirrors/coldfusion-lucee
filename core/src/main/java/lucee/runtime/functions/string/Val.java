@@ -22,7 +22,6 @@
 package lucee.runtime.functions.string;
 
 import lucee.runtime.PageContext;
-import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.Function;
 import lucee.runtime.op.Caster;
 
@@ -30,12 +29,17 @@ public final class Val implements Function {
 
 	private static final long serialVersionUID = -4333040593277864043L;
 
-	public static Number call(PageContext pc, String value) throws PageException {
+	public static Number call(PageContext pc, String value) {
 		if (value == null) return 0;
-		value = value.trim();
-		int pos = getPos(value);
-		if (pos <= 0) return Caster.toNumber(pc, 0);
-		return Caster.toNumber(pc, value.substring(0, pos));
+		try {
+			value = value.trim();
+			int pos = getPos(value);
+			if (pos <= 0) return Caster.toNumber(pc, 0);
+			return Caster.toNumber(pc, value.substring(0, pos));
+		}
+		catch (Exception e) {
+			return 0;
+		}
 	}
 
 	private static int getPos(String str) {
