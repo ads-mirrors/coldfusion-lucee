@@ -324,170 +324,204 @@
 	</cfscript>
 	<cfoutput>
 		<style>
-			h1.lucee, h2.lucee, h3.lucee, h4.lucee, h5.lucee, h6.lucee {
+			span.lucee-debug h1, span.lucee-debug h2, span.lucee-debug h3, span.lucee-debug h4, span.lucee-debug h5, span.lucee-debug h6 {
 				color: ##4e7620 !important;
 			}
-			h1.lucee {
+			span.lucee-debug h1 {
 				font-size: 32px !important;
 				margin-top: 20px !important; 
 			}
-			h2.lucee {font-size: 28px !important;}
-			h3.lucee {font-size: 22px !important;}
-			p.lucee {
-				xmax-width: 100% !important; /* Ensure it doesn't overflow the container */
+			span.lucee-debug h2 {font-size: 28px !important;}
+			span.lucee-debug h3 {font-size: 22px !important;}
+			span.lucee-debug p {
 				font-size: 16px !important;
 				align:center;
 				color: ##333 !important;
 			}
-				/* Style for inline code */
-				code.lucee {
-					 background-color: ##EEE !important;
-					 color: ##333 !important;
-					 padding: 2px 4px !important;
-					 font-family: 'Courier New', Courier, monospace !important;
 			
-					 border: solid 1px ##333 !important; 
-					 border-radius: 5px !important;
-					 white-space: nowrap !important; /* Prevent line breaks within the code */
+			/* Style for inline code */
+			span.lucee-debug code {
+				background-color: ##000 !important;
+				color: ##fff !important;
+				padding: 2px 4px !important;
+				margin: 2px 4px !important;
+				font-family: 'Courier New', Courier, monospace !important;
+	
+				border: solid 0px ##000 !important; 
+				border-radius: 3px !important;
+				white-space: nowrap !important; /* Prevent line breaks within the code */
+				font-weight: bold !important;
+	
+			}
 			
-				 }
+			/* Style for multi line code */
+			span.lucee-debug code.lucee-ml {
+				display: block !important;
+				background-color: ##333 !important;
+				padding: 10px 25px 10px 25px !important;
+				border: solid 1px ##eee !important; 
+				border-radius: 1em !important;
+				color: ##ccffff !important;
+				margin: 1px !important;
+				white-space: pre !important; /* Preserve whitespace and formatting */
+				overflow-x: auto !important;
+				word-wrap: break-word !important;
+				xmax-width: 90% !important; /* Ensure it doesn't overflow the container */
+				font-weight: normal !important;
+				font-family: "Courier New", Courier, monospace, sans-serif !important;
+				font-size: 16px !important;
+				white-space: pre-wrap !important;
+				word-break: break-all !important;
+				word-wrap: break-word !important; 
+				tab-size: 2 !important;
+			}
+
+			span.lucee-debug blockquote {
+				display: block !important;
+				background-color: ##EEE !important;
+				padding: 15px !important;
+				border: solid 1px ##333 !important; 
+				border-radius: 1em !important;
+				color: ##4e7620 !important;
+				margin: 1px !important;
+				white-space: pre !important; /* Preserve whitespace and formatting */
+				overflow-x: auto !important;
+				word-wrap: break-word !important;
+				font-weight: normal !important;
+				font-family: "Courier New", Courier, monospace, sans-serif !important;
+				font-size: 16px !important;
+				white-space: pre-wrap !important;
+				word-break: break-all !important;
+				word-wrap: break-word !important; 
+				tab-size: 2 !important;
+			}
 			
-				 /* Style for block code */
-				 pre code##lucee {
-					 display: block !important;
-					 background-color: ##333 !important;
-					 padding: 25px 25px 25px 25px !important;
-					 border: solid 1px ##eee !important; 
-					 border-radius: 1em !important;
-					 color: ##ccffff !important;
-					 margin: 1px !important;
-					 white-space: pre !important; /* Preserve whitespace and formatting */
-					 overflow-x: auto !important;
-					 word-wrap: break-word !important;
-					 xmax-width: 90% !important; /* Ensure it doesn't overflow the container */
-					 font-weight: normal !important;
-					 font-family: "Courier New", Courier, monospace, sans-serif !important;
-					 font-size: 16px !important;
-					 white-space: pre-wrap !important;
-					 word-break: break-all !important;
-					 word-wrap: break-word !important; 
-					 tab-size: 2 !important;
-				 }
-				 blockquote.lucee {
-					 display: block !important;
-					 background-color: ##EEE !important;
-					 padding: 15px !important;
-					 border: solid 1px ##333 !important; 
-					 border-radius: 1em !important;
-					 color: ##4e7620 !important;
-					 margin: 1px !important;
-					 white-space: pre !important; /* Preserve whitespace and formatting */
-					 overflow-x: auto !important;
-					 word-wrap: break-word !important;
-					xmax-width: 90% !important; /* Ensure it doesn't overflow the container */
-					 font-weight: normal !important;
-					 font-family: "Courier New", Courier, monospace, sans-serif !important;
-					 font-size: 16px !important;
-					 white-space: pre-wrap !important;
-					 word-break: break-all !important;
-					 word-wrap: break-word !important; 
-					 tab-size: 2 !important;
-				 }
-			
-				 .lucee_execute_result {
-					background-color: white !important;
-					border: solid 1px ##333 !important;
-					border-radius: 1em !important;
-					padding: 10px !important;
-					margin-top: 30px !important; /* Increase margin-top to accommodate the overlapping text */
-					margin-bottom: 10px !important; /* Increase margin-top to accommodate the overlapping text */
-					xmax-width: 90% !important; /* Ensure it doesn't overflow the container */
-					font-size: 16px !important;
-					position: relative !important; /* Needed for the absolute positioning of the label */
-				}
-			
-				.lucee_execute_result::before {
-					content: "Generated Output from the example above" !important;
-					position: absolute !important;
-					top: -10px !important; /* Adjust this value to position the text correctly */
-					left: 30px !important; /* Indent the text 20 pixels from the left */
-					background-color: white !important;
-					padding: 0 5px !important; /* Add some padding to the label */
-					font-size: 16px !important;
-					color: ##333 !important;
-					font-weight: bold !important;
-				}
-			
-				.language-lucee .nf {color: ##569cd6; !important}
-				.language-lucee .nv {color: ##9cdcfe; !important}
-				.language-lucee .syntaxFunc {color: ##dcdcaa; !important}
-				.language-lucee .syntaxType {color: ##4ec9b0; !important}
-				.language-lucee .p {color: ##d4d4d4; !important}
-				.language-lucee .nt {color: ##569cd6; !important}
-				.language-lucee .na {color: ##9cdcfe; !important}
-				.language-lucee .s {color: ##ce9178; !important}
-				.language-lucee .err {color: ##d4d4d4; !important}
-				.language-lucee .syntaxAttr { color: ##dcdcaa; !important}
-			
+			.lucee_execute_result {
+				background-color: white !important;
+				border: solid 1px ##333 !important;
+				border-radius: 1em !important;
+				padding: 10px !important;
+				margin-top: 30px !important; /* Increase margin-top to accommodate the overlapping text */
+				margin-bottom: 10px !important; /* Increase margin-top to accommodate the overlapping text */
+				xmax-width: 90% !important; /* Ensure it doesn't overflow the container */
+				font-size: 16px !important;
+				position: relative !important; /* Needed for the absolute positioning of the label */
+			}
+		
+			.lucee_execute_result::before {
+				content: "Generated Output from the example above" !important;
+				position: absolute !important;
+				top: -10px !important; /* Adjust this value to position the text correctly */
+				left: 30px !important; /* Indent the text 20 pixels from the left */
+				background-color: white !important;
+				padding: 0 5px !important; /* Add some padding to the label */
+				font-size: 16px !important;
+				color: ##333 !important;
+				font-weight: bold !important;
+			}
+			span.lucee-debug code.lucee-debug .keyword {color: ##dcdcaa; !important}
+			span.lucee-debug code.lucee-ml .variable {color: ##4ec9b0; !important}
+			span.lucee-debug code.lucee-ml .p {color: ##d4d4d4; !important}
+			span.lucee-debug code.lucee-ml .literal {color: ##ce9178; !important}
+
+			.lucee-debug .nf {color: ##569cd6; !important}
+			.lucee-debug .nv {color: ##9cdcfe; !important}
+			.lucee-debug .syntaxFunc {color: ##dcdcaa; !important}
+			.lucee-debug .syntaxType {color: ##4ec9b0; !important}
+			.lucee-debug .p {color: ##d4d4d4; !important}
+			.lucee-debug .nt {color: ##569cd6; !important}
+			.lucee-debug .na {color: ##9cdcfe; !important}
+			.lucee-debug .s {color: ##ce9178; !important}
+			.lucee-debug .err {color: ##d4d4d4; !important}
+			.lucee-debug .syntaxAttr { color: ##dcdcaa; !important}
+				
 			
 			 </style>
 	<cfif isNull(type)>
 		
-			<cfscript>systemOutput(form.search,1,1);
-				endpoint='default:exception';
+			<cfscript>
+				endpoint='default:documentation';
 				if(LuceeAIHas(endpoint)) {
-					if(!structKeyExists(session, "documentationAISession")) {
+					if(true || !structKeyExists(session, "documentationAISession")) {
 						ais=LuceeCreateAISession(endpoint, 
-			"You are a Lucee expert and documentation guide. Users will ask specific questions about Lucee functions, tags, or configurations. Respond concisely in plain markdown format (no starting ```markdown) without mentioning the origin of the data. Structure your response in a clear, brief format, suitable for direct HTML integration.");
-						session.documentationAISession=ais;
+						"You are a Lucee expert and documentation guide. "
+						&"Users will ask questions about Lucee functions, tags, or configurations. "
+						&"Respond concisely in plain HTML, without using triple backticks or mentioning the origin of the data. "
+						//&"Add attribute ""class"" with value ""lucee"" for  h2, h3, h4, h5, h6, p, and blockquote tags. "
+						&"Biggest heading tag you can use is h2."
+						&"For multi-line code examples, use <code class=""lucee-ml"">. "
+						&"For inline code, use <code>. Avoid <code> within heading tags, and ensure all code is properly escaped with &lt;. "
+						&"Structure responses clearly and briefly for direct HTML integration."
+						
+						// &"Inside <code class=""lucee-ml"">, use syntax coloring like this "
+						// &"<code class=""lucee-ml""><span class=""variable"">x</span><span class=""p"">=</span><span class=""keyword"">myFunction</span>"
+						// &"<span class=""p"">(</span><span class=""literal"">""Susi""</span><span class=""p"">,</span> "
+						// &"<span class=""literal"">123</span><span class=""p"">,</span> <span class=""literal"">true</span><span class=""p"">,</span>"
+						// &" <span class=""variable"">test</span><span class=""p"">);</span>. "
+						// &"Use this css classes for all kind of syntax."
+						);
+						// 	Respond concisely in plain markdown format (no starting ```markdown) without mentioning the origin of the data. 
+						try {
+							meta=LuceeAIGetMetaData(endpoint);
+							label='Generated by #meta.label?:""#';
+						}
+						catch(e) {
+							label="";
+						}	
+						session.documentationAISession={ais:ais,label:label};
 					}
 					else {
-						ais=session.documentationAISession;
+						ais=session.documentationAISession.ais;
+						label=session.documentationAISession.label;
 					}
-					echo("<!-- start pre --><pre>");
+					//echo("<!-- start pre -->");
+					echo("<span class=""lucee-debug"">");
 					md=LuceeInquiryAISession(ais,form.search,function(msg) {
 						echo(msg);
 						cfflush(throwonerror=false);
 						
 					});
-					echo("</pre><!-- end pre -->");
+					echo("<h4>#label#</h4></span");
+					//echo("<!-- end pre -->");
 					//md=LuceeInquiryAISession(ais,form.search);
-					md=executeCodeFragments(md);
-					code=enhanceHTML(markdownToHTML(md));
+					//md=executeCodeFragments(md);
+					//code=enhanceHTML(markdownToHTML(md));
 					
 					
-					echo(code);
+					//echo(code);
 					
 
-					try {
-						meta=LuceeAIGetMetaData('default:exception');
-						echo('AI (#meta.label?:""#)');
-					}
-					catch(e) {dump(e);}	
+					
 				}
 				else {
-					echo('<div class="section-title">no matching tag,function or component found ');
-					echo('for <b>#htmleditFormat(reReplace( form.search, '[^a-zA-Z0-9]', ' ', 'all' ))#</b></div>');
+					echo('<span class="lucee-debug"><p>
+    To use AI to provide information about [#htmleditFormat(reReplace(form.search, '[^a-zA-Z0-9]', ' ', 'all'))#], 
+    you need to create an AI endpoint and set it as <code>default="documentation"</code>. 
+    For more details, see: <a href="https://github.com/lucee/lucee-docs/blob/master/docs/recipes/ai.md" target="_blank">AI Documentation Guide</a>.
+					</p></span>
+');
 			
 				}
 			</cfscript>
 		<cfabort>
 	</cfif>
 	<cfif "recipes" NEQ type>
-		<!--- title --->
-		<h1 class="lucee">#ucFirst(type)# #data.name?:data.title#</h1>
-		<!--- deprecated? --->
-		<cfif (data.status?:"") EQ "deprecated">
-			<div class="warning nofocus">This #type# is deprecated</div>
-		</cfif>
-		
-		<!--- description --->
-		<span>
-			<cfif not StructKeyExists(data, "description")>
-				<em>No description found</em>
-			<cfelse>
-				#enhanceHTML(markdownToHTML(data.description))#
+		<span class="lucee-debug">
+			<!--- title --->
+			<h1>#ucFirst(type)# #data.name?:data.title#</h1>
+			<!--- deprecated? --->
+			<cfif (data.status?:"") EQ "deprecated">
+				<div class="warning nofocus">This #type# is deprecated</div>
 			</cfif>
+			
+			<!--- description --->
+			<span>
+				<cfif not StructKeyExists(data, "description")>
+					<em>No description found</em>
+				<cfelse>
+					#enhanceHTML(markdownToHTML(data.description))#
+				</cfif>
+			</span>
 		</span>
 	</cfif>
 
@@ -522,27 +556,26 @@
 	<!--- Syntax TODO css missing--->
 	<cfset first=true>
 	<cfset optCount=0>
-	<h3 class="lucee">Syntax</h3>
+	<span class="lucee-debug">
+	<h3>Syntax</h3>
 	
-	<pre><code id="lucee" class="language-lucee"><span class="nf">#data.name#</span><span class="p">(</snap><cfloop array="#data.arguments#" index="item"><cfif item.status EQ "hidden"><cfcontinue></cfif><cfif not first><span class="nv">,</span></cfif><cfif not item.required><cfset optCount=optCount+1><span class="nv">[</span></cfif><span class="nv">#item.type#</span> <span class="nv">#item.name#</span><cfset first=false></cfloop><span class="syntaxFunc">#RepeatString(']',optCount)#): </span><span class="syntaxType">#data.returntype#</span></code></pre>
+	<code class="lucee-ml"><span class="nf">#data.name#</span><span class="p">(</snap><cfloop array="#data.arguments#" index="item"><cfif item.status EQ "hidden"><cfcontinue></cfif><cfif not first><span class="nv">,</span></cfif><cfif not item.required><cfset optCount=optCount+1><span class="nv">[</span></cfif><span class="nv">#item.type#</span> <span class="nv">#item.name#</span><cfset first=false></cfloop><span class="syntaxFunc">#RepeatString(']',optCount)#): </span><span class="syntaxType">#data.returntype#</span></code>
 	
 	<!--- Syntax member TODO css missing--->
 	<cfif !isNull(data.member)>
 		<cfset first=true>
 		<cfset optCount=0>
-		<h3 class="lucee">Member Syntax</h3>
-	<pre><code id="lucee" class="language-lucee"><span class="nf">#data.member.type#.#data.member.name#</span><span class="p">(</snap><cfloop array="#data.arguments#" index="i" item="item"><cfif item.status EQ "hidden" or data.member.position EQ i><cfcontinue></cfif><cfif not first><span class="nv">,</span></cfif><cfif not item.required><cfset optCount=optCount+1><span class="nv">[</span></cfif><span class="nv">#item.type#</span> <span class="nv">#item.name#</span><cfset first=false></cfloop><span class="syntaxFunc">#RepeatString(']',optCount)#): </span><span class="syntaxType"><cfif data.member.chaining>#data.member.type#<cfelse>#data.returntype#</cfif></span></code></pre>
-	
-	
+		<h3>Member Syntax</h3>
+		<code class="lucee-ml"><span class="nf">#data.member.type#.#data.member.name#</span><span class="p">(</snap><cfloop array="#data.arguments#" index="i" item="item"><cfif item.status EQ "hidden" or data.member.position EQ i><cfcontinue></cfif><cfif not first><span class="nv">,</span></cfif><cfif not item.required><cfset optCount=optCount+1><span class="nv">[</span></cfif><span class="nv">#item.type#</span> <span class="nv">#item.name#</span><cfset first=false></cfloop><span class="syntaxFunc">#RepeatString(']',optCount)#): </span><span class="syntaxType"><cfif data.member.chaining>#data.member.type#<cfelse>#data.returntype#</cfif></span></code>
 	</cfif>
 	
 	
 	<!--- Argumente --->
-	<h3 class="lucee">Arguments</h3>
+	<h3>Arguments</h3>
 	<cfif data.argumentType EQ "fixed" and not arraylen(data.arguments)>
-		<p class="lucee">This function has no arguments</p>
+		<p>This function has no arguments</p>
 	<cfelse>
-		<p class="lucee">
+		<p>
 			#argtype[data.argumentType]#
 			<cfif data.argumentType EQ "dynamic">
 				<cfif data.argMin GT 0 and data.argMax GT 0>
@@ -599,24 +632,24 @@
 		</table>
 		
 		</cfif>
-	
+	</span>
 	
 	<!----------------------------------------
 	------------------- TAG -------------
 	------------------------------------------>
 	<cfelse>
-		
+		<span class="lucee-debug">
 	<!--- Body --->
-	<h3 class="lucee">Body</h3>
-	<p class="lucee">#body[ data.bodyType ]#</p>
+	<h3>Body</h3>
+	<p>#body[ data.bodyType ]#</p>
 	
 	<!--- Syntax --->
 	<cfset arrAttrNames= data.attributes.keyArray().sort( 'textnocase' )>
 	<cfset tagName = data.namespace & data.namespaceseperator & data.name>
 	<cfif data.hasNameAppendix><cfset tagName &= "CustomName"></cfif>
 	
-	<h3 class="lucee">Tag Syntax</h3>
-	<pre><code id="lucee" class="language-lucee"><!---
+	<h3>Tag Syntax</h3>
+	<code class="lucee-ml"><!---
 			---><span class="nt">&lt;#tagName#</span><!---
 			---><cfif data.attributeType == "noname"><!---
 				---> <span class="syntaxTag">##<!---
@@ -652,14 +685,14 @@
 				--->
 	&lt;/#tagName#&gt;</span><!---
 			---></cfif><!---
-		---></code></pre>
+		---></code>
 	
 	<!--- SCRIPT --->
 		<cfif data.keyExists( "script" ) && data.script.type != "none">
 			<cfset arrAttrNames = data.attributes.keyArray().sort( 'textnocase' )>
-			<h3 class="lucee">Script Syntax</h3>
-			<p class="lucee">This tag is also supported within cfscript</p>
-			<pre><code id="lucee" class="language-lucee"><!---
+			<h3>Script Syntax</h3>
+			<p>This tag is also supported within cfscript</p>
+			<code class="lucee-ml"><!---
 			---><span class="nt">&lt;cfscript&gt;</span>
 		<span class="nt">#data.name#</span><!---
 		---><cfif data.attributeType == "noname"><!---
@@ -709,15 +742,15 @@
 		}</span><!---
 		---></cfif>
 <span class="nt">&lt;/cfscript></span><!---
-	---></code></pre>
+	---></code>
 		</cfif>
 	
 	<!--- Attributes --->
-	<h3 class="lucee">Attributes</h3>
+	<h3>Attributes</h3>
 	<cfif data.attributeType == "fixed" && !arrayLen( arrAttrNames )>
-		<p class="lucee">This tag has no attributes</p>
+		<p>This tag has no attributes</p>
 	<cfelse>
-		<p class="lucee">#attrtype[data.attributeType]#
+		<p>#attrtype[data.attributeType]#
 			<cfif data.attributeType == "dynamic">
 				<cfif data.attrMin GT 0 && data.attrMax GT 0>
 					#replace( replace( attr.minMax, "{min}", data.attrMin ), "{max}", data.attrMax )#
@@ -758,14 +791,16 @@
 			</tbody>
 		</table>
 	</cfif>
-
+</span>
 	</cfif>
 	
 	
 	<!--- Category --->
 	<cfif structKeyExists(data, "keywords") AND !arrayIsEmpty(data.keywords)>
-		<h3 class="lucee">Category</h3>
-		<p class="lucee">#arraytolist(data.keywords,", ")#</p>
+		<span class="lucee-debug">
+		<h3>Category</h3>
+		<p>#arraytolist(data.keywords,", ")#</p>
+		</span>
 	</cfif>
 	
 	</cfoutput>

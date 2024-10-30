@@ -378,16 +378,16 @@ function luceeSearchAI(val) {
   	
 	xhttp.onprogress = function() {
 		el.innerHTML = this.responseText; // Append partial response data
+		//el.innerText = this.responseText; // Append partial response data
 	};
 	
 	xhttp.onreadystatechange = function() {
     	if (this.readyState == 4 && this.status == 200) {
-    		var start=this.responseText.indexOf("<!-- start pre -->");
+    		/*var start=this.responseText.indexOf("<!-- start pre -->");
     		var end=this.responseText.indexOf("<!-- end pre -->");
 			if(start>-1 && start<end) {
-				//el.innerText= this.responseText;
-				el.innerHTML= this.responseText.substring(0,start)+this.responseText.substring(end+16);
-			}
+				el.innerText= this.responseText.substring(0,start)+this.responseText.substring(end+16);
+			}*/
     	}
   	};
 

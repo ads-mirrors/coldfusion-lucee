@@ -14,6 +14,8 @@
 
 	stText.Settings.ai.defaultTypeException="Exception";
 	stText.Settings.ai.defaultTypeExceptionDesc="Lucee will use that connection to analyze any exceptions that are thrown and displayed in the error output. Lucee will detact secrets before sending it to the AI and log everything it send to the ai to the ai.log.";
+	stText.Settings.ai.defaultTypeDocumentation="Documentation";
+	stText.Settings.ai.defaultTypeExceptionDesc="Lucee will use that connection to provide documentation information in the Monitor part of the Lucee request.";
 	
 
 
@@ -22,7 +24,7 @@
 	param name="url.action2" default="list";
 	param name="form.mainAction" default="none";
 	param name="form.subAction" default="none";
-	defaults=["exception"];
+	defaults=["exception","documentation"];
 
 
 	sctDefaults=[:];

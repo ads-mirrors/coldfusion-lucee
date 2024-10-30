@@ -93,7 +93,7 @@ Redirtect to entry --->
 							<td nowrap><input type="hidden" name="name_#connections.currentrow#" value="#connections.name#">#connections.name#</td>
 							<td nowrap>#driver.getLabel()#<cfif !isNull(connections.custom.type)> / #ucFirst(connections.custom.type?:"-")#</cfif></td>
 							<td nowrap>#connections.custom.model?:"-"#</td>
-							<td nowrap><cfif structKeyExists(sctDefaults, connections.default)> #stText.Settings.ai["defaultType"&connections.default]?:(connections.default?:"-")#</cfif></td>
+							<td nowrap><cfif structKeyExists(sctDefaults, connections.default)> #stText.Settings.ai["defaultType"&connections.default]?:(ucFirst(connections.default?:"-"))#</cfif></td>
 							<td>
 								#renderEditButton("#request.self#?action=#url.action#&action2=create&name=#Hash(connections.name)#")#
 							</td>
