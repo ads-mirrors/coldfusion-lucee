@@ -18,7 +18,11 @@
 		opacity: 0.5; 
 	}
     
-	#aivalue code {
+	#ai-response-cell h1, #ai-response-cell h2, #ai-response-cell h3, #ai-response-cell h4, #ai-response-cell h5, #ai-response-cell h6 {
+		font-size: 1em !important;
+	}
+
+	#ai-response-cell code {
 		font-size: 1.2em;
 		background-color: rgba(0, 0, 0, 0.6); /* Lighter semi-transparent background */
 		color: #E6F0F2;              /* Light text color */
@@ -29,9 +33,9 @@
 		white-space: nowrap;         /* Prevent breaking lines */
 	}
 
-	#aivalue pre code  {
+	#ai-response-cell code.lucee-ml  {
 		display: block;              /* Make it a block element */
-		padding: 10px;               /* Padding around the text for better readability */
+		padding: 5px 10px;               /* Padding around the text for better readability */
 		border-radius: 5px;          /* Rounded corners for a nicer look */
 		overflow-x: auto;            /* Allows horizontal scrolling for long lines of code */
 		font-family: Consolas, "Courier New", monospace; /* Use a monospaced font for code */
@@ -85,12 +89,16 @@
 		</tr>
 	</cfif>
 	<!--- AI --->
-	<cfif LuceeAIHas('default:exception')>
+	<cfset hasAI=LuceeAIHas('default:exception')>
+	<cfif hasAI>
 		<cftry>
-			<cfset meta=LuceeAIGetMetaData('default:exception')>
+			<cfif not structKeyExists(application,"aiErrorEndpointName")>
+				<cfset meta=LuceeAIGetMetaData('default:exception')>
+				<cfset application.aiErrorEndpointName="AI (#meta.label?:''#)">
+			</cfif>
 			<tr>
 				<td class="label">
-					AI (#meta.label?:""#)
+					#application.aiErrorEndpointName#
 				</td>
 				<td id="ai-response-cell">...</td>
 			</tr>
@@ -161,8 +169,7 @@
 	</tr>
 </table>
 
-
-<cfif LuceeAIHas('default:exception')>
+<cfif hasAI>
 	<cftry>
 		<script>
 			var val= "";
@@ -177,11 +184,13 @@
 				index = (index + 1) % dotCycle.length;
 				setTimeout(luceeSpinner, 200, index)
 			}
-
-			function l(msg) {
-				document.getElementById('ai-response-cell').innerText+=msg;
-			}
 			luceeSpinner();
+
+			completeMsg="";
+			function l(msg) {
+				completeMsg+=msg;
+				document.getElementById('ai-response-cell').innerHTML=completeMsg;
+			}
 		
 		</script>
 <cfflush throwonerror=false>
@@ -190,15 +199,26 @@
 			path=catch.TagContext[1].template?:"";
 			line=catch.TagContext[1].line?:"";
 			
-			
+if(!structKeyExists(session, "exceptionAISession")) {
 			ais=LuceeCreateAISession('default:exception', 
-			"You are a Lucee expert. There was an exception while executing Lucee (CFML) code in template #path# on line #line#.
-Analyze the provided JSON containing exception details of this issue. 
+			"You are a Lucee expert. You will analyse exception that happen while executing Lucee (CFML) code.
+Analyze the provided JSON containing exception details of the issue. 
 The 'content' key contains the source code of the template that failed.
+The 'path' key contains the file name and 'line' the line number where it happens.
 
-Provide a concise analysis with potential fixes, and include example code if it maske sense. 
-Return the result in plain markdown format (no starting ""```markdown"") without referencing how the data was provided or mentioning any specific JSON keys. 
-Avoid repeating exception details, as those will be presented elsewhere. Keep your response brief and structured for inclusion in existing HTML output.");
+Respond concisely in plain HTML, without using triple backticks or mentioning the origin of the data. 
+Biggest heading tag you can use is h3.
+For multi-line code examples, use <code class=""lucee-ml"">.
+For inline code, use <code>. Avoid <code> within heading tags, and ensure all code is properly escaped with &lt;.
+Do not referencing how the data was provided or mentioning any specific JSON keys. 
+Avoid repeating exception details, as those will be presented elsewhere. Keep your response short and flat structured for inclusion in existing HTML output. example code is welcome."
+
+);
+session.exceptionAISession=ais;
+}
+else {
+	ais=session.exceptionAISession;
+}
 			catchi=duplicate(catch);
 			path=catch.TagContext[1].template?:"";
 			if(!fileExists(path)) path=expandPath(path);
@@ -206,14 +226,28 @@ Avoid repeating exception details, as those will be presented elsewhere. Keep yo
 				catchi["content"]=fileRead(path);
 
 			}
-			structDelete(catchi, "TagContext",false);
+			catchi.path=path;
+			catchi.line=line;
+			//structDelete(catchi, "TagContext",false);
+			if(structKeyExists(catchi, "TagContext")) {
+				loop array=catchi.TagContext item="el" {
+					structDelete(el, "id",false);
+					structDelete(el, "column",false);
+					structDelete(el, "Raw_Trace",false);
+					structDelete(el, "codePrintHTML",false);
+					structDelete(el, "type",false);
+				}
+			}
+			
+			
 			structDelete(catchi, "ErrorCode",false);
 			variables.aiFirst=true;
 			answer=LuceeInquiryAISession(ais,serializeJSON(catchi),function(msg) {
 				echo('<script>');
 				if(variables.aiFirst) {
 					echo('spinner=false;');
-					echo('document.getElementById("ai-response-cell").innerText="";');
+					echo('document.getElementById("ai-response-cell").innerHTML="";');
+					//echo("l('<span id=""lucee-error"">sss</span>');");	
 					variables.aiFirst=false;
 				}
 				echo("l(#serializeJson(msg)#);");	
@@ -225,8 +259,8 @@ Avoid repeating exception details, as those will be presented elsewhere. Keep yo
 	
 		</cfscript>
 		<script>
-			document.getElementById('ai-response-cell').innerHTML ='<span id="aivalue">'+ #serializeJSON(markdowntohtml(replaceNoCase(answer,"Coldfusion","CFML","all") ))# 
-				+'</span><p class="-lucee-comment"> created by #meta.label# (#(meta.model)#)</p>';
+			//document.getElementById('ai-response-cell').innerHTML ='<span id="aivalue">'+ #serializeJSON(markdowntohtml(replaceNoCase(answer,"Coldfusion","CFML","all") ))# 
+			//	+'</span><p class="-lucee-comment"> created by #meta.label# (#(meta.model)#)</p>';
 		</script>
 		<cfcatch></cfcatch>
 	</cftry>

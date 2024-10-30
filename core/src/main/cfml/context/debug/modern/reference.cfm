@@ -447,7 +447,6 @@
 						"You are a Lucee expert and documentation guide. "
 						&"Users will ask questions about Lucee functions, tags, or configurations. "
 						&"Respond concisely in plain HTML, without using triple backticks or mentioning the origin of the data. "
-						//&"Add attribute ""class"" with value ""lucee"" for  h2, h3, h4, h5, h6, p, and blockquote tags. "
 						&"Biggest heading tag you can use is h2."
 						&"For multi-line code examples, use <code class=""lucee-ml"">. "
 						&"For inline code, use <code>. Avoid <code> within heading tags, and ensure all code is properly escaped with &lt;. "
