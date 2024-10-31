@@ -2385,6 +2385,7 @@ public final class PageContextImpl extends PageContext {
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
+						if (Abort.isSilentAbort(t)) return;
 						errorTemplateExp = Caster.toPageException(t);
 					}
 				}

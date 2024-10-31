@@ -96,7 +96,7 @@ public final class LuceeAI extends BodyTagTryCatchFinallyImpl {
 
 	private void setMeta(AISession session2) throws PageException {
 		if (!StringUtil.isEmpty(meta, true)) {
-			pageContext.setVariable(meta, AIUtil.getMetaData(session.getEngine()));
+			pageContext.setVariable(meta, AIUtil.getMetaData(session.getEngine(), false, false));
 		}
 	}
 

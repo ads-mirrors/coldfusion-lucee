@@ -9692,6 +9692,13 @@ The following things are considered to be empty:
 			<required>yes</required>
 			<description></description>
 		</argument>
+		<argument>
+			<name>detailed</name>
+			<type>boolean</type>
+			<required>false</required>
+			<default>false</default>
+			<description></description>
+		</argument>
 		<return>
 			<type>struct</type>
 		</return>

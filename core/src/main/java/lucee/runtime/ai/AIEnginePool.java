@@ -44,7 +44,10 @@ public class AIEnginePool {
 
 		try {
 			aie = factory.createInstance(config);
-			if (aie != null) return aie;
+			if (aie != null) {
+				instances.put(name, aie);
+				return aie;
+			}
 		}
 		catch (Exception e) {
 			ApplicationException ae = new ApplicationException("Cannot create and instance of the AI engine [" + name + "]; " + e.getMessage());

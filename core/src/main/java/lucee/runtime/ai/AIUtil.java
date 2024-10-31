@@ -62,7 +62,7 @@ public class AIUtil {
 		return sb.toString();
 	}
 
-	public static Struct getMetaData(AIEngine aie) throws PageException {
+	public static Struct getMetaData(AIEngine aie, boolean addModelsInfo, boolean addFilesInfo) throws PageException {
 
 		Struct meta = new StructImpl();
 
@@ -72,7 +72,7 @@ public class AIUtil {
 		if (factory != null) meta.set(KeyConstants._name, factory.getName());
 
 		// models
-		{
+		if (addModelsInfo) {
 			List<AIModel> models = aie.getModels();
 			Query qry = new QueryImpl(new Key[] { KeyConstants._name, KeyConstants._label, KeyConstants._description, KeyConstants._custom }, models.size(), "models");
 			int row = 0;
@@ -87,7 +87,7 @@ public class AIUtil {
 		}
 
 		// files
-		if (aie instanceof AIEngineFile) {
+		if (addFilesInfo && aie instanceof AIEngineFile) {
 			AIEngineFile aief = (AIEngineFile) aie;
 			List<AIFile> files = aief.listFiles();
 

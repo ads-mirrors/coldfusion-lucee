@@ -104,6 +104,15 @@
 			</tr>
 			<cfcatch></cfcatch>
 		</cftry>
+	<cfelse>
+		<tr>
+			<td class="label">
+				AI (Experimental)
+			</td>
+			<td id="ai-response-cell">
+				For AI-driven exception analysis setup, see <a target="blank" href="https://github.com/lucee/lucee-docs/blob/master/docs/recipes/ai.md">AI Setup Guide</a>.
+			</td>
+		</tr>
 	</cfif>
 	<cfif structkeyexists( catch, 'errorcode' ) && len( catch.errorcode ) && catch.errorcode NEQ 0>
 		<tr>

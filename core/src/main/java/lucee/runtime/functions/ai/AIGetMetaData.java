@@ -15,9 +15,13 @@ public final class AIGetMetaData extends BIF {
 	private static final long serialVersionUID = 6532201888958323478L;
 
 	public static Struct call(PageContext pc, String nameAI) throws PageException {
+		return call(pc, nameAI, false);
+	}
+
+	public static Struct call(PageContext pc, String nameAI, boolean detailed) throws PageException {
 		if (nameAI.startsWith("default:")) nameAI = ((PageContextImpl) pc).getNameFromDefault(nameAI.substring(8));
 		AIEngine aie = ((PageContextImpl) pc).getAIEngine(nameAI);
-		return AIUtil.getMetaData(aie);
+		return AIUtil.getMetaData(aie, detailed, detailed);
 	}
 
 	@Override
