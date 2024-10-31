@@ -17,8 +17,8 @@ component extends = "org.lucee.cfml.test.LuceeTestCase"{
 				expect(fileexists(path&'imgDrawimg.jpg')).tobe("true");
 			});
 
-			it(title = "Checking with image.drawBeveledRect()", body = function( currentSpec ){
-				img = imageRead("https://pbs.twimg.com/profile_images/1037639083135250433/fREb9ZhM_400x400.jpg");
+			it(title = "Checking with image.drawBeveledRect()",skip=true, body = function( currentSpec ){
+				img = imageRead("https://pbs.twimg.com/profile_images/1037639083135250433/fREb9ZhM_400x400.jpg"); // TODO provide a local copy of this
 				img.DrawBeveledRect(100,40,50,30,"yes","yes");
 				cfimage(action = "write", source = img, destination = path&'objDrawbevelrect.jpg', overwrite = "yes");
 				expect(fileexists(path&'objDrawbevelrect.jpg')).tobe("true");
