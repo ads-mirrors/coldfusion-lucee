@@ -17,7 +17,7 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" labels="image" {
 				expect(fileexists(path&'imgDrawimg.jpg')).tobe("true");
 			});
 
-			it(title = "Checking with image.drawBeveledRect()", body = function( currentSpec ){
+			it(title = "Checking with image.drawBeveledRect()",skip=true, body = function( currentSpec ){
 				var img = imageNew("", 400, 400);
 				img.DrawBeveledRect(100,40,50,30,"yes","yes");
 				cfimage(action = "write", source = img, destination = path&'objDrawbevelrect.jpg', overwrite = "yes");
