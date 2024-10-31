@@ -4999,14 +4999,23 @@ public final class ConfigAdmin {
 					// component path
 					String cfcPath = Caster.toString(map.get("cfcPath"), null);
 					if (StringUtil.isEmpty(cfcPath)) cfcPath = Caster.toString(map.get("componentPath"), null);
+					if (StringUtil.isEmpty(cfcPath)) cfcPath = Caster.toString(map.get("cfc-path"), null);
+					if (StringUtil.isEmpty(cfcPath)) cfcPath = Caster.toString(map.get("component-path"), null);
+
 					// listener component path
 					String listenerCfcPath = Caster.toString(map.get("listenerCFCPath"), null);
 					if (StringUtil.isEmpty(listenerCfcPath)) listenerCfcPath = Caster.toString(map.get("listenerComponentPath"), null);
+
 					// startup mode
-					String strStartupMode = Caster.toString(map.get("startupMode"), "automatic");
+					String strStartupMode = Caster.toString(map.get("startupMode"), null);
+					if (StringUtil.isEmpty(strStartupMode)) strStartupMode = Caster.toString(map.get("startup-mode"), "automatic");
 					int startupMode = GatewayEntryImpl.toStartup(strStartupMode, GatewayEntryImpl.STARTUP_MODE_AUTOMATIC);
+
 					// read only
-					boolean readOnly = Caster.toBooleanValue(map.get("readOnly"), false);
+					String strReadOnly = Caster.toString(map.get("readOnly"), null);
+					if (StringUtil.isEmpty(strReadOnly)) strReadOnly = Caster.toString(map.get("read-only"), null);
+					boolean readOnly = Caster.toBooleanValue(strReadOnly, false);
+
 					// custom
 					Struct custom = Caster.toStruct(map.get("custom"), null);
 					/*
