@@ -717,7 +717,7 @@ loop array=enabledKeys index="local.i" item="local.k" {
 				name="luceesearchvalue"
 				placeholder="Search Tag, Function and Recipes"></textarea>
 				<p>
-					Type keywords for simple search. Press Enter to ask the AI (<a target="_blank" href="https://github.com/lucee/lucee-docs/blob/master/docs/recipes/ai.md">if enabled</a>) for more detailed info. 
+					Type keywords for simple search. Press Enter to ask the AI (<a target="_blank" href="https://github.com/lucee/lucee-docs/blob/master/docs/recipes/ai-for-documentation.md">if enabled</a>) for more detailed info. 
 				</p>
 				<!---<input onkeyup="luceeSearchSugestions(null,event);" 
 				id="-lucee-docs-search-input" 
