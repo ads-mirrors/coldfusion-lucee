@@ -36,7 +36,7 @@ public class AIEngineFactory {
 
 	public AIEngine createInstance(Config config) throws PageException, ClassException, BundleException {
 		AIEngine aie = (AIEngine) ClassUtil.loadInstance(cd.getClazz());
-		LogUtil.log(config, Log.LEVEL_TRACE, "ai", "ai-factory", "create AI instance [" + cd.toString() + "]");
+		LogUtil.logx(config, Log.LEVEL_TRACE, "ai-factory", "create AI instance [" + cd.toString() + "]", "ai", "application");
 		return aie.init(this, properties);
 	}
 

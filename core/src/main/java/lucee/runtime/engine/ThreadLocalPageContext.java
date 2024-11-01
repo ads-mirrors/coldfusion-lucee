@@ -27,6 +27,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.PageContextImpl;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
+import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.listener.ApplicationContext;
 import lucee.runtime.listener.ApplicationContextSupport;
 import lucee.runtime.thread.ThreadUtil;
@@ -194,54 +195,79 @@ public final class ThreadLocalPageContext {
 	}
 
 	public static Log getLog(PageContext pc, String logName) {
+		return getLog(pc, logName, true);
+	}
+
+	public static Log getLog(PageContext pc, String logName, boolean createIfNecessary) {
 		// pc provided
 		if (pc instanceof PageContextImpl) {
-			return ((PageContextImpl) pc).getLog(logName);
+			return ((PageContextImpl) pc).getLog(logName, createIfNecessary);
 		}
 		// pc from current thread
 		pc = pcThreadLocal.get();
 		if (pc instanceof PageContextImpl) {
-			return ((PageContextImpl) pc).getLog(logName);
+			return ((PageContextImpl) pc).getLog(logName, createIfNecessary);
 		}
 
 		// pc from parent thread
 		pc = pcThreadLocalInheritable.get();
 		if (pc instanceof PageContextImpl) {
-			return ((PageContextImpl) pc).getLog(logName);
+			return ((PageContextImpl) pc).getLog(logName, createIfNecessary);
 		}
 
 		// config
 		Config config = getConfig(pc);
 		if (config != null) {
-			return config.getLog(logName);
+			try {
+				return ((ConfigWebPro) config).getLog(logName, createIfNecessary);
+			}
+			catch (Exception e) {
+				return config.getLog(logName);
+			}
 		}
 		return null;
 	}
 
 	public static Log getLog(Config config, String logName) {
+		return getLog(config, logName, true);
+	}
+
+	public static Log getLog(Config config, String logName, boolean createIfNecessary) {
 
 		// pc from current thread
 		PageContext pc = pcThreadLocal.get();
 		if (pc instanceof PageContextImpl && pc.getConfig() == config) {
-			return ((PageContextImpl) pc).getLog(logName);
+			return ((PageContextImpl) pc).getLog(logName, createIfNecessary);
 		}
 
 		// pc from parent thread
 		pc = pcThreadLocalInheritable.get();
 		if (pc instanceof PageContextImpl && pc.getConfig() == config) {
-			return ((PageContextImpl) pc).getLog(logName);
+			return ((PageContextImpl) pc).getLog(logName, createIfNecessary);
 		}
 
 		// config
 		config = getConfig(config);
 		if (config != null) {
+			if (config instanceof ConfigPro) {
+				try {
+					return ((ConfigPro) config).getLog(logName, createIfNecessary);
+				}
+				catch (Exception e) {
+					return config.getLog(logName);
+				}
+			}
 			return config.getLog(logName);
 		}
 		return null;
 	}
 
 	public static Log getLog(String logName) {
-		return getLog((PageContext) null, logName);
+		return getLog((PageContext) null, logName, true);
+	}
+
+	public static Log getLog(String logName, boolean createIfNecessary) {
+		return getLog((PageContext) null, logName, createIfNecessary);
 	}
 
 	public static Locale getLocale() {

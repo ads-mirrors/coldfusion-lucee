@@ -148,7 +148,7 @@ public final class LogUtil {
 	public static void log(Config config, String type, Throwable t, int logLevel, String... logNames) {
 		Log log = null;
 		for (String ln: logNames) {
-			log = ThreadLocalPageContext.getLog(config, ln);
+			log = ThreadLocalPageContext.getLog(config, ln, false);
 			if (log != null) break;
 		}
 
@@ -180,10 +180,9 @@ public final class LogUtil {
 	public static void logx(Config config, int level, String type, String msg, String... logNames) {
 		Log log = null;
 		for (String ln: logNames) {
-			log = ThreadLocalPageContext.getLog(config, ln);
+			log = ThreadLocalPageContext.getLog(config, ln, false);
 			if (log != null) break;
 		}
-
 		if (log != null) log.log(level, type, msg);
 		else {
 			logGlobal(ThreadLocalPageContext.getConfig(config), level, logNames[0] + ":" + type, msg);

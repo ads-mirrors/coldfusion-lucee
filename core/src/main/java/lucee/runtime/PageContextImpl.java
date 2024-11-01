@@ -4114,10 +4114,21 @@ public final class PageContextImpl extends PageContext {
 		return config.getLog(name);
 	}
 
-	public Log getLog(String name, boolean createIfNecessary) throws PageException {
-		Log log = getApplicationContext().getLog(name);
+	public Log getLog(String name, boolean createIfNecessary) {
+		Log log = null;
+		try {
+			log = getApplicationContext().getLog(name);
+		}
+		catch (PageException e) {
+			config.getLog("application").error(getClass().getName(), e);
+		}
 		if (log != null) return log;
-		return config.getLog(name, createIfNecessary);
+		try {
+			return config.getLog(name, createIfNecessary);
+		}
+		catch (PageException e) {
+			return config.getLog(name);
+		}
 	}
 
 	public java.util.Collection<String> getLogNames() throws PageException {
