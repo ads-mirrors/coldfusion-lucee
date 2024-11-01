@@ -70,7 +70,18 @@
 	border-radius: 5px; 
 }
 
-
+textarea.ld {
+	margin: -10px 3px;
+	padding: 8px;
+	height: 2.5em; 
+    width: 22em;            /* Full width, or set a fixed width */
+    border: 1px solid #000; /* Standard border style */
+    border-radius: 4px;     /* Rounded corners for a modern look */
+    box-sizing: border-box; /* Ensures padding doesn’t affect width */
+    resize: both;           /* Prevents resizing to keep consistent dimensions */
+    line-height: 1;       /* Ensures consistent line height */
+    min-height: 1em;       /* Same height as a typical input field */
+}
 
 	.ldTabContent { margin: 2.5em 1em 0 1em; padding: 1em; background-color: #FFF; color: #222; border: 1px solid #CCC; border-radius: 5px; text-shadow: none; }
 	.ldTabContent.collapsed	{ padding: 0; border-width: 0; }
@@ -215,13 +226,29 @@ function loadRef() {
 			luceeRefData=JSON.parse(this.responseText.trim());
     	}
   	};
-  	xhttp.open("GET", "/lucee/debug/modern/reference.cfm", true);
+  	xhttp.open("GET", "/debug/modern/reference.cfm", true);
   	xhttp.send();
 }
+
+let lineHeight = -1
 function luceeSearchSugestions(val,event) {
-	var isEnter=event && event.key=="Enter";
-		
 	var src=document.getElementById("-lucee-docs-search-input");
+	var isEnter = event && event.key === "Enter" && !event.shiftKey;
+	var isShiftEnter = event && event.key === "Enter" && event.shiftKey;
+
+	if(isShiftEnter) {
+		try {
+			var currentHeight = parseFloat(window.getComputedStyle(src).height);
+			if(lineHeight < 0) {
+				lineHeight=currentHeight-20;
+			}
+		}
+		catch(e) {
+			lineHeight=13;
+		}
+		src.style.height = (currentHeight+lineHeight) + "px";
+		event.preventDefault();
+	}
 	var allFunctions=false;
 	var allTags=false;
 	var allRecipes=false;
@@ -240,6 +267,17 @@ function luceeSearchSugestions(val,event) {
 	else if(val=='recipes') {
 		allRecipes=true;
 		src.value="";
+	}
+	var val=val.trim();
+	if(isEnter) {
+		src.value=val;
+	}
+
+	// line length
+	var lines = val.split("\n");   // Split the text by newline
+    var lastLine = lines[lines.length - 1];  // Get the last line
+    if(lastLine.length>30) {
+		src.style.width = (src.offsetWidth +8 ) + "px"; 	
 	}
 	val=val.toLowerCase();
 	
@@ -357,7 +395,7 @@ function luceeSearch(val,type) {
     		el.innerHTML= this.responseText;
     	}
   	};
-  	xhttp.open("POST", "/lucee/debug/modern/reference.cfm", true);
+  	xhttp.open("POST", "/debug/modern/reference.cfm", true);
   	xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
   	xhttp.send("search=" + val + "&typ=" + type);
 }
@@ -392,7 +430,7 @@ function luceeSearchAI(val) {
   	};
 
 
-  	xhttp.open("POST", "/lucee/debug/modern/reference.cfm", true);
+  	xhttp.open("POST", "/debug/modern/reference.cfm", true);
   	//xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
 	var formData = new FormData();
 	formData.append("search", val);
@@ -668,12 +706,25 @@ loop array=enabledKeys index="local.i" item="local.k" {
 		<br><br>
 		<div class="pad">
 		<form id="luceeSearchForm" autocomplete="off">
-			<a class="large" onclick="luceeSearchSugestions('functions')">Functions | </a><a onclick="luceeSearchSugestions('tags')" class="large">Tags | </a><a onclick="luceeSearchSugestions('recipes')" class="large">Recipes | </a><input onkeyup="luceeSearchSugestions(null,event);" 
+			<a class="large" onclick="luceeSearchSugestions('functions')">Functions |</a>
+			<a onclick="luceeSearchSugestions('tags')" class="large">Tags | </a>
+			<a onclick="luceeSearchSugestions('recipes')" class="large">Recipes | </a>
+			<textarea
+				class="ld"
+				rows="10" cols="30"
+				onkeyup="luceeSearchSugestions(null,event);" 
+				id="-lucee-docs-search-input" 
+				name="luceesearchvalue"
+				placeholder="Search Tag, Function and Recipes"></textarea>
+				<p>
+					Type keywords for simple search. Press Enter to ask the AI (<a target="_blank" href="https://github.com/lucee/lucee-docs/blob/master/docs/recipes/ai.md">if enabled</a>) for more detailed info. 
+				</p>
+				<!---<input onkeyup="luceeSearchSugestions(null,event);" 
 				id="-lucee-docs-search-input" 
 				name="luceesearchvalue"
 					placeholder="Search Tag or Function" 
 					type="text">
-			<!---<input onclick="luceeSearch()" type="button" name="go" value="go">--->
+			<input onclick="luceeSearch()" type="button" name="go" value="go">--->
 				
 		</form>
 		<script>

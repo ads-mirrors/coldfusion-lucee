@@ -92,13 +92,10 @@
 	<cfset hasAI=LuceeAIHas('default:exception')>
 	<cfif hasAI>
 		<cftry>
-			<cfif not structKeyExists(application,"aiErrorEndpointName")>
-				<cfset meta=LuceeAIGetMetaData('default:exception')>
-				<cfset application.aiErrorEndpointName="AI (#meta.label?:''#)">
-			</cfif>
 			<tr>
 				<td class="label">
-					#application.aiErrorEndpointName#
+					<cfset meta=LuceeAIGetMetaData('default:exception')>
+					AI (#meta.label?:''#)
 				</td>
 				<td id="ai-response-cell">...</td>
 			</tr>
@@ -186,7 +183,7 @@
 			function luceeSpinner(index) {
 				var spinnerElement = document.getElementById('ai-response-cell');
 				
-				var dotCycle = ['⣷','⣯','⣟','⡿','⢿','⣻','⣽','⣾'];
+				var dotCycle = ['⠁', '⠈', '⠐', '⠠', '⢀', '⡀', '⠄', '⠂'];
 				if(!index) index = 0;
 				if(!spinner) return;
 				spinnerElement.innerText = dotCycle[index];
@@ -214,7 +211,6 @@ if(!structKeyExists(session, "exceptionAISession")) {
 Analyze the provided JSON containing exception details of the issue. 
 The 'content' key contains the source code of the template that failed.
 The 'path' key contains the file name and 'line' the line number where it happens.
-
 Respond concisely in plain HTML, without using triple backticks or mentioning the origin of the data. 
 Biggest heading tag you can use is h3.
 For multi-line code examples, use <code class=""lucee-ml"">.
