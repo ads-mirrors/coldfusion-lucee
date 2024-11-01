@@ -95,7 +95,7 @@ public class DatasourceConnectionFactory extends BasePooledObjectFactory<Datasou
 			if (dc.getConnection().isClosed()) return false;
 		}
 		catch (Exception e) {
-			LogUtil.log(config, logName, "connection", e, Log.LEVEL_ERROR);
+			LogUtil.log(config, "connection", e, Log.LEVEL_ERROR, logName);
 			return false;
 		}
 
@@ -103,7 +103,7 @@ public class DatasourceConnectionFactory extends BasePooledObjectFactory<Datasou
 			if (dc.getDatasource().validate() && !DataSourceUtil.isValid(dc, 1000)) return false;
 		}
 		catch (Exception e) {
-			LogUtil.log(config, logName, "connection", e, Log.LEVEL_ERROR);
+			LogUtil.log(config, "connection", e, Log.LEVEL_ERROR, logName);
 		}
 		return true;
 	}

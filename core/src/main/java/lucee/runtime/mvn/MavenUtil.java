@@ -23,6 +23,7 @@ import org.apache.http.util.EntityUtils;
 
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.log.Log;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.ExceptionUtil;
@@ -183,6 +184,7 @@ public class MavenUtil {
 				throw new IOException("could not find version for dependency [" + g + ":" + a + "] in [" + current + "]");
 			}
 		}
+
 		v = resolvePlaceholders(current, v, properties);
 		// PATCH TODO better solution for this
 		if (v != null && v.startsWith("[")) {
@@ -258,7 +260,13 @@ public class MavenUtil {
 
 		if (rawDependencies != null) {
 			for (Dependency rd: rawDependencies) {
-				GAVSO gavso = getDependency(rd, parent, current, properties, null, true);
+				GAVSO gavso = null;
+				try {
+					gavso = getDependency(rd, parent, current, properties, null, true);
+				}
+				catch (IOException ioe) {
+					LogUtil.log(null, "mvn", ioe, Log.LEVEL_WARN, "application");
+				}
 				if (gavso == null) continue;
 				POM p = POM.getInstance(localDirectory, current.getRepositories(), gavso.g, gavso.a, gavso.v, gavso.s, gavso.o, current.getDependencyScope(),
 						current.getDependencyScopeManagement(), log);

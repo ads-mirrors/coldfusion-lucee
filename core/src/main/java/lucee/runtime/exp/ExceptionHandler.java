@@ -35,7 +35,7 @@ public final class ExceptionHandler {
 	public static void log(Config config, Throwable t) {
 		PageException pe = Caster.toPageException(t);
 		int ll = t instanceof MissingIncludeException ? Log.LEVEL_WARN : Log.LEVEL_ERROR;
-		LogUtil.log(config, "exception", "", t, ll);
+		LogUtil.log(config, "", t, ll, "exception");
 	}
 
 	public static void printStackTrace(PageContext pc, Throwable t) {

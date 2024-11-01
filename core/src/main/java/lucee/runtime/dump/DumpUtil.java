@@ -643,7 +643,7 @@ public class DumpUtil {
 
 					// parameters
 					StringBuilder sbParams = new StringBuilder(method.getName());
-					sbParams.append(" (");
+					sbParams.append("(");
 					Class[] parameters = method.getArgumentClasses();
 					for (int p = 0; p < parameters.length; p++) {
 						if (p > 0) sbParams.append(", ");

@@ -96,7 +96,11 @@ public final class LogUtil {
 
 	//////////
 	public static void log(String type, Throwable t) {
-		log("application", type, t);
+		log((Config) null, type, t, Log.LEVEL_ERROR, "application");
+	}
+
+	public static void log(int level, String type, Throwable t) {
+		log((Config) null, type, t, level, "application");
 	}
 
 	public static void log(PageContext pc, String type, Throwable t) {
@@ -104,12 +108,16 @@ public final class LogUtil {
 	}
 
 	public static void log(Config config, String type, Throwable t) {
-		log(config, "application", type, t, Log.LEVEL_ERROR);
+		log(config, type, t, Log.LEVEL_ERROR, "application");
 	}
 
 	//////////
 	public static void log(String logName, String type, Throwable t) {
-		log(logName, type, t, Log.LEVEL_ERROR);
+		log((Config) null, type, t, Log.LEVEL_ERROR, logName);
+	}
+
+	public static void log(String type, Throwable t, String... logNames) {
+		log((Config) null, type, t, Log.LEVEL_ERROR, logNames);
 	}
 
 	public static void log(PageContext pc, String logName, String type, Throwable t) {
@@ -117,6 +125,7 @@ public final class LogUtil {
 	}
 
 	//////////
+	@Deprecated
 	public static void log(String logName, String type, Throwable t, int logLevel) {
 		Log log = ThreadLocalPageContext.getLog(logName);
 		if (log != null) {
@@ -126,6 +135,7 @@ public final class LogUtil {
 		else logGlobal(ThreadLocalPageContext.getConfig(), logLevel, type, ExceptionUtil.getStacktrace(t, true));
 	}
 
+	@Deprecated
 	public static void log(Config config, String logName, String type, Throwable t, int logLevel) {
 		Log log = ThreadLocalPageContext.getLog(config, logName);
 		if (log != null) {
@@ -133,6 +143,20 @@ public final class LogUtil {
 			else log.log(logLevel, type, t);
 		}
 		else logGlobal(config, logLevel, type, ExceptionUtil.getStacktrace(t, true));
+	}
+
+	public static void log(Config config, String type, Throwable t, int logLevel, String... logNames) {
+		Log log = null;
+		for (String ln: logNames) {
+			log = ThreadLocalPageContext.getLog(config, ln);
+			if (log != null) break;
+		}
+
+		if (log != null) {
+			if (Log.LEVEL_ERROR == logLevel) log.error(type, t);
+			else log.log(logLevel, type, t);
+		}
+		else logGlobal(ThreadLocalPageContext.getConfig(config), logLevel, type, ExceptionUtil.getStacktrace(t, true));
 	}
 
 	public static void log(PageContext pc, String logName, String type, Throwable t, int logLevel) {
@@ -150,6 +174,19 @@ public final class LogUtil {
 		if (log != null) log.log(level, type, msg);
 		else {
 			logGlobal(ThreadLocalPageContext.getConfig(), level, logName + ":" + type, msg);
+		}
+	}
+
+	public static void logx(Config config, int level, String type, String msg, String... logNames) {
+		Log log = null;
+		for (String ln: logNames) {
+			log = ThreadLocalPageContext.getLog(config, ln);
+			if (log != null) break;
+		}
+
+		if (log != null) log.log(level, type, msg);
+		else {
+			logGlobal(ThreadLocalPageContext.getConfig(config), level, logNames[0] + ":" + type, msg);
 		}
 	}
 
