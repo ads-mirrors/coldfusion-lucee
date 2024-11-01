@@ -26,6 +26,8 @@ import java.nio.charset.Charset;
 import java.sql.ResultSet;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -600,15 +602,31 @@ public class DumpUtil {
 			}
 			catch (IOException e) {
 			}
-			DumpTable methDump = new DumpTable("#d6ccc2", "#f5ebe0", "#000000");
-			methDump.appendRow(-1, new SimpleDumpData("type"), new SimpleDumpData("interface"), new SimpleDumpData("exceptions"));
-			methDump.setTitle("Methods");
+
+			DumpTable instanceMethods = new DumpTable("#d6ccc2", "#f5ebe0", "#000000");
+			instanceMethods.appendRow(-1, new SimpleDumpData("Return"), new SimpleDumpData("Interface"), new SimpleDumpData("Exceptions"));
+			instanceMethods.setTitle("Instance Methods");
+
+			DumpTable staticMethods = new DumpTable("#d6ccc2", "#f5ebe0", "#000000");
+			staticMethods.appendRow(-1, new SimpleDumpData("Return"), new SimpleDumpData("Interface"), new SimpleDumpData("Exceptions"));
+			staticMethods.setTitle("Static Methods");
 			boolean isStatic;
+			DumpTable mth;
+
+			Collections.sort(methods, new Comparator<Method>() {
+				@Override
+				public int compare(Method m1, Method m2) {
+					return m1.getName().toLowerCase().compareTo(m2.getName().toLowerCase());
+				}
+			});
+
 			for (int i = 0; i < 2; i++) {
 				if (methods != null) for (Method method: methods) {
 
 					isStatic = method.isStatic();
 					if ((i == 0 && !isStatic) || (i == 1 && isStatic)) continue;
+					mth = isStatic ? staticMethods : instanceMethods;
+
 					if (Object.class == method.getDeclaringClass()) {
 						if (objMethods.length() > 0) objMethods.append(", ");
 						objMethods.append(method.getName());
@@ -619,26 +637,34 @@ public class DumpUtil {
 					StringBuilder sbExp = new StringBuilder();
 					String[] exceptions = method.getExceptions();
 					for (int p = 0; p < exceptions.length; p++) {
-						if (p > 0) sbExp.append("\n");
+						if (p > 0) sbExp.append(",\n");
 						sbExp.append(exceptions[p]);
 					}
 
 					// parameters
 					StringBuilder sbParams = new StringBuilder(method.getName());
-					sbParams.append('(');
+					sbParams.append(" (");
 					Class[] parameters = method.getArgumentClasses();
 					for (int p = 0; p < parameters.length; p++) {
 						if (p > 0) sbParams.append(", ");
 						sbParams.append(Caster.toClassName(parameters[p]));
 					}
-					sbParams.append("):").append(Caster.toClassName(method.getReturnType()));
+					sbParams.append(')');
 
-					methDump.appendRow(0, new SimpleDumpData(isStatic ? "static" : "instance"), new SimpleDumpData(sbParams.toString()), new SimpleDumpData(sbExp.toString()));
+					mth.appendRow(0, new SimpleDumpData(Caster.toClassName(method.getReturnClass())), new SimpleDumpData(sbParams.toString()),
+							new SimpleDumpData(sbExp.toString()));
 
 				}
 			}
 
-			if (methods != null && methods.size() > 0) table.appendRow(0, methDump);
+			if (methods != null && methods.size() > 0) {
+				if (!staticMethods.isEmpty()) {
+					table.appendRow(0, staticMethods);
+				}
+				if (!instanceMethods.isEmpty()) {
+					table.appendRow(0, instanceMethods);
+				}
+			}
 
 			DumpTable inherited = new DumpTable("#d6ccc2", "#f5ebe0", "#000000");
 			inherited.setTitle("java.lang.Object methods");
