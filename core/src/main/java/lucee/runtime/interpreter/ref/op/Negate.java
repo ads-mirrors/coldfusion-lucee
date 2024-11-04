@@ -46,7 +46,7 @@ public final class Negate extends RefSupport implements Ref {
 	@Override
 	public Object getValue(PageContext pc) throws PageException {
 		if (ThreadLocalPageContext.preciseMath(pc)) {
-			return Caster.negate(Caster.toBigDecimal(ref));
+			// return Caster.negate(Caster.toBigDecimal(ref));
 		}
 
 		return Double.valueOf(-Caster.toDoubleValue(ref.getValue(pc)));
