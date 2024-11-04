@@ -42,7 +42,7 @@ public final class BigMinus extends Big {
 	@Override
 	public Object getValue(PageContext pc) throws PageException {
 		if (limited) throw new SecurityInterpreterException("invalid syntax, math operations are not supported in a json string.");
-		return MathUtil.subtract(getLeft(pc), getRight(pc));
+		return MathUtil.subtract(getLeft(pc), getRight(pc)).toString();
 	}
 
 }

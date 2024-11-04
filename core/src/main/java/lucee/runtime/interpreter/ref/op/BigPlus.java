@@ -41,7 +41,7 @@ public final class BigPlus extends Big {
 	@Override
 	public Object getValue(PageContext pc) throws PageException {
 		if (limited) throw new SecurityInterpreterException("invalid syntax, math operations are not supported.");
-		return getLeft(pc).add(getRight(pc));
+		return getLeft(pc).add(getRight(pc)).toString();
 	}
 
 }
