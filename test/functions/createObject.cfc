@@ -79,6 +79,72 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect(StringUtils.isEmpty("")).toBeTrue();
 			});
 
+			it( title = "Checking the createObject(..,javasettings:{maven:...}) with apache-httpclient", body = function( currentSpec ) {
+				var HttpClients=createObject("java","org.apache.http.impl.client.HttpClients",{
+					"maven":[
+						{
+							"groupId" : "org.apache.httpcomponents",
+							"artifactId" : "httpclient",
+							"version" : "4.5.13"
+						}
+					]
+				});
+				expect(HttpClients.createDefault().getClass().getSimpleName()).toEqual("InternalHttpClient");
+			});
+
+			it( title = "Checking the createObject(..,javasettings:{maven:...}) with logback-classic", body = function( currentSpec ) {
+				var LoggerFactory=createObject("java","ch.qos.logback.classic.Logger",{
+					"maven":[
+						{
+							"groupId" : "ch.qos.logback",
+							"artifactId" : "logback-classic",
+							"version" : "1.2.11"
+						}
+					]
+				});
+				expect(LoggerFactory.getName()).toBeDefined();
+			});
+
+			it( title = "Checking the createObject(..,javasettings:{maven:...}) with hamcrest", body = function( currentSpec ) {
+				var Matchers=createObject("java","org.hamcrest.Matchers",{
+					"maven":[
+						{
+							"groupId" : "org.hamcrest",
+							"artifactId" : "hamcrest",
+							"version" : "2.2"
+						}
+					]
+				});
+				expect(Matchers.is(1).matches(1)).toBeTrue();
+			});
+
+			it( title = "Checking the createObject(..,javasettings:{maven:...}) with rxjava", body = function( currentSpec ) {
+				var Observable=createObject("java","io.reactivex.rxjava3.core.Observable",{
+					"maven":[
+						{
+							"groupId" : "io.reactivex.rxjava3",
+							"artifactId" : "rxjava",
+							"version" : "3.0.13"
+						}
+					]
+				});
+				expect(Observable.just("Hello").blockingFirst()).toEqual("Hello");
+			});
+
+			it( title = "Checking the createObject(..,javasettings:{maven:...}) with maven-core", body = function( currentSpec ) {
+				var MavenCli=createObject("java","org.apache.maven.cli.MavenCli",{
+					"maven":[
+						{
+							"groupId" : "org.apache.maven",
+							"artifactId" : "maven-core",
+							"version" : "3.8.1"
+						}
+					]
+				});
+				expect(MavenCli.getClass().getSimpleName()).toEqual("MavenCli");
+			});
+
+
 
 
 		});
