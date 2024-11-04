@@ -41,6 +41,6 @@ public final class BigIntDiv extends Big {
 	@Override
 	public Object getValue(PageContext pc) throws PageException {
 		if (limited) throw new SecurityInterpreterException("invalid syntax, math operations are not supported.");
-		return getLeft(pc).toBigInteger().divide(getRight(pc).toBigInteger()).toString();
+		return getLeft(pc).toBigInteger().divide(getRight(pc).toBigInteger());
 	}
 }

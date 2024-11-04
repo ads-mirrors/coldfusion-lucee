@@ -4152,7 +4152,7 @@ public final class Caster {
 		else if (type == CFTypes.TYPE_BOOLEAN) return toBoolean(o);
 		else if (type == CFTypes.TYPE_BINARY) return toBinary(o);
 		else if (type == CFTypes.TYPE_DATETIME) return DateCaster.toDateAdvanced(o, pc.getTimeZone());
-		else if (type == CFTypes.TYPE_NUMERIC) return toDouble(o);
+		else if (type == CFTypes.TYPE_NUMERIC) return toNumber(pc, o);
 		else if (type == CFTypes.TYPE_QUERY) return toQuery(o);
 		else if (type == CFTypes.TYPE_QUERY_COLUMN) return toQueryColumn(o);
 		else if (type == CFTypes.TYPE_STRING) return toString(o);
