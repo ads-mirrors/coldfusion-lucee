@@ -16,6 +16,7 @@ import lucee.commons.io.log.Log;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.SerializableObject;
+import lucee.commons.lang.StringUtil;
 import lucee.commons.tree.TreeNode;
 import lucee.runtime.mvn.POMReader.Dependency;
 import lucee.runtime.op.Caster;
@@ -83,6 +84,13 @@ public class POM {
 		return getInstance(localDirectory, null, groupId, artifactId, version, null, null, dependencyScope, SCOPE_ALL, log);
 	}
 
+	/*
+	 * public static void main(String[] args) throws IOException { Resource dir =
+	 * ResourcesImpl.getFileResourceProvider().getResource("/Users/mic/tmp9/mvn/"); POM pom =
+	 * getInstance(dir, "org.apache.maven", "maven-core", "3.8.1", SCOPE_COMPILE, null); pom.getJars();
+	 * }
+	 */
+
 	public static POM getInstance(Resource localDirectory, Collection<Repository> repositories, String groupId, String artifactId, String version, int dependencyScope,
 			int dependencyScopeManagement, Log log) {
 		return getInstance(localDirectory, null, groupId, artifactId, version, null, null, dependencyScope, dependencyScopeManagement, log);
@@ -148,13 +156,25 @@ public class POM {
 						throw ioe;
 					}
 					this.packaging = reader.getPackaging();
+					boolean custom = true;
 					this.artifactExtension = this.packaging;
-					if (artifactExtension == null || "bundle".equalsIgnoreCase(artifactExtension)) this.artifactExtension = "jar";
+					if (artifactExtension == null || "bundle".equalsIgnoreCase(artifactExtension)) {
+						custom = false;
+						this.artifactExtension = "jar";
+					}
+
 					this.name = reader.getName();
 					this.description = reader.getDescription();
 					this.url = reader.getURL();
 
-					if (this.artifactExtension != null && !"pom".equalsIgnoreCase(this.artifactExtension)) MavenUtil.download(this, initRepositories, artifactExtension, log);
+					if (this.artifactExtension != null && !"pom".equalsIgnoreCase(this.artifactExtension)) {
+						try {
+							MavenUtil.download(this, initRepositories, artifactExtension, log);
+						}
+						catch (IOException ioe) {
+							if (!custom) throw ioe;
+						}
+					}
 
 					isInitXML = true;
 				}
@@ -384,14 +404,28 @@ public class POM {
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("HEAD");
 			int responseCode = connection.getResponseCode();
+
 			if (responseCode == 200) {
 				return url;
+			}
+			// TODO handle having more than one redirect
+			else if (responseCode == 301 || responseCode == 302) {
+				String newUrl = connection.getHeaderField("Location");
+				if (!StringUtil.isEmpty(newUrl, true)) {
+					url = new URL(newUrl);
+					connection = (HttpURLConnection) url.openConnection();
+					connection.setRequestMethod("HEAD");
+					responseCode = connection.getResponseCode();
+					if (responseCode == 200) {
+						return url;
+					}
+				}
 			}
 			if (sb == null) sb = new StringBuilder();
 			else sb.append(", ");
 			sb.append(url.toExternalForm());
 		}
-		throw new IOException("could not find a valid endpoint for [" + this + "], possibles endpoint are [" + sb + "]");
+		throw new IOException("could not find a valid endpoint [" + this + "] for type [" + type + "], possibles endpoint are [" + sb + "]");
 	}
 
 	@Override

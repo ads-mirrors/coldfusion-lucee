@@ -131,7 +131,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect(Observable.just("Hello").blockingFirst()).toBe("Hello");
 			});
 
-			/*it( title = "Checking the createObject(..,javasettings:{maven:...}) with maven-core", body = function( currentSpec ) {
+			it( title = "Checking the createObject(..,javasettings:{maven:...}) with maven-core", body = function( currentSpec ) {
 				var MavenCli=createObject("java","org.apache.maven.cli.MavenCli",{
 					"maven":[
 						{
@@ -142,7 +142,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					]
 				});
 				expect(MavenCli.getClass().getSimpleName()).toEqual("MavenCli");
-			});*/
+			});
 
 
 
