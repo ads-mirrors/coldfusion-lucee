@@ -54,14 +54,17 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 					[],
 					{dbtype="query"}
 				);
+				
 				expect( actual.foo ).toBeString();
 				expect( actual.foo ).toBeInstanceOf( 'java.lang.String' );
 				expect( actual.asNumber ).toBeNumeric();
-				expect( actual.asNumber ).toBeInstanceOf( 'java.lang.Double' );
+				expect( actual.asNumber ).toBeInstanceOf( 'java.lang.Number' ); // can be Double or BigDecimal
+				
+				
 				expect( actual.asNumber2 ).toBeNumeric();
-				expect( actual.asNumber2 ).toBeInstanceOf( 'java.lang.Double' );
+				expect( actual.asNumber2 ).toBeInstanceOf( 'java.lang.Number' );// can be Double or BigDecimal
 				expect( actual.asNumber3 ).toBeNumeric();
-				expect( actual.asNumber3 ).toBeInstanceOf( 'java.lang.Double' );
+				expect( actual.asNumber3 ).toBeInstanceOf( 'java.lang.Number' );// can be Double or BigDecimal
 			});
 
 			it(title="Can cast as boolean", body=function( currentSpec ){

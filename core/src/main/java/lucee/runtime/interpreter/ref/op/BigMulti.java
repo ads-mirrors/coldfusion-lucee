@@ -42,7 +42,7 @@ public final class BigMulti extends Big {
 	@Override
 	public Object getValue(PageContext pc) throws PageException {
 		if (limited) throw new SecurityInterpreterException("invalid syntax, math operations are not supported.");
-		return MathUtil.multiply(getLeft(pc), getRight(pc)).toString();
+		return (MathUtil.multiply(getLeft(pc), getRight(pc)));
 	}
 
 }
