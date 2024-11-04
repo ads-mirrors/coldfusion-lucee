@@ -37,7 +37,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 						}
 					]
 				});
-				expect(ImmutableList.of("a", "b", "c").size()).toEqual(3);
+				expect(ImmutableList.of("a", "b", "c").size()).toBe(3);
 			});
 
 			it( title = "Checking the createObject(..,javasettings:{maven:...}) with jackson-databind", body = function( currentSpec ) {
