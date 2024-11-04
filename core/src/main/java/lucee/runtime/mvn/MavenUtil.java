@@ -22,6 +22,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import lucee.commons.io.IOUtil;
+import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
@@ -339,31 +340,44 @@ public class MavenUtil {
 	public static void download(POM pom, Collection<Repository> repositories, String type, Log log) throws IOException {
 		Resource res = pom.getArtifact(type);
 		if (!res.isFile()) {
-			try {
-				URL url = pom.getArtifact(type, repositories);
-				if (log != null) log.info("maven", "download [" + url + "]");
-				try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-					HttpGet request = new HttpGet(pom.getArtifact(type, repositories).toExternalForm());
-					HttpResponse response = httpClient.execute(request);
-					HttpEntity entity = response.getEntity();
-					int sc = response.getStatusLine().getStatusCode();
-					if (sc == 200) {
-						if (entity != null) {
-							try (InputStream is = entity.getContent()) {
-								IOUtil.copy(is, res, false);
-								HTTPUtil.validateDownload(response, res, true);
+			synchronized (SystemUtil.createToken("mvn", res.getAbsolutePath())) {
+				if (!res.isFile()) {
+					try {
+						URL url = pom.getArtifact(type, repositories);
+						if (log != null) log.info("maven", "download [" + url + "]");
+						try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+							HttpGet request = new HttpGet(pom.getArtifact(type, repositories).toExternalForm());
+							HttpResponse response = httpClient.execute(request);
+							HttpEntity entity = response.getEntity();
+							int sc = response.getStatusLine().getStatusCode();
+							if (sc == 200) {
+								if (entity != null) {
+									Exception ex = null;
+									InputStream is = null;
+									try {
+										is = entity.getContent();
+										IOUtil.copy(is, res, false);
+									}
+									catch (IOException e) {
+										ex = e;
+									}
+									finally {
+										IOUtil.closeEL(is);
+										HTTPUtil.validateDownload(url, response, res, true, ex);
+									}
+								}
+							}
+							else {
+								EntityUtils.consume(entity); // Ensure the response entity is fully consumed
+								throw new IOException("Failed to download: " + url + " for [" + pom + "] - " + response.getStatusLine().getStatusCode());
 							}
 						}
 					}
-					else {
-						EntityUtils.consume(entity); // Ensure the response entity is fully consumed
-						throw new IOException("Failed to download: " + url + " for [" + pom + "] - " + response.getStatusLine().getStatusCode());
+					catch (IOException ioe) {
+						ResourceUtil.deleteEmptyFoldersInside(pom.getLocalDirectory());
+						throw ioe;
 					}
 				}
-			}
-			catch (IOException ioe) {
-				ResourceUtil.deleteEmptyFoldersInside(pom.getLocalDirectory());
-				throw ioe;
 			}
 		} // TODO handle not 200
 	}

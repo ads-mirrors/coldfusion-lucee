@@ -42,6 +42,7 @@ import org.apache.http.HttpResponse;
 import lucee.commons.digest.Hash;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.res.Resource;
+import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringList;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.lang.mimetype.ContentType;
@@ -691,7 +692,10 @@ public final class HTTPUtil {
 		return StringUtil.indexOfIgnoreCase(url.getProtocol(), "https") != -1;
 	}
 
-	public static void validateDownload(HttpResponse response, Resource res, boolean deleteFileWhenInvalid) throws IOException {
+	public static void validateDownload(URL url, HttpResponse response, Resource res, boolean deleteFileWhenInvalid, Exception cause) throws IOException {
+		// in case of an exception, the file may was not created
+		if (cause != null && !res.exists()) return;
+
 		Header[] headers;
 		Header h;
 		String label, name;
@@ -704,23 +708,31 @@ public final class HTTPUtil {
 				if (headers != null && headers.length > 0) {
 					h = headers[0];
 					if (!StringUtil.isEmpty(h.getValue(), true)) {
+
 						String fileHash;
 						if ("md5".equalsIgnoreCase(name)) fileHash = Hash.md5(res);
 						else if ("sha1".equalsIgnoreCase(name)) fileHash = Hash.sha1(res);
 						else if ("sha256".equalsIgnoreCase(name)) fileHash = Hash.sha256(res);
 						else if ("sha512".equalsIgnoreCase(name)) fileHash = Hash.sha512(res);
 						else continue;
+
 						if (!fileHash.equalsIgnoreCase(h.getValue())) {
 							if (deleteFileWhenInvalid) {
 								res.remove(true);
 							}
-							throw new IOException(String.format(label + " validation failed: The " + label + " hash in the response header '%s' [%s] does not match the computed "
-									+ label + " hash [%s] based on the downloaded file. File integrity might be compromised.", hn, h.getValue(), fileHash));
+							IOException ioe = new IOException(String
+									.format(label + " validation failed: The " + label + " hash in the response header [" + hn + " = " + h.getValue() + "] from the download ["
+											+ url + "] does not match the computed " + label + " hash [" + fileHash + "] based on the downloaded file at [" + res
+											+ "]. File integrity compromised" + (deleteFileWhenInvalid ? " and file got deleted" : "") + "."));
+							if (cause != null) ExceptionUtil.initCauseEL(ioe, cause);
+							throw ioe;
 						}
+						if (cause != null) throw ExceptionUtil.toIOException(cause);
 						return;
 					}
 				}
 			}
+			if (cause != null) throw ExceptionUtil.toIOException(cause);
 		}
 
 		// Digest validation
