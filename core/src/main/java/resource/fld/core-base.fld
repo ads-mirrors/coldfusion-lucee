@@ -9562,6 +9562,45 @@ The following things are considered to be empty:
 		</return>
 	</function>
 	
+		
+	<!-- MavenLoad -->
+	<function>
+		<name>MavenLoad</name>
+		<class>lucee.runtime.functions.mvn.MavenLoad</class>
+		<keywords>maven,classloading,dependencies,jars</keywords>
+		<description>
+Loads all JAR files from one or more Maven endpoints and makes them available for use within the Lucee server environment. 
+This function can be used to load dependencies, including transitive ones, for example at server startup.
+
+### Example Usage of MavenLoad Function
+The `MavenLoad` function allows you to load JAR files from Maven repositories, including all transitive dependencies. 
+This is particularly useful during server startup to ensure that all required libraries are available.
+
+#### Example Input as an Array of Structs:
+```cfml
+mavenLoad([
+	{
+		"groupId": "org.slf4j",
+		"artifactId": "slf4j-api",
+		"version": "1.7.32"
+	}
+]);
+```
+</description>
+		<argument>
+			<name>input</name>
+			<alias>data,endpoint</alias>
+			<type>any</type>
+			<required>Yes</required>
+			<description>A struct or an array of structs specifying the Maven coordinates, including groupId, artifactId, and version.</description>
+		</argument>
+		<return>
+			<description>An array containing the file paths of the loaded JARs.</description>
+			<type>array</type>
+		</return>
+	</function>
+
+	
 	<!-- max -->
 	<function>
 		<name>max</name>

@@ -318,4 +318,13 @@ public final class LogUtil {
 		}
 		return template;
 	}
+
+	public static Log getLog(Config c, String... logNames) {
+		Log log = null;
+		for (String ln: logNames) {
+			log = ThreadLocalPageContext.getLog(c, ln, false);
+			if (log != null) return log;
+		}
+		return null;
+	}
 }

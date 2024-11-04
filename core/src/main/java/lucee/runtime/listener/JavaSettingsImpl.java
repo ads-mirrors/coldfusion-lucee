@@ -376,7 +376,7 @@ public class JavaSettingsImpl implements JavaSettings {
 					// TODO add method getMavenDir to config
 					Resource dir = ((ConfigPro) config).getMavenDir();
 					dir.mkdirs();
-					Log log = config.getLog("application");
+					Log log = LogUtil.getLog(config, "mvn", "application");
 					while (it.hasNext()) {
 						Struct el = Caster.toStruct(it.next(), null);
 						if (el != null) {
