@@ -5,7 +5,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip=true {
 			it( title='regular addition', body=function() {
 				var x = 1;
 				var y = 1;
-				expect( compare((x+&y)&"","2") ).toBe(0);
+				expect( compare((x+y)&"","2") ).toBe(0);
 				
 			});
 
@@ -34,7 +34,6 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip=true {
 				expect( compare(Evaluate('int(x)+y')&"","2") ).toBe(0);
 				expect( compare(Evaluate('x+int(y)')&"","2") ).toBe(0);
 				expect( compare(Evaluate('int(x)+int(y)')&"","2") ).toBe(0);
-				
 			});
 		});
 	}
