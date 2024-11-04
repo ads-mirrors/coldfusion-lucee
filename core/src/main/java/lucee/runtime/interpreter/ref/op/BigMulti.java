@@ -18,12 +18,12 @@
  **/
 package lucee.runtime.interpreter.ref.op;
 
-import lucee.print;
 import lucee.commons.math.MathUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.interpreter.SecurityInterpreterException;
 import lucee.runtime.interpreter.ref.Ref;
+import lucee.runtime.op.Caster;
 
 /**
  * Minus operation
@@ -43,8 +43,7 @@ public final class BigMulti extends Big {
 	@Override
 	public Object getValue(PageContext pc) throws PageException {
 		if (limited) throw new SecurityInterpreterException("invalid syntax, math operations are not supported.");
-		print.ds();
-		return MathUtil.multiply(getLeft(pc), getRight(pc));
+		return Caster.toString(MathUtil.multiply(getLeft(pc), getRight(pc)));
 	}
 
 }

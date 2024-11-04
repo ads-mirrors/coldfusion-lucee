@@ -22,6 +22,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.interpreter.SecurityInterpreterException;
 import lucee.runtime.interpreter.ref.Ref;
+import lucee.runtime.op.Caster;
 
 /**
  * Minus operation
@@ -41,6 +42,6 @@ public final class BigMod extends Big {
 	@Override
 	public Object getValue(PageContext pc) throws PageException {
 		if (limited) throw new SecurityInterpreterException("invalid syntax, math operations are not supported.");
-		return getLeft(pc).remainder(getRight(pc)).toString();
+		return Caster.toString(getLeft(pc).remainder(getRight(pc)));
 	}
 }

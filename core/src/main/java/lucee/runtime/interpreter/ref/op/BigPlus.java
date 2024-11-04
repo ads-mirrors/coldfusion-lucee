@@ -22,6 +22,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.interpreter.SecurityInterpreterException;
 import lucee.runtime.interpreter.ref.Ref;
+import lucee.runtime.op.Caster;
 
 /**
  * Plus operation
@@ -41,7 +42,7 @@ public final class BigPlus extends Big {
 	@Override
 	public Object getValue(PageContext pc) throws PageException {
 		if (limited) throw new SecurityInterpreterException("invalid syntax, math operations are not supported.");
-		return getLeft(pc).add(getRight(pc));
+		return Caster.toString(getLeft(pc).add(getRight(pc)));
 	}
 
 }

@@ -23,6 +23,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.interpreter.SecurityInterpreterException;
 import lucee.runtime.interpreter.ref.Ref;
+import lucee.runtime.op.Caster;
 
 /**
  * Dividie operation
@@ -42,6 +43,6 @@ public final class BigDiv extends Big {
 	@Override
 	public Object getValue(PageContext pc) throws PageException {
 		if (limited) throw new SecurityInterpreterException("invalid syntax, math operations are not supported.");
-		return MathUtil.divide(getLeft(pc), getRight(pc)).toString();
+		return Caster.toString(MathUtil.divide(getLeft(pc), getRight(pc)));
 	}
 }
