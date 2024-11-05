@@ -132,7 +132,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 			});
 
 			it( title = "Checking the createObject(..,javasettings:{maven:...}) with maven-core", body = function( currentSpec ) {
-				var MavenCli=createObject("java","org.apache.maven.cli.MavenCli",{
+				var MissingModuleException=createObject("java","org.apache.maven.MissingModuleException",{
 					"maven":[
 						{
 							"groupId" : "org.apache.maven",
@@ -141,7 +141,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 						}
 					]
 				});
-				expect(MavenCli.getClass().getSimpleName()).toEqual("MavenCli");
+				var curr=createObject("java","java.io.File").init(getCurrentTemplatePath());
+				var msg=MissingModuleException.init("Test",curr,curr).getMessage();
+				
+				expect(len(msg)>0).toBeTrue();
 			});
 
 
