@@ -31,6 +31,8 @@ import java.util.Map.Entry;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
+import org.osgi.framework.BundleContext;
+
 import lucee.commons.digest.MD5;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
@@ -38,9 +40,12 @@ import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.ResourcesImpl;
+import lucee.commons.io.res.filter.ExtensionResourceFilter;
 import lucee.commons.io.res.type.compress.CompressResource;
 import lucee.commons.io.res.type.compress.CompressResourceProvider;
+import lucee.commons.io.res.util.ResourceClassLoader;
 import lucee.commons.io.res.util.ResourceUtil;
+import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.net.URLDecoder;
 import lucee.loader.engine.CFMLEngine;
@@ -65,6 +70,10 @@ import lucee.runtime.listener.NoneAppListener;
 import lucee.runtime.monitor.Monitor;
 import lucee.runtime.net.http.ReqRspUtil;
 import lucee.runtime.op.Caster;
+import lucee.runtime.op.Decision;
+import lucee.runtime.osgi.BundleBuilderFactory;
+import lucee.runtime.osgi.BundleFile;
+import lucee.runtime.osgi.OSGiUtil;
 import lucee.runtime.security.SecurityManager;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.ArrayImpl;
@@ -177,6 +186,57 @@ public final class ConfigWebUtil {
 				}
 			}
 		}
+	}
+
+	public static void reloadLib(Config config) throws IOException {
+		if (config instanceof ConfigWeb) loadLib(((ConfigWebImpl) config).getConfigServerImpl(), (ConfigPro) config);
+		else loadLib(null, (ConfigPro) config);
+	}
+
+	static void loadLib(ConfigServer configServer, ConfigPro config) throws IOException {
+		// get lib and classes resources
+		Resource lib = config.getLibraryDirectory();
+		Resource[] libs = lib.listResources(ExtensionResourceFilter.EXTENSION_JAR_NO_DIR);
+
+		// get resources from server config and merge
+		if (configServer != null) {
+			ResourceClassLoader rcl = ((ConfigPro) configServer).getResourceClassLoader();
+			libs = ResourceUtil.merge(libs, rcl.getResources());
+		}
+
+		CFMLEngine engine = ConfigWebUtil.getCFMLEngine(config);
+		BundleContext bc = engine.getBundleContext();
+		Log log = ThreadLocalPageContext.getLog(config, "application");
+		BundleFile bf;
+		List<Resource> list = new ArrayList<Resource>();
+		for (int i = 0; i < libs.length; i++) {
+			try {
+				bf = BundleFile.getInstance(libs[i], true);
+				// jar is not a bundle
+				if (bf == null) {
+					// convert to a bundle
+					BundleBuilderFactory factory = new BundleBuilderFactory(libs[i]);
+					factory.setVersion("0.0.0.0");
+					Resource tmp = SystemUtil.getTempFile("jar", false);
+					factory.build(tmp);
+					IOUtil.copy(tmp, libs[i]);
+					bf = BundleFile.getInstance(libs[i], true);
+				}
+
+				OSGiUtil.start(OSGiUtil.installBundle(bc, libs[i], true));
+
+			}
+			catch (Throwable t) {
+				ExceptionUtil.rethrowIfNecessary(t);
+				list.add(libs[i]);
+				log.log(Log.LEVEL_ERROR, "OSGi", t);
+			}
+		}
+
+		// set classloader
+
+		ClassLoader parent = SystemUtil.getCoreClassLoader();
+		((ConfigImpl) config).setResourceClassLoader(new ResourceClassLoader(list.toArray(new Resource[list.size()]), parent));
 	}
 
 	/**
@@ -766,6 +826,93 @@ public final class ConfigWebUtil {
 		return rst;
 	}
 
+	public static Object replaceConfigPlaceHolders(Object obj) {
+		if (obj == null) return obj;
+
+		// handle simple value
+		if (Decision.isSimpleValue(obj)) {
+			if (obj instanceof CharSequence) return replaceConfigPlaceHolder(obj.toString());
+			return obj;
+		}
+
+		// handle collection
+		if (obj instanceof lucee.runtime.type.Collection) {
+			return replaceConfigPlaceHolders((lucee.runtime.type.Collection) obj);
+		}
+
+		return obj;
+	}
+
+	public static lucee.runtime.type.Collection replaceConfigPlaceHolders(lucee.runtime.type.Collection data) {
+		if (data == null) return data;
+
+		lucee.runtime.type.Collection repl;
+		if (data instanceof Struct) repl = new StructImpl();
+		else if (data instanceof Array) repl = new ArrayImpl();
+		else return data;
+		Iterator<Entry<Key, Object>> it = data.entryIterator();
+		Entry<Key, Object> e;
+		while (it.hasNext()) {
+			e = it.next();
+			repl.setEL(e.getKey(), replaceConfigPlaceHolders(e.getValue()));
+		}
+		return repl;
+	}
+
+	public static String replaceConfigPlaceHolder(String v) {
+		if (StringUtil.isEmpty(v) || v.indexOf('{') == -1) return v;
+
+		int s = -1, e = -1, d = -1;
+		int prefixLen, start = -1, end;
+		String _name, _prop;
+		while ((s = v.indexOf("{system:", start)) != -1 | /* don't change */
+				(e = v.indexOf("{env:", start)) != -1 | /* don't change */
+				(d = v.indexOf("${", start)) != -1) {
+			boolean isSystem = false, isDollar = false;
+			// system
+			if (s > -1 && (e == -1 || e > s)) {
+				start = s;
+				prefixLen = 8;
+				isSystem = true;
+			}
+			// env
+			else if (e > -1) {
+				start = e;
+				prefixLen = 5;
+			}
+			// dollar
+			else {
+				start = d;
+				prefixLen = 2;
+				isDollar = true;
+			}
+
+			end = v.indexOf('}', start);
+			if (end > prefixLen) {
+				_name = v.substring(start + prefixLen, end);
+				// print.edate(_name);
+				if (isDollar) {
+					String[] _parts = _name.split(":");
+					_prop = SystemUtil.getSystemPropOrEnvVar(_parts[0], (_parts.length > 1) ? _parts[1] : null);
+				}
+				else {
+					_prop = isSystem ? System.getProperty(_name) : System.getenv(_name);
+				}
+
+				if (_prop != null) {
+					v = new StringBuilder().append(v.substring(0, start)).append(_prop).append(v.substring(end + 1)).toString();
+					start += _prop.length();
+				}
+				else start = end;
+			}
+			else start = end; // set start to end for the next round
+			s = -1;
+			e = -1; // reset index
+			d = -1; // I don't think we need this?
+		}
+		return v;
+	}
+
 	public static Array getAsArray(String parent, String child, Struct sct) {
 		return getAsArray(child, getAsStruct(parent, sct));
 	}
@@ -798,7 +945,7 @@ public final class ConfigWebUtil {
 			input.put(names[0], sct);
 			return sct;
 		}
-		return sct;
+		return (Struct) replaceConfigPlaceHolders(sct);
 	}
 
 	public static Struct toStruct(String str) {
@@ -806,11 +953,10 @@ public final class ConfigWebUtil {
 		Struct sct = new StructImpl(StructImpl.TYPE_LINKED);
 		try {
 			String[] arr = ListUtil.toStringArray(ListUtil.listToArrayRemoveEmpty(str, '&'));
-
 			String[] item;
 			for (int i = 0; i < arr.length; i++) {
 				item = ListUtil.toStringArray(ListUtil.listToArrayRemoveEmpty(arr[i], '='));
-				if (item.length == 2) sct.setEL(KeyImpl.init(URLDecoder.decode(item[0], true).trim()), URLDecoder.decode(item[1], true));
+				if (item.length == 2) sct.setEL(KeyImpl.init(URLDecoder.decode(item[0], true).trim()), replaceConfigPlaceHolder(URLDecoder.decode(item[1], true)));
 				else if (item.length == 1) sct.setEL(KeyImpl.init(URLDecoder.decode(item[0], true).trim()), "");
 			}
 		}
