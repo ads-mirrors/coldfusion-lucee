@@ -2368,9 +2368,10 @@ public final class ConfigWebFactory extends ConfigFactory {
 								Caster.toLongValue(getAttr(dataSource, "metaCacheTimeout"), 60000), toBoolean(getAttr(dataSource, "blob"), true),
 								toBoolean(getAttr(dataSource, "clob"), true), Caster.toIntValue(getAttr(dataSource, "allow"), DataSource.ALLOW_ALL),
 								toBoolean(getAttr(dataSource, "validate"), false), toBoolean(getAttr(dataSource, "storage"), false), getAttr(dataSource, "timezone"),
-								toStruct(getAttr(dataSource, "custom")), getAttr(dataSource, "dbdriver"), ParamSyntax.toParamSyntax(dataSource, ParamSyntax.DEFAULT),
-								toBoolean(getAttr(dataSource, "literalTimestampWithTSOffset"), false), toBoolean(getAttr(dataSource, "alwaysSetTimeout"), false),
-								toBoolean(getAttr(dataSource, "requestExclusive"), false), toBoolean(getAttr(dataSource, "alwaysResetConnections"), false)
+								ConfigWebUtilPatch.getAsStruct(dataSource, true, "custom"), getAttr(dataSource, "dbdriver"),
+								ParamSyntax.toParamSyntax(dataSource, ParamSyntax.DEFAULT), toBoolean(getAttr(dataSource, "literalTimestampWithTSOffset"), false),
+								toBoolean(getAttr(dataSource, "alwaysSetTimeout"), false), toBoolean(getAttr(dataSource, "requestExclusive"), false),
+								toBoolean(getAttr(dataSource, "alwaysResetConnections"), false)
 
 						);
 					}
@@ -2622,7 +2623,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 						}
 
 						{
-							Struct custom = toStruct(getAttr(data, "custom"));
+							Struct custom = ConfigWebUtilPatch.getAsStruct(data, true, "custom");
 
 							// Workaround for old EHCache class definitions
 							if (cd.getClassName() != null && cd.getClassName().endsWith(".EHCacheLite")) {
@@ -2798,7 +2799,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 						id = e.getKey().getLowerString();
 
 						ge = new GatewayEntryImpl(id, getClassDefinition(eConnection, "", config.getIdentification()), getAttr(eConnection, "cfcPath"),
-								getAttr(eConnection, "listenerCFCPath"), getAttr(eConnection, "startupMode"), toStruct(getAttr(eConnection, "custom")),
+								getAttr(eConnection, "listenerCFCPath"), getAttr(eConnection, "startupMode"), ConfigWebUtilPatch.getAsStruct(eConnection, true, "custom"),
 								Caster.toBooleanValue(getAttr(eConnection, "readOnly"), false));
 
 						if (!StringUtil.isEmpty(id)) {
@@ -3690,7 +3691,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			// usage
 			String strUsage = getAttr(_clients, "usage");
 			Struct sct;
-			if (!StringUtil.isEmpty(strUsage)) sct = toStruct(strUsage);// config.setRemoteClientUsage(toStruct(strUsage));
+			if (!StringUtil.isEmpty(strUsage)) sct = ConfigWebUtilPatch.getAsStruct(_clients, true, "custom");// config.setRemoteClientUsage(toStruct(strUsage));
 			else sct = new StructImpl();
 			// TODO make this generic
 			if (configServer != null) {
@@ -4699,7 +4700,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 						if (e == null) continue;
 						id = getAttr(e, "id");
 						list.put(id, new DebugEntry(id, getAttr(e, "type"), getAttr(e, "iprange"), getAttr(e, "label"), getAttr(e, "path"), getAttr(e, "fullname"),
-								toStruct(getAttr(e, "custom"))));
+								ConfigWebUtilPatch.getAsStruct(e, true, "custom")));
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
