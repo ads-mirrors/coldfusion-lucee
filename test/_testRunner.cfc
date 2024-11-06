@@ -1,6 +1,8 @@
 component {
+	request._tick = getTickCount();
 	// track which request variables exist before running tests, used for cleanup between tests
 	variables.requestKeys = ArrayToStruct( StructKeyArray( request ), true );
+
 	public function init (){
 		return this;
 	}
