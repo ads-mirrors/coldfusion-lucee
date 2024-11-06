@@ -1,5 +1,4 @@
 component {
-	request._tick = getTickCount();
 	// track which request variables exist before running tests, used for cleanup between tests
 	variables.requestKeys = ArrayToStruct( StructKeyArray( request ), true );
 
@@ -122,9 +121,10 @@ component {
 
 			// always clean up the request scope between test suites
 			for ( var rr in structKeyArray( request ) ){
-				if ( !structKeyExists( variables.requestKeys, rr ) )
-					systemOutput( "deleting request scope variable [#rr#]", true);
+				if ( !structKeyExists( variables.requestKeys, rr ) ){
+					systemOutput( "deleting left over request scope variable after test [#rr#]", true);
 					structDelete( request, rr );
+				}
 			}
 			//mem("non_heap");
 			//mem("heap");
