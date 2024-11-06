@@ -19,12 +19,20 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"	{
 		
 	public void function testConcurrentModification(){
+		var threadNames = [];
 		loop from=1 to=50 index="i" {
+			arrayAppend(threadNames, "t947_#i#");
 			thread action="run" name="t947_#i#" {
 				loop from=1 to=1000 index="y" {
-					request["y"&y]="";
+					request["ldev947-"&y]="";
 				}
 			}
+		}
+
+		threadJoin(threadNames.toList());
+
+		loop from=1 to=1000 index="y" {
+			structDelete(request,"ldev947-"&y);
 		}
 	}
 } 

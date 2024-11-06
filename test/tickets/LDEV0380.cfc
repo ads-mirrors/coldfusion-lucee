@@ -74,4 +74,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 
 		});
 	}
+
+	function afterAll(){
+		for (var i=1; i <5; i++)
+			structDelete(request, "hasError" & i);
+	};
 }

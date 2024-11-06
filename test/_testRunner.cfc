@@ -1,4 +1,6 @@
 component {
+	// track which request variables exist before running tests, used for cleanup between tests
+	variables.requestKeys = ArrayToStruct( StructKeyArray( request ), true );
 	public function init (){
 		return this;
 	}
@@ -114,6 +116,13 @@ component {
 					didntPassSummary &= ", #bundle.totalFail# FAILED";
 				}
 				systemOutput( TAB & " (#bundle.totalPass# tests passed in #NumberFormat(bundle.totalDuration)# ms#didntPassSummary#)", true );
+			}
+
+			// always clean up the request scope between test suites
+			for ( var rr in structKeyArray( request ) ){
+				if ( !structKeyExists( variables.requestKeys, rr ) )
+					systemOutput( "deleting request scope variable [#rr#]", true);
+					structDelete( request, rr );
 			}
 			//mem("non_heap");
 			//mem("heap");
