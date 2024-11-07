@@ -118,21 +118,21 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="ftp" {
 			//systemOutput("SFTP #secure#", true);
 
 			if ( arguments.secure eq true && arguments.secure neq "FTPS" ){ // ftp and sftp are rather different 
-				ftp action="quote" actionParams="ls" connection = "conn";
+				ftp action="quote" actionParam="ls" connection = "conn";
 				expect( trim( cfftp.returnValue ) ).NotToBeEmpty();
 				//systemOutput(cfftp, true);
 			} else {
-				ftp action="quote" actionParams="SYST" connection = "conn";
+				ftp action="quote" actionParam="SYST" connection = "conn";
 				expect( trim( cfftp.returnValue ) ).NotToBeEmpty();
 				//systemOutput(cfftp, true);
 
 					// test action="quote", custom command
-				ftp action="quote" actionParams="SIZE #file#" connection = "conn";
+				ftp action="quote" actionParam="SIZE #file#" connection = "conn";
 				expect( trim( cfftp.returnValue ) ).toBe( "213 " & Len( FileRead( getCurrentTemplatePath( ) ) ) );
 				//systemOutput(cfftp, true);
 
 				// test action="quote", custom command, trigger a 550 file not found exception
-				ftp action="quote" actionParams="SIZE #file#-missing" connection = "conn";
+				ftp action="quote" actionParam="SIZE #file#-missing" connection = "conn";
 				expect( trim( cfftp.errorCode ) ).toBe( "550" );
 				//systemOutput(cfftp, true);
 			}

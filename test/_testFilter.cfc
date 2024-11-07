@@ -43,18 +43,26 @@ component {
 				default:
 					break;
 			};
-			var meta = getTestMeta( arguments.path );
+			try {
+				var meta = getTestMeta( arguments.path );
+			
+				if ( variables.testSkip && structKeyExists( meta, "skip" ) && meta.skip ?: false )
+					return "test suite has skip=true";
 
-			if ( variables.testSkip && structKeyExists( meta, "skip" ) && meta.skip ?: false )
-				return "test suite has skip=true";
+				var extends = checkExtendsTestCase( meta, arguments.path ); // returns an empty string, unless error
+				if ( len( extends ) )
+					return extends;
 
-			var extends = checkExtendsTestCase( meta, arguments.path ); // returns an empty string, unless error
-			if ( len( extends ) )
-				return extends;
-
-			var labelCheck =  checkTestLabels( meta, arguments.path, variables.testLabels );
-			if ( len( labelCheck ) )
-				return labelCheck;
+				var labelCheck =  checkTestLabels( meta, arguments.path, variables.testLabels );
+				if ( len( labelCheck ) )
+					return labelCheck;
+			
+			} catch( e ){
+				var meta = {
+					'_exception': e,
+					skip: false
+				};
+			}
 
 			// only report an exception if all other filters have passed
 			if ( structKeyExists( meta, "_exception" ) ) {
@@ -121,6 +129,7 @@ component {
 				var meta = GetComponentMetaData( cfcPath );
 			}
 		} catch ( e ) {
+			//systemOutput(e, true);
 			// try and manually parse to see if there's a skip="true", if not throw
 			// TODO refactor, need to respect test labels (thus possible ignore)
 			var meta = sniffMetaDataFromBrokenCFC( arguments.path );
@@ -184,7 +193,9 @@ component {
 
 		local.src = fileRead( arguments.cfcPath );
 		src = reReplace(src, "<!---.*?--->", "", "all"); // strip out cfml comments
-		src = reReplace(src, "/\/\*[\s\S]*?\*\/|([^:]|^)\/\/.*$", "", "all"); // strip out script comments
+		application regex={type="java"};
+		src = reReplace(src, "\/{2}.*|\/\*[\s\S]*?\*\/", "", "all"); // strip out script comments
+		application regex={type="perl"};
 		src = trim(src);
 
 		local.isCfml = findNoCase( "<" & "cf" & "component", src ) || findNoCase( "<" & "cf" & "interface", src );
@@ -215,6 +226,7 @@ component {
 			return meta;
 		} catch (e){
 			// ignore, try manual parsing
+			// systemOutput(e, true);
 		}
 
 		meta.manualParsing=true;
@@ -231,7 +243,7 @@ component {
 			if ( hasTrue gt 0 and hasTrue lt (local.hasSkip + 7) )
 				meta.skip = true;
 		}
-		return meta
+		return meta;
 	}
 
 	// create a stub cfc to try and extract out just the component metadata (from a cfc with compile errors)
@@ -240,6 +252,8 @@ component {
 			local.src = arguments.str & '</c' & 'fcomponent">';
 		} else {
 			local.src = arguments.str & ' this.stubCFC=true; }';
+			if ( findNoCase( "<cf" & "script>", src ) ) 
+				local.src = local.src & ' </c' & 'fscript>';
 		}
 		// systemOutput( "SRC:" & str, true );
 		// systemOutput( "SRC:" & src, true );
