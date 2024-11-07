@@ -33,6 +33,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
+import lucee.commons.math.MathUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.config.NullSupportHelper;
 import lucee.runtime.dump.DumpData;
@@ -73,8 +74,9 @@ public final class CGIImplReadOnly extends ReadOnlyStruct implements CGI, Script
 			KeyConstants._request_method, KeyConstants._request_url, KeyConstants._script_name, KeyConstants._server_name, KeyConstants._server_port,
 			KeyConstants._server_port_secure, KeyConstants._server_protocol, KeyConstants._server_software, KeyConstants._web_server_api, KeyConstants._context_path,
 			KeyConstants._local_addr, KeyConstants._local_host };
-	private static Struct staticKeys = new StructImpl();
+	private static Struct staticKeys;
 	static {
+		staticKeys = new StructImpl(StructImpl.TYPE_UNDEFINED, MathUtil.nextPowerOfTwo(keys.length, StructImpl.DEFAULT_INITIAL_CAPACITY));
 		for (int i = 0; i < keys.length; i++) {
 			staticKeys.setEL(keys[i], "");
 		}

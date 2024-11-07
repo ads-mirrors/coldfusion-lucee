@@ -143,4 +143,15 @@ public final class MathUtil {
 	public static BigInteger roundToBigInteger(Object val) throws ArithmeticException, PageException {
 		return roundToBigInteger(Caster.toBigDecimal(val), 12);
 	}
+
+	public static int nextPowerOfTwo(int size, int min) {
+		int n = size - 1;
+		n |= n >> 1;
+		n |= n >> 2;
+		n |= n >> 4;
+		n |= n >> 8;
+		n |= n >> 16;
+		int result = (n < 0) ? 1 : n + 1;
+		return (result >= min) ? result : min;
+	}
 }
