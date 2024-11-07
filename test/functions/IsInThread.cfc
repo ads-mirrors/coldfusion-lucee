@@ -44,5 +44,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 		}
 		thread action="join" name="threadTest";
 	}
+
+	function afterAll(){
+		structDelete(request, "dataIsInThread");
+	};
 	
 }

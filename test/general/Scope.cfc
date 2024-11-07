@@ -125,6 +125,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 
 		}
 		finally {
+			structDelete(request, "data"&cacheName);
 			deleteCache(cacheName);
 		}
 	}

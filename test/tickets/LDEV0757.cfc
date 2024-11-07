@@ -46,6 +46,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 
 	}
 
+	function afterAll(){
+		structDelete(request, "results757");
+	};
+
 	private string function createURI(string calledName){
 		var baseURI="/test/#listLast(getDirectoryFromPath(getCurrenttemplatepath()),"\/")#/";
 		return baseURI&""&calledName;
