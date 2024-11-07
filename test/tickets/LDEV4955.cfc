@@ -56,7 +56,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 	}
 
 	private function _expand ( str ){
-		var webFactory = createObject("java", "lucee.runtime.config.ConfigWebFactory");
-		return webFactory.replaceConfigPlaceHolder(str );
+		var webFactory = createObject("java", "lucee.runtime.config.ConfigWebUtil");
+		return webFactory.replaceConfigPlaceHolders(str );
 	}	
 }
