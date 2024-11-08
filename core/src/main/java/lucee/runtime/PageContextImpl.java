@@ -193,7 +193,8 @@ import lucee.runtime.type.scope.FormImpl;
 import lucee.runtime.type.scope.Local;
 import lucee.runtime.type.scope.LocalNotSupportedScope;
 import lucee.runtime.type.scope.Request;
-import lucee.runtime.type.scope.RequestImpl;
+import lucee.runtime.type.scope.RequestLinked;
+import lucee.runtime.type.scope.RequestStandalone;
 import lucee.runtime.type.scope.Scope;
 import lucee.runtime.type.scope.ScopeContext;
 import lucee.runtime.type.scope.ScopeFactory;
@@ -230,7 +231,7 @@ public final class PageContextImpl extends PageContext {
 	private static final RefBoolean DUMMY_BOOL = new RefBooleanImpl(false);
 	private static final boolean JAVA_SETTING_CLASSIC_MODE = false;
 	private static int counter = 0;
-
+	private static final boolean LINKED_REQUEST = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.request.linked", null), false);
 	/**
 	 * Field <code>pathList</code>
 	 */
@@ -270,7 +271,7 @@ public final class PageContextImpl extends PageContext {
 	private URL url;
 	private Form form;
 
-	private RequestImpl request = new RequestImpl();
+	private Request request = LINKED_REQUEST ? new RequestLinked() : new RequestStandalone();
 	private CGIImplReadOnly cgiR = new CGIImplReadOnly();
 	private CGIImpl cgiRW = new CGIImpl();
 	private Argument argument = new ArgumentImpl();
@@ -509,7 +510,7 @@ public final class PageContextImpl extends PageContext {
 			if (hasFamily) {
 				variablesRoot = new VariablesImpl();
 				variables = variablesRoot;
-				request = new RequestImpl();
+				request = LINKED_REQUEST ? new RequestLinked() : new RequestStandalone();
 				_url = new URLImpl();
 				_form = new FormImpl();
 				urlForm = new UrlFormImpl(_form, _url);

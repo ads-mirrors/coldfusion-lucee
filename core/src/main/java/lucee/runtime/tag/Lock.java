@@ -37,7 +37,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.dt.TimeSpan;
 import lucee.runtime.type.scope.ApplicationImpl;
-import lucee.runtime.type.scope.RequestImpl;
+import lucee.runtime.type.scope.RequestPro;
 import lucee.runtime.type.scope.ServerImpl;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.util.PageContextUtil;
@@ -226,7 +226,7 @@ public final class Lock extends BodyTagTryCatchFinallyImpl {
 			// Session
 			if (scope == SCOPE_REQUEST) {
 				lockType = "request";
-				name = "__request_" + cid + "__" + ((RequestImpl) pageContext.requestScope())._getId();
+				name = "__request_" + cid + "__" + ((RequestPro) pageContext.requestScope())._getId();
 			}
 			// Session
 			else if (scope == SCOPE_SESSION) {

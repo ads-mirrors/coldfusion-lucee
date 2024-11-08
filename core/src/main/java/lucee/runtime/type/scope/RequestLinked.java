@@ -39,14 +39,14 @@ import lucee.runtime.type.it.EntryIterator;
 import lucee.runtime.type.util.ListUtil;
 import lucee.runtime.type.util.StructSupport;
 
-public final class RequestImpl extends StructSupport implements Request {
+public final class RequestLinked extends StructSupport implements RequestPro {
 
 	private HttpServletRequest _req;
 	private boolean init;
 	private static int _id = 0;
 	private int id = 0;
 
-	public RequestImpl() {
+	public RequestLinked() {
 		id = ++_id;
 		// super("request",SCOPE_REQUEST,Struct.TYPE_REGULAR);
 
@@ -55,6 +55,7 @@ public final class RequestImpl extends StructSupport implements Request {
 	/**
 	 * @return Returns the id.
 	 */
+	@Override
 	public int _getId() {
 		return id;
 	}
