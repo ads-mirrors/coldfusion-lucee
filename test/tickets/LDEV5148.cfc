@@ -1,17 +1,35 @@
-component extends="org.lucee.cfml.test.LuceeTestCase" skip="true" {
+component extends="org.lucee.cfml.test.LuceeTestCase" labels="thread" {
 
-	function run( testResults , testBox ) {
-		describe( title='LDEV-5148', body=function(){
+	function testThreadRequestScope(){
+		request.results5148 = 0;
+		var names = [];
+		loop from=1 to=5 index="local.i" {
+			ArrayAppend( names, "ldev5148_#i#" );
+			thread name="ldev5148_#i#" {
+				lock name="ldev5148" type="exclusive"{
+					request.results5148++;
+				}
+				request[ thread.name ] = true;
+			}
+		}
+		thread action="join" name="#names.toList()#";
 
-			it( title='chck if the child threads are linked or not', body=function() {
-				request.testReq = "test5148";
-				variables.result = runAsync(() => return request).get();
-				
-				expect(request.testReq?:"undefined").toBe("test5148");
-				expect(result.testReq?:"undefined").toBe("test5148");
-			});
+		expect ( request.results5148 ).toBe( arrayLen( names ) ); 
 
-		});
+		loop from=1 to=5 index="local.i" {
+			expect ( request[ "ldev5148_#i#" ] ).toBeTrue(); 
+		}
+
+		for ( var t in names ){
+			expect( cfthread[ t ] ).notToHaveKey( "error" );
+		}
+
 	}
 
+	function afterAll(){
+		structDelete( request, "results5148" );
+		loop from=1 to=5 index="local.i" {
+			structDelete( request, "ldev5148_#i#");
+		}
+	}
 }
