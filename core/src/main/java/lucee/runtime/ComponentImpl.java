@@ -2346,7 +2346,7 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 				ConfigWeb config = (ConfigWeb) ThreadLocalPageContext.getConfig();
 				Pair[] parr = new Pair[0];
 				pc = ThreadUtil.createPageContext(config, DevNullOutputStream.DEV_NULL_OUTPUT_STREAM, "localhost", "/", "", SerializableCookie.COOKIES0, parr, null, parr,
-						new StructImpl(), true, -1);
+						new StructImpl(), true, -1, null, null);
 
 			}
 

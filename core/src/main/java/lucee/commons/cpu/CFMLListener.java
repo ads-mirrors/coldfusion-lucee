@@ -33,7 +33,7 @@ public abstract class CFMLListener implements Listener {
 		if (pc == null) {
 			release = true;
 			pc = ThreadUtil.createPageContext(config, DevNullOutputStream.DEV_NULL_OUTPUT_STREAM, "localhost", "/", "", null, new Pair[0], null, new Pair[0], new StructImpl(),
-					false, -1);
+					false, -1, null, null);
 		}
 		try {
 			_listen(pc, list);

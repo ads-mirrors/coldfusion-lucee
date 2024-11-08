@@ -72,7 +72,7 @@ public final class CreatePageContext implements Function {
 
 		HttpSession session = pc != null && pc.getSessionType() == Config.SESSION_TYPE_JEE ? pc.getSession() : null;
 		return ThreadUtil.createPageContext(pc.getConfig(), DevNullOutputStream.DEV_NULL_OUTPUT_STREAM, serverName, scriptName, queryString, toCookies(cookies),
-				toPair(headers, true), null, toPair(parameters, true), castValuesToString(attributes), true, -1, session);
+				toPair(headers, true), null, toPair(parameters, true), castValuesToString(attributes), true, -1, session, null);
 	}
 
 	public static Struct castValuesToString(Struct sct) throws PageException {

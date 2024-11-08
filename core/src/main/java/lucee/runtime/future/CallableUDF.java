@@ -58,7 +58,8 @@ public class CallableUDF implements Callable<Object> {
 		ThreadLocalPageContext.register(pc);
 
 		DevNullOutputStream os = DevNullOutputStream.DEV_NULL_OUTPUT_STREAM;
-		pc = ThreadUtil.createPageContext(cw, os, serverName, requestURI, queryString, SerializableCookie.toCookies(cookies), headers, null, parameters, attributes, true, -1);
+		pc = ThreadUtil.createPageContext(cw, os, serverName, requestURI, queryString, SerializableCookie.toCookies(cookies), headers, null, parameters, attributes, true, -1, null,
+				null);
 		pc.setRequestTimeout(requestTimeout);
 
 		pc.setApplicationContext(ac);

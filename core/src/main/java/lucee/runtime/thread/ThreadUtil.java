@@ -69,27 +69,13 @@ public class ThreadUtil {
 		return dest;
 	}
 
-	/**
-	 * 
-	 * @param config
-	 * @param os
-	 * @param serverName
-	 * @param requestURI
-	 * @param queryString
-	 * @param cookies
-	 * @param headers
-	 * @param parameters
-	 * @param attributes
-	 * @param register
-	 * @param timeout timeout in ms, if the value is smaller than 1 it is ignored and the value coming
-	 *            from the context is used
-	 * @return
-	 */
+	@Deprecated
 	public static PageContextImpl createPageContext(ConfigWeb config, OutputStream os, String serverName, String requestURI, String queryString, Cookie[] cookies, Pair[] headers,
 			byte[] body, Pair[] parameters, Struct attributes, boolean register, long timeout) {
-		return createPageContext(config, os, serverName, requestURI, queryString, cookies, headers, body, parameters, attributes, register, timeout, null);
+		return createPageContext(config, os, serverName, requestURI, queryString, cookies, headers, body, parameters, attributes, register, timeout, null, null);
 	}
 
+	@Deprecated
 	public static PageContextImpl createPageContext(ConfigWeb config, OutputStream os, String serverName, String requestURI, String queryString, Cookie[] cookies, Pair[] headers,
 			byte[] body, Pair[] parameters, Struct attributes, boolean register, long timeout, HttpSession session) {
 
@@ -113,7 +99,7 @@ public class ThreadUtil {
 	}
 
 	public static PageContextImpl createDummyPageContext(ConfigWeb config) {
-		return createPageContext(config, DevNullOutputStream.DEV_NULL_OUTPUT_STREAM, Constants.NAME, "/", "", null, null, null, null, null, true, -1, null).setDummy(true);
+		return createPageContext(config, DevNullOutputStream.DEV_NULL_OUTPUT_STREAM, Constants.NAME, "/", "", null, null, null, null, null, true, -1, null, null).setDummy(true);
 	}
 
 	/**

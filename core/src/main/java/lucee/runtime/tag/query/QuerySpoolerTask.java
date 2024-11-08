@@ -103,7 +103,7 @@ public class QuerySpoolerTask extends SpoolerTaskSupport {
 				HttpSession session = oldPc != null && oldPc.getSessionType() == Config.SESSION_TYPE_JEE ? oldPc.getSession() : null;
 				DevNullOutputStream os = DevNullOutputStream.DEV_NULL_OUTPUT_STREAM;
 				pc = ThreadUtil.createPageContext(cwi, os, serverName, requestURI, queryString, SerializableCookie.toCookies(cookies), headers, null, parameters, attributes, true,
-						-1, session);
+						-1, session, null);
 				pc.setRequestTimeout(requestTimeout);
 				PageSource ps = UDFPropertiesImpl.toPageSource(pc, cwi, mapping == null ? null : mapping.toMapping(), relPath, relPathwV);
 				pc.addPageSource(ps, true);

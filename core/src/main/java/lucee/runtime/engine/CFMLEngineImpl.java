@@ -1812,7 +1812,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 					attrs.setEL(KeyConstants._client, "lucee-listener-1-0");
 
 					pc = ThreadUtil.createPageContext((ConfigWeb) config, DevNullOutputStream.DEV_NULL_OUTPUT_STREAM, "localhost", requestURI, queryString,
-							SerializableCookie.COOKIES0, headers, null, new Pair[0], attrs, true, Long.MAX_VALUE);
+							SerializableCookie.COOKIES0, headers, null, new Pair[0], attrs, true, Long.MAX_VALUE, null, null);
 				}
 				else {
 					Map<String, Object> headers = new HashMap<String, Object>();

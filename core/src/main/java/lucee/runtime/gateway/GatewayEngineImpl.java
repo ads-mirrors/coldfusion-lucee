@@ -434,7 +434,7 @@ public class GatewayEngineImpl implements GatewayEngine {
 		}
 		PageContextImpl pc = ThreadUtil.createPageContext(config, DevNullOutputStream.DEV_NULL_OUTPUT_STREAM, "localhost", requestURI,
 				"method=" + functionName + (cfcPeristent ? "&" + ComponentPageImpl.REMOTE_PERSISTENT_ID + "=" + remotePersisId : ""), null,
-				new Pair[] { new Pair<String, Object>("AMF-Forward", "true") }, null, null, attrs, register, Long.MAX_VALUE);
+				new Pair[] { new Pair<String, Object>("AMF-Forward", "true") }, null, null, attrs, register, Long.MAX_VALUE, null, null);
 
 		pc.setGatewayContext(true);
 		if (arguments != null) attrs.setEL(KeyConstants._argumentCollection, arguments);
