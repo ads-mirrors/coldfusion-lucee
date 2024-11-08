@@ -21,7 +21,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="thread" {
 		}
 
 		for ( var t in names ){
-			expect( cfthread[ t ] ).notToInclude( "error" );
+			expect( cfthread[ t ] ).notToHaveKey( "error" );
 		}
 
 	}
