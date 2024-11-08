@@ -247,12 +247,25 @@ public final class CFMLEngineImpl implements CFMLEngine {
 				Map<String, Object> config = new HashMap<String, Object>();
 				Iterator<Entry<Object, Object>> it = prop.entrySet().iterator();
 				Entry<Object, Object> e;
-				String k;
+				String k, val, addional;
 				while (it.hasNext()) {
 					e = it.next();
 					k = (String) e.getKey();
 					if (!k.startsWith("org.") && !k.startsWith("felix.")) continue;
-					config.put(k, CFMLEngineFactorySupport.removeQuotes((String) e.getValue(), true));
+
+					val = CFMLEngineFactorySupport.removeQuotes((String) e.getValue(), true);
+					addional = Caster.toString(SystemUtil.getSystemPropOrEnvVar(k, null), null);
+
+					if (!StringUtil.isEmpty(addional, true)) {
+						if ("org.osgi.framework.bootdelegation".equals(k) || "org.osgi.framework.system.packages".equals(k)) {
+							val = addional.trim() + "," + val;
+
+						}
+						else {
+							val = addional.trim();
+						}
+					}
+					config.put(k, val);
 				}
 
 				config.put(Constants.FRAMEWORK_BOOTDELEGATION, "lucee.*");

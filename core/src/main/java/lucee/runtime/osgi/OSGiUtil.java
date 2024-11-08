@@ -2262,6 +2262,13 @@ public class OSGiUtil {
 				is = OSGiUtil.class.getClassLoader().getResourceAsStream("default.properties");
 				prop.load(is);
 				String bd = prop.getProperty("org.osgi.framework.bootdelegation");
+				String addional = Caster.toString(SystemUtil.getSystemPropOrEnvVar("org.osgi.framework.bootdelegation", null), null);
+
+				if (!StringUtil.isEmpty(addional, true)) {
+					if (!StringUtil.isEmpty(bd)) bd = addional.trim() + "," + bd;
+					else bd = addional.trim();
+				}
+
 				if (!StringUtil.isEmpty(bd)) {
 					bd += ",java.lang,java.lang.*";
 					bootDelegation = ListUtil.trimItems(ListUtil.listToStringArray(StringUtil.unwrap(bd), ','));
