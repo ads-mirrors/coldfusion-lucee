@@ -245,10 +245,7 @@ public final class ComponentScopeThis extends StructSupport implements Component
 
 	@Override
 	public Collection duplicate(boolean deepCopy) {
-
-		StructImpl sct = new StructImpl();
-		StructImpl.copy(this, sct, deepCopy);
-		return sct;
+		return StructImpl.copy(this, deepCopy);
 	}
 
 	/**

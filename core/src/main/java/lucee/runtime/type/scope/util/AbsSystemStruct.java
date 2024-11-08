@@ -4,7 +4,6 @@ import java.util.Iterator;
 
 import lucee.runtime.exp.PageException;
 import lucee.runtime.type.Collection;
-import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.it.EntryIterator;
 import lucee.runtime.type.it.KeyIterator;
@@ -20,9 +19,7 @@ public abstract class AbsSystemStruct extends StructSupport {
 
 	@Override
 	public final Collection duplicate(boolean deepCopy) {
-		Struct sct = new StructImpl();
-		StructImpl.copy(this, sct, deepCopy);
-		return sct;
+		return StructImpl.copy(this, deepCopy);
 	}
 
 	@Override

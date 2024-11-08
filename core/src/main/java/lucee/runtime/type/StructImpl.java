@@ -35,6 +35,7 @@ import org.apache.commons.collections4.map.ReferenceMap;
 import lucee.commons.collection.AccessOrderLimitedSizeMap;
 import lucee.commons.collection.MapFactory;
 import lucee.commons.lang.ExceptionUtil;
+import lucee.commons.math.MathUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.config.NullSupportHelper;
 import lucee.runtime.dump.DumpData;
@@ -261,7 +262,11 @@ public class StructImpl extends StructSupport {
 		return sct;
 	}
 
-	public static void copy(Struct src, Struct trg, boolean deepCopy) {
+	public static Struct copy(Struct src, boolean deepCopy) {
+		return copy(src, new StructImpl(StructImpl.TYPE_UNDEFINED, MathUtil.nextPowerOfTwo(src.size(), StructImpl.DEFAULT_INITIAL_CAPACITY)), deepCopy);
+	}
+
+	public static Struct copy(Struct src, Struct trg, boolean deepCopy) {
 		boolean inside = ThreadLocalDuplication.set(src, trg);
 		try {
 			Iterator<Entry<Key, Object>> it = src.entryIterator();
@@ -275,6 +280,7 @@ public class StructImpl extends StructSupport {
 		finally {
 			if (!inside) ThreadLocalDuplication.reset();
 		}
+		return trg;
 	}
 
 	@Override

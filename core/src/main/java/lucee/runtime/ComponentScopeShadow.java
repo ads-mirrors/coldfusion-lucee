@@ -348,9 +348,7 @@ public class ComponentScopeShadow extends StructSupport implements ComponentScop
 
 	@Override
 	public Collection duplicate(boolean deepCopy) {
-		StructImpl sct = new StructImpl();
-		StructImpl.copy(this, sct, deepCopy);
-		return sct;
+		return StructImpl.copy(this, deepCopy);
 		// MUST muss deepCopy checken
 		// return new ComponentScopeShadow(component,shadow);//new
 		// ComponentScopeThis(component.cloneComponentImpl());

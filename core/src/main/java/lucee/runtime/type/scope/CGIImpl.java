@@ -180,9 +180,7 @@ public final class CGIImpl extends StructSupport implements CGI, ScriptProtected
 
 	@Override
 	public Collection duplicate(boolean deepCopy) {
-		Struct sct = new StructImpl(StructImpl.TYPE_UNDEFINED, 64);
-		StructImpl.copy(this, sct, deepCopy);
-		return sct;
+		return StructImpl.copy(this, deepCopy);
 	}
 
 	@Override

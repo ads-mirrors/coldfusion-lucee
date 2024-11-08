@@ -466,9 +466,7 @@ public final class ArgumentImpl extends ScopeSupport implements Argument, ArrayP
 	 * @return resulting struct
 	 */
 	public static Struct toStruct(Argument arg) {
-		Struct trg = new StructImpl();
-		StructImpl.copy(arg, trg, false);
-		return trg;
+		return StructImpl.copy(arg, false);
 	}
 
 	/**

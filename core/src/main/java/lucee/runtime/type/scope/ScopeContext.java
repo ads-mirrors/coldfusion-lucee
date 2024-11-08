@@ -329,15 +329,11 @@ public final class ScopeContext {
 	}
 
 	public Struct getAllApplicationScopes() {
-		Struct trg = new StructImpl();
-		StructImpl.copy(MapAsStruct.toStruct(applicationContexts, true), trg, false);
-		return trg;
+		return StructImpl.copy(MapAsStruct.toStruct(applicationContexts, true), false);
 	}
 
 	public Struct getAllCFSessionScopes() {
-		Struct trg = new StructImpl();
-		StructImpl.copy(MapAsStruct.toStruct(this.cfSessionContexts, true), trg, false);
-		return trg;
+		return StructImpl.copy(MapAsStruct.toStruct(this.cfSessionContexts, true), false);
 	}
 
 	/**

@@ -33,7 +33,6 @@ import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.type.Collection;
 import lucee.runtime.type.KeyImpl;
-import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.it.EntryIterator;
 import lucee.runtime.type.util.ListUtil;
@@ -238,9 +237,7 @@ public final class RequestLinked extends StructSupport implements RequestPro {
 
 	@Override
 	public Collection duplicate(boolean deepCopy) {
-		Struct trg = new StructImpl();
-		StructImpl.copy(this, trg, deepCopy);
-		return trg;
+		return StructImpl.copy(this, deepCopy);
 	}
 
 	@Override
