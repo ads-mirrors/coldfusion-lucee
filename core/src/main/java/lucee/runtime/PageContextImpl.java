@@ -231,7 +231,7 @@ public final class PageContextImpl extends PageContext {
 	private static final RefBoolean DUMMY_BOOL = new RefBooleanImpl(false);
 	private static final boolean JAVA_SETTING_CLASSIC_MODE = false;
 	private static int counter = 0;
-	private static final boolean LINKED_REQUEST = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.request.linked", null), false);
+	private static final boolean LINKED_REQUEST = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.request.linked", null), true);
 	/**
 	 * Field <code>pathList</code>
 	 */
