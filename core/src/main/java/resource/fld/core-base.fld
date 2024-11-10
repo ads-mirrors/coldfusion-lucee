@@ -3929,7 +3929,6 @@ Specifies the type of results to return:
 	    <class>lucee.runtime.functions.conversion.DeserializeJSON</class>
 	    <member-name>deserializeJSON</member-name>
 	    <keywords>string,parsing,json,javascript,json5</keywords>
-	    <since>6.2.0.14</since>
 	    <description>Converts a JSON (JavaScript Object Notation) or JSON5 string data representation into CFML data, such as a struct or array.</description>
 	    <argument>
 	        <name>JSONVar</name>
@@ -3950,6 +3949,7 @@ Specifies the type of results to return:
 	        <type>string</type>
 	        <required>No</required>
 	        <default>json5</default>
+	        <introduced>6.2.0.14</introduced>
 	        <description>The format of the input string. Possible values are:
 	- **json**: Standard JSON format
 	- **json5**: JSON5 format which allows additional features such as comments and unquoted keys</description>
@@ -7437,7 +7437,6 @@ The following things are considered to be empty:
 	    <name>IsJson</name>
 	    <class>lucee.runtime.functions.conversion.IsJSON</class>
 	    <keywords>decision,json,javascript,json5</keywords>
-	    <since>6.2.0.14</since>
 	    <description>Evaluates whether a string is in a valid JSON (JavaScript Object Notation) or JSON5 data interchange format.</description>
 	    <argument>
 	        <name>var</name>
@@ -7451,6 +7450,7 @@ The following things are considered to be empty:
 	        <type>string</type>
 	        <required>No</required>
 	        <default>json5</default>
+	        <introduced>6.2.0.14</introduced>
 	        <description>The format of the input string. Possible values are:
 	- **json**: Standard JSON format
 	- **json5**: JSON5 format which allows additional features such as comments and unquoted keys</description>
@@ -8274,10 +8274,11 @@ The following things are considered to be empty:
 		<description>the object to cast</description>
     </argument>
 	<argument>
-			<name>javaSettings</name>
-			<type>struct</type>
-			<required>no</required>
+		<name>javaSettings</name>
+		<type>struct</type>
+		<required>no</required>
 		<description>javasettings to use to load the class</description>
+		<introduced>6.2.0.26</introduced>
     </argument>
 		<return>
 			<type>any</type>
@@ -9567,6 +9568,7 @@ The following things are considered to be empty:
 	<function>
 		<name>MavenLoad</name>
 		<class>lucee.runtime.functions.mvn.MavenLoad</class>
+		<introduced>6.2.0.151</introduced>
 		<keywords>maven,classloading,dependencies,jars</keywords>
 		<description>
 Loads all JAR files from one or more Maven endpoints and makes them available for use within the Lucee server environment. 
@@ -12455,6 +12457,7 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 		<name>GatewayState</name>
 		<class>lucee.runtime.functions.gateway.GatewayState</class>
 		<description>Return the current state for the given gateway id.</description>
+		<introduced>6.2.0.75</introduced>
 		<argument>
 			<name>gatewayID</name>
 			<type>string</type>
@@ -12469,6 +12472,7 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 	<function>
 		<name>GatewayAction</name>
 		<class>lucee.runtime.functions.gateway.GatewayAction</class>
+		<introduced>6.2.0.75</introduced>
 		<description>Executes a specifc action for a gateway instance.</description>
 		<argument>
 			<name>gatewayID</name>
