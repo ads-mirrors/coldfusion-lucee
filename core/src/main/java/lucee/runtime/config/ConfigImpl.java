@@ -2308,11 +2308,15 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		this.cacheDirSize = cacheDirSize;
 	}
 
-	protected void setDumpWritersEntries(DumpWriterEntry[] dmpWriterEntries) {
-		this.dmpWriterEntries = dmpWriterEntries;
-	}
-
 	public DumpWriterEntry[] getDumpWritersEntries() {
+		if (dmpWriterEntries == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getDumpWritersEntries")) {
+				if (dmpWriterEntries == null) {
+					dmpWriterEntries = ConfigWebFactory.loadDumpWriter(this, root, null);
+					// MUST handle default value was returned
+				}
+			}
+		}
 		return dmpWriterEntries;
 	}
 

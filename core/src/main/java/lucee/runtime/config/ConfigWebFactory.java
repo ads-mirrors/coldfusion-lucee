@@ -459,9 +459,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			_loadListener(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded listeners");
 
-			_loadDumpWriter(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded dump writers");
-
 			_loadGatewayEL(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded gateways");
 
@@ -476,9 +473,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 			_loadLogin(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded login");
-
-			_loadAI(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded AI");
 
 			_loadStartupHook(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded startup hook");
@@ -766,7 +760,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return defaultValue;
 	}
 
-	private static void _loadDumpWriter(ConfigServerImpl config, Struct root, Log log) {
+	public static DumpWriterEntry[] loadDumpWriter(ConfigImpl config, Struct root, DumpWriterEntry[] defaultValue) {
 		try {
 			Array writers = ConfigWebUtil.getAsArray("dumpWriters", root);
 
@@ -801,7 +795,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
-						log(config, log, t);
+						log(config, null, t);
 					}
 				}
 			}
@@ -819,12 +813,13 @@ public final class ConfigWebFactory extends ConfigFactory {
 			while (it.hasNext()) {
 				entries.add((DumpWriterEntry) it.next());
 			}
-			config.setDumpWritersEntries(entries.toArray(new DumpWriterEntry[entries.size()]));
+			return entries.toArray(new DumpWriterEntry[entries.size()]);
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, null, t);
 		}
+		return defaultValue;
 	}
 
 	static Map<String, String> toArguments(Struct coll, String name, boolean decode, boolean lowerKeys) throws PageException {
