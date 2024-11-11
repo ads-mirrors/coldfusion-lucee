@@ -443,6 +443,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	protected Map<String, AIEngineFactory> aiEngineFactories;
 
+	protected Struct root;
+
 	/**
 	 * @return the allowURLRequestTimeout
 	 */
@@ -3962,16 +3964,13 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		javaSettingsInstances.put(id, js);
 	}
 
-	public void setJavaSettings(JavaSettings js) {
-		javaSettings = js;
-	}
-
 	@Override
 	public JavaSettings getJavaSettings() {
 		if (javaSettings == null) {
 			synchronized (javaSettingsInstances) {
 				if (javaSettings == null) {
-					javaSettings = JavaSettingsImpl.getInstance(this, new StructImpl(), null);
+					javaSettings = ConfigWebFactory.loadJavaSettings(this, root, null);
+					if (javaSettings == null) javaSettings = JavaSettingsImpl.getInstance(this, new StructImpl(), null);
 				}
 			}
 		}

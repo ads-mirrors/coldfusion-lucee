@@ -154,7 +154,7 @@ public final class ConfigServerFactory extends ConfigFactory {
 			}
 			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_INFO, ConfigServerFactory.class.getName(), "load config file");
 			Struct root = loadDocumentCreateIfFails(configFileNew, "server");
-
+			config.setRoot(root);
 			// admin mode
 			ConfigWebFactory.createContextFiles(configDir, doNew);
 			load(config, root, false, doNew, essentialOnly);

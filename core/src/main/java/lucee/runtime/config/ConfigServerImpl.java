@@ -79,6 +79,7 @@ import lucee.runtime.osgi.OSGiUtil.BundleDefinition;
 import lucee.runtime.reflection.Reflector;
 import lucee.runtime.security.SecurityManager;
 import lucee.runtime.security.SecurityManagerImpl;
+import lucee.runtime.type.Struct;
 import lucee.runtime.type.scope.Cluster;
 import lucee.runtime.type.scope.ClusterRemote;
 import lucee.runtime.type.scope.ClusterWrap;
@@ -904,5 +905,9 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 			}
 		}
 		return aiEnginePool;
+	}
+
+	public void setRoot(Struct root) {
+		this.root = root;
 	}
 }

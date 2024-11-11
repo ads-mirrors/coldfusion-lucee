@@ -344,13 +344,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 
 		if (!essentialOnly) {
-			_loadJavaSettings(config, root, log); // define compile type
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded java settings");
-		}
-
-		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded lib");
-
-		if (!essentialOnly) {
 			_loadSystem(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded system");
 
@@ -3562,26 +3555,24 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadJavaSettings(ConfigServerImpl config, Struct root, Log log) {
+	public static JavaSettings loadJavaSettings(ConfigImpl config, Struct root, JavaSettings defaultValue) {
 		try {
-			{
 
-				Resource lib = config.getLibraryDirectory();
-				Resource[] libs = lib.listResources(ExtensionResourceFilter.EXTENSION_JAR_NO_DIR);
+			Resource lib = config.getLibraryDirectory();
+			Resource[] libs = lib.listResources(ExtensionResourceFilter.EXTENSION_JAR_NO_DIR);
 
-				ConfigServerImpl csi = config;
-				Struct javasettings = ConfigWebUtil.getAsStruct(root, false, "javasettings");
+			Struct javasettings = ConfigWebUtil.getAsStruct(root, false, "javasettings");
 
-				if (javasettings != null && javasettings.size() > 0) {
-					JavaSettings js = JavaSettingsImpl.getInstance(config, javasettings, libs);
-					csi.setJavaSettings(js);
-				}
+			if (javasettings != null && javasettings.size() > 0) {
+				JavaSettings js = JavaSettingsImpl.getInstance(config, javasettings, libs);
+				return js;
 			}
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, null, t);
 		}
+		return defaultValue;
 	}
 
 	private static void _loadConstants(ConfigServerImpl config, Struct root) {
