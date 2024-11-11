@@ -1622,11 +1622,6 @@ class SingleContextConfigWeb extends ConfigBase implements ConfigWebInner {
 	}
 
 	@Override
-	public short getAdminMode() {
-		return cs.getAdminMode();
-	}
-
-	@Override
 	public int getServerPasswordType() {
 		return cs.getPasswordType();
 	}
@@ -1765,7 +1760,7 @@ class SingleContextConfigWeb extends ConfigBase implements ConfigWebInner {
 
 	@Override
 	public short getPasswordSource() {
-		return MultiContextConfigWeb.PASSWORD_ORIGIN_SERVER;
+		return ConfigWebInner.PASSWORD_ORIGIN_SERVER;
 	}
 
 	@Override

@@ -96,7 +96,6 @@ import lucee.runtime.coder.CoderException;
 import lucee.runtime.config.AdminSync;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigAdmin;
-import lucee.runtime.config.ConfigImpl;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.ConfigServer;
 import lucee.runtime.config.ConfigServerImpl;
@@ -321,8 +320,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		}
 
 		// Type
-		singleMode = config.getAdminMode() == ConfigImpl.ADMINMODE_SINGLE;
-		type = singleMode ? TYPE_SERVER : toType(getString("type", "web"), true);
+		type = TYPE_SERVER;
 
 		// has Password
 		if (action.equals("haspassword")) {

@@ -173,11 +173,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private static final RHExtension[] RHEXTENSIONS_EMPTY = new RHExtension[0];
 
-	// FUTURE add to interface
-	public static final short ADMINMODE_SINGLE = 1;
-	public static final short ADMINMODE_MULTI = 2;
-	public static final short ADMINMODE_AUTO = 4;
-
 	private int mode = MODE_CUSTOM;
 
 	private final Map<String, PhysicalClassLoader> rpcClassLoaders = new ConcurrentHashMap<String, PhysicalClassLoader>();

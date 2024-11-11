@@ -145,8 +145,6 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 
 	private GatewayMap gatewayEntries;
 
-	private short adminMode = ADMINMODE_SINGLE;
-
 	private Resource mvnDir;
 
 	/**
@@ -870,15 +868,6 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 			throw Caster.toPageException(e);
 		}
 
-	}
-
-	public void setAdminMode(short adminMode) {
-		this.adminMode = adminMode;
-	}
-
-	@Override
-	public short getAdminMode() {
-		return adminMode;
 	}
 
 	@Override

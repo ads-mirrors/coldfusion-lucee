@@ -67,7 +67,6 @@ import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.log.LoggerAndSourceData;
 import lucee.commons.io.res.Resource;
-import lucee.commons.io.res.ResourcesImpl;
 import lucee.commons.io.res.filter.ExtensionResourceFilter;
 import lucee.commons.io.res.type.cfml.CFMLResourceProvider;
 import lucee.commons.io.res.type.s3.DummyS3ResourceProvider;
@@ -185,7 +184,6 @@ import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.UDF;
 import lucee.runtime.type.dt.TimeSpan;
 import lucee.runtime.type.scope.Undefined;
-import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.type.util.CollectionUtil;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
@@ -207,121 +205,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 	public static final boolean LOG = true;
 	private static final int DEFAULT_MAX_CONNECTION = 100;
 	public static final String DEFAULT_LOCATION = Constants.DEFAULT_UPDATE_URL.toExternalForm();
-
-	/**
-	 * creates a new ServletConfig Impl Object
-	 * 
-	 * @param configServer
-	 * @param configDir
-	 * @param servletConfig
-	 * @return new Instance
-	 * @throws SAXException
-	 * @throws ClassNotFoundException
-	 * @throws PageException
-	 * @throws IOException
-	 * @throws TagLibException
-	 * @throws FunctionLibException
-	 * @throws NoSuchAlgorithmException
-	 * @throws BundleException
-	 * @throws ConverterException
-	 */
-
-	public static ConfigWebPro newInstanceMulti(CFMLEngine engine, CFMLFactoryImpl factory, ConfigServerImpl configServer, Resource configDir, ServletConfig servletConfig,
-			ConfigWebImpl existingToUpdate)
-			throws SAXException, ClassException, PageException, IOException, TagLibException, FunctionLibException, NoSuchAlgorithmException, BundleException, ConverterException {
-
-		// boolean multi = configServer.getAdminMode() == ConfigImpl.ADMINMODE_MULTI;
-
-		// make sure the web context does not point to the same directory as the server context
-		if (configDir.equals(configServer.getConfigDir())) {
-			throw new ApplicationException(
-					"the web context [" + createLabel(configServer, servletConfig) + "] has defined the same configuration directory [" + configDir + "] as the server context");
-		}
-		ConfigWeb[] webs = configServer.getConfigWebs();
-		if (!ArrayUtil.isEmpty(webs)) {
-			for (int i = 0; i < webs.length; i++) {
-				// not sure this is necessary if(hash.equals(((ConfigWebImpl)webs[i]).getHash())) continue;
-				if (configDir.equals(webs[i].getConfigDir())) throw new ApplicationException("the web context [" + createLabel(configServer, servletConfig)
-						+ "] has defined the same configuration directory [" + configDir + "] as the web context [" + webs[i].getLabel() + "]");
-			}
-		}
-		String label = createLabel(configServer, servletConfig);
-		LogUtil.logGlobal(configServer, Log.LEVEL_INFO, ConfigWebFactory.class.getName(),
-				"===================================================================\n" + "WEB CONTEXT (" + label + ")\n"
-						+ "-------------------------------------------------------------------\n" + "- config:" + configDir + "\n" + "- webroot:"
-						+ ReqRspUtil.getRootPath(servletConfig.getServletContext()) + "\n" + "- label:" + createLabel(configServer, servletConfig) + "\n"
-						+ "===================================================================\n"
-
-		);
-
-		boolean doNew = getNew(engine, configDir, false, UpdateInfo.NEW_NONE).updateType != NEW_NONE;
-		Resource configFileOld = configDir.getRealResource("lucee-web.xml." + TEMPLATE_EXTENSION);
-		Resource configFileNew = ConfigServerFactory.getConfigFile(configDir, false);
-		String strPath = servletConfig.getServletContext().getRealPath("/WEB-INF");
-		Resource path = ResourcesImpl.getFileResourceProvider().getResource(strPath);
-		boolean hasConfigOld = false;
-		boolean hasConfigNew = configFileNew.exists() && configFileNew.length() > 0;
-		if (!hasConfigNew) {
-			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_INFO, ConfigWebFactory.class.getName(),
-					"has no json web context config for " + label + " at " + "[" + configFileNew + "]");
-			hasConfigOld = configFileOld.exists() && configFileOld.length() > 0;
-			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_INFO, ConfigWebFactory.class.getName(),
-					"has " + (hasConfigOld ? "" : "no ") + "xml web context config for " + label + " at " + "[" + configFileOld + "]");
-
-		}
-		MultiContextConfigWeb multiweb = new MultiContextConfigWeb(factory, configServer, servletConfig, configDir, configFileNew);
-		ConfigWebPro configWeb = existingToUpdate != null ? existingToUpdate.setInstance(multiweb) : new ConfigWebImpl(multiweb);
-		factory.setConfig(configServer, configWeb);
-
-		// translate to new
-		Struct root = null;
-		if (!hasConfigNew) {
-			if (hasConfigOld) {
-				LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_INFO, ConfigWebFactory.class.getName(), "convert web context xml config to json for " + label);
-				try {
-					translateConfigFile(configWeb, configFileOld, configFileNew, "", false);
-				}
-				catch (IOException e) {
-					LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), ConfigWebFactory.class.getName(), e);
-					throw e;
-				}
-				catch (ConverterException e) {
-					LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), ConfigWebFactory.class.getName(), e);
-					throw e;
-				}
-				catch (SAXException e) {
-					LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), ConfigWebFactory.class.getName(), e);
-					throw e;
-				}
-			}
-			// create config file
-			else {
-				LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_INFO, ConfigWebFactory.class.getName(),
-						"create new web context json config file for " + label + " at " + "[" + configFileNew + "]");
-				createConfigFile("web", configFileNew);
-				hasConfigNew = true;
-			}
-		}
-		LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_INFO, ConfigWebFactory.class.getName(), "load config file for " + label);
-		root = loadDocumentCreateIfFails(configFileNew, "web");
-
-		// htaccess
-		if (path.exists()) createHtAccess(path.getRealResource(".htaccess"));
-		if (configDir.exists()) createHtAccess(configDir.getRealResource(".htaccess"));
-
-		createContextFiles(configDir, doNew);
-
-		load(configServer, multiweb, (ConfigWebImpl) configWeb, root, false, doNew, false);
-		createContextFilesPost(configDir, configWeb, servletConfig, false, doNew);
-		((ThreadQueueImpl) configWeb.getThreadQueue()).setMode(configWeb.getQueueEnable() ? ThreadQueuePro.MODE_ENABLED : ThreadQueuePro.MODE_DISABLED);
-
-		// call web.cfc for this context
-		((CFMLEngineImpl) ConfigWebUtil.getEngine(configWeb)).onStart(configWeb, false);
-
-		((GatewayEngineImpl) configWeb.getGatewayEngine()).autoStart();
-
-		return configWeb;
-	}
 
 	public static ConfigWebPro newInstanceSingle(CFMLEngine engine, CFMLFactoryImpl factory, ConfigServerImpl configServer, Resource configDirWeb, ServletConfig servletConfig,
 			ConfigWebImpl existingToUpdate) throws PageException {
@@ -394,68 +277,11 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @throws NoSuchAlgorithmException
 	 */ // MUST
 	public static void reloadInstance(CFMLEngine engine, ConfigServerImpl cs, ConfigWebImpl cwi, boolean force)
-			throws ClassException, PageException, IOException, TagLibException, FunctionLibException, BundleException {
+			throws PageException, IOException, TagLibException, FunctionLibException, BundleException {
 
-		boolean isSingle = cs.getAdminMode() == ConfigImpl.ADMINMODE_SINGLE;
-		boolean isWebSingle = cwi.isSingle();
-		if (isWebSingle) {
-			// changed from single to mult1
-			if (isSingle != isWebSingle) {
-				// Resource configDir, boolean isConfigDirACustomSetting,
-				// ServletConfig servletConfig
-				try {
-					newInstanceMulti(engine, (CFMLFactoryImpl) cwi.getFactory(), cs, cwi.getWebConfigDir(), cwi.getServletConfig(), cwi);
-					return;
-				}
-				catch (NoSuchAlgorithmException e) {
-					throw Caster.toPageException(e);
-				}
-				catch (SAXException e) {
-					throw Caster.toPageException(e);
-				}
-				catch (ConverterException e) {
-					throw Caster.toPageException(e);
-				}
-			}
-			((SingleContextConfigWeb) cwi.getInstance()).reload();
-			settings(cwi, null);
-			return;
-		}
-
-		// changed from multi to single
-		if (isSingle != isWebSingle) {
-			newInstanceSingle(engine, (CFMLFactoryImpl) cwi.getFactory(), cs, cwi.getWebConfigDir(), cwi.getServletConfig(), cwi);
-			return;
-		}
-
-		MultiContextConfigWeb mcw = (MultiContextConfigWeb) cwi.getInstance();
-
-		Resource configFile = cwi.getConfigFile();
-		Resource configDir = cwi.getConfigDir();
-
-		int iDoNew = getNew(engine, configDir, false, UpdateInfo.NEW_NONE).updateType;
-		boolean doNew = iDoNew != NEW_NONE;
-
-		if (configFile == null) return;
-
-		if (second(cwi.getLoadTime()) > second(configFile.lastModified()) && !force) return;
-
-		Struct root = loadDocumentCreateIfFails(configFile, "web");
-		createContextFiles(configDir, doNew);
-		cwi.reset();
-		// TODO handle differtly
-		load(cs, mcw, cwi, root, true, doNew, false);
-		createContextFilesPost(configDir, cwi, null, false, doNew);
-
-		((ThreadQueueImpl) cwi.getThreadQueue()).setMode(cwi.getQueueEnable() ? ThreadQueuePro.MODE_ENABLED : ThreadQueuePro.MODE_DISABLED);
-
-		((CFMLEngineImpl) ConfigWebUtil.getEngine(cwi)).onStart(cwi, true);
-
-		((GatewayEngineImpl) cwi.getGatewayEngine()).autoStart();
-	}
-
-	private static long second(long ms) {
-		return ms / 1000;
+		((SingleContextConfigWeb) cwi.getInstance()).reload();
+		settings(cwi, null);
+		return;
 	}
 
 	/**
@@ -515,9 +341,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			ConfigWebUtil.deployWeb(cs, (ConfigWeb) config, false);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(cs == null ? config : cs), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "deploy web context");
 		}
-
-		if (config instanceof ConfigServerImpl) _loadAdminMode((ConfigServerImpl) config, root);
-		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(cs == null ? config : cs), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded admin mode");
 
 		_loadConfig(cs, config, root);
 		int mode = config.getMode();
@@ -1264,48 +1087,14 @@ public final class ConfigWebFactory extends ConfigFactory {
 			SecurityManager securityManager = null;
 			if (config instanceof ConfigServerImpl) {
 				ConfigServerImpl cs = (ConfigServerImpl) config;
-				boolean isSingle = cs.getAdminMode() == ConfigImpl.ADMINMODE_SINGLE;
 				Struct security = ConfigWebUtil.getAsStruct("security", root);
 				// Default SecurityManager
-				SecurityManagerImpl sm = isSingle ? _toSecurityManagerSingle(security) : _toSecurityManager(security);
+				SecurityManagerImpl sm = _toSecurityManagerSingle(security);
 				cs.setDefaultSecurityManager(sm);
-				// additional file access directories
-				if (!isSingle) {
-					Array elFileAccesses = ConfigWebUtil.getAsArray("fileAccess", security);
-					sm.setCustomFileAccess(_loadFileAccess(config, elFileAccesses, log));
-
-					// Web SecurityManager
-					Array accessors = ConfigWebUtil.getAsArray("", security);
-					Iterator<?> it = accessors.getIterator();
-					Struct ac;
-					while (it.hasNext()) {
-						try {
-							ac = Caster.toStruct(it.next(), null);
-							if (ac == null) continue;
-
-							String id = getAttr(ac, "id");
-							if (id != null) {
-								sm = _toSecurityManager(ac);
-
-								elFileAccesses = ConfigWebUtil.getAsArray("fileAccess", ac);
-								sm.setCustomFileAccess(_loadFileAccess(config, elFileAccesses, log));
-								cs.setSecurityManager(id, sm);
-							}
-						}
-						catch (Throwable t) {
-							ExceptionUtil.rethrowIfNecessary(t);
-							log(config, log, t);
-						}
-					}
-				}
 			}
 
 			else if (configServer != null) {
 				securityManager = configServer.getSecurityManager(config.getIdentification().getId());
-			}
-			if (config instanceof MultiContextConfigWeb) {
-				if (securityManager == null) securityManager = SecurityManagerImpl.getOpenSecurityManager();
-				((MultiContextConfigWeb) config).setSecurityManager(securityManager);
 			}
 
 			Struct security = ConfigWebUtil.getAsStruct("security", root);
@@ -1713,7 +1502,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		if (!(config instanceof ConfigServer)) {
 			boolean hasChanged = false;
 
-			if (config instanceof MultiContextConfigWeb) sb.append(";").append(((MultiContextConfigWeb) config).getConfigServerImpl().getLibHash());
 			try {
 				String hashValue = HashUtil.create64BitHashAsString(sb.toString());
 				// check and compare lib version file
@@ -1743,11 +1531,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 					flushPageSourcePool(config.getComponentMappings());
 					flushPageSourcePool(config.getFunctionMappings());
 					flushPageSourcePool(config.getTagMappings());
-
-					if (config instanceof MultiContextConfigWeb) {
-						flushPageSourcePool(((MultiContextConfigWeb) config).getApplicationMappings());
-					}
-
 				}
 				catch (IOException e) {
 					e.printStackTrace(config.getErrWriter());
@@ -1958,15 +1741,8 @@ public final class ConfigWebFactory extends ConfigFactory {
 			}
 
 			if (!finished) {
-				if ((config instanceof MultiContextConfigWeb) && ResourceUtil.isUNCPath(config.getRootDirectory().getPath())) {
-
-					tmp = new MappingImpl(config, "/", config.getRootDirectory().getPath(), null, ConfigPro.INSPECT_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED,
-							ConfigPro.INSPECT_INTERVAL_UNDEFINED, true, true, true, true, false, false, null, -1, -1);
-				}
-				else {
-					tmp = new MappingImpl(config, "/", "/", null, ConfigPro.INSPECT_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED, true,
-							true, true, true, false, false, null, -1, -1);
-				}
+				tmp = new MappingImpl(config, "/", "/", null, ConfigPro.INSPECT_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED, true, true,
+						true, true, false, false, null, -1, -1);
 				mappings.put("/", tmp);
 			}
 
@@ -3092,13 +2868,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		pw = PasswordImpl.readFromStruct(root, salt, false, configServer == null);
 		if (pw != null) {
 			config.setPassword(pw);
-			if (config instanceof MultiContextConfigWeb) ((MultiContextConfigWeb) config).setPasswordSource(ConfigWebImpl.PASSWORD_ORIGIN_WEB);
-		}
-		else if (configServer != null) {
-
-			((MultiContextConfigWeb) config)
-					.setPasswordSource(configServer.hasCustomDefaultPassword() ? ConfigWebImpl.PASSWORD_ORIGIN_DEFAULT : ConfigWebImpl.PASSWORD_ORIGIN_SERVER);
-			if (configServer.getDefaultPassword() != null) config.setPassword(configServer.getDefaultPassword());
 		}
 
 		if (config instanceof ConfigServerImpl) {
@@ -3588,31 +3357,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
-	}
-
-	/**
-	 * @param configServer
-	 * @param config
-	 * @param doc
-	 */
-	private static void _loadAdminMode(ConfigServerImpl config, Struct root) {
-		final short undefined = -1;
-		short am = undefined;
-
-		// force by env var
-		String str = SystemUtil.getSystemPropOrEnvVar("lucee.admin.mode", null);
-		if (!StringUtil.isEmpty(str, true)) {
-			am = ConfigWebUtil.toAdminMode(str, undefined);
-		}
-
-		// when not forced
-		if (am == undefined) {
-			am = ConfigWebUtil.toAdminMode(getAttr(root, "mode"), undefined);
-			if (am == undefined) {
-				am = ConfigWebUtil.toAdminMode(SystemUtil.getSystemPropOrEnvVar("lucee.admin.mode.default", null), ConfigImpl.ADMINMODE_SINGLE);
-			}
-		}
-		config.setAdminMode(am);
 	}
 
 	private static void _loadSetting(ConfigServerImpl configServer, ConfigImpl config, Struct root, Log log) {
@@ -4688,12 +4432,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 */
 	private static void _loadScheduler(ConfigServer configServer, ConfigImpl config, Struct root, Log log) {
 		try {
-			if (config instanceof ConfigServer) {
-				short mode = ((ConfigServerImpl) config).getAdminMode();
-				// short mode = ConfigWebUtil.toAdminMode(getAttr(root, "mode"), ConfigImpl.ADMINMODE_SINGLE);
-				if (mode == ConfigImpl.ADMINMODE_MULTI) return;
-			}
-
 			Resource configDir = config.getConfigDir();
 			Array scheduledTasks = ConfigWebUtil.getAsArray("scheduledTasks", root);
 			config.setScheduler(configServer != null ? configServer.getEngine() : ((ConfigServer) config).getEngine(), scheduledTasks);
@@ -4987,16 +4725,10 @@ public final class ConfigWebFactory extends ConfigFactory {
 		Log deployLog = config.getLog("deploy");
 		if (deployLog != null) log = deployLog;
 		try {
-			boolean changed = false;
-			if (config instanceof ConfigServer) {
-				changed = ConfigFactory.modeChange(config.getConfigDir(), config.getAdminMode() == ConfigImpl.ADMINMODE_MULTI ? "multi" : "single", false);
-			}
 			Array children = ConfigWebUtil.getAsArray("extensions", root);
 			String md5 = CollectionUtil.md5(children);
-			if (!changed) {
-				if (md5.equals(config.getExtensionsMD5())) {
-					return;
-				}
+			if (md5.equals(config.getExtensionsMD5())) {
+				return;
 			}
 
 			boolean firstLoad = config.getExtensionsMD5() == null;
@@ -5034,7 +4766,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 					// we force a new installation if we have switched from single to multi mode, because extension can
 					// act completely different if that is the case
-					rhe = RHExtension.installExtension(config, id, Caster.toString(child.get(KeyConstants._version, null), null), res, changed);
+					rhe = RHExtension.installExtension(config, id, Caster.toString(child.get(KeyConstants._version, null), null), res, false);
 					if (rhe.getStartBundles()) {
 						if (!firstLoad) {
 							rhe.deployBundles(config, true);

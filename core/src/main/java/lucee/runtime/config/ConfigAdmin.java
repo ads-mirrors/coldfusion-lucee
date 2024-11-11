@@ -52,7 +52,6 @@ import org.xml.sax.SAXException;
 
 import com.allaire.cfx.CustomTag;
 
-import lucee.aprint;
 import lucee.commons.digest.MD5;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.FileUtil;
@@ -360,16 +359,6 @@ public final class ConfigAdmin {
 		else if (config instanceof ConfigWebImpl) {
 			ConfigServerImpl cs = ((ConfigWebImpl) config).getConfigServerImpl();
 			ConfigWebFactory.reloadInstance(engine, cs, (ConfigWebImpl) config, false);
-		}
-		else if (config instanceof SingleContextConfigWeb) {
-			if (true) throw new RuntimeException("important exception, please report to Lucee");
-			// TODO remove this this should never happening
-			aprint.ds();
-			SingleContextConfigWeb sccw = (SingleContextConfigWeb) config;
-
-			ConfigServerImpl cs = sccw.getConfigServerImpl();
-			ConfigServerFactory.reloadInstance(engine, cs);
-			sccw.reload();
 		}
 	}
 
@@ -4060,45 +4049,6 @@ public final class ConfigAdmin {
 
 	public void updateUpdateAdminMode(String mode, boolean merge, boolean keep) throws PageException {
 		checkWriteAccess();
-
-		if (config.getAdminMode() == ConfigImpl.ADMINMODE_MULTI) {
-			// copy the content from all web cfconfig into the server cfconfig
-			if (merge) {
-				ConfigWeb[] webs = ((ConfigServer) config).getConfigWebs();
-				for (ConfigWeb cw: webs) {
-					try {
-
-						merge(root, ConfigWebFactory.loadDocumentCreateIfFails(cw.getConfigFile(), "web"), EXCLUDE_LIST, ARRAY_INDEX);
-					}
-					catch (IOException e) {
-						throw Caster.toPageException(e);
-					}
-				}
-			}
-
-			// move all extension in installed in web context to available in server context
-			{
-				ConfigWeb[] webs = ((ConfigServer) config).getConfigWebs();
-				for (ConfigWeb cw: webs) {
-					try {
-						for (RHExtension ext: ((ConfigPro) cw).getRHExtensions()) {
-							ext.addToAvailable(cw);
-						}
-					}
-					catch (Exception e) {
-						LogUtil.log("deploy", "extension", e);
-					}
-				}
-			}
-
-			// delete all the server configs
-			if (!keep) {
-				ConfigWeb[] webs = ((ConfigServer) config).getConfigWebs();
-				for (ConfigWeb cw: webs) {
-					cw.getConfigFile().delete();
-				}
-			}
-		}
 
 		if (StringUtil.isEmpty(mode, true)) return;
 		mode = mode.trim();

@@ -23,9 +23,9 @@ import lucee.runtime.listener.JavaSettings;
 import lucee.runtime.writer.CFMLWriter;
 
 public class ConfigWebImpl implements ConfigWebPro {
-	private ConfigWebInner instance;
+	private SingleContextConfigWeb instance;
 
-	public ConfigWebImpl(ConfigWebInner instance) {
+	public ConfigWebImpl(SingleContextConfigWeb instance) {
 		this.instance = instance;
 	}
 
@@ -66,15 +66,13 @@ public class ConfigWebImpl implements ConfigWebPro {
 
 	@Override
 	public void setIdentification(lucee.runtime.config.IdentificationWeb arg0) {
-		if (instance instanceof MultiContextConfigWeb) ((MultiContextConfigWeb) instance).setIdentification(arg0);
-		else((SingleContextConfigWeb) instance).setIdentification(arg0);
+		instance.setIdentification(arg0);
 		// ignored for Single, should not be called anyway
 	}
 
 	@Override
 	public boolean equals(java.lang.Object arg0) {
-		if (instance instanceof MultiContextConfigWeb) return instance.equals(arg0);
-		else return (instance).equals(arg0);
+		return (instance).equals(arg0);
 	}
 
 	@Override
@@ -88,13 +86,11 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public java.lang.Object[] getConsoleLayouts() throws lucee.runtime.exp.PageException {
-		if (instance instanceof MultiContextConfigWeb) return ((MultiContextConfigWeb) instance).getConsoleLayouts();
-		else return ((SingleContextConfigWeb) instance).getConsoleLayouts();
+		return instance.getConsoleLayouts();
 	}
 
 	public java.lang.String getServerSalt() {
-		if (instance instanceof MultiContextConfigWeb) return ((MultiContextConfigWeb) instance).getServerSalt();
-		else return ((SingleContextConfigWeb) instance).getServerSalt();
+		return instance.getServerSalt();
 	}
 
 	@Override
@@ -129,8 +125,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public lucee.commons.lang.CharSet getMailDefaultCharSet() {
-		if (instance instanceof MultiContextConfigWeb) return ((MultiContextConfigWeb) instance).getMailDefaultCharSet();
-		else return ((SingleContextConfigWeb) instance).getMailDefaultCharSet();
+		return instance.getMailDefaultCharSet();
 	}
 
 	@Override
@@ -195,8 +190,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public int getDebugOptions() {
-		if (instance instanceof MultiContextConfigWeb) return ((MultiContextConfigWeb) instance).getDebugOptions();
-		else return ((SingleContextConfigWeb) instance).getDebugOptions();
+		return instance.getDebugOptions();
 	}
 
 	@Override
@@ -205,18 +199,12 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	@Override
-	public short getAdminMode() {
-		return instance.getAdminMode();
-	}
-
-	@Override
 	public long getApplicationPathCacheTimeout() {
 		return instance.getApplicationPathCacheTimeout();
 	}
 
 	public java.util.Map getGatewayEntries() {
-		if (instance instanceof MultiContextConfigWeb) return ((MultiContextConfigWeb) instance).getGatewayEntries();
-		else return ((SingleContextConfigWeb) instance).getGatewayEntries();
+		return instance.getGatewayEntries();
 	}
 
 	@Override
@@ -225,8 +213,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public lucee.runtime.Mapping getScriptMapping() {
-		if (instance instanceof MultiContextConfigWeb) return ((MultiContextConfigWeb) instance).getScriptMapping();
-		else return ((SingleContextConfigWeb) instance).getScriptMapping();
+		return instance.getScriptMapping();
 	}
 
 	@Override
@@ -235,8 +222,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public void resetRPCClassLoader() {
-		if (instance instanceof MultiContextConfigWeb) ((MultiContextConfigWeb) instance).resetRPCClassLoader();
-		else((SingleContextConfigWeb) instance).resetRPCClassLoader();
+		instance.resetRPCClassLoader();
 	}
 
 	@Override
@@ -318,8 +304,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	public lucee.runtime.PageSource[] getPageSources(lucee.runtime.PageContext arg0, lucee.runtime.Mapping[] arg1, java.lang.String arg2, boolean arg3, boolean arg4, boolean arg5,
 			boolean arg6, boolean arg7) {
 
-		if (instance instanceof MultiContextConfigWeb) return ((MultiContextConfigWeb) instance).getPageSources(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
-		else return ((SingleContextConfigWeb) instance).getPageSources(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+		return instance.getPageSources(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
 	}
 
 	@Override
@@ -408,8 +393,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public void clearComponentMetadata() {
-		if (instance instanceof MultiContextConfigWeb) ((MultiContextConfigWeb) instance).clearComponentMetadata();
-		else((SingleContextConfigWeb) instance).clearComponentMetadata();
+		instance.clearComponentMetadata();
 	}
 
 	@Override
@@ -418,8 +402,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public java.lang.Object[] getResourceLayouts() throws lucee.runtime.exp.PageException {
-		if (instance instanceof MultiContextConfigWeb) return ((MultiContextConfigWeb) instance).getResourceLayouts();
-		else return ((SingleContextConfigWeb) instance).getResourceLayouts();
+		return instance.getResourceLayouts();
 	}
 
 	@Override
@@ -479,8 +462,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public void flushComponentPathCache() {
-		if (instance instanceof MultiContextConfigWeb) ((MultiContextConfigWeb) instance).flushComponentPathCache();
-		else((SingleContextConfigWeb) instance).flushComponentPathCache();
+		instance.flushComponentPathCache();
 	}
 
 	@Override
@@ -509,8 +491,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public java.lang.String createSecurityToken() {
-		if (instance instanceof MultiContextConfigWeb) return ((MultiContextConfigWeb) instance).createSecurityToken();
-		else return ((SingleContextConfigWeb) instance).createSecurityToken();
+		return instance.createSecurityToken();
 	}
 
 	@Override
@@ -529,8 +510,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public lucee.commons.io.res.Resource getServerConfigDir() {
-		if (instance instanceof MultiContextConfigWeb) return ((MultiContextConfigWeb) instance).getServerConfigDir();
-		else return ((SingleContextConfigWeb) instance).getServerConfigDir();
+		return instance.getServerConfigDir();
 	}
 
 	@Override
@@ -560,8 +540,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public java.lang.String getCacheMD5() {
-		if (instance instanceof MultiContextConfigWeb) return ((MultiContextConfigWeb) instance).getCacheMD5();
-		else return ((SingleContextConfigWeb) instance).getCacheMD5();
+		return instance.getCacheMD5();
 	}
 
 	@Override
@@ -680,8 +659,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public ComponentMetaData getComponentMetadata(java.lang.String arg0) {
-		if (instance instanceof MultiContextConfigWeb) return ((MultiContextConfigWeb) instance).getComponentMetadata(arg0);
-		else return ((SingleContextConfigWeb) instance).getComponentMetadata(arg0);
+		return instance.getComponentMetadata(arg0);
 	}
 
 	@Override
@@ -710,8 +688,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public lucee.commons.io.cache.Cache createRAMCache(lucee.runtime.type.Struct arg0) throws java.io.IOException {
-		if (instance instanceof MultiContextConfigWeb) return ((MultiContextConfigWeb) instance).createRAMCache(arg0);
-		else return ((SingleContextConfigWeb) instance).createRAMCache(arg0);
+		return instance.createRAMCache(arg0);
 	}
 
 	@Override
@@ -820,8 +797,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public void setAllowURLRequestTimeout(boolean arg0) {
-		if (instance instanceof MultiContextConfigWeb) ((MultiContextConfigWeb) instance).setAllowURLRequestTimeout(arg0);
-		else((SingleContextConfigWeb) instance).setAllowURLRequestTimeout(arg0);
+		instance.setAllowURLRequestTimeout(arg0);
 	}
 
 	@Override
@@ -829,9 +805,8 @@ public class ConfigWebImpl implements ConfigWebPro {
 		return instance.getHash();
 	}
 
-	public void updatePassword(boolean arg0, lucee.runtime.config.Password arg1, lucee.runtime.config.Password arg2) throws lucee.runtime.exp.PageException {
-		if (instance instanceof MultiContextConfigWeb) ((MultiContextConfigWeb) instance).updatePassword(this, arg0, arg1, arg2);
-		// TODO what do do here?
+	public void updatePassword(boolean arg0, lucee.runtime.config.Password arg1, lucee.runtime.config.Password arg2) {
+
 	}
 
 	@Override
@@ -885,8 +860,6 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	protected void setPasswordSource(short arg0) {
-		if (instance instanceof MultiContextConfigWeb) ((MultiContextConfigWeb) instance).setPasswordSource(arg0);
-
 	}
 
 	@Override
@@ -1120,8 +1093,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public lucee.runtime.Mapping getDefaultServerFunctionMapping() {
-		if (instance instanceof MultiContextConfigWeb) return ((MultiContextConfigWeb) instance).getDefaultServerFunctionMapping();
-		else return ((SingleContextConfigWeb) instance).getDefaultServerFunctionMapping();
+		return instance.getDefaultServerFunctionMapping();
 	}
 
 	@Override
@@ -1152,8 +1124,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public void flushApplicationPathCache() {
-		if (instance instanceof MultiContextConfigWeb) ((MultiContextConfigWeb) instance).flushApplicationPathCache();
-		else((SingleContextConfigWeb) instance).flushApplicationPathCache();
+		instance.flushApplicationPathCache();
 	}
 
 	@Override
@@ -1162,8 +1133,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public lucee.runtime.config.ConfigServerImpl getConfigServerImpl() {
-		if (instance instanceof MultiContextConfigWeb) return ((MultiContextConfigWeb) instance).getConfigServerImpl();
-		return ((SingleContextConfigWeb) instance).getConfigServerImpl();
+		return instance.getConfigServerImpl();
 	}
 
 	@Override
@@ -1188,13 +1158,11 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public void createTag(lucee.transformer.library.tag.TagLib arg0, java.lang.String arg1, java.lang.String arg2) {
-		if (instance instanceof MultiContextConfigWeb) ((MultiContextConfigWeb) instance).createTag(arg0, arg1, arg2);
-		else((SingleContextConfigWeb) instance).createTag(arg0, arg1, arg2);
+		instance.createTag(arg0, arg1, arg2);
 	}
 
 	public lucee.commons.lang.CharSet getTemplateCharSet() {
-		if (instance instanceof MultiContextConfigWeb) return ((MultiContextConfigWeb) instance).getTemplateCharSet();
-		else return ((SingleContextConfigWeb) instance).getTemplateCharSet();
+		return instance.getTemplateCharSet();
 	}
 
 	@Override
@@ -1218,8 +1186,6 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public void setCacheMD5(java.lang.String arg0) {
-		if (instance instanceof MultiContextConfigWeb) ((MultiContextConfigWeb) instance).setCacheMD5(arg0);
-
 	}
 
 	@Override
@@ -1298,8 +1264,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public void flushCTPathCache() {
-		if (instance instanceof MultiContextConfigWeb) ((MultiContextConfigWeb) instance).flushCTPathCache();
-		else((SingleContextConfigWeb) instance).flushCTPathCache();
+		instance.flushCTPathCache();
 	}
 
 	@Override
@@ -1348,8 +1313,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public void putComponentMetadata(java.lang.String arg0, ComponentMetaData arg1) {
-		if (instance instanceof MultiContextConfigWeb) ((MultiContextConfigWeb) instance).putComponentMetadata(arg0, arg1);
-		else((SingleContextConfigWeb) instance).putComponentMetadata(arg0, arg1);
+		instance.putComponentMetadata(arg0, arg1);
 	}
 
 	@Override
@@ -1368,8 +1332,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public java.lang.String[] getLogNames() {
-		if (instance instanceof MultiContextConfigWeb) return ((MultiContextConfigWeb) instance).getLogNames();
-		else return ((SingleContextConfigWeb) instance).getLogNames();
+		return instance.getLogNames();
 	}
 
 	@Override
@@ -1434,8 +1397,6 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	protected void setAMFEngine(lucee.runtime.net.amf.AMFEngine arg0) {
-		if (instance instanceof MultiContextConfigWeb) ((MultiContextConfigWeb) instance).setAMFEngine(arg0);
-
 	}
 
 	@Override
@@ -1500,8 +1461,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	protected void setGatewayEntries(GatewayMap entries) {
-		// TODO i think that method is never used
-		if (instance instanceof ConfigImpl) ((ConfigImpl) instance).setGatewayEntries(entries);
+
 	}
 
 	@Override
@@ -1510,8 +1470,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public long getSessionScopeDirSize() {
-		if (instance instanceof MultiContextConfigWeb) return ((MultiContextConfigWeb) instance).getSessionScopeDirSize();
-		else return ((SingleContextConfigWeb) instance).getSessionScopeDirSize();
+		return instance.getSessionScopeDirSize();
 	}
 
 	@Override
@@ -1520,8 +1479,6 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public void clearResourceProviders() {
-		if (instance instanceof MultiContextConfigWeb) ((MultiContextConfigWeb) instance).clearResourceProviders();
-
 	}
 
 	@Override
@@ -1560,8 +1517,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public lucee.runtime.Mapping getApplicationMapping(java.lang.String arg0, java.lang.String arg1) {
-		if (instance instanceof MultiContextConfigWeb) return ((MultiContextConfigWeb) instance).getApplicationMapping(arg0, arg1);
-		else return ((SingleContextConfigWeb) instance).getApplicationMapping(arg0, arg1);
+		return instance.getApplicationMapping(arg0, arg1);
 	}
 
 	@Override
@@ -1580,8 +1536,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public int getMode() {
-		if (instance instanceof MultiContextConfigWeb) return ((MultiContextConfigWeb) instance).getMode();
-		else return ((SingleContextConfigWeb) instance).getMode();
+		return instance.getMode();
 	}
 
 	@Override
@@ -1610,7 +1565,6 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public void setCacheDefinitions(java.util.Map arg0) {
-		if (instance instanceof MultiContextConfigWeb) ((MultiContextConfigWeb) instance).setCacheDefinitions(arg0);
 	}
 
 	@Override
@@ -1644,8 +1598,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public lucee.runtime.db.ClassDefinition getORMEngineClass() {
-		if (instance instanceof MultiContextConfigWeb) return ((MultiContextConfigWeb) instance).getORMEngineClass();
-		else return ((SingleContextConfigWeb) instance).getORMEngineClass();
+		return instance.getORMEngineClass();
 	}
 
 	@Override
@@ -1674,8 +1627,6 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public void createFunction(lucee.transformer.library.function.FunctionLib arg0, java.lang.String arg1, java.lang.String arg2) {
-		if (instance instanceof MultiContextConfigWeb) ((MultiContextConfigWeb) instance).createFunction(arg0, arg1, arg2);
-
 	}
 
 	@Override
@@ -1699,12 +1650,10 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public lucee.runtime.dump.DumpWriterEntry[] getDumpWritersEntries() {
-		if (instance instanceof MultiContextConfigWeb) return ((MultiContextConfigWeb) instance).getDumpWritersEntries();
-		else return ((SingleContextConfigWeb) instance).getDumpWritersEntries();
+		return instance.getDumpWritersEntries();
 	}
 
 	protected void setSecurityManager(lucee.runtime.security.SecurityManager arg0) {
-		if (instance instanceof MultiContextConfigWeb) ((MultiContextConfigWeb) instance).setSecurityManager(arg0);
 	}
 
 	@Override
@@ -1844,22 +1793,22 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	protected void setMode(int mode) {
-		if (instance instanceof MultiContextConfigWeb) ((MultiContextConfigWeb) instance).setMode(mode);
+
 	}
 
 	protected void setSalt(String salt) {
-		if (instance instanceof MultiContextConfigWeb) ((MultiContextConfigWeb) instance).setSalt(salt);
+
 	}
 
 	protected void setCheckForChangesInConfigFile(boolean checkForChangesInConfigFile) {
-		if (instance instanceof MultiContextConfigWeb) ((MultiContextConfigWeb) instance).setCheckForChangesInConfigFile(checkForChangesInConfigFile);
+
 	}
 
 	public ConfigWebPro getInstance() {
 		return instance;
 	}
 
-	public ConfigWebImpl setInstance(ConfigWebInner instance) {
+	public ConfigWebImpl setInstance(SingleContextConfigWeb instance) {
 		if (this.instance != null) {
 			this.instance.reset();
 		}
@@ -1878,8 +1827,7 @@ public class ConfigWebImpl implements ConfigWebPro {
 	}
 
 	public Password getPassword() {
-		if (instance instanceof MultiContextConfigWeb) return ((MultiContextConfigWeb) instance).getPassword();
-		else return ((SingleContextConfigWeb) instance).getPassword();
+		return instance.getPassword();
 	}
 
 	@Override
