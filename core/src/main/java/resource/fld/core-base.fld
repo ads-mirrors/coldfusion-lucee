@@ -6990,16 +6990,23 @@ Use the GetBaseTemplatePath() function instead.</description>
 		<name>getTickCount</name>
 		<class>lucee.runtime.functions.other.GetTickCount</class>
 		<tte-class>lucee.transformer.cfml.evaluator.func.impl.GetTickCount</tte-class>
-		<description>Returns the number of milliseconds since the start of the application server</description>
+		<description>
+			Returns the elapsed time from a specific reference point, based on the specified `unit`. 
+			The default unit, "milli," represents milliseconds since midnight, January 1, 1970 UTC, and aligns with conventional system time. 
+			The "nano" and "micro" units offer high-resolution timing based on the Java Virtual Machine's internal clock, ideal for measuring elapsed time rather than absolute wall-clock time. 
+			These values are not tied to real-world dates but provide a consistent point of origin within the Java Virtual Machine for accurate time intervals. 
+			This function is well-suited for performance testing, such as timing code execution, by capturing precise intervals.</description>
 		<argument>
 			<name>unit</name>
 			<type>string</type>
 			<required>No</required>
-			<description>base unit for the function, valid values are:
-- nano: nano seconds
-- milli (default): milli seconds
-- second: seconds</description>
-    	</argument>
+			<description>Specifies the unit of time for the returned value. Valid options include:
+- **nano**: nanoseconds, representing elapsed time from an arbitrary fixed origin, with high precision for timing purposes.
+- **micro**: microseconds, derived from nanoseconds (dividing by 1,000), also measuring elapsed time with high precision.
+- **milli** (default): milliseconds, representing the difference between the current time and midnight, January 1, 1970 UTC.
+- **second**: seconds, representing elapsed time from the same reference point as milliseconds.</description>
+	
+		</argument>
 		<return>
 			<type>number</type>
 		</return>
