@@ -1515,8 +1515,26 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		this.datasources = datasources;
 	}
 
-	protected void setAIEngineFactories(Map<String, AIEngineFactory> aiEngineFactories) {
-		this.aiEngineFactories = aiEngineFactories;
+	@Override
+	public Collection<String> getAIEngineFactoryNames() {
+		return getAIEngineFactories().keySet();
+	}
+
+	@Override
+	public AIEngineFactory getAIEngineFactory(String name) {
+		return getAIEngineFactories().get(name);
+	}
+
+	private Map<String, AIEngineFactory> getAIEngineFactories() {
+		if (aiEngineFactories == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getAIEngineFactories")) {
+				if (aiEngineFactories == null) {
+					aiEngineFactories = ConfigWebFactory.loadAI(this, root, null);
+					if (aiEngineFactories == null) aiEngineFactories = new HashMap<>();
+				}
+			}
+		}
+		return aiEngineFactories;
 	}
 
 	/**

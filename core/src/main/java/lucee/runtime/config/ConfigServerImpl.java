@@ -51,7 +51,6 @@ import lucee.runtime.CFMLFactory;
 import lucee.runtime.CFMLFactoryImpl;
 import lucee.runtime.Mapping;
 import lucee.runtime.MappingImpl;
-import lucee.runtime.ai.AIEngineFactory;
 import lucee.runtime.ai.AIEnginePool;
 import lucee.runtime.config.ConfigFactory.UpdateInfo;
 import lucee.runtime.config.gateway.GatewayMap;
@@ -701,11 +700,15 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 
 	@Override
 	public IdentificationServer getIdentification() {
+		if (id == null) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "id")) {
+				if (id == null) {
+					id = ConfigWebFactory.loadId(this, root, null);
+					id.getId();
+				}
+			}
+		}
 		return id;
-	}
-
-	protected void setIdentification(IdentificationServer id) {
-		this.id = id;
 	}
 
 	@Override
@@ -883,16 +886,6 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 			}
 		}
 		return mvnDir;
-	}
-
-	@Override
-	public Collection<String> getAIEngineFactoryNames() {
-		return aiEngineFactories.keySet();
-	}
-
-	@Override
-	public AIEngineFactory getAIEngineFactory(String name) {
-		return aiEngineFactories.get(name);
 	}
 
 	@Override

@@ -332,9 +332,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		_loadTempDirectory(config, root, isReload, log);
 		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded temp dir");
 
-		_loadId(config, root, log);
-		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded id");
-
 		_loadVersion(config, root, log);
 		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded version");
 
@@ -724,9 +721,8 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadAI(ConfigServerImpl config, Struct root, Log log) {
+	public static Map<String, AIEngineFactory> loadAI(ConfigImpl config, Struct root, Map<String, AIEngineFactory> defaultValue) {
 		try {
-
 			// we only load this for the server context
 			Struct ai = ConfigWebUtil.getAsStruct(root, false, "ai");
 			if (ai != null) {
@@ -758,15 +754,16 @@ public final class ConfigWebFactory extends ConfigFactory {
 						}
 					}
 					catch (Exception e) {
-						log(config, log, e);
+						log(config, null, e);
 					}
 				}
-				config.setAIEngineFactories(engines);
+				return engines;
 			}
 		}
 		catch (Exception ex) {
-			log(config, log, ex);
+			log(config, null, ex);
 		}
+		return defaultValue;
 	}
 
 	private static void _loadDumpWriter(ConfigServerImpl config, Struct root, Log log) {
@@ -945,7 +942,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadId(ConfigServerImpl config, Struct root, Log log) {
+	public static IdentificationServerImpl loadId(ConfigServerImpl config, Struct root, IdentificationServerImpl defaultValue) {
 		try {
 
 			// Security key
@@ -961,7 +958,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 				}
 			}
 			catch (Exception ioe) {
-				log(config, log, ioe);
+				log(config, null, ioe);
 			}
 			if (StringUtil.isEmpty(securityKey)) securityKey = UUID.randomUUID().toString();
 
@@ -969,13 +966,14 @@ public final class ConfigWebFactory extends ConfigFactory {
 			String apiKey = null;
 			String str = root != null ? getAttr(root, "apiKey") : null;
 			if (!StringUtil.isEmpty(str, true)) apiKey = str.trim();
-			config.setIdentification(new IdentificationServerImpl(config, securityKey, apiKey));
-			config.getIdentification().getId();
+			return new IdentificationServerImpl(config, securityKey, apiKey);
+
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, null, t);
 		}
+		return defaultValue;
 	}
 
 	/**
