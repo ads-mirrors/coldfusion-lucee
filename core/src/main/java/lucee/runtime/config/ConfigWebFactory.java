@@ -320,10 +320,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		int mode = config.getMode();
 		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded config");
 
-		if (!essentialOnly) {
-			_loadConstants(config, root);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded constants");
-		}
 		_loadLoggers(config, root, isReload);
 		Log log = ThreadLocalPageContext.getLog(config, "application");
 		// loadServerLibDesc(cs, config, doc,log);
@@ -3568,7 +3564,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return defaultValue;
 	}
 
-	private static void _loadConstants(ConfigServerImpl config, Struct root) {
+	public static Struct loadConstants(ConfigImpl config, Struct root, Struct defaultValue) {
 		try {
 			Struct constants = ConfigWebUtil.getAsStruct("constants", root);
 
@@ -3598,12 +3594,13 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 				}
 			}
-			config.setConstants(sct);
+			return sct;
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, null, t);
 		}
+		return defaultValue;
 	}
 
 	public static void log(Config config, Log log, Throwable e) {

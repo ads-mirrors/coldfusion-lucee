@@ -2572,14 +2572,15 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 */
 	@Override
 	public Struct getConstants() {
+		if (constants == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getConstants")) {
+				if (constants == null) {
+					constants = ConfigWebFactory.loadConstants(this, root, null);
+					if (constants == null) constants = new StructImpl();
+				}
+			}
+		}
 		return constants;
-	}
-
-	/**
-	 * @param constants the constants to set
-	 */
-	protected void setConstants(Struct constants) {
-		this.constants = constants;
 	}
 
 	/**
