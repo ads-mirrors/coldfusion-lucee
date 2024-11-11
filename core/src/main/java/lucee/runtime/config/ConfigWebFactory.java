@@ -275,7 +275,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @throws PageException
 	 * @throws BundleException
 	 */
-	synchronized static void load(ConfigImpl config, Struct root, boolean isReload, boolean doNew, boolean essentialOnly) throws IOException {
+	synchronized static void load(ConfigServerImpl config, Struct root, boolean isReload, boolean doNew, boolean essentialOnly) throws IOException {
 		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_INFO, ConfigWebFactory.class.getName(), "start reading config");
 		ThreadLocalConfig.register(config);
 		boolean reload = false;
@@ -287,9 +287,9 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 			// delete to big felix.log (there is also code in the loader to do this, but if the loader is not
 			// updated ...)
-			if (!essentialOnly && config instanceof ConfigServerImpl) {
+			if (!essentialOnly) {
 				try {
-					ConfigServerImpl _cs = (ConfigServerImpl) config;
+					ConfigServerImpl _cs = config;
 					File rr = _cs.getEngine().getCFMLEngineFactory().getResourceRoot();
 					File log = new File(rr, "context/logs/felix.log");
 					if (log.isFile() && log.length() > GB1) {
@@ -548,7 +548,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return root;
 	}
 
-	private static void _loadResourceProvider(ConfigImpl config, Struct root, Log log) {
+	private static void _loadResourceProvider(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			config.clearResourceProviders();
 			Array providers = ConfigWebUtil.getAsArray("resourceProviders", root);
@@ -684,7 +684,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return cd;
 	}
 
-	private static void _loadCacheHandler(ConfigImpl config, Struct root, Log log) {
+	private static void _loadCacheHandler(ConfigServerImpl config, Struct root, Log log) {
 		try {
 
 			// first of all we make sure we have a request and timespan cachehandler
@@ -731,7 +731,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadAI(ConfigImpl config, Struct root, Log log) {
+	private static void _loadAI(ConfigServerImpl config, Struct root, Log log) {
 		try {
 
 			// we only load this for the server context
@@ -776,7 +776,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadDumpWriter(ConfigImpl config, Struct root, Log log) {
+	private static void _loadDumpWriter(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			Array writers = ConfigWebUtil.getAsArray("dumpWriters", root);
 
@@ -898,10 +898,10 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return URLDecoder.decode(str, false);
 	}
 
-	private static void _loadListener(ConfigImpl config, Struct root, Log log) {
+	private static void _loadListener(ConfigServerImpl config, Struct root, Log log) {
 		try {
-			if (config instanceof ConfigServer) {
-				ConfigServer cs = (ConfigServer) config;
+			{
+				ConfigServer cs = config;
 				Struct listener = ConfigWebUtil.getAsStruct("listener", root);
 				ClassDefinition cd = listener != null ? getClassDefinition(listener, "", config.getIdentification()) : null;
 				String strArguments = getAttr(listener, "arguments");
@@ -941,7 +941,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadVersion(ConfigImpl config, Struct root, Log log) {
+	private static void _loadVersion(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			String strVersion = getAttr(root, "version");
 			config.setVersion(Caster.toDoubleValue(strVersion, 5.0d)); // cfconfig started with version 5
@@ -952,7 +952,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadId(ConfigImpl config, Struct root, Log log) {
+	private static void _loadId(ConfigServerImpl config, Struct root, Log log) {
 		try {
 
 			// Security key
@@ -976,7 +976,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			String apiKey = null;
 			String str = root != null ? getAttr(root, "apiKey") : null;
 			if (!StringUtil.isEmpty(str, true)) apiKey = str.trim();
-			((ConfigServerImpl) config).setIdentification(new IdentificationServerImpl((ConfigServerImpl) config, securityKey, apiKey));
+			config.setIdentification(new IdentificationServerImpl(config, securityKey, apiKey));
 			config.getIdentification().getId();
 		}
 		catch (Throwable t) {
@@ -990,12 +990,11 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param config
 	 * @param doc
 	 */
-	private static void _loadSecurity(ConfigImpl config, Struct root, Log log) {
+	private static void _loadSecurity(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			// Security Manger
-			SecurityManager securityManager = null;
-			if (config instanceof ConfigServerImpl) {
-				ConfigServerImpl cs = (ConfigServerImpl) config;
+			{
+				ConfigServerImpl cs = config;
 				Struct security = ConfigWebUtil.getAsStruct("security", root);
 				// Default SecurityManager
 				SecurityManagerImpl sm = _toSecurityManagerSingle(security);
@@ -1477,7 +1476,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param doc
 	 * @throws IOException
 	 */
-	private static void _loadMappings(ConfigImpl config, Struct root, int mode, Log log) throws IOException {
+	private static void _loadMappings(ConfigServerImpl config, Struct root, int mode, Log log) throws IOException {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_MAPPING);
 			Struct _mappings = Caster.toStruct(root.get("mappings", null), null);
@@ -1492,7 +1491,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			Map<String, Mapping> mappings = MapFactory.<String, Mapping>getConcurrentMap();
 			Mapping tmp;
 
-			boolean finished = config instanceof ConfigServer;
+			boolean finished = true;
 
 			if (hasAccess) {
 				boolean hasServerContext = false;
@@ -1522,7 +1521,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 							boolean hidden = toBoolean(getAttr(el, "hidden"), false);
 							boolean toplevel = toBoolean(getAttr(el, "toplevel"), true);
 
-							if (config instanceof ConfigServer) {
+							{
 								if ("/lucee-server/".equalsIgnoreCase(virtual) || "/lucee-server-context/".equalsIgnoreCase(virtual)) {
 									hasServerContext = true;
 								}
@@ -1588,7 +1587,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 				}
 
 				// set default lucee-server-context
-				if (config instanceof ConfigServer) {
+				{
 					if (!hasServerContext) {
 						ApplicationListener listener = ConfigWebUtil.loadListener(ApplicationListener.TYPE_MODERN, null);
 						listener.setMode(ApplicationListener.MODE_CURRENT2ROOT);
@@ -1650,7 +1649,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return ConfigWebUtil.inspectTemplate(strInsTemp, ConfigPro.INSPECT_UNDEFINED);
 	}
 
-	private static void _loadRest(ConfigImpl config, Struct root, Log log) {
+	private static void _loadRest(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			boolean hasAccess = true;// MUST
 			// ConfigWebUtil.hasAccess(config,SecurityManager.TYPE_REST);
@@ -1712,7 +1711,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadLoggers(ConfigImpl config, Struct root, boolean isReload) {
+	private static void _loadLoggers(ConfigServerImpl config, Struct root, boolean isReload) {
 		config.clearLoggers(Boolean.FALSE);
 		Set<String> existing = new HashSet<>();
 		try {
@@ -1798,7 +1797,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadExeLog(ConfigImpl config, Struct root, Log log) {
+	private static void _loadExeLog(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			Struct el = ConfigWebUtil.getAsStruct("executionLog", root);
 
@@ -1889,7 +1888,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @throws BundleException
 	 * @throws ClassNotFoundException
 	 */
-	private static void _loadDataSources(ConfigImpl config, Struct root, Log log) {
+	private static void _loadDataSources(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			// load JDBC Driver definition
 			config.setJDBCDrivers(_loadJDBCDrivers(config, root, log));
@@ -2115,7 +2114,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return map.values().toArray(new JDBCDriver[map.size()]);
 	}
 
-	private static void _loadCache(ConfigImpl config, Struct root, Log log) {
+	private static void _loadCache(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			Struct defaultCache = ConfigWebUtil.getAsStruct("cache", root);
 
@@ -2317,7 +2316,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadGatewayEL(ConfigImpl config, Struct root, Log log) {
+	private static void _loadGatewayEL(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			_loadGateway(config, root, log);
 		}
@@ -2326,7 +2325,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadGateway(final ConfigImpl config, Struct root, Log log) {
+	private static void _loadGateway(final ConfigServerImpl config, Struct root, Log log) {
 		GatewayMap mapGateways = new GatewayMap();
 		boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManagerImpl.TYPE_GATEWAY);
 		GatewayEntry ge;
@@ -2393,7 +2392,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param doc
 	 * @throws IOException
 	 */
-	private static void _loadCustomTagsMappings(ConfigImpl config, Struct root, int mode, Log log) {
+	private static void _loadCustomTagsMappings(ConfigServerImpl config, Struct root, int mode, Log log) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_CUSTOM_TAG);
 
@@ -2509,7 +2508,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @throws IOException
 	 * @throws NoSuchAlgorithmException
 	 */
-	private static void _loadConfig(ConfigImpl config, Struct root) {
+	private static void _loadConfig(ConfigServerImpl config, Struct root) {
 		String salt = null;
 		Password pw = null;
 
@@ -2524,8 +2523,8 @@ public final class ConfigWebFactory extends ConfigFactory {
 			config.setPassword(pw);
 		}
 
-		if (config instanceof ConfigServerImpl) {
-			ConfigServerImpl csi = (ConfigServerImpl) config;
+		{
+			ConfigServerImpl csi = config;
 			String keyList = getAttr(root, "authKeys");
 			if (!StringUtil.isEmpty(keyList)) {
 				String[] keys = ListUtil.trimItems(ListUtil.toStringArray(ListUtil.toListRemoveEmpty(keyList, ',')));
@@ -2542,9 +2541,9 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 
 		// default password
-		if (config instanceof ConfigServerImpl) {
+		{
 			pw = PasswordImpl.readFromStruct(root, salt, true, true);
-			if (pw != null) ((ConfigServerImpl) config).setDefaultPassword(pw);
+			if (pw != null) config.setDefaultPassword(pw);
 		}
 
 		// mode
@@ -2562,7 +2561,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadTag(ConfigImpl config, Struct root, Log log) {
+	private static void _loadTag(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			{
 				Array tags = ConfigWebUtil.getAsArray("tags", root);
@@ -2630,7 +2629,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadTempDirectory(ConfigImpl config, Struct root, boolean isReload, Log log) {
+	private static void _loadTempDirectory(ConfigServerImpl config, Struct root, boolean isReload, Log log) {
 		try {
 			Resource configDir = config.getConfigDir();
 
@@ -2659,7 +2658,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @throws TagLibException
 	 * @throws FunctionLibException
 	 */
-	private static void _loadFilesystem(ConfigImpl config, Struct root, boolean doNew, Log log) {
+	private static void _loadFilesystem(ConfigServerImpl config, Struct root, boolean doNew, Log log) {
 		try {
 			Resource configDir = config.getConfigDir();
 
@@ -2719,7 +2718,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 			// init TLDS
 			{
-				ConfigServerImpl cs = (ConfigServerImpl) config;
+				ConfigServerImpl cs = config;
 				config.setTLDs(ConfigWebUtil.duplicate(new TagLib[] { cs.coreTLDs }, false));
 			}
 
@@ -2767,7 +2766,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 			// Init flds
 			{
-				ConfigServerImpl cs = (ConfigServerImpl) config;
+				ConfigServerImpl cs = config;
 				config.setFLDs(cs.coreFLDs.duplicate(false));
 
 			}
@@ -2927,11 +2926,11 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param config
 	 * @param doc
 	 */
-	private static void _loadUpdate(Config config, Struct root, Log log) {
+	private static void _loadUpdate(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			// Server
-			if (config instanceof ConfigServer && root != null) {
-				ConfigServer cs = (ConfigServer) config;
+			if (root != null) {
+				ConfigServer cs = config;
 				cs.setUpdateType(getAttr(root, "updateType"));
 
 				String location = getAttr(root, "updateLocation");
@@ -2953,7 +2952,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadSetting(ConfigImpl config, Struct root, Log log) {
+	private static void _loadSetting(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
 
@@ -3022,7 +3021,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadRemoteClient(ConfigImpl config, Struct root, Log log) {
+	private static void _loadRemoteClient(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManagerImpl.TYPE_REMOTE);
 
@@ -3122,7 +3121,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadSystem(ConfigImpl config, Struct root, Log log) {
+	private static void _loadSystem(ConfigServerImpl config, Struct root, Log log) {
 		try {
 
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
@@ -3207,7 +3206,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param config
 	 * @param doc
 	 */
-	private static void _loadCharset(ConfigImpl config, Struct root, Log log) {
+	private static void _loadCharset(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
 
@@ -3233,11 +3232,11 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadQueue(ConfigImpl config, Struct root, Log log) {
+	private static void _loadQueue(ConfigServerImpl config, Struct root, Log log) {
 		try {
 
 			// Server
-			if (config instanceof ConfigServerImpl) {
+			{
 
 				// max
 				Integer max = Caster.toInteger(SystemUtil.getSystemPropOrEnvVar("lucee.queue.max", null), null);
@@ -3269,7 +3268,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param config
 	 * @param doc
 	 */
-	private static void _loadRegional(ConfigImpl config, Struct root, Log log) {
+	private static void _loadRegional(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
 
@@ -3300,7 +3299,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadWS(ConfigImpl config, Struct root, Log log) {
+	private static void _loadWS(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			Struct ws = ConfigWebUtil.getAsStruct("webservice", root);
 			ClassDefinition cd = ws != null ? getClassDefinition(ws, "", config.getIdentification()) : null;
@@ -3314,7 +3313,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadORM(ConfigImpl config, Struct root, Log log) {
+	private static void _loadORM(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManagerImpl.TYPE_ORM);
 			Struct orm = ConfigWebUtil.getAsStruct("orm", root);
@@ -3361,7 +3360,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @throws PageException
 	 * @throws IOException
 	 */
-	private static void _loadScope(ConfigImpl config, Struct root, int mode, Log log) {
+	private static void _loadScope(ConfigServerImpl config, Struct root, int mode, Log log) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
 
@@ -3533,7 +3532,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadJava(ConfigImpl config, Struct root, Log log) {
+	private static void _loadJava(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			String strInspectTemplate = getAttr(root, "inspectTemplate");
 			int inspectTemplateAutoIntervalSlow = Caster.toIntValue(getAttr(root, "inspectTemplateIntervalSlow"), ConfigPro.INSPECT_INTERVAL_SLOW);
@@ -3563,14 +3562,14 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadJavaSettings(ConfigImpl config, Struct root, Log log) {
+	private static void _loadJavaSettings(ConfigServerImpl config, Struct root, Log log) {
 		try {
-			if (config instanceof ConfigServerImpl) {
+			{
 
 				Resource lib = config.getLibraryDirectory();
 				Resource[] libs = lib.listResources(ExtensionResourceFilter.EXTENSION_JAR_NO_DIR);
 
-				ConfigServerImpl csi = (ConfigServerImpl) config;
+				ConfigServerImpl csi = config;
 				Struct javasettings = ConfigWebUtil.getAsStruct(root, false, "javasettings");
 
 				if (javasettings != null && javasettings.size() > 0) {
@@ -3585,7 +3584,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadConstants(ConfigImpl config, Struct root) {
+	private static void _loadConstants(ConfigServerImpl config, Struct root) {
 		try {
 			Struct constants = ConfigWebUtil.getAsStruct("constants", root);
 
@@ -3636,15 +3635,15 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadLogin(ConfigImpl config, Struct root, Log log) {
+	private static void _loadLogin(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			// server context
-			if (config instanceof ConfigServer) {
+			{
 				boolean captcha = Caster.toBooleanValue(getAttr(root, "loginCaptcha"), false);
 				boolean rememberme = Caster.toBooleanValue(getAttr(root, "loginRememberme"), true);
 
 				int delay = Caster.toIntValue(getAttr(root, "loginDelay"), 1);
-				ConfigServerImpl cs = (ConfigServerImpl) config;
+				ConfigServerImpl cs = config;
 				cs.setLoginDelay(delay);
 				cs.setLoginCaptcha(captcha);
 				cs.setRememberMe(rememberme);
@@ -3656,7 +3655,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadStartupHook(ConfigImpl config, Struct root, Log log) {
+	private static void _loadStartupHook(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			Array children = ConfigWebUtil.getAsArray("startupHooks", root);
 
@@ -3715,7 +3714,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param doc
 	 * @throws IOException
 	 */
-	private static void _loadMail(ConfigImpl config, Struct root, Log log) { // does no init values
+	private static void _loadMail(ConfigServerImpl config, Struct root, Log log) { // does no init values
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_MAIL);
 
@@ -3792,10 +3791,10 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadMonitors(ConfigImpl config, Struct root, Log log) {
+	private static void _loadMonitors(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			// only load in server context
-			ConfigServerImpl configServer = (ConfigServerImpl) config;
+			ConfigServerImpl configServer = config;
 			Struct parent = ConfigWebUtil.getAsStruct("monitoring", root);
 			Boolean enabled = Caster.toBoolean(getAttr(parent, "enabled"), null);
 			if (enabled != null) configServer.setMonitoringEnabled(enabled.booleanValue());
@@ -3883,7 +3882,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param doc
 	 * @throws PageException
 	 */
-	private static void _loadSearch(ConfigImpl config, Struct root, Log log) {
+	private static void _loadSearch(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			Struct search = ConfigWebUtil.getAsStruct("search", root);
 
@@ -3915,11 +3914,11 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @throws IOException
 	 * @throws PageException
 	 */
-	private static void _loadScheduler(ConfigImpl config, Struct root, Log log) {
+	private static void _loadScheduler(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			Resource configDir = config.getConfigDir();
 			Array scheduledTasks = ConfigWebUtil.getAsArray("scheduledTasks", root);
-			config.setScheduler(((ConfigServer) config).getEngine(), scheduledTasks);
+			config.setScheduler(config.getEngine(), scheduledTasks);
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
@@ -3932,7 +3931,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param config
 	 * @param doc
 	 */
-	private static void _loadDebug(ConfigImpl config, Struct root, Log log) {
+	private static void _loadDebug(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_DEBUGGING);
 
@@ -4108,7 +4107,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param config
 	 * @param doc
 	 */
-	private static void _loadCFX(ConfigImpl config, Struct root, Log log) {
+	private static void _loadCFX(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_CFX_SETTING);
 
@@ -4163,7 +4162,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param doc
 	 * @param log
 	 */
-	private static void _loadExtensionBundles(ConfigImpl config, Struct root, Log log) {
+	private static void _loadExtensionBundles(ConfigServerImpl config, Struct root, Log log) {
 		Log deployLog = config.getLog("deploy");
 		if (deployLog != null) log = deployLog;
 		try {
@@ -4271,8 +4270,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadExtensionDefinition(ConfigImpl config, Struct root, Log log) {
-		if (!(config instanceof ConfigServer)) return;
+	private static void _loadExtensionDefinition(ConfigServerImpl config, Struct root, Log log) {
 
 		try {
 			Log deployLog = config.getLog("deploy");
@@ -4308,7 +4306,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadExtensionProviders(ConfigImpl config, Struct root, Log log) {
+	private static void _loadExtensionProviders(ConfigServerImpl config, Struct root, Log log) {
 		try {
 
 			// RH Providers
@@ -4355,7 +4353,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param doc
 	 * @throws IOException
 	 */
-	private static void _loadComponent(ConfigImpl config, Struct root, int mode, Log log) {
+	private static void _loadComponent(ConfigServerImpl config, Struct root, int mode, Log log) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
 			boolean hasSet = false;
@@ -4515,7 +4513,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadProxy(ConfigImpl config, Struct root, Log log) {
+	private static void _loadProxy(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
 			Struct proxy = ConfigWebUtil.getAsStruct("proxy", root);
@@ -4545,7 +4543,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadError(ConfigImpl config, Struct root, Log log) {
+	private static void _loadError(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			// Struct error = ConfigWebUtil.getAsStruct("error", root);
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_DEBUGGING);
@@ -4581,7 +4579,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 	}
 
-	private static void _loadRegex(ConfigImpl config, Struct root, Log log) {
+	private static void _loadRegex(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
 
@@ -4601,7 +4599,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 	}
 
-	private static void _loadCompiler(ConfigImpl config, Struct root, int mode, Log log) {
+	private static void _loadCompiler(ConfigServerImpl config, Struct root, int mode, Log log) {
 		try {
 			// suppress WS between cffunction and cfargument
 			if (mode == ConfigPro.MODE_STRICT) {
@@ -4706,7 +4704,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @throws IOException
 	 * @throws PageException
 	 */
-	private static void _loadApplication(ConfigImpl config, Struct root, int mode, Log log) {
+	private static void _loadApplication(ConfigServerImpl config, Struct root, int mode, Log log) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
 
@@ -4801,7 +4799,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			}
 
 			// classic-date-parsing
-			if (config instanceof ConfigServer) {
+			{
 				if (mode == ConfigPro.MODE_STRICT) {
 					DateCaster.classicStyle = true;
 				}
