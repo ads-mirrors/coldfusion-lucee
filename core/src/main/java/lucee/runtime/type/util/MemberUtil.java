@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import lucee.commons.io.SystemUtil;
 import lucee.commons.lang.CFTypes;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
@@ -58,26 +59,30 @@ public class MemberUtil {
 	private static Map<Short, Map<Collection.Key, FunctionLibFunction>> matchesCFML = new HashMap<Short, Map<Collection.Key, FunctionLibFunction>>();
 
 	public static Map<Collection.Key, FunctionLibFunction> getMembers(PageContext pc, short type) {
-		Map<Short, Map<Key, FunctionLibFunction>> matches = matchesCFML;
 
-		Map<Key, FunctionLibFunction> match = matches.get(type);
-		if (match != null) return match;
-
-		FunctionLib flds = ((ConfigWebPro) pc.getConfig()).getFLDs();
-		Iterator<FunctionLibFunction> it;
-		FunctionLibFunction f;
-		match = new HashMap<Collection.Key, FunctionLibFunction>();
-		String[] names;
-		it = flds.getFunctions().values().iterator();
-		while (it.hasNext()) {
-			f = it.next();
-			names = f.getMemberNames();
-			if (!ArrayUtil.isEmpty(names) && f.getMemberType() == type && f.getArgType() == FunctionLibFunction.ARG_FIX) {
-				for (int y = 0; y < names.length; y++)
-					match.put(KeyImpl.init(names[y]), f);
+		Map<Key, FunctionLibFunction> match = matchesCFML.get(type);
+		if (match == null) {
+			synchronized (SystemUtil.createToken("MemberUtil.getMembers", "type:" + type)) {
+				match = matchesCFML.get(type);
+				if (match == null) {
+					FunctionLib flds = ((ConfigWebPro) pc.getConfig()).getFLDs();
+					Iterator<FunctionLibFunction> it;
+					FunctionLibFunction f;
+					match = new HashMap<Collection.Key, FunctionLibFunction>();
+					String[] names;
+					it = flds.getFunctions().values().iterator();
+					while (it.hasNext()) {
+						f = it.next();
+						names = f.getMemberNames();
+						if (!ArrayUtil.isEmpty(names) && f.getMemberType() == type && f.getArgType() == FunctionLibFunction.ARG_FIX) {
+							for (int y = 0; y < names.length; y++)
+								match.put(KeyImpl.init(names[y]), f);
+						}
+					}
+					matchesCFML.put(type, match);
+				}
 			}
 		}
-		matches.put(type, match);
 		return match;
 	}
 
@@ -101,24 +106,28 @@ public class MemberUtil {
 				if (type == CFTypes.TYPE_ANY) hasAny = true;
 			}
 			members = getMembers(pc, type);
-			FunctionLibFunction member = members.get(methodName);
+			FunctionLibFunction member = members.get(methodName), tmp;
 			if (member == null && !isChked) {
 				if (type == CFTypes.TYPE_NUMERIC) {
 					members = getMembers(pc, CFTypes.TYPE_STRING);
 					member = members.get(methodName);
 				}
-				if (type == CFTypes.TYPE_STRING && Decision.isNumber(coll)) {
+				else if (type == CFTypes.TYPE_STRING) {
+
 					members = getMembers(pc, CFTypes.TYPE_NUMERIC);
-					member = members.get(methodName);
-				}
-				if (type == CFTypes.TYPE_STRING && member == null && Caster.toString(coll).length() > 2 && !Decision.isInteger(coll, false) && args.length <= 3) { // to avoid the
-																																									// overhead of
-																																									// isDateAdvanced()
-					if (Decision.isDateAdvanced(coll, false)) {
+					tmp = members.get(methodName);
+					if (tmp != null && Decision.isNumber(coll)) {
+						member = tmp;
+					}
+					if (member == null) {
 						members = getMembers(pc, CFTypes.TYPE_DATETIME);
-						member = members.get(methodName);
+						tmp = members.get(methodName);
+						if (tmp != null && args.length <= 3 && Caster.toString(coll).length() > 2 && !Decision.isInteger(coll, false) && Decision.isDateAdvanced(coll, false)) {
+							member = tmp;
+						}
 					}
 				}
+
 				isChked = true;
 			}
 			if (member != null) {
@@ -200,13 +209,13 @@ public class MemberUtil {
 			if (args.size() < _args.size()) {
 				Object val;
 				ArrayList<Ref> refs = new ArrayList<Ref>();
-				int pos = member.getMemberPosition();
-				argMem = _args.get(pos - 1); // set member argument as per member-position
+				int index = member.getMemberPosition() - 1;
+				argMem = _args.get(index); // set member argument as per member-position
 				refs.add(new Casting(argMem.getTypeAsString(), argMem.getType(), new LFunctionValue(new LString(argMem.getName()), coll)));
 				for (int y = 0; y < _args.size(); y++) {
 					arg = _args.get(y);
 
-					if (arg.getName() == argMem.getName()) continue; // member argument already added in refs
+					if (index == y) continue; // member argument already added in refs
 
 					// match by name
 					val = args.get(arg.getName(), null);

@@ -3465,7 +3465,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 						}
 					}
 					else {
-						if (bf != null) bf = bd.getBundleFile(false, null);
+						if (bf == null) bf = bd.getBundleFile(false, null);
 						qry.setAt(KeyConstants._version, row, bf.getVersionAsString());
 						// qry.setAt(KeyConstants._id, row, bf.getBundleId());
 						qry.setAt(FRAGMENT, row, OSGiUtil.isFragment(bf));

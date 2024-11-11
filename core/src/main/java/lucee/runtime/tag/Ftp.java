@@ -971,9 +971,9 @@ public final class Ftp extends TagImpl {
 	}
 
 	/**
-	 * @param actionParams a custom ftp command, used with action="quote"
+	 * @param actionParam a custom ftp command, used with action="quote"
 	 */
-	public void setActionparams(String actionParams) {
-		this.actionParams = actionParams;
+	public void setActionparam(String actionParam) {
+		this.actionParams = actionParam;
 	}
 }
