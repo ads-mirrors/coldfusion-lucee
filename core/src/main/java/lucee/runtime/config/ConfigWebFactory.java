@@ -220,8 +220,8 @@ public final class ConfigWebFactory extends ConfigFactory {
 		);
 
 		boolean doNew = configServer.getUpdateInfo().updateType != NEW_NONE;
-		SingleContextConfigWeb sccw = new SingleContextConfigWeb(factory, configServer, servletConfig, configDirWeb);
-		ConfigWebPro configWeb = existingToUpdate != null ? existingToUpdate.setInstance(sccw) : new ConfigWebImpl(sccw);
+		ConfigWebPro configWeb = existingToUpdate != null ? existingToUpdate.setInstance(factory, configServer, servletConfig, configDirWeb)
+				: new ConfigWebImpl(factory, configServer, servletConfig, configDirWeb);
 		factory.setConfig(configServer, configWeb);
 
 		// createContextFiles(configDir, servletConfig, doNew);
@@ -248,20 +248,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return label;
 	}
 
-	private static void createHtAccess(Resource htAccess) {
-		if (!htAccess.exists()) {
-			htAccess.createNewFile();
-
-			String content = "AuthName \"WebInf Folder\"\n" + "AuthType Basic\n" + "<Limit GET POST>\n" + "order deny,allow\n" + "deny from all\n" + "</Limit>";
-			try {
-				IOUtil.copy(new ByteArrayInputStream(content.getBytes()), htAccess, true);
-			}
-			catch (Throwable t) {
-				ExceptionUtil.rethrowIfNecessary(t);
-			}
-		}
-	}
-
 	/**
 	 * reloads the Config Object
 	 * 
@@ -279,7 +265,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	public static void reloadInstance(CFMLEngine engine, ConfigServerImpl cs, ConfigWebImpl cwi, boolean force)
 			throws PageException, IOException, TagLibException, FunctionLibException, BundleException {
 
-		((SingleContextConfigWeb) cwi.getInstance()).reload();
+		cwi.reload();
 		settings(cwi, null);
 		return;
 	}
