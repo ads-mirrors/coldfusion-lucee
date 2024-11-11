@@ -75,8 +75,9 @@ public class MemberUtil {
 						f = it.next();
 						names = f.getMemberNames();
 						if (!ArrayUtil.isEmpty(names) && f.getMemberType() == type && f.getArgType() == FunctionLibFunction.ARG_FIX) {
-							for (int y = 0; y < names.length; y++)
+							for (int y = 0; y < names.length; y++) {
 								match.put(KeyImpl.init(names[y]), f);
+							}
 						}
 					}
 					matchesCFML.put(type, match);
@@ -94,6 +95,7 @@ public class MemberUtil {
 		Map<Key, FunctionLibFunction> members = null;
 		boolean hasAny = false;
 		boolean isChked = false;
+		FunctionLibFunction member, tmp;
 		for (int i = 0; i <= types.length; i++) {
 			if (i == types.length) {
 				if (hasAny) break;
@@ -106,8 +108,8 @@ public class MemberUtil {
 				if (type == CFTypes.TYPE_ANY) hasAny = true;
 			}
 			members = getMembers(pc, type);
-			FunctionLibFunction member = members.get(methodName), tmp;
-			if (member == null && !isChked) {
+			member = members.get(methodName);
+			if (!isChked && member == null) {
 				if (type == CFTypes.TYPE_NUMERIC) {
 					members = getMembers(pc, CFTypes.TYPE_STRING);
 					member = members.get(methodName);
