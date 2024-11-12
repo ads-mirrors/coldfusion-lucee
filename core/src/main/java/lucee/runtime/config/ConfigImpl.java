@@ -1584,21 +1584,14 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public CFXTagPool getCFXTagPool() throws SecurityException {
+		if (cfxTagPool == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCFXTagPool")) {
+				if (cfxTagPool == null) {
+					cfxTagPool = new CFXTagPoolImpl(ConfigWebFactory.loadCFX(this, root, getLog()));
+				}
+			}
+		}
 		return cfxTagPool;
-	}
-
-	/**
-	 * @param cfxTagPool The customTagPool to set.
-	 */
-	protected void setCFXTagPool(CFXTagPool cfxTagPool) {
-		this.cfxTagPool = cfxTagPool;
-	}
-
-	/**
-	 * @param cfxTagPool The customTagPool to set.
-	 */
-	protected void setCFXTagPool(Map cfxTagPool) {
-		this.cfxTagPool = new CFXTagPoolImpl(cfxTagPool);
 	}
 
 	@Override
@@ -1753,21 +1746,27 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return this.clientType;
 	}
 
-	/**
-	 * @param searchEngine The searchEngine to set.
-	 */
-	protected void setSearchEngine(ClassDefinition cd, String directory) {
-		this.searchEngineClassDef = cd;
-		this.searchEngineDirectory = directory;
-	}
-
 	@Override
 	public ClassDefinition<SearchEngine> getSearchEngineClassDefinition() {
+		if (searchEngineClassDef == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getSearchEngineClassDefinition")) {
+				if (searchEngineClassDef == null) {
+					searchEngineClassDef = ConfigWebFactory.loadSearchClass(this, root, getLog());
+				}
+			}
+		}
 		return this.searchEngineClassDef;
 	}
 
 	@Override
 	public String getSearchEngineDirectory() {
+		if (searchEngineDirectory == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getSearchEngineDirectory")) {
+				if (searchEngineDirectory == null) {
+					searchEngineDirectory = ConfigWebFactory.loadSearchDir(this, root, getLog());
+				}
+			}
+		}
 		return this.searchEngineDirectory;
 	}
 

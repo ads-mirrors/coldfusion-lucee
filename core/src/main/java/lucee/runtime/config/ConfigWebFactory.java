@@ -409,17 +409,11 @@ public final class ConfigWebFactory extends ConfigFactory {
 			_loadMail(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded mail");
 
-			_loadSearch(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded search");
-
 			_loadScheduler(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded scheduled tasks");
 
 			_loadDebug(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded debug");
-
-			_loadCFX(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded cfx");
 
 			_loadComponent(config, root, mode, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded component");
@@ -3714,9 +3708,10 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param configServer
 	 * @param config
 	 * @param doc
+	 * @return
 	 * @throws PageException
 	 */
-	private static void _loadSearch(ConfigServerImpl config, Struct root, Log log) {
+	public static ClassDefinition<SearchEngine> loadSearchClass(ConfigImpl config, Struct root, Log log) {
 		try {
 			Struct search = ConfigWebUtil.getAsStruct("search", root);
 
@@ -3726,18 +3721,32 @@ public final class ConfigWebFactory extends ConfigFactory {
 				cd = new ClassDefinitionImpl(DummySearchEngine.class);
 			}
 
+			return cd;
+		}
+		catch (Throwable t) {
+			ExceptionUtil.rethrowIfNecessary(t);
+			log(config, log, t);
+		}
+		return new ClassDefinitionImpl(DummySearchEngine.class);
+	}
+
+	public static String loadSearchDir(ConfigImpl config, Struct root, Log log) {
+		try {
+			Struct search = ConfigWebUtil.getAsStruct("search", root);
+
 			// directory
 			String dir = search != null ? getAttr(search, "directory") : null;
 			if (StringUtil.isEmpty(dir)) {
 				dir = "{lucee-web}/search/";
 			}
 
-			config.setSearchEngine(cd, dir);
+			return dir;
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
+		return "{lucee-web}/search/";
 	}
 
 	/**
@@ -3940,12 +3949,12 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param configServer
 	 * @param config
 	 * @param doc
+	 * @return
 	 */
-	private static void _loadCFX(ConfigServerImpl config, Struct root, Log log) {
+	public static Map<String, CFXTagClass> loadCFX(ConfigImpl config, Struct root, Log log) {
+		Map<String, CFXTagClass> map = MapFactory.<String, CFXTagClass>getConcurrentMap();
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_CFX_SETTING);
-
-			Map<String, CFXTagClass> map = MapFactory.<String, CFXTagClass>getConcurrentMap();
 
 			if (hasAccess) {
 				System.setProperty("cfx.bin.path", config.getConfigDir().getRealResource("bin").getAbsolutePath());
@@ -3980,12 +3989,12 @@ public final class ConfigWebFactory extends ConfigFactory {
 				}
 
 			}
-			config.setCFXTagPool(map);
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
+		return map;
 	}
 
 	/**
