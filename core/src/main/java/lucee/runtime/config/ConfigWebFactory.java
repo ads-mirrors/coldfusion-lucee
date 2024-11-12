@@ -330,11 +330,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded temp dir");
 
 		if (!essentialOnly) {
-			_loadSecurity(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded security");
-		}
-
-		if (!essentialOnly) {
 			_loadSystem(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded system");
 
@@ -358,9 +353,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		if (!essentialOnly) {
 			_loadWS(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded webservice");
-
-			_loadORM(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded orm");
 
 			_loadCacheHandler(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded cache handlers");
@@ -926,12 +918,13 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param configServer
 	 * @param config
 	 * @param doc
+	 * @return
 	 */
-	private static void _loadSecurity(ConfigServerImpl config, Struct root, Log log) {
+	public static int loadSecurity(ConfigImpl config, Struct root, Log log) {
 		try {
 			// Security Manger
 			{
-				ConfigServerImpl cs = config;
+				ConfigServerImpl cs = (ConfigServerImpl) config;
 				Struct security = ConfigWebUtil.getAsStruct("security", root);
 				// Default SecurityManager
 				SecurityManagerImpl sm = _toSecurityManagerSingle(security);
@@ -947,13 +940,14 @@ public final class ConfigWebFactory extends ConfigFactory {
 			if (vu == ConfigImpl.QUERY_VAR_USAGE_UNDEFINED) {
 				vu = ConfigImpl.QUERY_VAR_USAGE_IGNORE;
 			}
-			config.setQueryVarUsage(vu);
+			return vu;
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			t.printStackTrace();
 			log(config, log, t);
 		}
+		return ConfigImpl.QUERY_VAR_USAGE_IGNORE;
 	}
 
 	private static Resource[] _loadFileAccess(Config config, Array fileAccesses, Log log) {
@@ -3156,13 +3150,13 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadORM(ConfigServerImpl config, Struct root, Log log) {
+	public static ClassDefinition loadORMClass(ConfigImpl config, Struct root, Log log) {
+		ClassDefinition cdDefault = new ClassDefinitionImpl(DummyORMEngine.class);
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManagerImpl.TYPE_ORM);
 			Struct orm = ConfigWebUtil.getAsStruct("orm", root);
 
 			// engine
-			ClassDefinition cdDefault = new ClassDefinitionImpl(DummyORMEngine.class);
 
 			ClassDefinition cd = null;
 			if (orm != null) {
@@ -3176,24 +3170,30 @@ public final class ConfigWebFactory extends ConfigFactory {
 			if (cd == null || !cd.hasClass()) {
 				cd = cdDefault;
 			}
-
-			// load class (removed because this unnecessary loads the orm engine)
-			/*
-			 * try { cd.getClazz(); // TODO check interface as well } catch (Exception e) { log.error("ORM", e);
-			 * cd=cdDefault; }
-			 */
-
-			config.setORMEngineClass(cd);
-
-			// config
-			ORMConfiguration def = null;
-			ORMConfiguration ormConfig = root == null ? def : ORMConfigurationImpl.load(config, null, orm, config.getRootDirectory(), def);
-			config.setORMConfig(ormConfig);
+			return cd;
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
+		return cdDefault;
+	}
+
+	public static ORMConfiguration loadORMConfig(ConfigImpl config, Struct root, Log log, ORMConfiguration defaultValue) {
+		try {
+			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManagerImpl.TYPE_ORM);
+			Struct orm = ConfigWebUtil.getAsStruct("orm", root);
+
+			// config
+			ORMConfiguration def = null;
+			ORMConfiguration ormConfig = root == null ? def : ORMConfigurationImpl.load(config, null, orm, config.getRootDirectory(), def);
+			return ormConfig;
+		}
+		catch (Throwable t) {
+			ExceptionUtil.rethrowIfNecessary(t);
+			log(config, log, t);
+		}
+		return defaultValue;
 	}
 
 	/**

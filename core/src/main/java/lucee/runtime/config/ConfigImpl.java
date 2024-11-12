@@ -406,7 +406,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private int queueMax = -1;
 	private long queueTimeout = -1;
 	private Boolean queueEnable;
-	private int varUsage;
+	private Integer varUsage;
 
 	private TimeSpan cachedAfterTimeRange;
 
@@ -663,12 +663,15 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return psq;
 	}
 
-	protected void setQueryVarUsage(int varUsage) {
-		this.varUsage = varUsage;
-	}
-
 	@Override
 	public int getQueryVarUsage() {
+		if (varUsage == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getQueryVarUsage")) {
+				if (varUsage == null) {
+					varUsage = ConfigWebFactory.loadSecurity(this, root, getLog());
+				}
+			}
+		}
 		return varUsage;
 	}
 
@@ -3163,7 +3166,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			Throwable t = null;
 
 			try {
-				engine = (ORMEngine) ClassUtil.loadInstance(cdORMEngine.getClazz());
+				engine = (ORMEngine) ClassUtil.loadInstance(getORMEngineClassDefintion().getClazz());
 				engine.init(pc);
 			}
 			catch (ClassException ce) {
@@ -3177,7 +3180,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 
 			if (t != null) {
-				ApplicationException ae = new ApplicationException("cannot initialize ORM Engine [" + cdORMEngine + "], make sure you have added all the required jar files");
+				ApplicationException ae = new ApplicationException(
+						"cannot initialize ORM Engine [" + getORMEngineClassDefintion() + "], make sure you have added all the required jar files");
 				ExceptionUtil.initCauseEL(ae, t);
 				throw ae;
 
@@ -3193,23 +3197,30 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public ClassDefinition<? extends ORMEngine> getORMEngineClassDefintion() {
+		if (cdORMEngine == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getORMEngineClassDefintion")) {
+				if (cdORMEngine == null) {
+					cdORMEngine = ConfigWebFactory.loadORMClass(this, root, getLog());
+				}
+			}
+		}
+
 		return cdORMEngine;
 	}
 
-	protected void setORMEngineClass(ClassDefinition<? extends ORMEngine> cd) {
-		this.cdORMEngine = cd;
-	}
-
 	public ClassDefinition<? extends ORMEngine> getORMEngineClass() {
-		return this.cdORMEngine;
-	}
-
-	protected void setORMConfig(ORMConfiguration ormConfig) {
-		this.ormConfig = ormConfig;
+		return getORMEngineClassDefintion();
 	}
 
 	@Override
 	public ORMConfiguration getORMConfig() {
+		if (ormConfig == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getORMConfig")) {
+				if (ormConfig == null) {
+					ormConfig = ConfigWebFactory.loadORMConfig(this, root, getLog(), null);
+				}
+			}
+		}
 		return ormConfig;
 	}
 
