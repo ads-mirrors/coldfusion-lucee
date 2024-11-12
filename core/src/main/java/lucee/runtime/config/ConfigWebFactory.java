@@ -165,6 +165,7 @@ import lucee.runtime.osgi.BundleInfo;
 import lucee.runtime.osgi.OSGiUtil;
 import lucee.runtime.reflection.Reflector;
 import lucee.runtime.reflection.pairs.ConstructorInstance;
+import lucee.runtime.regex.Regex;
 import lucee.runtime.regex.RegexFactory;
 import lucee.runtime.search.DummySearchEngine;
 import lucee.runtime.search.SearchEngine;
@@ -367,15 +368,10 @@ public final class ConfigWebFactory extends ConfigFactory {
 			_loadCacheHandler(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded cache handlers");
 
-			_loadCharset(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded charset");
 		}
 
 		_loadApplication(config, root, mode, log);
 		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded application");
-
-		_loadJava(config, root, log); // define compile type
-		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded java");
 
 		if (!essentialOnly) {
 			_loadMappings(config, root, mode, log); // it is important this runs after
@@ -425,12 +421,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			_loadDebug(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded debug");
 
-			_loadError(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded error");
-
-			_loadRegex(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded regex");
-
 			_loadCFX(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded cfx");
 
@@ -442,9 +432,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 			_loadSetting(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded setting");
-
-			_loadProxy(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded proxy");
 
 			_loadRemoteClient(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded remote clients");
@@ -460,9 +447,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 			_loadExeLog(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded exe log");
-
-			_loadQueue(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded queue");
 
 			_loadMonitors(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded monitors");
@@ -3146,68 +3130,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param config
 	 * @param doc
 	 */
-	private static void _loadCharset(ConfigServerImpl config, Struct root, Log log) {
-		try {
-			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
-
-			// template
-			String template = SystemUtil.getSystemPropOrEnvVar("lucee.template.charset", null);
-			if (StringUtil.isEmpty(template)) template = getAttr(root, "templateCharset");
-			if (!StringUtil.isEmpty(template)) config.setTemplateCharset(template);
-
-			// web
-			String web = SystemUtil.getSystemPropOrEnvVar("lucee.web.charset", null);
-			if (StringUtil.isEmpty(web)) web = getAttr(root, "webCharset");
-			if (!StringUtil.isEmpty(web)) config.setWebCharset(web);
-
-			// resource
-			String resource = null;
-			resource = SystemUtil.getSystemPropOrEnvVar("lucee.resource.charset", null);
-			if (StringUtil.isEmpty(resource)) resource = getAttr(root, "resourceCharset");
-			if (!StringUtil.isEmpty(resource)) config.setResourceCharset(resource);
-		}
-		catch (Throwable t) {
-			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
-		}
-	}
-
-	private static void _loadQueue(ConfigServerImpl config, Struct root, Log log) {
-		try {
-
-			// Server
-			{
-
-				// max
-				Integer max = Caster.toInteger(SystemUtil.getSystemPropOrEnvVar("lucee.queue.max", null), null);
-				if (max == null) max = Caster.toInteger(getAttr(root, "requestQueueMax"), null);
-				config.setQueueMax(Caster.toIntValue(max, 100));
-
-				// timeout
-				Long timeout = Caster.toLong(SystemUtil.getSystemPropOrEnvVar("lucee.queue.timeout", null), null);
-				if (timeout == null) timeout = Caster.toLong(getAttr(root, "requestQueueTimeout"), null);
-				config.setQueueTimeout(Caster.toLongValue(timeout, 0L));
-
-				// enable
-				Boolean enable = Caster.toBoolean(SystemUtil.getSystemPropOrEnvVar("lucee.queue.enable", null), null);
-				if (enable == null) enable = Caster.toBoolean(getAttr(root, "requestQueueEnable"), null);
-				config.setQueueEnable(Caster.toBooleanValue(enable, false));
-
-				// ((ConfigServerImpl) config).setThreadQueue(new ThreadQueueImpl(config.getQueueEnable() ?
-				// ThreadQueuePro.MODE_ENABLED : ThreadQueuePro.MODE_DISABLED, null));
-			}
-		}
-		catch (Throwable t) {
-			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
-		}
-	}
-
-	/**
-	 * @param configServer
-	 * @param config
-	 * @param doc
-	 */
 	private static void _loadRegional(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
@@ -3472,26 +3394,17 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadJava(ConfigServerImpl config, Struct root, Log log) {
+	public static short loadJava(ConfigImpl config, Struct root, Log log, short defaultValue) {
 		try {
-			String strInspectTemplate = getAttr(root, "inspectTemplate");
-			int inspectTemplateAutoIntervalSlow = Caster.toIntValue(getAttr(root, "inspectTemplateIntervalSlow"), ConfigPro.INSPECT_INTERVAL_SLOW);
-			int inspectTemplateAutoIntervalFast = Caster.toIntValue(getAttr(root, "inspectTemplateIntervalFast"), ConfigPro.INSPECT_INTERVAL_FAST);
-
-			if (!StringUtil.isEmpty(strInspectTemplate, true)) {
-				config.setInspectTemplate(ConfigWebUtil.inspectTemplate(strInspectTemplate, ConfigPro.INSPECT_AUTO));
-				config.setInspectTemplateAutoInterval(inspectTemplateAutoIntervalSlow, inspectTemplateAutoIntervalFast);
-
-			}
 
 			String strCompileType = getAttr(root, "compileType");
 			if (!StringUtil.isEmpty(strCompileType)) {
 				strCompileType = strCompileType.trim().toLowerCase();
 				if (strCompileType.equals("after-startup")) {
-					config.setCompileType(Config.RECOMPILE_AFTER_STARTUP);
+					return Config.RECOMPILE_AFTER_STARTUP;
 				}
 				else if (strCompileType.equals("always")) {
-					config.setCompileType(Config.RECOMPILE_ALWAYS);
+					return Config.RECOMPILE_ALWAYS;
 				}
 			}
 
@@ -3500,6 +3413,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
+		return defaultValue;
 	}
 
 	public static JavaSettings loadJavaSettings(ConfigImpl config, Struct root, Log log, JavaSettings defaultValue) {
@@ -4452,7 +4366,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadProxy(ConfigServerImpl config, Struct root, Log log) {
+	public static void loadProxy(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
 			Struct proxy = ConfigWebUtil.getAsStruct("proxy", root);
@@ -4482,43 +4396,27 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadError(ConfigServerImpl config, Struct root, Log log) {
+	public static boolean loadError(ConfigImpl config, Struct root, Log log, boolean defaultValue) {
 		try {
 			// Struct error = ConfigWebUtil.getAsStruct("error", root);
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_DEBUGGING);
-
-			// 500
-			String template500 = getAttr(root, "errorGeneralTemplate");
-			if (StringUtil.isEmpty(template500)) template500 = getAttr(root, "generalErrorTemplate");
-			if (hasAccess && !StringUtil.isEmpty(template500)) {
-				config.setErrorTemplate(500, template500);
-			}
-			else config.setErrorTemplate(500, "/lucee/templates/error/error." + TEMPLATE_EXTENSION);
-
-			// 404
-			String template404 = getAttr(root, "errorMissingTemplate");
-			if (StringUtil.isEmpty(template404)) template404 = getAttr(root, "missingErrorTemplate");
-			if (hasAccess && !StringUtil.isEmpty(template404)) {
-				config.setErrorTemplate(404, template404);
-			}
-			else config.setErrorTemplate(404, "/lucee/templates/error/error." + TEMPLATE_EXTENSION);
 
 			// status code
 			Boolean bStausCode = Caster.toBoolean(SystemUtil.getSystemPropOrEnvVar("lucee.status.code", null), null);
 			if (bStausCode == null) bStausCode = Caster.toBoolean(getAttr(root, "errorStatusCode"), null);
 
 			if (bStausCode != null && hasAccess) {
-				config.setErrorStatusCode(bStausCode.booleanValue());
+				return bStausCode.booleanValue();
 			}
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
-
+		return defaultValue;
 	}
 
-	private static void _loadRegex(ConfigServerImpl config, Struct root, Log log) {
+	public static Regex loadRegex(ConfigImpl config, Struct root, Log log, Regex defaultValue) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
 
@@ -4526,16 +4424,16 @@ public final class ConfigWebFactory extends ConfigFactory {
 			int type = StringUtil.isEmpty(strType) ? RegexFactory.TYPE_UNDEFINED : RegexFactory.toType(strType, RegexFactory.TYPE_UNDEFINED);
 
 			if (hasAccess && type != RegexFactory.TYPE_UNDEFINED) {
-				config.setRegex(RegexFactory.toRegex(type, null));
+				return RegexFactory.toRegex(type, null);
 			}
-			else config.setRegex(RegexFactory.toRegex(RegexFactory.TYPE_PERL, null));
+			else return RegexFactory.toRegex(RegexFactory.TYPE_PERL, null);
 
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
-
+		return defaultValue;
 	}
 
 	private static void _loadCompiler(ConfigServerImpl config, Struct root, int mode, Log log) {

@@ -263,7 +263,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private boolean psq = false;
 	private boolean debugShowUsage;
 
-	private Map<String, String> errorTemplates = new HashMap<String, String>();
+	private Map<String, String> errorTemplates;
 
 	protected Password password;
 	private String salt;
@@ -293,11 +293,9 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private Resource deployDirectory;
 
-	private short compileType = RECOMPILE_NEVER;
-
-	private CharSet resourceCharset = SystemUtil.getCharSet();
-	private CharSet templateCharset = SystemUtil.getCharSet();
-	private CharSet webCharset = CharSet.UTF8;
+	private CharSet resourceCharset;
+	private CharSet templateCharset;
+	private CharSet webCharset;
 
 	private CharSet mailDefaultCharset = CharSet.UTF8;
 
@@ -348,7 +346,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private Resource remoteClientDirectory;
 
 	private boolean allowURLRequestTimeout = false;
-	private boolean errorStatusCode = true;
+	private Boolean errorStatusCode;
 	private int localMode = Undefined.MODE_LOCAL_OR_ARGUMENTS_ONLY_WHEN_EXISTS;
 
 	private RHExtensionProvider[] rhextensionProviders = Constants.RH_EXTENSION_PROVIDERS;
@@ -375,7 +373,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	protected Mapping defaultTagMapping;
 	protected Map<String, Mapping> tagMappings = new ConcurrentHashMap<String, Mapping>();
 
-	private short inspectTemplate = INSPECT_AUTO;
 	private boolean typeChecking = true;
 	private String cacheMD5;
 	private boolean executionLogEnabled;
@@ -404,9 +401,9 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private Map<Integer, Object> cachedWithins = new HashMap<Integer, Object>();
 
-	private int queueMax = 100;
-	private long queueTimeout = 0;
-	private boolean queueEnable = false;
+	private int queueMax = -1;
+	private long queueTimeout = -1;
+	private Boolean queueEnable;
 	private int varUsage;
 
 	private TimeSpan cachedAfterTimeRange;
@@ -422,9 +419,10 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private static Object token = new Object();
 	private String mainLoggerName;
 
-	private int inspectTemplateAutoIntervalSlow = ConfigPro.INSPECT_INTERVAL_SLOW;
-
-	private int inspectTemplateAutoIntervalFast = ConfigPro.INSPECT_INTERVAL_FAST;
+	private short compileType = -1;
+	private short inspectTemplate = INSPECT_AUTO;
+	private int inspectTemplateAutoIntervalSlow = ConfigPro.INSPECT_INTERVAL_UNDEFINED;
+	private int inspectTemplateAutoIntervalFast = ConfigPro.INSPECT_INTERVAL_UNDEFINED;
 
 	private boolean formUrlAsStruct = true;
 
@@ -464,6 +462,13 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public short getCompileType() {
+		if (compileType == -1) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCompileType")) {
+				if (compileType == -1) {
+					ConfigWebFactory.loadJava(this, root, getLog(), RECOMPILE_NEVER);
+				}
+			}
+		}
 		return compileType;
 	}
 
@@ -1820,14 +1825,30 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public String getErrorTemplate(int statusCode) {
-		return errorTemplates.get(Caster.toString(statusCode));
-	}
 
-	/**
-	 * @param errorTemplate the errorTemplate to set
-	 */
-	protected void setErrorTemplate(int statusCode, String errorTemplate) {
-		this.errorTemplates.put(Caster.toString(statusCode), errorTemplate);
+		if (errorTemplates == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getErrorTemplate")) {
+				if (errorTemplates == null) {
+					Map<String, String> tmp = new HashMap<String, String>();
+					boolean hasAccess = ConfigWebUtil.hasAccess(this, SecurityManager.TYPE_DEBUGGING);
+
+					// 500
+					String template500 = ConfigWebFactory.getAttr(root, "errorGeneralTemplate");
+					if (StringUtil.isEmpty(template500)) template500 = ConfigWebFactory.getAttr(root, "generalErrorTemplate");
+					if (hasAccess && !StringUtil.isEmpty(template500)) tmp.put("500", template500);
+					else tmp.put("500", "/lucee/templates/error/error." + (Constants.getCFMLTemplateExtensions()[0]));
+
+					// 404
+					String template404 = ConfigWebFactory.getAttr(root, "errorMissingTemplate");
+					if (StringUtil.isEmpty(template404)) template404 = ConfigWebFactory.getAttr(root, "missingErrorTemplate");
+					if (hasAccess && !StringUtil.isEmpty(template404)) tmp.put("404", template404);
+					else tmp.put("404", "/lucee/templates/error/error." + (Constants.getCFMLTemplateExtensions()[0]));
+
+					errorTemplates = tmp;
+				}
+			}
+		}
+		return errorTemplates.get(Caster.toString(statusCode));
 	}
 
 	@Override
@@ -1904,15 +1925,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	public abstract Resource getRootDirectory();
 
 	/**
-	 * sets the compileType value.
-	 * 
-	 * @param compileType The compileType to set.
-	 */
-	protected void setCompileType(short compileType) {
-		this.compileType = compileType;
-	}
-
-	/**
 	 * FUTHER Returns the value of suppresswhitespace.
 	 * 
 	 * @return value suppresswhitespace
@@ -1942,75 +1954,71 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public String getDefaultEncoding() {
-		return webCharset.name();
+		return getWebCharset().name();
 	}
 
 	@Override
 	public Charset getTemplateCharset() {
-		return CharsetUtil.toCharset(templateCharset);
+		return CharsetUtil.toCharset(getTemplateCharSet());
 	}
 
 	public CharSet getTemplateCharSet() {
+		if (templateCharset == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getTemplateCharSet")) {
+				if (templateCharset == null) {
+					String template = SystemUtil.getSystemPropOrEnvVar("lucee.template.charset", null);
+					if (StringUtil.isEmpty(template)) template = ConfigWebFactory.getAttr(root, "templateCharset");
+					if (!StringUtil.isEmpty(template)) templateCharset = CharsetUtil.toCharSet(template, null);
+
+					if (templateCharset == null) templateCharset = SystemUtil.getCharSet();
+				}
+			}
+		}
+
 		return templateCharset;
-	}
-
-	/**
-	 * sets the charset to read the files
-	 * 
-	 * @param templateCharset
-	 */
-	protected void setTemplateCharset(String templateCharset) {
-		this.templateCharset = CharsetUtil.toCharSet(templateCharset, this.templateCharset);
-	}
-
-	protected void setTemplateCharset(Charset templateCharset) {
-		this.templateCharset = CharsetUtil.toCharSet(templateCharset);
 	}
 
 	@Override
 	public Charset getWebCharset() {
-		return CharsetUtil.toCharset(webCharset);
+		return CharsetUtil.toCharset(getWebCharSet());
 	}
 
 	@Override
 	public CharSet getWebCharSet() {
+		if (webCharset == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getWebCharSet")) {
+				if (webCharset == null) {
+					// web
+					String web = SystemUtil.getSystemPropOrEnvVar("lucee.web.charset", null);
+					if (StringUtil.isEmpty(web)) web = ConfigWebFactory.getAttr(root, "webCharset");
+					if (!StringUtil.isEmpty(web)) webCharset = CharsetUtil.toCharSet(web, null);
+
+					if (webCharset == null) webCharset = CharSet.UTF8;
+				}
+			}
+		}
 		return webCharset;
-	}
-
-	/**
-	 * sets the charset to read and write resources
-	 * 
-	 * @param resourceCharset
-	 */
-	protected void setResourceCharset(String resourceCharset) {
-		this.resourceCharset = CharsetUtil.toCharSet(resourceCharset, this.resourceCharset);
-	}
-
-	protected void setResourceCharset(Charset resourceCharset) {
-		this.resourceCharset = CharsetUtil.toCharSet(resourceCharset);
 	}
 
 	@Override
 	public Charset getResourceCharset() {
-		return CharsetUtil.toCharset(resourceCharset);
+		return CharsetUtil.toCharset(getResourceCharSet());
 	}
 
 	@Override
-	public CharSet getResourceCharSet() {
+	public CharSet getResourceCharSet() {// = SystemUtil.getCharSet()
+		if (resourceCharset == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getResourceCharSet")) {
+				if (resourceCharset == null) {
+					String resource = null;
+					resource = SystemUtil.getSystemPropOrEnvVar("lucee.resource.charset", null);
+					if (StringUtil.isEmpty(resource)) resource = ConfigWebFactory.getAttr(root, "resourceCharset");
+					if (!StringUtil.isEmpty(resource)) resourceCharset = CharsetUtil.toCharSet(resource, null);
+					if (resourceCharset == null) resourceCharset = SystemUtil.getCharSet();
+				}
+			}
+		}
 		return resourceCharset;
-	}
-
-	/**
-	 * sets the charset for the response stream
-	 * 
-	 * @param webCharset
-	 */
-	protected void setWebCharset(String webCharset) {
-		this.webCharset = CharsetUtil.toCharSet(webCharset, this.webCharset);
-	}
-
-	protected void setWebCharset(Charset webCharset) {
-		this.webCharset = CharsetUtil.toCharSet(webCharset);
 	}
 
 	@Override
@@ -2714,14 +2722,14 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 */
 	@Override
 	public boolean getErrorStatusCode() {
+		if (errorStatusCode == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getErrorStatusCode")) {
+				if (errorStatusCode == null) {
+					errorStatusCode = ConfigWebFactory.loadError(this, root, getLog(), true);
+				}
+			}
+		}
 		return errorStatusCode;
-	}
-
-	/**
-	 * @param errorStatusCode the errorStatusCode to set
-	 */
-	protected void setErrorStatusCode(boolean errorStatusCode) {
-		this.errorStatusCode = errorStatusCode;
 	}
 
 	@Override
@@ -2933,6 +2941,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 */
 	@Override
 	public short getInspectTemplate() {
+		if (inspectTemplate == -1) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getInspectTemplate")) {
+				if (inspectTemplate == -1) {
+					String strInspectTemplate = ConfigWebFactory.getAttr(root, "inspectTemplate");
+					if (!StringUtil.isEmpty(strInspectTemplate, true)) {
+						inspectTemplate = ConfigWebUtil.inspectTemplate(strInspectTemplate, ConfigPro.INSPECT_AUTO);
+					}
+					if (inspectTemplate == -1) inspectTemplate = INSPECT_AUTO;
+				}
+			}
+		}
 		return inspectTemplate;
 	}
 
@@ -2945,20 +2964,16 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		this.typeChecking = typeChecking;
 	}
 
-	/**
-	 * @param inspectTemplate the inspectTemplate to set
-	 */
-	protected void setInspectTemplate(short inspectTemplate) {
-		this.inspectTemplate = inspectTemplate;
-	}
-
-	protected void setInspectTemplateAutoInterval(int inspectTemplateAutoIntervalSlow, int inspectTemplateAutoIntervalFast) {
-		this.inspectTemplateAutoIntervalSlow = inspectTemplateAutoIntervalSlow <= ConfigPro.INSPECT_UNDEFINED ? ConfigPro.INSPECT_INTERVAL_SLOW : inspectTemplateAutoIntervalSlow;
-		this.inspectTemplateAutoIntervalFast = inspectTemplateAutoIntervalFast <= ConfigPro.INSPECT_UNDEFINED ? ConfigPro.INSPECT_INTERVAL_FAST : inspectTemplateAutoIntervalFast;
-	}
-
 	@Override
 	public int getInspectTemplateAutoInterval(boolean slow) {
+		if (inspectTemplateAutoIntervalSlow == -1) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getInspectTemplateAutoInterval")) {
+				if (inspectTemplateAutoIntervalSlow == -1) {
+					inspectTemplateAutoIntervalFast = Caster.toIntValue(ConfigWebFactory.getAttr(root, "inspectTemplateIntervalFast"), ConfigPro.INSPECT_INTERVAL_FAST);
+					inspectTemplateAutoIntervalSlow = Caster.toIntValue(ConfigWebFactory.getAttr(root, "inspectTemplateIntervalSlow"), ConfigPro.INSPECT_INTERVAL_SLOW);
+				}
+			}
+		}
 		return slow ? inspectTemplateAutoIntervalSlow : inspectTemplateAutoIntervalFast;
 	}
 
@@ -3833,29 +3848,44 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public int getQueueMax() {
+		if (queueMax == -1) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getQueueMax")) {
+				if (queueMax == -1) {
+					Integer max = Caster.toInteger(SystemUtil.getSystemPropOrEnvVar("lucee.queue.max", null), null);
+					if (max == null) max = Caster.toInteger(ConfigWebFactory.getAttr(root, "requestQueueMax"), null);
+					queueMax = Caster.toIntValue(max, 100);
+				}
+			}
+		}
 		return queueMax;
-	}
-
-	protected void setQueueMax(int queueMax) {
-		this.queueMax = queueMax;
 	}
 
 	@Override
 	public long getQueueTimeout() {
+		if (queueTimeout == -1) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getQueueTimeout")) {
+				if (queueTimeout == -1) {
+					Long timeout = Caster.toLong(SystemUtil.getSystemPropOrEnvVar("lucee.queue.timeout", null), null);
+					if (timeout == null) timeout = Caster.toLong(ConfigWebFactory.getAttr(root, "requestQueueTimeout"), null);
+					queueTimeout = Caster.toLongValue(timeout, 0L);
+				}
+			}
+		}
 		return queueTimeout;
-	}
-
-	protected void setQueueTimeout(long queueTimeout) {
-		this.queueTimeout = queueTimeout;
 	}
 
 	@Override
 	public boolean getQueueEnable() {
+		if (queueEnable == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getQueueEnable")) {
+				if (queueEnable == null) {
+					Boolean enable = Caster.toBoolean(SystemUtil.getSystemPropOrEnvVar("lucee.queue.enable", null), null);
+					if (enable == null) enable = Caster.toBoolean(ConfigWebFactory.getAttr(root, "requestQueueEnable"), null);
+					queueEnable = Caster.toBooleanValue(enable, false);
+				}
+			}
+		}
 		return queueEnable;
-	}
-
-	protected void setQueueEnable(boolean queueEnable) {
-		this.queueEnable = queueEnable;
 	}
 
 	private boolean cgiScopeReadonly = true;
@@ -3992,12 +4022,13 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public Regex getRegex() {
-		if (regex == null) regex = RegexFactory.toRegex(RegexFactory.TYPE_PERL, null);
+		if (regex == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getRegex")) {
+				if (regex == null) regex = ConfigWebFactory.loadRegex(this, root, getLog(), null);
+				if (regex == null) regex = RegexFactory.toRegex(RegexFactory.TYPE_PERL, null);
+			}
+		}
 		return regex;
-	}
-
-	protected void setRegex(Regex regex) {
-		this.regex = regex;
 	}
 
 	@Override
