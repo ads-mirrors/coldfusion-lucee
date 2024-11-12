@@ -444,6 +444,10 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	protected Map<String, AIEngineFactory> aiEngineFactories;
 
+	private Map<String, ClassDefinition> cacheDefinitions;
+
+	private GatewayMap gatewayEntries;
+
 	protected Struct root;
 
 	/**
@@ -3919,10 +3923,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 * DeployHandler.deployExtension(this, ed, getLog("deploy"),true); }
 	 */
 
-	private Map<String, ClassDefinition> cacheDefinitions;
-
-	private GatewayMap gatewayEntries;
-
 	public void setCacheDefinitions(Map<String, ClassDefinition> caches) {
 		this.cacheDefinitions = caches;
 	}
@@ -3942,11 +3942,14 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return getConfigDir().getRealResource("security/antisamy-basic.xml");
 	}
 
-	public void setGatewayEntries(GatewayMap gatewayEntries) {
-		this.gatewayEntries = gatewayEntries;
-	}
-
 	public GatewayMap getGatewayEntries() {
+		if (gatewayEntries == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getGatewayEntries")) {
+				if (gatewayEntries == null) {
+					gatewayEntries = ConfigWebFactory.loadGatewayEL(this, root, getLog());
+				}
+			}
+		}
 		return gatewayEntries;
 	}
 

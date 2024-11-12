@@ -113,9 +113,9 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 	private ActionMonitorCollector actionMonitorCollector;
 
 	private boolean monitoringEnabled = false;
-	private int delay = 1;
-	private boolean captcha = false;
-	private boolean rememberMe = true;
+	private int delay = -1;
+	private Boolean captcha;
+	private Boolean rememberMe;
 	// private static ConfigServerImpl instance;
 
 	private String[] authKeys;
@@ -463,30 +463,39 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		this.monitoringEnabled = monitoringEnabled;
 	}
 
-	protected void setLoginDelay(int delay) {
-		this.delay = delay;
-	}
-
-	protected void setLoginCaptcha(boolean captcha) {
-		this.captcha = captcha;
-	}
-
-	protected void setRememberMe(boolean rememberMe) {
-		this.rememberMe = rememberMe;
-	}
-
 	@Override
 	public int getLoginDelay() {
+		if (delay == -1) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getLoginDelay")) {
+				if (delay == -1) {
+					delay = Caster.toIntValue(ConfigWebFactory.getAttr(root, "loginDelay"), 1);
+				}
+			}
+		}
 		return delay;
 	}
 
 	@Override
 	public boolean getLoginCaptcha() {
+		if (captcha == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getLoginCaptcha")) {
+				if (captcha == null) {
+					captcha = Caster.toBooleanValue(ConfigWebFactory.getAttr(root, "loginCaptcha"), false);
+				}
+			}
+		}
 		return captcha;
 	}
 
 	@Override
 	public boolean getRememberMe() {
+		if (rememberMe == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getRememberMe")) {
+				if (rememberMe == null) {
+					rememberMe = Caster.toBooleanValue(ConfigWebFactory.getAttr(root, "loginRememberme"), true);
+				}
+			}
+		}
 		return rememberMe;
 	}
 

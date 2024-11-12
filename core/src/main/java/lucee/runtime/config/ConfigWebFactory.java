@@ -439,17 +439,11 @@ public final class ConfigWebFactory extends ConfigFactory {
 			_loadListener(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded listeners");
 
-			_loadGatewayEL(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded gateways");
-
 			_loadExeLog(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded exe log");
 
 			_loadMonitors(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded monitors");
-
-			_loadLogin(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded login");
 
 			_loadStartupHook(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded startup hook");
@@ -1788,7 +1782,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 				}
 			}
 			catch (IOException e) {
-				e.printStackTrace(config.getErrWriter());
+				log(config, log, e);
 			}
 
 			if (hasChanged) {
@@ -1796,7 +1790,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 					if (config.getClassDirectory().exists()) config.getClassDirectory().remove(true);
 				}
 				catch (IOException e) {
-					e.printStackTrace(config.getErrWriter());
+					log(config, log, e);
 				}
 			}
 
@@ -2282,16 +2276,17 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadGatewayEL(ConfigServerImpl config, Struct root, Log log) {
+	public static GatewayMap loadGatewayEL(ConfigImpl config, Struct root, Log log) {
 		try {
-			_loadGateway(config, root, log);
+			return loadGateway(config, root, log);
 		}
 		catch (Exception e) {
 			log(config, log, e);
+			return new GatewayMap();
 		}
 	}
 
-	private static void _loadGateway(final ConfigServerImpl config, Struct root, Log log) {
+	public static GatewayMap loadGateway(final ConfigImpl config, Struct root, Log log) {
 		GatewayMap mapGateways = new GatewayMap();
 		boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManagerImpl.TYPE_GATEWAY);
 		GatewayEntry ge;
@@ -2329,13 +2324,13 @@ public final class ConfigWebFactory extends ConfigFactory {
 						log(config, log, t);
 					}
 				}
-				config.setGatewayEntries(mapGateways);
 			}
 			catch (Throwable t) {
 				ExceptionUtil.rethrowIfNecessary(t);
 				log(config, log, t);
 			}
 		}
+		return mapGateways;
 	}
 
 	private static void setDatasource(ConfigImpl config, Map<String, DataSource> datasources, String datasourceName, ClassDefinition cd, String server, String databasename,
@@ -3491,26 +3486,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		catch (Throwable th) {
 			ExceptionUtil.rethrowIfNecessary(th);
 			th.printStackTrace();
-		}
-	}
-
-	private static void _loadLogin(ConfigServerImpl config, Struct root, Log log) {
-		try {
-			// server context
-			{
-				boolean captcha = Caster.toBooleanValue(getAttr(root, "loginCaptcha"), false);
-				boolean rememberme = Caster.toBooleanValue(getAttr(root, "loginRememberme"), true);
-
-				int delay = Caster.toIntValue(getAttr(root, "loginDelay"), 1);
-				ConfigServerImpl cs = config;
-				cs.setLoginDelay(delay);
-				cs.setLoginCaptcha(captcha);
-				cs.setRememberMe(rememberme);
-			}
-		}
-		catch (Throwable t) {
-			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
 		}
 	}
 
