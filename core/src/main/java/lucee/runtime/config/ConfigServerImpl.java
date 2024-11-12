@@ -105,7 +105,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 	Password defaultPassword;
 	private Resource rootDir;
 	private URL updateLocation;
-	private String updateType = "";
+	private String updateType;
 	private ConfigListener configListener;
 	private Map<String, String> labels;
 	private RequestMonitor[] requestMonitors;
@@ -344,37 +344,48 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 
 	@Override
 	public String getUpdateType() {
+		if (updateType == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getUpdateType")) {
+				if (updateType == null) {
+					String ut = ConfigWebFactory.getAttr(root, "updateType");
+					if (StringUtil.isEmpty(ut, true)) updateType = "manual";
+					else updateType = ut.trim();
+				}
+			}
+		}
 		return updateType;
 	}
 
 	@Override
 	public void setUpdateType(String updateType) {
-		if (!StringUtil.isEmpty(updateType)) this.updateType = updateType;
+		throw new RuntimeException("this action is no longer allowed");
 	}
 
 	@Override
 	public URL getUpdateLocation() {
+		if (updateLocation == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getUpdateLocation")) {
+				if (updateLocation == null) {
+					updateLocation = ConfigWebFactory.loadUpdate(this, root, getLog());
+				}
+			}
+		}
 		return updateLocation;
 	}
 
 	@Override
 	public void setUpdateLocation(URL updateLocation) {
-		this.updateLocation = updateLocation;
+		throw new RuntimeException("this action is no longer allowed");
 	}
 
 	@Override
 	public void setUpdateLocation(String strUpdateLocation) throws MalformedURLException {
-		setUpdateLocation(new URL(strUpdateLocation));
+		throw new RuntimeException("this action is no longer allowed");
 	}
 
 	@Override
 	public void setUpdateLocation(String strUpdateLocation, URL defaultValue) {
-		try {
-			setUpdateLocation(strUpdateLocation);
-		}
-		catch (MalformedURLException e) {
-			setUpdateLocation(defaultValue);
-		}
+		throw new RuntimeException("this action is no longer allowed");
 	}
 
 	@Override

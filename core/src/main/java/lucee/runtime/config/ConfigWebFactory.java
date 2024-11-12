@@ -26,9 +26,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
@@ -77,6 +77,7 @@ import lucee.commons.lang.ClassException;
 import lucee.commons.lang.ClassUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
+import lucee.commons.net.HTTPUtil;
 import lucee.commons.net.URLDecoder;
 import lucee.loader.engine.CFMLEngine;
 import lucee.loader.engine.CFMLEngineFactory;
@@ -330,9 +331,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded temp dir");
 
 		if (!essentialOnly) {
-			_loadSystem(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded system");
-
 			_loadResourceProvider(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded resource providers");
 		}
@@ -406,9 +404,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 			_loadComponent(config, root, mode, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded component");
-
-			_loadUpdate(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded update");
 
 			_loadSetting(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded setting");
@@ -2805,13 +2800,13 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param configServer
 	 * @param config
 	 * @param doc
+	 * @return
 	 */
-	private static void _loadUpdate(ConfigImpl config, Struct root, Log log) {
+	public static URL loadUpdate(ConfigImpl config, Struct root, Log log) {
 		try {
 			// Server
 			if (root != null) {
-				ConfigServer cs = (ConfigServerImpl) config;
-				cs.setUpdateType(getAttr(root, "updateType"));
+				ConfigServerImpl cs = (ConfigServerImpl) config;
 
 				String location = getAttr(root, "updateLocation");
 				if (!StringUtil.isEmpty(location, true)) {
@@ -2819,17 +2814,16 @@ public final class ConfigWebFactory extends ConfigFactory {
 					if ("http://update.lucee.org".equals(location)) location = DEFAULT_LOCATION;
 					if ("http://snapshot.lucee.org".equals(location) || "https://snapshot.lucee.org".equals(location)) location = DEFAULT_LOCATION;
 					if ("http://release.lucee.org".equals(location) || "https://release.lucee.org".equals(location)) location = DEFAULT_LOCATION;
-					cs.setUpdateLocation(location);
+					return HTTPUtil.toURL(location, HTTPUtil.ENCODED_AUTO);
 				}
-				else {
-					cs.setUpdateLocation(DEFAULT_LOCATION);
-				}
+
 			}
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
+		return Constants.DEFAULT_UPDATE_URL;
 	}
 
 	private static void _loadSetting(ConfigServerImpl config, Struct root, Log log) {
@@ -3001,34 +2995,39 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadSystem(ConfigServerImpl config, Struct root, Log log) {
+	public static PrintStream loadErr(ConfigImpl config, Struct root, Log log) {
+		try {
+			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
+
+			String err = null;
+			err = SystemUtil.getSystemPropOrEnvVar("lucee.system.err", null);
+			if (StringUtil.isEmpty(err)) err = getAttr(root, "systemErr");
+			return toPrintStream(config, err, true);
+		}
+		catch (Throwable t) {
+			ExceptionUtil.rethrowIfNecessary(t);
+			log(config, log, t);
+		}
+		return null;
+	}
+
+	public static PrintStream loadOut(ConfigImpl config, Struct root, Log log) {
 		try {
 
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
 
-			String out = null, err = null;
+			String out = null;
 			// sys prop or env var
 			out = SystemUtil.getSystemPropOrEnvVar("lucee.system.out", null);
-			err = SystemUtil.getSystemPropOrEnvVar("lucee.system.err", null);
-
 			if (StringUtil.isEmpty(out)) out = getAttr(root, "systemOut");
-			if (StringUtil.isEmpty(err)) err = getAttr(root, "systemErr");
-
-			// OUT
-			PrintStream ps = toPrintStream(config, out, false);
-			config.setOut(new PrintWriter(ps));
-			System.setOut(ps);
-
-			// ERR
-			ps = toPrintStream(config, err, true);
-			config.setErr(new PrintWriter(ps));
-			System.setErr(ps);
+			return toPrintStream(config, out, false);
 
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
+		return null;
 	}
 
 	private static PrintStream toPrintStream(Config config, String streamtype, boolean iserror) {

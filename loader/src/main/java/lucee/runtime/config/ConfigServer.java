@@ -66,9 +66,7 @@ public interface ConfigServer extends Config {
 	 */
 	public abstract SecurityManager getDefaultSecurityManager();
 
-	/**
-	 * @param updateType The updateType to set.
-	 */
+	@Deprecated
 	public abstract void setUpdateType(String updateType);
 
 	/**

@@ -22,6 +22,7 @@ import static lucee.runtime.db.DatasourceManagerImpl.QOQ_DATASOURCE_NAME;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.ref.SoftReference;
 import java.net.InetAddress;
@@ -325,8 +326,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private boolean useComponentShadow = true;
 
-	private PrintWriter out = SystemUtil.getPrintWriter(SystemUtil.OUT);
-	private PrintWriter err = SystemUtil.getPrintWriter(SystemUtil.ERR);
+	private PrintWriter out;
+	private PrintWriter err;
 
 	private Map<String, DatasourceConnPool> pools = new HashMap<>();
 
@@ -2446,26 +2447,42 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public PrintWriter getErrWriter() {
-		return err;
-	}
+		if (err == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getErrWriter")) {
+				if (err == null) {
+					PrintStream tmp = ConfigWebFactory.loadErr(this, root, getLog());
+					if (tmp == null) {
+						err = SystemUtil.getPrintWriter(SystemUtil.ERR);
+					}
+					else {
+						err = new PrintWriter(tmp);
+						System.setOut(tmp);
 
-	/**
-	 * @param err the err to set
-	 */
-	protected void setErr(PrintWriter err) {
-		this.err = err;
+					}
+				}
+			}
+		}
+		return err;
 	}
 
 	@Override
 	public PrintWriter getOutWriter() {
-		return out;
-	}
+		if (out == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getOutWriter")) {
+				if (out == null) {
+					PrintStream tmp = ConfigWebFactory.loadOut(this, root, getLog());
+					if (tmp == null) {
+						out = SystemUtil.getPrintWriter(SystemUtil.OUT);
+					}
+					else {
+						out = new PrintWriter(tmp);
+						System.setOut(tmp);
 
-	/**
-	 * @param out the out to set
-	 */
-	protected void setOut(PrintWriter out) {
-		this.out = out;
+					}
+				}
+			}
+		}
+		return out;
 	}
 
 	@Override
