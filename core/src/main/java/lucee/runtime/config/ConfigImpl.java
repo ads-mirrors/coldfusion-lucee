@@ -44,7 +44,6 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
 import lucee.aprint;
-import lucee.print;
 import lucee.commons.date.TimeZoneConstants;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.FileUtil;
@@ -380,7 +379,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private boolean typeChecking = true;
 	private String cacheMD5;
-	private boolean executionLogEnabled;
+	private Boolean executionLogEnabled;
 	private ExecutionLogFactory executionLogFactory;
 	private Map<String, ORMEngine> ormengines = new HashMap<String, ORMEngine>();
 	private ClassDefinition<? extends ORMEngine> cdORMEngine;
@@ -3140,20 +3139,25 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public boolean getExecutionLogEnabled() {
+		if (executionLogEnabled == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getExecutionLogEnabled")) {
+				Struct sct = ConfigWebUtil.getAsStruct("executionLog", root);
+				executionLogEnabled = Caster.toBoolean(ConfigWebFactory.getAttr(sct, "enabled"), Boolean.FALSE);
+			}
+		}
 		return executionLogEnabled;
-	}
-
-	protected void setExecutionLogEnabled(boolean executionLogEnabled) {
-		this.executionLogEnabled = executionLogEnabled;
 	}
 
 	@Override
 	public ExecutionLogFactory getExecutionLogFactory() {
+		if (executionLogFactory == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getExecutionLogFactory")) {
+				if (executionLogFactory == null) {
+					executionLogFactory = ConfigWebFactory.loadExeLog(this, root, getLog());
+				}
+			}
+		}
 		return executionLogFactory;
-	}
-
-	protected void setExecutionLogFactory(ExecutionLogFactory executionLogFactory) {
-		this.executionLogFactory = executionLogFactory;
 	}
 
 	@Override
@@ -3691,7 +3695,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	@Override
 	public Map<String, LoggerAndSourceData> getLoggers() {
 		if (loggers == null) {
-			print.ds();
 			synchronized (SystemUtil.createToken("ConfigImpl", "loggers")) {
 				if (loggers == null) {
 					if (insideLoggers.get()) {

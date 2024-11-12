@@ -422,9 +422,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			_loadListener(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded listeners");
 
-			_loadExeLog(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded exe log");
-
 			_loadMonitors(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded monitors");
 
@@ -1731,14 +1728,9 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return las;
 	}
 
-	private static void _loadExeLog(ConfigServerImpl config, Struct root, Log log) {
+	public static ExecutionLogFactory loadExeLog(ConfigImpl config, Struct root, Log log) {
 		try {
 			Struct el = ConfigWebUtil.getAsStruct("executionLog", root);
-
-			// enabled
-			Boolean bEnabled = Caster.toBoolean(getAttr(el, "enabled"), null);
-			config.setExecutionLogEnabled(bEnabled.booleanValue());
-
 			boolean hasChanged = false;
 			String val = Caster.toString(config.getExecutionLogEnabled());
 			try {
@@ -1801,16 +1793,14 @@ public final class ConfigWebFactory extends ConfigFactory {
 				Map<String, String> args = toArguments(el, "arguments", true, false);
 				if (args == null) args = toArguments(el, "classArguments", true, false);
 
-				config.setExecutionLogFactory(new ExecutionLogFactory(clazz, args));
-			}
-			else {
-				config.setExecutionLogFactory(new ExecutionLogFactory(ConsoleExecutionLog.class, new HashMap<String, String>()));
+				return new ExecutionLogFactory(clazz, args);
 			}
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
+		return new ExecutionLogFactory(ConsoleExecutionLog.class, new HashMap<String, String>());
 	}
 
 	/**
