@@ -239,7 +239,6 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private Struct attributes = new StructImpl();
 	private String action = null;
 	private short type;
-	private boolean singleMode;
 	private Password password;
 	private ConfigAdmin admin;
 	private ConfigPro config = null;
@@ -871,20 +870,9 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		return true;
 	}
 
-	private boolean check(String action, short access) throws ApplicationException {
+	private boolean check(String action, short access) {
 		if (this.action.equalsIgnoreCase(action)) {
 			if (access == ACCESS_FREE) {
-			}
-			else if (access == ACCESS_NOT_WHEN_SERVER) {
-				throwNoAccessWhenServer();
-			}
-
-			else if (access == ACCESS_NOT_WHEN_WEB) {
-				throwNoAccessWhenWeb();
-			}
-			else if (access == ACCESS_NEVER) {
-				throwNoAccessWhenServer();
-				throwNoAccessWhenServer();
 			}
 			return true;
 		}
@@ -1514,10 +1502,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	}
 
 	private void doGetLoggedDebugData() throws PageException {
-
-		// to get logged debugging data config should be a ConfigWebPro,
-		// for singleMode config is always ConfigServer so config must be redefine if it was singleMode
-		if (singleMode) config = configWeb = (ConfigWebPro) pageContext.getConfig();
+		config = configWeb = (ConfigWebPro) pageContext.getConfig();
 
 		ConfigWebPro cw = configWeb;
 		String id = getString("id", null);
@@ -1632,15 +1617,8 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	}
 
 	private void doUpdateDefaultSecurityManager() throws PageException {
-		if (singleMode) {
-			admin.updateDefaultSecurity(fb2("access_read"), fb2("access_write"));
-		}
-		else {
-			admin.updateDefaultSecurity(fb("setting"), SecurityManagerImpl.toShortAccessValue(getString("admin", action, "file")), getFileAcces(), fb("direct_java_access"),
-					fb("mail"), SecurityManagerImpl.toShortAccessValue(getString("admin", action, "datasource")), fb("mapping"), fb("remote"), fb("custom_tag"), fb("cfx_setting"),
-					fb("cfx_usage"), fb("debugging"), fb("search"), fb("scheduled_task"), fb("tag_execute"), fb("tag_import"), fb("tag_object"), fb("tag_registry"), fb("cache"),
-					fb("gateway"), fb("orm"), fb2("access_read"), fb2("access_write"));
-		}
+		admin.updateDefaultSecurity(fb2("access_read"), fb2("access_write"));
+
 		store();
 		adminSync.broadcast(attributes, config);
 	}
@@ -5380,15 +5358,5 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private Object emptyIfNull(String str) {
 		if (str == null) return "";
 		return str;
-	}
-
-	private void throwNoAccessWhenWeb() throws ApplicationException {
-		if (!singleMode && type == TYPE_WEB) throw new ApplicationException("Action [" + action + "] is not available for Web Admin ( Server Admin only )");
-	}
-
-	private void throwNoAccessWhenServer() throws ApplicationException {
-		if (!singleMode && type == TYPE_SERVER) {
-			throw new ApplicationException("Action [" + action + "] is not available for Server Admin ( Web Admin only )");
-		}
 	}
 }

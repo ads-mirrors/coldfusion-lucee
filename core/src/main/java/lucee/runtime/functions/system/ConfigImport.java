@@ -35,11 +35,9 @@ public class ConfigImport extends BIF {
 				null);
 
 		// type
-		boolean singleMode = true;
 		if (StringUtil.isEmpty(type)) type = "server";
-		else if (!"server".equalsIgnoreCase(type) && (singleMode || !"web".equalsIgnoreCase(type))) {
-			throw new FunctionException(pc, "ConfigFileImport", "second", "type", "Invalid value for argument type (" + type + "), valid values are ["
-					+ (singleMode ? "server" : "server,web") + "] in " + (singleMode ? "single" : "multi") + " mode", null);
+		else if (!"server".equalsIgnoreCase(type)) {
+			throw new FunctionException(pc, "ConfigFileImport", "second", "type", "Invalid value for argument type (" + type + "), valid values is [server]", null);
 		}
 
 		// password
