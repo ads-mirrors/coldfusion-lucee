@@ -177,6 +177,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private static final RHExtension[] RHEXTENSIONS_EMPTY = new RHExtension[0];
 
 	private int mode = MODE_CUSTOM;
+	private static final double DEFAULT_VERSION = 5.0d;
 
 	private final Map<String, PhysicalClassLoader> rpcClassLoaders = new ConcurrentHashMap<String, PhysicalClassLoader>();
 	private PhysicalClassLoader directClassLoader;
@@ -330,7 +331,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private Boolean doCustomTagDeepSearch = null;
 	private boolean doComponentTagDeepSearch = false;
 
-	private double version = 1.0D;
+	private Double version = null;
 
 	private boolean closeConnection = false;
 	private boolean contentLength = true;
@@ -2591,15 +2592,27 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return doCustomTagDeepSearch;
 	}
 
-	protected void setVersion(double version) {
-		this.version = version;
-	}
-
 	/**
 	 * @return the version
 	 */
 	@Override
 	public double getVersion() {
+		if (version == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getVersion")) {
+				if (version == null) {
+					try {
+						String strVersion = ConfigWebFactory.getAttr(root, "version");
+						version = Caster.toDoubleValue(strVersion, DEFAULT_VERSION);
+					}
+					catch (Throwable t) {
+						ExceptionUtil.rethrowIfNecessary(t);
+						ConfigWebFactory.log(this, getLog(), t);
+					}
+					if (version == null) version = DEFAULT_VERSION;
+				}
+			}
+
+		}
 		return version;
 	}
 

@@ -329,9 +329,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		_loadTempDirectory(config, root, isReload, log);
 		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded temp dir");
 
-		_loadVersion(config, root, log);
-		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded version");
-
 		if (!essentialOnly) {
 			_loadSecurity(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded security");
@@ -884,17 +881,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 	private static void settings(ConfigPro config, Log log) {
 		try {
 			doCheckChangesInLibraries(config);
-		}
-		catch (Throwable t) {
-			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
-		}
-	}
-
-	private static void _loadVersion(ConfigServerImpl config, Struct root, Log log) {
-		try {
-			String strVersion = getAttr(root, "version");
-			config.setVersion(Caster.toDoubleValue(strVersion, 5.0d)); // cfconfig started with version 5
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
@@ -2539,7 +2525,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadTempDirectory(ConfigServerImpl config, Struct root, boolean isReload, Log log) {
+	public static void _loadTempDirectory(ConfigImpl config, Struct root, boolean isReload, Log log) {
 		try {
 			Resource configDir = config.getConfigDir();
 
