@@ -896,7 +896,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 				}
 			}
 			catch (Exception ioe) {
-				log(config, log, ioe);
+				LogUtil.logGlobal(config, ConfigWebFactory.class.getName(), ioe);
 			}
 			if (StringUtil.isEmpty(securityKey)) securityKey = UUID.randomUUID().toString();
 
@@ -909,7 +909,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			LogUtil.logGlobal(config, ConfigWebFactory.class.getName(), t);
 		}
 		return defaultValue;
 	}

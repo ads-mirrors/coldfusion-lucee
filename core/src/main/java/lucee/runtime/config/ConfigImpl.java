@@ -38,10 +38,13 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
+import lucee.aprint;
+import lucee.print;
 import lucee.commons.date.TimeZoneConstants;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.FileUtil;
@@ -449,6 +452,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private GatewayMap gatewayEntries;
 
+	private AtomicBoolean insideLoggers = new AtomicBoolean(false);
 	protected Struct root;
 
 	/**
@@ -3687,9 +3691,20 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	@Override
 	public Map<String, LoggerAndSourceData> getLoggers() {
 		if (loggers == null) {
+			print.ds();
 			synchronized (SystemUtil.createToken("ConfigImpl", "loggers")) {
 				if (loggers == null) {
-					loggers = ConfigWebFactory.loadLoggers(this, root);
+					if (insideLoggers.get()) {
+						aprint.ds("cycle loop detected"); // FUTURE remove this
+						return new HashMap<String, LoggerAndSourceData>(); // avoid cycle loop
+					}
+					insideLoggers.set(true);
+					try {
+						loggers = ConfigWebFactory.loadLoggers(this, root);
+					}
+					finally {
+						insideLoggers.set(false);
+					}
 				}
 			}
 		}
