@@ -2378,51 +2378,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_CUSTOM_TAG);
 
-			// do patch cache
-			String strDoPathcache = getAttr(root, "customTagUseCachePath");
-			if (hasAccess && !StringUtil.isEmpty(strDoPathcache, true)) {
-				config.setUseCTPathCache(Caster.toBooleanValue(strDoPathcache.trim(), true));
-			}
-
-			// do custom tag local search
-			if (mode == ConfigPro.MODE_STRICT) {
-				config.setDoLocalCustomTag(false);
-			}
-			else {
-				String strDoCTLocalSearch = getAttr(root, "customTagLocalSearch");
-				if (hasAccess && !StringUtil.isEmpty(strDoCTLocalSearch)) {
-					config.setDoLocalCustomTag(Caster.toBooleanValue(strDoCTLocalSearch.trim(), true));
-				}
-
-			}
-
-			// do custom tag deep search
-			if (mode == ConfigPro.MODE_STRICT) {
-				config.setDoCustomTagDeepSearch(false);
-			}
-			else {
-				String strDoCTDeepSearch = getAttr(root, "customTagDeepSearch");
-				if (hasAccess && !StringUtil.isEmpty(strDoCTDeepSearch)) {
-					config.setDoCustomTagDeepSearch(Caster.toBooleanValue(strDoCTDeepSearch.trim(), false));
-				}
-			}
-
-			// extensions
-			if (mode == ConfigPro.MODE_STRICT) {
-				config.setCustomTagExtensions(Constants.getComponentExtensions());
-			}
-			else {
-				String strExtensions = getAttr(root, "customTagExtensions");
-				if (hasAccess && !StringUtil.isEmpty(strExtensions)) {
-					try {
-						String[] arr = ListUtil.toStringArray(ListUtil.listToArrayRemoveEmpty(strExtensions, ","));
-						config.setCustomTagExtensions(ListUtil.trimItems(arr));
-					}
-					catch (PageException e) {
-					}
-				}
-			}
-
 			// Struct customTag = ConfigWebUtil.getAsStruct("customTag", root);
 			Array ctMappings = ConfigWebUtil.getAsArray("customTagMappings", root);
 

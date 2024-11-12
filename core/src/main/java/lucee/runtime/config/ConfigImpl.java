@@ -149,6 +149,7 @@ import lucee.runtime.type.scope.ClusterNotSupported;
 import lucee.runtime.type.scope.Undefined;
 import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.type.util.KeyConstants;
+import lucee.runtime.type.util.ListUtil;
 import lucee.runtime.video.VideoExecuterNotSupported;
 import lucee.transformer.library.function.FunctionLib;
 import lucee.transformer.library.function.FunctionLibException;
@@ -326,7 +327,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private Map<String, DatasourceConnPool> pools = new HashMap<>();
 
-	private boolean doCustomTagDeepSearch = false;
+	private Boolean doCustomTagDeepSearch = null;
 	private boolean doComponentTagDeepSearch = false;
 
 	private double version = 1.0D;
@@ -335,7 +336,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private boolean contentLength = true;
 	private boolean allowCompression = ConfigImpl.DEFAULT_ALLOW_COMPRESSION;
 
-	private boolean doLocalCustomTag = true;
+	private Boolean doLocalCustomTag;
 
 	private Struct constants = null;
 
@@ -361,7 +362,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private Struct remoteClientUsage;
 	private Class adminSyncClass = AdminSyncNotSupported.class;
 	private AdminSync adminSync;
-	private String[] customTagExtensions = Constants.getExtensions();
+	private String[] customTagExtensions = null;
 	private Class videoExecuterClass = VideoExecuterNotSupported.class;
 
 	protected MappingImpl scriptMapping;
@@ -386,7 +387,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private boolean componentLocalSearch = true;
 	private boolean componentRootSearch = true;
 	private boolean useComponentPathCache = true;
-	private boolean useCTPathCache = true;
+	private Boolean useCTPathCache;
 	private lucee.runtime.rest.Mapping[] restMappings;
 
 	protected int writerType = CFML_WRITER_REFULAR;
@@ -2368,6 +2369,19 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public boolean useCTPathCache() {
+		if (useCTPathCache == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "useCTPathCache")) {
+				if (useCTPathCache == null) {
+					if (ConfigWebUtil.hasAccess(this, SecurityManager.TYPE_CUSTOM_TAG)) {
+						String strDoPathcache = ConfigWebFactory.getAttr(root, "customTagUseCachePath");
+						if (!StringUtil.isEmpty(strDoPathcache, true)) {
+							useCTPathCache = Caster.toBooleanValue(strDoPathcache.trim(), true);
+						}
+					}
+					if (useCTPathCache == null) useCTPathCache = Boolean.TRUE;
+				}
+			}
+		}
 		return useCTPathCache;
 	}
 
@@ -2381,10 +2395,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	public void flushCTPathCache() {
 		if (ctPatchCache != null) ctPatchCache.clear();
-	}
-
-	protected void setUseCTPathCache(boolean useCTPathCache) {
-		this.useCTPathCache = useCTPathCache;
 	}
 
 	protected void setUseComponentPathCache(boolean useComponentPathCache) {
@@ -2491,20 +2501,56 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public boolean doLocalCustomTag() {
+		if (doLocalCustomTag == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "doLocalCustomTag")) {
+				if (doLocalCustomTag == null) {
+					if (mode == ConfigPro.MODE_STRICT) {
+						doLocalCustomTag = Boolean.FALSE;
+					}
+					else {
+						if (ConfigWebUtil.hasAccess(this, SecurityManager.TYPE_CUSTOM_TAG)) {
+							String strDoCTLocalSearch = ConfigWebFactory.getAttr(root, "customTagLocalSearch");
+							if (!StringUtil.isEmpty(strDoCTLocalSearch)) {
+								doLocalCustomTag = Caster.toBooleanValue(strDoCTLocalSearch.trim(), true);
+							}
+						}
+					}
+					if (doLocalCustomTag == null) doLocalCustomTag = Boolean.TRUE;
+				}
+			}
+		}
 		return doLocalCustomTag;
 	}
 
 	@Override
 	public String[] getCustomTagExtensions() {
+		if (customTagExtensions == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCustomTagExtensions")) {
+				if (customTagExtensions == null) {
+					// extensions
+					if (mode == ConfigPro.MODE_STRICT) {
+						customTagExtensions = Constants.getExtensions();
+					}
+					else {
+						if (ConfigWebUtil.hasAccess(this, SecurityManager.TYPE_CUSTOM_TAG)) {
+							String strExtensions = ConfigWebFactory.getAttr(root, "customTagExtensions");
+							if (!StringUtil.isEmpty(strExtensions)) {
+								try {
+									String[] arr = ListUtil.toStringArray(ListUtil.listToArrayRemoveEmpty(strExtensions, ","));
+									customTagExtensions = ListUtil.trimItems(arr);
+								}
+								catch (PageException e) {
+									// MUST log
+									LogUtil.log("config", e);
+								}
+							}
+						}
+					}
+					customTagExtensions = Constants.getExtensions();
+				}
+			}
+		}
 		return customTagExtensions;
-	}
-
-	protected void setCustomTagExtensions(String... customTagExtensions) {
-		this.customTagExtensions = customTagExtensions;
-	}
-
-	protected void setDoLocalCustomTag(boolean doLocalCustomTag) {
-		this.doLocalCustomTag = doLocalCustomTag;
 	}
 
 	@Override
@@ -2518,14 +2564,26 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public boolean doCustomTagDeepSearch() {
+		if (doCustomTagDeepSearch == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "doCustomTagDeepSearch")) {
+				if (doCustomTagDeepSearch == null) {
+					// do custom tag deep search
+					if (mode == ConfigPro.MODE_STRICT) {
+						doCustomTagDeepSearch = Boolean.FALSE;
+					}
+					else {
+						if (ConfigWebUtil.hasAccess(this, SecurityManager.TYPE_CUSTOM_TAG)) {
+							String strDoCTDeepSearch = ConfigWebFactory.getAttr(root, "customTagDeepSearch");
+							if (!StringUtil.isEmpty(strDoCTDeepSearch)) {
+								doCustomTagDeepSearch = Caster.toBooleanValue(strDoCTDeepSearch.trim(), false);
+							}
+						}
+					}
+					if (doCustomTagDeepSearch == null) doCustomTagDeepSearch = Boolean.FALSE;
+				}
+			}
+		}
 		return doCustomTagDeepSearch;
-	}
-
-	/**
-	 * @param doCustomTagDeepSearch the doCustomTagDeepSearch to set
-	 */
-	protected void setDoCustomTagDeepSearch(boolean doCustomTagDeepSearch) {
-		this.doCustomTagDeepSearch = doCustomTagDeepSearch;
 	}
 
 	protected void setVersion(double version) {
