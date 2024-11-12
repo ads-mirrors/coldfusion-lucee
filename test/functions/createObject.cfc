@@ -9,6 +9,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 			it( title = "Checking the createObject(..,javasettings:{maven:...}) with jlama", body = function( currentSpec ) {
 				
+				if ( getJavaVersion() < 21) return;
+
 				var PromptContext=createObject("java","com.github.tjake.jlama.safetensors.prompt.PromptContext",{
 					"maven":[
 						{
@@ -448,5 +450,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 			fileCopy(jar, tmp);
 		}
 		return rtn;
+	}
+
+	private function getJavaVersion() {
+		var raw=server.java.version;
+		var arr=listToArray(raw,'.');
+		if(arr[1]==1) // version 1-9
+			return arr[2];
+		return arr[1];
 	}
 }
