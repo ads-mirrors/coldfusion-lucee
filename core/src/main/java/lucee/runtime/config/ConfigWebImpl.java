@@ -1454,7 +1454,13 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 
 	@Override
 	public IdentificationWeb getIdentification() {
-		if (id == null) id = new SCCWIdentificationWeb(cs.getIdentification());
+		if (id == null) {
+			synchronized (SystemUtil.createToken("ConfigWebImpl", "getIdentification")) {
+				if (id == null) {
+					id = new SCCWIdentificationWeb(cs.getIdentification());
+				}
+			}
+		}
 		return id;
 	}
 
