@@ -1703,13 +1703,13 @@ public final class ConfigWebFactory extends ConfigFactory {
 				}
 				catch (Throwable t) {
 					ExceptionUtil.rethrowIfNecessary(t);
-					log(config, null, t);
+					LogUtil.logGlobal(config, ConfigWebFactory.class.getName(), t);
 				}
 			}
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, null, t);
+			LogUtil.logGlobal(config, ConfigWebFactory.class.getName(), t);
 		}
 		return loggerMap;
 	}
@@ -2816,11 +2816,11 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param config
 	 * @param doc
 	 */
-	private static void _loadUpdate(ConfigServerImpl config, Struct root, Log log) {
+	private static void _loadUpdate(ConfigImpl config, Struct root, Log log) {
 		try {
 			// Server
 			if (root != null) {
-				ConfigServer cs = config;
+				ConfigServer cs = (ConfigServerImpl) config;
 				cs.setUpdateType(getAttr(root, "updateType"));
 
 				String location = getAttr(root, "updateLocation");

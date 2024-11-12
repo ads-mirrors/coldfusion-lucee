@@ -1542,7 +1542,12 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	protected Log getLog() {
-		return getLog(getMainLogger());
+		try {
+			return getLog("application", false);
+		}
+		catch (PageException e) {
+			return null;
+		}
 	}
 
 	/**
@@ -3688,7 +3693,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 				}
 			}
 		}
-
 		return loggers;
 	}
 
