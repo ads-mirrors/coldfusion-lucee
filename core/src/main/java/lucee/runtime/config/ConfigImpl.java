@@ -42,6 +42,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
+import lucee.commons.date.TimeZoneConstants;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.FileUtil;
 import lucee.commons.io.SystemUtil;
@@ -693,6 +694,13 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public Locale getLocale() {
+		if (locale == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getLocale")) {
+				if (locale == null) {
+					locale = ConfigWebFactory.loadLocale(this, root, getLog(), Locale.US);
+				}
+			}
+		}
 		return locale;
 	}
 
@@ -760,6 +768,19 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public TimeZone getTimeZone() {
+		if (timeZone == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getTimeZone")) {
+				if (timeZone == null) {
+					timeZone = ConfigWebFactory.loadTimezone(this, root, getLog(), null);
+					if (timeZone == null) timeZone = TimeZone.getDefault();
+					// there was no system default, so we use UTC
+					if (timeZone == null) {
+						timeZone = TimeZoneConstants.UTC;
+						TimeZone.setDefault(timeZone);
+					}
+				}
+			}
+		}
 		return timeZone;
 	}
 
@@ -1478,42 +1499,10 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	/**
-	 * sets the timezone
-	 * 
-	 * @param timeZone
-	 */
-	protected void setTimeZone(TimeZone timeZone) {
-		this.timeZone = timeZone;
-	}
-
-	/**
 	 * sets the locale
 	 * 
 	 * @param strLocale
 	 */
-	protected void setLocale(String strLocale) {
-		if (strLocale == null) {
-			this.locale = Locale.US;
-		}
-		else {
-			try {
-				this.locale = Caster.toLocale(strLocale);
-				if (this.locale == null) this.locale = Locale.US;
-			}
-			catch (ExpressionException e) {
-				this.locale = Locale.US;
-			}
-		}
-	}
-
-	/**
-	 * sets the locale
-	 * 
-	 * @param locale
-	 */
-	protected void setLocale(Locale locale) {
-		this.locale = locale;
-	}
 
 	/**
 	 * @param datasources The datasources to set

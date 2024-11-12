@@ -400,9 +400,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			_loadTag(config, root, log); // load tlds
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded tags");
 
-			_loadRegional(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded regional");
-
 			_loadCompiler(config, root, mode, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded compiler");
 
@@ -3130,7 +3127,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param config
 	 * @param doc
 	 */
-	private static void _loadRegional(ConfigServerImpl config, Struct root, Log log) {
+	public static TimeZone loadTimezone(ConfigImpl config, Struct root, Log log, TimeZone defaultValue) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
 
@@ -3138,27 +3135,36 @@ public final class ConfigWebFactory extends ConfigFactory {
 			String strTimeZone = null;
 			strTimeZone = getAttr(root, new String[] { "timezone", "thisTimezone" });
 
-			if (!StringUtil.isEmpty(strTimeZone)) config.setTimeZone(TimeZone.getTimeZone(strTimeZone));
+			if (!StringUtil.isEmpty(strTimeZone)) return TimeZone.getTimeZone(strTimeZone);
 			else {
 				TimeZone def = TimeZone.getDefault();
 				if (def == null) {
 					def = TimeZoneConstants.EUROPE_LONDON;
 				}
-				config.setTimeZone(def);
+				return def;
 			}
-
-			// this is necessary, otherwise travis has no default
-			if (TimeZone.getDefault() == null) TimeZone.setDefault(config.getTimeZone());
-
-			// locale
-			String strLocale = getAttr(root, new String[] { "locale", "thisLocale" });
-			if (!StringUtil.isEmpty(strLocale)) config.setLocale(strLocale);
-			else config.setLocale(Locale.US);
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
+		return defaultValue;
+	}
+
+	public static Locale loadLocale(ConfigImpl config, Struct root, Log log, Locale defaultValue) {
+		if (ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING)) {
+			try {
+				// locale
+				String strLocale = getAttr(root, new String[] { "locale", "thisLocale" });
+				if (!StringUtil.isEmpty(strLocale)) return Caster.toLocale(strLocale, defaultValue);
+
+			}
+			catch (Throwable t) {
+				ExceptionUtil.rethrowIfNecessary(t);
+				log(config, log, t);
+			}
+		}
+		return defaultValue;
 	}
 
 	private static void _loadWS(ConfigServerImpl config, Struct root, Log log) {
