@@ -703,7 +703,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		if (id == null) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "id")) {
 				if (id == null) {
-					id = ConfigWebFactory.loadId(this, root, null);
+					id = ConfigWebFactory.loadId(this, root, getLog(), null);
 					id.getId();
 				}
 			}

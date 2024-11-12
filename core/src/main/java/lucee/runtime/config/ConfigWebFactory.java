@@ -64,6 +64,7 @@ import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
+import lucee.commons.io.log.LoggerAndSourceData;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.filter.ExtensionResourceFilter;
 import lucee.commons.io.res.type.cfml.CFMLResourceProvider;
@@ -320,8 +321,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		int mode = config.getMode();
 		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded config");
 
-		_loadLoggers(config, root, isReload);
-		Log log = ThreadLocalPageContext.getLog(config, "application");
+		Log log = config.getLog("application");
 		// loadServerLibDesc(cs, config, doc,log);
 		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded loggers");
 
@@ -711,7 +711,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	public static Map<String, AIEngineFactory> loadAI(ConfigImpl config, Struct root, Map<String, AIEngineFactory> defaultValue) {
+	public static Map<String, AIEngineFactory> loadAI(ConfigImpl config, Struct root, Log log, Map<String, AIEngineFactory> defaultValue) {
 		try {
 			// we only load this for the server context
 			Struct ai = ConfigWebUtil.getAsStruct(root, false, "ai");
@@ -744,19 +744,19 @@ public final class ConfigWebFactory extends ConfigFactory {
 						}
 					}
 					catch (Exception e) {
-						log(config, null, e);
+						log(config, log, e);
 					}
 				}
 				return engines;
 			}
 		}
 		catch (Exception ex) {
-			log(config, null, ex);
+			log(config, log, ex);
 		}
 		return defaultValue;
 	}
 
-	public static DumpWriterEntry[] loadDumpWriter(ConfigImpl config, Struct root, DumpWriterEntry[] defaultValue) {
+	public static DumpWriterEntry[] loadDumpWriter(ConfigImpl config, Struct root, Log log, DumpWriterEntry[] defaultValue) {
 		try {
 			Array writers = ConfigWebUtil.getAsArray("dumpWriters", root);
 
@@ -791,7 +791,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
-						log(config, null, t);
+						log(config, log, t);
 					}
 				}
 			}
@@ -813,7 +813,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, null, t);
+			log(config, log, t);
 		}
 		return defaultValue;
 	}
@@ -933,7 +933,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	public static IdentificationServerImpl loadId(ConfigServerImpl config, Struct root, IdentificationServerImpl defaultValue) {
+	public static IdentificationServerImpl loadId(ConfigServerImpl config, Struct root, Log log, IdentificationServerImpl defaultValue) {
 		try {
 
 			// Security key
@@ -949,7 +949,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 				}
 			}
 			catch (Exception ioe) {
-				log(config, null, ioe);
+				log(config, log, ioe);
 			}
 			if (StringUtil.isEmpty(securityKey)) securityKey = UUID.randomUUID().toString();
 
@@ -962,7 +962,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, null, t);
+			log(config, log, t);
 		}
 		return defaultValue;
 	}
@@ -1693,26 +1693,11 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadLoggers(ConfigServerImpl config, Struct root, boolean isReload) {
+	public static Map<String, LoggerAndSourceData> loadLoggers(ConfigImpl config, Struct root) {
 		config.clearLoggers(Boolean.FALSE);
 		Set<String> existing = new HashSet<>();
-		try {
 
-			// main logger
-			String mainLogger = ConfigWebUtil.getAsString("mainLogger", root, null);
-			if (!StringUtil.isEmpty(mainLogger, true)) {
-				config.setMainLogger(mainLogger.trim());
-			}
-			else {
-				mainLogger = SystemUtil.getSystemPropOrEnvVar("lucee.logging.main", null);
-				if (!StringUtil.isEmpty(mainLogger, true)) config.setMainLogger(mainLogger.trim());
-			}
-		}
-		catch (Throwable t) {
-			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, null, t);
-		}
-
+		Map<String, LoggerAndSourceData> loggerMap = new HashMap<String, LoggerAndSourceData>();
 		try {
 			// loggers
 			Struct loggers = ConfigWebUtil.getAsStruct("loggers", root);
@@ -1762,9 +1747,9 @@ public final class ConfigWebFactory extends ConfigFactory {
 					if (cdAppender.hasClass() && !StringUtil.isEmpty(name)) {
 						existing.add(name.toLowerCase());
 						if (cdLayout.hasClass()) {
-							config.addLogger(name, level, cdAppender, appenderArgs, cdLayout, layoutArgs, readOnly, false);
+							addLogger(config, loggerMap, name, level, cdAppender, appenderArgs, cdLayout, layoutArgs, readOnly, false);
 						}
-						else config.addLogger(name, level, cdAppender, appenderArgs, null, null, readOnly, false);
+						else addLogger(config, loggerMap, name, level, cdAppender, appenderArgs, null, null, readOnly, false);
 					}
 				}
 				catch (Throwable t) {
@@ -1777,6 +1762,24 @@ public final class ConfigWebFactory extends ConfigFactory {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, null, t);
 		}
+		return loggerMap;
+	}
+
+	public static LoggerAndSourceData addLogger(Config config, Map<String, LoggerAndSourceData> loggers, String name, int level, ClassDefinition appender,
+			Map<String, String> appenderArgs, ClassDefinition layout, Map<String, String> layoutArgs, boolean readOnly, boolean dyn) throws PageException {
+		LoggerAndSourceData existing = loggers.get(name.toLowerCase());
+		String id = LoggerAndSourceData.id(name.toLowerCase(), appender, appenderArgs, layout, layoutArgs, level, readOnly);
+
+		if (existing != null) {
+			if (existing.id().equals(id)) {
+				return existing;
+			}
+			existing.close();
+		}
+
+		LoggerAndSourceData las = new LoggerAndSourceData(config, id, name.toLowerCase(), appender, appenderArgs, layout, layoutArgs, level, readOnly, dyn);
+		loggers.put(name.toLowerCase(), las);
+		return las;
 	}
 
 	private static void _loadExeLog(ConfigServerImpl config, Struct root, Log log) {
@@ -3499,7 +3502,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	public static JavaSettings loadJavaSettings(ConfigImpl config, Struct root, JavaSettings defaultValue) {
+	public static JavaSettings loadJavaSettings(ConfigImpl config, Struct root, Log log, JavaSettings defaultValue) {
 		try {
 
 			Resource lib = config.getLibraryDirectory();
@@ -3514,12 +3517,12 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, null, t);
+			log(config, log, t);
 		}
 		return defaultValue;
 	}
 
-	public static Struct loadConstants(ConfigImpl config, Struct root, Struct defaultValue) {
+	public static Struct loadConstants(ConfigImpl config, Struct root, Log log, Struct defaultValue) {
 		try {
 			Struct constants = ConfigWebUtil.getAsStruct("constants", root);
 
@@ -3544,7 +3547,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
-						log(config, null, t);
+						log(config, log, t);
 					}
 
 				}
@@ -3553,7 +3556,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, null, t);
+			log(config, log, t);
 		}
 		return defaultValue;
 	}

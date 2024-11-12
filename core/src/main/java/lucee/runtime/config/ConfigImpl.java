@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -211,7 +212,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private boolean _mergeFormAndURL = false;
 
-	private Map<String, LoggerAndSourceData> loggers = new HashMap<String, LoggerAndSourceData>();
+	private Map<String, LoggerAndSourceData> loggers;
 
 	private int debugLogOutput = SERVER_BOOLEAN_FALSE;
 	private int debugOptions = 0;
@@ -1530,12 +1531,16 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (aiEngineFactories == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getAIEngineFactories")) {
 				if (aiEngineFactories == null) {
-					aiEngineFactories = ConfigWebFactory.loadAI(this, root, null);
+					aiEngineFactories = ConfigWebFactory.loadAI(this, root, getLog(), null);
 					if (aiEngineFactories == null) aiEngineFactories = new HashMap<>();
 				}
 			}
 		}
 		return aiEngineFactories;
+	}
+
+	protected Log getLog() {
+		return getLog(getMainLogger());
 	}
 
 	/**
@@ -2313,7 +2318,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (dmpWriterEntries == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getDumpWritersEntries")) {
 				if (dmpWriterEntries == null) {
-					dmpWriterEntries = ConfigWebFactory.loadDumpWriter(this, root, null);
+					dmpWriterEntries = ConfigWebFactory.loadDumpWriter(this, root, getLog(), null);
 					// MUST handle default value was returned
 				}
 			}
@@ -2633,7 +2638,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (constants == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getConstants")) {
 				if (constants == null) {
-					constants = ConfigWebFactory.loadConstants(this, root, null);
+					constants = ConfigWebFactory.loadConstants(this, root, getLog(), null);
 					if (constants == null) constants = new StructImpl();
 				}
 			}
@@ -3614,57 +3619,52 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	protected void clearLoggers(Boolean dyn) {
-		if (loggers.size() == 0) return;
-		List<String> list = dyn != null ? new ArrayList<String>() : null;
-		try {
-			Iterator<Entry<String, LoggerAndSourceData>> it = loggers.entrySet().iterator();
-			Entry<String, LoggerAndSourceData> e;
-			while (it.hasNext()) {
-				e = it.next();
-				if (dyn == null || dyn.booleanValue() == e.getValue().getDyn()) {
-					e.getValue().close();
-					if (list != null) list.add(e.getKey());
+		if (loggers == null || loggers.size() == 0) return;
+		synchronized (SystemUtil.createToken("ConfigImpl", "loggers")) {
+			List<String> list = dyn != null ? new ArrayList<String>() : null;
+			try {
+				Iterator<Entry<String, LoggerAndSourceData>> it = loggers.entrySet().iterator();
+				Entry<String, LoggerAndSourceData> e;
+				while (it.hasNext()) {
+					e = it.next();
+					if (dyn == null || dyn.booleanValue() == e.getValue().getDyn()) {
+						e.getValue().close();
+						if (list != null) list.add(e.getKey());
+					}
+
 				}
-
 			}
-		}
-		catch (Exception e) {
-		}
-
-		if (list == null) loggers.clear();
-		else {
-			Iterator<String> it = list.iterator();
-			while (it.hasNext()) {
-				loggers.remove(it.next());
+			catch (Exception e) {
 			}
-		}
-	}
 
-	protected LoggerAndSourceData addLogger(String name, int level, ClassDefinition appender, Map<String, String> appenderArgs, ClassDefinition layout,
-			Map<String, String> layoutArgs, boolean readOnly, boolean dyn) throws PageException {
-		LoggerAndSourceData existing = loggers.get(name.toLowerCase());
-		String id = LoggerAndSourceData.id(name.toLowerCase(), appender, appenderArgs, layout, layoutArgs, level, readOnly);
-
-		if (existing != null) {
-			if (existing.id().equals(id)) {
-				return existing;
+			if (list == null) loggers.clear();
+			else {
+				Iterator<String> it = list.iterator();
+				while (it.hasNext()) {
+					loggers.remove(it.next());
+				}
 			}
-			existing.close();
+			loggers = null;
 		}
-
-		LoggerAndSourceData las = new LoggerAndSourceData(this, id, name.toLowerCase(), appender, appenderArgs, layout, layoutArgs, level, readOnly, dyn);
-		loggers.put(name.toLowerCase(), las);
-		return las;
 	}
 
 	@Override
 	public Map<String, LoggerAndSourceData> getLoggers() {
+		if (loggers == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "loggers")) {
+				if (loggers == null) {
+					loggers = ConfigWebFactory.loadLoggers(this, root);
+				}
+			}
+		}
+
 		return loggers;
 	}
 
 	// FUTURE add to interface
 	public String[] getLogNames() {
-		return loggers.keySet().toArray(new String[loggers.size()]);
+		Set<String> keys = getLoggers().keySet();
+		return keys.toArray(new String[keys.size()]);
 	}
 
 	@Override
@@ -3685,10 +3685,11 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	private LoggerAndSourceData _getLoggerAndSourceData(String name, boolean createIfNecessary) throws PageException {
-		LoggerAndSourceData las = loggers.get(name.toLowerCase());
+		LoggerAndSourceData las = getLoggers().get(name.toLowerCase());
 		if (las == null) {
 			if (!createIfNecessary) return null;
-			return addLogger(name, Log.LEVEL_ERROR, getLogEngine().appenderClassDefintion("console"), null, getLogEngine().layoutClassDefintion("pattern"), null, true, true);
+			return ConfigWebFactory.addLogger(this, loggers, name, Log.LEVEL_ERROR, getLogEngine().appenderClassDefintion("console"), null,
+					getLogEngine().layoutClassDefintion("pattern"), null, true, true);
 		}
 		return las;
 	}
@@ -4014,6 +4015,32 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public String getMainLogger() {
+		if (mainLoggerName == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getMainLogger")) {
+				if (mainLoggerName == null) {
+					try {
+
+						// main logger
+						String mainLogger = ConfigWebFactory.getAttr(root, "mainLogger");
+						if (!StringUtil.isEmpty(mainLogger, true)) {
+							mainLoggerName = mainLogger.trim();
+						}
+						else {
+							mainLogger = SystemUtil.getSystemPropOrEnvVar("lucee.logging.main", null);
+							if (!StringUtil.isEmpty(mainLogger, true)) {
+								mainLoggerName = mainLogger.trim();
+							}
+						}
+					}
+					catch (Throwable t) {
+						ExceptionUtil.rethrowIfNecessary(t);
+						ConfigWebFactory.log(this, getLog(), t);
+					}
+				}
+				if (mainLoggerName == null) mainLoggerName = "application";
+			}
+		}
+
 		return this.mainLoggerName;
 	}
 
@@ -4050,7 +4077,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (javaSettings == null) {
 			synchronized (javaSettingsInstances) {
 				if (javaSettings == null) {
-					javaSettings = ConfigWebFactory.loadJavaSettings(this, root, null);
+					javaSettings = ConfigWebFactory.loadJavaSettings(this, root, getLog(), null);
 					if (javaSettings == null) javaSettings = JavaSettingsImpl.getInstance(this, new StructImpl(), null);
 				}
 			}
