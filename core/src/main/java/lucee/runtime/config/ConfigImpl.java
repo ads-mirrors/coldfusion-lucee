@@ -245,14 +245,14 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private long loadTime;
 
-	private int spoolInterval = 30;
-	private boolean spoolEnable = true;
-	private boolean sendPartial = false;
-	private boolean userSet = true;
+	private int spoolInterval = -1;
+	private Boolean spoolEnable;
+	private Boolean sendPartial;
+	private Boolean userSet;
 
 	private Server[] mailServers;
 
-	private int mailTimeout = 30;
+	private int mailTimeout = -1;
 
 	private int returnFormat = UDF.RETURN_FORMAT_WDDX;
 
@@ -302,7 +302,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private CharSet templateCharset;
 	private CharSet webCharset;
 
-	private CharSet mailDefaultCharset = CharSet.UTF8;
+	private CharSet mailDefaultCharset;
 
 	private Resource tldFile;
 	private Resource fldFile;
@@ -636,29 +636,63 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public boolean isMailSpoolEnable() {
+		if (spoolEnable == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "mail")) {
+				if (spoolEnable == null) {
+					ConfigWebFactory.loadMail(this, root, getLog());
+				}
+			}
+		}
 		return spoolEnable;
 	}
 
 	// FUTURE add to interface
 	@Override
 	public boolean isMailSendPartial() {
+		if (sendPartial == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "mail")) {
+				if (sendPartial == null) {
+					ConfigWebFactory.loadMail(this, root, getLog());
+				}
+			}
+		}
 		return sendPartial;
 	}
 
 	// FUTURE add to interface and impl
 	@Override
 	public boolean isUserset() {
+		if (userSet == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "mail")) {
+				if (userSet == null) {
+					ConfigWebFactory.loadMail(this, root, getLog());
+				}
+			}
+		}
 		return userSet;
 	}
 
 	@Override
 	public Server[] getMailServers() {
-		if (mailServers == null) mailServers = new Server[0];
+		if (mailServers == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "mail")) {
+				if (mailServers == null) {
+					ConfigWebFactory.loadMail(this, root, getLog());
+				}
+			}
+		}
 		return mailServers;
 	}
 
 	@Override
 	public int getMailTimeout() {
+		if (mailTimeout == -1) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "mail")) {
+				if (mailTimeout == -1) {
+					ConfigWebFactory.loadMail(this, root, getLog());
+				}
+			}
+		}
 		return mailTimeout;
 	}
 
@@ -775,6 +809,13 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public int getMailSpoolInterval() {
+		if (spoolInterval == -1) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "mail")) {
+				if (spoolInterval == -1) {
+					ConfigWebFactory.loadMail(this, root, getLog());
+				}
+			}
+		}
 		return spoolInterval;
 	}
 
@@ -2075,6 +2116,13 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	public CharSet getMailDefaultCharSet() {
+		if (mailDefaultCharset == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "mail")) {
+				if (mailDefaultCharset == null) {
+					ConfigWebFactory.loadMail(this, root, getLog());
+				}
+			}
+		}
 		return mailDefaultCharset;
 	}
 

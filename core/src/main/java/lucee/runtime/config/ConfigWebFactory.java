@@ -393,9 +393,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			_loadScope(config, root, mode, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded scope");
 
-			_loadMail(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded mail");
-
 			_loadScheduler(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded scheduled tasks");
 
@@ -3517,51 +3514,112 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param doc
 	 * @throws IOException
 	 */
-	private static void _loadMail(ConfigServerImpl config, Struct root, Log log) { // does no init values
+	public static void loadMail(ConfigImpl config, Struct root, Log log) { // does no init values
+
+		boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_MAIL);
+
+		// Send partial
 		try {
-			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_MAIL);
-
-			// Send partial
-			{
-				String strSendPartial = getAttr(root, "mailSendPartial");
-				if (!StringUtil.isEmpty(strSendPartial) && hasAccess) {
-					config.setMailSendPartial(toBoolean(strSendPartial, false));
-				}
+			String strSendPartial = getAttr(root, "mailSendPartial");
+			if (!StringUtil.isEmpty(strSendPartial) && hasAccess) {
+				config.setMailSendPartial(toBoolean(strSendPartial, false));
 			}
-			// User set
-			{
-				String strUserSet = getAttr(root, "mailUserSet");
-				if (!StringUtil.isEmpty(strUserSet) && hasAccess) {
-					config.setUserSet(toBoolean(strUserSet, false));
-				}
+			else {
+				config.setMailSendPartial(false);
 			}
+		}
+		catch (Throwable t) {
+			ExceptionUtil.rethrowIfNecessary(t);
+			log(config, log, t);
+			config.setMailSendPartial(false);
+		}
 
-			// Spool Interval
+		// User set
+		try {
+			String strUserSet = getAttr(root, "mailUserSet");
+			if (!StringUtil.isEmpty(strUserSet) && hasAccess) {
+				config.setUserSet(toBoolean(strUserSet, true));
+			}
+			else {
+				config.setUserSet(true);
+			}
+		}
+		catch (Throwable t) {
+			ExceptionUtil.rethrowIfNecessary(t);
+			log(config, log, t);
+			config.setUserSet(true);
+		}
+
+		// Spool Interval
+		try {
 			String strSpoolInterval = getAttr(root, "mailSpoolInterval");
 			if (!StringUtil.isEmpty(strSpoolInterval) && hasAccess) {
 				config.setMailSpoolInterval(Caster.toIntValue(strSpoolInterval, 30));
 			}
+			else {
+				config.setMailSpoolInterval(30);
+			}
+		}
+		catch (Throwable t) {
+			ExceptionUtil.rethrowIfNecessary(t);
+			log(config, log, t);
+			config.setMailSpoolInterval(30);
+		}
 
+		// Encoding
+		try {
 			String strEncoding = getAttr(root, "mailDefaultEncoding");
-			if (!StringUtil.isEmpty(strEncoding) && hasAccess) config.setMailDefaultEncoding(strEncoding);
+			if (!StringUtil.isEmpty(strEncoding, true) && hasAccess) {
+				config.setMailDefaultEncoding(strEncoding);
+			}
+			else {
+				config.setMailDefaultEncoding(CharsetUtil.UTF8);
+			}
+		}
+		catch (Throwable t) {
+			ExceptionUtil.rethrowIfNecessary(t);
+			log(config, log, t);
+			config.setMailDefaultEncoding(CharsetUtil.UTF8);
+		}
 
-			// Spool Enable
+		// Spool Enable
+		try {
 			String strSpoolEnable = getAttr(root, "mailSpoolEnable");
 			if (!StringUtil.isEmpty(strSpoolEnable) && hasAccess) {
-				config.setMailSpoolEnable(toBoolean(strSpoolEnable, false));
+				config.setMailSpoolEnable(toBoolean(strSpoolEnable, true));
 			}
+			else {
+				config.setMailSpoolEnable(true);
+			}
+		}
+		catch (Throwable t) {
+			ExceptionUtil.rethrowIfNecessary(t);
+			log(config, log, t);
+			config.setMailSpoolEnable(true);
+		}
 
-			// Timeout
+		// Timeout
+		try {
 			String strTimeout = getAttr(root, "mailConnectionTimeout");
 			if (!StringUtil.isEmpty(strTimeout) && hasAccess) {
-				config.setMailTimeout(Caster.toIntValue(strTimeout, 60));
+				config.setMailTimeout(Caster.toIntValue(strTimeout, 30));
 			}
+			else {
+				config.setMailTimeout(30);
+			}
+		}
+		catch (Throwable t) {
+			ExceptionUtil.rethrowIfNecessary(t);
+			log(config, log, t);
+			config.setMailTimeout(30);
+		}
 
-			// Servers
+		// Servers
+		List<Server> servers = new ArrayList<Server>();
+		try {
 			int index = 0;
 			// Server[] servers = null;
 			Array elServers = ConfigWebUtil.getAsArray("mailServers", root);
-			List<Server> servers = new ArrayList<Server>();
 
 			// TODO get mail servers from env var
 			if (hasAccess) {
@@ -3591,6 +3649,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
+			config.setMailServers(servers.toArray(new Server[servers.size()]));
 		}
 	}
 
