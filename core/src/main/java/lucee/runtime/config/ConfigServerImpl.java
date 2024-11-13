@@ -731,6 +731,16 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		return id;
 	}
 
+	public void clearIdentification() {
+		if (id != null) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "id")) {
+				if (id != null) {
+					id = null;
+				}
+			}
+		}
+	}
+
 	@Override
 	public Collection<BundleDefinition> getAllExtensionBundleDefintions() {
 		Map<String, BundleDefinition> rtn = new HashMap<>();

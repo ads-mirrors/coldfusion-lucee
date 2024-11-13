@@ -101,6 +101,7 @@ import lucee.runtime.config.ConfigServer;
 import lucee.runtime.config.ConfigServerImpl;
 import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.config.ConfigWebFactory;
+import lucee.runtime.config.ConfigWebImpl;
 import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.config.ConfigWebUtil;
 import lucee.runtime.config.Constants;
@@ -1156,6 +1157,14 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doUpdateAPIKey() throws PageException {
 		admin.updateAPIKey(getString("key", null));
 		store();
+		getConfigServerImpl(config).clearIdentification();
+	}
+
+	private ConfigServerImpl getConfigServerImpl(ConfigPro config) {
+		if (config instanceof ConfigServerImpl) return (ConfigServerImpl) config;
+		if (config instanceof ConfigWebImpl) return ((ConfigWebImpl) config).getConfigServerImpl();
+		// MUST remove
+		throw new RuntimeException("getConfigServerImpl: " + config.getClass().getName());
 	}
 
 	private void doRemoveAPIKey() throws PageException {
@@ -1165,6 +1174,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		catch (Exception e) {
 		}
 		store();
+		getConfigServerImpl(config).clearIdentification();
 	}
 
 	private void doGetAPIKey() throws PageException {
