@@ -173,10 +173,6 @@ import lucee.transformer.library.tag.TagLibTagScript;
  */
 public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
-	public static final boolean DEFAULT_ALLOW_COMPRESSION = false;
-	public static final boolean DEFAULT_BUFFER_TAG_BODY_OUTPUT = false;
-	public static final boolean DEFAULT_DEVELOP_MODE = false;
-
 	private static final RHExtension[] RHEXTENSIONS_EMPTY = new RHExtension[0];
 
 	private int mode = MODE_CUSTOM;

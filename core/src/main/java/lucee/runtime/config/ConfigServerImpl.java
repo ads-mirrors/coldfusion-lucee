@@ -173,6 +173,10 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		this.updateInfo = updateInfo;
 	}
 
+	public void setRoot(Struct root) {
+		this.root = root;
+	}
+
 	public UpdateInfo getUpdateInfo() {
 		return updateInfo;
 	}
@@ -345,7 +349,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 	@Override
 	public String getUpdateType() {
 		if (updateType == null) {
-			synchronized (SystemUtil.createToken("ConfigImpl", "getUpdateType")) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "getUpdateType")) {
 				if (updateType == null) {
 					String ut = ConfigWebFactory.getAttr(root, "updateType");
 					if (StringUtil.isEmpty(ut, true)) updateType = "manual";
@@ -364,7 +368,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 	@Override
 	public URL getUpdateLocation() {
 		if (updateLocation == null) {
-			synchronized (SystemUtil.createToken("ConfigImpl", "getUpdateLocation")) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "getUpdateLocation")) {
 				if (updateLocation == null) {
 					updateLocation = ConfigWebFactory.loadUpdate(this, root, getLog());
 				}
@@ -477,7 +481,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 	@Override
 	public int getLoginDelay() {
 		if (delay == -1) {
-			synchronized (SystemUtil.createToken("ConfigImpl", "getLoginDelay")) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "getLoginDelay")) {
 				if (delay == -1) {
 					delay = Caster.toIntValue(ConfigWebFactory.getAttr(root, "loginDelay"), 1);
 				}
@@ -489,7 +493,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 	@Override
 	public boolean getLoginCaptcha() {
 		if (captcha == null) {
-			synchronized (SystemUtil.createToken("ConfigImpl", "getLoginCaptcha")) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "getLoginCaptcha")) {
 				if (captcha == null) {
 					captcha = Caster.toBooleanValue(ConfigWebFactory.getAttr(root, "loginCaptcha"), false);
 				}
@@ -501,7 +505,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 	@Override
 	public boolean getRememberMe() {
 		if (rememberMe == null) {
-			synchronized (SystemUtil.createToken("ConfigImpl", "getRememberMe")) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "getRememberMe")) {
 				if (rememberMe == null) {
 					rememberMe = Caster.toBooleanValue(ConfigWebFactory.getAttr(root, "loginRememberme"), true);
 				}
@@ -720,6 +724,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 
 	@Override
 	public IdentificationServer getIdentification() {
+		id = null;
 		if (id == null) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "id")) {
 				if (id == null) {
@@ -928,9 +933,5 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 			}
 		}
 		return aiEnginePool;
-	}
-
-	public void setRoot(Struct root) {
-		this.root = root;
 	}
 }

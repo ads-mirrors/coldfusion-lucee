@@ -100,6 +100,10 @@ public interface ConfigPro extends Config {
 	public static final int[] CACHE_TYPES_MAX = new int[] { ConfigPro.CACHE_TYPE_RESOURCE, ConfigPro.CACHE_TYPE_FUNCTION, ConfigPro.CACHE_TYPE_INCLUDE, ConfigPro.CACHE_TYPE_QUERY,
 			ConfigPro.CACHE_TYPE_TEMPLATE, ConfigPro.CACHE_TYPE_OBJECT, ConfigPro.CACHE_TYPE_FILE, ConfigPro.CACHE_TYPE_HTTP, ConfigPro.CACHE_TYPE_WEBSERVICE };
 
+	public static final boolean DEFAULT_ALLOW_COMPRESSION = false;
+	public static final boolean DEFAULT_BUFFER_TAG_BODY_OUTPUT = false;
+	public static final boolean DEFAULT_DEVELOP_MODE = false;
+
 	public Iterator<Entry<String, Class<CacheHandler>>> getCacheHandlers();
 
 	public boolean getDotNotationUpperCase();

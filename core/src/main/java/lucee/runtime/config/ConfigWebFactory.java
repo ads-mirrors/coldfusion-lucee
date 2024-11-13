@@ -921,13 +921,13 @@ public final class ConfigWebFactory extends ConfigFactory {
 			}
 
 			Struct security = ConfigWebUtil.getAsStruct("security", root);
-			int vu = ConfigImpl.QUERY_VAR_USAGE_UNDEFINED;
+			int vu = ConfigPro.QUERY_VAR_USAGE_UNDEFINED;
 			if (security != null) {
-				vu = AppListenerUtil.toVariableUsage(getAttr(security, "variableUsage"), ConfigImpl.QUERY_VAR_USAGE_UNDEFINED);
-				if (vu == ConfigImpl.QUERY_VAR_USAGE_UNDEFINED) vu = AppListenerUtil.toVariableUsage(getAttr(security, "varUsage"), ConfigImpl.QUERY_VAR_USAGE_UNDEFINED);
+				vu = AppListenerUtil.toVariableUsage(getAttr(security, "variableUsage"), ConfigPro.QUERY_VAR_USAGE_UNDEFINED);
+				if (vu == ConfigPro.QUERY_VAR_USAGE_UNDEFINED) vu = AppListenerUtil.toVariableUsage(getAttr(security, "varUsage"), ConfigPro.QUERY_VAR_USAGE_UNDEFINED);
 			}
-			if (vu == ConfigImpl.QUERY_VAR_USAGE_UNDEFINED) {
-				vu = ConfigImpl.QUERY_VAR_USAGE_IGNORE;
+			if (vu == ConfigPro.QUERY_VAR_USAGE_UNDEFINED) {
+				vu = ConfigPro.QUERY_VAR_USAGE_IGNORE;
 			}
 			return vu;
 		}
@@ -936,7 +936,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			t.printStackTrace();
 			log(config, log, t);
 		}
-		return ConfigImpl.QUERY_VAR_USAGE_IGNORE;
+		return ConfigPro.QUERY_VAR_USAGE_IGNORE;
 	}
 
 	private static Resource[] _loadFileAccess(Config config, Array fileAccesses, Log log) {
@@ -2876,13 +2876,13 @@ public final class ConfigWebFactory extends ConfigFactory {
 				str = getAttr(root, "allowCompression");
 			}
 			if (!StringUtil.isEmpty(str) && hasAccess) {
-				config.setAllowCompression(toBoolean(str, ConfigImpl.DEFAULT_ALLOW_COMPRESSION));
+				config.setAllowCompression(toBoolean(str, ConfigPro.DEFAULT_ALLOW_COMPRESSION));
 			}
 
 			// mode
 			String developMode = getAttr(root, "developMode");
 			if (!StringUtil.isEmpty(developMode) && hasAccess) {
-				config.setDevelopMode(toBoolean(developMode, ConfigImpl.DEFAULT_DEVELOP_MODE));
+				config.setDevelopMode(toBoolean(developMode, ConfigPro.DEFAULT_DEVELOP_MODE));
 			}
 
 		}
@@ -3878,7 +3878,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			// debug-log-output
 			String strDLO = getAttr(root, "debuggingLogOutput");
 			if (hasAccess && !StringUtil.isEmpty(strDLO)) {
-				config.setDebugLogOutput(toBoolean(strDLO, false) ? ConfigImpl.CLIENT_BOOLEAN_TRUE : ConfigImpl.CLIENT_BOOLEAN_FALSE);
+				config.setDebugLogOutput(toBoolean(strDLO, false) ? ConfigPro.CLIENT_BOOLEAN_TRUE : ConfigPro.CLIENT_BOOLEAN_FALSE);
 			}
 
 			// debug options

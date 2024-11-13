@@ -322,9 +322,9 @@ public final class ConfigAdmin {
 	}
 
 	private synchronized void _cleanup() {
-		removeIf("allowCompression", ConfigImpl.DEFAULT_ALLOW_COMPRESSION);
-		removeIf("bufferTagBodyOutput", ConfigImpl.DEFAULT_BUFFER_TAG_BODY_OUTPUT);
-		removeIf("developMode", ConfigImpl.DEFAULT_DEVELOP_MODE);
+		removeIf("allowCompression", ConfigPro.DEFAULT_ALLOW_COMPRESSION);
+		removeIf("bufferTagBodyOutput", ConfigPro.DEFAULT_BUFFER_TAG_BODY_OUTPUT);
+		removeIf("developMode", ConfigPro.DEFAULT_DEVELOP_MODE);
 	}
 
 	private void removeIf(String name, Boolean expected) {
