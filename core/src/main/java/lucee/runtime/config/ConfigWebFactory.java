@@ -349,8 +349,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 		}
 		if (!essentialOnly) {
-			_loadWS(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded webservice");
 
 			_loadCacheHandler(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded cache handlers");
@@ -3119,18 +3117,19 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return defaultValue;
 	}
 
-	private static void _loadWS(ConfigServerImpl config, Struct root, Log log) {
+	public static ClassDefinition loadWS(ConfigImpl config, Struct root, Log log, ClassDefinition defaultValue) {
 		try {
 			Struct ws = ConfigWebUtil.getAsStruct("webservice", root);
 			ClassDefinition cd = ws != null ? getClassDefinition(ws, "", config.getIdentification()) : null;
 			if (cd != null && !StringUtil.isEmpty(cd.getClassName())) {
-				config.setWSHandlerClassDefinition(cd);
+				return cd;
 			}
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
+		return defaultValue;
 	}
 
 	public static ClassDefinition loadORMClass(ConfigImpl config, Struct root, Log log) {

@@ -124,7 +124,6 @@ import lucee.runtime.listener.JavaSettingsImpl;
 import lucee.runtime.net.mail.Server;
 import lucee.runtime.net.proxy.ProxyData;
 import lucee.runtime.net.proxy.ProxyDataImpl;
-import lucee.runtime.net.rpc.WSHandler;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
 import lucee.runtime.op.Duplicator;
@@ -4594,17 +4593,30 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	private ClassDefinition wsHandlerCD;
-	protected WSHandler wsHandler = null;
-
-	protected void setWSHandlerClassDefinition(ClassDefinition cd) {
-		this.wsHandlerCD = cd;
-		wsHandler = null;
-	}
-
-	// public abstract WSHandler getWSHandler() throws PageException;
+	private boolean initWsHandlerCD = true;
 
 	protected ClassDefinition getWSHandlerClassDefinition() {
+		if (initWsHandlerCD) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getWSHandlerClassDefinition")) {
+				if (initWsHandlerCD) {
+					wsHandlerCD = ConfigWebFactory.loadWS(this, root, getLog(), null);
+					initWsHandlerCD = false;
+				}
+			}
+		}
 		return wsHandlerCD;
+	}
+
+	protected ConfigImpl resetWSHandlerClassDefinition() {
+		if (!initWsHandlerCD) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getWSHandlerClassDefinition")) {
+				if (!initWsHandlerCD) {
+					wsHandlerCD = null;
+					initWsHandlerCD = true;
+				}
+			}
+		}
+		return this;
 	}
 
 	boolean isEmpty(ClassDefinition cd) {
