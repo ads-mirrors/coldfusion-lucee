@@ -126,6 +126,7 @@ import lucee.runtime.net.proxy.ProxyData;
 import lucee.runtime.net.proxy.ProxyDataImpl;
 import lucee.runtime.net.rpc.WSHandler;
 import lucee.runtime.op.Caster;
+import lucee.runtime.op.Decision;
 import lucee.runtime.op.Duplicator;
 import lucee.runtime.orm.ORMConfiguration;
 import lucee.runtime.orm.ORMEngine;
@@ -398,7 +399,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private List resourceLayouts = new ArrayList();
 
 	private Map<Key, Map<Key, Object>> tagDefaultAttributeValues;
-	private boolean handleUnQuotedAttrValueAsString = true;
+	private Boolean handleUnQuotedAttrValueAsString;
 
 	private Map<Integer, Object> cachedWithins = new HashMap<Integer, Object>();
 
@@ -416,7 +417,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private long applicationPathCacheTimeout = Caster.toLongValue(SystemUtil.getSystemPropOrEnvVar("lucee.application.path.cache.timeout", null), 20000);
 	private ClassLoader envClassLoader;
 
-	private boolean preciseMath = true;
+	private Boolean preciseMath;
 	private static Object token = new Object();
 	private String mainLoggerName;
 
@@ -437,7 +438,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private JavaSettings javaSettings;
 	private Map<String, JavaSettings> javaSettingsInstances = new ConcurrentHashMap<>();
 
-	private boolean fullNullSupport = false;
+	private Boolean fullNullSupport;
 
 	private Resource extInstalled;
 	private Resource extAvailable;
@@ -3975,42 +3976,96 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return debugMaxRecordsLogged;
 	}
 
-	private boolean dotNotationUpperCase = true;
-
-	protected void setDotNotationUpperCase(boolean dotNotationUpperCase) {
-		this.dotNotationUpperCase = dotNotationUpperCase;
-	}
+	private Boolean dotNotationUpperCase;
 
 	@Override
 	public boolean getDotNotationUpperCase() {
+		if (dotNotationUpperCase == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getDotNotationUpperCase")) {
+				if (dotNotationUpperCase == null) {
+					Boolean tmp = Caster.toBoolean(SystemUtil.getSystemPropOrEnvVar("lucee.preserve.case", null), null);
+					if (tmp == null) tmp = Caster.toBoolean(ConfigWebFactory.getAttr(root, "dotNotationUpperCase"), null);
+					if (tmp == null) {
+						tmp = Caster.toBoolean(ConfigWebFactory.getAttr(root, "preserveCase"), null);
+						if (tmp != null) tmp = !tmp;
+					}
+					if (tmp == null) dotNotationUpperCase = Boolean.TRUE;
+					else dotNotationUpperCase = tmp;
+				}
+			}
+		}
 		return dotNotationUpperCase;
+	}
+
+	public ConfigImpl resetDotNotationUpperCase() {
+		if (dotNotationUpperCase != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getDotNotationUpperCase")) {
+				if (dotNotationUpperCase != null) {
+					dotNotationUpperCase = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
 	public boolean preserveCase() {
-		return !dotNotationUpperCase;
+		return !getDotNotationUpperCase();
 	}
 
-	private boolean defaultFunctionOutput = true;
-
-	protected void setDefaultFunctionOutput(boolean defaultFunctionOutput) {
-		this.defaultFunctionOutput = defaultFunctionOutput;
-	}
+	private Boolean defaultFunctionOutput;
 
 	@Override
 	public boolean getDefaultFunctionOutput() {
+		if (defaultFunctionOutput == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getDefaultFunctionOutput")) {
+				if (defaultFunctionOutput == null) {
+					String output = ConfigWebFactory.getAttr(root, "defaultFunctionOutput");
+					defaultFunctionOutput = Caster.toBooleanValue(output, true);
+				}
+			}
+		}
 		return defaultFunctionOutput;
 	}
 
-	private boolean getSuppressWSBeforeArg = true;
-
-	protected void setSuppressWSBeforeArg(boolean getSuppressWSBeforeArg) {
-		this.getSuppressWSBeforeArg = getSuppressWSBeforeArg;
+	public ConfigImpl restDefaultFunctionOutput() {
+		if (defaultFunctionOutput != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getDefaultFunctionOutput")) {
+				if (defaultFunctionOutput != null) {
+					defaultFunctionOutput = null;
+				}
+			}
+		}
+		return this;
 	}
+
+	private Boolean getSuppressWSBeforeArg;
 
 	@Override
 	public boolean getSuppressWSBeforeArg() {
+		if (getSuppressWSBeforeArg == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getSuppressWSBeforeArg")) {
+				if (getSuppressWSBeforeArg == null) {
+					String suppress = SystemUtil.getSystemPropOrEnvVar("lucee.suppress.ws.before.arg", null);
+					if (StringUtil.isEmpty(suppress, true)) {
+						suppress = ConfigWebFactory.getAttr(root, new String[] { "suppressWhitespaceBeforeArgument", "suppressWhitespaceBeforecfargument" });
+					}
+					getSuppressWSBeforeArg = Caster.toBooleanValue(suppress, true);
+				}
+			}
+		}
 		return getSuppressWSBeforeArg;
+	}
+
+	public ConfigImpl restSuppressWSBeforeArg() {
+		if (getSuppressWSBeforeArg != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getSuppressWSBeforeArg")) {
+				if (getSuppressWSBeforeArg != null) {
+					getSuppressWSBeforeArg = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	private RestSettings restSetting = new RestSettingImpl(false, UDF.RETURN_FORMAT_JSON);
@@ -4045,7 +4100,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private boolean bufferOutput = DEFAULT_BUFFER_TAG_BODY_OUTPUT;
 
-	private int externalizeStringGTE = -1;
+	private Integer externalizeStringGTE;
 	private Map<String, BundleDefinition> extensionBundles;
 	private JDBCDriver[] drivers;
 	private Resource logDir;
@@ -4081,13 +4136,31 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return checkForChangesInConfigFile;
 	}
 
-	protected void setExternalizeStringGTE(int externalizeStringGTE) {
-		this.externalizeStringGTE = externalizeStringGTE;
-	}
-
 	@Override
 	public int getExternalizeStringGTE() {
+		if (externalizeStringGTE == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getExternalizeStringGTE")) {
+				if (externalizeStringGTE == null) {
+					String str = ConfigWebFactory.getAttr(root, "externalizeStringGte");
+					if (Decision.isNumber(str)) {
+						externalizeStringGTE = Caster.toIntValue(str, -1);
+					}
+					else externalizeStringGTE = -1;
+				}
+			}
+		}
 		return externalizeStringGTE;
+	}
+
+	public ConfigImpl resetExternalizeStringGTE() {
+		if (externalizeStringGTE != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getExternalizeStringGTE")) {
+				if (externalizeStringGTE != null) {
+					externalizeStringGTE = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	protected void addConsoleLayout(Object layout) {
@@ -4217,11 +4290,30 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public Boolean getHandleUnQuotedAttrValueAsString() {
+		if (handleUnQuotedAttrValueAsString == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getHandleUnQuotedAttrValueAsString")) {
+				if (handleUnQuotedAttrValueAsString == null) {
+					// Handle Unquoted Attribute Values As String
+					String str = ConfigWebFactory.getAttr(root, "handleUnquotedAttributeValueAsString");
+					if (str != null && Decision.isBoolean(str)) {
+						handleUnQuotedAttrValueAsString = Caster.toBooleanValue(str, true);
+					}
+					else handleUnQuotedAttrValueAsString = true;
+				}
+			}
+		}
 		return handleUnQuotedAttrValueAsString;
 	}
 
-	protected void setHandleUnQuotedAttrValueAsString(boolean handleUnQuotedAttrValueAsString) {
-		this.handleUnQuotedAttrValueAsString = handleUnQuotedAttrValueAsString;
+	public ConfigImpl resetHandleUnQuotedAttrValueAsString() {
+		if (handleUnQuotedAttrValueAsString != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getHandleUnQuotedAttrValueAsString")) {
+				if (handleUnQuotedAttrValueAsString != null) {
+					handleUnQuotedAttrValueAsString = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	protected void setCachedWithin(int type, Object value) {
@@ -4519,13 +4611,34 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return cd == null || StringUtil.isEmpty(cd.getClassName());
 	}
 
-	protected final void setFullNullSupport(boolean fullNullSupport) {
-		this.fullNullSupport = fullNullSupport;
-	}
-
 	@Override
 	public final boolean getFullNullSupport() {
+		if (fullNullSupport == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getFullNullSupport")) {
+				if (fullNullSupport == null) {
+					boolean fns = false;
+					String str = ConfigWebFactory.getAttr(root, new String[] { "nullSupport", "fullNullSupport" });
+					if (StringUtil.isEmpty(str, true)) str = SystemUtil.getSystemPropOrEnvVar("lucee.full.null.support", null);
+
+					if (!StringUtil.isEmpty(str, true)) {
+						fns = Caster.toBooleanValue(str, false);
+					}
+					fullNullSupport = fns;
+				}
+			}
+		}
 		return fullNullSupport;
+	}
+
+	public final ConfigImpl resetFullNullSupport() {
+		if (fullNullSupport != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getFullNullSupport")) {
+				if (fullNullSupport != null) {
+					fullNullSupport = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	private static LogEngine logEngine;
@@ -4582,11 +4695,32 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public boolean getPreciseMath() {
+		if (preciseMath == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getPreciseMath")) {
+				if (preciseMath == null) {
+					boolean pm = true;
+					String str = ConfigWebFactory.getAttr(root, "preciseMath");
+					if (StringUtil.isEmpty(str, true)) str = SystemUtil.getSystemPropOrEnvVar("lucee.precise.math", null);
+
+					if (!StringUtil.isEmpty(str, true)) {
+						pm = Caster.toBooleanValue(str, true);
+					}
+					preciseMath = pm;
+				}
+			}
+		}
 		return preciseMath;
 	}
 
-	protected void setPreciseMath(boolean preciseMath) {
-		this.preciseMath = preciseMath;
+	public ConfigImpl resetPreciseMath() {
+		if (preciseMath != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getPreciseMath")) {
+				if (preciseMath != null) {
+					preciseMath = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	protected void setMainLogger(String mainLoggerName) {

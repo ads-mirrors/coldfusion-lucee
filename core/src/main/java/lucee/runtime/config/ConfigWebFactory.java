@@ -387,9 +387,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			_loadTag(config, root, log); // load tlds
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded tags");
 
-			_loadCompiler(config, root, mode, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded compiler");
-
 			_loadScope(config, root, mode, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded scope");
 
@@ -4458,104 +4455,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			log(config, log, t);
 		}
 		return defaultValue;
-	}
-
-	private static void _loadCompiler(ConfigServerImpl config, Struct root, int mode, Log log) {
-		try {
-			// suppress WS between cffunction and cfargument
-			if (mode == ConfigPro.MODE_STRICT) {
-				config.setSuppressWSBeforeArg(true);
-			}
-			else {
-				//
-				String suppress = SystemUtil.getSystemPropOrEnvVar("lucee.suppress.ws.before.arg", null);
-				if (StringUtil.isEmpty(suppress, true)) suppress = getAttr(root, new String[] { "suppressWhitespaceBeforeArgument", "suppressWhitespaceBeforecfargument" });
-				if (!StringUtil.isEmpty(suppress, true)) {
-					config.setSuppressWSBeforeArg(Caster.toBooleanValue(suppress, true));
-				}
-			}
-
-			// do dot notation keys upper case
-			if (mode == ConfigPro.MODE_STRICT) {
-				config.setDotNotationUpperCase(false);
-			}
-			else {
-				// Env Var
-				Boolean tmp = Caster.toBoolean(SystemUtil.getSystemPropOrEnvVar("lucee.preserve.case", null), null);
-				if (tmp != null) {
-					config.setDotNotationUpperCase(!tmp.booleanValue());
-				}
-				String _case = getAttr(root, "dotNotationUpperCase");
-				String _pc = getAttr(root, "preserveCase");
-
-				if (!StringUtil.isEmpty(_pc, true)) {
-					config.setDotNotationUpperCase(!Caster.toBooleanValue(_pc, false));
-				}
-				else if (!StringUtil.isEmpty(_case, true)) {
-					config.setDotNotationUpperCase(Caster.toBooleanValue(_case, true));
-				}
-			}
-
-			// full null support
-			// if (!hasCS) {
-			boolean fns = false;
-			if (mode == ConfigPro.MODE_STRICT) {
-				fns = true;
-			}
-			else {
-				String str = getAttr(root, new String[] { "nullSupport", "fullNullSupport" });
-				if (StringUtil.isEmpty(str, true)) str = SystemUtil.getSystemPropOrEnvVar("lucee.full.null.support", null);
-
-				if (!StringUtil.isEmpty(str, true)) {
-					fns = Caster.toBooleanValue(str, false);
-				}
-			}
-			// when FNS is true or the lucee dialect is disabled we have no flip flop within a request. FNS is
-			// always the same
-			config.setFullNullSupport(fns);
-
-			// precise math
-			boolean pm = true;
-			if (mode == ConfigPro.MODE_STRICT) {
-				pm = true;
-			}
-			else {
-				String str = getAttr(root, "preciseMath");
-				if (StringUtil.isEmpty(str, true)) str = SystemUtil.getSystemPropOrEnvVar("lucee.precise.math", null);
-
-				if (!StringUtil.isEmpty(str, true)) {
-					pm = Caster.toBooleanValue(str, true);
-				}
-			}
-			config.setPreciseMath(pm);
-
-			// default output setting
-			String output = getAttr(root, "defaultFunctionOutput");
-			if (!StringUtil.isEmpty(output, true)) {
-				config.setDefaultFunctionOutput(Caster.toBooleanValue(output, true));
-			}
-
-			// suppress WS between cffunction and cfargument
-			String str = getAttr(root, "externalizeStringGte");
-			if (Decision.isNumber(str)) {
-				config.setExternalizeStringGTE(Caster.toIntValue(str, -1));
-			}
-
-			// Handle Unquoted Attribute Values As String
-			if (mode == ConfigPro.MODE_STRICT) {
-				config.setHandleUnQuotedAttrValueAsString(false);
-			}
-			else {
-				str = getAttr(root, "handleUnquotedAttributeValueAsString");
-				if (str != null && Decision.isBoolean(str)) {
-					config.setHandleUnQuotedAttrValueAsString(Caster.toBooleanValue(str, true));
-				}
-			}
-		}
-		catch (Throwable t) {
-			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
-		}
 	}
 
 	/**

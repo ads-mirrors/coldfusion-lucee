@@ -3108,6 +3108,8 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		admin.updateTemplateCharset(getString("admin", action, "templateCharset"));
 
 		store();
+		getConfigServerImpl(config).restSuppressWSBeforeArg().resetDotNotationUpperCase().resetFullNullSupport().resetPreciseMath().resetExternalizeStringGTE()
+				.resetHandleUnQuotedAttrValueAsString();
 		adminSync.broadcast(attributes, config);
 	}
 
