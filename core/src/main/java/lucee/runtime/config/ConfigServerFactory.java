@@ -230,7 +230,9 @@ public final class ConfigServerFactory extends ConfigFactory {
 		}
 		int iDoNew = getNew(engine, configServer.getConfigDir(), quick, UpdateInfo.NEW_NONE).updateType;
 		boolean doNew = iDoNew != NEW_NONE;
-		load(configServer, loadDocumentCreateIfFails(configFile, "server"), true, doNew, quick);
+		Struct root = loadDocumentCreateIfFails(configFile, "server");
+		configServer.setRoot(root);
+		load(configServer, root, true, doNew, quick);
 		((CFMLEngineImpl) ConfigWebUtil.getEngine(configServer)).onStart(configServer, true);
 	}
 
