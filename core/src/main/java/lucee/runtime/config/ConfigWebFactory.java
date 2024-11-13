@@ -136,7 +136,6 @@ import lucee.runtime.listener.AppListenerUtil;
 import lucee.runtime.listener.ApplicationListener;
 import lucee.runtime.listener.JavaSettings;
 import lucee.runtime.listener.JavaSettingsImpl;
-import lucee.runtime.listener.MixedAppListener;
 import lucee.runtime.listener.ModernAppListener;
 import lucee.runtime.listener.SerializationSettings;
 import lucee.runtime.monitor.ActionMonitor;
@@ -4467,21 +4466,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
 
-			// Listener type
-			ApplicationListener listener;
-			if (mode == ConfigPro.MODE_STRICT) {
-				listener = new ModernAppListener();
-			}
-			else {
-				String strLT = SystemUtil.getSystemPropOrEnvVar("lucee.listener.type", null);
-				if (StringUtil.isEmpty(strLT)) strLT = SystemUtil.getSystemPropOrEnvVar("lucee.application.listener", null);
-				if (StringUtil.isEmpty(strLT)) strLT = getAttr(root, new String[] { "listenerType", "applicationListener" });
-				listener = ConfigWebUtil.loadListener(strLT, null);
-				if (listener == null) {
-					if (listener == null) listener = new MixedAppListener();
-				}
-			}
-
 			// cachedwithin
 			for (int i = 0; i < ConfigPro.CACHE_TYPES.length; i++) {
 				try {
@@ -4508,29 +4492,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			}
 			if (ts != null) config.setCachedAfterTimeRange(ts);
 			else config.setCachedAfterTimeRange(null);
-
-			// Listener Mode
-			String strLM = SystemUtil.getSystemPropOrEnvVar("lucee.listener.mode", null);
-			if (StringUtil.isEmpty(strLM)) strLM = SystemUtil.getSystemPropOrEnvVar("lucee.application.mode", null);
-			if (StringUtil.isEmpty(strLM)) strLM = getAttr(root, new String[] { "listenerMode", "applicationMode" });
-			int listenerMode = ConfigWebUtil.toListenerMode(strLM, -1);
-			if (listenerMode == -1) {
-				listenerMode = ApplicationListener.MODE_CURRENT2ROOT;
-			}
-
-			listener.setMode(listenerMode);
-			config.setApplicationListener(listener);
-
-			// Req Timeout URL
-			if (mode == ConfigPro.MODE_STRICT) {
-				config.setAllowURLRequestTimeout(false);
-			}
-			else {
-				String allowURLReqTimeout = getAttr(root, new String[] { "requestTimeoutInURL", "allowUrlRequesttimeout" });
-				if (hasAccess && !StringUtil.isEmpty(allowURLReqTimeout)) {
-					config.setAllowURLRequestTimeout(Caster.toBooleanValue(allowURLReqTimeout, false));
-				}
-			}
 
 			// Req Timeout
 			ts = null;

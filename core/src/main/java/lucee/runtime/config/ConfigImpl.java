@@ -121,6 +121,7 @@ import lucee.runtime.listener.ApplicationContext;
 import lucee.runtime.listener.ApplicationListener;
 import lucee.runtime.listener.JavaSettings;
 import lucee.runtime.listener.JavaSettingsImpl;
+import lucee.runtime.listener.MixedAppListener;
 import lucee.runtime.net.mail.Server;
 import lucee.runtime.net.proxy.ProxyData;
 import lucee.runtime.net.proxy.ProxyDataImpl;
@@ -346,7 +347,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private Resource remoteClientDirectory;
 
-	private boolean allowURLRequestTimeout = false;
+	private Boolean allowURLRequestTimeout;
 	private Boolean errorStatusCode;
 	private int localMode = Undefined.MODE_LOCAL_OR_ARGUMENTS_ONLY_WHEN_EXISTS;
 
@@ -456,14 +457,29 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 */
 	@Override
 	public boolean isAllowURLRequestTimeout() {
+		if (allowURLRequestTimeout == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "isAllowURLRequestTimeout")) {
+				if (allowURLRequestTimeout == null) {
+					String allowURLReqTimeout = ConfigWebFactory.getAttr(root, new String[] { "requestTimeoutInURL", "allowUrlRequesttimeout" });
+					if (!StringUtil.isEmpty(allowURLReqTimeout)) {
+						allowURLRequestTimeout = Caster.toBooleanValue(allowURLReqTimeout, false);
+					}
+					else allowURLRequestTimeout = false;
+				}
+			}
+		}
 		return allowURLRequestTimeout;
 	}
 
-	/**
-	 * @param allowURLRequestTimeout the allowURLRequestTimeout to set
-	 */
-	public void setAllowURLRequestTimeout(boolean allowURLRequestTimeout) {
-		this.allowURLRequestTimeout = allowURLRequestTimeout;
+	public ConfigImpl resetAllowURLRequestTimeout() {
+		if (allowURLRequestTimeout != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "isAllowURLRequestTimeout")) {
+				if (allowURLRequestTimeout != null) {
+					allowURLRequestTimeout = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -2431,14 +2447,43 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public ApplicationListener getApplicationListener() {
+		if (applicationListener == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getApplicationListener")) {
+				if (applicationListener == null) {
+
+					// type
+					ApplicationListener listener;
+					String strLT = SystemUtil.getSystemPropOrEnvVar("lucee.listener.type", null);
+					if (StringUtil.isEmpty(strLT)) strLT = SystemUtil.getSystemPropOrEnvVar("lucee.application.listener", null);
+					if (StringUtil.isEmpty(strLT)) strLT = ConfigWebFactory.getAttr(root, new String[] { "listenerType", "applicationListener" });
+					listener = ConfigWebUtil.loadListener(strLT, null);
+					if (listener == null) listener = new MixedAppListener();
+
+					// mode
+					String strLM = SystemUtil.getSystemPropOrEnvVar("lucee.listener.mode", null);
+					if (StringUtil.isEmpty(strLM)) strLM = SystemUtil.getSystemPropOrEnvVar("lucee.application.mode", null);
+					if (StringUtil.isEmpty(strLM)) strLM = ConfigWebFactory.getAttr(root, new String[] { "listenerMode", "applicationMode" });
+					int listenerMode = ConfigWebUtil.toListenerMode(strLM, -1);
+					if (listenerMode == -1) listenerMode = ApplicationListener.MODE_CURRENT2ROOT;
+
+					listener.setMode(listenerMode);
+					applicationListener = listener;
+
+				}
+			}
+		}
 		return applicationListener;
 	}
 
-	/**
-	 * @param applicationListener the applicationListener to set
-	 */
-	protected void setApplicationListener(ApplicationListener applicationListener) {
-		this.applicationListener = applicationListener;
+	public ConfigImpl resetApplicationListener() {
+		if (applicationListener != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getApplicationListener")) {
+				if (applicationListener != null) {
+					applicationListener = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	/**
