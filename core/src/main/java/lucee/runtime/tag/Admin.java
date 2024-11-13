@@ -1160,7 +1160,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		getConfigServerImpl(config).clearIdentification();
 	}
 
-	private ConfigServerImpl getConfigServerImpl(ConfigPro config) {
+	public static ConfigServerImpl getConfigServerImpl(Config config) {
 		if (config instanceof ConfigServerImpl) return (ConfigServerImpl) config;
 		if (config instanceof ConfigWebImpl) return ((ConfigWebImpl) config).getConfigServerImpl();
 		// MUST remove
@@ -1256,6 +1256,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doUpdateUpdate() throws PageException {
 		admin.updateUpdate(getString("admin", action, "updatetype"), getString("admin", action, "updatelocation"));
 		store();
+		getConfigServerImpl(config).clearUpdateLocation().clearUpdateType();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -1836,6 +1837,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		admin.updateErrorTemplate(404, getString("admin", action, "template404"));
 		admin.updateErrorStatusCode(getBoolObject("admin", action, "statuscode"));
 		store();
+		getConfigServerImpl(config).clearErrorTemplates();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -1856,6 +1858,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		lucee.runtime.db.ClassDefinition cd = ClassDefinitionImpl.toClassDefinitionImpl(attributes, null, true, config.getIdentification());
 		admin.updateJavaCFX(name, cd);
 		store();
+		getConfigServerImpl(config).clearCFXTagPool();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -1878,6 +1881,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doRemoveCFX() throws PageException {
 		admin.removeCFX(getString("admin", action, "name"));
 		store();
+		getConfigServerImpl(config).clearCFXTagPool();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -2702,6 +2706,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		ClassDefinition cd = ClassDefinitionImpl.toClassDefinitionImpl(attributes, null, true, config.getIdentification());
 		admin.updateAIConnection(getString("admin", action, "name"), cd, getString("default", null), getStruct("admin", action, "custom"));
 		store();
+		getConfigServerImpl(config).clearAIEngineFactories();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -3824,6 +3829,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doRemoveAIConnection() throws PageException {
 		admin.removeAIConnection(getString("admin", action, "name"));
 		store();
+		getConfigServerImpl(config).clearAIEngineFactories();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -4671,6 +4677,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		int delay = getInt("admin", "UpdateLoginSettings", "delay");
 		admin.updateLoginSettings(captcha, rememberMe, delay);
 		store();
+		getConfigServerImpl(config).clearLoginCaptcha().clearLoginDelay().clearRememberMe();
 	}
 
 	private void doUpdateLogSettings() throws PageException {

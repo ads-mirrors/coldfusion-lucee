@@ -1582,6 +1582,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return aiEngineFactories;
 	}
 
+	public ConfigImpl clearAIEngineFactories() {
+		if (aiEngineFactories != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getAIEngineFactories")) {
+				if (aiEngineFactories != null) {
+					aiEngineFactories = null;
+				}
+			}
+		}
+		return this;
+	}
+
 	protected Log getLog() {
 		try {
 			return getLog("application", false);
@@ -1642,6 +1653,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 		}
 		return cfxTagPool;
+	}
+
+	public ConfigImpl clearCFXTagPool() {
+		if (cfxTagPool != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCFXTagPool")) {
+				if (cfxTagPool != null) {
+					cfxTagPool = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -1808,6 +1830,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return this.searchEngineClassDef;
 	}
 
+	public ConfigImpl clearSearchEngineClassDefinition() {
+		if (searchEngineClassDef != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getSearchEngineClassDefinition")) {
+				if (searchEngineClassDef != null) {
+					searchEngineClassDef = null;
+				}
+			}
+		}
+		return this;
+	}
+
 	@Override
 	public String getSearchEngineDirectory() {
 		if (searchEngineDirectory == null) {
@@ -1818,6 +1851,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 		}
 		return this.searchEngineDirectory;
+	}
+
+	public ConfigImpl clearSearchEngineDirectory() {
+		if (searchEngineDirectory != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getSearchEngineDirectory")) {
+				if (searchEngineDirectory != null) {
+					searchEngineDirectory = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -1891,6 +1935,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 		}
 		return errorTemplates.get(Caster.toString(statusCode));
+	}
+
+	public ConfigImpl clearErrorTemplates() {
+		if (errorTemplates != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getErrorTemplate")) {
+				if (errorTemplates != null) {
+					errorTemplates = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override

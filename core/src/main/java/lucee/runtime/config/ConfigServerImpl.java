@@ -360,6 +360,17 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		return updateType;
 	}
 
+	public ConfigServerImpl clearUpdateType() {
+		if (updateType != null) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "getUpdateType")) {
+				if (updateType != null) {
+					updateType = null;
+				}
+			}
+		}
+		return this;
+	}
+
 	@Override
 	public void setUpdateType(String updateType) {
 		throw new RuntimeException("this action is no longer allowed");
@@ -375,6 +386,17 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 			}
 		}
 		return updateLocation;
+	}
+
+	public ConfigServerImpl clearUpdateLocation() {
+		if (updateLocation != null) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "getUpdateLocation")) {
+				if (updateLocation != null) {
+					updateLocation = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -490,6 +512,17 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		return delay;
 	}
 
+	public ConfigServerImpl clearLoginDelay() {
+		if (delay != -1) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "getLoginDelay")) {
+				if (delay != -1) {
+					delay = -1;
+				}
+			}
+		}
+		return this;
+	}
+
 	@Override
 	public boolean getLoginCaptcha() {
 		if (captcha == null) {
@@ -502,6 +535,17 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		return captcha;
 	}
 
+	public ConfigServerImpl clearLoginCaptcha() {
+		if (captcha != null) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "getLoginCaptcha")) {
+				if (captcha != null) {
+					captcha = null;
+				}
+			}
+		}
+		return this;
+	}
+
 	@Override
 	public boolean getRememberMe() {
 		if (rememberMe == null) {
@@ -512,6 +556,17 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 			}
 		}
 		return rememberMe;
+	}
+
+	public ConfigServerImpl clearRememberMe() {
+		if (rememberMe != null) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "getRememberMe")) {
+				if (rememberMe != null) {
+					rememberMe = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override

@@ -134,6 +134,7 @@ import lucee.runtime.search.SearchEngine;
 import lucee.runtime.security.SecurityManager;
 import lucee.runtime.security.SecurityManagerImpl;
 import lucee.runtime.security.SerialNumber;
+import lucee.runtime.tag.Admin;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.ArrayImpl;
 import lucee.runtime.type.Collection;
@@ -1862,6 +1863,7 @@ public final class ConfigAdmin {
 		ConfigAdmin admin = new ConfigAdmin(config, null, true);
 		admin._removeSearchEngine();
 		admin._store();
+		Admin.getConfigServerImpl(config).clearSearchEngineClassDefinition().clearSearchEngineDirectory();
 		if (reload) admin._reload();
 	}
 
@@ -4847,6 +4849,7 @@ public final class ConfigAdmin {
 					ClassDefinition cd = ClassDefinitionImpl.toClassDefinition(map, false, config.getIdentification());
 					if (cd != null && cd.hasClass()) {
 						_updateSearchEngine(cd);
+						Admin.getConfigServerImpl(config).clearSearchEngineClassDefinition().clearSearchEngineDirectory();
 						reloadNecessary = true;
 					}
 					logger.info("extension", "Update search engine [" + cd + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
