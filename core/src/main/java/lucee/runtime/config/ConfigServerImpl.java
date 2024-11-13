@@ -360,7 +360,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		return updateType;
 	}
 
-	public ConfigServerImpl clearUpdateType() {
+	public ConfigServerImpl resetUpdateType() {
 		if (updateType != null) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "getUpdateType")) {
 				if (updateType != null) {
@@ -388,7 +388,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		return updateLocation;
 	}
 
-	public ConfigServerImpl clearUpdateLocation() {
+	public ConfigServerImpl resetUpdateLocation() {
 		if (updateLocation != null) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "getUpdateLocation")) {
 				if (updateLocation != null) {
@@ -512,7 +512,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		return delay;
 	}
 
-	public ConfigServerImpl clearLoginDelay() {
+	public ConfigServerImpl resetLoginDelay() {
 		if (delay != -1) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "getLoginDelay")) {
 				if (delay != -1) {
@@ -535,7 +535,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		return captcha;
 	}
 
-	public ConfigServerImpl clearLoginCaptcha() {
+	public ConfigServerImpl resetLoginCaptcha() {
 		if (captcha != null) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "getLoginCaptcha")) {
 				if (captcha != null) {
@@ -558,7 +558,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		return rememberMe;
 	}
 
-	public ConfigServerImpl clearRememberMe() {
+	public ConfigServerImpl resetRememberMe() {
 		if (rememberMe != null) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "getRememberMe")) {
 				if (rememberMe != null) {
@@ -791,7 +791,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		return id;
 	}
 
-	public void clearIdentification() {
+	public void resetIdentification() {
 		if (id != null) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "id")) {
 				if (id != null) {

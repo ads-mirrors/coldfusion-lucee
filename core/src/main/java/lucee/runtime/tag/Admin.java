@@ -1157,7 +1157,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doUpdateAPIKey() throws PageException {
 		admin.updateAPIKey(getString("key", null));
 		store();
-		getConfigServerImpl(config).clearIdentification();
+		getConfigServerImpl(config).resetIdentification();
 	}
 
 	public static ConfigServerImpl getConfigServerImpl(Config config) {
@@ -1174,7 +1174,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		catch (Exception e) {
 		}
 		store();
-		getConfigServerImpl(config).clearIdentification();
+		getConfigServerImpl(config).resetIdentification();
 	}
 
 	private void doGetAPIKey() throws PageException {
@@ -1256,7 +1256,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doUpdateUpdate() throws PageException {
 		admin.updateUpdate(getString("admin", action, "updatetype"), getString("admin", action, "updatelocation"));
 		store();
-		getConfigServerImpl(config).clearUpdateLocation().clearUpdateType();
+		getConfigServerImpl(config).resetUpdateLocation().resetUpdateType();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -1754,6 +1754,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doUpdateSecurity() throws PageException {
 		admin.updateSecurity(getString("varUsage", ""), getBool("limitEvaluation", null));
 		store();
+		getConfigServerImpl(config).resetQueryVarUsage();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -1837,7 +1838,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		admin.updateErrorTemplate(404, getString("admin", action, "template404"));
 		admin.updateErrorStatusCode(getBoolObject("admin", action, "statuscode"));
 		store();
-		getConfigServerImpl(config).clearErrorTemplates();
+		getConfigServerImpl(config).resetErrorTemplates().resetErrorStatusCode();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -1845,6 +1846,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 
 		admin.updateRegexType(getString("admin", action, "regextype"));
 		store();
+		getConfigServerImpl(config).resetRegex();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -1858,7 +1860,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		lucee.runtime.db.ClassDefinition cd = ClassDefinitionImpl.toClassDefinitionImpl(attributes, null, true, config.getIdentification());
 		admin.updateJavaCFX(name, cd);
 		store();
-		getConfigServerImpl(config).clearCFXTagPool();
+		getConfigServerImpl(config).resetCFXTagPool();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -1881,7 +1883,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doRemoveCFX() throws PageException {
 		admin.removeCFX(getString("admin", action, "name"));
 		store();
-		getConfigServerImpl(config).clearCFXTagPool();
+		getConfigServerImpl(config).resetCFXTagPool();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -2210,6 +2212,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doRemoveMailServer() throws PageException {
 		admin.removeMailServer(getString("admin", action, "hostname"), getString("username", null));
 		store();
+		getConfigServerImpl(config).resetMailServers();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -2225,6 +2228,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 
 		);
 		store();
+		getConfigServerImpl(config).resetMailServers();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -2250,6 +2254,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 
 		admin.setMailDefaultCharset(getString("admin", action, "defaultencoding"));
 		store();
+		getConfigServerImpl(config).resetMailDefaultCharSet().resetMailSpoolEnable().resetMailSendPartial().resetMailSpoolInterval().resetMailTimeout();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -2706,7 +2711,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		ClassDefinition cd = ClassDefinitionImpl.toClassDefinitionImpl(attributes, null, true, config.getIdentification());
 		admin.updateAIConnection(getString("admin", action, "name"), cd, getString("default", null), getStruct("admin", action, "custom"));
 		store();
-		getConfigServerImpl(config).clearAIEngineFactories();
+		getConfigServerImpl(config).resetAIEngineFactories();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -2724,23 +2729,13 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 				if (!dir.isDirectory()) throw new ApplicationException("Directory [" + path + " ] not exists ");
 			}
 		}
-		// listenerCfcPath validation
-		/*
-		 * String path = getString("admin", action, "listenerCfcPath"); if(!StringUtil.isEmpty(path,true)) {
-		 * path=path.trim().replace('\\','/'); if(path.indexOf("./")==-1)path=path.replace('.','/'); String
-		 * ext = "."+Constants.getCFMLComponentExtension(); if(!path.endsWith(ext)) path+=ext;
-		 * 
-		 * Resource listnerCFC = ResourceUtil.toResourceNotExisting(pageContext, path);
-		 * if(!listnerCFC.exists()) throw new ApplicationException("invalid [" + listnerCFC
-		 * +" ] listener CFC"); }
-		 */
-
 		ClassDefinition cd = ClassDefinitionImpl.toClassDefinitionImpl(attributes, null, true, config.getIdentification());
 		admin.updateGatewayEntry(getString("admin", action, "id"), cd, getString("admin", action, "cfcPath"), getString("admin", action, "listenerCfcPath"), startup,
 				getStruct("admin", action, "custom"), getBoolV("readOnly", false)
 
 		);
 		store();
+		getConfigServerImpl(config).resetGatewayEntries();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -2793,6 +2788,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doRemoveLogSetting() throws PageException {
 		admin.removeLogSetting(getString("admin", "RemoveLogSettings", "name"));
 		store();
+		getConfigServerImpl(config).resetLoggers();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -3100,6 +3096,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		else admin.updateCachedAfterTimeRange(null);
 
 		store();
+		getConfigServerImpl(config).resetInspectTemplate().resetInspectTemplateAutoInterval();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -3829,13 +3826,14 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doRemoveAIConnection() throws PageException {
 		admin.removeAIConnection(getString("admin", action, "name"));
 		store();
-		getConfigServerImpl(config).clearAIEngineFactories();
+		getConfigServerImpl(config).resetAIEngineFactories();
 		adminSync.broadcast(attributes, config);
 	}
 
 	private void doRemoveGatewayEntry() throws PageException {
 		admin.removeGatewayEntry(getString("admin", action, "id"));
 		store();
+		getConfigServerImpl(config).resetGatewayEntries();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -4209,6 +4207,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doUpdateQueueSettings() throws PageException {
 		admin.updateQueue(getInteger("admin", action, "max"), getInteger("admin", action, "timeout"), getBoolObject("admin", action, "enable"));
 		store();
+		getConfigServerImpl(config).resetQueueEnable().resetQueueMax().resetQueueTimeout();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -4229,6 +4228,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		admin.updateCTPathCache(getBool("admin", action, "customTagPathCache"));
 		admin.updateCustomTagExtensions(getString("admin", action, "extensions"));
 		store();
+		getConfigServerImpl(config).resetUseCTPathCache().resetLocalCustomTag().resetCustomTagExtensions().resetCustomTagDeepSearch();// MUST add more here
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -4251,6 +4251,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		ClassDefinition cd = ClassDefinitionImpl.toClassDefinitionImpl(attributes, null, true, config.getIdentification());
 		admin.updateORMEngine(cd);
 		store();
+		getConfigServerImpl(config).resetORMEngineClassDefintion().resetORMConfig();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -4265,6 +4266,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		lucee.runtime.db.ClassDefinition cd = ClassDefinitionImpl.toClassDefinitionImpl(attributes, null, true, config.getIdentification());
 		admin.updateExecutionLog(cd, getStruct("admin", "updateExecutionLog", "arguments"), getBool("admin", "updateExecutionLog", "enabled"));
 		store();
+		getConfigServerImpl(config).resetExecutionLogEnabled().resetExecutionLogFactory();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -4283,6 +4285,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doRemoveORMEngine() throws PageException {
 		admin.removeORMEngine();
 		store();
+		getConfigServerImpl(config).resetORMEngineClassDefintion().resetORMConfig();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -4587,6 +4590,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		}
 		finally {
 			store();
+			getConfigServerImpl(config).resetLocale().resetTimeZone();
 		}
 		adminSync.broadcast(attributes, config);
 	}
@@ -4677,7 +4681,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		int delay = getInt("admin", "UpdateLoginSettings", "delay");
 		admin.updateLoginSettings(captcha, rememberMe, delay);
 		store();
-		getConfigServerImpl(config).clearLoginCaptcha().clearLoginDelay().clearRememberMe();
+		getConfigServerImpl(config).resetLoginCaptcha().resetLoginDelay().resetRememberMe();
 	}
 
 	private void doUpdateLogSettings() throws PageException {
@@ -4697,6 +4701,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		admin.updateLogSettings(getString("admin", "UpdateLogSettings", "name", true), l, acd, Caster.toStruct(getObject("admin", "UpdateLogSettings", "appenderArgs")), lcd,
 				Caster.toStruct(getObject("admin", "UpdateLogSettings", "layoutArgs")));
 		store();
+		getConfigServerImpl(config).resetLoggers();
 	}
 
 	private void doUpdateSSLCertificate() throws PageException {
@@ -5014,6 +5019,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		admin.updateTemplateCharset(getString("admin", action, "templateCharset"));
 		admin.updateWebCharset(getString("admin", action, "webCharset"));
 		store();
+		getConfigServerImpl(config).resetResourceCharSet().resetTemplateCharSet().resetWebCharSet();
 		adminSync.broadcast(attributes, config);
 	}
 

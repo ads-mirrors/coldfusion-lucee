@@ -478,6 +478,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return compileType;
 	}
 
+	public ConfigImpl resetCompileType() {
+		if (compileType != -1) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCompileType")) {
+				if (compileType != -1) {
+					compileType = -1;
+				}
+			}
+		}
+		return this;
+	}
+
 	@Override
 	public void reset() {
 		componentDumpTemplate = "";
@@ -642,6 +653,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return spoolEnable;
 	}
 
+	public ConfigImpl resetMailSpoolEnable() {
+		if (spoolEnable != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "mail")) {
+				if (spoolEnable != null) {
+					spoolEnable = null;
+				}
+			}
+		}
+		return this;
+	}
+
 	// FUTURE add to interface
 	@Override
 	public boolean isMailSendPartial() {
@@ -653,6 +675,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 		}
 		return sendPartial;
+	}
+
+	public ConfigImpl resetMailSendPartial() {
+		if (sendPartial != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "mail")) {
+				if (sendPartial != null) {
+					sendPartial = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	// FUTURE add to interface and impl
@@ -668,6 +701,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return userSet;
 	}
 
+	public ConfigImpl resetUserset() {
+		if (userSet != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "mail")) {
+				if (userSet != null) {
+					userSet = null;
+				}
+			}
+		}
+		return this;
+	}
+
 	@Override
 	public Server[] getMailServers() {
 		if (mailServers == null) {
@@ -680,6 +724,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return mailServers;
 	}
 
+	public ConfigImpl resetMailServers() {
+		if (mailServers != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "mail")) {
+				if (mailServers != null) {
+					mailServers = null;
+				}
+			}
+		}
+		return this;
+	}
+
 	@Override
 	public int getMailTimeout() {
 		if (mailTimeout == -1) {
@@ -690,6 +745,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 		}
 		return mailTimeout;
+	}
+
+	public ConfigImpl resetMailTimeout() {
+		if (mailTimeout != -1) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "mail")) {
+				if (mailTimeout != -1) {
+					mailTimeout = -1;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -707,6 +773,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 		}
 		return varUsage;
+	}
+
+	public ConfigImpl resetQueryVarUsage() {
+		if (varUsage != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getQueryVarUsage")) {
+				if (varUsage != null) {
+					varUsage = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -744,6 +821,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 		}
 		return locale;
+	}
+
+	public ConfigImpl resetLocale() {
+		if (locale != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getLocale")) {
+				if (locale != null) {
+					locale = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -815,6 +903,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return spoolInterval;
 	}
 
+	public ConfigImpl resetMailSpoolInterval() {
+		if (spoolInterval != -1) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "mail")) {
+				if (spoolInterval != -1) {
+					spoolInterval = -1;
+				}
+			}
+		}
+		return this;
+	}
+
 	@Override
 	public TimeZone getTimeZone() {
 		if (timeZone == null) {
@@ -831,6 +930,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 		}
 		return timeZone;
+	}
+
+	public ConfigImpl resetTimeZone() {
+		if (timeZone != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getTimeZone")) {
+				if (timeZone != null) {
+					timeZone = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -1582,7 +1692,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return aiEngineFactories;
 	}
 
-	public ConfigImpl clearAIEngineFactories() {
+	public ConfigImpl resetAIEngineFactories() {
 		if (aiEngineFactories != null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getAIEngineFactories")) {
 				if (aiEngineFactories != null) {
@@ -1655,7 +1765,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return cfxTagPool;
 	}
 
-	public ConfigImpl clearCFXTagPool() {
+	public ConfigImpl resetCFXTagPool() {
 		if (cfxTagPool != null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getCFXTagPool")) {
 				if (cfxTagPool != null) {
@@ -1830,7 +1940,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return this.searchEngineClassDef;
 	}
 
-	public ConfigImpl clearSearchEngineClassDefinition() {
+	public ConfigImpl resetSearchEngineClassDefinition() {
 		if (searchEngineClassDef != null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getSearchEngineClassDefinition")) {
 				if (searchEngineClassDef != null) {
@@ -1853,7 +1963,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return this.searchEngineDirectory;
 	}
 
-	public ConfigImpl clearSearchEngineDirectory() {
+	public ConfigImpl resetSearchEngineDirectory() {
 		if (searchEngineDirectory != null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getSearchEngineDirectory")) {
 				if (searchEngineDirectory != null) {
@@ -1937,7 +2047,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return errorTemplates.get(Caster.toString(statusCode));
 	}
 
-	public ConfigImpl clearErrorTemplates() {
+	public ConfigImpl resetErrorTemplates() {
 		if (errorTemplates != null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getErrorTemplate")) {
 				if (errorTemplates != null) {
@@ -2075,6 +2185,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return templateCharset;
 	}
 
+	public ConfigImpl resetTemplateCharSet() {
+		if (templateCharset != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getTemplateCharSet")) {
+				if (templateCharset != null) {
+					templateCharset = null;
+				}
+			}
+		}
+		return this;
+	}
+
 	@Override
 	public Charset getWebCharset() {
 		return CharsetUtil.toCharset(getWebCharSet());
@@ -2097,6 +2218,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return webCharset;
 	}
 
+	public ConfigImpl resetWebCharSet() {
+		if (webCharset != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getWebCharSet")) {
+				if (webCharset != null) {
+					webCharset = null;
+				}
+			}
+		}
+		return this;
+	}
+
 	@Override
 	public Charset getResourceCharset() {
 		return CharsetUtil.toCharset(getResourceCharSet());
@@ -2116,6 +2248,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 		}
 		return resourceCharset;
+	}
+
+	public ConfigImpl resetResourceCharSet() {// = SystemUtil.getCharSet()
+		if (resourceCharset != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getResourceCharSet")) {
+				if (resourceCharset != null) {
+					resourceCharset = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -2175,6 +2318,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 		}
 		return mailDefaultCharset;
+	}
+
+	public ConfigImpl resetMailDefaultCharSet() {
+		if (mailDefaultCharset != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "mail")) {
+				if (mailDefaultCharset != null) {
+					mailDefaultCharset = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	/**
@@ -2438,6 +2592,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return dmpWriterEntries;
 	}
 
+	public ConfigImpl resetDumpWritersEntries() {
+		if (dmpWriterEntries != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getDumpWritersEntries")) {
+				if (dmpWriterEntries != null) {
+					dmpWriterEntries = null;
+				}
+			}
+		}
+		return this;
+	}
+
 	@Override
 	public DumpWriter getDefaultDumpWriter(int defaultType) {
 		DumpWriterEntry[] entries = getDumpWritersEntries();
@@ -2502,6 +2667,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return useCTPathCache;
 	}
 
+	public ConfigImpl resetUseCTPathCache() {
+		if (useCTPathCache != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "useCTPathCache")) {
+				if (useCTPathCache != null) {
+					useCTPathCache = null;
+				}
+			}
+		}
+		return this;
+	}
+
 	public void flushComponentPathCache() {
 		if (componentPathCache != null) componentPathCache.clear();
 	}
@@ -2564,6 +2740,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return err;
 	}
 
+	public ConfigImpl resetErrWriter() {
+		if (err != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getErrWriter")) {
+				if (err != null) {
+					err = null;
+				}
+			}
+		}
+		return this;
+	}
+
 	@Override
 	public PrintWriter getOutWriter() {
 		if (out == null) {
@@ -2582,6 +2769,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 		}
 		return out;
+	}
+
+	public ConfigImpl resetOutWriter() {
+		if (out != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getOutWriter")) {
+				if (out != null) {
+					out = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -2655,6 +2853,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return doLocalCustomTag;
 	}
 
+	public ConfigImpl resetLocalCustomTag() {
+		if (doLocalCustomTag != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "doLocalCustomTag")) {
+				if (doLocalCustomTag != null) {
+					doLocalCustomTag = null;
+				}
+			}
+		}
+		return this;
+	}
+
 	@Override
 	public String[] getCustomTagExtensions() {
 		if (customTagExtensions == null) {
@@ -2684,6 +2893,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 		}
 		return customTagExtensions;
+	}
+
+	public ConfigImpl resetCustomTagExtensions() {
+		if (customTagExtensions != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCustomTagExtensions")) {
+				if (customTagExtensions != null) {
+					customTagExtensions = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -2719,6 +2939,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return doCustomTagDeepSearch;
 	}
 
+	public ConfigImpl resetCustomTagDeepSearch() {
+		if (doCustomTagDeepSearch != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "doCustomTagDeepSearch")) {
+				if (doCustomTagDeepSearch != null) {
+					doCustomTagDeepSearch = null;
+				}
+			}
+		}
+		return this;
+	}
+
 	/**
 	 * @return the version
 	 */
@@ -2741,6 +2972,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 		}
 		return version;
+	}
+
+	public ConfigImpl resetVersion() {
+		if (version != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getVersion")) {
+				if (version != null) {
+					version = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -2784,6 +3026,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 		}
 		return constants;
+	}
+
+	public ConfigImpl resetConstants() {
+		if (constants != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getConstants")) {
+				if (constants != null) {
+					constants = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	/**
@@ -2862,6 +3115,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 		}
 		return errorStatusCode;
+	}
+
+	public ConfigImpl resetErrorStatusCode() {
+		if (errorStatusCode != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getErrorStatusCode")) {
+				if (errorStatusCode != null) {
+					errorStatusCode = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -3087,6 +3351,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return inspectTemplate;
 	}
 
+	public ConfigImpl resetInspectTemplate() {
+		if (inspectTemplate != -1) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getInspectTemplate")) {
+				if (inspectTemplate != -1) {
+					inspectTemplate = -1;
+				}
+			}
+		}
+		return this;
+	}
+
 	@Override
 	public boolean getTypeChecking() {
 		return typeChecking;
@@ -3107,6 +3382,18 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 		}
 		return slow ? inspectTemplateAutoIntervalSlow : inspectTemplateAutoIntervalFast;
+	}
+
+	public ConfigImpl resetInspectTemplateAutoInterval() {
+		if (inspectTemplateAutoIntervalSlow != -1) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getInspectTemplateAutoInterval")) {
+				if (inspectTemplateAutoIntervalSlow != -1) {
+					inspectTemplateAutoIntervalSlow = -1;
+					inspectTemplateAutoIntervalFast = -1;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -3257,11 +3544,24 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	public boolean getExecutionLogEnabled() {
 		if (executionLogEnabled == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getExecutionLogEnabled")) {
-				Struct sct = ConfigWebUtil.getAsStruct("executionLog", root);
-				executionLogEnabled = Caster.toBoolean(ConfigWebFactory.getAttr(sct, "enabled"), Boolean.FALSE);
+				if (executionLogEnabled == null) {
+					Struct sct = ConfigWebUtil.getAsStruct("executionLog", root);
+					executionLogEnabled = Caster.toBoolean(ConfigWebFactory.getAttr(sct, "enabled"), Boolean.FALSE);
+				}
 			}
 		}
 		return executionLogEnabled;
+	}
+
+	public ConfigImpl resetExecutionLogEnabled() {
+		if (executionLogEnabled != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getExecutionLogEnabled")) {
+				if (executionLogEnabled != null) {
+					executionLogEnabled = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -3274,6 +3574,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 		}
 		return executionLogFactory;
+	}
+
+	public ConfigImpl resetExecutionLogFactory() {
+		if (executionLogFactory != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getExecutionLogFactory")) {
+				if (executionLogFactory != null) {
+					executionLogFactory = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -3333,8 +3644,18 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 				}
 			}
 		}
-
 		return cdORMEngine;
+	}
+
+	public ConfigImpl resetORMEngineClassDefintion() {
+		if (cdORMEngine != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getORMEngineClassDefintion")) {
+				if (cdORMEngine != null) {
+					cdORMEngine = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	public ClassDefinition<? extends ORMEngine> getORMEngineClass() {
@@ -3351,6 +3672,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 		}
 		return ormConfig;
+	}
+
+	public ConfigImpl resetORMConfig() {
+		if (ormConfig != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getORMConfig")) {
+				if (ormConfig != null) {
+					ormConfig = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	private Map<String, SoftReference<PageSource>> componentPathCache = null;// new ArrayList<Page>();
@@ -3830,6 +4162,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return loggers;
 	}
 
+	public Map<String, LoggerAndSourceData> resetLoggers() {
+		if (loggers != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "loggers")) {
+				if (loggers != null) {
+					loggers = null;
+				}
+			}
+		}
+		return loggers;
+	}
+
 	// FUTURE add to interface
 	public String[] getLogNames() {
 		Set<String> keys = getLoggers().keySet();
@@ -4014,6 +4357,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return queueMax;
 	}
 
+	public ConfigImpl resetQueueMax() {
+		if (queueMax != -1) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getQueueMax")) {
+				if (queueMax != -1) {
+					queueMax = -1;
+				}
+			}
+		}
+		return this;
+	}
+
 	@Override
 	public long getQueueTimeout() {
 		if (queueTimeout == -1) {
@@ -4028,6 +4382,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return queueTimeout;
 	}
 
+	public ConfigImpl resetQueueTimeout() {
+		if (queueTimeout != -1) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getQueueTimeout")) {
+				if (queueTimeout != -1) {
+					queueTimeout = -1;
+				}
+			}
+		}
+		return this;
+	}
+
 	@Override
 	public boolean getQueueEnable() {
 		if (queueEnable == null) {
@@ -4040,6 +4405,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 		}
 		return queueEnable;
+	}
+
+	public ConfigImpl resetQueueEnable() {
+		if (queueEnable != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getQueueEnable")) {
+				if (queueEnable != null) {
+					queueEnable = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	private boolean cgiScopeReadonly = true;
@@ -4114,6 +4490,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return gatewayEntries;
 	}
 
+	public ConfigImpl resetGatewayEntries() {
+		if (gatewayEntries != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getGatewayEntries")) {
+				if (gatewayEntries != null) {
+					gatewayEntries = null;
+				}
+			}
+		}
+		return this;
+	}
+
 	private ClassDefinition wsHandlerCD;
 	protected WSHandler wsHandler = null;
 
@@ -4184,6 +4571,15 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return regex;
 	}
 
+	public ConfigImpl resetRegex() {
+		if (regex != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getRegex")) {
+				if (regex != null) regex = null;
+			}
+		}
+		return this;
+	}
+
 	@Override
 	public boolean getPreciseMath() {
 		return preciseMath;
@@ -4226,6 +4622,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		}
 
 		return this.mainLoggerName;
+	}
+
+	public ConfigImpl resetMainLogger() {
+		if (mainLoggerName != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getMainLogger")) {
+				if (mainLoggerName != null) {
+					mainLoggerName = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -4287,6 +4694,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return extInstalled;
 	}
 
+	public ConfigImpl resetExtensionInstalledDir() {
+		if (extInstalled != null) {
+			synchronized (SystemUtil.createToken("extensions", "installed")) {
+				if (extInstalled != null) {
+					extInstalled = null;
+				}
+			}
+		}
+		return this;
+	}
+
 	@Override
 	public Resource getExtensionAvailableDir() {
 		if (extAvailable == null) {
@@ -4298,5 +4716,16 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 		}
 		return extAvailable;
+	}
+
+	public ConfigImpl resetExtensionAvailableDir() {
+		if (extAvailable != null) {
+			synchronized (SystemUtil.createToken("extensions", "available")) {
+				if (extAvailable != null) {
+					extAvailable = null;
+				}
+			}
+		}
+		return this;
 	}
 }
