@@ -94,4 +94,8 @@ public abstract class IdentificationImpl implements Identification, Serializable
 		qs.append(name).append('=').append(value); // TODO encoding
 	}
 
+	@Override
+	public String toString() {
+		return "id:" + getId() + ";apikey:" + getApiKey() + ";securityKey:" + getSecurityKey() + ";securityToken:" + getSecurityToken();
+	}
 }
