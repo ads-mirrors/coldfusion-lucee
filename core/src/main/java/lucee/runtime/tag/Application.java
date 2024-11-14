@@ -926,9 +926,9 @@ public final class Application extends TagImpl implements DynamicAttributes {
 
 		ApplicationContextSupport acs = (ApplicationContextSupport) ac;
 
-		if (scriptrotect != null) ac.setScriptProtect(AppListenerUtil.translateScriptProtect(scriptrotect));
+		if (scriptrotect != null) ac.setScriptProtect(AppListenerUtil.translateScriptProtect(scriptrotect, 0));
 		if (functionpaths != null) acs.setFunctionDirectories(AppListenerUtil.loadResources(pageContext.getConfig(), ac, functionpaths, true));
-		if (proxy != null) acs.setProxyData(ProxyDataImpl.toProxyData(proxy));
+		if (proxy != null) acs.setProxyData(ProxyDataImpl.toProxyData(proxy, null));
 		if (bufferOutput != null) ac.setBufferOutput(bufferOutput.booleanValue());
 		if (secureJson != null) ac.setSecureJson(secureJson.booleanValue());
 		if (typeChecking != null) ac.setTypeChecking(typeChecking.booleanValue());

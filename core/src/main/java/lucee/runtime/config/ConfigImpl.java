@@ -2736,7 +2736,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 					String strScriptProtect = SystemUtil.getSystemPropOrEnvVar("lucee.script.protect", null);
 					if (StringUtil.isEmpty(strScriptProtect)) strScriptProtect = ConfigWebFactory.getAttr(root, "scriptProtect");
 					if (!StringUtil.isEmpty(strScriptProtect)) {
-						scriptProtect = AppListenerUtil.translateScriptProtect(strScriptProtect);
+						scriptProtect = AppListenerUtil.translateScriptProtect(strScriptProtect, 0);
 					}
 					else scriptProtect = ApplicationContext.SCRIPT_PROTECT_ALL;
 				}

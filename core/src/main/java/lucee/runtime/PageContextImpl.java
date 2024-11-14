@@ -825,15 +825,14 @@ public final class PageContextImpl extends PageContext {
 	@Override
 	public void writePSQ(Object o) throws IOException, PageException {
 		// is var usage allowed?
-		if (getApplicationContext().getQueryVarUsage() != ConfigPro.QUERY_VAR_USAGE_IGNORE) {
+		if ((applicationContext == null ? config.getQueryVarUsage() : getApplicationContext().getQueryVarUsage()) != ConfigPro.QUERY_VAR_USAGE_IGNORE) {
 			// Warning
-			if (getApplicationContext().getQueryVarUsage() == ConfigPro.QUERY_VAR_USAGE_WARN) {
+			if ((applicationContext == null ? config.getQueryVarUsage() : getApplicationContext().getQueryVarUsage()) == ConfigPro.QUERY_VAR_USAGE_WARN) {
 				DebuggerImpl.deprecated(this, "query.variableUsage",
 						"Please do not use variables within the cfquery tag, instead use the tag \"cfqueryparam\" or the attribute \"params\"");
-
 			}
 			// Error
-			else if (getApplicationContext().getQueryVarUsage() == ConfigPro.QUERY_VAR_USAGE_ERROR) {
+			else if ((applicationContext == null ? config.getQueryVarUsage() : getApplicationContext().getQueryVarUsage()) == ConfigPro.QUERY_VAR_USAGE_ERROR) {
 				throw new ApplicationException("Variables are not allowed within cfquery, please use the tag <cfqueryparam> or the attribute \"params\" instead.");
 			}
 		}
@@ -928,15 +927,18 @@ public final class PageContextImpl extends PageContext {
 	}
 
 	public PageSource getPageSource(String realPath) {
-		return PageSourceImpl.best(config.getPageSources(this, getApplicationContext().getMappings(), realPath, false, useSpecialMappings, true));
+		return PageSourceImpl.best(
+				config.getPageSources(this, applicationContext == null ? config.getMappings() : getApplicationContext().getMappings(), realPath, false, useSpecialMappings, true));
 	}
 
 	public PageSource[] getPageSources(String realPath) { // to not change, this is used in the flex extension
-		return config.getPageSources(this, getApplicationContext().getMappings(), realPath, false, useSpecialMappings, true, false);
+		return config.getPageSources(this, applicationContext == null ? config.getMappings() : getApplicationContext().getMappings(), realPath, false, useSpecialMappings, true,
+				false);
 	}
 
 	public PageSource getPageSourceExisting(String realPath) { // do not change, this method is used in flex extension
-		return config.getPageSourceExisting(this, getApplicationContext().getMappings(), realPath, false, useSpecialMappings, true, false);
+		return config.getPageSourceExisting(this, applicationContext == null ? config.getMappings() : getApplicationContext().getMappings(), realPath, false, useSpecialMappings,
+				true, false);
 	}
 
 	public boolean useSpecialMappings(boolean useTagMappings) {
@@ -950,12 +952,12 @@ public final class PageContextImpl extends PageContext {
 	}
 
 	public Resource getPhysical(String realPath, boolean alsoDefaultMapping) {
-		return config.getPhysical(getApplicationContext().getMappings(), realPath, alsoDefaultMapping);
+		return config.getPhysical(applicationContext == null ? config.getMappings() : getApplicationContext().getMappings(), realPath, alsoDefaultMapping);
 	}
 
 	@Override
 	public PageSource toPageSource(Resource res, PageSource defaultValue) {
-		return config.toPageSource(getApplicationContext().getMappings(), res, defaultValue);
+		return config.toPageSource(applicationContext == null ? config.getMappings() : getApplicationContext().getMappings(), res, defaultValue);
 	}
 
 	@Override
@@ -1452,7 +1454,7 @@ public final class PageContextImpl extends PageContext {
 
 	@Override
 	public CGI cgiScope() {
-		CGI cgi = getApplicationContext().getCGIScopeReadonly() ? cgiR : cgiRW;
+		CGI cgi = (applicationContext == null ? config.getCGIScopeReadonly() : getApplicationContext().getCGIScopeReadonly()) ? cgiR : cgiRW;
 		if (!cgi.isInitalized()) cgi.initialize(this);
 		return cgi;
 	}
@@ -2845,7 +2847,7 @@ public final class PageContextImpl extends PageContext {
 
 	public boolean show() {
 		if (isGatewayContext()) return false;
-		ApplicationContextSupport ac = getApplicationContext();
+		ApplicationContextSupport ac = applicationContext;
 		if (ac == null) {
 			return config.getShowDoc() || config.getShowMetric() || config.getShowTest() || (config.getShowDebug() /* && DebuggerImpl.getDebugEntry(this) != null */);
 		}
@@ -2855,26 +2857,26 @@ public final class PageContextImpl extends PageContext {
 
 	public boolean showDebug() {
 		if (isGatewayContext()) return false;
-		return getApplicationContext().getShowDebug();
+		return applicationContext == null ? config.getShowDebug() : getApplicationContext().getShowDebug();
 	}
 
 	public boolean showDoc() {
 		if (isGatewayContext()) return false;
-		return getApplicationContext().getShowDoc();
+		return applicationContext == null ? config.getShowDoc() : getApplicationContext().getShowDoc();
 	}
 
 	public boolean showMetric() {
 		if (isGatewayContext()) return false;
-		return getApplicationContext().getShowMetric();
+		return applicationContext == null ? config.getShowMetric() : getApplicationContext().getShowMetric();
 	}
 
 	public boolean showTest() {
 		if (isGatewayContext()) return false;
-		return getApplicationContext().getShowTest();
+		return applicationContext == null ? config.getShowTest() : getApplicationContext().getShowTest();
 	}
 
 	public boolean hasDebugOptions(int option) {
-		return getApplicationContext().hasDebugOptions(option);
+		return applicationContext == null ? config.hasDebugOptions(option) : getApplicationContext().hasDebugOptions(option);
 	}
 
 	public int getDebugOptions() {
@@ -2948,7 +2950,7 @@ public final class PageContextImpl extends PageContext {
 	@Override
 	public long getRequestTimeout() {
 		if (requestTimeout == -1) {
-			return getApplicationContext().getRequestTimeout().getMillis();
+			return applicationContext == null ? config.getRequestTimeout().getMillis() : getApplicationContext().getRequestTimeout().getMillis();
 		}
 		return requestTimeout;
 	}
@@ -3157,7 +3159,7 @@ public final class PageContextImpl extends PageContext {
 
 	@Override
 	public Locale getLocale() {
-		Locale l = getApplicationContext() == null ? null : getApplicationContext().getLocale();
+		Locale l = applicationContext == null ? null : getApplicationContext().getLocale();
 		if (l != null) return l;
 		if (locale != null) return locale;
 		return config.getLocale();
@@ -3165,7 +3167,7 @@ public final class PageContextImpl extends PageContext {
 
 	@Override
 	public void setLocale(Locale locale) {
-		if (getApplicationContext() != null) getApplicationContext().setLocale(locale);
+		if (applicationContext != null) getApplicationContext().setLocale(locale);
 		this.locale = locale;
 		HttpServletResponse rsp = getHttpServletResponse();
 
@@ -3446,6 +3448,17 @@ public final class PageContextImpl extends PageContext {
 	@Override
 	public ApplicationContextSupport getApplicationContext() {
 		if (applicationContext == null) {
+			synchronized (scopeFactory) {
+				if (applicationContext == null) {
+					applicationContext = new ClassicApplicationContext(config, "", true, null);
+				}
+			}
+		}
+		return applicationContext;
+	}
+
+	public ApplicationContextSupport getApplicationContext(boolean createIfNecessary) {
+		if (createIfNecessary && applicationContext == null) {
 			synchronized (scopeFactory) {
 				if (applicationContext == null) {
 					applicationContext = new ClassicApplicationContext(config, "", true, null);
@@ -3785,7 +3798,7 @@ public final class PageContextImpl extends PageContext {
 	@Override
 	public TimeZone getTimeZone() {
 		if (timeZone != null) return timeZone;
-		TimeZone tz = getApplicationContext() == null ? null : getApplicationContext().getTimeZone();
+		TimeZone tz = applicationContext == null ? null : getApplicationContext().getTimeZone();
 		if (tz != null) return tz;
 		return config.getTimeZone();
 	}
@@ -3922,7 +3935,7 @@ public final class PageContextImpl extends PageContext {
 	@Override
 	public short getSessionType() {
 		if (isGatewayContext()) return Config.SESSION_TYPE_APPLICATION;
-		return getApplicationContext().getSessionType();
+		return applicationContext == null ? config.getSessionType() : getApplicationContext().getSessionType();
 	}
 
 	// this is just a wrapper method for ACF
@@ -3933,7 +3946,7 @@ public final class PageContextImpl extends PageContext {
 	@Override
 	public DataSource getDataSource(String datasource) throws PageException {
 
-		DataSource ds = getApplicationContext() == null ? null : getApplicationContext().getDataSource(datasource, null);
+		DataSource ds = applicationContext == null ? null : getApplicationContext().getDataSource(datasource, null);
 		if (ds != null) return ds;
 		ds = getConfig().getDataSource(datasource, null);
 		if (ds != null) return ds;
@@ -3943,7 +3956,7 @@ public final class PageContextImpl extends PageContext {
 
 	@Override
 	public DataSource getDataSource(String datasource, DataSource defaultValue) {
-		DataSource ds = getApplicationContext() == null ? null : getApplicationContext().getDataSource(datasource, null);
+		DataSource ds = applicationContext == null ? null : getApplicationContext().getDataSource(datasource, null);
 		if (ds == null) ds = getConfig().getDataSource(datasource, defaultValue);
 		return ds;
 	}
@@ -3952,7 +3965,7 @@ public final class PageContextImpl extends PageContext {
 		cacheName = cacheName.toLowerCase().trim();
 
 		CacheConnection cc = null;
-		if (getApplicationContext() != null) cc = getApplicationContext().getCacheConnection(cacheName, null);
+		if (applicationContext != null) cc = getApplicationContext().getCacheConnection(cacheName, null);
 		if (cc == null) cc = config.getCacheConnections().get(cacheName);
 		if (cc == null) return defaultValue;
 
@@ -3963,7 +3976,7 @@ public final class PageContextImpl extends PageContext {
 		cacheName = cacheName.toLowerCase().trim();
 
 		CacheConnection cc = null;
-		if (getApplicationContext() != null) cc = getApplicationContext().getCacheConnection(cacheName, null);
+		if (applicationContext != null) cc = getApplicationContext().getCacheConnection(cacheName, null);
 		if (cc == null) cc = config.getCacheConnections().get(cacheName);
 		if (cc == null) throw CacheUtil.noCache(config, cacheName);
 
@@ -4000,14 +4013,14 @@ public final class PageContextImpl extends PageContext {
 
 	@Override
 	public Charset getResourceCharset() {
-		Charset cs = getApplicationContext() == null ? null : getApplicationContext().getResourceCharset();
+		Charset cs = applicationContext == null ? null : getApplicationContext().getResourceCharset();
 		if (cs != null) return cs;
 		return config.getResourceCharset();
 	}
 
 	@Override
 	public Charset getWebCharset() {
-		Charset cs = getApplicationContext() == null ? null : getApplicationContext().getWebCharset();
+		Charset cs = applicationContext == null ? null : getApplicationContext().getWebCharset();
 		if (cs != null) return cs;
 		return config.getWebCharset();
 	}
@@ -4017,7 +4030,7 @@ public final class PageContextImpl extends PageContext {
 	}
 
 	public boolean getTypeChecking() {
-		return getApplicationContext().getTypeChecking();
+		return applicationContext == null ? config.getTypeChecking() : getApplicationContext().getTypeChecking();
 	}
 
 	public boolean getAllowCompression() {
@@ -4030,12 +4043,12 @@ public final class PageContextImpl extends PageContext {
 
 	@Override
 	public Object getCachedWithin(int type) {
-		return getApplicationContext().getCachedWithin(type);
+		return applicationContext == null ? config.getCachedWithin(type) : getApplicationContext().getCachedWithin(type);
 	}
 
 	// FUTURE add to interface
 	public lucee.runtime.net.mail.Server[] getMailServers() {
-		lucee.runtime.net.mail.Server[] appms = getApplicationContext().getMailServers();
+		lucee.runtime.net.mail.Server[] appms = applicationContext == null ? null : getApplicationContext().getMailServers();
 		if (ArrayUtil.isEmpty(appms)) return config.getMailServers();
 
 		lucee.runtime.net.mail.Server[] cms = config.getMailServers();
@@ -4047,6 +4060,7 @@ public final class PageContextImpl extends PageContext {
 
 	// FUTURE add to interface
 	public boolean getFullNullSupport() {
+		if (applicationContext == null) return config.getFullNullSupport();
 		return getApplicationContext().getFullNullSupport();
 	}
 
@@ -4106,7 +4120,7 @@ public final class PageContextImpl extends PageContext {
 	public Log getLog(String name) {
 		Log log = null;
 		try {
-			log = getApplicationContext().getLog(name);
+			log = applicationContext == null ? config.getLog(name) : getApplicationContext().getLog(name);
 		}
 		catch (PageException e) {
 			config.getLog("application").error(getClass().getName(), e);
@@ -4118,7 +4132,7 @@ public final class PageContextImpl extends PageContext {
 	public Log getLog(String name, boolean createIfNecessary) {
 		Log log = null;
 		try {
-			log = getApplicationContext().getLog(name);
+			log = applicationContext == null ? config.getLog(name) : getApplicationContext().getLog(name);
 		}
 		catch (PageException e) {
 			config.getLog("application").error(getClass().getName(), e);
@@ -4207,7 +4221,7 @@ public final class PageContextImpl extends PageContext {
 	}
 
 	public Regex getRegex() {
-		return getApplicationContext().getRegex();
+		return applicationContext == null ? config.getRegex() : getApplicationContext().getRegex();
 	}
 
 	private static int getIdCounter() {

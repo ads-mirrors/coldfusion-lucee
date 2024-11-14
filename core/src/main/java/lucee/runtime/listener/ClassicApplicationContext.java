@@ -28,6 +28,7 @@ import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 
 import lucee.commons.io.CharsetUtil;
+import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.type.ftp.FTPConnectionData;
@@ -72,24 +73,24 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 	private static final long serialVersionUID = 940663152793150953L;
 
 	private String name;
-	private boolean setClientCookies;
-	private boolean setDomainCookies;
-	private boolean setSessionManagement;
-	private boolean setClientManagement;
-	private TimeSpan sessionTimeout = null;
-	private TimeSpan requestTimeout = null;
+	private Boolean setClientCookies;
+	private Boolean setDomainCookies;
+	private Boolean setSessionManagement;
+	private Boolean setClientManagement;
+	private TimeSpan sessionTimeout;
+	private TimeSpan requestTimeout;
 	private TimeSpan clientTimeout;
-	private TimeSpan applicationTimeout = null;
+	private TimeSpan applicationTimeout;
 	private int loginStorage = -1;
 	private String clientstorage;
 	private String sessionstorage;
-	private int scriptProtect;
-	private boolean typeChecking;
+	private Integer scriptProtect;
+	private Boolean typeChecking;
 	private Mapping[] mappings;
 	private Mapping[] ctmappings;
 	private Mapping[] cmappings;
 	private List<Resource> funcDirs;
-	private boolean bufferOutput;
+	private Boolean bufferOutput;
 	private boolean secureJson;
 	private String secureJsonPrefix = "//";
 	private boolean isDefault;
@@ -100,16 +101,16 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 	private Properties s3;
 	private FTPConnectionData ftp;
 
-	private int localMode;
+	private Integer localMode;
 	private Locale locale;
 	private TimeZone timeZone;
 	private CharSet webCharset;
 	private CharSet resourceCharset;
-	private short sessionType;
-	private boolean sessionCluster;
-	private boolean clientCluster;
+	private Short sessionType;
+	private Boolean sessionCluster;
+	private Boolean clientCluster;
 	private Resource source;
-	private boolean triggerComponentDataMember;
+	private Boolean triggerComponentDataMember;
 	private Map<Integer, String> defaultCaches = new ConcurrentHashMap<Integer, String>();
 	private Map<Collection.Key, CacheConnection> cacheConnections = new ConcurrentHashMap<Collection.Key, CacheConnection>();
 	private Server[] mailServers;
@@ -121,12 +122,12 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 	private DataSource[] dataSources;
 	private UDF onMissingTemplate;
 
-	private short scopeCascading;
-	private boolean allowCompression;
-	private boolean suppressRemoteComponentContent;
+	private Short scopeCascading;
+	private Boolean allowCompression;
+	private Boolean suppressRemoteComponentContent;
 
 	private short wstype;
-	private boolean cgiScopeReadonly;
+	private Boolean cgiScopeReadonly;
 
 	private SessionCookieData sessionCookie;
 
@@ -139,11 +140,11 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	private boolean wsMaintainSession;
 
-	private boolean fullNullSupport;
+	private Boolean fullNullSupport;
 	private SerializationSettings serializationSettings = SerializationSettings.DEFAULT;
 
-	private boolean queryPSQ;
-	private int queryVarUsage;
+	private Boolean queryPSQ;
+	private Integer queryVarUsage;
 
 	private ProxyData proxyData;
 
@@ -153,23 +154,25 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	private Map<Key, Object> customAttrs;
 
-	private boolean allowImplicidQueryCall;
-	private boolean limitEvaluation;
+	private Boolean allowImplicidQueryCall;
+	private Boolean limitEvaluation;
 	private Regex regex;
 
-	private boolean preciseMath;
-	private boolean formUrlAsStruct;
+	private Boolean preciseMath;
+	private Boolean formUrlAsStruct;
 
-	private int returnFormat = UDF.RETURN_FORMAT_WDDX;
+	private Integer returnFormat;
 
-	private boolean showDebug;
+	private Boolean showDebug;
 
-	private boolean showDoc;
+	private Boolean showDoc;
 
-	private boolean showMetric;
+	private Boolean showMetric;
 
-	private boolean showTest;
-	private int debugging;
+	private Boolean showTest;
+	private Integer debugging;
+
+	private ConfigPro cp;
 
 	/**
 	 * constructor of the class
@@ -178,69 +181,13 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 	 */
 	public ClassicApplicationContext(ConfigWeb config, String name, boolean isDefault, Resource source) {
 		super(config);
-		ConfigPro cp = (ConfigPro) config;
+		cp = (ConfigPro) config;
 		this.name = name;
-		setClientCookies = config.isClientCookies();
-		setDomainCookies = config.isDomainCookies();
-		setSessionManagement = config.isSessionManagement();
-		setClientManagement = config.isClientManagement();
-		sessionTimeout = config.getSessionTimeout();
-		requestTimeout = config.getRequestTimeout();
-		clientTimeout = config.getClientTimeout();
-		applicationTimeout = config.getApplicationTimeout();
+
 		loginStorage = Scope.SCOPE_COOKIE;
-		scriptProtect = config.getScriptProtect();
-		typeChecking = cp.getTypeChecking();
-		allowCompression = cp.allowCompression();
 		this.isDefault = isDefault;
-		this.defaultDataSource = config.getDefaultDataSource();
-		this.localMode = config.getLocalMode();
-		this.queryPSQ = config.getPSQL();
-		this.queryVarUsage = ((ConfigPro) config).getQueryVarUsage();
-		this.queryCachedAfter = ((ConfigPro) config).getCachedAfterTimeRange();
-
-		this.locale = config.getLocale();
-		this.timeZone = config.getTimeZone();
-		this.fullNullSupport = config.getFullNullSupport();
-		this.scopeCascading = config.getScopeCascadingType();
-		this.allowImplicidQueryCall = config.allowImplicidQueryCall();
-		this.limitEvaluation = cp.limitEvaluation();
-
-		this.webCharset = cp.getWebCharSet();
-		this.resourceCharset = cp.getResourceCharSet();
-		this.bufferOutput = cp.getBufferOutput();
-		suppressRemoteComponentContent = cp.isSuppressContent();
-		this.sessionType = config.getSessionType();
-		this.sessionCluster = config.getSessionCluster();
-		this.clientCluster = config.getClientCluster();
-		this.clientstorage = cp.getClientStorage();
-		this.sessionstorage = cp.getSessionStorage();
-
 		this.source = source;
-		this.triggerComponentDataMember = config.getTriggerComponentDataMember();
-		this.restSettings = config.getRestSetting();
 		this.wstype = WS_TYPE_AXIS1;
-		cgiScopeReadonly = cp.getCGIScopeReadonly();
-		this.antiSamyPolicy = ((ConfigPro) config).getAntiSamyPolicy();
-		this.regex = cp.getRegex();
-		this.preciseMath = cp.getPreciseMath();
-		this.formUrlAsStruct = cp.getFormUrlAsStruct();
-
-		this.returnFormat = cp.getReturnFormat();
-		this.showDebug = cp.getShowDebug();
-		this.showDoc = cp.getShowDoc();
-		this.showMetric = cp.getShowMetric();
-		this.showTest = cp.getShowTest();
-
-		if (cp.hasDebugOptions(ConfigPro.DEBUG_DATABASE)) this.debugging += ConfigPro.DEBUG_DATABASE;
-		if (cp.hasDebugOptions(ConfigPro.DEBUG_DUMP)) this.debugging += ConfigPro.DEBUG_DUMP;
-		if (cp.hasDebugOptions(ConfigPro.DEBUG_EXCEPTION)) this.debugging += ConfigPro.DEBUG_EXCEPTION;
-		if (cp.hasDebugOptions(ConfigPro.DEBUG_IMPLICIT_ACCESS)) this.debugging += ConfigPro.DEBUG_IMPLICIT_ACCESS;
-		if (cp.hasDebugOptions(ConfigPro.DEBUG_QUERY_USAGE)) this.debugging += ConfigPro.DEBUG_QUERY_USAGE;
-		if (cp.hasDebugOptions(ConfigPro.DEBUG_TEMPLATE)) this.debugging += ConfigPro.DEBUG_TEMPLATE;
-		if (cp.hasDebugOptions(ConfigPro.DEBUG_THREAD)) this.debugging += ConfigPro.DEBUG_THREAD;
-		if (cp.hasDebugOptions(ConfigPro.DEBUG_TIMER)) this.debugging += ConfigPro.DEBUG_TIMER;
-		if (cp.hasDebugOptions(ConfigPro.DEBUG_TRACING)) this.debugging += ConfigPro.DEBUG_TRACING;
 
 	}
 
@@ -330,6 +277,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public TimeSpan getApplicationTimeout() {
+		if (applicationTimeout == null) return config.getApplicationTimeout();
 		return applicationTimeout;
 	}
 
@@ -372,6 +320,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public TimeSpan getSessionTimeout() {
+		if (sessionTimeout == null) return config.getSessionTimeout();
 		return sessionTimeout;
 	}
 
@@ -385,6 +334,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public TimeSpan getClientTimeout() {
+		if (clientTimeout == null) return config.getClientTimeout();
 		return clientTimeout;
 	}
 
@@ -398,6 +348,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public boolean isSetClientCookies() {
+		if (setClientCookies == null) return config.isClientCookies();
 		return setClientCookies;
 	}
 
@@ -411,6 +362,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public boolean isSetClientManagement() {
+		if (setClientManagement == null) return config.isClientManagement();
 		return setClientManagement;
 	}
 
@@ -424,6 +376,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public boolean isSetDomainCookies() {
+		if (setDomainCookies == null) return config.isDomainCookies();
 		return setDomainCookies;
 	}
 
@@ -437,6 +390,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public boolean isSetSessionManagement() {
+		if (setSessionManagement == null) return config.isSessionManagement();
 		return setSessionManagement;
 	}
 
@@ -450,11 +404,13 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public String getClientstorage() {
+		if (clientstorage == null) return ((ConfigPro) config).getClientStorage();
 		return clientstorage;
 	}
 
 	@Override
 	public String getSessionstorage() {
+		if (sessionstorage == null) return ((ConfigPro) config).getSessionStorage();
 		return sessionstorage;
 	}
 
@@ -488,7 +444,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public int getScriptProtect() {
-		// if(isDefault)print.err("get:"+scriptProtect);
+		if (scriptProtect == null) return config.getScriptProtect();
 		return scriptProtect;
 	}
 
@@ -502,6 +458,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public boolean getTypeChecking() {
+		if (typeChecking == null) return ((ConfigPro) config).getTypeChecking();
 		return typeChecking;
 	}
 
@@ -553,6 +510,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public boolean getBufferOutput() {
+		if (bufferOutput == null) return ((ConfigPro) config).getBufferOutput();
 		return bufferOutput;
 	}
 
@@ -581,6 +539,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public Object getDefDataSource() {
+		if (defaultDataSource == null) return config.getDefaultDataSource();
 		return defaultDataSource;
 	}
 
@@ -638,39 +597,45 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public int getLocalMode() {
+		if (localMode == null) return config.getLocalMode();
 		return localMode;
 	}
 
 	@Override
 	public Locale getLocale() {
+		if (locale == null) return config.getLocale();
 		return locale;
 	}
 
 	@Override
 	public TimeZone getTimeZone() {
+		if (timeZone == null) return config.getTimeZone();
 		return timeZone;
 	}
 
 	@Override
 	public boolean getFullNullSupport() {
+		if (fullNullSupport == null) return config.getFullNullSupport();
 		return fullNullSupport;
 	}
 
 	@Override
 	public Charset getWebCharset() {
-		return CharsetUtil.toCharset(webCharset);
+		return CharsetUtil.toCharset(getWebCharSet());
 	}
 
 	public CharSet getWebCharSet() {
+		if (webCharset == null) return ((ConfigPro) config).getWebCharSet();
 		return webCharset;
 	}
 
 	@Override
 	public Charset getResourceCharset() {
-		return CharsetUtil.toCharset(resourceCharset);
+		return CharsetUtil.toCharset(getResourceCharSet());
 	}
 
 	public CharSet getResourceCharSet() {
+		if (resourceCharset == null) return ((ConfigPro) config).getResourceCharSet();
 		return resourceCharset;
 	}
 
@@ -712,6 +677,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 	 */
 	@Override
 	public short getSessionType() {
+		if (sessionType == null) return config.getSessionType();
 		return sessionType;
 	}
 
@@ -728,6 +694,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 	 */
 	@Override
 	public boolean getSessionCluster() {
+		if (sessionCluster == null) return config.getSessionCluster();
 		return sessionCluster;
 	}
 
@@ -744,6 +711,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 	 */
 	@Override
 	public boolean getClientCluster() {
+		if (clientCluster == null) return config.getClientCluster();
 		return clientCluster;
 	}
 
@@ -787,6 +755,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public boolean getTriggerComponentDataMember() {
+		if (triggerComponentDataMember == null) return config.getTriggerComponentDataMember();
 		return triggerComponentDataMember;
 	}
 
@@ -856,11 +825,13 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public boolean getFormUrlAsStruct() {
+		if (formUrlAsStruct == null) return cp.getFormUrlAsStruct();
 		return formUrlAsStruct;
 	}
 
 	@Override
 	public RestSettings getRestSettings() {
+		if (restSettings == null) return config.getRestSetting();
 		return restSettings;
 	}
 
@@ -917,6 +888,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public short getScopeCascading() {
+		if (scopeCascading == null) return config.getScopeCascadingType();
 		return scopeCascading;
 	}
 
@@ -927,6 +899,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public boolean getAllowImplicidQueryCall() {
+		if (allowImplicidQueryCall == null) return config.allowImplicidQueryCall();
 		return allowImplicidQueryCall;
 	}
 
@@ -937,6 +910,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public boolean getLimitEvaluation() {
+		if (limitEvaluation == null) return ((ConfigPro) config).limitEvaluation();
 		return limitEvaluation;
 	}
 
@@ -947,6 +921,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public boolean getAllowCompression() {
+		if (allowCompression == null) return ((ConfigPro) config).allowCompression();
 		return allowCompression;
 	}
 
@@ -957,6 +932,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public TimeSpan getRequestTimeout() {
+		if (requestTimeout == null) return config.getRequestTimeout();
 		return requestTimeout;
 	}
 
@@ -973,6 +949,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public boolean getSuppressContent() {
+		if (suppressRemoteComponentContent == null) return ((ConfigPro) config).isSuppressContent();
 		return suppressRemoteComponentContent;
 	}
 
@@ -993,6 +970,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public boolean getCGIScopeReadonly() {
+		if (cgiScopeReadonly == null) return ((ConfigPro) config).getCGIScopeReadonly();
 		return cgiScopeReadonly;
 	}
 
@@ -1003,6 +981,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public Resource getAntiSamyPolicyResource() {
+		if (antiSamyPolicy == null) return cp.getAntiSamyPolicy();
 		return antiSamyPolicy;
 	}
 
@@ -1110,6 +1089,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public boolean getQueryPSQ() {
+		if (queryPSQ == null) return config.getPSQL();
 		return queryPSQ;
 	}
 
@@ -1120,6 +1100,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public int getQueryVarUsage() {
+		if (queryVarUsage == null) return ((ConfigPro) config).getQueryVarUsage();
 		return queryVarUsage;
 	}
 
@@ -1130,6 +1111,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public TimeSpan getQueryCachedAfter() {
+		if (queryCachedAfter == null) return ((ConfigPro) config).getCachedAfterTimeRange();
 		return queryCachedAfter;
 	}
 
@@ -1177,6 +1159,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public Regex getRegex() {
+		if (regex == null) return cp.getRegex();
 		return regex;
 	}
 
@@ -1187,6 +1170,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public boolean getPreciseMath() {
+		if (preciseMath == null) return cp.getPreciseMath();
 		return preciseMath;
 	}
 
@@ -1197,6 +1181,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public int getReturnFormat() {
+		if (returnFormat == null) return cp.getReturnFormat();
 		return returnFormat;
 	}
 
@@ -1207,21 +1192,25 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public boolean getShowDebug() {
+		if (showDebug == null) return cp.getShowDebug();
 		return this.showDebug;
 	}
 
 	@Override
 	public boolean getShowDoc() {
+		if (showDoc == null) return cp.getShowDoc();
 		return this.showDoc;
 	}
 
 	@Override
 	public boolean getShowMetric() {
+		if (showMetric == null) return cp.getShowMetric();
 		return this.showMetric;
 	}
 
 	@Override
 	public boolean getShowTest() {
+		if (showTest == null) return cp.getShowTest();
 		return this.showTest;
 	}
 
@@ -1247,11 +1236,29 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public boolean hasDebugOptions(int option) {
-		return (debugging & option) > 0;
+		return (getDebugOptions() & option) > 0;
 	}
 
 	@Override
 	public int getDebugOptions() {
+		if (debugging == null) {
+			synchronized (SystemUtil.createToken("ClassicApplicationContext", "getDebugOptions")) {
+				if (debugging == null) {
+					int d = 0;
+					if (cp.hasDebugOptions(ConfigPro.DEBUG_DATABASE)) d += ConfigPro.DEBUG_DATABASE;
+					if (cp.hasDebugOptions(ConfigPro.DEBUG_DUMP)) d += ConfigPro.DEBUG_DUMP;
+					if (cp.hasDebugOptions(ConfigPro.DEBUG_EXCEPTION)) d += ConfigPro.DEBUG_EXCEPTION;
+					if (cp.hasDebugOptions(ConfigPro.DEBUG_IMPLICIT_ACCESS)) d += ConfigPro.DEBUG_IMPLICIT_ACCESS;
+					if (cp.hasDebugOptions(ConfigPro.DEBUG_QUERY_USAGE)) d += ConfigPro.DEBUG_QUERY_USAGE;
+					if (cp.hasDebugOptions(ConfigPro.DEBUG_TEMPLATE)) d += ConfigPro.DEBUG_TEMPLATE;
+					if (cp.hasDebugOptions(ConfigPro.DEBUG_THREAD)) d += ConfigPro.DEBUG_THREAD;
+					if (cp.hasDebugOptions(ConfigPro.DEBUG_TIMER)) d += ConfigPro.DEBUG_TIMER;
+					if (cp.hasDebugOptions(ConfigPro.DEBUG_TRACING)) d += ConfigPro.DEBUG_TRACING;
+					debugging = d;
+				}
+			}
+		}
+
 		return debugging;
 	}
 

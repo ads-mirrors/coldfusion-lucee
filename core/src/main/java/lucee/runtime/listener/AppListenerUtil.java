@@ -592,7 +592,7 @@ public final class AppListenerUtil {
 	 * @param strScriptProtect
 	 * @return
 	 */
-	public static int translateScriptProtect(String strScriptProtect) {
+	public static int translateScriptProtect(String strScriptProtect, int defaultValue) {
 		strScriptProtect = strScriptProtect.toLowerCase().trim();
 
 		if ("none".equals(strScriptProtect)) return ApplicationContext.SCRIPT_PROTECT_NONE;
@@ -613,6 +613,7 @@ public final class AppListenerUtil {
 			else if ("form".equals(item) && (scriptProtect & ApplicationContext.SCRIPT_PROTECT_FORM) == 0) scriptProtect += ApplicationContext.SCRIPT_PROTECT_FORM;
 			else if ("url".equals(item) && (scriptProtect & ApplicationContext.SCRIPT_PROTECT_URL) == 0) scriptProtect += ApplicationContext.SCRIPT_PROTECT_URL;
 		}
+		if (scriptProtect == 0) return defaultValue;
 		return scriptProtect;
 	}
 

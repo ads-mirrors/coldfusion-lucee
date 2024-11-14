@@ -225,7 +225,7 @@ public class ProxyDataImpl implements ProxyData, Serializable {
 		return includes;
 	}
 
-	public static ProxyData toProxyData(Struct sct) {
+	public static ProxyData toProxyData(Struct sct, ProxyData defaultValue) {
 		ProxyDataImpl pd = null;
 		if (sct != null) {
 			String srv = Caster.toString(sct.get(KeyConstants._server, null), null);
@@ -247,6 +247,7 @@ public class ProxyDataImpl implements ProxyData, Serializable {
 				pd.setIncludes(toStringSet(sct.get("includes", null)));
 			}
 		}
+		if (pd == null) return defaultValue;
 		return pd;
 	}
 
