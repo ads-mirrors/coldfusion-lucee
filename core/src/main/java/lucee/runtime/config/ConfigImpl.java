@@ -229,7 +229,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private boolean tempDirectoryReload;
 	private TimeSpan clientTimeout;
 	private TimeSpan sessionTimeout;
-	private TimeSpan applicationTimeout = new TimeSpanImpl(1, 0, 0, 0);
+	private TimeSpan applicationTimeout;
 	private TimeSpan requestTimeout;
 
 	private boolean sessionManagement = true;
@@ -714,7 +714,29 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public TimeSpan getApplicationTimeout() {
+		if (applicationTimeout == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getApplicationTimeout")) {
+				if (applicationTimeout == null) {
+					String str = ConfigWebFactory.getAttr(root, "applicationTimeout");
+					if (!StringUtil.isEmpty(str, true)) {
+						applicationTimeout = Caster.toTimespan(str.trim(), null);
+					}
+					if (applicationTimeout == null) applicationTimeout = new TimeSpanImpl(1, 0, 0, 0);
+				}
+			}
+		}
 		return applicationTimeout;
+	}
+
+	public ConfigImpl resetApplicationTimeout() {
+		if (applicationTimeout != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getApplicationTimeout")) {
+				if (applicationTimeout != null) {
+					applicationTimeout = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -726,7 +748,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 					if (!StringUtil.isEmpty(str, true)) {
 						sessionTimeout = Caster.toTimespan(str.trim(), null);
 					}
-					else sessionTimeout = new TimeSpanImpl(0, 0, 30, 0);
+					if (sessionTimeout == null) sessionTimeout = new TimeSpanImpl(0, 0, 30, 0);
 				}
 			}
 		}
@@ -1613,21 +1635,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		while (it.hasNext()) {
 			existingFL.setFunction(it.next());
 		}
-	}
-
-	/**
-	 * @param strApplicationTimeout The applicationTimeout to set.
-	 * @throws PageException
-	 */
-	void setApplicationTimeout(String strApplicationTimeout) throws PageException {
-		setApplicationTimeout(Caster.toTimespan(strApplicationTimeout));
-	}
-
-	/**
-	 * @param applicationTimeout The applicationTimeout to set.
-	 */
-	protected void setApplicationTimeout(TimeSpan applicationTimeout) {
-		this.applicationTimeout = applicationTimeout;
 	}
 
 	/**

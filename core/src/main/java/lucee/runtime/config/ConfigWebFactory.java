@@ -3159,12 +3159,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
 
-			// App Timeout
-			String appTimeout = getAttr(root, "applicationTimeout");
-			if (hasAccess && !StringUtil.isEmpty(appTimeout)) {
-				config.setApplicationTimeout(appTimeout);
-			}
-
 			// Client Type
 			String strClientType = getAttr(root, "clientType");
 			if (hasAccess && !StringUtil.isEmpty(strClientType)) {
