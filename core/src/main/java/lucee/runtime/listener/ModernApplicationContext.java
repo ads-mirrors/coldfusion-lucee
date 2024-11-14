@@ -279,10 +279,6 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 		this.triggerComponentDataMember = config.getTriggerComponentDataMember();
 		this.restSetting = config.getRestSetting();
 		this.component = cfc;
-		this.regex = ci.getRegex();
-		this.preciseMath = ci.getPreciseMath();
-		this.formUrlAsStruct = ci.getFormUrlAsStruct();
-		this.returnFormat = ci.getReturnFormat();
 
 		this.showDebug = ci.getShowDebug();
 		this.showDoc = ci.getShowDoc();
@@ -733,6 +729,7 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 		if (o != null && Decision.isBoolean(o)) {
 			formUrlAsStruct = Caster.toBooleanValue(o, true);
 		}
+		else formUrlAsStruct = ((ConfigPro) config).getFormUrlAsStruct();
 
 		if (oldForm != sameFormFieldAsArray || oldMerge != formUrlAsStruct) pc.formScope().reinitialize(this);
 		if (oldURL != sameURLFieldAsArray || oldMerge != formUrlAsStruct) pc.urlScope().reinitialize(this);
@@ -2009,6 +2006,7 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 			Boolean b = Caster.toBoolean(get(component, KeyConstants._preciseMath, null), null);
 			if (b == null) b = Caster.toBoolean(get(component, KeyConstants._precisionEvaluate, null), null);
 			if (b != null) preciseMath = b.booleanValue();
+			else preciseMath = ((ConfigPro) config).getPreciseMath();
 
 			initPreciseMath = true;
 		}
@@ -2026,8 +2024,9 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 		if (!initReturnFormat) {
 			String str = Caster.toString(get(component, KeyConstants._returnFormat, null), null);
 			if (!StringUtil.isEmpty(str, true)) {
-				setReturnFormat(UDFUtil.toReturnFormat(str.trim(), -1));
+				setReturnFormat(UDFUtil.toReturnFormat(str.trim(), ((ConfigPro) config).getReturnFormat()));
 			}
+			else setReturnFormat(((ConfigPro) config).getReturnFormat());
 			initReturnFormat = true;
 		}
 		return returnFormat;
@@ -2175,9 +2174,12 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 							has = true;
 							regex = tmp;
 						}
+						else regex = ((ConfigPro) config).getRegex();
 					}
 				}
+				else regex = ((ConfigPro) config).getRegex();
 			}
+			else regex = ((ConfigPro) config).getRegex();
 			if (!has) {
 				Boolean res = Caster.toBoolean(get(component, KeyConstants._useJavaAsRegexEngine, null), null);
 				if (res != null) regex = RegexFactory.toRegex(res.booleanValue());
