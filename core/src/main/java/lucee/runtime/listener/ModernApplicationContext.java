@@ -271,10 +271,6 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	public ModernApplicationContext(PageContext pc, Component cfc, RefBoolean throwsErrorWhileInit) {
 		super(pc.getConfig());
 		ConfigPro ci = ((ConfigPro) config);
-		sessionTimeout = config.getSessionTimeout();
-		clientTimeout = config.getClientTimeout();
-		requestTimeout = config.getRequestTimeout();
-		applicationTimeout = config.getApplicationTimeout();
 		scriptProtect = config.getScriptProtect();
 		typeChecking = ci.getTypeChecking();
 		allowCompression = ci.allowCompression();
@@ -449,7 +445,8 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	public TimeSpan getApplicationTimeout() {
 		if (!initApplicationTimeout) {
 			Object o = get(component, KeyConstants._applicationTimeout, null);
-			if (o != null) applicationTimeout = Caster.toTimespan(o, applicationTimeout);
+			if (o != null) applicationTimeout = Caster.toTimespan(o, config.getApplicationTimeout());
+			else applicationTimeout = config.getApplicationTimeout();
 			initApplicationTimeout = true;
 		}
 		return applicationTimeout;
@@ -459,7 +456,8 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	public TimeSpan getSessionTimeout() {
 		if (!initSessionTimeout) {
 			Object o = get(component, KeyConstants._sessionTimeout, null);
-			if (o != null) sessionTimeout = Caster.toTimespan(o, sessionTimeout);
+			if (o != null) sessionTimeout = Caster.toTimespan(o, config.getSessionTimeout());
+			else sessionTimeout = config.getSessionTimeout();
 			initSessionTimeout = true;
 		}
 		return sessionTimeout;
@@ -469,7 +467,8 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	public TimeSpan getClientTimeout() {
 		if (!initClientTimeout) {
 			Object o = get(component, KeyConstants._clientTimeout, null);
-			if (o != null) clientTimeout = Caster.toTimespan(o, clientTimeout);
+			if (o != null) clientTimeout = Caster.toTimespan(o, config.getClientTimeout());
+			else clientTimeout = config.getClientTimeout();
 			initClientTimeout = true;
 		}
 		return clientTimeout;
@@ -480,7 +479,8 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 		if (!initRequestTimeout) {
 			Object o = get(component, KeyConstants._requestTimeout, null);
 			if (o == null) o = get(component, KeyConstants._timeout, null);
-			if (o != null) requestTimeout = Caster.toTimespan(o, requestTimeout);
+			if (o != null) requestTimeout = Caster.toTimespan(o, config.getRequestTimeout());
+			else requestTimeout = config.getRequestTimeout();
 			initRequestTimeout = true;
 		}
 		return requestTimeout;
