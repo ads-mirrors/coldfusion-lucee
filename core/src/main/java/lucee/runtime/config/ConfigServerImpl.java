@@ -275,22 +275,12 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 	public SecurityManager getSecurityManager(String id) {
 		Object o = managers.get(id);
 		if (o != null) return (SecurityManager) o;
-		if (defaultSecurityManager == null) {
-			defaultSecurityManager = SecurityManagerImpl.getOpenSecurityManager();
-		}
-		return defaultSecurityManager.cloneSecurityManager();
+		return getDefaultSecurityManager().cloneSecurityManager();
 	}
 
 	@Override
 	public boolean hasIndividualSecurityManager(String id) {
 		return managers.containsKey(id);
-	}
-
-	/**
-	 * @param defaultSecurityManager
-	 */
-	protected void setDefaultSecurityManager(SecurityManager defaultSecurityManager) {
-		this.defaultSecurityManager = defaultSecurityManager;
 	}
 
 	/**
@@ -310,7 +300,31 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 
 	@Override
 	public SecurityManager getDefaultSecurityManager() {
+		if (defaultSecurityManager == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getDefaultSecurityManager")) {
+				if (defaultSecurityManager == null) {
+					Struct security = ConfigWebUtil.getAsStruct("security", root);
+					if (security != null) {
+						defaultSecurityManager = ConfigWebFactory._toSecurityManagerSingle(security);
+					}
+					else defaultSecurityManager = SecurityManagerImpl.getOpenSecurityManager();
+				}
+			}
+		}
+
 		return defaultSecurityManager;
+	}
+
+	public ConfigServerImpl resetDefaultSecurityManager() {
+		if (defaultSecurityManager != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getDefaultSecurityManager")) {
+				if (defaultSecurityManager != null) {
+					defaultSecurityManager = null;
+				}
+			}
+		}
+
+		return this;
 	}
 
 	/**

@@ -1612,11 +1612,13 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doCreateSecurityManager() throws PageException {
 		admin.createSecurityManager(password, getString("admin", action, "id"));
 		store();
+		getConfigServerImpl(config).resetDefaultSecurityManager();
 	}
 
 	private void doRemoveSecurityManager() throws PageException {
 		admin.removeSecurityManager(password, getString("admin", action, "id"));
 		store();
+		getConfigServerImpl(config).resetDefaultSecurityManager();
 	}
 
 	private short fb(String key) throws PageException {
@@ -1629,8 +1631,8 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 
 	private void doUpdateDefaultSecurityManager() throws PageException {
 		admin.updateDefaultSecurity(fb2("access_read"), fb2("access_write"));
-
 		store();
+		getConfigServerImpl(config).resetDefaultSecurityManager();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -1660,7 +1662,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 				fb("custom_tag"), fb("cfx_setting"), fb("cfx_usage"), fb("debugging"), fb("search"), fb("scheduled_task"), fb("tag_execute"), fb("tag_import"), fb("tag_object"),
 				fb("tag_registry"), fb("cache"), fb("gateway"), fb("orm"), fb2("access_read"), fb2("access_write"));
 		store();
-		getConfigServerImpl(config).resetLimitEvaluation();
+		getConfigServerImpl(config).resetDefaultSecurityManager().resetLimitEvaluation();
 	}
 
 	/**
@@ -1755,7 +1757,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doUpdateSecurity() throws PageException {
 		admin.updateSecurity(getString("varUsage", ""), getBool("limitEvaluation", null));
 		store();
-		getConfigServerImpl(config).resetQueryVarUsage().resetLimitEvaluation();
+		getConfigServerImpl(config).resetDefaultSecurityManager().resetQueryVarUsage().resetLimitEvaluation();
 		adminSync.broadcast(attributes, config);
 	}
 

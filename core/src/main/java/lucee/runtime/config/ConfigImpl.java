@@ -2535,11 +2535,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	@Override
-	public SecurityManager getSecurityManager() {
-		return null;
-	}
-
-	@Override
 	public Resource getFldFile() {
 		return fldFile;
 	}

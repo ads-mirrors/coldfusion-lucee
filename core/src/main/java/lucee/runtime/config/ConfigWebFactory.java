@@ -888,15 +888,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 */
 	public static int loadSecurity(ConfigImpl config, Struct root, Log log) {
 		try {
-			// Security Manger
-			{
-				ConfigServerImpl cs = (ConfigServerImpl) config;
-				Struct security = ConfigWebUtil.getAsStruct("security", root);
-				// Default SecurityManager
-				SecurityManagerImpl sm = _toSecurityManagerSingle(security);
-				cs.setDefaultSecurityManager(sm);
-			}
-
 			Struct security = ConfigWebUtil.getAsStruct("security", root);
 			int vu = ConfigPro.QUERY_VAR_USAGE_UNDEFINED;
 			if (security != null) {
@@ -956,7 +947,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return sm;
 	}
 
-	private static SecurityManagerImpl _toSecurityManagerSingle(Struct el) {
+	public static SecurityManagerImpl _toSecurityManagerSingle(Struct el) {
 		SecurityManagerImpl sm = (SecurityManagerImpl) SecurityManagerImpl.getOpenSecurityManager();
 		sm.setAccess(SecurityManager.TYPE_ACCESS_READ, _attr2(el, "access_read", SecurityManager.ACCESS_PROTECTED));
 		sm.setAccess(SecurityManager.TYPE_ACCESS_WRITE, _attr2(el, "access_write", SecurityManager.ACCESS_PROTECTED));
