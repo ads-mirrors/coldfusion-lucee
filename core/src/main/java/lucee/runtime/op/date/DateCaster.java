@@ -39,6 +39,7 @@ import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.Component;
+import lucee.runtime.config.ConfigPro;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.PageException;
@@ -67,7 +68,6 @@ public final class DateCaster {
 	// private static short MODE_NONE=4;
 	private static long DEFAULT_VALUE = Long.MIN_VALUE;
 	private static DateTimeUtil util = DateTimeUtil.getInstance();
-	public static boolean classicStyle = false;
 
 	private static final int SORT_AFTER_FIRST = 200;
 	private static final int SORT_AFTER = 10000;
@@ -728,19 +728,16 @@ public final class DateCaster {
 		}
 
 		if (ds.isAfterLast()) {
-			if (classicStyle() && del == '.') return toDate(month, timeZone, second, first, third, defaultValue);
+			if (del == '.' && ((ConfigPro) ThreadLocalPageContext.getConfig()).getDateCasterClassicStyle()) return toDate(month, timeZone, second, first, third, defaultValue);
 			return toDate(month, timeZone, first, second, third, defaultValue);
 		}
 		ds.fwIfCurrent(' ');
 		ds.fwIfCurrent('T');
 		ds.fwIfCurrent(' ');
-		if (classicStyle() && del == '.') return parseTime(timeZone, _toDate(month, second, first, third), ds, defaultValue, -1);
+		if (del == '.' && ((ConfigPro) ThreadLocalPageContext.getConfig()).getDateCasterClassicStyle())
+			return parseTime(timeZone, _toDate(month, second, first, third), ds, defaultValue, -1);
 		return parseTime(timeZone, _toDate(month, first, second, third), ds, defaultValue, -1);
 
-	}
-
-	private static boolean classicStyle() {
-		return classicStyle;
 	}
 
 	private static DateTime parseTime(TimeZone timeZone, int[] date, DateString ds, DateTime defaultValue, int hours) {

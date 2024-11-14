@@ -157,7 +157,6 @@ import lucee.runtime.net.proxy.ProxyData;
 import lucee.runtime.net.proxy.ProxyDataImpl;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
-import lucee.runtime.op.date.DateCaster;
 import lucee.runtime.orm.DummyORMEngine;
 import lucee.runtime.orm.ORMConfiguration;
 import lucee.runtime.orm.ORMConfigurationImpl;
@@ -4466,31 +4465,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
 
 			// cachedwithin
-			for (int i = 0; i < ConfigPro.CACHE_TYPES.length; i++) {
-				try {
-					String cw = getAttr(root, "cachedWithin" + StringUtil.ucFirst(ConfigPro.STRING_CACHE_TYPES[i]));
-					if (!StringUtil.isEmpty(cw, true)) config.setCachedWithin(ConfigPro.CACHE_TYPES[i], cw);
-				}
-				catch (Throwable t) {
-					ExceptionUtil.rethrowIfNecessary(t);
-					log(config, log, t);
-				}
-			}
-
-			// cached after
-
-			// classic-date-parsing
-			{
-				if (mode == ConfigPro.MODE_STRICT) {
-					DateCaster.classicStyle = true;
-				}
-				else {
-					String strClassicDateParsing = getAttr(root, "classicDateParsing");
-					if (!StringUtil.isEmpty(strClassicDateParsing)) {
-						DateCaster.classicStyle = Caster.toBooleanValue(strClassicDateParsing, false);
-					}
-				}
-			}
 
 			// admin sync
 			ClassDefinition asc = getClassDefinition(root, "adminSync", config.getIdentification());

@@ -409,4 +409,6 @@ public interface ConfigPro extends Config {
 	public AIEnginePool getAIEnginePool();
 
 	public CFMLEngine getEngine();
+
+	public boolean getDateCasterClassicStyle();
 }

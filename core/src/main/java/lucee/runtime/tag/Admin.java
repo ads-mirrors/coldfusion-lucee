@@ -5009,6 +5009,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		admin.updateCachedWithin(type, getString("admin", action, "cachedWithin"));
 
 		store();
+		getConfigServerImpl(config).resetCachedWithin();
 		adminSync.broadcast(attributes, config);
 	}
 

@@ -2134,4 +2134,9 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	public CFMLEngine getEngine() {
 		return cs.getEngine();
 	}
+
+	@Override
+	public boolean getDateCasterClassicStyle() {
+		return cs.getDateCasterClassicStyle();
+	}
 }

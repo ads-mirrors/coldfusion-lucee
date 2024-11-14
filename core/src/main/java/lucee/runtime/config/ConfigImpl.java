@@ -402,7 +402,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private Map<Key, Map<Key, Object>> tagDefaultAttributeValues;
 	private Boolean handleUnQuotedAttrValueAsString;
 
-	private Map<Integer, Object> cachedWithins = new HashMap<Integer, Object>();
+	private Map<Integer, Object> cachedWithins;
 
 	private int queueMax = -1;
 	private long queueTimeout = -1;
@@ -4462,13 +4462,39 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return this;
 	}
 
-	protected void setCachedWithin(int type, Object value) {
-		cachedWithins.put(type, value);
-	}
-
 	@Override
 	public Object getCachedWithin(int type) {
+		if (cachedWithins == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCachedWithin")) {
+				if (cachedWithins == null) {
+					HashMap<Integer, Object> map = new HashMap<Integer, Object>();
+					for (int i = 0; i < ConfigPro.CACHE_TYPES.length; i++) {
+						try {
+							String cw = ConfigWebFactory.getAttr(root, "cachedWithin" + StringUtil.ucFirst(ConfigPro.STRING_CACHE_TYPES[i]));
+							if (!StringUtil.isEmpty(cw, true)) map.put(ConfigPro.CACHE_TYPES[i], cw.trim());
+						}
+						catch (Throwable t) {
+							ExceptionUtil.rethrowIfNecessary(t);
+							ConfigWebFactory.log(this, getLog(), t);
+						}
+					}
+					cachedWithins = map;
+				}
+			}
+		}
 		return cachedWithins.get(type);
+		// = new HashMap<Integer, Object>()
+	}
+
+	public ConfigImpl resetCachedWithin() {
+		if (cachedWithins != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCachedWithin")) {
+				if (cachedWithins != null) {
+					cachedWithins = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override

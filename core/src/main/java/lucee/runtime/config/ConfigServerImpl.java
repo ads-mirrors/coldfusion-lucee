@@ -116,6 +116,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 	private int delay = -1;
 	private Boolean captcha;
 	private Boolean rememberMe;
+	private Boolean classicStyle;
 	// private static ConfigServerImpl instance;
 
 	private String[] authKeys;
@@ -563,6 +564,29 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "getRememberMe")) {
 				if (rememberMe != null) {
 					rememberMe = null;
+				}
+			}
+		}
+		return this;
+	}
+
+	public boolean getDateCasterClassicStyle() {
+		if (classicStyle == null) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "getDateCasterClassicStyle")) {
+				if (classicStyle == null) {
+					String strClassicDateParsing = ConfigWebFactory.getAttr(root, "classicDateParsing");
+					classicStyle = Caster.toBoolean(strClassicDateParsing, Boolean.FALSE);
+				}
+			}
+		}
+		return classicStyle;
+	}
+
+	public ConfigImpl resetDateCasterClassicStyle() {
+		if (classicStyle != null) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "getDateCasterClassicStyle")) {
+				if (classicStyle != null) {
+					classicStyle = null;
 				}
 			}
 		}
