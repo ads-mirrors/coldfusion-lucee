@@ -4237,7 +4237,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 				if (clientStorage == null) {
 					String str = ConfigWebFactory.getAttr(root, "clientStorage");
 					if (!StringUtil.isEmpty(str, true)) {
-						clientStorage = clientStorage.trim();
+						clientStorage = str.trim();
 					}
 					else clientStorage = DEFAULT_STORAGE_CLIENT;
 				}
