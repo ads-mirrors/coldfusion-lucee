@@ -2006,10 +2006,6 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 		return cs.createRAMCache(arg0);
 	}
 
-	public void setAllowURLRequestTimeout(boolean arg0) {
-		cs.setAllowURLRequestTimeout(arg0);
-	}
-
 	public Mapping getDefaultServerFunctionMapping() {
 		return cs.getDefaultFunctionMapping();
 	}
