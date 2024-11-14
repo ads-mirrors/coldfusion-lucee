@@ -1660,6 +1660,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 				fb("custom_tag"), fb("cfx_setting"), fb("cfx_usage"), fb("debugging"), fb("search"), fb("scheduled_task"), fb("tag_execute"), fb("tag_import"), fb("tag_object"),
 				fb("tag_registry"), fb("cache"), fb("gateway"), fb("orm"), fb2("access_read"), fb2("access_write"));
 		store();
+		getConfigServerImpl(config).resetLimitEvaluation();
 	}
 
 	/**
@@ -1754,7 +1755,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doUpdateSecurity() throws PageException {
 		admin.updateSecurity(getString("varUsage", ""), getBool("limitEvaluation", null));
 		store();
-		getConfigServerImpl(config).resetQueryVarUsage();
+		getConfigServerImpl(config).resetQueryVarUsage().resetLimitEvaluation();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -4179,7 +4180,8 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		config.getFormUrlAsStruct();
 
 		store();
-		getConfigServerImpl(config).resetLocalMode();
+		getConfigServerImpl(config).resetLocalMode().resetCGIScopeReadonly().resetSessionType().resetAllowImplicidQueryCall().resetMergeFormAndURL().resetClientStorage()
+				.resetSessionStorage().resetClientTimeout().resetSessionTimeout();// MUST
 		adminSync.broadcast(attributes, config);
 	}
 

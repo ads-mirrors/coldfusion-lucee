@@ -210,11 +210,11 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private FunctionLib cfmlFlds;
 
-	private short type = SCOPE_STANDARD;
-	private boolean _allowImplicidQueryCall = true;
-	private boolean _limitEvaluation = false;
+	private Short scopeType;
+	private Boolean allowImplicidQueryCall;
+	private Boolean limitEvaluation;
 
-	private boolean _mergeFormAndURL = false;
+	private Boolean mergeFormAndURL;
 
 	private Map<String, LoggerAndSourceData> loggers;
 
@@ -227,8 +227,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private Resource tempDirectory;
 	private boolean tempDirectoryReload;
-	private TimeSpan clientTimeout = new TimeSpanImpl(0, 0, 90, 0);
-	private TimeSpan sessionTimeout = new TimeSpanImpl(0, 0, 30, 0);
+	private TimeSpan clientTimeout;
+	private TimeSpan sessionTimeout;
 	private TimeSpan applicationTimeout = new TimeSpanImpl(1, 0, 0, 0);
 	private TimeSpan requestTimeout;
 
@@ -240,8 +240,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private Resource configFile;
 	private Resource configDir;
-	private String sessionStorage = DEFAULT_STORAGE_SESSION;
-	private String clientStorage = DEFAULT_STORAGE_CLIENT;
+	private String sessionStorage;
+	private String clientStorage;
 
 	private long loadTime;
 
@@ -294,7 +294,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private int componentDataMemberDefaultAccess = Component.ACCESS_PUBLIC;
 	private boolean triggerComponentDataMember = false;
 
-	private short sessionType = SESSION_TYPE_APPLICATION;
+	private Short sessionType;
 
 	private Resource deployDirectory;
 
@@ -553,7 +553,31 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public short getScopeCascadingType() {
-		return type;
+		if (scopeType == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getScopeCascadingType")) {
+				if (scopeType == null) {
+					// Cascading
+					String strScopeCascadingType = ConfigWebFactory.getAttr(root, "scopeCascading");
+					if (!StringUtil.isEmpty(strScopeCascadingType)) {
+						scopeType = ConfigWebUtil.toScopeCascading(strScopeCascadingType, Config.SCOPE_STANDARD);
+					}
+					else scopeType = SCOPE_STANDARD;
+				}
+			}
+		}
+		return scopeType;
+	}
+
+	public ConfigImpl resetScopeCascadingType() {
+		if (scopeType != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getScopeCascadingType")) {
+				if (scopeType != null) {
+					scopeType = null;
+				}
+			}
+		}
+
+		return this;
 	}
 	/*
 	 * @Override public String[] getCFMLExtensions() { return getAllExtensions(); }
@@ -603,17 +627,89 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public boolean allowImplicidQueryCall() {
-		return _allowImplicidQueryCall;
+		if (allowImplicidQueryCall == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "allowImplicidQueryCall")) {
+				if (allowImplicidQueryCall == null) {
+					Boolean b = Caster.toBoolean(SystemUtil.getSystemPropOrEnvVar("lucee.cascade.to.resultset", null), null);
+					if (b == null) b = Caster.toBoolean(ConfigWebFactory.getAttr(root, "cascadeToResultset"), Boolean.TRUE);
+					allowImplicidQueryCall = b;
+				}
+			}
+		}
+		return allowImplicidQueryCall;
+	}
+
+	public ConfigImpl resetAllowImplicidQueryCall() {
+		if (allowImplicidQueryCall != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "allowImplicidQueryCall")) {
+				if (allowImplicidQueryCall != null) {
+					allowImplicidQueryCall = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
 	public boolean limitEvaluation() {
-		return _limitEvaluation;
+		if (limitEvaluation == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "limitEvaluation")) {
+				if (limitEvaluation == null) {
+
+					Boolean b = Caster.toBoolean(SystemUtil.getSystemPropOrEnvVar("lucee.security.limitEvaluation", null), null);
+					if (b == null) b = Caster.toBoolean(SystemUtil.getSystemPropOrEnvVar("lucee.security.isdefined", null), null);
+					if (b == null) b = Caster.toBoolean(SystemUtil.getSystemPropOrEnvVar("lucee.isdefined.limit", null), null);
+					if (b == null) {
+						Struct security = ConfigWebUtil.getAsStruct("security", root);
+						if (security != null) {
+							b = Caster.toBoolean(ConfigWebFactory.getAttr(security, "limitEvaluation"), null);
+						}
+					}
+					if (b != null) limitEvaluation = b;
+					else limitEvaluation = Boolean.FALSE;
+
+				}
+			}
+		}
+		return limitEvaluation;
+	}
+
+	public ConfigImpl resetLimitEvaluation() {
+		if (limitEvaluation != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "limitEvaluation")) {
+				if (limitEvaluation != null) {
+					limitEvaluation = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
 	public boolean mergeFormAndURL() {
-		return _mergeFormAndURL;
+		if (mergeFormAndURL == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "mergeFormAndURL")) {
+				if (mergeFormAndURL == null) {
+					String strMergeFormAndURL = ConfigWebFactory.getAttr(root, "mergeUrlForm");
+					if (!StringUtil.isEmpty(strMergeFormAndURL, true)) {
+						mergeFormAndURL = Caster.toBoolean(strMergeFormAndURL, Boolean.FALSE);
+					}
+					else mergeFormAndURL = Boolean.FALSE;
+				}
+			}
+		}
+		return mergeFormAndURL;
+	}
+
+	public ConfigImpl resetMergeFormAndURL() {
+		if (mergeFormAndURL != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "mergeFormAndURL")) {
+				if (mergeFormAndURL != null) {
+					mergeFormAndURL = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -623,12 +719,56 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public TimeSpan getSessionTimeout() {
+		if (sessionTimeout == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getSessionTimeout")) {
+				if (sessionTimeout == null) {
+					String str = ConfigWebFactory.getAttr(root, "sessionTimeout");
+					if (!StringUtil.isEmpty(str, true)) {
+						sessionTimeout = Caster.toTimespan(str.trim(), null);
+					}
+					else sessionTimeout = new TimeSpanImpl(0, 0, 30, 0);
+				}
+			}
+		}
 		return sessionTimeout;
+	}
+
+	public ConfigImpl resetSessionTimeout() {
+		if (sessionTimeout != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getSessionTimeout")) {
+				if (sessionTimeout != null) {
+					sessionTimeout = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
 	public TimeSpan getClientTimeout() {
+		if (clientTimeout == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getClientTimeout")) {
+				if (clientTimeout == null) {
+					String str = ConfigWebFactory.getAttr(root, "clientTimeout");
+					if (!StringUtil.isEmpty(str, true)) {
+						clientTimeout = Caster.toTimespan(str.trim(), null);
+					}
+					if (clientTimeout == null) clientTimeout = new TimeSpanImpl(0, 0, 90, 0);
+				}
+			}
+		}
 		return clientTimeout;
+	}
+
+	public ConfigImpl resetClientTimeout() {
+		if (clientTimeout != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getClientTimeout")) {
+				if (clientTimeout != null) {
+					clientTimeout = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -1187,15 +1327,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		this.password = password;
 	}
 
-	/**
-	 * set how lucee cascade scopes
-	 * 
-	 * @param type cascading type
-	 */
-	protected void setScopeCascadingType(short type) {
-		this.type = type;
-	}
-
 	protected void addTag(String nameSpace, String nameSpaceSeperator, String name, ClassDefinition cd) {
 
 		TagLib[] tlds = cfmlTlds;
@@ -1485,29 +1616,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	/**
-	 * sets if it is allowed to implict query call, call a query member without define name of the
-	 * query.
-	 * 
-	 * @param _allowImplicidQueryCall is allowed
-	 */
-	protected void setAllowImplicidQueryCall(boolean _allowImplicidQueryCall) {
-		this._allowImplicidQueryCall = _allowImplicidQueryCall;
-	}
-
-	protected void setLimitEvaluation(boolean _limitEvaluation) {
-		this._limitEvaluation = _limitEvaluation;
-	}
-
-	/**
-	 * sets if url and form scope will be merged
-	 * 
-	 * @param _mergeFormAndURL merge yes or no
-	 */
-	protected void setMergeFormAndURL(boolean _mergeFormAndURL) {
-		this._mergeFormAndURL = _mergeFormAndURL;
-	}
-
-	/**
 	 * @param strApplicationTimeout The applicationTimeout to set.
 	 * @throws PageException
 	 */
@@ -1520,32 +1628,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 */
 	protected void setApplicationTimeout(TimeSpan applicationTimeout) {
 		this.applicationTimeout = applicationTimeout;
-	}
-
-	/**
-	 * @param strSessionTimeout The sessionTimeout to set.
-	 * @throws PageException
-	 */
-	protected void setSessionTimeout(String strSessionTimeout) throws PageException {
-		setSessionTimeout(Caster.toTimespan(strSessionTimeout));
-	}
-
-	/**
-	 * @param sessionTimeout The sessionTimeout to set.
-	 */
-	protected void setSessionTimeout(TimeSpan sessionTimeout) {
-		this.sessionTimeout = sessionTimeout;
-	}
-
-	protected void setClientTimeout(String strClientTimeout) throws PageException {
-		setClientTimeout(Caster.toTimespan(strClientTimeout));
-	}
-
-	/**
-	 * @param clientTimeout The sessionTimeout to set.
-	 */
-	protected void setClientTimeout(TimeSpan clientTimeout) {
-		this.clientTimeout = clientTimeout;
 	}
 
 	/**
@@ -2118,14 +2200,30 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public short getSessionType() {
+		if (sessionType == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getSessionType")) {
+				if (sessionType == null) {
+					// Session-Type
+					String strSessionType = ConfigWebFactory.getAttr(root, "sessionType");
+					if (!StringUtil.isEmpty(strSessionType, true)) {
+						sessionType = AppListenerUtil.toSessionType(strSessionType.trim(), Config.SESSION_TYPE_APPLICATION);
+					}
+					else sessionType = SESSION_TYPE_APPLICATION;
+				}
+			}
+		}
 		return sessionType;
 	}
 
-	/**
-	 * @param sessionType The sessionType to set.
-	 */
-	protected void setSessionType(short sessionType) {
-		this.sessionType = sessionType;
+	public ConfigImpl resetSessionType() {
+		if (sessionType != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getSessionType")) {
+				if (sessionType != null) {
+					sessionType = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -4127,20 +4225,56 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public String getClientStorage() {
+		if (clientStorage == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "")) {
+				if (clientStorage == null) {
+					String str = ConfigWebFactory.getAttr(root, "clientStorage");
+					if (!StringUtil.isEmpty(str, true)) {
+						clientStorage = clientStorage.trim();
+					}
+					else clientStorage = DEFAULT_STORAGE_CLIENT;
+				}
+			}
+		}
 		return clientStorage;
+	}
+
+	public ConfigImpl resetClientStorage() {
+		if (clientStorage != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "")) {
+				if (clientStorage != null) {
+					clientStorage = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
 	public String getSessionStorage() {
+		if (sessionStorage == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getSessionStorage")) {
+				if (sessionStorage == null) {
+					String str = ConfigWebFactory.getAttr(root, "sessionStorage");
+					if (!StringUtil.isEmpty(str, true)) {
+						sessionStorage = str.trim();
+					}
+					else sessionStorage = DEFAULT_STORAGE_SESSION;
+				}
+			}
+		}
 		return sessionStorage;
 	}
 
-	protected void setClientStorage(String clientStorage) {
-		this.clientStorage = clientStorage;
-	}
-
-	protected void setSessionStorage(String sessionStorage) {
-		this.sessionStorage = sessionStorage;
+	public ConfigImpl resetSessionStorage() {
+		if (sessionStorage != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getSessionStorage")) {
+				if (sessionStorage != null) {
+					sessionStorage = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	private Map<String, ComponentMetaData> componentMetaData = null;
@@ -4761,15 +4895,33 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return this;
 	}
 
-	private boolean cgiScopeReadonly = true;
+	private Boolean cgiScopeReadonly;
 
 	@Override
 	public boolean getCGIScopeReadonly() {
+		if (cgiScopeReadonly == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCGIScopeReadonly")) {
+				if (cgiScopeReadonly == null) {
+					String strCGIReadonly = ConfigWebFactory.getAttr(root, "cgiReadonly");
+					if (!StringUtil.isEmpty(strCGIReadonly, true)) {
+						cgiScopeReadonly = Caster.toBooleanValue(strCGIReadonly.trim(), true);
+					}
+					else cgiScopeReadonly = Boolean.TRUE;
+				}
+			}
+		}
 		return cgiScopeReadonly;
 	}
 
-	protected void setCGIScopeReadonly(boolean cgiScopeReadonly) {
-		this.cgiScopeReadonly = cgiScopeReadonly;
+	public ConfigImpl resetCGIScopeReadonly() {
+		if (cgiScopeReadonly != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCGIScopeReadonly")) {
+				if (cgiScopeReadonly != null) {
+					cgiScopeReadonly = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	private Resource deployDir;
