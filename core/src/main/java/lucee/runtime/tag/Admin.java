@@ -3096,7 +3096,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		else admin.updateCachedAfterTimeRange(null);
 
 		store();
-		getConfigServerImpl(config).resetInspectTemplate().resetInspectTemplateAutoInterval();
+		getConfigServerImpl(config).resetInspectTemplate().resetInspectTemplateAutoInterval().resetTypeChecking().resetCachedAfterTimeRange();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -4203,7 +4203,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		admin.updateScriptProtect(getString("admin", action, "scriptProtect"));
 		admin.updateAllowURLRequestTimeout(getBoolObject("admin", action, "allowURLRequestTimeout")); // DIFF 23
 		store();
-		getConfigServerImpl(config).resetAllowURLRequestTimeout();
+		getConfigServerImpl(config).resetAllowURLRequestTimeout().resetRequestTimeout().resetScriptProtect();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -4998,7 +4998,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		admin.updateApplicationListener(getString("admin", action, "listenerType"), getString("admin", action, "listenerMode"));
 		admin.updateApplicationPathTimeout(getTimespan("admin", action, "applicationPathTimeout"));
 		store();
-		getConfigServerImpl(config).resetApplicationListener();
+		getConfigServerImpl(config).resetApplicationListener().resetApplicationPathCacheTimeout();
 		adminSync.broadcast(attributes, config);
 	}
 

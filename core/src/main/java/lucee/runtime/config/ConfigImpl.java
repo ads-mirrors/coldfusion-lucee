@@ -62,6 +62,7 @@ import lucee.commons.io.res.ResourcesImpl.ResourceProviderFactory;
 import lucee.commons.io.res.filter.ExtensionResourceFilter;
 import lucee.commons.io.res.type.compress.Compress;
 import lucee.commons.io.res.util.ResourceUtil;
+import lucee.commons.lang.ByteSizeParser;
 import lucee.commons.lang.CharSet;
 import lucee.commons.lang.ClassException;
 import lucee.commons.lang.ClassUtil;
@@ -227,7 +228,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private TimeSpan clientTimeout = new TimeSpanImpl(0, 0, 90, 0);
 	private TimeSpan sessionTimeout = new TimeSpanImpl(0, 0, 30, 0);
 	private TimeSpan applicationTimeout = new TimeSpanImpl(1, 0, 0, 0);
-	private TimeSpan requestTimeout = new TimeSpanImpl(0, 0, 0, 50);
+	private TimeSpan requestTimeout;
 
 	private boolean sessionManagement = true;
 	private boolean clientManagement = false;
@@ -309,7 +310,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private ApplicationListener applicationListener;
 
-	private int scriptProtect = ApplicationContext.SCRIPT_PROTECT_ALL;
+	private Integer scriptProtect;
 
 	private ProxyData proxy = null;
 
@@ -319,7 +320,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private long sessionScopeDirSize = 1024 * 1024 * 100;
 
 	private Resource cacheDir;
-	private long cacheDirSize = 1024 * 1024 * 100;
+	private Long cacheDirSize;
 
 	private boolean useComponentShadow = true;
 
@@ -375,7 +376,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	protected Mapping defaultTagMapping;
 	protected Map<String, Mapping> tagMappings = new ConcurrentHashMap<String, Mapping>();
 
-	private boolean typeChecking = true;
+	private Boolean typeChecking;
 	private String cacheMD5;
 	private Boolean executionLogEnabled;
 	private ExecutionLogFactory executionLogFactory;
@@ -409,12 +410,13 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private Integer varUsage;
 
 	private TimeSpan cachedAfterTimeRange;
+	private boolean initCachedAfterTimeRange = true;
 
 	private static Map<String, Startup> startups;
 
 	private Regex regex; // TODO add possibility to configure
 
-	private long applicationPathCacheTimeout = Caster.toLongValue(SystemUtil.getSystemPropOrEnvVar("lucee.application.path.cache.timeout", null), 20000);
+	private Long applicationPathCacheTimeout;
 	private ClassLoader envClassLoader;
 
 	private Boolean preciseMath;
@@ -629,7 +631,30 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public TimeSpan getRequestTimeout() {
+		if (requestTimeout == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getRequestTimeout")) {
+				if (requestTimeout == null) {
+					TimeSpan ts = null;
+					String reqTimeout = SystemUtil.getSystemPropOrEnvVar("lucee.requesttimeout", null);
+					if (StringUtil.isEmpty(reqTimeout)) reqTimeout = ConfigWebFactory.getAttr(root, "requesttimeout");
+					if (!StringUtil.isEmpty(reqTimeout)) ts = Caster.toTimespan(reqTimeout, null);
+					if (ts != null && ts.getMillis() > 0) requestTimeout = ts;
+					else requestTimeout = new TimeSpanImpl(0, 0, 0, 50);
+				}
+			}
+		}
 		return requestTimeout;
+	}
+
+	public ConfigImpl resetRequestTimeout() {
+		if (requestTimeout != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getRequestTimeout")) {
+				if (requestTimeout != null) {
+					requestTimeout = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -1529,21 +1554,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 */
 	protected void setClientTimeout(TimeSpan clientTimeout) {
 		this.clientTimeout = clientTimeout;
-	}
-
-	/**
-	 * @param strRequestTimeout The requestTimeout to set.
-	 * @throws PageException
-	 */
-	protected void setRequestTimeout(String strRequestTimeout) throws PageException {
-		setRequestTimeout(Caster.toTimespan(strRequestTimeout));
-	}
-
-	/**
-	 * @param requestTimeout The requestTimeout to set.
-	 */
-	protected void setRequestTimeout(TimeSpan requestTimeout) {
-		this.requestTimeout = requestTimeout;
 	}
 
 	/**
@@ -2491,14 +2501,30 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 */
 	@Override
 	public int getScriptProtect() {
+		if (scriptProtect == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getScriptProtect")) {
+				if (scriptProtect == null) {
+					String strScriptProtect = SystemUtil.getSystemPropOrEnvVar("lucee.script.protect", null);
+					if (StringUtil.isEmpty(strScriptProtect)) strScriptProtect = ConfigWebFactory.getAttr(root, "scriptProtect");
+					if (!StringUtil.isEmpty(strScriptProtect)) {
+						scriptProtect = AppListenerUtil.translateScriptProtect(strScriptProtect);
+					}
+					else scriptProtect = ApplicationContext.SCRIPT_PROTECT_ALL;
+				}
+			}
+		}
 		return scriptProtect;
 	}
 
-	/**
-	 * @param scriptProtect the scriptProtect to set
-	 */
-	protected void setScriptProtect(int scriptProtect) {
-		this.scriptProtect = scriptProtect;
+	public ConfigImpl resetScriptProtect() {
+		if (scriptProtect != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getScriptProtect")) {
+				if (scriptProtect != null) {
+					scriptProtect = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	/**
@@ -2607,22 +2633,62 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		rpcClassLoaders.clear();
 	}
 
-	protected void setCacheDir(Resource cacheDir) {
-		this.cacheDir = cacheDir;
-	}
-
 	@Override
 	public Resource getCacheDir() {
-		return this.cacheDir;
+		if (cacheDir == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDir")) {
+				if (cacheDir == null) {
+					Resource configDir = getConfigDir();
+					String strCacheDirectory = ConfigWebFactory.getAttr(root, "cacheDirectory");
+					if (!StringUtil.isEmpty(strCacheDirectory)) {
+						strCacheDirectory = ConfigWebUtil.translateOldPath(strCacheDirectory);
+						Resource res = ConfigWebUtil.getFile(configDir, strCacheDirectory, "cache", configDir, FileUtil.TYPE_DIR, ResourceUtil.LEVEL_GRAND_PARENT_FILE, this);
+						cacheDir = res;
+					}
+					else {
+						cacheDir = configDir.getRealResource("cache");
+					}
+				}
+			}
+		}
+		return cacheDir;
+	}
+
+	public ConfigImpl resetCacheDir() {
+		if (cacheDir != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDir")) {
+				if (cacheDir != null) {
+					cacheDir = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
 	public long getCacheDirSize() {
+		if (cacheDirSize == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDirSize")) {
+				if (cacheDirSize == null) {
+					String strMax = ConfigWebFactory.getAttr(root, "cacheDirectoryMaxSize");
+					if (!StringUtil.isEmpty(strMax)) {
+						cacheDirSize = ByteSizeParser.parseByteSizeDefinition(strMax, 1024L * 1024L * 100L);
+					}
+				}
+			}
+		}
 		return cacheDirSize;
 	}
 
-	protected void setCacheDirSize(long cacheDirSize) {
-		this.cacheDirSize = cacheDirSize;
+	public ConfigImpl resetCacheDirSize() {
+		if (cacheDirSize != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDirSize")) {
+				if (cacheDirSize != null) {
+					cacheDirSize = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	public DumpWriterEntry[] getDumpWritersEntries() {
@@ -3409,11 +3475,28 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public boolean getTypeChecking() {
+		if (typeChecking == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getTypeChecking")) {
+				if (typeChecking == null) {
+					Boolean b = Caster.toBoolean(SystemUtil.getSystemPropOrEnvVar("lucee.type.checking", null), null);
+					if (b == null) b = Caster.toBoolean(SystemUtil.getSystemPropOrEnvVar("lucee.udf.type.checking", null), null);
+					if (b == null) b = Caster.toBoolean(ConfigWebFactory.getAttr(root, new String[] { "typeChecking", "UDFTypeChecking" }), Boolean.TRUE);
+					typeChecking = b;
+				}
+			}
+		}
 		return typeChecking;
 	}
 
-	protected void setTypeChecking(boolean typeChecking) {
-		this.typeChecking = typeChecking;
+	public ConfigImpl resetTypeChecking() {
+		if (typeChecking != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getTypeChecking")) {
+				if (typeChecking != null) {
+					typeChecking = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -3785,11 +3868,30 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public long getApplicationPathCacheTimeout() {
+		if (applicationPathCacheTimeout == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getApplicationPathCacheTimeout")) {
+				if (applicationPathCacheTimeout == null) {
+					TimeSpan ts = null;
+					String str = SystemUtil.getSystemPropOrEnvVar("lucee.application.path.cache.timeout", null);
+					if (StringUtil.isEmpty(str)) str = ConfigWebFactory.getAttr(root, "applicationPathTimeout");
+					if (!StringUtil.isEmpty(str)) ts = Caster.toTimespan(str, null);
+					if (ts != null && ts.getMillis() > 0) applicationPathCacheTimeout = ts.getMillis();
+					else applicationPathCacheTimeout = 20000L;
+				}
+			}
+		}
 		return applicationPathCacheTimeout;
 	}
 
-	protected void setApplicationPathCacheTimeout(long applicationPathCacheTimeout) {
-		this.applicationPathCacheTimeout = applicationPathCacheTimeout;
+	public ConfigImpl resetApplicationPathCacheTimeout() {
+		if (applicationPathCacheTimeout != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getApplicationPathCacheTimeout")) {
+				if (applicationPathCacheTimeout != null) {
+					applicationPathCacheTimeout = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -4713,15 +4815,32 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return logEngine;
 	}
 
-	protected void setCachedAfterTimeRange(TimeSpan ts) {
-		if (ts != null && ts.getMillis() > 0) {
-			this.cachedAfterTimeRange = ts;
-		}
-	}
-
 	@Override
 	public TimeSpan getCachedAfterTimeRange() {
+		if (initCachedAfterTimeRange) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCachedAfterTimeRange")) {
+				if (initCachedAfterTimeRange) {
+					TimeSpan ts = null;
+					String ca = ConfigWebFactory.getAttr(root, "cachedAfter");
+					if (!StringUtil.isEmpty(ca)) ts = Caster.toTimespan(ca, null);
+					if (ts != null && ts.getMillis() > 0) cachedAfterTimeRange = ts;
+					initCachedAfterTimeRange = false;
+				}
+			}
+		}
 		return this.cachedAfterTimeRange;
+	}
+
+	public ConfigImpl resetCachedAfterTimeRange() {
+		if (!initCachedAfterTimeRange) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCachedAfterTimeRange")) {
+				if (!initCachedAfterTimeRange) {
+					cachedAfterTimeRange = null;
+					initCachedAfterTimeRange = true;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override

@@ -178,7 +178,6 @@ import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.UDF;
-import lucee.runtime.type.dt.TimeSpan;
 import lucee.runtime.type.scope.Undefined;
 import lucee.runtime.type.util.CollectionUtil;
 import lucee.runtime.type.util.KeyConstants;
@@ -4478,45 +4477,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 				}
 			}
 
-			// Type Checking
-			Boolean typeChecking = Caster.toBoolean(SystemUtil.getSystemPropOrEnvVar("lucee.type.checking", null), null);
-			if (typeChecking == null) typeChecking = Caster.toBoolean(SystemUtil.getSystemPropOrEnvVar("lucee.udf.type.checking", null), null);
-			if (typeChecking == null) typeChecking = Caster.toBoolean(getAttr(root, new String[] { "typeChecking", "UDFTypeChecking" }), null);
-			if (typeChecking != null) config.setTypeChecking(typeChecking.booleanValue());
-
 			// cached after
-			TimeSpan ts = null;
-			if (hasAccess) {
-				String ca = getAttr(root, "cachedAfter");
-				if (!StringUtil.isEmpty(ca)) ts = Caster.toTimespan(ca);
-			}
-			if (ts != null) config.setCachedAfterTimeRange(ts);
-			else config.setCachedAfterTimeRange(null);
-
-			// Req Timeout
-			ts = null;
-			if (hasAccess) {
-				String reqTimeout = SystemUtil.getSystemPropOrEnvVar("lucee.requesttimeout", null);
-				if (reqTimeout == null) reqTimeout = getAttr(root, "requesttimeout");
-				if (!StringUtil.isEmpty(reqTimeout)) ts = Caster.toTimespan(reqTimeout);
-			}
-			if (ts != null && ts.getMillis() > 0) config.setRequestTimeout(ts);
-
-			// application Path Timeout
-			ts = null;
-			if (hasAccess) {
-				String reqTimeout = SystemUtil.getSystemPropOrEnvVar("lucee.application.path.cache.timeout", null);
-				if (reqTimeout == null) reqTimeout = getAttr(root, "applicationPathTimeout");
-				if (!StringUtil.isEmpty(reqTimeout)) ts = Caster.toTimespan(reqTimeout);
-			}
-			if (ts != null && ts.getMillis() > 0) config.setApplicationPathCacheTimeout(ts.getMillis());
-
-			// script-protect
-			String strScriptProtect = SystemUtil.getSystemPropOrEnvVar("lucee.script.protect", null);
-			if (StringUtil.isEmpty(strScriptProtect)) strScriptProtect = getAttr(root, "scriptProtect");
-			if (hasAccess && !StringUtil.isEmpty(strScriptProtect)) {
-				config.setScriptProtect(AppListenerUtil.translateScriptProtect(strScriptProtect));
-			}
 
 			// classic-date-parsing
 			{
@@ -4529,24 +4490,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 						DateCaster.classicStyle = Caster.toBooleanValue(strClassicDateParsing, false);
 					}
 				}
-			}
-
-			// Cache
-			Resource configDir = config.getConfigDir();
-			String strCacheDirectory = getAttr(root, "cacheDirectory");
-			if (hasAccess && !StringUtil.isEmpty(strCacheDirectory)) {
-				strCacheDirectory = ConfigWebUtil.translateOldPath(strCacheDirectory);
-				Resource res = ConfigWebUtil.getFile(configDir, strCacheDirectory, "cache", configDir, FileUtil.TYPE_DIR, ResourceUtil.LEVEL_GRAND_PARENT_FILE, config);
-				config.setCacheDir(res);
-			}
-			else {
-				config.setCacheDir(configDir.getRealResource("cache"));
-			}
-
-			// cache dir max size
-			String strMax = getAttr(root, "cacheDirectoryMaxSize");
-			if (hasAccess && !StringUtil.isEmpty(strMax)) {
-				config.setCacheDirSize(ByteSizeParser.parseByteSizeDefinition(strMax, config.getCacheDirSize()));
 			}
 
 			// admin sync
