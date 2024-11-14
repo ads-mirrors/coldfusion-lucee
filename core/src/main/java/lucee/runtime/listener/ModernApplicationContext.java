@@ -272,14 +272,7 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 		super(pc.getConfig());
 		ConfigPro ci = ((ConfigPro) config);
 		this.defaultDataSource = config.getDefaultDataSource();
-		this.locale = config.getLocale();
-		suppressContent = ci.isSuppressContent();
-		this.sessionType = config.getSessionType();
 		this.wstype = WS_TYPE_AXIS1;
-		this.cgiScopeReadonly = ci.getCGIScopeReadonly();
-		this.fullNullSupport = ci.getFullNullSupport();
-		this.queryPSQ = ci.getPSQL();
-		this.queryCachedAfter = ci.getCachedAfterTimeRange();
 		this.queryVarUsage = ci.getQueryVarUsage();
 		this.proxyData = config.getProxyData();
 
@@ -639,8 +632,10 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 			Object o = get(component, KeyConstants._sessionType, null);
 			if (o != null) {
 				str = Caster.toString(o, null);
-				if (str != null) sessionType = AppListenerUtil.toSessionType(str, sessionType);
+				if (str != null) sessionType = AppListenerUtil.toSessionType(str, config.getSessionType());
+				else sessionType = config.getSessionType();
 			}
+			else sessionType = config.getSessionType();
 			initSessionType = true;
 		}
 		return sessionType;
@@ -1079,8 +1074,10 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 			Object o = get(component, KeyConstants._locale, null);
 			if (o != null) {
 				String str = Caster.toString(o, null);
-				if (!StringUtil.isEmpty(str)) locale = LocaleFactory.getLocale(str, locale);
+				if (!StringUtil.isEmpty(str)) locale = LocaleFactory.getLocale(str, config.getLocale());
+				else locale = config.getLocale();
 			}
+			else locale = config.getLocale();
 			initLocale = true;
 		}
 		return locale;
@@ -1374,7 +1371,8 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	public boolean getSuppressContent() {
 		if (!initSuppressContent) {
 			Object o = get(component, KeyConstants._suppressRemoteComponentContent, null);
-			if (o != null) suppressContent = Caster.toBooleanValue(o, suppressContent);
+			if (o != null) suppressContent = Caster.toBooleanValue(o, ((ConfigPro) config).isSuppressContent());
+			else suppressContent = ((ConfigPro) config).isSuppressContent();
 			initSuppressContent = true;
 		}
 		return suppressContent;
@@ -1877,7 +1875,8 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	public boolean getCGIScopeReadonly() {
 		if (!initCGIScopeReadonly) {
 			Object o = get(component, KeyConstants._CGIReadOnly, null);
-			if (o != null) cgiScopeReadonly = Caster.toBooleanValue(o, cgiScopeReadonly);
+			if (o != null) cgiScopeReadonly = Caster.toBooleanValue(o, ((ConfigPro) config).getCGIScopeReadonly());
+			else cgiScopeReadonly = ((ConfigPro) config).getCGIScopeReadonly();
 			initCGIScopeReadonly = true;
 		}
 		return cgiScopeReadonly;
@@ -1992,7 +1991,7 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 			Boolean b = Caster.toBoolean(get(component, KeyConstants._nullSupport, null), null);
 			if (b == null) b = Caster.toBoolean(get(component, KeyConstants._enableNULLSupport, null), null);
 			if (b != null) fullNullSupport = b.booleanValue();
-
+			else fullNullSupport = config.getFullNullSupport();
 			initFullNullSupport = true;
 		}
 		return fullNullSupport;
@@ -2051,7 +2050,9 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 				Boolean b = Caster.toBoolean(qry.get(KeyConstants._psq, null), null);
 				if (b == null) b = Caster.toBoolean(qry.get(KeyConstants._preservesinglequote, null), null);
 				if (b != null) queryPSQ = b.booleanValue();
+				else queryPSQ = config.getPSQL();
 			}
+			else queryPSQ = config.getPSQL();
 			initQueryPSQ = true;
 		}
 		return queryPSQ;
@@ -2070,7 +2071,9 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 			if (qry != null) {
 				TimeSpan ts = Caster.toTimespan(qry.get(KeyConstants._cachedAfter, null), null);
 				if (ts != null) queryCachedAfter = ts;
+				else queryCachedAfter = ((ConfigPro) config).getCachedAfterTimeRange();
 			}
+			else queryCachedAfter = ((ConfigPro) config).getCachedAfterTimeRange();
 			initQueryCacheAfter = true;
 		}
 		return queryCachedAfter;
