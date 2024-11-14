@@ -323,9 +323,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		// loadServerLibDesc(cs, config, doc,log);
 		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded loggers");
 
-		_loadTempDirectory(config, root, isReload, log);
-		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded temp dir");
-
 		if (!essentialOnly) {
 			_loadResourceProvider(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded resource providers");
@@ -2482,27 +2479,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 				// initTagDefaultAttributeValues
 
 			}
-		}
-		catch (Throwable t) {
-			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
-		}
-	}
-
-	public static void _loadTempDirectory(ConfigImpl config, Struct root, boolean isReload, Log log) {
-		try {
-			Resource configDir = config.getConfigDir();
-
-			String strTempDirectory = ConfigWebUtil.translateOldPath(getAttr(root, "tempDirectory"));
-
-			Resource cst = null;
-			// Temp Dir
-			if (!StringUtil.isEmpty(strTempDirectory))
-				cst = ConfigWebUtil.getFile(configDir, strTempDirectory, null, configDir, FileUtil.TYPE_DIR, ResourceUtil.LEVEL_GRAND_PARENT_FILE, config);
-
-			if (cst == null) cst = ConfigWebUtil.getFile(configDir, "temp", null, configDir, FileUtil.TYPE_DIR, ResourceUtil.LEVEL_GRAND_PARENT_FILE, config);
-
-			config.setTempDirectory(cst, !isReload);
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);

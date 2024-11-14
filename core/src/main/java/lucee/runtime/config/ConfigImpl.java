@@ -226,6 +226,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private boolean showVersion = false;
 
 	private Resource tempDirectory;
+	private boolean tempDirectoryReload;
 	private TimeSpan clientTimeout = new TimeSpanImpl(0, 0, 90, 0);
 	private TimeSpan sessionTimeout = new TimeSpanImpl(0, 0, 30, 0);
 	private TimeSpan applicationTimeout = new TimeSpanImpl(1, 0, 0, 0);
@@ -923,17 +924,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	@Override
-	public Resource getTempDirectory() {
-		if (tempDirectory == null) {
-			Resource tmp = SystemUtil.getTempDirectory();
-			if (!tmp.exists()) tmp.mkdirs();
-			return tmp;
-		}
-		if (!tempDirectory.exists()) tempDirectory.mkdirs();
-		return tempDirectory;
-	}
-
-	@Override
 	public int getMailSpoolInterval() {
 		if (spoolInterval == -1) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "mail")) {
@@ -1626,34 +1616,59 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		this.debugLogOutput = debugLogOutput;
 	}
 
-	/**
-	 * sets the temp directory
-	 * 
-	 * @param strTempDirectory temp directory
-	 * @throws ExpressionException
-	 */
-	protected void setTempDirectory(String strTempDirectory, boolean flush) throws ExpressionException {
-		setTempDirectory(resources.getResource(strTempDirectory), flush);
-	}
+	@Override
+	public Resource getTempDirectory() {
+		if (tempDirectory == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getTempDirectory")) {
+				if (tempDirectory == null) {
+					try {
+						Resource configDir = getConfigDir();
+						String strTempDirectory = ConfigWebUtil.translateOldPath(ConfigWebFactory.getAttr(root, "tempDirectory"));
 
-	/**
-	 * sets the temp directory
-	 * 
-	 * @param tempDirectory temp directory
-	 * @throws ExpressionException
-	 */
-	protected void setTempDirectory(Resource tempDirectory, boolean flush) throws ExpressionException {
-		if (!isDirectory(tempDirectory) || !tempDirectory.isWriteable()) {
-			LogUtil.log(this, Log.LEVEL_ERROR, "loading",
-					"temp directory [" + tempDirectory + "] is not writable or can not be created, using directory [" + SystemUtil.getTempDirectory() + "] instead");
+						Resource cst = null;
+						// Temp Dir
+						if (!StringUtil.isEmpty(strTempDirectory)) {
+							cst = ConfigWebUtil.getFile(configDir, strTempDirectory, null, configDir, FileUtil.TYPE_DIR, ResourceUtil.LEVEL_GRAND_PARENT_FILE, this);
+						}
+						if (cst == null) {
+							cst = ConfigWebUtil.getFile(configDir, "temp", null, configDir, FileUtil.TYPE_DIR, ResourceUtil.LEVEL_GRAND_PARENT_FILE, this);
+						}
 
-			tempDirectory = SystemUtil.getTempDirectory();
-			if (!tempDirectory.isWriteable()) {
-				LogUtil.log(this, Log.LEVEL_ERROR, "loading", "temp directory [" + tempDirectory + "] is not writable");
+						if (!isDirectory(cst) || !cst.isWriteable()) {
+							LogUtil.log(this, Log.LEVEL_ERROR, "loading",
+									"temp directory [" + cst + "] is not writable or can not be created, using directory [" + SystemUtil.getTempDirectory() + "] instead");
+
+							cst = SystemUtil.getTempDirectory();
+							if (!cst.isWriteable()) {
+								LogUtil.log(this, Log.LEVEL_ERROR, "loading", "temp directory [" + cst + "] is not writable");
+							}
+							if (!cst.exists()) cst.mkdirs();
+
+						}
+						if (!tempDirectoryReload) ResourceUtil.removeChildrenEL(cst, true);// start with an empty temp directory
+						this.tempDirectory = cst;
+
+					}
+					catch (Throwable t) {
+						ExceptionUtil.rethrowIfNecessary(t);
+						ConfigWebFactory.log(this, getLog(), t);
+					}
+				}
 			}
 		}
-		if (flush) ResourceUtil.removeChildrenEL(tempDirectory, true);// start with an empty temp directory
-		this.tempDirectory = tempDirectory;
+		return tempDirectory;
+	}
+
+	public ConfigImpl resetTempDirectory() {
+		if (tempDirectory != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getTempDirectory")) {
+				if (tempDirectory != null) {
+					tempDirectory = null;
+					tempDirectoryReload = true;
+				}
+			}
+		}
+		return this;
 	}
 
 	/**
