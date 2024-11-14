@@ -273,27 +273,8 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 		ConfigPro ci = ((ConfigPro) config);
 		this.defaultDataSource = config.getDefaultDataSource();
 		this.wstype = WS_TYPE_AXIS1;
-		this.queryVarUsage = ci.getQueryVarUsage();
-		this.proxyData = config.getProxyData();
 
-		this.triggerComponentDataMember = config.getTriggerComponentDataMember();
-		this.restSetting = config.getRestSetting();
 		this.component = cfc;
-
-		this.showDebug = ci.getShowDebug();
-		this.showDoc = ci.getShowDoc();
-		this.showMetric = ci.getShowMetric();
-		this.showTest = ci.getShowTest();
-
-		if (ci.hasDebugOptions(ConfigPro.DEBUG_DATABASE)) this.debugging += ConfigPro.DEBUG_DATABASE;
-		if (ci.hasDebugOptions(ConfigPro.DEBUG_DUMP)) this.debugging += ConfigPro.DEBUG_DUMP;
-		if (ci.hasDebugOptions(ConfigPro.DEBUG_EXCEPTION)) this.debugging += ConfigPro.DEBUG_EXCEPTION;
-		if (ci.hasDebugOptions(ConfigPro.DEBUG_IMPLICIT_ACCESS)) this.debugging += ConfigPro.DEBUG_IMPLICIT_ACCESS;
-		if (ci.hasDebugOptions(ConfigPro.DEBUG_QUERY_USAGE)) this.debugging += ConfigPro.DEBUG_QUERY_USAGE;
-		if (ci.hasDebugOptions(ConfigPro.DEBUG_TEMPLATE)) this.debugging += ConfigPro.DEBUG_TEMPLATE;
-		if (ci.hasDebugOptions(ConfigPro.DEBUG_THREAD)) this.debugging += ConfigPro.DEBUG_THREAD;
-		if (ci.hasDebugOptions(ConfigPro.DEBUG_TIMER)) this.debugging += ConfigPro.DEBUG_TIMER;
-		if (ci.hasDebugOptions(ConfigPro.DEBUG_TRACING)) this.debugging += ConfigPro.DEBUG_TRACING;
 
 		initAntiSamyPolicyResource(pc);
 		if (antiSamyPolicyResource == null) this.antiSamyPolicyResource = ((ConfigPro) config).getAntiSamyPolicy();
@@ -693,7 +674,9 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 			if (o != null) {
 				b = Caster.toBoolean(o, null);
 				if (b != null) triggerComponentDataMember = b.booleanValue();
+				else triggerComponentDataMember = config.getTriggerComponentDataMember();
 			}
+			else triggerComponentDataMember = config.getTriggerComponentDataMember();
 			initTriggerComponentDataMember = true;
 		}
 		return triggerComponentDataMember;
@@ -1083,6 +1066,22 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	private void initMonitor() {
 		synchronized (KeyConstants._monitoring) {
 			if (!initMonitor) {
+				ConfigPro ci = (ConfigPro) config;
+				if (ci.hasDebugOptions(ConfigPro.DEBUG_DATABASE)) this.debugging += ConfigPro.DEBUG_DATABASE;
+				if (ci.hasDebugOptions(ConfigPro.DEBUG_DUMP)) this.debugging += ConfigPro.DEBUG_DUMP;
+				if (ci.hasDebugOptions(ConfigPro.DEBUG_EXCEPTION)) this.debugging += ConfigPro.DEBUG_EXCEPTION;
+				if (ci.hasDebugOptions(ConfigPro.DEBUG_IMPLICIT_ACCESS)) this.debugging += ConfigPro.DEBUG_IMPLICIT_ACCESS;
+				if (ci.hasDebugOptions(ConfigPro.DEBUG_QUERY_USAGE)) this.debugging += ConfigPro.DEBUG_QUERY_USAGE;
+				if (ci.hasDebugOptions(ConfigPro.DEBUG_TEMPLATE)) this.debugging += ConfigPro.DEBUG_TEMPLATE;
+				if (ci.hasDebugOptions(ConfigPro.DEBUG_THREAD)) this.debugging += ConfigPro.DEBUG_THREAD;
+				if (ci.hasDebugOptions(ConfigPro.DEBUG_TIMER)) this.debugging += ConfigPro.DEBUG_TIMER;
+				if (ci.hasDebugOptions(ConfigPro.DEBUG_TRACING)) this.debugging += ConfigPro.DEBUG_TRACING;
+
+				showDebug = ci.getShowDebug();
+				showDoc = ci.getShowDoc();
+				showMetric = ci.getShowMetric();
+				showTest = ci.getShowTest();
+
 				ConfigPro cp = (ConfigPro) config;
 				Struct sct = Caster.toStruct(get(component, KeyConstants._monitoring, null), null);
 				if (sct != null) {
@@ -1190,6 +1189,7 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 						}
 					}
 				}
+
 				initMonitor = true;
 			}
 		}
@@ -1707,6 +1707,7 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 
 	private void initRest() {
 		if (!initRestSetting) {
+			restSetting = config.getRestSetting();
 			Object o = get(component, KeyConstants._restsettings, null);
 			if (o != null && Decision.isStruct(o)) {
 				Struct sct = Caster.toStruct(o, null);
@@ -2092,8 +2093,10 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 			if (sct != null) {
 				String str = Caster.toString(sct.get(KeyConstants._varusage, null), null);
 				if (StringUtil.isEmpty(str)) str = Caster.toString(sct.get(KeyConstants._variableusage, null), null);
-				if (!StringUtil.isEmpty(str)) queryVarUsage = AppListenerUtil.toVariableUsage(str, queryVarUsage);
+				if (!StringUtil.isEmpty(str)) queryVarUsage = AppListenerUtil.toVariableUsage(str, ((ConfigPro) config).getQueryVarUsage());
+				else queryVarUsage = ((ConfigPro) config).getQueryVarUsage();
 			}
+			else queryVarUsage = ((ConfigPro) config).getQueryVarUsage();
 			initQueryVarUsage = true;
 		}
 		return queryVarUsage;
@@ -2109,7 +2112,8 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	public ProxyData getProxyData() {
 		if (!initProxyData) {
 			Struct sct = Caster.toStruct(get(component, KeyConstants._proxy, null), null);
-			proxyData = ProxyDataImpl.toProxyData(sct, null);
+			if (sct != null) proxyData = ProxyDataImpl.toProxyData(sct, config.getProxyData());
+			else proxyData = config.getProxyData();
 			initProxyData = true;
 		}
 		return proxyData;
