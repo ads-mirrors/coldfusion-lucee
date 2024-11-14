@@ -201,7 +201,6 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	private boolean initCache;
 	private boolean initCTMappings;
 	private boolean initCMappings;
-	private int localMode;
 	private boolean initLocalMode;
 	private boolean initBufferOutput;
 	private boolean initSuppressContent;
@@ -271,11 +270,7 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	public ModernApplicationContext(PageContext pc, Component cfc, RefBoolean throwsErrorWhileInit) {
 		super(pc.getConfig());
 		ConfigPro ci = ((ConfigPro) config);
-		scriptProtect = config.getScriptProtect();
-		typeChecking = ci.getTypeChecking();
-		allowCompression = ci.allowCompression();
 		this.defaultDataSource = config.getDefaultDataSource();
-		this.localMode = config.getLocalMode();
 		this.locale = config.getLocale();
 		this.timeZone = config.getTimeZone();
 		this.webCharset = ci.getWebCharSet();
@@ -554,7 +549,9 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 			if (o != null) {
 				str = Caster.toString(o, null);
 				if (str != null) scriptProtect = AppListenerUtil.translateScriptProtect(str, 0);
+				else scriptProtect = config.getScriptProtect();
 			}
+			else scriptProtect = config.getScriptProtect();
 			initScriptProtect = true;
 		}
 		return scriptProtect;
@@ -565,6 +562,7 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 		if (!initTypeChecking) {
 			Boolean b = Caster.toBoolean(get(component, KeyConstants._typeChecking, null), null);
 			if (b != null) typeChecking = b.booleanValue();
+			else typeChecking = ((ConfigPro) config).getTypeChecking();
 			initTypeChecking = true;
 		}
 		return typeChecking;
@@ -575,6 +573,7 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 		if (!initAllowCompression) {
 			Boolean b = Caster.toBoolean(get(component, KeyConstants._compression, null), null);
 			if (b != null) allowCompression = b.booleanValue();
+			else allowCompression = ((ConfigPro) config).allowCompression();
 			initAllowCompression = true;
 		}
 		return allowCompression;
@@ -1070,7 +1069,8 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	public int getLocalMode() {
 		if (!initLocalMode) {
 			Object o = get(component, KeyConstants._localMode, null);
-			if (o != null) localMode = AppListenerUtil.toLocalMode(o, localMode);
+			if (o != null) localMode = AppListenerUtil.toLocalMode(o, config.getLocalMode());
+			else localMode = config.getLocalMode();
 			initLocalMode = true;
 		}
 		return localMode;
