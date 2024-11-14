@@ -176,7 +176,6 @@ import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.UDF;
-import lucee.runtime.type.scope.Undefined;
 import lucee.runtime.type.util.CollectionUtil;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
@@ -351,9 +350,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		if (!essentialOnly) {
 			_loadMappings(config, root, mode, log); // it is important this runs after
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded mappings");
-
-			_loadRest(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded rest");
 
 			_loadExtensionProviders(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded extensions");
@@ -1554,23 +1550,17 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return ConfigWebUtil.inspectTemplate(strInsTemp, ConfigPro.INSPECT_UNDEFINED);
 	}
 
-	private static void _loadRest(ConfigServerImpl config, Struct root, Log log) {
+	public static lucee.runtime.rest.Mapping[] loadRestMappings(ConfigImpl config, Struct root, Log log) {
+		Map<String, lucee.runtime.rest.Mapping> mappings = new HashMap<String, lucee.runtime.rest.Mapping>();
 		try {
 			boolean hasAccess = true;// MUST
 			// ConfigWebUtil.hasAccess(config,SecurityManager.TYPE_REST);
 			Struct el = ConfigWebUtil.getAsStruct("rest", root);
 
-			// list
-			Boolean list = el != null ? Caster.toBoolean(getAttr(el, "list"), null) : null;
-			if (list != null) {
-				config.setRestList(list.booleanValue());
-			}
-
 			Array _mappings = ConfigWebUtil.getAsArray("mapping", el);
 
 			// first get mapping defined in server admin (read-only)
 			boolean hasDefault = false;
-			Map<String, lucee.runtime.rest.Mapping> mappings = new HashMap<String, lucee.runtime.rest.Mapping>();
 			lucee.runtime.rest.Mapping tmp;
 
 			// get current mappings
@@ -1607,13 +1597,24 @@ public final class ConfigWebFactory extends ConfigFactory {
 				tmp = new lucee.runtime.rest.Mapping(config, "/default-set-by-lucee", rest.getAbsolutePath(), true, true, true);
 				mappings.put(tmp.getVirtual(), tmp);
 			}
-
-			config.setRestMappings(mappings.values().toArray(new lucee.runtime.rest.Mapping[mappings.size()]));
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
+		lucee.runtime.rest.Mapping[] arr = mappings.values().toArray(new lucee.runtime.rest.Mapping[mappings.size()]);
+
+		// make sure only one is default
+		boolean hasDefault = false;
+		lucee.runtime.rest.Mapping m;
+		for (int i = 0; i < arr.length; i++) {
+			m = arr[i];
+			if (m.isDefault()) {
+				if (hasDefault) m.setDefault(false);
+				hasDefault = true;
+			}
+		}
+		return arr;
 	}
 
 	public static Map<String, LoggerAndSourceData> loadLoggers(ConfigImpl config, Struct root) {
@@ -3157,18 +3158,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 	private static void _loadScope(ConfigServerImpl config, Struct root, int mode, Log log) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
-
-			// Local Mode
-			if (mode == ConfigPro.MODE_STRICT) {
-				config.setLocalMode(Undefined.MODE_LOCAL_OR_ARGUMENTS_ALWAYS);
-			}
-			else {
-				String strLocalMode = getAttr(root, "localMode");
-				if (StringUtil.isEmpty(strLocalMode)) strLocalMode = getAttr(root, "localScopeMode");
-				if (hasAccess && !StringUtil.isEmpty(strLocalMode)) {
-					config.setLocalMode(strLocalMode);
-				}
-			}
 
 			// CGI readonly
 			String strCGIReadonly = getAttr(root, "cgiReadonly");

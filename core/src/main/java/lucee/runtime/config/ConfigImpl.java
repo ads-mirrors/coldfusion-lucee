@@ -286,7 +286,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private PageSource baseComponentPageSource;
 	private String baseComponentTemplate;
-	private boolean restList = false;
+	private Boolean restList;
 
 	private short clientType = CLIENT_SCOPE_TYPE_COOKIE;
 
@@ -352,7 +352,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private Boolean allowURLRequestTimeout;
 	private Boolean errorStatusCode;
-	private int localMode = Undefined.MODE_LOCAL_OR_ARGUMENTS_ONLY_WHEN_EXISTS;
+	private Integer localMode;
 
 	private RHExtensionProvider[] rhextensionProviders = Constants.RH_EXTENSION_PROVIDERS;
 
@@ -1083,24 +1083,25 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public lucee.runtime.rest.Mapping[] getRestMappings() {
-		if (restMappings == null) restMappings = new lucee.runtime.rest.Mapping[0];
+		if (restMappings == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getRestMappings")) {
+				if (restMappings == null) {
+					restMappings = ConfigWebFactory.loadRestMappings(this, root, getLog());
+				}
+			}
+		}
 		return restMappings;
 	}
 
-	protected void setRestMappings(lucee.runtime.rest.Mapping[] restMappings) {
-
-		// make sure only one is default
-		boolean hasDefault = false;
-		lucee.runtime.rest.Mapping m;
-		for (int i = 0; i < restMappings.length; i++) {
-			m = restMappings[i];
-			if (m.isDefault()) {
-				if (hasDefault) m.setDefault(false);
-				hasDefault = true;
+	public ConfigImpl resetRestMappings() {
+		if (restMappings != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getRestMappings")) {
+				if (restMappings != null) {
+					restMappings = null;
+				}
 			}
 		}
-
-		this.restMappings = restMappings;
+		return this;
 	}
 
 	@Override
@@ -1938,13 +1939,28 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		this.baseComponentTemplate = template;
 	}
 
-	protected void setRestList(boolean restList) {
-		this.restList = restList;
-	}
-
 	@Override
 	public boolean getRestList() {
+		if (restList == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getRestList")) {
+				if (restList == null) {
+					Struct rest = ConfigWebUtil.getAsStruct("rest", root);
+					restList = rest != null ? Caster.toBoolean(ConfigWebFactory.getAttr(rest, "list"), Boolean.FALSE) : Boolean.FALSE;
+				}
+			}
+		}
 		return restList;
+	}
+
+	public ConfigImpl resetRestList() {
+		if (restList != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getRestList")) {
+				if (restList != null) {
+					restList = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	/**
@@ -3257,21 +3273,32 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public int getLocalMode() {
+		if (localMode == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getLocalMode")) {
+				if (localMode == null) {
+					String strLocalMode = ConfigWebFactory.getAttr(root, "localMode");
+					if (StringUtil.isEmpty(strLocalMode)) strLocalMode = ConfigWebFactory.getAttr(root, "localScopeMode");
+					if (!StringUtil.isEmpty(strLocalMode, true)) {
+						localMode = AppListenerUtil.toLocalMode(strLocalMode, Undefined.MODE_LOCAL_OR_ARGUMENTS_ONLY_WHEN_EXISTS);
+					}
+					else {
+						localMode = Undefined.MODE_LOCAL_OR_ARGUMENTS_ONLY_WHEN_EXISTS;
+					}
+				}
+			}
+		}
 		return localMode;
 	}
 
-	/**
-	 * @param localMode the localMode to set
-	 */
-	protected void setLocalMode(int localMode) {
-		this.localMode = localMode;
-	}
-
-	/**
-	 * @param strLocalMode the localMode to set
-	 */
-	protected void setLocalMode(String strLocalMode) {
-		this.localMode = AppListenerUtil.toLocalMode(strLocalMode, this.localMode);
+	public ConfigImpl resetLocalMode() {
+		if (localMode != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getLocalMode")) {
+				if (localMode != null) {
+					localMode = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override

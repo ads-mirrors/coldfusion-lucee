@@ -2066,6 +2066,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doUpdateRestMapping() throws PageException {
 		admin.updateRestMapping(getString("admin", action, "virtual"), getString("admin", action, "physical"), getBool("admin", action, "default"));
 		store();
+		getConfigServerImpl(config).resetRestMappings();
 		adminSync.broadcast(attributes, config);
 
 		RestUtil.release(config.getRestMappings());
@@ -2074,6 +2075,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doRemoveRestMapping() throws PageException {
 		admin.removeRestMapping(getString("admin", action, "virtual"));
 		store();
+		getConfigServerImpl(config).resetRestMappings();
 		adminSync.broadcast(attributes, config);
 		RestUtil.release(config.getRestMappings());
 	}
@@ -4177,6 +4179,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		config.getFormUrlAsStruct();
 
 		store();
+		getConfigServerImpl(config).resetLocalMode();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -4194,8 +4197,8 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doUpdateRestSettings() throws PageException {
 
 		admin.updateRestList(getBool("list", null));
-		// admin.updateRestAllowChanges(getBool("allowChanges", null));
 		store();
+		getConfigServerImpl(config).resetRestList();
 		adminSync.broadcast(attributes, config);
 	}
 
