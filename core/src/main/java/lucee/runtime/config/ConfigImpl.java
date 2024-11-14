@@ -45,6 +45,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
 import lucee.aprint;
+import lucee.print;
 import lucee.commons.date.TimeZoneConstants;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.FileUtil;
@@ -232,11 +233,11 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private TimeSpan applicationTimeout;
 	private TimeSpan requestTimeout;
 
-	private boolean sessionManagement = true;
-	private boolean clientManagement = false;
-	private boolean clientCookies = true;
+	private Boolean sessionManagement;
+	private Boolean clientManagement;
+	private Boolean clientCookies;
 	private boolean developMode = ConfigImpl.DEFAULT_DEVELOP_MODE;
-	private boolean domainCookies = false;
+	private Boolean domainCookies;
 
 	private Resource configFile;
 	private Resource configDir;
@@ -288,7 +289,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private String baseComponentTemplate;
 	private Boolean restList;
 
-	private short clientType = CLIENT_SCOPE_TYPE_COOKIE;
+	private Short clientType;
 
 	private String componentDumpTemplate;
 	private int componentDataMemberDefaultAccess = Component.ACCESS_PUBLIC;
@@ -318,7 +319,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private Resource clientScopeDir;
 	private Resource sessionScopeDir;
-	private long clientScopeDirSize = 1024 * 1024 * 100;
+	private Long clientScopeDirSize;
 	private long sessionScopeDirSize = 1024 * 1024 * 100;
 
 	private Resource cacheDir;
@@ -430,7 +431,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private int inspectTemplateAutoIntervalSlow = ConfigPro.INSPECT_INTERVAL_UNDEFINED;
 	private int inspectTemplateAutoIntervalFast = ConfigPro.INSPECT_INTERVAL_UNDEFINED;
 
-	private boolean formUrlAsStruct = true;
+	private Boolean formUrlAsStruct;
 
 	private boolean showDebug;
 
@@ -823,7 +824,29 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public boolean isClientCookies() {
+		if (clientCookies == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "isClientCookies")) {
+				if (clientCookies == null) {
+					String strClientCookies = ConfigWebFactory.getAttr(root, "clientCookies");
+					if (!StringUtil.isEmpty(strClientCookies, true)) {
+						clientCookies = Caster.toBoolean(strClientCookies, Boolean.TRUE);
+					}
+					else clientCookies = Boolean.TRUE;
+				}
+			}
+		}
 		return clientCookies;
+	}
+
+	public ConfigImpl resetClientCookies() {
+		if (clientCookies != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "isClientCookies")) {
+				if (clientCookies != null) {
+					clientCookies = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -833,17 +856,82 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public boolean isClientManagement() {
+		if (clientManagement == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "isClientManagement")) {
+				if (clientManagement == null) {
+					String strClientManagement = ConfigWebFactory.getAttr(root, "clientManagement");
+					if (!StringUtil.isEmpty(strClientManagement)) {
+						clientManagement = Caster.toBoolean(strClientManagement, Boolean.FALSE);
+					}
+					else clientManagement = Boolean.FALSE;
+				}
+			}
+		}
 		return clientManagement;
+	}
+
+	public ConfigImpl resetClientManagement() {
+		if (clientManagement != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "isClientManagement")) {
+				if (clientManagement != null) {
+					clientManagement = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
 	public boolean isDomainCookies() {
+		if (domainCookies == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "isDomainCookies")) {
+				if (domainCookies == null) {
+					String strDomainCookies = ConfigWebFactory.getAttr(root, "domainCookies");
+					if (!StringUtil.isEmpty(strDomainCookies, true)) {
+						domainCookies = Caster.toBoolean(strDomainCookies.trim(), Boolean.FALSE);
+					}
+					else domainCookies = Boolean.FALSE;
+				}
+			}
+		}
 		return domainCookies;
+	}
+
+	public ConfigImpl resetDomainCookies() {
+		if (domainCookies != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "isDomainCookies")) {
+				if (domainCookies != null) {
+					domainCookies = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
 	public boolean isSessionManagement() {
+		if (sessionManagement == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "isSessionManagement")) {
+				if (sessionManagement == null) {
+					String strSessionManagement = ConfigWebFactory.getAttr(root, "sessionManagement");
+					if (!StringUtil.isEmpty(strSessionManagement, true)) {
+						sessionManagement = Caster.toBoolean(strSessionManagement, Boolean.TRUE);
+					}
+				}
+			}
+		}
 		return sessionManagement;
+	}
+
+	public ConfigImpl resetSessionManagement() {
+		if (sessionManagement != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "isSessionManagement")) {
+				if (sessionManagement != null) {
+					sessionManagement = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -1638,38 +1726,10 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	/**
-	 * @param clientCookies The clientCookies to set.
-	 */
-	protected void setClientCookies(boolean clientCookies) {
-		this.clientCookies = clientCookies;
-	}
-
-	/**
 	 * @param developMode
 	 */
 	protected void setDevelopMode(boolean developMode) {
 		this.developMode = developMode;
-	}
-
-	/**
-	 * @param clientManagement The clientManagement to set.
-	 */
-	protected void setClientManagement(boolean clientManagement) {
-		this.clientManagement = clientManagement;
-	}
-
-	/**
-	 * @param domainCookies The domainCookies to set.
-	 */
-	protected void setDomainCookies(boolean domainCookies) {
-		this.domainCookies = domainCookies;
-	}
-
-	/**
-	 * @param sessionManagement The sessionManagement to set.
-	 */
-	protected void setSessionManagement(boolean sessionManagement) {
-		this.sessionManagement = sessionManagement;
 	}
 
 	/**
@@ -2072,7 +2132,34 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public short getClientType() {
+		if (clientType == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getClientType")) {
+				if (clientType == null) {
+					String str = ConfigWebFactory.getAttr(root, "clientType");
+					if (!StringUtil.isEmpty(str, true)) {
+						str = str.trim().toLowerCase();
+						if (str.equals("file")) clientType = Config.CLIENT_SCOPE_TYPE_FILE;
+						else if (str.equals("db")) clientType = Config.CLIENT_SCOPE_TYPE_DB;
+						else if (str.equals("database")) clientType = Config.CLIENT_SCOPE_TYPE_DB;
+						else clientType = Config.CLIENT_SCOPE_TYPE_COOKIE;
+					}
+					else clientType = Config.CLIENT_SCOPE_TYPE_COOKIE;
+				}
+			}
+		}
 		return this.clientType;
+	}
+
+	public ConfigImpl resetClientType() {
+		if (clientType != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getClientType")) {
+				if (clientType != null) {
+					clientType = null;
+				}
+
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -2701,8 +2788,34 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public Resource getClientScopeDir() {
-		if (clientScopeDir == null) clientScopeDir = getConfigDir().getRealResource("client-scope");
+		print.e("!!!!!!!!!!!!!!!!!!!! getClientScopeDir !!!!!!!!!!!!!!!!");
+		if (clientScopeDir == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getClientScopeDir")) {
+				if (clientScopeDir == null) {
+					Resource configDir = getConfigDir();
+					String strClientDirectory = ConfigWebFactory.getAttr(root, "clientDirectory");
+					if (!StringUtil.isEmpty(strClientDirectory, true)) {
+						strClientDirectory = ConfigWebUtil.translateOldPath(strClientDirectory.trim());
+						clientScopeDir = ConfigWebUtil.getFile(configDir, strClientDirectory, "client-scope", configDir, FileUtil.TYPE_DIR, ResourceUtil.LEVEL_PARENT_FILE, this);
+					}
+					else {
+						clientScopeDir = configDir.getRealResource("client-scope");
+					}
+				}
+			}
+		}
 		return clientScopeDir;
+	}
+
+	public ConfigImpl resetClientScopeDir() {
+		if (clientScopeDir != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getClientScopeDir")) {
+				if (clientScopeDir != null) {
+					clientScopeDir = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -2713,29 +2826,39 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public long getClientScopeDirSize() {
+		if (clientScopeDirSize == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getClientScopeDirSize")) {
+				if (clientScopeDirSize == null) {
+					String strMax = ConfigWebFactory.getAttr(root, "clientDirectoryMaxSize");
+					if (!StringUtil.isEmpty(strMax, true)) {
+						clientScopeDirSize = ByteSizeParser.parseByteSizeDefinition(strMax.trim(), 1024L * 1024L * 100L);
+					}
+					else clientScopeDirSize = 1024L * 1024L * 100L;
+				}
+			}
+		}
 		return clientScopeDirSize;
 	}
+
+	public ConfigImpl resetClientScopeDirSize() {
+		if (clientScopeDirSize != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getClientScopeDirSize")) {
+				if (clientScopeDirSize != null) {
+					clientScopeDirSize = null;
+				}
+			}
+		}
+		return this;
+	}
+
+	// =
 
 	public long getSessionScopeDirSize() {
 		return sessionScopeDirSize;
 	}
 
-	/**
-	 * @param clientScopeDir the clientScopeDir to set
-	 */
-	protected void setClientScopeDir(Resource clientScopeDir) {
-		this.clientScopeDir = clientScopeDir;
-	}
-
 	protected void setSessionScopeDir(Resource sessionScopeDir) {
 		this.sessionScopeDir = sessionScopeDir;
-	}
-
-	/**
-	 * @param clientScopeDirSize the clientScopeDirSize to set
-	 */
-	protected void setClientScopeDirSize(long clientScopeDirSize) {
-		this.clientScopeDirSize = clientScopeDirSize;
 	}
 
 	@Override
@@ -5211,11 +5334,30 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public boolean getFormUrlAsStruct() {
+		if (formUrlAsStruct == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getFormUrlAsStruct")) {
+				if (formUrlAsStruct == null) {
+					String str = ConfigWebFactory.getAttr(root, "formUrlAsStruct");
+					if (!StringUtil.isEmpty(str, true)) {
+						formUrlAsStruct = Caster.toBoolean(str.trim(), Boolean.TRUE);
+					}
+					else formUrlAsStruct = Boolean.TRUE;
+				}
+			}
+		}
 		return formUrlAsStruct;
 	}
 
-	protected void setFormUrlAsStruct(boolean formUrlAsStruct) {
-		this.formUrlAsStruct = formUrlAsStruct;
+	// = true
+	public ConfigImpl resetFormUrlAsStruct() {
+		if (formUrlAsStruct != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getFormUrlAsStruct")) {
+				if (formUrlAsStruct != null) {
+					formUrlAsStruct = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override

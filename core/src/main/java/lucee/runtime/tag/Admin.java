@@ -4181,7 +4181,8 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 
 		store();
 		getConfigServerImpl(config).resetLocalMode().resetCGIScopeReadonly().resetSessionType().resetAllowImplicidQueryCall().resetMergeFormAndURL().resetClientStorage()
-				.resetSessionStorage().resetClientTimeout().resetSessionTimeout().resetApplicationTimeout();// MUST
+				.resetSessionStorage().resetClientTimeout().resetSessionTimeout().resetApplicationTimeout().resetClientType().resetSessionManagement().resetClientManagement()
+				.resetClientCookies().resetDomainCookies().resetFormUrlAsStruct();// MUST
 		adminSync.broadcast(attributes, config);
 	}
 

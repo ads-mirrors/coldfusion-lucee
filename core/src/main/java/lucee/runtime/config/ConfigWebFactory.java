@@ -72,7 +72,6 @@ import lucee.commons.io.res.type.s3.DummyS3ResourceProvider;
 import lucee.commons.io.res.type.zip.ZipResourceProvider;
 import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.io.retirement.RetireOutputStream;
-import lucee.commons.lang.ByteSizeParser;
 import lucee.commons.lang.ClassException;
 import lucee.commons.lang.ClassUtil;
 import lucee.commons.lang.ExceptionUtil;
@@ -370,9 +369,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		if (!essentialOnly) {
 			_loadTag(config, root, log); // load tlds
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded tags");
-
-			_loadScope(config, root, mode, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded scope");
 
 			_loadScheduler(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded scheduled tasks");
@@ -3146,78 +3142,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			log(config, log, t);
 		}
 		return defaultValue;
-	}
-
-	/**
-	 * @param configServer
-	 * @param config
-	 * @param doc
-	 * @throws PageException
-	 * @throws IOException
-	 */
-	private static void _loadScope(ConfigServerImpl config, Struct root, int mode, Log log) {
-		try {
-			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
-
-			// Client Type
-			String strClientType = getAttr(root, "clientType");
-			if (hasAccess && !StringUtil.isEmpty(strClientType)) {
-				config.setClientType(strClientType);
-			}
-
-			// Client
-			Resource configDir = config.getConfigDir();
-			String strClientDirectory = getAttr(root, "clientDirectory");
-			if (hasAccess && !StringUtil.isEmpty(strClientDirectory)) {
-				strClientDirectory = ConfigWebUtil.translateOldPath(strClientDirectory);
-				Resource res = ConfigWebUtil.getFile(configDir, strClientDirectory, "client-scope", configDir, FileUtil.TYPE_DIR, ResourceUtil.LEVEL_PARENT_FILE, config);
-				config.setClientScopeDir(res);
-			}
-			else {
-				config.setClientScopeDir(configDir.getRealResource("client-scope"));
-			}
-
-			String strMax = getAttr(root, "clientDirectoryMaxSize");
-			if (hasAccess && !StringUtil.isEmpty(strMax)) {
-				config.setClientScopeDirSize(ByteSizeParser.parseByteSizeDefinition(strMax, config.getClientScopeDirSize()));
-			}
-
-			// Session Management
-			String strSessionManagement = getAttr(root, "sessionManagement");
-			if (hasAccess && !StringUtil.isEmpty(strSessionManagement)) {
-				config.setSessionManagement(toBoolean(strSessionManagement, true));
-			}
-
-			// Client Management
-			String strClientManagement = getAttr(root, "clientManagement");
-			if (hasAccess && !StringUtil.isEmpty(strClientManagement)) {
-				config.setClientManagement(toBoolean(strClientManagement, false));
-			}
-
-			// Client Cookies
-			String strClientCookies = getAttr(root, "clientCookies");
-			if (hasAccess && !StringUtil.isEmpty(strClientCookies)) {
-				config.setClientCookies(toBoolean(strClientCookies, true));
-			}
-
-			// Domain Cookies
-			String strDomainCookies = getAttr(root, "domainCookies");
-			if (hasAccess && !StringUtil.isEmpty(strDomainCookies)) {
-				config.setDomainCookies(toBoolean(strDomainCookies, false));
-			}
-
-			// FormUrlAsStruct
-			String formUrlAsStruct = getAttr(root, "formUrlAsStruct");
-
-			if (hasAccess && !StringUtil.isEmpty(formUrlAsStruct)) {
-				config.setFormUrlAsStruct(toBoolean(formUrlAsStruct, true));
-			}
-
-		}
-		catch (Throwable t) {
-			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
-		}
 	}
 
 	public static short loadJava(ConfigImpl config, Struct root, Log log, short defaultValue) {
