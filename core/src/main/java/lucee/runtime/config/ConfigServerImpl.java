@@ -347,6 +347,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 	 * @return Returns the defaultPassword.
 	 */
 	protected Password getDefaultPassword() {
+		defaultPassword = null;// TEST PW
 		if (defaultPassword == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getDefaultPassword")) {
 				if (defaultPassword == null) {

@@ -1254,6 +1254,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 * @return gets the password as hash
 	 */
 	protected Password getPassword() {
+		initPassword = true; // TEST PW
 		if (initPassword) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getPassword")) {
 				if (initPassword) {
@@ -4919,6 +4920,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public String getSalt() {
+		salt = null;// TEST PW
 		if (salt == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getSalt")) {
 				if (salt == null) {
