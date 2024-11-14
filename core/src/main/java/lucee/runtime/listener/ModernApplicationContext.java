@@ -276,12 +276,6 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 		this.queryVarUsage = ci.getQueryVarUsage();
 		this.proxyData = config.getProxyData();
 
-		this.sessionCluster = config.getSessionCluster();
-		this.clientCluster = config.getClientCluster();
-		this.sessionStorage = ci.getSessionStorage();
-		this.clientStorage = ci.getClientStorage();
-		this.allowImplicidQueryCall = config.allowImplicidQueryCall();
-		this.limitEvaluation = ci.limitEvaluation();
 		this.triggerComponentDataMember = config.getTriggerComponentDataMember();
 		this.restSetting = config.getRestSetting();
 		this.component = cfc;
@@ -345,7 +339,8 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 		Object o = get(component, KeyConstants._searchQueries, null);
 		if (o == null) o = get(component, KeyConstants._searchResults, null);
 
-		if (o != null) allowImplicidQueryCall = Caster.toBooleanValue(o, allowImplicidQueryCall);
+		if (o != null) allowImplicidQueryCall = Caster.toBooleanValue(o, config.allowImplicidQueryCall());
+		else allowImplicidQueryCall = config.allowImplicidQueryCall();
 	}
 
 	private void initLimitEvaluation() {
@@ -354,9 +349,10 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 		if (o instanceof Struct) {
 			Struct sct = (Struct) o;
 			o = sct.get(KeyConstants._limitEvaluation, null);
-			if (o != null) limitEvaluation = Caster.toBooleanValue(o, limitEvaluation);
-
+			if (o != null) limitEvaluation = Caster.toBooleanValue(o, ((ConfigPro) config).limitEvaluation());
+			else limitEvaluation = ((ConfigPro) config).limitEvaluation();
 		}
+		else limitEvaluation = ((ConfigPro) config).limitEvaluation();
 	}
 
 	@Override
@@ -526,6 +522,7 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 		if (!initClientStorage) {
 			String str = Caster.toString(get(component, KeyConstants._clientStorage, null), null);
 			if (!StringUtil.isEmpty(str)) clientStorage = str;
+			else clientStorage = ((ConfigPro) config).getClientStorage();
 			initClientStorage = true;
 		}
 		return clientStorage;
@@ -600,6 +597,7 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 		if (!initSessionStorage) {
 			String str = Caster.toString(get(component, KeyConstants._sessionStorage, null), null);
 			if (!StringUtil.isEmpty(str)) sessionStorage = str;
+			else sessionStorage = ((ConfigPro) config).getSessionStorage();
 			initSessionStorage = true;
 		}
 		return sessionStorage;
@@ -609,7 +607,8 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	public boolean getSessionCluster() {
 		if (!initSessionCluster) {
 			Object o = get(component, KeyConstants._sessionCluster, null);
-			if (o != null) sessionCluster = Caster.toBooleanValue(o, sessionCluster);
+			if (o != null) sessionCluster = Caster.toBooleanValue(o, config.getSessionCluster());
+			else sessionCluster = config.getSessionCluster();
 			initSessionCluster = true;
 		}
 		return sessionCluster;
@@ -619,7 +618,8 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	public boolean getClientCluster() {
 		if (!initClientCluster) {
 			Object o = get(component, KeyConstants._clientCluster, null);
-			if (o != null) clientCluster = Caster.toBooleanValue(o, clientCluster);
+			if (o != null) clientCluster = Caster.toBooleanValue(o, config.getClientCluster());
+			else clientCluster = config.getClientCluster();
 			initClientCluster = true;
 		}
 		return clientCluster;
