@@ -26,7 +26,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -315,10 +314,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 		config.setLastModified();
 
-		_loadConfig(config, root);
-		int mode = config.getMode();
-		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded config");
-
 		Log log = config.getLog("application");
 		// loadServerLibDesc(cs, config, doc,log);
 		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded loggers");
@@ -342,7 +337,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 
 		if (!essentialOnly) {
-			_loadMappings(config, root, mode, log); // it is important this runs after
+			_loadMappings(config, root, log); // it is important this runs after
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded mappings");
 
 			_loadExtensionProviders(config, root, log);
@@ -356,7 +351,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			_loadCache(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded cache");
 
-			_loadCustomTagsMappings(config, root, mode, log);
+			_loadCustomTagsMappings(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded custom tag mappings");
 			// loadFilesystem(cs, config, doc, doNew); // load tlds
 		}
@@ -371,7 +366,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			_loadDebug(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded debug");
 
-			_loadComponent(config, root, mode, log);
+			_loadComponent(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded component");
 
 			_loadSetting(config, root, log);
@@ -1378,7 +1373,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param doc
 	 * @throws IOException
 	 */
-	private static void _loadMappings(ConfigServerImpl config, Struct root, int mode, Log log) throws IOException {
+	private static void _loadMappings(ConfigServerImpl config, Struct root, Log log) throws IOException {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_MAPPING);
 			Struct _mappings = Caster.toStruct(root.get("mappings", null), null);
@@ -1444,7 +1439,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 							ApplicationListener listener = ConfigWebUtil.loadListener(listenerType, null);
 							if (listener != null || listenerMode != -1) {
 								// type
-								if (mode == ConfigPro.MODE_STRICT) listener = new ModernAppListener();
+								if (config.getMode() == ConfigPro.MODE_STRICT) listener = new ModernAppListener();
 								else if (listener == null) listener = ConfigWebUtil.loadListener(ConfigWebUtil.toListenerType(config.getApplicationListener().getType(), -1), null);
 								if (listener == null)// this should never be true
 									listener = new ModernAppListener();
@@ -2296,7 +2291,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param doc
 	 * @throws IOException
 	 */
-	private static void _loadCustomTagsMappings(ConfigServerImpl config, Struct root, int mode, Log log) {
+	private static void _loadCustomTagsMappings(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_CUSTOM_TAG);
 
@@ -2357,67 +2352,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 	private static Object toKey(Mapping m) {
 		if (!StringUtil.isEmpty(m.getStrPhysical(), true)) return m.getVirtual() + ":" + m.getStrPhysical().toLowerCase().trim();
 		return (m.getVirtual() + ":" + m.getStrPhysical() + ":" + m.getStrArchive()).toLowerCase();
-	}
-
-	/**
-	 * @param configServer
-	 * @param config
-	 * @param doc
-	 * @param serverPW
-	 * @throws IOException
-	 * @throws NoSuchAlgorithmException
-	 */
-	private static void _loadConfig(ConfigServerImpl config, Struct root) {
-		String salt = null;
-		Password pw = null;
-
-		salt = getAttr(root, "salt");
-		if (StringUtil.isEmpty(salt, true)) salt = getAttr(root, "adminSalt");
-		// salt (every context need to have a salt)
-		if (StringUtil.isEmpty(salt, true)) throw new RuntimeException("context is invalid, there is no salt!");
-		config.setSalt(salt = salt.trim());
-		// password
-		pw = PasswordImpl.readFromStruct(root, salt, false, true);
-		if (pw != null) {
-			config.setPassword(pw);
-		}
-
-		{
-			ConfigServerImpl csi = config;
-			String keyList = getAttr(root, "authKeys");
-			if (!StringUtil.isEmpty(keyList)) {
-				String[] keys = ListUtil.trimItems(ListUtil.toStringArray(ListUtil.toListRemoveEmpty(keyList, ',')));
-				for (int i = 0; i < keys.length; i++) {
-					try {
-						keys[i] = URLDecoder.decode(keys[i], "UTF-8", true);
-					}
-					catch (UnsupportedEncodingException e) {
-					}
-				}
-
-				csi.setAuthenticationKeys(keys);
-			}
-		}
-
-		// default password
-		{
-			pw = PasswordImpl.readFromStruct(root, salt, true, true);
-			if (pw != null) config.setDefaultPassword(pw);
-		}
-
-		// mode
-		String mode = getAttr(root, "mode");
-		if (!StringUtil.isEmpty(mode, true)) {
-			mode = mode.trim();
-			if ("custom".equalsIgnoreCase(mode)) config.setMode(ConfigPro.MODE_CUSTOM);
-			if ("strict".equalsIgnoreCase(mode)) config.setMode(ConfigPro.MODE_STRICT);
-		}
-
-		// check config file for changes
-		String cFc = getAttr(root, "checkForChanges");
-		if (!StringUtil.isEmpty(cFc, true)) {
-			config.setCheckForChangesInConfigFile(Caster.toBooleanValue(cFc.trim(), false));
-		}
 	}
 
 	private static void _loadTag(ConfigServerImpl config, Struct root, Log log) {
@@ -4020,12 +3954,14 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param doc
 	 * @throws IOException
 	 */
-	private static void _loadComponent(ConfigServerImpl config, Struct root, int mode, Log log) {
+	private static void _loadComponent(ConfigServerImpl config, Struct root, Log log) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
 			boolean hasSet = false;
 
+			int mode = config.getMode();
 			if (hasAccess) {
+
 				// component default return format
 				String strRF = getAttr(root, "returnFormat");
 				if (!StringUtil.isEmpty(strRF, true)) config.setReturnFormat(UDFUtil.toReturnFormat(strRF, UDF.RETURN_FORMAT_WDDX));
@@ -4038,7 +3974,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 				config.setBaseComponentTemplate("Component.cfc");
 
 				// deep search
-				if (mode == ConfigPro.MODE_STRICT) {
+				if (config.getMode() == ConfigPro.MODE_STRICT) {
 					config.setDoComponentDeepSearch(false);
 				}
 				else {

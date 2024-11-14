@@ -179,7 +179,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private static final RHExtension[] RHEXTENSIONS_EMPTY = new RHExtension[0];
 
-	private int mode = MODE_CUSTOM;
+	private Integer mode;
 	private static final double DEFAULT_VERSION = 5.0d;
 
 	private final Map<String, PhysicalClassLoader> rpcClassLoaders = new ConcurrentHashMap<String, PhysicalClassLoader>();
@@ -272,6 +272,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private Map<String, String> errorTemplates;
 
 	protected Password password;
+	private boolean initPassword = true;
 	private String salt;
 
 	private Mapping[] uncheckedMappings = null;
@@ -396,7 +397,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	protected int writerType = CFML_WRITER_REFULAR;
 	private long configFileLastModified;
-	private boolean checkForChangesInConfigFile;
+	private Boolean checkForChangesInConfigFile;
 	// protected String apiKey=null;
 
 	private List consoleLayouts = new ArrayList();
@@ -1252,24 +1253,46 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 * @return gets the password as hash
 	 */
 	protected Password getPassword() {
+		if (initPassword) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getPassword")) {
+				if (initPassword) {
+					Password pw = PasswordImpl.readFromStruct(root, getSalt(), false, true);
+					if (pw != null) {
+						password = pw;
+					}
+					initPassword = false;
+				}
+			}
+		}
 		return password;
+	}
+
+	protected ConfigImpl resetPassword() {
+		if (!initPassword) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getPassword")) {
+				if (!initPassword) {
+					initPassword = true;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
 	public Password isPasswordEqual(String password) {
-		if (this.password == null) return null;
-		return ((PasswordImpl) this.password).isEqual(this, password);
+		if (getPassword() == null) return null;
+		return ((PasswordImpl) getPassword()).isEqual(this, password);
 	}
 
 	@Override
 	public boolean hasPassword() {
-		return password != null;
+		return getPassword() != null;
 	}
 
 	@Override
 	public boolean passwordEqual(Password password) {
-		if (this.password == null) return false;
-		return this.password.equals(password);
+		if (getPassword() == null) return false;
+		return getPassword().equals(password);
 	}
 
 	@Override
@@ -3211,7 +3234,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (doLocalCustomTag == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "doLocalCustomTag")) {
 				if (doLocalCustomTag == null) {
-					if (mode == ConfigPro.MODE_STRICT) {
+					if (getMode() == ConfigPro.MODE_STRICT) {
 						doLocalCustomTag = Boolean.FALSE;
 					}
 					else {
@@ -3246,7 +3269,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getCustomTagExtensions")) {
 				if (customTagExtensions == null) {
 					// extensions
-					if (mode == ConfigPro.MODE_STRICT) {
+					if (getMode() == ConfigPro.MODE_STRICT) {
 						customTagExtensions = Constants.getExtensions();
 					}
 					else {
@@ -3297,7 +3320,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			synchronized (SystemUtil.createToken("ConfigImpl", "doCustomTagDeepSearch")) {
 				if (doCustomTagDeepSearch == null) {
 					// do custom tag deep search
-					if (mode == ConfigPro.MODE_STRICT) {
+					if (getMode() == ConfigPro.MODE_STRICT) {
 						doCustomTagDeepSearch = Boolean.FALSE;
 					}
 					else {
@@ -4573,12 +4596,33 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return restSetting;
 	}
 
-	protected void setMode(int mode) {
-		this.mode = mode;
+	public int getMode() {
+		if (mode == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getMode")) {
+				if (mode == null) {
+					String str = ConfigWebFactory.getAttr(root, "mode");
+					if (!StringUtil.isEmpty(str, true)) {
+						str = str.trim();
+						if ("custom".equalsIgnoreCase(str)) mode = ConfigPro.MODE_CUSTOM;
+						else if ("strict".equalsIgnoreCase(str)) mode = ConfigPro.MODE_STRICT;
+						else mode = ConfigPro.MODE_CUSTOM;
+					}
+					else mode = ConfigPro.MODE_CUSTOM;
+				}
+			}
+		}
+		return mode;
 	}
 
-	public int getMode() {
-		return mode;
+	public ConfigImpl resetMode() {
+		if (mode != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getMode")) {
+				if (mode != null) {
+					mode = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	// do not move to Config interface, do instead getCFMLWriterClass
@@ -4621,13 +4665,31 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		this.debugOptions = debugOptions;
 	}
 
-	protected void setCheckForChangesInConfigFile(boolean checkForChangesInConfigFile) {
-		this.checkForChangesInConfigFile = checkForChangesInConfigFile;
-	}
-
 	@Override
 	public boolean checkForChangesInConfigFile() {
+		if (checkForChangesInConfigFile == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "checkForChangesInConfigFile")) {
+				if (checkForChangesInConfigFile == null) {
+					String cFc = ConfigWebFactory.getAttr(root, "checkForChanges");
+					if (!StringUtil.isEmpty(cFc, true)) {
+						checkForChangesInConfigFile = Caster.toBoolean(cFc.trim(), Boolean.FALSE);
+					}
+					else checkForChangesInConfigFile = Boolean.FALSE;
+				}
+			}
+		}
 		return checkForChangesInConfigFile;
+	}
+
+	public ConfigImpl resetCheckForChangesInConfigFile() {
+		if (checkForChangesInConfigFile != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "checkForChangesInConfigFile")) {
+				if (checkForChangesInConfigFile != null) {
+					checkForChangesInConfigFile = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -4859,31 +4921,49 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return logDir;
 	}
 
-	protected void setSalt(String salt) {
-		this.salt = salt;
-	}
-
 	@Override
 	public String getSalt() {
-		return this.salt;
+		if (salt == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getSalt")) {
+				if (salt == null) {
+					String salt = ConfigWebFactory.getAttr(root, "salt");
+					if (StringUtil.isEmpty(salt, true)) salt = ConfigWebFactory.getAttr(root, "adminSalt");
+					// salt (every context need to have a salt)
+					if (StringUtil.isEmpty(salt, true)) throw new RuntimeException("context is invalid, there is no salt!");
+					this.salt = salt.trim();
+				}
+			}
+		}
+		return salt;
+	}
+
+	public ConfigImpl resetSalt() {
+		if (salt != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getSalt")) {
+				if (salt != null) {
+					salt = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
 	public int getPasswordType() {
-		if (password == null) return Password.HASHED_SALTED;// when there is no password, we will have a HS password
-		return password.getType();
+		if (getPassword() == null) return Password.HASHED_SALTED;// when there is no password, we will have a HS password
+		return getPassword().getType();
 	}
 
 	@Override
 	public String getPasswordSalt() {
-		if (password == null || password.getSalt() == null) return this.salt;
-		return password.getSalt();
+		if (getPassword() == null || getPassword().getSalt() == null) return getSalt();
+		return getPassword().getSalt();
 	}
 
 	@Override
 	public int getPasswordOrigin() {
-		if (password == null) return Password.ORIGIN_UNKNOW;
-		return password.getOrigin();
+		if (getPassword() == null) return Password.ORIGIN_UNKNOW;
+		return getPassword().getOrigin();
 	}
 
 	@Override

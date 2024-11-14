@@ -20,6 +20,7 @@ package lucee.runtime.config;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
@@ -44,6 +45,7 @@ import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.ClassUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
+import lucee.commons.net.URLDecoder;
 import lucee.loader.engine.CFMLEngine;
 import lucee.loader.engine.CFMLEngineFactory;
 import lucee.loader.util.ExtensionFilter;
@@ -83,6 +85,7 @@ import lucee.runtime.type.scope.Cluster;
 import lucee.runtime.type.scope.ClusterRemote;
 import lucee.runtime.type.scope.ClusterWrap;
 import lucee.runtime.type.util.ArrayUtil;
+import lucee.runtime.type.util.ListUtil;
 import lucee.transformer.library.function.FunctionLib;
 import lucee.transformer.library.function.FunctionLibException;
 import lucee.transformer.library.function.FunctionLibFactory;
@@ -314,19 +317,35 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 	 * @return Returns the defaultPassword.
 	 */
 	protected Password getDefaultPassword() {
-		if (defaultPassword == null) return password;
+		if (defaultPassword == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getDefaultPassword")) {
+				if (defaultPassword == null) {
+					Password pw = PasswordImpl.readFromStruct(root, getSalt(), true, true);
+					if (pw != null) defaultPassword = pw;
+					else defaultPassword = getPassword();
+				}
+			}
+		}
 		return defaultPassword;
 	}
 
-	protected boolean hasCustomDefaultPassword() {
-		return defaultPassword != null;
+	protected ConfigImpl resetDefaultPassword() {
+		if (defaultPassword != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getDefaultPassword")) {
+				if (defaultPassword != null) {
+					defaultPassword = null;
+				}
+			}
+		}
+		return this;
 	}
 
-	/**
-	 * @param defaultPassword The defaultPassword to set.
-	 */
 	protected void setDefaultPassword(Password defaultPassword) {
 		this.defaultPassword = defaultPassword;
+	}
+
+	protected boolean hasCustomDefaultPassword() {
+		return getDefaultPassword() != null;
 	}
 
 	@Override
@@ -570,6 +589,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		return this;
 	}
 
+	@Override
 	public boolean getDateCasterClassicStyle() {
 		if (classicStyle == null) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "getDateCasterClassicStyle")) {
@@ -758,11 +778,26 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 	}
 
 	public String[] getAuthenticationKeys() {
-		return authKeys == null ? new String[0] : authKeys;
-	}
-
-	protected void setAuthenticationKeys(String[] authKeys) {
-		this.authKeys = authKeys;
+		if (authKeys == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getAuthenticationKeys")) {
+				if (authKeys == null) {
+					String keyList = ConfigWebFactory.getAttr(root, "authKeys");
+					if (!StringUtil.isEmpty(keyList)) {
+						String[] keys = ListUtil.trimItems(ListUtil.toStringArray(ListUtil.toListRemoveEmpty(keyList, ',')));
+						for (int i = 0; i < keys.length; i++) {
+							try {
+								keys[i] = URLDecoder.decode(keys[i], "UTF-8", true);
+							}
+							catch (UnsupportedEncodingException e) {
+							}
+						}
+						authKeys = keys;
+					}
+					else authKeys = new String[0];
+				}
+			}
+		}
+		return authKeys;
 	}
 
 	public ConfigServer getConfigServer(String key, String nonce) {

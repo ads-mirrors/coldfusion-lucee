@@ -3411,6 +3411,7 @@ public final class ConfigAdmin {
 	 * @throws DOMException
 	 */
 	public void updateDefaultPassword(String password) throws SecurityException, IOException {
+		// MUST this is not very good, make it better
 		checkWriteAccess();
 		((ConfigServerImpl) config).setDefaultPassword(PasswordImpl.writeToStruct(root, password, true));
 	}
@@ -3418,7 +3419,7 @@ public final class ConfigAdmin {
 	public void removeDefaultPassword() throws SecurityException {
 		checkWriteAccess();
 		PasswordImpl.removeFromStruct(root, true);
-		((ConfigServerImpl) config).setDefaultPassword(null);
+		((ConfigServerImpl) config).resetDefaultPassword();
 	}
 
 	/**
