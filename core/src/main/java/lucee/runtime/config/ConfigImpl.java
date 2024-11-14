@@ -918,6 +918,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 					if (!StringUtil.isEmpty(strSessionManagement, true)) {
 						sessionManagement = Caster.toBoolean(strSessionManagement, Boolean.TRUE);
 					}
+					else sessionManagement = Boolean.TRUE;
 				}
 			}
 		}
