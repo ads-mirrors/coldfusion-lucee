@@ -271,9 +271,6 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	public ModernApplicationContext(PageContext pc, Component cfc, RefBoolean throwsErrorWhileInit) {
 		super(pc.getConfig());
 		ConfigPro ci = ((ConfigPro) config);
-		setDomainCookies = config.isDomainCookies();
-		setSessionManagement = config.isSessionManagement();
-		setClientManagement = config.isClientManagement();
 		sessionTimeout = config.getSessionTimeout();
 		clientTimeout = config.getClientTimeout();
 		requestTimeout = config.getRequestTimeout();
@@ -510,7 +507,8 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	public boolean isSetClientManagement() {
 		if (!initSetClientManagement) {
 			Object o = get(component, KeyConstants._clientManagement, null);
-			if (o != null) setClientManagement = Caster.toBooleanValue(o, setClientManagement);
+			if (o != null) setClientManagement = Caster.toBooleanValue(o, config.isClientManagement());
+			else setClientManagement = config.isClientManagement();
 			initSetClientManagement = true;
 		}
 		return setClientManagement;
@@ -520,7 +518,8 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	public boolean isSetDomainCookies() {
 		if (!initSetDomainCookies) {
 			Object o = get(component, KeyConstants._setDomainCookies, null);
-			if (o != null) setDomainCookies = Caster.toBooleanValue(o, setDomainCookies);
+			if (o != null) setDomainCookies = Caster.toBooleanValue(o, config.isDomainCookies());
+			else setDomainCookies = config.isDomainCookies();
 			initSetDomainCookies = true;
 		}
 		return setDomainCookies;
@@ -530,7 +529,8 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	public boolean isSetSessionManagement() {
 		if (!initSetSessionManagement) {
 			Object o = get(component, KeyConstants._sessionManagement, null);
-			if (o != null) setSessionManagement = Caster.toBooleanValue(o, setSessionManagement);
+			if (o != null) setSessionManagement = Caster.toBooleanValue(o, config.isSessionManagement());
+			else setSessionManagement = config.isSessionManagement();
 			initSetSessionManagement = true;
 		}
 		return setSessionManagement;
