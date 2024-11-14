@@ -378,9 +378,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			settings(config, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded settings2");
 
-			_loadListener(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded listeners");
-
 			_loadMonitors(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded monitors");
 
@@ -803,30 +800,24 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return URLDecoder.decode(str, false);
 	}
 
-	private static void _loadListener(ConfigServerImpl config, Struct root, Log log) {
+	public static ConfigListener loadListener(ConfigServerImpl config, Struct root, Log log, ConfigListener defaultValue) {
 		try {
-			{
-				ConfigServer cs = config;
-				Struct listener = ConfigWebUtil.getAsStruct("listener", root);
-				ClassDefinition cd = listener != null ? getClassDefinition(listener, "", config.getIdentification()) : null;
-				String strArguments = getAttr(listener, "arguments");
-				if (strArguments == null) strArguments = "";
+			Struct listener = ConfigWebUtil.getAsStruct("listener", root);
+			ClassDefinition cd = listener != null ? getClassDefinition(listener, "", config.getIdentification()) : null;
+			String strArguments = getAttr(listener, "arguments");
+			if (strArguments == null) strArguments = "";
 
-				if (cd != null && cd.hasClass()) {
-					try {
-
-						Object obj = ClassUtil.loadInstance(cd.getClazz(), new Object[] { strArguments }, null);
-						if (obj instanceof ConfigListener) {
-							ConfigListener cl = (ConfigListener) obj;
-							cs.setConfigListener(cl);
-						}
+			if (cd != null && cd.hasClass()) {
+				try {
+					Object obj = ClassUtil.loadInstance(cd.getClazz(), new Object[] { strArguments }, null);
+					if (obj instanceof ConfigListener) {
+						ConfigListener cl = (ConfigListener) obj;
+						return cl;
 					}
-					catch (Throwable t) {
-						ExceptionUtil.rethrowIfNecessary(t);
-						t.printStackTrace(config.getErrWriter());
-
-					}
-
+				}
+				catch (Throwable t) {
+					ExceptionUtil.rethrowIfNecessary(t);
+					log(config, log, t);
 				}
 			}
 		}
@@ -834,6 +825,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
+		return defaultValue;
 	}
 
 	private static void settings(ConfigPro config, Log log) {

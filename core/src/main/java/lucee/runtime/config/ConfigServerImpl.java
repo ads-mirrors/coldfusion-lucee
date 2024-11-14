@@ -110,6 +110,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 	private URL updateLocation;
 	private String updateType;
 	private ConfigListener configListener;
+	private boolean initConfigListener;
 	private Map<String, String> labels;
 	private RequestMonitor[] requestMonitors;
 	private IntervallMonitor[] intervallMonitors;
@@ -185,20 +186,35 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		return updateInfo;
 	}
 
-	/**
-	 * @return the configListener
-	 */
 	@Override
 	public ConfigListener getConfigListener() {
+		if (initConfigListener) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getConfigListener")) {
+				if (initConfigListener) {
+					configListener = ConfigWebFactory.loadListener(this, root, getLog(), null);
+					initConfigListener = false;
+				}
+			}
+		}
 		return configListener;
 	}
 
-	/**
-	 * @param configListener the configListener to set
-	 */
+	public ConfigServerImpl resetConfigListener() {
+		if (!initConfigListener) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getConfigListener")) {
+				if (!initConfigListener) {
+					configListener = null;
+					initConfigListener = true;
+				}
+			}
+		}
+		return this;
+	}
+
 	@Override
 	public void setConfigListener(ConfigListener configListener) {
 		this.configListener = configListener;
+		this.initConfigListener = false;
 	}
 
 	@Override
