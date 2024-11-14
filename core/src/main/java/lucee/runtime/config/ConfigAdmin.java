@@ -4204,6 +4204,7 @@ public final class ConfigAdmin {
 		ConfigAdmin admin = new ConfigAdmin(config, null, true);
 		admin._removeCacheHandler(id);
 		admin._store();
+		Admin.getConfigServerImpl(config).resetCacheHandlers();
 		if (reload) admin._reload();
 	}
 
@@ -4640,6 +4641,7 @@ public final class ConfigAdmin {
 	}
 
 	public void updateRHExtension(Config config, RHExtension rhext, boolean reload, boolean force) throws PageException {
+		// MUST 7 rest all values set
 		try {
 			if (!force && _hasRHExtensionInstalled((ConfigPro) config, rhext.toExtensionDefinition()) != null) {
 				throw new ApplicationException("the extension " + rhext.getName() + " (id: " + rhext.getId() + ") in version " + rhext.getVersion() + " is already installed");
@@ -4835,6 +4837,7 @@ public final class ConfigAdmin {
 					String _id = map.get("id");
 					if (!StringUtil.isEmpty(_id) && cd != null && cd.hasClass()) {
 						_updateCacheHandler(_id, cd);
+						Admin.getConfigServerImpl(config).resetCacheHandlers();
 						reloadNecessary = true;
 					}
 					logger.info("extension", "Update cache handler [" + cd + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
@@ -4955,12 +4958,14 @@ public final class ConfigAdmin {
 					// class
 					if (cd != null && cd.isBundle()) {
 						_updateStartupHook(cd);
+						Admin.getConfigServerImpl(config).resetStartups();
 						reloadNecessary = true;
 						logger.info("extension", "Update Startup Hook [" + cd + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
 					}
 					// component
 					else if (!StringUtil.isEmpty(cfc, true)) {
 						_updateStartupHook(cfc);
+						Admin.getConfigServerImpl(config).resetStartups();
 						reloadNecessary = true;
 						logger.info("extension", "Update Startup Hook [" + cfc + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
 					}
@@ -5170,6 +5175,7 @@ public final class ConfigAdmin {
 
 					if (!StringUtil.isEmpty(_id) && cd != null && cd.hasClass()) {
 						_removeCacheHandler(_id);
+						Admin.getConfigServerImpl(config).resetCacheHandlers();
 						// reload=true;
 					}
 					logger.info("extension", "Remove cache handler [" + cd + "] from extension [" + rhe.getName() + ":" + rhe.getVersion() + "]");
@@ -5296,9 +5302,11 @@ public final class ConfigAdmin {
 
 					if (cd != null && cd.isBundle()) {
 						_removeStartupHook(cd);
+						Admin.getConfigServerImpl(config).resetStartups();
 					}
 					else if (!StringUtil.isEmpty(cfc, true)) {
 						_removeStartupHook(cfc);
+						Admin.getConfigServerImpl(config).resetStartups();
 					}
 					logger.info("extension", "Remove Startup Hook [" + cd + "] from extension [" + rhe.getName() + ":" + rhe.getVersion() + "]");
 				}

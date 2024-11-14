@@ -89,11 +89,13 @@ import lucee.runtime.ai.AIEngine;
 import lucee.runtime.ai.AIEngineFactory;
 import lucee.runtime.cache.CacheConnection;
 import lucee.runtime.cache.CacheConnectionImpl;
+import lucee.runtime.cache.tag.CacheHandler;
 import lucee.runtime.cache.tag.request.RequestCacheHandler;
 import lucee.runtime.cache.tag.timespan.TimespanCacheHandler;
 import lucee.runtime.cfx.customtag.CFXTagClass;
 import lucee.runtime.cfx.customtag.JavaCFXTagClass;
 import lucee.runtime.component.ImportDefintion;
+import lucee.runtime.config.ConfigBase.Startup;
 //import lucee.runtime.config.ajax.AjaxFactory;
 import lucee.runtime.config.component.ComponentFactory;
 import lucee.runtime.config.gateway.GatewayMap;
@@ -337,13 +339,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		else {
 			_loadExtensionDefinition(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded extension definitions");
-
-		}
-		if (!essentialOnly) {
-
-			_loadCacheHandler(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded cache handlers");
-
 		}
 
 		if (!essentialOnly) {
@@ -394,8 +389,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			_loadMonitors(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded monitors");
 
-			_loadStartupHook(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded startup hook");
 		}
 
 		config.setLoadTime(System.currentTimeMillis());
@@ -588,12 +581,14 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return cd;
 	}
 
-	private static void _loadCacheHandler(ConfigServerImpl config, Struct root, Log log) {
+	public static HashMap<String, Class<CacheHandler>> loadCacheHandler(ConfigImpl config, Struct root, Log log) {
+		HashMap<String, Class<CacheHandler>> cacheHandlers = new HashMap<String, Class<CacheHandler>>();
+
 		try {
 
 			// first of all we make sure we have a request and timespan cachehandler
-			config.addCacheHandler("request", new ClassDefinitionImpl(RequestCacheHandler.class));
-			config.addCacheHandler("timespan", new ClassDefinitionImpl(TimespanCacheHandler.class));
+			addCacheHandler(cacheHandlers, "request", new ClassDefinitionImpl(RequestCacheHandler.class));
+			addCacheHandler(cacheHandlers, "timespan", new ClassDefinitionImpl(TimespanCacheHandler.class));
 
 			Struct handlers = ConfigWebUtil.getAsStruct("cacheHandlers", root);
 			if (handlers != null) {
@@ -614,7 +609,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 						if (cd.hasClass() && !StringUtil.isEmpty(strId)) {
 							strId = strId.trim().toLowerCase();
 							try {
-								config.addCacheHandler(strId, cd);
+								addCacheHandler(cacheHandlers, strId, cd);
 							}
 							catch (Throwable t) {
 								ExceptionUtil.rethrowIfNecessary(t);
@@ -633,6 +628,16 @@ public final class ConfigWebFactory extends ConfigFactory {
 			ExceptionUtil.rethrowIfNecessary(th);
 			log(config, log, th);
 		}
+		return cacheHandlers;
+	}
+
+	private static void addCacheHandler(HashMap<String, Class<CacheHandler>> cacheHandlers, String id, ClassDefinition<CacheHandler> cd) throws ClassException, BundleException {
+		Class<CacheHandler> clazz = cd.getClazz();
+		Object o = ClassUtil.loadInstance(clazz); // just try to load and forget afterwards
+		if (o instanceof CacheHandler) {
+			cacheHandlers.put(id, clazz);
+		}
+		else throw new ClassException("object [" + Caster.toClassName(o) + "] must implement the interface " + CacheHandler.class.getName());
 	}
 
 	public static Map<String, AIEngineFactory> loadAI(ConfigImpl config, Struct root, Log log, Map<String, AIEngineFactory> defaultValue) {
@@ -3238,11 +3243,12 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadStartupHook(ConfigServerImpl config, Struct root, Log log) {
+	public static Map<String, Startup> loadStartupHook(ConfigImpl config, Struct root, Log log) {
+		Map<String, Startup> startups = new HashMap<>();
 		try {
 			Array children = ConfigWebUtil.getAsArray("startupHooks", root);
 
-			if (children == null || children.size() == 0) return;
+			if (children == null || children.size() == 0) return startups;
 
 			Iterator<?> it = children.getIterator();
 			Struct child;
@@ -3259,7 +3265,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 					// class
 					ClassDefinition cd = getClassDefinition(child, "", config.getIdentification());
-					ConfigBase.Startup existing = config.getStartups().get(cd.getClassName());
+					ConfigBase.Startup existing = startups.get(cd.getClassName());
 
 					if (existing != null) {
 						if (existing.cd.equals(cd)) continue;
@@ -3276,8 +3282,8 @@ public final class ConfigWebFactory extends ConfigFactory {
 					Class clazz = cd.getClazz();
 
 					Constructor constr = Reflector.getConstructor(clazz, new Class[] { Config.class }, null);
-					if (constr != null) config.getStartups().put(cd.getClassName(), new ConfigBase.Startup(cd, constr.newInstance(new Object[] { config })));
-					else config.getStartups().put(cd.getClassName(), new ConfigBase.Startup(cd, ClassUtil.loadInstance(clazz)));
+					if (constr != null) startups.put(cd.getClassName(), new ConfigBase.Startup(cd, constr.newInstance(new Object[] { config })));
+					else startups.put(cd.getClassName(), new ConfigBase.Startup(cd, ClassUtil.loadInstance(clazz)));
 				}
 				catch (Throwable t) {
 					ExceptionUtil.rethrowIfNecessary(t);
@@ -3289,6 +3295,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
+		return startups;
 	}
 
 	/**

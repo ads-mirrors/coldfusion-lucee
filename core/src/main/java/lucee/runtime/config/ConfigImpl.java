@@ -309,7 +309,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private Resource fldFile;
 
 	private Resources resources = new ResourcesImpl();
-	private Map<String, Class<CacheHandler>> cacheHandlerClasses = new HashMap<String, Class<CacheHandler>>();
+	private Map<String, Class<CacheHandler>> cacheHandlerClasses;
 
 	private ApplicationListener applicationListener;
 
@@ -2617,22 +2617,27 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return resources.getDefaultResourceProvider();
 	}
 
-	protected void addCacheHandler(String id, ClassDefinition<CacheHandler> cd) throws ClassException, BundleException {
-		Class<CacheHandler> clazz = cd.getClazz();
-		Object o = ClassUtil.loadInstance(clazz); // just try to load and forget afterwards
-		if (o instanceof CacheHandler) {
-			addCacheHandler(id, clazz);
-		}
-		else throw new ClassException("object [" + Caster.toClassName(o) + "] must implement the interface " + CacheHandler.class.getName());
-	}
-
-	protected void addCacheHandler(String id, Class<CacheHandler> chc) {
-		cacheHandlerClasses.put(id, chc);
-	}
-
 	@Override
 	public Iterator<Entry<String, Class<CacheHandler>>> getCacheHandlers() {
+		if (cacheHandlerClasses == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCacheHandlers")) {
+				if (cacheHandlerClasses == null) {
+					cacheHandlerClasses = ConfigWebFactory.loadCacheHandler(this, root, getLog());
+				}
+			}
+		}
 		return cacheHandlerClasses.entrySet().iterator();
+	}
+
+	public ConfigImpl resetCacheHandlers() {
+		if (cacheHandlerClasses != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCacheHandlers")) {
+				if (cacheHandlerClasses != null) {
+					cacheHandlerClasses = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	protected void addResourceProvider(String strProviderScheme, ClassDefinition cd, Map arguments) {
@@ -5232,8 +5237,25 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public Map<String, Startup> getStartups() {
-		if (startups == null) startups = new HashMap<>();
+		if (startups == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getStartups")) {
+				if (startups == null) {
+					startups = ConfigWebFactory.loadStartupHook(this, root, getLog());
+				}
+			}
+		}
 		return startups;
+	}
+
+	public ConfigImpl resetStartups() {
+		if (startups == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getStartups")) {
+				if (startups == null) {
+					startups = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
