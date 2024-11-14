@@ -164,6 +164,7 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	private int queryVarUsage;
 	private ProxyData proxyData;
 	private String blockedExtForFileUpload;
+	private int localMode;
 
 	private int debugging;
 
@@ -272,7 +273,6 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 		ConfigPro ci = ((ConfigPro) config);
 		this.defaultDataSource = config.getDefaultDataSource();
 		this.locale = config.getLocale();
-		this.timeZone = config.getTimeZone();
 		this.webCharset = ci.getWebCharSet();
 		this.resourceCharset = ci.getResourceCharSet();
 		this.bufferOutput = ci.getBufferOutput();
@@ -1284,8 +1284,10 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 			Object o = get(component, KeyConstants._timezone, null);
 			if (o != null) {
 				String str = Caster.toString(o, null);
-				if (!StringUtil.isEmpty(str)) timeZone = TimeZoneUtil.toTimeZone(str, timeZone);
+				if (!StringUtil.isEmpty(str)) timeZone = TimeZoneUtil.toTimeZone(str, config.getTimeZone());
+				else timeZone = config.getTimeZone();
 			}
+			else timeZone = config.getTimeZone();
 			initTimeZone = true;
 		}
 		return timeZone;
