@@ -273,9 +273,6 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 		ConfigPro ci = ((ConfigPro) config);
 		this.defaultDataSource = config.getDefaultDataSource();
 		this.locale = config.getLocale();
-		this.webCharset = ci.getWebCharSet();
-		this.resourceCharset = ci.getResourceCharSet();
-		this.bufferOutput = ci.getBufferOutput();
 		suppressContent = ci.isSuppressContent();
 		this.sessionType = config.getSessionType();
 		this.wstype = WS_TYPE_AXIS1;
@@ -1337,19 +1334,25 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	 * @return webcharset if it was defined, otherwise null
 	 */
 	private CharSet initCharset() {
+		webCharset = ((ConfigPro) config).getWebCharSet();
+		resourceCharset = ((ConfigPro) config).getResourceCharSet();
 		Object o = get(component, KeyConstants._charset, null);
 		if (o != null) {
 			Struct sct = Caster.toStruct(o, null);
 			if (sct != null) {
 				CharSet web = CharsetUtil.toCharSet(Caster.toString(sct.get(KeyConstants._web, null), null), null);
-				if (!initWebCharset && web != null) webCharset = web;
+				if (web != null) webCharset = web;
+
 				CharSet res = CharsetUtil.toCharSet(Caster.toString(sct.get(KeyConstants._resource, null), null), null);
-				if (!initResourceCharset && res != null) resourceCharset = res;
+				if (res != null) resourceCharset = res;
 
 				initWebCharset = true;
 				initResourceCharset = true;
 				return web;
 			}
+		}
+		else {
+
 		}
 		initWebCharset = true;
 		initResourceCharset = true;
@@ -1358,14 +1361,10 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public boolean getBufferOutput() {
-		boolean bo = _getBufferOutput();
-		return bo;
-	}
-
-	public boolean _getBufferOutput() {
 		if (!initBufferOutput) {
 			Object o = get(component, KeyConstants._bufferOutput, null);
-			if (o != null) bufferOutput = Caster.toBooleanValue(o, bufferOutput);
+			if (o != null) bufferOutput = Caster.toBooleanValue(o, ((ConfigPro) config).getBufferOutput());
+			else bufferOutput = ((ConfigPro) config).getBufferOutput();
 			initBufferOutput = true;
 		}
 		return bufferOutput;
