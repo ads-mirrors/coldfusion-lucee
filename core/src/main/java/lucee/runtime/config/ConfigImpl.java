@@ -134,6 +134,7 @@ import lucee.runtime.orm.ORMEngine;
 import lucee.runtime.osgi.BundleInfo;
 import lucee.runtime.osgi.EnvClassLoader;
 import lucee.runtime.osgi.OSGiUtil.BundleDefinition;
+import lucee.runtime.reflection.Reflector;
 import lucee.runtime.regex.Regex;
 import lucee.runtime.regex.RegexFactory;
 import lucee.runtime.rest.RestSettingImpl;
@@ -362,7 +363,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private DumpWriterEntry[] dmpWriterEntries;
 	private Class clusterClass = ClusterNotSupported.class;// ClusterRemoteNotSupported.class;//
 	private Struct remoteClientUsage;
-	private Class adminSyncClass = AdminSyncNotSupported.class;
+	private Class adminSyncClass;
 	private AdminSync adminSync;
 	private String[] customTagExtensions = null;
 	private Class videoExecuterClass = VideoExecuterNotSupported.class;
@@ -3349,21 +3350,57 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public Class<AdminSync> getAdminSyncClass() {
-		return adminSyncClass;
-	}
+		if (adminSyncClass == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getAdminSyncClass")) {
+				if (adminSyncClass == null) {
+					try {
+						ClassDefinition asc = ConfigWebFactory.getClassDefinition(root, "adminSync", getIdentification());
+						if (!asc.hasClass()) asc = ConfigWebFactory.getClassDefinition(root, "adminSynchronisation", getIdentification());
 
-	protected void setAdminSyncClass(Class adminSyncClass) {
-		this.adminSyncClass = adminSyncClass;
-		this.adminSync = null;
+						if (asc.hasClass()) {
+
+							Class clazz = asc.getClazz();
+							if (!Reflector.isInstaneOf(clazz, AdminSync.class, false))
+								throw new ApplicationException("class [" + clazz.getName() + "] does not implement interface [" + AdminSync.class.getName() + "]");
+							adminSyncClass = clazz;
+
+						}
+					}
+					catch (Throwable t) {
+						ExceptionUtil.rethrowIfNecessary(t);
+						LogUtil.logGlobal(this, ConfigWebFactory.class.getName(), t);
+
+					}
+					if (adminSyncClass == null) adminSyncClass = AdminSyncNotSupported.class;
+				}
+			}
+		}
+		return adminSyncClass;
 	}
 
 	@Override
 	public AdminSync getAdminSync() throws ClassException {
 		if (adminSync == null) {
-			adminSync = (AdminSync) ClassUtil.loadInstance(getAdminSyncClass());
+			synchronized (SystemUtil.createToken("ConfigImpl", "getAdminSyncClass")) {
+				if (adminSync == null) {
+					adminSync = (AdminSync) ClassUtil.loadInstance(getAdminSyncClass());
+				}
+			}
 
 		}
 		return this.adminSync;
+	}
+
+	public ConfigImpl resetAdminSyncClass() {
+		if (adminSyncClass != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getAdminSyncClass")) {
+				if (adminSyncClass != null) {
+					adminSyncClass = null;
+					adminSync = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override

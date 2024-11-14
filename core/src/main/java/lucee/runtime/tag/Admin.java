@@ -2199,6 +2199,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		ClassDefinition cd = ClassDefinitionImpl.toClassDefinitionImpl(attributes, null, true, config.getIdentification());
 		admin.updateAdminSyncClass(cd);
 		store();
+		getConfigServerImpl(config).resetAdminSyncClass();
 	}
 
 	private void doGetAdminSyncClass() throws PageException {

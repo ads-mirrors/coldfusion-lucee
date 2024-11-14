@@ -122,7 +122,6 @@ import lucee.runtime.engine.ThreadLocalConfig;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.engine.ThreadQueueImpl;
 import lucee.runtime.engine.ThreadQueuePro;
-import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.extension.ExtensionDefintion;
@@ -352,9 +351,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 		}
 
-		_loadApplication(config, root, mode, log);
-		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded application");
-
 		if (!essentialOnly) {
 			_loadMappings(config, root, mode, log); // it is important this runs after
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded mappings");
@@ -579,7 +575,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static <T> ClassDefinition<T> getClassDefinition(Struct data, String prefix, Identification id) throws PageException {
+	public static <T> ClassDefinition<T> getClassDefinition(Struct data, String prefix, Identification id) throws PageException {
 		String attrName;
 		String cn;
 
@@ -4451,44 +4447,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			log(config, log, t);
 		}
 		return defaultValue;
-	}
-
-	/**
-	 * @param configServer
-	 * @param config
-	 * @param doc
-	 * @throws IOException
-	 * @throws PageException
-	 */
-	private static void _loadApplication(ConfigServerImpl config, Struct root, int mode, Log log) {
-		try {
-			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
-
-			// cachedwithin
-
-			// admin sync
-			ClassDefinition asc = getClassDefinition(root, "adminSync", config.getIdentification());
-			if (!asc.hasClass()) asc = getClassDefinition(root, "adminSynchronisation", config.getIdentification());
-
-			if (hasAccess && asc.hasClass()) {
-				try {
-					Class clazz = asc.getClazz();
-					if (!Reflector.isInstaneOf(clazz, AdminSync.class, false))
-						throw new ApplicationException("class [" + clazz.getName() + "] does not implement interface [" + AdminSync.class.getName() + "]");
-					config.setAdminSyncClass(clazz);
-
-				}
-				catch (Throwable t) {
-					ExceptionUtil.rethrowIfNecessary(t);
-					LogUtil.logGlobal(config, ConfigWebFactory.class.getName(), t);
-
-				}
-			}
-		}
-		catch (Throwable t) {
-			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
-		}
 	}
 
 	/**
