@@ -29,6 +29,7 @@ import org.xml.sax.SAXException;
 
 import com.jacob.com.LibraryLoader;
 
+import lucee.print;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
@@ -278,7 +279,7 @@ public final class ConfigServerFactory extends ConfigFactory {
 	}
 
 	private static void createContextFiles(Resource configDir, ConfigServer config, boolean doNew, boolean cleanupDatasources) {
-
+		print.e("server.createContextFiles:" + configDir);
 		Resource contextDir = configDir.getRealResource("context");
 		Resource adminDir = contextDir.getRealResource("admin");
 
@@ -353,12 +354,11 @@ public final class ConfigServerFactory extends ConfigFactory {
 			Resource binDir = configDir.getRealResource("bin");
 			if (binDir != null) {
 
-				if (!binDir.exists()) binDir.mkdirs();
-
 				String name = (SystemUtil.getJREArch() == SystemUtil.ARCH_64) ? "jacob-x64.dll" : "jacob-i586.dll";
 
 				Resource jacob = binDir.getRealResource(name);
 				if (!jacob.exists()) {
+					if (!binDir.exists()) binDir.mkdirs();
 					createFileFromResourceEL("/resource/bin/windows" + ((SystemUtil.getJREArch() == SystemUtil.ARCH_64) ? "64" : "32") + "/" + name, jacob);
 				}
 				System.setProperty(LibraryLoader.JACOB_DLL_PATH, jacob.getAbsolutePath());

@@ -51,6 +51,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.xml.sax.SAXException;
 
+import lucee.print;
 import lucee.commons.collection.MapFactory;
 import lucee.commons.date.TimeZoneConstants;
 import lucee.commons.date.TimeZoneUtil;
@@ -1024,30 +1025,20 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @throws IOException
 	 */
 	public static void createContextFiles(Resource configDir, boolean doNew) throws IOException {
-		// NICE dies muss dynamisch erstellt werden, da hier der admin hinkommt
-		// und dieser sehr viele files haben wird
+		print.e("web.createContextFiles:" + configDir);
 		Resource contextDir = configDir.getRealResource("context");
 		if (!contextDir.exists()) contextDir.mkdirs();
-
-		// custom locale files
-		if (doNew) {
-			Resource dir = configDir.getRealResource("locales");
-			if (!dir.exists()) dir.mkdirs();
-			Resource file = dir.getRealResource("pt-PT-date.df");
-			if (!file.exists()) createFileFromResourceEL("/resource/locales/pt-PT-date.df", file);
-		}
-		// bin
-		Resource binDir = configDir.getRealResource("bin");
-		if (!binDir.exists()) binDir.mkdirs();
 
 		Resource ctDir = configDir.getRealResource("customtags");
 		if (!ctDir.exists()) ctDir.mkdirs();
 
 		// Jacob
 		if (SystemUtil.isWindows()) {
+			Resource binDir = configDir.getRealResource("bin");
 			String name = (SystemUtil.getJREArch() == SystemUtil.ARCH_64) ? "jacob-x64.dll" : "jacob-i586.dll";
 			Resource jacob = binDir.getRealResource(name);
 			if (!jacob.exists()) {
+				if (!binDir.exists()) binDir.mkdirs();
 				createFileFromResourceEL("/resource/bin/windows" + ((SystemUtil.getJREArch() == SystemUtil.ARCH_64) ? "64" : "32") + "/" + name, jacob);
 			}
 		}
@@ -1080,10 +1071,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 		f = contextDir.getRealResource("component-dump." + TEMPLATE_EXTENSION);
 		if (!f.exists()) createFileFromResourceEL("/resource/context/component-dump." + TEMPLATE_EXTENSION, f);
-
-		// Base Component
-		String badContent = "<cfcomponent displayname=\"Component\" hint=\"This is the Base Component\">\n</cfcomponent>";
-		String badVersion = "704b5bd8597be0743b0c99a644b65896";
 
 		// Component.cfc
 		f = contextDir.getRealResource("Component." + COMPONENT_EXTENSION);
