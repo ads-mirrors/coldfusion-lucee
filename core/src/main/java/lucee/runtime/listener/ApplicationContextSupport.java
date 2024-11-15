@@ -511,6 +511,4 @@ public abstract class ApplicationContextSupport implements ApplicationContext {
 	public abstract void setDebugOptions(int option);
 
 	public abstract void remDebugOptions(int option);
-
-	public abstract boolean getSameFieldAsArray(PageContext pc, int scope);
 }

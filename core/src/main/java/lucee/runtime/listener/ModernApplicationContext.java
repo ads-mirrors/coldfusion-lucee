@@ -35,7 +35,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import lucee.print;
 import lucee.commons.date.TimeZoneUtil;
 import lucee.commons.io.CharsetUtil;
-import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
@@ -284,7 +283,7 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 		oldForm = ac.getSameFieldAsArray(Scope.SCOPE_FORM);
 		oldURL = ac.getSameFieldAsArray(Scope.SCOPE_URL);
 		oldMerge = ac.getFormUrlAsStruct();
-
+		initSameFieldAsArray(pc); // this needs to happen here because it reinit the scope if needed
 		initContext(pc);
 
 		// ORM
@@ -697,48 +696,40 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	@Override
 
 	public boolean getSameFieldAsArray(int scope) {
-		return getSameFieldAsArray(null, scope);
+		return Scope.SCOPE_URL == scope ? sameURLFieldAsArray : sameFormFieldAsArray;
 	}
 
-	@Override
-	public boolean getSameFieldAsArray(PageContext pc, int scope) {
-		if (sameFormFieldAsArray == null) {
-			synchronized (SystemUtil.createToken("ModernApplicationContext", "getSameFieldAsArray")) {
-				if (sameFormFieldAsArray == null) {
-					// Form
-					Object o = get(component, KeyConstants._sameformfieldsasarray, null);
-					if (o != null && Decision.isBoolean(o)) sameFormFieldAsArray = Caster.toBoolean(o, Boolean.FALSE);
-					else sameFormFieldAsArray = Boolean.FALSE;
+	public void initSameFieldAsArray(PageContext pc) {
 
-					// URL
-					o = get(component, KeyConstants._sameurlfieldsasarray, null);
-					if (o != null && Decision.isBoolean(o)) sameURLFieldAsArray = Caster.toBoolean(o, Boolean.FALSE);
-					else sameURLFieldAsArray = Boolean.FALSE;
+		// Form
+		Object o = get(component, KeyConstants._sameformfieldsasarray, null);
+		if (o != null && Decision.isBoolean(o)) sameFormFieldAsArray = Caster.toBoolean(o, Boolean.FALSE);
+		else sameFormFieldAsArray = Boolean.FALSE;
 
-					// merge
-					o = get(component, KeyConstants._formUrlAsStruct, null);
-					if (o != null && Decision.isBoolean(o)) {
-						formUrlAsStruct = Caster.toBooleanValue(o, true);
-					}
-					else formUrlAsStruct = ((ConfigPro) config).getFormUrlAsStruct();
+		// URL
+		o = get(component, KeyConstants._sameurlfieldsasarray, null);
+		if (o != null && Decision.isBoolean(o)) sameURLFieldAsArray = Caster.toBoolean(o, Boolean.FALSE);
+		else sameURLFieldAsArray = Boolean.FALSE;
 
-					if (oldForm != sameFormFieldAsArray || oldMerge != formUrlAsStruct) {
-						pc = ThreadLocalPageContext.get(pc);
-						if (pc != null) pc.formScope().reinitialize(this);
-					}
-					if (oldURL != sameURLFieldAsArray || oldMerge != formUrlAsStruct) {
-						pc = ThreadLocalPageContext.get(pc);
-						if (pc != null) pc.urlScope().reinitialize(this);
-					}
-				}
-			}
+		// merge
+		o = get(component, KeyConstants._formUrlAsStruct, null);
+		if (o != null && Decision.isBoolean(o)) {
+			formUrlAsStruct = Caster.toBooleanValue(o, true);
 		}
-		return Scope.SCOPE_URL == scope ? sameURLFieldAsArray : sameFormFieldAsArray;
+		else formUrlAsStruct = ((ConfigPro) config).getFormUrlAsStruct();
+
+		if (oldForm != sameFormFieldAsArray || oldMerge != formUrlAsStruct) {
+			pc = ThreadLocalPageContext.get(pc);
+			if (pc != null) pc.formScope().reinitialize(this);
+		}
+		if (oldURL != sameURLFieldAsArray || oldMerge != formUrlAsStruct) {
+			pc = ThreadLocalPageContext.get(pc);
+			if (pc != null) pc.urlScope().reinitialize(this);
+		}
 	}
 
 	@Override
 	public boolean getFormUrlAsStruct() {
-		getSameFieldAsArray(null, Scope.SCOPE_URL); // needed to init
 		return formUrlAsStruct;
 	}
 
