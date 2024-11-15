@@ -21,6 +21,7 @@ package lucee.runtime.com;
 import com.jacob.com.Variant;
 
 import lucee.commons.lang.ExceptionUtil;
+import lucee.runtime.config.Config;
 import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.reflection.Reflector;
@@ -37,9 +38,9 @@ public final class COMUtil {
 	 * @param key
 	 * @return Object from Variant
 	 */
-	public static Object toObject(COMObject parent, Variant variant, String key, Object defaultValue) {
+	public static Object toObject(Config config, COMObject parent, Variant variant, String key, Object defaultValue) {
 		try {
-			return toObject(parent, variant, key);
+			return toObject(config, parent, variant, key);
 		}
 		catch (ExpressionException ee) {
 			return defaultValue;
@@ -55,7 +56,7 @@ public final class COMUtil {
 	 * @return Object from Variant
 	 * @throws ExpressionException
 	 */
-	public static Object toObject(COMObject parent, Variant variant, String key) throws ExpressionException {
+	public static Object toObject(Config config, COMObject parent, Variant variant, String key) throws ExpressionException {
 		short type = variant.getvt();
 		// print.ln(key+" -> variant.getvt("+toStringType(type)+")");
 
@@ -101,13 +102,13 @@ public final class COMUtil {
 			Variant[] varr = variant.getVariantArrayRef();
 			Object[] oarr = new Object[varr.length];
 			for (int i = 0; i < varr.length; i++) {
-				oarr[i] = toObject(parent, varr[i], Caster.toString(i));
+				oarr[i] = toObject(config, parent, varr[i], Caster.toString(i));
 			}
 			return new ArrayImpl(oarr);
 		}
 		else if (type == Variant.VariantDispatch) {
 
-			return new COMObject(variant, variant.toDispatch(), parent.getName() + "." + key);
+			return new COMObject(config, variant, variant.toDispatch(), parent.getName() + "." + key);
 		}
 		// TODO ?? else if(type==Variant.VariantError) return variant.toError();
 

@@ -1030,21 +1030,29 @@ public abstract class ConfigFactory {
 	}
 
 	static void create(String srcPath, String[] names, Resource dir, boolean doNew) {
-		for (int i = 0; i < names.length; i++) {
-			create(srcPath, names[i], dir, doNew);
+		// directory does not exist (so file do also not exist)
+		if (!dir.exists()) {
+			doNew = true;
+			dir.mkdirs();
+		}
+
+		for (String name: names) {
+			Resource f = dir.getRealResource(name);
+			if (doNew || f.length() == 0L) {
+				ConfigFactory.createFileFromResourceEL(srcPath + name, f);
+			}
 		}
 	}
 
 	static Resource create(String srcPath, String name, Resource dir, boolean doNew) {
-		boolean update = doNew;
 		// directory does not exist (so file do also not exist)
 		if (!dir.exists()) {
-			update = true;
+			doNew = true;
 			dir.mkdirs();
 		}
 
 		Resource f = dir.getRealResource(name);
-		if (update || f.length() == 0L) {
+		if (doNew || f.length() == 0L) {
 			ConfigFactory.createFileFromResourceEL(srcPath + name, f);
 		}
 		return f;

@@ -24,9 +24,14 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import com.jacob.com.Dispatch;
+import com.jacob.com.LibraryLoader;
 import com.jacob.com.Variant;
 
+import lucee.commons.io.SystemUtil;
+import lucee.commons.io.res.Resource;
 import lucee.runtime.PageContext;
+import lucee.runtime.config.Config;
+import lucee.runtime.config.ConfigWebFactory;
 import lucee.runtime.dump.DumpData;
 import lucee.runtime.dump.DumpProperties;
 import lucee.runtime.dump.DumpTable;
@@ -45,9 +50,28 @@ import lucee.runtime.type.it.ObjectsEntryIterator;
 
 public final class COMObject implements Objects, Iteratorable {
 
+	private static boolean setup;
 	private String name;
 	private Dispatch dispatch;
 	private Variant parent;
+
+	public static void setupWindowsDLL(Config config) {
+		if (SystemUtil.isWindows()) {
+			Resource binDir = config.getConfigDir().getRealResource("bin");
+			if (binDir != null) {
+				String name = (SystemUtil.getJREArch() == SystemUtil.ARCH_64) ? "jacob-x64.dll" : "jacob-i586.dll";
+
+				Resource jacob = binDir.getRealResource(name);
+				if (!jacob.exists()) {
+					if (!binDir.exists()) binDir.mkdirs();
+					ConfigWebFactory.createFileFromResourceEL("/resource/bin/windows" + ((SystemUtil.getJREArch() == SystemUtil.ARCH_64) ? "64" : "32") + "/" + name, jacob);
+				}
+				System.setProperty(LibraryLoader.JACOB_DLL_PATH, jacob.getAbsolutePath());
+				System.setProperty(LibraryLoader.JACOB_DLL_NAME, name);
+			}
+		}
+		setup = true;
+	}
 
 	/**
 	 * Public Constructor of the class
@@ -55,11 +79,8 @@ public final class COMObject implements Objects, Iteratorable {
 	 * @param dispatch
 	 * @throws ExpressionException
 	 */
-	public COMObject(String dispatch) {
-		// if(!SystemUtil.isWindows()) throw new ExpressionException("Com Objects are only supported in
-		// Windows Environments");
-		this.name = dispatch;
-		this.dispatch = new Dispatch(dispatch);
+	public COMObject(Config config, String dispatch) {
+		this(config, null, new Dispatch(dispatch), dispatch);
 	}
 
 	/**
@@ -69,10 +90,19 @@ public final class COMObject implements Objects, Iteratorable {
 	 * @param dispatch
 	 * @param name
 	 */
-	COMObject(Variant parent, Dispatch dispatch, String name) {
+	COMObject(Config config, Variant parent, Dispatch dispatch, String name) {
 		this.parent = parent;
 		this.name = name;
 		this.dispatch = dispatch;
+
+		if (!setup) {
+			synchronized (SystemUtil.createToken("COMObject", "windll")) {
+				if (!setup) {
+					setupWindowsDLL(config);
+				}
+			}
+		}
+
 	}
 
 	/*
@@ -82,7 +112,7 @@ public final class COMObject implements Objects, Iteratorable {
 
 	@Override
 	public Object get(PageContext pc, Collection.Key key) throws PageException {
-		return COMUtil.toObject(this, Dispatch.call(dispatch, key.getString()), key.getString());
+		return COMUtil.toObject(pc.getConfig(), this, Dispatch.call(dispatch, key.getString()), key.getString());
 	}
 
 	/*
@@ -92,7 +122,7 @@ public final class COMObject implements Objects, Iteratorable {
 
 	@Override
 	public Object get(PageContext pc, Collection.Key key, Object defaultValue) {
-		return COMUtil.toObject(this, Dispatch.call(dispatch, key.getString()), key.getString(), defaultValue);
+		return COMUtil.toObject(pc.getConfig(), this, Dispatch.call(dispatch, key.getString()), key.getString(), defaultValue);
 	}
 
 	/*
@@ -132,7 +162,7 @@ public final class COMObject implements Objects, Iteratorable {
 			if (args[i] instanceof COMObject) arr[i] = ((COMObject) args[i]).dispatch;
 			else arr[i] = args[i];
 		}
-		return COMUtil.toObject(this, Dispatch.callN(dispatch, methodName, arr), methodName);
+		return COMUtil.toObject(pc.getConfig(), this, Dispatch.callN(dispatch, methodName, arr), methodName);
 	}
 
 	/*

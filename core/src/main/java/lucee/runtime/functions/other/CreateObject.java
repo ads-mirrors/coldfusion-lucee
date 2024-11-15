@@ -177,7 +177,7 @@ public final class CreateObject extends BIF {
 	}
 
 	public static Object doCOM(PageContext pc, String className) {
-		return new COMObject(className);
+		return new COMObject(ThreadLocalPageContext.getConfig(), className);
 	}
 
 	public static Component doComponent(PageContext pc, String className) throws PageException {

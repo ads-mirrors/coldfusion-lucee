@@ -27,8 +27,6 @@ import java.util.Map;
 import org.osgi.framework.BundleException;
 import org.xml.sax.SAXException;
 
-import com.jacob.com.LibraryLoader;
-
 import lucee.print;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
@@ -157,13 +155,10 @@ public final class ConfigServerFactory extends ConfigFactory {
 			Struct root = loadDocumentCreateIfFails(configFileNew, "server");
 			config.setRoot(root);
 			// admin mode
-			ConfigWebFactory.createContextFiles(configDir, doNew);
 			load(config, root, false, doNew, essentialOnly);
 
 			if (!essentialOnly) {
-				double version = ConfigWebUtil.getAsDouble("version", root, 1.0d);
-				boolean cleanupDatasources = version < 5.0D;
-				createContextFiles(configDir, config, doNew, cleanupDatasources);
+				createContextFiles(configDir, config, doNew);
 				((CFMLEngineImpl) ConfigWebUtil.getEngine(config)).onStart(config, false);
 			}
 
@@ -278,38 +273,97 @@ public final class ConfigServerFactory extends ConfigFactory {
 		configServer.setLabels(labels);
 	}
 
-	private static void createContextFiles(Resource configDir, ConfigServer config, boolean doNew, boolean cleanupDatasources) {
+	private static void createContextFiles(Resource configDir, ConfigServer config, boolean doNew) {
 		print.e("server.createContextFiles:" + configDir);
-		Resource contextDir = configDir.getRealResource("context");
-		Resource adminDir = contextDir.getRealResource("admin");
+
+		// context
+		{
+			Resource contextDir = configDir.getRealResource("context");
+			// lucee-admin (only deploy if enabled)
+			if (Caster.toBoolean(SystemUtil.getSystemPropOrEnvVar("lucee.admin.enabled", "true"), true)) {
+				Resource f = contextDir.getRealResource("lucee-admin.lar");
+				if (!f.exists() || doNew) createFileFromResourceEL("/resource/context/lucee-admin.lar", f);
+				else ConfigWebFactory.createFileFromResourceCheckSizeDiffEL("/resource/context/lucee-admin.lar", f);
+			}
+
+			create("/resource/context/",
+					new String[] { "lucee-context.lar", "lucee-doc.lar", "component-dump.cfm", "Application.cfc", "form.cfm", "graph.cfm", "wddx.cfm", "admin.cfm" }, contextDir,
+					doNew);
+		}
+
+		// Plugin
+		if (doNew) {
+			Resource pluginDir = configDir.getRealResource("context/admin/plugin");
+			create("/resource/context/admin/plugin/", new String[] { "Plugin.cfc" }, pluginDir, doNew);
+		}
+		// Plugin Note
+		if (doNew) {
+			Resource note = configDir.getRealResource("context/admin/plugin/Note");
+			create("/resource/context/admin/plugin/Note/", new String[] { "language.xml", "overview.cfm", "Action.cfc" }, note, doNew);
+		}
+
+		// customtags
+		if (doNew) {
+			Resource ctDir = configDir.getRealResource("customtags");
+			if (!ctDir.exists()) ctDir.mkdirs();
+		}
+
+		// gateway
+		if (doNew) {
+			Resource gwDir = configDir.getRealResource("components/lucee/extension/gateway/");
+			create("/resource/context/gateway/", new String[] { "TaskGateway.cfc", "DummyGateway.cfc", "DirectoryWatcher.cfc", "DirectoryWatcherListener.cfc", "WatchService.cfc",
+					"MailWatcher.cfc", "MailWatcherListener.cfc", "AsynchronousEvents.cfc", "AsynchronousEventsListener.cfc" }, gwDir, doNew);
+		}
+
+		// error
+		if (doNew) {
+			Resource errorDir = configDir.getRealResource("context/templates/error");
+			create("/resource/context/templates/error/", new String[] { "error.cfm", "error-neo.cfm", "error-public.cfm" }, errorDir, doNew);
+		}
+
+		// display
+		if (doNew) {
+			Resource displayDir = configDir.getRealResource("context/templates/display");
+			if (!displayDir.exists()) displayDir.mkdirs();
+		}
 
 		// Debug
-		Resource debug = adminDir.getRealResource("debug");
-		create("/resource/context/admin/debug/", new String[] { "Debug.cfc", "Field.cfc", "Group.cfc", "Classic.cfc", "Simple.cfc", "Modern.cfc", "Comment.cfc" }, debug, doNew);
+		if (doNew) {
+			Resource debug = configDir.getRealResource("context/admin/debug");
+			create("/resource/context/admin/debug/", new String[] { "Debug.cfc", "Field.cfc", "Group.cfc", "Classic.cfc", "Simple.cfc", "Modern.cfc", "Comment.cfc" }, debug,
+					doNew);
+		}
 
 		// Info
-		Resource info = adminDir.getRealResource("info");
-		create("/resource/context/admin/info/", new String[] { "Info.cfc" }, info, doNew);
+		if (doNew) {
+			Resource info = configDir.getRealResource("context/admin/info");
+			create("/resource/context/admin/info/", new String[] { "Info.cfc" }, info, doNew);
+		}
 
 		// DB Drivers types
-		Resource dbDir = adminDir.getRealResource("dbdriver");
-		Resource typesDir = dbDir.getRealResource("types");
-		create("/resource/context/admin/dbdriver/types/", new String[] { "IDriver.cfc", "Driver.cfc", "IDatasource.cfc", "IDriverSelector.cfc", "Field.cfc" }, typesDir, doNew);
+		if (doNew) {
+			Resource typesDir = configDir.getRealResource("context/admin/dbdriver/types");
+			create("/resource/context/admin/dbdriver/types/", new String[] { "IDriver.cfc", "Driver.cfc", "IDatasource.cfc", "IDriverSelector.cfc", "Field.cfc" }, typesDir, doNew);
+		}
 
-		create("/resource/context/admin/dbdriver/", new String[] { "Other.cfc" }, dbDir, doNew);
+		if (doNew) {
+			Resource dbDir = configDir.getRealResource("context/admin/dbdriver");
+			create("/resource/context/admin/dbdriver/", new String[] { "Other.cfc" }, dbDir, doNew);
+		}
 
 		// Cache Drivers
-		Resource cDir = adminDir.getRealResource("cdriver");
-		create("/resource/context/admin/cdriver/", new String[] { "Cache.cfc", "RamCache.cfc"
-				// ,"EHCache.cfc"
-				, "Field.cfc", "Group.cfc" }, cDir, doNew);
+		if (doNew) {
+			Resource cDir = configDir.getRealResource("context/admin/cdriver");
+			create("/resource/context/admin/cdriver/", new String[] { "Cache.cfc", "RamCache.cfc", "Field.cfc", "Group.cfc" }, cDir, doNew);
+		}
 
 		// AI Drivers
-		Resource aiDir = adminDir.getRealResource("aidriver");
-		create("/resource/context/admin/aidriver/", new String[] { "AI.cfc", "Gemini.cfc", "OpenAI.cfc", "Field.cfc", "Group.cfc" }, aiDir, doNew);
+		if (doNew) {
+			Resource aiDir = configDir.getRealResource("context/admin/aidriver");
+			create("/resource/context/admin/aidriver/", new String[] { "AI.cfc", "Gemini.cfc", "OpenAI.cfc", "Field.cfc", "Group.cfc" }, aiDir, doNew);
+		}
 
 		Resource wcdDir = configDir.getRealResource("web-context-deployment/admin");
-
 		try {
 			ResourceUtil.deleteEmptyFolders(wcdDir);
 		}
@@ -318,29 +372,32 @@ public final class ConfigServerFactory extends ConfigFactory {
 		}
 
 		// Mail Server Drivers
-		Resource msDir = adminDir.getRealResource("mailservers");
-		create("/resource/context/admin/mailservers/",
-				new String[] { "Other.cfc", "GMail.cfc", "GMX.cfc", "iCloud.cfc", "Yahoo.cfc", "Outlook.cfc", "MailCom.cfc", "MailServer.cfc" }, msDir, doNew);
-
+		if (doNew) {
+			Resource msDir = configDir.getRealResource("context/admin/mailservers");
+			create("/resource/context/admin/mailservers/",
+					new String[] { "Other.cfc", "GMail.cfc", "GMX.cfc", "iCloud.cfc", "Yahoo.cfc", "Outlook.cfc", "MailCom.cfc", "MailServer.cfc" }, msDir, doNew);
+		}
 		// Gateway Drivers
-		Resource gDir = adminDir.getRealResource("gdriver");
-		create("/resource/context/admin/gdriver/",
-				new String[] { "TaskGatewayDriver.cfc", "AsynchronousEvents.cfc", "DirectoryWatcher.cfc", "MailWatcher.cfc", "Gateway.cfc", "Field.cfc", "Group.cfc" }, gDir,
-				doNew);
-
+		if (doNew) {
+			Resource gDir = configDir.getRealResource("context/admin/gdriver");
+			create("/resource/context/admin/gdriver/",
+					new String[] { "TaskGatewayDriver.cfc", "AsynchronousEvents.cfc", "DirectoryWatcher.cfc", "MailWatcher.cfc", "Gateway.cfc", "Field.cfc", "Group.cfc" }, gDir,
+					doNew);
+		}
 		// Logging/appender
-		Resource app = adminDir.getRealResource("logging/appender");
-		create("/resource/context/admin/logging/appender/",
-				new String[] { "DatasourceAppender.cfc", "ConsoleAppender.cfc", "ResourceAppender.cfc", "Appender.cfc", "Field.cfc", "Group.cfc" }, app, doNew);
-
+		if (doNew) {
+			Resource app = configDir.getRealResource("context/admin/logging/appender");
+			create("/resource/context/admin/logging/appender/",
+					new String[] { "DatasourceAppender.cfc", "ConsoleAppender.cfc", "ResourceAppender.cfc", "Appender.cfc", "Field.cfc", "Group.cfc" }, app, doNew);
+		}
 		// Logging/layout
-		Resource lay = adminDir.getRealResource("logging/layout");
-		create("/resource/context/admin/logging/layout/", new String[] { "DatadogLayout.cfc", "ClassicLayout.cfc", "HTMLLayout.cfc", "PatternLayout.cfc", "XMLLayout.cfc",
-				"JsonLayout.cfc", "Layout.cfc", "Field.cfc", "Group.cfc" }, lay, doNew);
-
+		if (doNew) {
+			Resource lay = configDir.getRealResource("context/admin/logging/layout");
+			create("/resource/context/admin/logging/layout/", new String[] { "DatadogLayout.cfc", "ClassicLayout.cfc", "HTMLLayout.cfc", "PatternLayout.cfc", "XMLLayout.cfc",
+					"JsonLayout.cfc", "Layout.cfc", "Field.cfc", "Group.cfc" }, lay, doNew);
+		}
 		// Security / SSL
 		Resource secDir = configDir.getRealResource("security");
-		if (!secDir.exists()) secDir.mkdirs();
 		Resource res = create("/resource/security/", "cacerts", secDir, false);
 		if (SystemUtil.getSystemPropOrEnvVar("lucee.use.lucee.SSL.TrustStore", "").equalsIgnoreCase("true"))
 			System.setProperty("javax.net.ssl.trustStore", res.toString());/* JAVJAK */
@@ -348,23 +405,6 @@ public final class ConfigServerFactory extends ConfigFactory {
 		if (!SystemUtil.getSystemPropOrEnvVar("lucee.disable.systemProxies", "").equalsIgnoreCase("true")) System.setProperty("java.net.useSystemProxies", "true"); // it defaults
 																																									// to false
 
-		// Jacob
-		if (SystemUtil.isWindows()) {
-
-			Resource binDir = configDir.getRealResource("bin");
-			if (binDir != null) {
-
-				String name = (SystemUtil.getJREArch() == SystemUtil.ARCH_64) ? "jacob-x64.dll" : "jacob-i586.dll";
-
-				Resource jacob = binDir.getRealResource(name);
-				if (!jacob.exists()) {
-					if (!binDir.exists()) binDir.mkdirs();
-					createFileFromResourceEL("/resource/bin/windows" + ((SystemUtil.getJREArch() == SystemUtil.ARCH_64) ? "64" : "32") + "/" + name, jacob);
-				}
-				System.setProperty(LibraryLoader.JACOB_DLL_PATH, jacob.getAbsolutePath());
-				System.setProperty(LibraryLoader.JACOB_DLL_NAME, name);
-			}
-		}
 	}
 
 }

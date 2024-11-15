@@ -22,6 +22,7 @@ import java.util.Iterator;
 
 import com.jacob.com.EnumVariant;
 
+import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.CasterException;
 import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.op.Caster;
@@ -57,7 +58,7 @@ public final class COMKeyWrapperIterator implements Iterator<Collection.Key> {
 	@Override
 	public Collection.Key next() {
 		try {
-			return Caster.toKey(COMUtil.toObject(wrapper, enumVariant.Next(), "", null));
+			return Caster.toKey(COMUtil.toObject(ThreadLocalPageContext.getConfig(), wrapper, enumVariant.Next(), "", null));
 		}
 		catch (CasterException e) {
 			throw new PageRuntimeException(e);
