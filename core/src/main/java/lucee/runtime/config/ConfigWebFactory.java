@@ -197,6 +197,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	public static final boolean LOG = true;
 	private static final int DEFAULT_MAX_CONNECTION = 100;
 	public static final String DEFAULT_LOCATION = Constants.DEFAULT_UPDATE_URL.toExternalForm();
+	public static final ClassDefinition DUMMY_ORM_ENGINE = new ClassDefinitionImpl(DummyORMEngine.class);;
 
 	public static ConfigWebPro newInstanceSingle(CFMLEngine engine, CFMLFactoryImpl factory, ConfigServerImpl configServer, Resource configDirWeb, ServletConfig servletConfig,
 			ConfigWebImpl existingToUpdate) throws PageException {
@@ -1058,11 +1059,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		if (!compDir.exists()) compDir.mkdirs();
 
 		// remove old cacerts files, they are now only in the server context
-		Resource secDir = configDir.getRealResource("security");
 		Resource f = null;
-		if (!secDir.exists()) secDir.mkdirs();
-		f = secDir.getRealResource("antisamy-basic.xml");
-		if (!f.exists() || doNew) createFileFromResourceEL("/resource/security/antisamy-basic.xml", f);
 
 		// lucee-context
 		f = contextDir.getRealResource("lucee-context.lar");
@@ -3021,7 +3018,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	}
 
 	public static ClassDefinition loadORMClass(ConfigImpl config, Struct root, Log log) {
-		ClassDefinition cdDefault = new ClassDefinitionImpl(DummyORMEngine.class);
+
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManagerImpl.TYPE_ORM);
 			Struct orm = ConfigWebUtil.getAsStruct("orm", root);
@@ -3038,7 +3035,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			}
 
 			if (cd == null || !cd.hasClass()) {
-				cd = cdDefault;
+				cd = DUMMY_ORM_ENGINE;
 			}
 			return cd;
 		}
@@ -3046,7 +3043,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
-		return cdDefault;
+		return DUMMY_ORM_ENGINE;
 	}
 
 	public static ORMConfiguration loadORMConfig(ConfigImpl config, Struct root, Log log, ORMConfiguration defaultValue) {

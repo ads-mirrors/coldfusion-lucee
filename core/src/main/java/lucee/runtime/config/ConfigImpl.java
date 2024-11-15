@@ -45,7 +45,6 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
 import lucee.aprint;
-import lucee.print;
 import lucee.commons.date.TimeZoneConstants;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.FileUtil;
@@ -456,6 +455,13 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private GatewayMap gatewayEntries;
 
 	private AtomicBoolean insideLoggers = new AtomicBoolean(false);
+
+	private Resource deployDir;
+
+	private Resource antiSamyPolicy;
+	private Boolean cgiScopeReadonly;
+
+	private boolean newVersion;
 	protected Struct root;
 
 	/**
@@ -538,9 +544,10 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 * @param configDir - config directory
 	 * @param configFile - config file
 	 */
-	protected ConfigImpl(Resource configDir, Resource configFile) {
+	protected ConfigImpl(Resource configDir, Resource configFile, boolean newVersion) {
 		this.configDir = configDir;
 		this.configFile = configFile;
+		this.newVersion = newVersion;
 	}
 
 	@Override
@@ -2813,7 +2820,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public Resource getClientScopeDir() {
-		print.e("!!!!!!!!!!!!!!!!!!!! getClientScopeDir !!!!!!!!!!!!!!!!");
 		if (clientScopeDir == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getClientScopeDir")) {
 				if (clientScopeDir == null) {
@@ -4096,6 +4102,11 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	@Override
+	public boolean hasORMEngine() {
+		return getORMEngineClassDefintion().equals(ConfigWebFactory.DUMMY_ORM_ENGINE);
+	}
+
+	@Override
 	public ClassDefinition<? extends ORMEngine> getORMEngineClassDefintion() {
 		if (cdORMEngine == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getORMEngineClassDefintion")) {
@@ -5108,8 +5119,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return this;
 	}
 
-	private Boolean cgiScopeReadonly;
-
 	@Override
 	public boolean getCGIScopeReadonly() {
 		if (cgiScopeReadonly == null) {
@@ -5136,8 +5145,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		}
 		return this;
 	}
-
-	private Resource deployDir;
 
 	@Override
 	public Resource getDeployDirectory() {
@@ -5184,7 +5191,21 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public Resource getAntiSamyPolicy() {
-		return getConfigDir().getRealResource("security/antisamy-basic.xml");
+		if (antiSamyPolicy == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getAntiSamyPolicy")) {
+				if (antiSamyPolicy == null) {
+
+					Resource secDir = getConfigDir().getRealResource("security");
+					antiSamyPolicy = getConfigDir().getRealResource("antisamy-basic.xml");
+					if (!antiSamyPolicy.exists() || newVersion) {
+						if (!secDir.exists()) secDir.mkdirs();
+						ConfigWebFactory.createFileFromResourceEL("/resource/security/antisamy-basic.xml", antiSamyPolicy);
+					}
+
+				}
+			}
+		}
+		return antiSamyPolicy;
 	}
 
 	public GatewayMap getGatewayEntries() {

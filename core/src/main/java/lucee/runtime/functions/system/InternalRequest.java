@@ -212,7 +212,6 @@ public class InternalRequest implements Function {
 		String str = Caster.toString(obj);
 		int index;
 		Struct data = new StructImpl(Struct.TYPE_LINKED);
-		// boolean asArray = pc.getApplicationContext().getSameFieldAsArray(scope);
 		Key n;
 		String v;
 		Object existing;

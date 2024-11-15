@@ -2139,4 +2139,9 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	public boolean getDateCasterClassicStyle() {
 		return cs.getDateCasterClassicStyle();
 	}
+
+	@Override
+	public boolean hasORMEngine() {
+		return cs.hasORMEngine();
+	}
 }

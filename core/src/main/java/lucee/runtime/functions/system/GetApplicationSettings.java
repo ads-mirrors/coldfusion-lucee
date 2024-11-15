@@ -229,8 +229,8 @@ public class GetApplicationSettings extends BIF {
 
 		sct.setEL("invokeImplicitAccessor", Caster.toBoolean(ac.getTriggerComponentDataMember()));
 		sct.setEL("triggerDataMember", Caster.toBoolean(ac.getTriggerComponentDataMember()));
-		sct.setEL("sameformfieldsasarray", Caster.toBoolean(ac.getSameFieldAsArray(Scope.SCOPE_FORM)));
-		sct.setEL("sameurlfieldsasarray", Caster.toBoolean(ac.getSameFieldAsArray(Scope.SCOPE_URL)));
+		sct.setEL("sameformfieldsasarray", Caster.toBoolean(((ApplicationContextSupport) ac).getSameFieldAsArray(pc, Scope.SCOPE_FORM)));
+		sct.setEL("sameurlfieldsasarray", Caster.toBoolean(((ApplicationContextSupport) ac).getSameFieldAsArray(pc, Scope.SCOPE_URL)));
 		sct.setEL("formUrlAsStruct", Caster.toBoolean(acs.getFormUrlAsStruct()));
 
 		Object ds = ac.getDefDataSource();

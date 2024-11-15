@@ -164,8 +164,8 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 	 * @throws FunctionLibException
 	 */
 	protected ConfigServerImpl(CFMLEngineImpl engine, Map<String, CFMLFactory> initContextes, Map<String, CFMLFactory> contextes, Resource configDir, Resource configFile,
-			UpdateInfo updateInfo, boolean essentialOnly) throws TagLibException, FunctionLibException {
-		super(configDir, configFile);
+			UpdateInfo updateInfo, boolean essentialOnly, boolean newVersion) throws TagLibException, FunctionLibException {
+		super(configDir, configFile, newVersion);
 		this.coreTLDs = TagLibFactory.loadFromSystem(id);
 		this.coreFLDs = FunctionLibFactory.loadFromSystem(id);
 

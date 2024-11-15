@@ -122,7 +122,7 @@ public final class ConfigServerFactory extends ConfigFactory {
 				LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_INFO, ConfigServerFactory.class.getName(),
 						"has " + (hasConfigOld ? "" : "no ") + "xml server context config [" + configFileOld + "]");
 			}
-			ConfigServerImpl config = existing != null ? existing : new ConfigServerImpl(engine, initContextes, contextes, configDir, configFileNew, ui, essentialOnly);
+			ConfigServerImpl config = existing != null ? existing : new ConfigServerImpl(engine, initContextes, contextes, configDir, configFileNew, ui, essentialOnly, doNew);
 			ThreadLocalConfigServer.register(config);
 			// translate to new
 			if (!hasConfigNew) {

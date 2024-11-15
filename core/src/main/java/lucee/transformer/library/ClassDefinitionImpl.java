@@ -224,6 +224,7 @@ public class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externalizabl
 	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof ClassDefinition)) return false;
+		if (obj == this) return true;
 		ClassDefinition other = (ClassDefinition) obj;
 		return StringUtil.emptyIfNull(other.getClassName()).equals(StringUtil.emptyIfNull(className))
 				&& StringUtil.emptyIfNull(other.getName()).equals(StringUtil.emptyIfNull(name))

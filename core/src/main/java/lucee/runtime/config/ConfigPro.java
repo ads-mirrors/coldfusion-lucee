@@ -270,6 +270,8 @@ public interface ConfigPro extends Config {
 
 	public ORMConfiguration getORMConfig();
 
+	public boolean hasORMEngine();
+
 	public ClassDefinition<? extends ORMEngine> getORMEngineClassDefintion();
 
 	public Resource getLibraryDirectory();

@@ -382,7 +382,7 @@ public abstract class ApplicationContextSupport implements ApplicationContext {
 	}
 
 	// FUTURE add to interface
-	public abstract Resource getAntiSamyPolicyResource();
+	public abstract Resource getAntiSamyPolicyResource(PageContext pc);
 
 	public abstract void setAntiSamyPolicyResource(Resource res);
 
@@ -511,4 +511,6 @@ public abstract class ApplicationContextSupport implements ApplicationContext {
 	public abstract void setDebugOptions(int option);
 
 	public abstract void remDebugOptions(int option);
+
+	public abstract boolean getSameFieldAsArray(PageContext pc, int scope);
 }

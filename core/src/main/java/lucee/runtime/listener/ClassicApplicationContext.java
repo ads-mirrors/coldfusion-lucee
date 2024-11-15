@@ -809,6 +809,11 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public boolean getSameFieldAsArray(int scope) {
+		return getSameFieldAsArray(null, scope);
+	}
+
+	@Override
+	public boolean getSameFieldAsArray(PageContext pc, int scope) {
 		Boolean b = sameFieldAsArrays.get(scope);
 		if (b == null) return false;
 		return b.booleanValue();
@@ -980,7 +985,7 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 	}
 
 	@Override
-	public Resource getAntiSamyPolicyResource() {
+	public Resource getAntiSamyPolicyResource(PageContext pc) {
 		if (antiSamyPolicy == null) return cp.getAntiSamyPolicy();
 		return antiSamyPolicy;
 	}

@@ -34,6 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import lucee.commons.date.TimeZoneUtil;
 import lucee.commons.io.CharsetUtil;
+import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
@@ -125,6 +126,7 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	private boolean typeChecking;
 	private boolean allowCompression;
 	private Object defaultDataSource;
+	private boolean initDefaultDataSource;
 	private boolean bufferOutput;
 	private boolean suppressContent;
 	private short sessionType;
@@ -146,8 +148,8 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	private boolean triggerComponentDataMember;
 	private Map<Integer, String> defaultCaches;
 	private Map<Collection.Key, CacheConnection> cacheConnections;
-	private boolean sameFormFieldAsArray;
-	private boolean sameURLFieldAsArray;
+	private Boolean sameFormFieldAsArray;
+	private Boolean sameURLFieldAsArray;
 	private boolean formUrlAsStruct;
 	private Map<String, CustomType> customTypes;
 	private boolean cgiScopeReadonly;
@@ -216,6 +218,7 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	private JavaSettings javaSettings;
 	private ClassLoader cl;
 	private Object ormDatasource;
+	private boolean initOrmDatasource;
 	private Locale locale;
 	private boolean initLocale;
 
@@ -229,9 +232,7 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	private TimeZone timeZone;
 	private boolean initTimeZone;
 	private CharSet webCharset;
-	private boolean initWebCharset;
 	private CharSet resourceCharset;
-	private boolean initResourceCharset;
 	private boolean initCGIScopeReadonly;
 	private boolean initPreciseMath;
 	private boolean initReturnFormat;
@@ -252,7 +253,7 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 
 	private Resource[] restCFCLocations;
 
-	private short scopeCascading = -1;
+	private Short scopeCascading;
 
 	private Server[] mailServers;
 	private boolean initMailServer;
@@ -264,77 +265,55 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	private List<Resource> funcDirs;
 	private boolean initFuncDirs = false;
 
-	private boolean allowImplicidQueryCall;
-	private boolean limitEvaluation;
+	private Boolean allowImplicidQueryCall;
+	private Boolean limitEvaluation;
 	private Regex regex;
+
+	private boolean oldForm;
+	private boolean oldURL;
+	private boolean oldMerge;
 
 	public ModernApplicationContext(PageContext pc, Component cfc, RefBoolean throwsErrorWhileInit) {
 		super(pc.getConfig());
-		ConfigPro ci = ((ConfigPro) config);
-		this.defaultDataSource = config.getDefaultDataSource();
 		this.wstype = WS_TYPE_AXIS1;
 
 		this.component = cfc;
 
-		initAntiSamyPolicyResource(pc);
-		if (antiSamyPolicyResource == null) this.antiSamyPolicyResource = ((ConfigPro) config).getAntiSamyPolicy();
-		// read scope cascading
-		initScopeCascading();
-		initSameFieldAsArray(pc);
-		initWebCharset(pc);
-		initAllowImplicidQueryCall();
-		initLimitEvaluation();
+		ApplicationContextSupport ac = (ApplicationContextSupport) pc.getApplicationContext();
+		oldForm = ac.getSameFieldAsArray(Scope.SCOPE_FORM);
+		oldURL = ac.getSameFieldAsArray(Scope.SCOPE_URL);
+		oldMerge = ac.getFormUrlAsStruct();
 
-		pc.addPageSource(component.getPageSource(), true);
-		try {
+		initContext(pc);
 
-			/////////// ORM /////////////////////////////////
-			reinitORM(pc);
-
-			throwsErrorWhileInit.setValue(false);
+		// ORM
+		if (((ConfigPro) config).hasORMEngine()) {
+			pc.addPageSource(component.getPageSource(), true);
+			try {
+				reinitORM(pc);
+				throwsErrorWhileInit.setValue(false);
+			}
+			catch (Throwable t) {
+				ExceptionUtil.rethrowIfNecessary(t);
+				throwsErrorWhileInit.setValue(true);
+				pc.removeLastPageSource(true);
+			}
 		}
-		catch (Throwable t) {
-			ExceptionUtil.rethrowIfNecessary(t);
-			throwsErrorWhileInit.setValue(true);
-			pc.removeLastPageSource(true);
-		}
-	}
-
-	public void initScopeCascading() {
-		Object o = get(component, KeyConstants._scopeCascading, null);
-		if (o != null) {
-			scopeCascading = ConfigWebUtil.toScopeCascading(Caster.toString(o, null), (short) -1);
-		}
-		else {
-			Boolean b = Caster.toBoolean(get(component, KeyConstants._searchImplicitScopes, null), null);
-			if (b != null) scopeCascading = ConfigWebUtil.toScopeCascading(b);
-		}
-
-	}
-
-	private void initAllowImplicidQueryCall() {
-		Object o = get(component, KeyConstants._searchQueries, null);
-		if (o == null) o = get(component, KeyConstants._searchResults, null);
-
-		if (o != null) allowImplicidQueryCall = Caster.toBooleanValue(o, config.allowImplicidQueryCall());
-		else allowImplicidQueryCall = config.allowImplicidQueryCall();
-	}
-
-	private void initLimitEvaluation() {
-		Object o = get(component, KeyConstants._security, null);
-
-		if (o instanceof Struct) {
-			Struct sct = (Struct) o;
-			o = sct.get(KeyConstants._limitEvaluation, null);
-			if (o != null) limitEvaluation = Caster.toBooleanValue(o, ((ConfigPro) config).limitEvaluation());
-			else limitEvaluation = ((ConfigPro) config).limitEvaluation();
-		}
-		else limitEvaluation = ((ConfigPro) config).limitEvaluation();
 	}
 
 	@Override
 	public short getScopeCascading() {
-		if (scopeCascading == -1) return config.getScopeCascadingType();
+		if (scopeCascading == null) {
+			Object o = get(component, KeyConstants._scopeCascading, null);
+			if (o != null) {
+				scopeCascading = ConfigWebUtil.toScopeCascading(Caster.toString(o, null), config.getScopeCascadingType());
+			}
+			else {
+				Boolean b = Caster.toBoolean(get(component, KeyConstants._searchImplicitScopes, null), null);
+				if (b != null) scopeCascading = ConfigWebUtil.toScopeCascading(b);
+				else scopeCascading = config.getScopeCascadingType();
+			}
+		}
 		return scopeCascading;
 	}
 
@@ -345,21 +324,8 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public void reinitORM(PageContext pc) throws PageException {
-
-		// datasource
-		Object o = get(component, KeyConstants._datasource, null);
-		if (o != null) {
-			this.ormDatasource = this.defaultDataSource = AppListenerUtil.toDefaultDatasource(pc.getConfig(), o, ThreadLocalPageContext.getLog(pc, "application"));
-		}
-
-		// default datasource
-		o = get(component, KeyConstants._defaultdatasource, null);
-		if (o != null) {
-			this.defaultDataSource = AppListenerUtil.toDefaultDatasource(pc.getConfig(), o, ThreadLocalPageContext.getLog(pc, "application"));
-		}
-
 		// ormenabled
-		o = get(component, KeyConstants._ormenabled, null);
+		Object o = get(component, KeyConstants._ormenabled, null);
 		if (o != null && Caster.toBooleanValue(o, false)) {
 			this.ormEnabled = true;
 
@@ -370,6 +336,43 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 			else settings = new StructImpl();
 			AppListenerUtil.setORMConfiguration(pc, this, settings);
 		}
+	}
+
+	@Override
+	public Object getORMDataSource() {
+		if (!initOrmDatasource) {
+			// datasource
+			Object o = get(component, KeyConstants._datasource, null);
+			if (o != null) {
+				try {
+					this.ormDatasource = AppListenerUtil.toDefaultDatasource(config, o, ThreadLocalPageContext.getLog(config, "application"));
+				}
+				catch (PageException e) {
+					LogUtil.log("ModernApplicationContext", e);
+				}
+			}
+			initOrmDatasource = true;
+		}
+		return ormDatasource;
+	}
+
+	@Override
+	public Object getDefDataSource() {
+		if (!initDefaultDataSource) {
+			// datasource
+			Object o = get(component, KeyConstants._datasource, null);
+			if (o == null) o = get(component, KeyConstants._defaultdatasource, null);
+			if (o != null) {
+				try {
+					this.defaultDataSource = AppListenerUtil.toDefaultDatasource(config, o, ThreadLocalPageContext.getLog(config, "application"));
+				}
+				catch (PageException e) {
+					LogUtil.log("ModernApplicationContext", e);
+				}
+			}
+			initDefaultDataSource = true;
+		}
+		return defaultDataSource;
 	}
 
 	@Override
@@ -689,38 +692,54 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	}
 
 	@Override
+
 	public boolean getSameFieldAsArray(int scope) {
+		return getSameFieldAsArray(null, scope);
+	}
+
+	@Override
+	public boolean getSameFieldAsArray(PageContext pc, int scope) {
+		if (sameFormFieldAsArray == null) {
+			synchronized (SystemUtil.createToken("ModernApplicationContext", "getSameFieldAsArray")) {
+				if (sameFormFieldAsArray == null) {
+					// Form
+					Object o = get(component, KeyConstants._sameformfieldsasarray, null);
+					if (o != null && Decision.isBoolean(o)) sameFormFieldAsArray = Caster.toBoolean(o, Boolean.FALSE);
+					else sameFormFieldAsArray = Boolean.FALSE;
+
+					// URL
+					o = get(component, KeyConstants._sameurlfieldsasarray, null);
+					if (o != null && Decision.isBoolean(o)) sameURLFieldAsArray = Caster.toBoolean(o, Boolean.FALSE);
+					else sameURLFieldAsArray = Boolean.FALSE;
+
+					// merge
+					o = get(component, KeyConstants._formUrlAsStruct, null);
+					if (o != null && Decision.isBoolean(o)) {
+						formUrlAsStruct = Caster.toBooleanValue(o, true);
+					}
+					else formUrlAsStruct = ((ConfigPro) config).getFormUrlAsStruct();
+
+					if (oldForm != sameFormFieldAsArray || oldMerge != formUrlAsStruct) {
+						pc = ThreadLocalPageContext.get(pc);
+						if (pc != null) pc.formScope().reinitialize(this);
+					}
+					if (oldURL != sameURLFieldAsArray || oldMerge != formUrlAsStruct) {
+						pc = ThreadLocalPageContext.get(pc);
+						if (pc != null) pc.urlScope().reinitialize(this);
+					}
+				}
+			}
+		}
 		return Scope.SCOPE_URL == scope ? sameURLFieldAsArray : sameFormFieldAsArray;
 	}
 
-	public void initSameFieldAsArray(PageContext pc) {
-		ApplicationContextSupport ac = (ApplicationContextSupport) pc.getApplicationContext();
-		boolean oldForm = ac.getSameFieldAsArray(Scope.SCOPE_FORM);
-		boolean oldURL = ac.getSameFieldAsArray(Scope.SCOPE_URL);
-		boolean oldMerge = ac.getFormUrlAsStruct();
-
-		// Form
-		Object o = get(component, KeyConstants._sameformfieldsasarray, null);
-		if (o != null && Decision.isBoolean(o)) sameFormFieldAsArray = Caster.toBooleanValue(o, false);
-
-		// URL
-		o = get(component, KeyConstants._sameurlfieldsasarray, null);
-		if (o != null && Decision.isBoolean(o)) sameURLFieldAsArray = Caster.toBooleanValue(o, false);
-
-		// merge
-		o = get(component, KeyConstants._formUrlAsStruct, null);
-		if (o != null && Decision.isBoolean(o)) {
-			formUrlAsStruct = Caster.toBooleanValue(o, true);
-		}
-		else formUrlAsStruct = ((ConfigPro) config).getFormUrlAsStruct();
-
-		if (oldForm != sameFormFieldAsArray || oldMerge != formUrlAsStruct) pc.formScope().reinitialize(this);
-		if (oldURL != sameURLFieldAsArray || oldMerge != formUrlAsStruct) pc.urlScope().reinitialize(this);
-
+	@Override
+	public boolean getFormUrlAsStruct() {
+		getSameFieldAsArray(null, Scope.SCOPE_URL); // needed to init
+		return formUrlAsStruct;
 	}
 
-	public void initWebCharset(PageContext pc) {
-		initCharset();
+	public void initContext(PageContext pc) {
 		Charset cs = getWebCharset();
 		// has defined a web charset
 		if (cs != null) {
@@ -728,7 +747,6 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 				ReqRspUtil.setContentType(pc.getHttpServletResponse(), "text/html; charset=" + cs.name());
 			}
 		}
-
 	}
 
 	@Override
@@ -1285,18 +1303,19 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	}
 
 	@Override
-	public Charset getWebCharset() {
-		if (!initWebCharset) initCharset();
-		return CharsetUtil.toCharset(webCharset);
-	}
-
-	public CharSet getWebCharSet() {
-		if (!initWebCharset) initCharset();
-		return webCharset;
-	}
-
-	@Override
-	public Resource getAntiSamyPolicyResource() {
+	public Resource getAntiSamyPolicyResource(PageContext pc) {
+		if (antiSamyPolicyResource == null) {
+			Struct sct = Caster.toStruct(get(component, KeyConstants._security, null), null);
+			if (sct != null) {
+				String path = Caster.toString(sct.get("antisamypolicy", null), null);
+				if (!StringUtil.isEmpty(path)) {
+					Resource tmp = ResourceUtil.toResourceExisting(pc, path, true, null);
+					if (tmp != null) antiSamyPolicyResource = tmp;
+					else this.antiSamyPolicyResource = ((ConfigPro) config).getAntiSamyPolicy();
+				}
+				else this.antiSamyPolicyResource = ((ConfigPro) config).getAntiSamyPolicy();
+			}
+		}
 		return antiSamyPolicyResource;
 	}
 
@@ -1306,51 +1325,47 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	}
 
 	public void initAntiSamyPolicyResource(PageContext pc) {
-		Struct sct = Caster.toStruct(get(component, KeyConstants._security, null), null);
-		if (sct != null) {
-			Resource tmp = ResourceUtil.toResourceExisting(pc, Caster.toString(sct.get("antisamypolicy", null), null), true, null);
-			if (tmp != null) antiSamyPolicyResource = tmp;
+
+	}
+
+	@Override
+	public Charset getWebCharset() {
+		return CharsetUtil.toCharset(getWebCharSet());
+	}
+
+	public CharSet getWebCharSet() {
+		if (webCharset == null) {
+			Object o = get(component, KeyConstants._charset, null);
+			if (o != null) {
+				Struct sct = Caster.toStruct(o, null);
+				if (sct != null) {
+					CharSet web = CharsetUtil.toCharSet(Caster.toString(sct.get(KeyConstants._web, null), null), null);
+					if (web != null) webCharset = web;
+				}
+			}
+			if (webCharset == null) webCharset = ((ConfigPro) config).getWebCharSet();
 		}
+		return webCharset;
 	}
 
 	@Override
 	public Charset getResourceCharset() {
-		if (!initResourceCharset) initCharset();
-		return CharsetUtil.toCharset(resourceCharset);
+		return CharsetUtil.toCharset(getResourceCharSet());
 	}
 
 	public CharSet getResourceCharSet() {
-		if (!initResourceCharset) initCharset();
-		return resourceCharset;
-	}
-
-	/**
-	 * @return webcharset if it was defined, otherwise null
-	 */
-	private CharSet initCharset() {
-		webCharset = ((ConfigPro) config).getWebCharSet();
-		resourceCharset = ((ConfigPro) config).getResourceCharSet();
-		Object o = get(component, KeyConstants._charset, null);
-		if (o != null) {
-			Struct sct = Caster.toStruct(o, null);
-			if (sct != null) {
-				CharSet web = CharsetUtil.toCharSet(Caster.toString(sct.get(KeyConstants._web, null), null), null);
-				if (web != null) webCharset = web;
-
-				CharSet res = CharsetUtil.toCharSet(Caster.toString(sct.get(KeyConstants._resource, null), null), null);
-				if (res != null) resourceCharset = res;
-
-				initWebCharset = true;
-				initResourceCharset = true;
-				return web;
+		if (resourceCharset == null) {
+			Object o = get(component, KeyConstants._charset, null);
+			if (o != null) {
+				Struct sct = Caster.toStruct(o, null);
+				if (sct != null) {
+					CharSet web = CharsetUtil.toCharSet(Caster.toString(sct.get(KeyConstants._resource, null), null), null);
+					if (web != null) resourceCharset = web;
+				}
 			}
+			if (resourceCharset == null) resourceCharset = ((ConfigPro) config).getResourceCharSet();
 		}
-		else {
-
-		}
-		initWebCharset = true;
-		initResourceCharset = true;
-		return null;
+		return resourceCharset;
 	}
 
 	@Override
@@ -1407,11 +1422,6 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	}
 
 	@Override
-	public Object getDefDataSource() {
-		return defaultDataSource;
-	}
-
-	@Override
 	public DataSource[] getDataSources() {
 		if (!initDataSources) {
 			Object o = get(component, KeyConstants._datasources, null);
@@ -1436,11 +1446,6 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	@Override
 	public String getORMDatasource() {
 		throw new PageRuntimeException(new DeprecatedException("this method is no longer supported!"));
-	}
-
-	@Override
-	public Object getORMDataSource() {
-		return ormDatasource;
 	}
 
 	@Override
@@ -1547,11 +1552,13 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	@Override
 	public void setDefaultDataSource(String datasource) {
 		this.defaultDataSource = datasource;
+		initDefaultDataSource = true;
 	}
 
 	@Override
 	public void setDefDataSource(Object datasource) {
 		this.defaultDataSource = datasource;
+		initDefaultDataSource = true;
 	}
 
 	@Override
@@ -1622,13 +1629,11 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public void setWebCharset(Charset webCharset) {
-		initWebCharset = true;
 		this.webCharset = CharsetUtil.toCharSet(webCharset);
 	}
 
 	@Override
 	public void setResourceCharset(Charset resourceCharset) {
-		initResourceCharset = true;
 		this.resourceCharset = CharsetUtil.toCharSet(resourceCharset);
 	}
 
@@ -1681,11 +1686,13 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	@Override
 	public void setORMDatasource(String ormDatasource) {
 		this.ormDatasource = ormDatasource;
+		initOrmDatasource = true;
 	}
 
 	@Override
 	public void setORMDataSource(Object ormDatasource) {
 		this.ormDatasource = ormDatasource;
+		initOrmDatasource = true;
 	}
 
 	@Override
@@ -1884,11 +1891,6 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	public void setCGIScopeReadonly(boolean cgiScopeReadonly) {
 		initCGIScopeReadonly = true;
 		this.cgiScopeReadonly = cgiScopeReadonly;
-	}
-
-	@Override
-	public boolean getFormUrlAsStruct() {
-		return formUrlAsStruct;
 	}
 
 	@Override
@@ -2142,6 +2144,16 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public boolean getLimitEvaluation() {
+		if (limitEvaluation == null) {
+			Object o = get(component, KeyConstants._security, null);
+			if (o instanceof Struct) {
+				Struct sct = (Struct) o;
+				o = sct.get(KeyConstants._limitEvaluation, null);
+				if (o != null) limitEvaluation = Caster.toBoolean(o, ((ConfigPro) config).limitEvaluation());
+				else limitEvaluation = ((ConfigPro) config).limitEvaluation();
+			}
+			else limitEvaluation = ((ConfigPro) config).limitEvaluation();
+		}
 		return limitEvaluation;
 	}
 
@@ -2152,6 +2164,12 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public boolean getAllowImplicidQueryCall() {
+		if (allowImplicidQueryCall == null) {
+			Object o = get(component, KeyConstants._searchQueries, null);
+			if (o == null) o = get(component, KeyConstants._searchResults, null);
+			if (o != null) allowImplicidQueryCall = Caster.toBoolean(o, config.allowImplicidQueryCall());
+			else allowImplicidQueryCall = config.allowImplicidQueryCall();
+		}
 		return allowImplicidQueryCall;
 	}
 
