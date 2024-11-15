@@ -40,6 +40,8 @@ import lucee.commons.lang.ClassException;
 import lucee.commons.lang.StringUtil;
 import lucee.loader.engine.CFMLEngine;
 import lucee.runtime.CFMLFactory;
+import lucee.runtime.component.ImportDefintion;
+import lucee.runtime.config.component.ComponentFactory;
 import lucee.runtime.converter.ConverterException;
 import lucee.runtime.engine.CFMLEngineImpl;
 import lucee.runtime.engine.ThreadLocalConfigServer;
@@ -291,17 +293,6 @@ public final class ConfigServerFactory extends ConfigFactory {
 					doNew);
 		}
 
-		// Plugin
-		if (doNew) {
-			Resource pluginDir = configDir.getRealResource("context/admin/plugin");
-			create("/resource/context/admin/plugin/", new String[] { "Plugin.cfc" }, pluginDir, doNew);
-		}
-		// Plugin Note
-		if (doNew) {
-			Resource note = configDir.getRealResource("context/admin/plugin/Note");
-			create("/resource/context/admin/plugin/Note/", new String[] { "language.xml", "overview.cfm", "Action.cfc" }, note, doNew);
-		}
-
 		// customtags
 		if (doNew) {
 			Resource ctDir = configDir.getRealResource("customtags");
@@ -340,6 +331,49 @@ public final class ConfigServerFactory extends ConfigFactory {
 			create("/resource/context/admin/info/", new String[] { "Info.cfc" }, info, doNew);
 		}
 
+		Resource wcdDir = configDir.getRealResource("web-context-deployment/admin");
+		try {
+			ResourceUtil.deleteEmptyFolders(wcdDir);
+		}
+		catch (IOException e) {
+			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), ConfigServerFactory.class.getName(), e);
+		}
+
+		// Security / SSL
+		Resource secDir = configDir.getRealResource("security");
+		Resource res = create("/resource/security/", "cacerts", secDir, false);
+		if (SystemUtil.getSystemPropOrEnvVar("lucee.use.lucee.SSL.TrustStore", "").equalsIgnoreCase("true"))
+			System.setProperty("javax.net.ssl.trustStore", res.toString());/* JAVJAK */
+		// Allow using system proxies
+		if (!SystemUtil.getSystemPropOrEnvVar("lucee.disable.systemProxies", "").equalsIgnoreCase("true")) System.setProperty("java.net.useSystemProxies", "true"); // it defaults
+																																									// to false
+
+		// deploy org.lucee.cfml components
+		if (doNew) {
+			ImportDefintion _import = ((ConfigPro) config).getComponentDefaultImport();
+			String path = _import.getPackageAsPath();
+			Resource components = config.getConfigDir().getRealResource("components");
+			Resource dir = components.getRealResource(path);
+			ComponentFactory.deploy(dir, doNew);
+		}
+
+		createContextFilesAdmin(configDir, config, doNew);
+	}
+
+	private static void createContextFilesAdmin(Resource configDir, ConfigServer config, boolean doNew) {
+		print.e("server.createContextFilesAdmin:" + configDir);
+
+		// Plugin
+		if (doNew) {
+			Resource pluginDir = configDir.getRealResource("context/admin/plugin");
+			create("/resource/context/admin/plugin/", new String[] { "Plugin.cfc" }, pluginDir, doNew);
+		}
+		// Plugin Note
+		if (doNew) {
+			Resource note = configDir.getRealResource("context/admin/plugin/Note");
+			create("/resource/context/admin/plugin/Note/", new String[] { "language.xml", "overview.cfm", "Action.cfc" }, note, doNew);
+		}
+
 		// DB Drivers types
 		if (doNew) {
 			Resource typesDir = configDir.getRealResource("context/admin/dbdriver/types");
@@ -361,14 +395,6 @@ public final class ConfigServerFactory extends ConfigFactory {
 		if (doNew) {
 			Resource aiDir = configDir.getRealResource("context/admin/aidriver");
 			create("/resource/context/admin/aidriver/", new String[] { "AI.cfc", "Gemini.cfc", "OpenAI.cfc", "Field.cfc", "Group.cfc" }, aiDir, doNew);
-		}
-
-		Resource wcdDir = configDir.getRealResource("web-context-deployment/admin");
-		try {
-			ResourceUtil.deleteEmptyFolders(wcdDir);
-		}
-		catch (IOException e) {
-			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), ConfigServerFactory.class.getName(), e);
 		}
 
 		// Mail Server Drivers
@@ -396,15 +422,5 @@ public final class ConfigServerFactory extends ConfigFactory {
 			create("/resource/context/admin/logging/layout/", new String[] { "DatadogLayout.cfc", "ClassicLayout.cfc", "HTMLLayout.cfc", "PatternLayout.cfc", "XMLLayout.cfc",
 					"JsonLayout.cfc", "Layout.cfc", "Field.cfc", "Group.cfc" }, lay, doNew);
 		}
-		// Security / SSL
-		Resource secDir = configDir.getRealResource("security");
-		Resource res = create("/resource/security/", "cacerts", secDir, false);
-		if (SystemUtil.getSystemPropOrEnvVar("lucee.use.lucee.SSL.TrustStore", "").equalsIgnoreCase("true"))
-			System.setProperty("javax.net.ssl.trustStore", res.toString());/* JAVJAK */
-		// Allow using system proxies
-		if (!SystemUtil.getSystemPropOrEnvVar("lucee.disable.systemProxies", "").equalsIgnoreCase("true")) System.setProperty("java.net.useSystemProxies", "true"); // it defaults
-																																									// to false
-
 	}
-
 }

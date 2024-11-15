@@ -93,10 +93,7 @@ import lucee.runtime.cache.tag.request.RequestCacheHandler;
 import lucee.runtime.cache.tag.timespan.TimespanCacheHandler;
 import lucee.runtime.cfx.customtag.CFXTagClass;
 import lucee.runtime.cfx.customtag.JavaCFXTagClass;
-import lucee.runtime.component.ImportDefintion;
 import lucee.runtime.config.ConfigBase.Startup;
-//import lucee.runtime.config.ajax.AjaxFactory;
-import lucee.runtime.config.component.ComponentFactory;
 import lucee.runtime.config.gateway.GatewayMap;
 import lucee.runtime.converter.ConverterException;
 import lucee.runtime.converter.JSONConverter;
@@ -219,7 +216,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 		// createContextFiles(configDir, servletConfig, doNew);
 		settings(configWeb, ThreadLocalPageContext.getLog(configWeb, "application"));
-		createContextFilesPost(configDir, configWeb, servletConfig, false, doNew);
 		((ThreadQueueImpl) configWeb.getThreadQueue()).setMode(configWeb.getQueueEnable() ? ThreadQueuePro.MODE_ENABLED : ThreadQueuePro.MODE_DISABLED);
 
 		// call web.cfc for this context
@@ -1014,29 +1010,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		else file.createNewFile();
 		IOUtil.copy(new ByteArrayInputStream(barr), file, true);
-	}
-
-	private static void createContextFilesPost(Resource configDir, ConfigWebPro config, ServletConfig servletConfig, boolean isEventGatewayContext, boolean doNew) {
-		Resource contextDir = configDir.getRealResource("context");
-		if (!contextDir.exists()) contextDir.mkdirs();
-
-		Resource adminDir = contextDir.getRealResource("admin");
-		if (!adminDir.exists()) adminDir.mkdirs();
-
-		// Plugin
-		Resource pluginDir = adminDir.getRealResource("plugin");
-		if (!pluginDir.exists()) pluginDir.mkdirs();
-
-		// deploy org.lucee.cfml components
-		if (config != null) {
-			ImportDefintion _import = config.getComponentDefaultImport();
-			String path = _import.getPackageAsPath();
-			Resource components = config.getConfigDir().getRealResource("components");
-			Resource dir = components.getRealResource(path);
-			dir.mkdirs();
-			// print.o(dir);
-			ComponentFactory.deploy(dir, doNew);
-		}
 	}
 
 	private static void doCheckChangesInLibraries(ConfigPro config) {

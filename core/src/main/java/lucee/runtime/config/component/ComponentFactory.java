@@ -32,43 +32,36 @@ public class ComponentFactory {
 	 */
 	public static void deploy(Resource dir, boolean doNew) {
 		String path = "/resource/component/" + (Constants.DEFAULT_PACKAGE.replace('.', '/')) + "/";
-
-		delete(dir, "Base");
-		deploy(dir, path, doNew, "HelperBase");
-		deploy(dir, path, doNew, "Feed");
-		deploy(dir, path, doNew, "Ftp");
-		deploy(dir, path, doNew, "Http");
-		deploy(dir, path, doNew, "Mail");
-		deploy(dir, path, doNew, "Query");
-		deploy(dir, path, doNew, "Result");
-		deploy(dir, path, doNew, "Administrator");
-		deploy(dir, path, doNew, "Component");
+		deploy(dir, path, doNew, "HelperBase", "Feed", "Ftp", "Http", "Mail", "Query", "Result", "Administrator", "Component");
 
 		// orm
 		{
 			Resource ormDir = dir.getRealResource("orm");
 			String ormPath = path + "orm/";
-			if (!ormDir.exists()) ormDir.mkdirs();
-			deploy(ormDir, ormPath, doNew, "IEventHandler");
-			deploy(ormDir, ormPath, doNew, "INamingStrategy");
+			deploy(ormDir, ormPath, doNew, "IEventHandler", "INamingStrategy");
 		}
 		// test
 		{
 			Resource testDir = dir.getRealResource("test");
 			String testPath = path + "test/";
-			if (!testDir.exists()) testDir.mkdirs();
-
-			deploy(testDir, testPath, doNew, "LuceeTestSuite");
-			deploy(testDir, testPath, doNew, "LuceeTestSuiteRunner");
-			deploy(testDir, testPath, doNew, "LuceeTestCase");
-			deploy(testDir, testPath, doNew, "LuceeTestCaseParallel");
+			deploy(testDir, testPath, doNew, "LuceeTestSuite", "LuceeTestSuiteRunner", "LuceeTestCase", "LuceeTestCaseParallel");
 		}
-
 	}
 
-	private static void deploy(Resource dir, String path, boolean doNew, String name) {
-		Resource f = dir.getRealResource(name + ".cfc");
-		if (!f.exists() || doNew) ConfigFactory.createFileFromResourceEL(path + name + ".cfc", f);
+	private static void deploy(Resource dir, String path, boolean doNew, String... names) {
+		if (!dir.exists()) {
+			dir.mkdirs();
+			doNew = true; // in case the dir does not exist, the file also don't, so no check needed
+		}
+
+		Resource f;
+		for (String name: names) {
+			f = dir.getRealResource(name + ".cfc");
+			if (doNew || !f.exists()) {
+				ConfigFactory.createFileFromResourceEL(path + name + ".cfc", f);
+			}
+		}
+
 	}
 
 	private static void delete(Resource dir, String name) {

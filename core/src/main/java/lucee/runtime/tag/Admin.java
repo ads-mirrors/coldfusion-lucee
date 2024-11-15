@@ -595,6 +595,8 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 			ConfigWebUtil.checkPassword(config, null, password);
 			ConfigWebUtil.checkGeneralReadAccess(config, password);
 
+			ConfigServerImpl csi = Admin.getConfigServerImpl(config);
+			// ConfigServerFactory.createContextFilesAdmin(config.getConfigDir(), csi, csi.newVersion());
 			try {
 				if (config instanceof ConfigServer) ((PageContextImpl) pageContext).setServerPassword(password);
 			}

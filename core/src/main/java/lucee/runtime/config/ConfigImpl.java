@@ -2583,7 +2583,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 */
 	@Override
 	public Charset getMailDefaultCharset() {
-		return mailDefaultCharset.toCharset();
+		return getMailDefaultCharSet().toCharset();
 	}
 
 	public CharSet getMailDefaultCharSet() {
@@ -5564,5 +5564,9 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 		}
 		return this;
+	}
+
+	public boolean newVersion() {
+		return newVersion;
 	}
 }
