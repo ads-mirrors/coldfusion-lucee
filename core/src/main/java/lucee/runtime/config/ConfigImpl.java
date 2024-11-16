@@ -218,8 +218,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private Map<String, LoggerAndSourceData> loggers;
 
-	private int debugLogOutput = SERVER_BOOLEAN_FALSE;
-	private int debugOptions = 0;
+	private Integer debugLogOutput;
+	private Integer debugOptions;
 
 	private boolean suppresswhitespace = false;
 	private boolean suppressContent = false;
@@ -433,13 +433,11 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private Boolean formUrlAsStruct;
 
-	private boolean showDebug;
+	private Boolean showDebug;
+	private Boolean showDoc;
+	private Boolean showMetric;
+	private Boolean showTest;
 
-	private boolean showDoc;
-
-	private boolean showMetric;
-
-	private boolean showTest;
 	private JavaSettings javaSettings;
 	private Map<String, JavaSettings> javaSettingsInstances = new ConcurrentHashMap<>();
 
@@ -462,6 +460,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private Boolean cgiScopeReadonly;
 
 	private boolean newVersion;
+	private Integer debugMaxRecordsLogged;
 	protected Struct root;
 
 	/**
@@ -1143,44 +1142,156 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public boolean getShowDebug() {
-		return this.showDebug;
+		if (showDebug == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getShowDebug")) {
+				if (showDebug == null) {
+					// monitoring debug
+					String str = ConfigWebFactory.getAttr(root, "showDebug");
+					if (StringUtil.isEmpty(str, true)) str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.showDebug", null);
+
+					if (!StringUtil.isEmpty(str)) {
+						showDebug = Caster.toBoolean(str, Boolean.FALSE);
+					}
+					else showDebug = Boolean.FALSE;
+				}
+			}
+		}
+		return showDebug;
 	}
 
-	public void setShowDebug(boolean b) {
-		this.showDebug = b;
+	public ConfigImpl resetShowDebug() {
+		if (showDebug != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getShowDebug")) {
+				if (showDebug != null) {
+					showDebug = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
 	public boolean getShowDoc() {
-		return this.showDoc;
+		if (showDoc == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getShowDoc")) {
+				if (showDoc == null) {
+					String str = ConfigWebFactory.getAttr(root, "showDoc");
+					if (StringUtil.isEmpty(str, true)) str = ConfigWebFactory.getAttr(root, "showReference");
+					if (StringUtil.isEmpty(str, true)) str = ConfigWebFactory.getAttr(root, "doc");
+					if (StringUtil.isEmpty(str, true)) str = ConfigWebFactory.getAttr(root, "documentation");
+					if (StringUtil.isEmpty(str, true)) str = ConfigWebFactory.getAttr(root, "reference");
+					if (StringUtil.isEmpty(str, true)) str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.showDoc", null);
+					if (!StringUtil.isEmpty(str)) {
+						showDoc = Caster.toBoolean(str, Boolean.FALSE);
+					}
+					else showDoc = Boolean.FALSE;
+				}
+			}
+		}
+		return showDoc;
 	}
 
-	public void setShowDoc(boolean b) {
-		this.showDoc = b;
+	public ConfigImpl resetShowDoc() {
+		if (showDoc != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getShowDoc")) {
+				if (showDoc != null) {
+					showDoc = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
 	public boolean getShowMetric() {
+		if (showMetric == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getShowMetric")) {
+				if (showMetric == null) {
+					String str = ConfigWebFactory.getAttr(root, "showMetric");
+					if (StringUtil.isEmpty(str, true)) str = ConfigWebFactory.getAttr(root, "showMetrics");
+					if (StringUtil.isEmpty(str, true)) str = ConfigWebFactory.getAttr(root, "metric");
+					if (StringUtil.isEmpty(str, true)) str = ConfigWebFactory.getAttr(root, "metrics");
+					if (StringUtil.isEmpty(str, true)) str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.showMetric", null);
+					if (!StringUtil.isEmpty(str)) {
+						showMetric = Caster.toBoolean(str, Boolean.FALSE);
+					}
+					else showMetric = Boolean.FALSE;
+				}
+			}
+		}
 		return this.showMetric;
 	}
 
-	public void setShowMetric(boolean b) {
-		this.showMetric = b;
+	public ConfigImpl resetShowMetric() {
+		if (showMetric != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getShowMetric")) {
+				if (showMetric != null) {
+					showMetric = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
 	public boolean getShowTest() {
+		if (showTest == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getShowTest")) {
+				if (showTest == null) {
+					String str = ConfigWebFactory.getAttr(root, "showTest");
+					if (StringUtil.isEmpty(str, true)) str = ConfigWebFactory.getAttr(root, "showTests");
+					if (StringUtil.isEmpty(str, true)) str = ConfigWebFactory.getAttr(root, "test");
+					if (StringUtil.isEmpty(str, true)) str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.showTest", null);
+					if (!StringUtil.isEmpty(str)) {
+						showTest = Caster.toBoolean(str, false);
+					}
+					else showTest = Boolean.FALSE;
+				}
+			}
+		}
 		return this.showTest;
 	}
 
-	public void setShowTest(boolean b) {
-		this.showTest = b;
+	public ConfigImpl resetShowTest() {
+		if (showTest != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getShowTest")) {
+				if (showTest != null) {
+					showTest = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
 	public boolean debugLogOutput() {
+		if (debugLogOutput == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "debugLogOutput")) {
+				if (debugLogOutput == null) {
+					String strDLO = ConfigWebFactory.getAttr(root, "debuggingLogOutput");
+					if (!StringUtil.isEmpty(strDLO)) {
+						debugLogOutput = Caster.toBooleanValue(strDLO, false) ? ConfigPro.CLIENT_BOOLEAN_TRUE : ConfigPro.CLIENT_BOOLEAN_FALSE;
+					}
+					else debugLogOutput = ConfigPro.CLIENT_BOOLEAN_FALSE;
+				}
+			}
+		}
 		return debugLogOutput == CLIENT_BOOLEAN_TRUE || debugLogOutput == SERVER_BOOLEAN_TRUE;
 	}
+
+	public ConfigImpl resetLogOutput() {
+		if (debugLogOutput != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "debugLogOutput")) {
+				if (debugLogOutput != null) {
+					debugLogOutput = null;
+				}
+			}
+		}
+
+		return this;
+	}
+
+	// = SERVER_BOOLEAN_FALSE
 
 	@Override
 	public int getMailSpoolInterval() {
@@ -1792,10 +1903,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 */
 	protected void setPSQL(boolean psq) {
 		this.psq = psq;
-	}
-
-	protected void setDebugLogOutput(int debugLogOutput) {
-		this.debugLogOutput = debugLogOutput;
 	}
 
 	@Override
@@ -4462,18 +4569,53 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private DebugEntry[] debugEntries;
 
-	protected void setDebugEntries(DebugEntry[] debugEntries) {
-		this.debugEntries = debugEntries;
-	}
-
 	@Override
 	public DebugEntry[] getDebugEntries() {
-		if (debugEntries == null) debugEntries = new DebugEntry[0];
+		if (debugEntries == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getDebugEntries")) {
+				if (debugEntries == null) {
+					Array entries = ConfigWebUtil.getAsArray("debugTemplates", root);
+					Map<String, DebugEntry> list = new HashMap<String, DebugEntry>();
+
+					String id;
+					if (entries != null) {
+						Iterator<?> it = entries.getIterator();
+						Struct e;
+						while (it.hasNext()) {
+							try {
+								e = Caster.toStruct(it.next(), null);
+								if (e == null) continue;
+								id = ConfigWebFactory.getAttr(e, "id");
+								list.put(id, new DebugEntry(id, ConfigWebFactory.getAttr(e, "type"), ConfigWebFactory.getAttr(e, "iprange"), ConfigWebFactory.getAttr(e, "label"),
+										ConfigWebFactory.getAttr(e, "path"), ConfigWebFactory.getAttr(e, "fullname"), ConfigWebUtil.getAsStruct(e, true, "custom")));
+							}
+							catch (Throwable t) {
+								ExceptionUtil.rethrowIfNecessary(t);
+								ConfigWebFactory.log(this, getLog(), t);
+							}
+						}
+					}
+					debugEntries = list.values().toArray(new DebugEntry[list.size()]);
+				}
+			}
+		}
 		return debugEntries;
+	}
+
+	public ConfigImpl resetDebugEntries() {
+		if (debugEntries != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getDebugEntries")) {
+				if (debugEntries != null) {
+					debugEntries = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
 	public DebugEntry getDebugEntry(String ip, DebugEntry defaultValue) {
+		DebugEntry[] debugEntries = getDebugEntries();
 		if (debugEntries.length == 0) return defaultValue;
 		InetAddress ia;
 
@@ -4490,15 +4632,34 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return defaultValue;
 	}
 
-	private int debugMaxRecordsLogged = 10;
-
-	protected void setDebugMaxRecordsLogged(int debugMaxRecordsLogged) {
-		this.debugMaxRecordsLogged = debugMaxRecordsLogged;
-	}
+	// debugMaxRecordsLogged = 10
 
 	@Override
 	public int getDebugMaxRecordsLogged() {
+		if (debugMaxRecordsLogged == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getDebugMaxRecordsLogged")) {
+				if (debugMaxRecordsLogged == null) {
+					String strMax = ConfigWebFactory.getAttr(root, "debuggingMaxRecordsLogged");
+					if (StringUtil.isEmpty(strMax)) strMax = ConfigWebFactory.getAttr(root, "debuggingShowMaxRecordsLogged");
+					if (!StringUtil.isEmpty(strMax)) {
+						debugMaxRecordsLogged = Caster.toIntValue(strMax, 10);
+					}
+					else debugMaxRecordsLogged = 10;
+				}
+			}
+		}
 		return debugMaxRecordsLogged;
+	}
+
+	public ConfigImpl resetDebugMaxRecordsLogged() {
+		if (debugMaxRecordsLogged != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getDebugMaxRecordsLogged")) {
+				if (debugMaxRecordsLogged != null) {
+					debugMaxRecordsLogged = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	private Boolean dotNotationUpperCase;
@@ -4661,16 +4822,31 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	public int getDebugOptions() {
+		if (debugOptions == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getDebugOptions")) {
+				if (debugOptions == null) {
+					debugOptions = ConfigWebFactory.loadDebugOptions(this, root, getLog());
+				}
+			}
+		}
 		return debugOptions;
 	}
 
+	public ConfigImpl resetDebugOptions() {
+		if (debugOptions != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getDebugOptions")) {
+				if (debugOptions != null) {
+					debugOptions = null;
+				}
+			}
+		}
+		return this;
+	}
+	// = 0
+
 	@Override
 	public boolean hasDebugOptions(int debugOption) {
-		return (debugOptions & debugOption) > 0;
-	}
-
-	protected void setDebugOptions(int debugOptions) {
-		this.debugOptions = debugOptions;
+		return (getDebugOptions() & debugOption) > 0;
 	}
 
 	@Override

@@ -360,9 +360,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			_loadScheduler(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded scheduled tasks");
 
-			_loadDebug(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded debug");
-
 			_loadComponent(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded component");
 
@@ -3298,89 +3295,15 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	/**
-	 * @param configServer
-	 * @param config
-	 * @param doc
-	 */
-	private static void _loadDebug(ConfigServerImpl config, Struct root, Log log) {
+	public static int loadDebugOptions(ConfigImpl config, Struct root, Log log) {
+		int options = 0;
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_DEBUGGING);
-
-			// Entries
-			// Struct debugging = ConfigWebUtil.getAsStruct("debugging", root);
-			Array entries = ConfigWebUtil.getAsArray("debugTemplates", root);
-			Map<String, DebugEntry> list = new HashMap<String, DebugEntry>();
-
-			String id;
-			if (entries != null) {
-				Iterator<?> it = entries.getIterator();
-				Struct e;
-				while (it.hasNext()) {
-					try {
-						e = Caster.toStruct(it.next(), null);
-						if (e == null) continue;
-						id = getAttr(e, "id");
-						list.put(id, new DebugEntry(id, getAttr(e, "type"), getAttr(e, "iprange"), getAttr(e, "label"), getAttr(e, "path"), getAttr(e, "fullname"),
-								ConfigWebUtil.getAsStruct(e, true, "custom")));
-					}
-					catch (Throwable t) {
-						ExceptionUtil.rethrowIfNecessary(t);
-						log(config, log, t);
-					}
-				}
-			}
-			config.setDebugEntries(list.values().toArray(new DebugEntry[list.size()]));
-			{
-				// monitoring debug
-				String str = getAttr(root, "showDebug");
-				if (StringUtil.isEmpty(str, true)) str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.showDebug", null);
-
-				if (hasAccess && !StringUtil.isEmpty(str)) {
-					config.setShowDebug(toBoolean(str, false));
-				}
-
-				// monitoring doc
-				str = getAttr(root, "showDoc");
-				if (StringUtil.isEmpty(str, true)) str = getAttr(root, "showReference");
-				if (StringUtil.isEmpty(str, true)) str = getAttr(root, "doc");
-				if (StringUtil.isEmpty(str, true)) str = getAttr(root, "documentation");
-				if (StringUtil.isEmpty(str, true)) str = getAttr(root, "reference");
-				if (StringUtil.isEmpty(str, true)) str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.showDoc", null);
-				if (hasAccess && !StringUtil.isEmpty(str)) {
-					config.setShowDoc(toBoolean(str, false));
-				}
-
-				// monitoring metric
-				str = getAttr(root, "showMetric");
-				if (StringUtil.isEmpty(str, true)) str = getAttr(root, "showMetrics");
-				if (StringUtil.isEmpty(str, true)) str = getAttr(root, "metric");
-				if (StringUtil.isEmpty(str, true)) str = getAttr(root, "metrics");
-				if (StringUtil.isEmpty(str, true)) str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.showMetric", null);
-				if (hasAccess && !StringUtil.isEmpty(str)) {
-					config.setShowMetric(toBoolean(str, false));
-				}
-
-				// monitoring test
-				str = getAttr(root, "showTest");
-				if (StringUtil.isEmpty(str, true)) str = getAttr(root, "showTests");
-				if (StringUtil.isEmpty(str, true)) str = getAttr(root, "test");
-				if (StringUtil.isEmpty(str, true)) str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.showTest", null);
-				if (hasAccess && !StringUtil.isEmpty(str)) {
-					config.setShowTest(toBoolean(str, false));
-				}
-			}
-			// debug-log-output
-			String strDLO = getAttr(root, "debuggingLogOutput");
-			if (hasAccess && !StringUtil.isEmpty(strDLO)) {
-				config.setDebugLogOutput(toBoolean(strDLO, false) ? ConfigPro.CLIENT_BOOLEAN_TRUE : ConfigPro.CLIENT_BOOLEAN_FALSE);
-			}
 
 			// debug options
 			String strDebugOption = SystemUtil.getSystemPropOrEnvVar("lucee.debugging.options", null);
 			String[] debugOptions = StringUtil.isEmpty(strDebugOption) ? null : ListUtil.listToStringArray(strDebugOption, ',');
 
-			int options = 0;
 			String str = getAttr(root, "debuggingDatabase");
 			if (StringUtil.isEmpty(str)) str = getAttr(root, "debuggingShowDatabase");
 			if (StringUtil.isEmpty(str)) str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.debuggingDatabase", null);
@@ -3451,20 +3374,12 @@ public final class ConfigWebFactory extends ConfigFactory {
 			if (hasAccess && !StringUtil.isEmpty(str)) {
 				if (toBoolean(str, false)) options += ConfigPro.DEBUG_THREAD;
 			}
-
-			// max records logged
-			String strMax = getAttr(root, "debuggingMaxRecordsLogged");
-			if (StringUtil.isEmpty(str)) str = getAttr(root, "debuggingShowMaxRecordsLogged");
-			if (hasAccess && !StringUtil.isEmpty(strMax)) {
-				config.setDebugMaxRecordsLogged(Caster.toIntValue(strMax, 10));
-			}
-
-			config.setDebugOptions(options);
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
+		return options;
 	}
 
 	private static boolean extractDebugOption(String name, String[] values) {

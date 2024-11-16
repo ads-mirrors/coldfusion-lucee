@@ -1775,6 +1775,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 
 		// TODO?admin.updateDebugTemplate(getString("admin", action, "debugTemplate"));
 		store();
+		getConfigServerImpl(config).resetDebugOptions();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -1784,6 +1785,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 
 		// TODO?admin.updateDebugTemplate(getString("admin", action, "debugTemplate"));
 		store();
+		getConfigServerImpl(config).resetShowDebug().resetShowTest().resetShowMetric().resetShowDoc();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -1801,6 +1803,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		else maxLogs = Caster.toIntValue(str);
 		admin.updateDebugSetting(maxLogs);
 		store();
+		getConfigServerImpl(config).resetDebugMaxRecordsLogged();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -1815,6 +1818,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		}
 
 		store();
+		getConfigServerImpl(config).resetDebugEntries();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -3850,6 +3854,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doRemoveDebugEntry() throws PageException {
 		admin.removeDebugEntry(getString("admin", action, "id"));
 		store();
+		getConfigServerImpl(config).resetDebugEntries();
 		adminSync.broadcast(attributes, config);
 	}
 
