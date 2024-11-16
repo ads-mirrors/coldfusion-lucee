@@ -277,8 +277,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private Mapping[] uncheckedMappings = null;
 	private Mapping[] mappings = new Mapping[0];
-	private Mapping[] uncheckedCustomTagMappings = null;
-	private Mapping[] customTagMappings = new Mapping[0];
+	private Mapping[] uncheckedCustomTagMappings;
+	private Mapping[] customTagMappings;
 	private Mapping[] uncheckedComponentMappings;
 	private Mapping[] componentMappings;
 
@@ -1436,12 +1436,28 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public Mapping[] getCustomTagMappings() {
+		if (customTagMappings == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCustomTagMappings")) {
+				if (customTagMappings == null) {
+					close(this.uncheckedCustomTagMappings);
+					this.customTagMappings = initMappings(this.customTagMappings = ConfigWebFactory.loadCustomTagsMappings(this, root, getLog()));
+				}
+			}
+		}
 		return customTagMappings;
 	}
 
-	protected void setCustomTagMappings(Mapping[] customTagMappings) {
-		close(this.uncheckedCustomTagMappings);
-		this.customTagMappings = initMappings(this.uncheckedCustomTagMappings = customTagMappings);
+	public ConfigImpl resetCustomTagMappings() {
+		if (customTagMappings != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCustomTagMappings")) {
+				if (customTagMappings != null) {
+					close(this.uncheckedCustomTagMappings);
+					this.customTagMappings = null;
+					this.uncheckedCustomTagMappings = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override

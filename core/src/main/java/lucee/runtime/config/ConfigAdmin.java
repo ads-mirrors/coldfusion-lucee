@@ -156,6 +156,8 @@ import lucee.transformer.library.ClassDefinitionImpl;
 import lucee.transformer.library.function.FunctionLibException;
 import lucee.transformer.library.tag.TagLibException;
 
+// MUST 7 check all admin._store(); in this file, should be followed by a reset
+
 public final class ConfigAdmin {
 
 	private static final BundleInfo[] EMPTY = new BundleInfo[0];
@@ -582,6 +584,7 @@ public final class ConfigAdmin {
 		ConfigAdmin admin = new ConfigAdmin(config, null, true);
 		admin._updateComponentMapping(virtual, physical, archive, primary, inspect, inspectTemplateIntervalSlow, inspectTemplateIntervalFast);
 		admin._store();
+		Admin.getConfigServerImpl(config).resetComponentMappings();
 		if (reload) admin._reload();
 	}
 
@@ -590,6 +593,7 @@ public final class ConfigAdmin {
 		ConfigAdmin admin = new ConfigAdmin(config, null, true);
 		admin._updateCustomTag(virtual, physical, archive, primary, inspect, inspectTemplateIntervalSlow, inspectTemplateIntervalFast);
 		admin._store();
+		Admin.getConfigServerImpl(config).resetCustomTagMappings();
 		if (reload) admin._reload();
 	}
 

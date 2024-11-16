@@ -345,9 +345,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			_loadCache(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded cache");
 
-			_loadCustomTagsMappings(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded custom tag mappings");
-			// loadFilesystem(cs, config, doc, doNew); // load tlds
 		}
 
 		if (!essentialOnly) {
@@ -2051,64 +2048,58 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param configServer
 	 * @param config
 	 * @param doc
+	 * @return
 	 * @throws IOException
 	 */
-	private static void _loadCustomTagsMappings(ConfigServerImpl config, Struct root, Log log) {
+	public static Mapping[] loadCustomTagsMappings(ConfigImpl config, Struct root, Log log) {
+		Mapping[] mappings = null;
 		try {
-			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_CUSTOM_TAG);
-
 			// Struct customTag = ConfigWebUtil.getAsStruct("customTag", root);
 			Array ctMappings = ConfigWebUtil.getAsArray("customTagMappings", root);
 
 			// Web Mapping
-			boolean hasSet = false;
-			Mapping[] mappings = null;
-			if (hasAccess) {
-				if (ctMappings.size() > 0) {
-					Iterator<Object> it = ctMappings.valueIterator();
-					List<Mapping> list = new ArrayList<>();
-					Struct ctMapping;
-					while (it.hasNext()) {
-						try {
-							ctMapping = Caster.toStruct(it.next(), null);
-							if (ctMapping == null) continue;
+			if (ctMappings.size() > 0) {
+				Iterator<Object> it = ctMappings.valueIterator();
+				List<Mapping> list = new ArrayList<>();
+				Struct ctMapping;
+				while (it.hasNext()) {
+					try {
+						ctMapping = Caster.toStruct(it.next(), null);
+						if (ctMapping == null) continue;
 
-							String virtual = createVirtual(ctMapping);
-							String physical = getAttr(ctMapping, "physical");
-							String archive = getAttr(ctMapping, "archive");
-							boolean readonly = toBoolean(getAttr(ctMapping, "readonly"), false);
-							boolean hidden = toBoolean(getAttr(ctMapping, "hidden"), false);
-							short inspTemp = inspectTemplate(ctMapping);
-							int insTempSlow = Caster.toIntValue(getAttr(ctMapping, "inspectTemplateIntervalSlow"), -1);
-							int insTempFast = Caster.toIntValue(getAttr(ctMapping, "inspectTemplateIntervalFast"), -1);
+						String virtual = createVirtual(ctMapping);
+						String physical = getAttr(ctMapping, "physical");
+						String archive = getAttr(ctMapping, "archive");
+						boolean readonly = toBoolean(getAttr(ctMapping, "readonly"), false);
+						boolean hidden = toBoolean(getAttr(ctMapping, "hidden"), false);
+						short inspTemp = inspectTemplate(ctMapping);
+						int insTempSlow = Caster.toIntValue(getAttr(ctMapping, "inspectTemplateIntervalSlow"), -1);
+						int insTempFast = Caster.toIntValue(getAttr(ctMapping, "inspectTemplateIntervalFast"), -1);
 
-							String primary = getAttr(ctMapping, "primary");
+						String primary = getAttr(ctMapping, "primary");
 
-							boolean physicalFirst = StringUtil.isEmpty(archive, true) || !"archive".equalsIgnoreCase(primary);
-							hasSet = true;
-							list.add(new MappingImpl(config, virtual, physical, archive, inspTemp, insTempSlow, insTempFast, physicalFirst, hidden, readonly, true, false, true,
-									null, -1, -1));
-						}
-						catch (Throwable t) {
-							ExceptionUtil.rethrowIfNecessary(t);
-							log(config, log, t);
-						}
+						boolean physicalFirst = StringUtil.isEmpty(archive, true) || !"archive".equalsIgnoreCase(primary);
+						list.add(new MappingImpl(config, virtual, physical, archive, inspTemp, insTempSlow, insTempFast, physicalFirst, hidden, readonly, true, false, true, null,
+								-1, -1));
 					}
-					mappings = list.toArray(new Mapping[list.size()]);
-					config.setCustomTagMappings(mappings);
+					catch (Throwable t) {
+						ExceptionUtil.rethrowIfNecessary(t);
+						log(config, log, t);
+					}
 				}
-				else {
-					// we make sure we always have that mapping
-					config.setCustomTagMappings(new Mapping[] { new MappingImpl(config, "/default-customtags", "{lucee-config}/customtags/", null, ConfigPro.INSPECT_UNDEFINED,
-							ConfigPro.INSPECT_INTERVAL_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED, true, true, true, true, false, true, null, -1, -1) });
-				}
+				mappings = list.toArray(new Mapping[list.size()]);
 			}
+
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
-
+		if (mappings == null) {
+			mappings = new Mapping[] { new MappingImpl(config, "/default-customtags", "{lucee-config}/customtags/", null, ConfigPro.INSPECT_UNDEFINED,
+					ConfigPro.INSPECT_INTERVAL_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED, true, true, true, true, false, true, null, -1, -1) };
+		}
+		return mappings;
 	}
 
 	private static Object toKey(Mapping m) {

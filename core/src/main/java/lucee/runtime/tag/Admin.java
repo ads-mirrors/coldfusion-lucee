@@ -1997,6 +1997,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 				getString("admin", action, "primary"), ConfigWebUtil.inspectTemplate(getString("inspect", ""), ConfigPro.INSPECT_UNDEFINED),
 				getInt("inspectTemplateIntervalSlow", ConfigPro.INSPECT_INTERVAL_UNDEFINED), getInt("inspectTemplateIntervalFast", ConfigPro.INSPECT_INTERVAL_UNDEFINED));
 		store();
+		getConfigServerImpl(config).resetCustomTagMappings();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -2007,6 +2008,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doRemoveCustomTag() throws PageException {
 		admin.removeCustomTag(getString("admin", action, "virtual"));
 		store();
+		getConfigServerImpl(config).resetCustomTagMappings();
 		adminSync.broadcast(attributes, config);
 	}
 
