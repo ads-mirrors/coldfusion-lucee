@@ -158,6 +158,7 @@ import lucee.runtime.type.scope.Undefined;
 import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
+import lucee.runtime.type.util.UDFUtil;
 import lucee.runtime.video.VideoExecuterNotSupported;
 import lucee.transformer.library.function.FunctionLib;
 import lucee.transformer.library.function.FunctionLibException;
@@ -206,7 +207,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private String cacheDefaultConnectionNameFile = null;
 	private String cacheDefaultConnectionNameWebservice = null;
 
-	private TagLib[] cfmlTlds = new TagLib[0];
+	private TagLib[] cfmlTlds;
 
 	private FunctionLib cfmlFlds;
 
@@ -254,7 +255,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private int mailTimeout = -1;
 
-	private int returnFormat = UDF.RETURN_FORMAT_WDDX;
+	private Integer returnFormat;
 
 	private TimeZone timeZone;
 
@@ -278,22 +279,22 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private Mapping[] mappings = new Mapping[0];
 	private Mapping[] uncheckedCustomTagMappings = null;
 	private Mapping[] customTagMappings = new Mapping[0];
-	private Mapping[] uncheckedComponentMappings = null;
-	private Mapping[] componentMappings = new Mapping[0];
+	private Mapping[] uncheckedComponentMappings;
+	private Mapping[] componentMappings;
 
 	private SchedulerImpl scheduler;
 
 	private CFXTagPool cfxTagPool;
 
 	private PageSource baseComponentPageSource;
-	private String baseComponentTemplate;
+	private final String baseComponentTemplate = "Component.cfc";
 	private Boolean restList;
 
 	private Short clientType;
 
 	private String componentDumpTemplate;
-	private int componentDataMemberDefaultAccess = Component.ACCESS_PUBLIC;
-	private boolean triggerComponentDataMember = false;
+	private Integer componentDataMemberDefaultAccess;
+	private Boolean triggerComponentDataMember;
 
 	private Short sessionType;
 
@@ -325,7 +326,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private Resource cacheDir;
 	private Long cacheDirSize;
 
-	private boolean useComponentShadow = true;
+	private Boolean useComponentShadow;
 
 	private PrintWriter out;
 	private PrintWriter err;
@@ -333,7 +334,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private Map<String, DatasourceConnPool> pools = new HashMap<>();
 
 	private Boolean doCustomTagDeepSearch = null;
-	private boolean doComponentTagDeepSearch = false;
+	private Boolean doComponentTagDeepSearch;
 
 	private Double version = null;
 
@@ -387,10 +388,10 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private ClassDefinition<? extends ORMEngine> cdORMEngine;
 	private ORMConfiguration ormConfig;
 
-	private ImportDefintion componentDefaultImport = new ImportDefintionImpl(Constants.DEFAULT_PACKAGE, "*");
-	private boolean componentLocalSearch = true;
+	private ImportDefintion componentDefaultImport;
+	private Boolean componentLocalSearch;
 	private boolean componentRootSearch = true;
-	private boolean useComponentPathCache = true;
+	private Boolean useComponentPathCache;
 	private Boolean useCTPathCache;
 	private lucee.runtime.rest.Mapping[] restMappings;
 
@@ -518,7 +519,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public void reset() {
-		componentDumpTemplate = "";
 		// resources.reset();
 		ormengines.clear();
 		clearFunctionCache();
@@ -627,6 +627,15 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	@Override
 	public TagLib[] getTLDs() {
 		return cfmlTlds;
+	}
+
+	@Override
+	public TagLib getCoreTagLib() {
+		TagLib[] tlds = getTLDs();
+		for (int i = 0; i < tlds.length; i++) {
+			if (tlds[i].isCore()) return tlds[i];
+		}
+		throw new RuntimeException("no core taglib found"); // this should never happen
 	}
 
 	protected void setTLDs(TagLib[] tlds) {
@@ -1437,12 +1446,28 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public Mapping[] getComponentMappings() {
+		if (componentMappings == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getComponentMappings")) {
+				if (componentMappings == null) {
+					close(this.uncheckedComponentMappings);
+					this.componentMappings = initMappings(this.uncheckedComponentMappings = ConfigWebFactory.loadComponentMappings(this, root, getLog()));
+				}
+			}
+		}
 		return componentMappings;
 	}
 
-	protected void setComponentMappings(Mapping[] componentMappings) {
-		close(this.uncheckedComponentMappings);
-		this.componentMappings = initMappings(this.uncheckedComponentMappings = componentMappings);
+	public ConfigImpl resetComponentMappings() {
+		if (componentMappings != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getComponentMappings")) {
+				if (componentMappings != null) {
+					close(this.uncheckedComponentMappings);
+					this.componentMappings = null;
+					this.uncheckedComponentMappings = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	public void checkMappings() {
@@ -1649,15 +1674,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		while (it.hasNext()) {
 			tlds[index++] = it.next();
 		}
-	}
-
-	@Override
-	public TagLib getCoreTagLib() {
-		TagLib[] tlds = cfmlTlds;
-		for (int i = 0; i < tlds.length; i++) {
-			if (tlds[i].isCore()) return tlds[i];
-		}
-		throw new RuntimeException("no core taglib found"); // this should never happen
 	}
 
 	protected void setTagDirectory(List<Path> listTagDirectory) {
@@ -2107,17 +2123,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return this;
 	}
 
-	@Override
-	@Deprecated
-	public String getBaseComponentTemplate(int dialect) { // FUTURE remove from interface
-		return baseComponentTemplate;
-	}
-
-	@Override
-	public String getBaseComponentTemplate() {
-		return baseComponentTemplate;
-	}
-
 	/**
 	 * @return pagesource of the base component
 	 */
@@ -2219,12 +2224,15 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return base;
 	}
 
-	/**
-	 * @param template The baseComponent template to set.
-	 */
-	protected void setBaseComponentTemplate(String template) {
-		this.baseComponentPageSource = null;
-		this.baseComponentTemplate = template;
+	@Override
+	@Deprecated
+	public String getBaseComponentTemplate(int dialect) { // FUTURE remove from interface
+		return baseComponentTemplate;
+	}
+
+	@Override
+	public String getBaseComponentTemplate() {
+		return baseComponentTemplate;
 	}
 
 	@Override
@@ -2349,15 +2357,37 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public int getComponentDataMemberDefaultAccess() {
+		if (componentDataMemberDefaultAccess == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getComponentDataMemberDefaultAccess")) {
+				if (componentDataMemberDefaultAccess == null) {
+
+					String strDmda = ConfigWebFactory.getAttr(root, "componentDataMemberAccess");
+					if (!StringUtil.isEmpty(strDmda, true)) {
+						strDmda = strDmda.toLowerCase().trim();
+						if (strDmda.equals("remote")) componentDataMemberDefaultAccess = Component.ACCESS_REMOTE;
+						else if (strDmda.equals("public")) componentDataMemberDefaultAccess = Component.ACCESS_PUBLIC;
+						else if (strDmda.equals("package")) componentDataMemberDefaultAccess = Component.ACCESS_PACKAGE;
+						else if (strDmda.equals("private")) componentDataMemberDefaultAccess = Component.ACCESS_PRIVATE;
+						else componentDataMemberDefaultAccess = Component.ACCESS_PUBLIC;
+					}
+
+				}
+			}
+		}
 		return componentDataMemberDefaultAccess;
 	}
 
-	/**
-	 * @param componentDataMemberDefaultAccess The componentDataMemberDefaultAccess to set.
-	 */
-	protected void setComponentDataMemberDefaultAccess(int componentDataMemberDefaultAccess) {
-		this.componentDataMemberDefaultAccess = componentDataMemberDefaultAccess;
+	public ConfigImpl resetComponentDataMemberDefaultAccess() {
+		if (componentDataMemberDefaultAccess != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getComponentDataMemberDefaultAccess")) {
+				if (componentDataMemberDefaultAccess != null) {
+					componentDataMemberDefaultAccess = null;
+				}
+			}
+		}
+		return this;
 	}
+	// = Component.ACCESS_PUBLIC
 
 	@Override
 	@Deprecated
@@ -2367,14 +2397,30 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public String getComponentDumpTemplate() {
+		if (componentDumpTemplate == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getComponentDumpTemplate")) {
+				if (componentDumpTemplate == null) {
+					String strDumpRemplate = ConfigWebFactory.getAttr(root, "componentDumpTemplate");
+					if (StringUtil.isEmpty(strDumpRemplate, true)) {
+						componentDumpTemplate = "/lucee/component-dump.cfm";
+					}
+					else componentDumpTemplate = strDumpRemplate.trim();
+
+				}
+			}
+		}
 		return componentDumpTemplate;
 	}
 
-	/**
-	 * @param template The componentDump template to set.
-	 */
-	protected void setComponentDumpTemplate(String template) {
-		this.componentDumpTemplate = template;
+	public ConfigImpl resetComponentDumpTemplate() {
+		if (componentDumpTemplate != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getComponentDumpTemplate")) {
+				if (componentDumpTemplate != null) {
+					componentDumpTemplate = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	public String createSecurityToken() {
@@ -2915,14 +2961,25 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 */
 	@Override
 	public boolean getTriggerComponentDataMember() {
+		if (triggerComponentDataMember == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getTriggerComponentDataMember")) {
+				if (triggerComponentDataMember == null) {
+					triggerComponentDataMember = Caster.toBoolean(ConfigWebFactory.getAttr(root, "componentImplicitNotation"), Boolean.FALSE);
+				}
+			}
+		}
 		return triggerComponentDataMember;
 	}
 
-	/**
-	 * @param triggerComponentDataMember the triggerComponentDataMember to set
-	 */
-	protected void setTriggerComponentDataMember(boolean triggerComponentDataMember) {
-		this.triggerComponentDataMember = triggerComponentDataMember;
+	public ConfigImpl resetTriggerComponentDataMember() {
+		if (triggerComponentDataMember != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getTriggerComponentDataMember")) {
+				if (triggerComponentDataMember != null) {
+					triggerComponentDataMember = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -3150,12 +3207,48 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public boolean useComponentShadow() {
+		if (useComponentShadow == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "useComponentShadow")) {
+				if (useComponentShadow == null) {
+					useComponentShadow = Caster.toBoolean(ConfigWebFactory.getAttr(root, "componentUseVariablesScope"), Boolean.TRUE);
+				}
+			}
+		}
 		return useComponentShadow;
+	}
+
+	public ConfigImpl resetComponentShadow() {
+		if (useComponentShadow != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "useComponentShadow")) {
+				if (useComponentShadow != null) {
+					useComponentShadow = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
 	public boolean useComponentPathCache() {
+		if (useComponentPathCache == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "useComponentPathCache")) {
+				if (useComponentPathCache == null) {
+					useComponentPathCache = Caster.toBoolean(ConfigWebFactory.getAttr(root, "componentUseCachePath"), Boolean.TRUE);
+				}
+			}
+		}
 		return useComponentPathCache;
+	}
+
+	public ConfigImpl resetComponentPathCache() {
+		if (useComponentPathCache != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "useComponentPathCache")) {
+				if (useComponentPathCache != null) {
+					useComponentPathCache = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -3197,17 +3290,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	public void flushCTPathCache() {
 		if (ctPatchCache != null) ctPatchCache.clear();
-	}
-
-	protected void setUseComponentPathCache(boolean useComponentPathCache) {
-		this.useComponentPathCache = useComponentPathCache;
-	}
-
-	/**
-	 * @param useComponentShadow the useComponentShadow to set
-	 */
-	protected void setUseComponentShadow(boolean useComponentShadow) {
-		this.useComponentShadow = useComponentShadow;
 	}
 
 	@Override
@@ -3417,11 +3499,29 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public boolean doComponentDeepSearch() {
+		if (doComponentTagDeepSearch == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "doComponentDeepSearch")) {
+				if (doComponentTagDeepSearch == null) {
+					String strDeepSearch = ConfigWebFactory.getAttr(root, "componentDeepSearch");
+					if (!StringUtil.isEmpty(strDeepSearch)) {
+						doComponentTagDeepSearch = Caster.toBoolean(strDeepSearch.trim(), Boolean.FALSE);
+					}
+					else doComponentTagDeepSearch = Boolean.FALSE;
+				}
+			}
+		}
 		return doComponentTagDeepSearch;
 	}
 
-	protected void setDoComponentDeepSearch(boolean doComponentTagDeepSearch) {
-		this.doComponentTagDeepSearch = doComponentTagDeepSearch;
+	public ConfigImpl resetComponentDeepSearch() {
+		if (doComponentTagDeepSearch != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "doComponentDeepSearch")) {
+				if (doComponentTagDeepSearch != null) {
+					doCustomTagDeepSearch = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -4440,15 +4540,33 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public ImportDefintion getComponentDefaultImport() {
+		if (componentDefaultImport == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getComponentDefaultImport")) {
+				if (componentDefaultImport == null) {
+					String strCDI = ConfigWebFactory.getAttr(root, "componentAutoImport");
+					if (!StringUtil.isEmpty(strCDI, true)) {
+						this.componentDefaultImport = ImportDefintionImpl.getInstance(strCDI.trim(), null);
+					}
+					if (this.componentDefaultImport == null) this.componentDefaultImport = new ImportDefintionImpl(Constants.DEFAULT_PACKAGE, "*");
+				}
+			}
+		}
 		return componentDefaultImport;
 	}
 
-	protected void setComponentDefaultImport(String str) {
-		if (StringUtil.isEmpty(str)) return;
-		if ("org.railo.cfml.*".equalsIgnoreCase(str)) str = "org.lucee.cfml.*";
+	public ConfigImpl resetComponentDefaultImport() {
+		if (componentDefaultImport != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getComponentDefaultImport")) {
+				if (componentDefaultImport != null) {
+					this.componentDefaultImport = null;
+				}
+			}
+		}
+		return this;
+	}
 
-		ImportDefintion cdi = ImportDefintionImpl.getInstance(str, null);
-		if (cdi != null) this.componentDefaultImport = cdi;
+	protected void setComponentDefaultImport(String str) {
+
 	}
 
 	/**
@@ -4456,15 +4574,27 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 */
 	@Override
 	public boolean getComponentLocalSearch() {
+		if (componentLocalSearch == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getComponentLocalSearch")) {
+				if (componentLocalSearch == null) {
+					componentLocalSearch = Caster.toBoolean(ConfigWebFactory.getAttr(root, "componentLocalSearch"), Boolean.TRUE);
+				}
+			}
+		}
 		return componentLocalSearch;
 	}
 
-	/**
-	 * @param componentLocalSearch the componentLocalSearch to set
-	 */
-	protected void setComponentLocalSearch(boolean componentLocalSearch) {
-		this.componentLocalSearch = componentLocalSearch;
+	public ConfigImpl resetComponentLocalSearch() {
+		if (componentLocalSearch != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getComponentLocalSearch")) {
+				if (componentLocalSearch != null) {
+					componentLocalSearch = null;
+				}
+			}
+		}
+		return this;
 	}
+	// = true
 
 	/**
 	 * @return the componentLocalSearch
@@ -5659,11 +5789,27 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public int getReturnFormat() {
+		if (returnFormat == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getReturnFormat")) {
+				if (returnFormat == null) {
+					String strRF = ConfigWebFactory.getAttr(root, "returnFormat");
+					if (!StringUtil.isEmpty(strRF, true)) returnFormat = UDFUtil.toReturnFormat(strRF, UDF.RETURN_FORMAT_WDDX);
+					else returnFormat = UDF.RETURN_FORMAT_WDDX;
+				}
+			}
+		}
 		return returnFormat;
 	}
 
-	protected void setReturnFormat(int returnFormat) {
-		this.returnFormat = returnFormat;
+	public ConfigImpl resetReturnFormat() {
+		if (returnFormat != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getReturnFormat")) {
+				if (returnFormat != null) {
+					returnFormat = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override

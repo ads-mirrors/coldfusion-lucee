@@ -1974,6 +1974,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 				ConfigWebUtil.inspectTemplate(getString("inspect", ""), ConfigPro.INSPECT_UNDEFINED), getInt("inspectTemplateIntervalSlow", ConfigPro.INSPECT_INTERVAL_UNDEFINED),
 				getInt("inspectTemplateIntervalFast", ConfigPro.INSPECT_INTERVAL_UNDEFINED));
 		store();
+		getConfigServerImpl(config).resetComponentMappings();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -1984,6 +1985,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doRemoveComponentMapping() throws PageException {
 		admin.removeComponentMapping(getString("admin", action, "virtual"));
 		store();
+		getConfigServerImpl(config).resetComponentMappings();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -4566,6 +4568,8 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		admin.updateComponentPathCache(getBoolObject("admin", action, "componentPathCache"));
 		admin.updateReturnFormat(getString("admin", action, "returnFormat"));
 		store();
+		getConfigServerImpl(config).resetReturnFormat().resetComponentDefaultImport().resetComponentDeepSearch().resetComponentDumpTemplate()
+				.resetComponentDataMemberDefaultAccess().resetTriggerComponentDataMember().resetComponentLocalSearch().resetComponentPathCache().resetComponentShadow(); // MUST
 		adminSync.broadcast(attributes, config);
 	}
 

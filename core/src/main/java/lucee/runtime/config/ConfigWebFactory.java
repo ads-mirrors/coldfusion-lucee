@@ -80,7 +80,6 @@ import lucee.commons.net.URLDecoder;
 import lucee.loader.engine.CFMLEngine;
 import lucee.loader.engine.CFMLEngineFactory;
 import lucee.runtime.CFMLFactoryImpl;
-import lucee.runtime.Component;
 import lucee.runtime.Mapping;
 import lucee.runtime.MappingImpl;
 import lucee.runtime.PageContext;
@@ -172,11 +171,9 @@ import lucee.runtime.type.Array;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
-import lucee.runtime.type.UDF;
 import lucee.runtime.type.util.CollectionUtil;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
-import lucee.runtime.type.util.UDFUtil;
 import lucee.transformer.dynamic.meta.Constructor;
 import lucee.transformer.dynamic.meta.Method;
 import lucee.transformer.library.ClassDefinitionImpl;
@@ -359,9 +356,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 			_loadScheduler(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded scheduled tasks");
-
-			_loadComponent(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded component");
 
 			_loadSetting(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded setting");
@@ -2150,39 +2144,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 				}
 			}
 
-			// set tag default values
-			Array defaults = ConfigWebUtil.getAsArray("tagDefaults", root);
-			if (defaults.size() > 0) {
-				Struct def;
-				String tagName, attrName, attrValue;
-				Struct tags = new StructImpl(), tag;
-				Iterator<?> it = defaults.getIterator();
-				Map<Key, Map<Key, Object>> trg = new HashMap<Key, Map<Key, Object>>();
-				while (it.hasNext()) {
-					try {
-						def = Caster.toStruct(it.next(), null);
-						if (def == null) continue;
-
-						tagName = getAttr(def, "tag");
-						attrName = getAttr(def, "attributeName");
-						attrValue = getAttr(def, "attributeValue");
-						if (StringUtil.isEmpty(tagName) || StringUtil.isEmpty(attrName) || StringUtil.isEmpty(attrValue)) continue;
-
-						tag = (Struct) tags.get(tagName, null);
-						if (tag == null) {
-							tag = new StructImpl();
-							tags.setEL(tagName, tag);
-						}
-					}
-					catch (Throwable t) {
-						ExceptionUtil.rethrowIfNecessary(t);
-						log(config, log, t);
-					}
-				}
-
-				// initTagDefaultAttributeValues
-
-			}
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
@@ -3638,161 +3599,60 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param configServer
 	 * @param config
 	 * @param doc
+	 * @return
 	 * @throws IOException
 	 */
-	private static void _loadComponent(ConfigServerImpl config, Struct root, Log log) {
+	public static Mapping[] loadComponentMappings(ConfigImpl config, Struct root, Log log) {
+		Mapping[] mappings = null;
 		try {
-			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
 			boolean hasSet = false;
-
-			int mode = config.getMode();
-			if (hasAccess) {
-
-				// component default return format
-				String strRF = getAttr(root, "returnFormat");
-				if (!StringUtil.isEmpty(strRF, true)) config.setReturnFormat(UDFUtil.toReturnFormat(strRF, UDF.RETURN_FORMAT_WDDX));
-
-				// component-default-import
-				String strCDI = getAttr(root, "componentAutoImport");
-				if (!StringUtil.isEmpty(strCDI, true)) config.setComponentDefaultImport(strCDI);
-
-				// Base CFML
-				config.setBaseComponentTemplate("Component.cfc");
-
-				// deep search
-				if (config.getMode() == ConfigPro.MODE_STRICT) {
-					config.setDoComponentDeepSearch(false);
-				}
-				else {
-					String strDeepSearch = getAttr(root, "componentDeepSearch");
-					if (!StringUtil.isEmpty(strDeepSearch)) {
-						config.setDoComponentDeepSearch(Caster.toBooleanValue(strDeepSearch.trim(), false));
-					}
-				}
-
-				// Dump-Template
-				String strDumpRemplate = getAttr(root, "componentDumpTemplate");
-				if (StringUtil.isEmpty(strDumpRemplate, true)) {
-					strDumpRemplate = "/lucee/component-dump.cfm";
-				}
-				config.setComponentDumpTemplate(strDumpRemplate.trim());
-
-				// data-member-default-access
-				if (mode == ConfigPro.MODE_STRICT) {
-					config.setComponentDataMemberDefaultAccess(Component.ACCESS_PRIVATE);
-				}
-				else {
-					String strDmda = getAttr(root, "componentDataMemberAccess");
-					if (!StringUtil.isEmpty(strDmda, true)) {
-						strDmda = strDmda.toLowerCase().trim();
-						if (strDmda.equals("remote")) config.setComponentDataMemberDefaultAccess(Component.ACCESS_REMOTE);
-						else if (strDmda.equals("public")) config.setComponentDataMemberDefaultAccess(Component.ACCESS_PUBLIC);
-						else if (strDmda.equals("package")) config.setComponentDataMemberDefaultAccess(Component.ACCESS_PACKAGE);
-						else if (strDmda.equals("private")) config.setComponentDataMemberDefaultAccess(Component.ACCESS_PRIVATE);
-					}
-				}
-
-				// trigger-properties
-				if (mode == ConfigPro.MODE_STRICT) {
-					config.setTriggerComponentDataMember(true);
-				}
-				else {
-					Boolean tp = Caster.toBoolean(getAttr(root, "componentImplicitNotation"), null);
-					if (tp != null) config.setTriggerComponentDataMember(tp.booleanValue());
-				}
-
-				// local search
-				if (mode == ConfigPro.MODE_STRICT) {
-					config.setComponentLocalSearch(false);
-				}
-				else {
-					Boolean ls = Caster.toBoolean(getAttr(root, "componentLocalSearch"), null);
-					if (ls != null) config.setComponentLocalSearch(ls.booleanValue());
-				}
-
-				// use cache path
-				Boolean ucp = Caster.toBoolean(getAttr(root, "componentUseCachePath"), null);
-				if (ucp != null) config.setUseComponentPathCache(ucp.booleanValue());
-
-				// use component shadow
-				if (mode == ConfigPro.MODE_STRICT) {
-					config.setUseComponentShadow(false);
-				}
-				else {
-					Boolean ucs = Caster.toBoolean(getAttr(root, "componentUseVariablesScope"), null);
-					if (ucs != null) config.setUseComponentShadow(ucs.booleanValue());
-				}
-			}
-
-			if (mode == ConfigPro.MODE_STRICT) {
-				config.setDoComponentDeepSearch(false);
-				config.setComponentDataMemberDefaultAccess(Component.ACCESS_PRIVATE);
-				config.setTriggerComponentDataMember(true);
-				config.setComponentLocalSearch(false);
-				config.setUseComponentShadow(false);
-
-			}
 
 			// Web Mapping
 			Array compMappings = ConfigWebUtil.getAsArray("componentMappings", root);
 			hasSet = false;
-			Mapping[] mappings = null;
-			if (hasAccess) {
-				if (compMappings.size() > 0) {
-					Iterator<Object> it = compMappings.valueIterator();
-					List<Mapping> list = new ArrayList<>();
-					Struct cMapping;
-					while (it.hasNext()) {
-						try {
-							cMapping = Caster.toStruct(it.next(), null);
-							if (cMapping == null) continue;
 
-							String virtual = createVirtual(cMapping);
-							String physical = getAttr(cMapping, "physical");
-							String archive = getAttr(cMapping, "archive");
-							boolean readonly = toBoolean(getAttr(cMapping, "readonly"), false);
-							boolean hidden = toBoolean(getAttr(cMapping, "hidden"), false);
+			if (compMappings.size() > 0) {
+				Iterator<Object> it = compMappings.valueIterator();
+				List<Mapping> list = new ArrayList<>();
+				Struct cMapping;
+				while (it.hasNext()) {
+					try {
+						cMapping = Caster.toStruct(it.next(), null);
+						if (cMapping == null) continue;
 
-							String strListMode = getAttr(cMapping, "listenerMode");
-							if (StringUtil.isEmpty(strListMode)) strListMode = getAttr(cMapping, "listener-mode");
-							if (StringUtil.isEmpty(strListMode)) strListMode = getAttr(cMapping, "listenermode");
-							int listMode = ConfigWebUtil.toListenerMode(strListMode, -1);
+						String virtual = createVirtual(cMapping);
+						String physical = getAttr(cMapping, "physical");
+						String archive = getAttr(cMapping, "archive");
+						boolean readonly = toBoolean(getAttr(cMapping, "readonly"), false);
+						boolean hidden = toBoolean(getAttr(cMapping, "hidden"), false);
 
-							String strListType = getAttr(cMapping, "listenerType");
-							if (StringUtil.isEmpty(strListType)) strListMode = getAttr(cMapping, "listener-type");
-							if (StringUtil.isEmpty(strListType)) strListMode = getAttr(cMapping, "listenertype");
-							int listType = ConfigWebUtil.toListenerType(strListType, -1);
+						String strListMode = getAttr(cMapping, "listenerMode");
+						if (StringUtil.isEmpty(strListMode)) strListMode = getAttr(cMapping, "listener-mode");
+						if (StringUtil.isEmpty(strListMode)) strListMode = getAttr(cMapping, "listenermode");
+						int listMode = ConfigWebUtil.toListenerMode(strListMode, -1);
 
-							short inspTemp = inspectTemplate(cMapping);
-							int insTempSlow = Caster.toIntValue(getAttr(cMapping, "inspectTemplateIntervalSlow"), -1);
-							int insTempFast = Caster.toIntValue(getAttr(cMapping, "inspectTemplateIntervalFast"), -1);
+						String strListType = getAttr(cMapping, "listenerType");
+						if (StringUtil.isEmpty(strListType)) strListMode = getAttr(cMapping, "listener-type");
+						if (StringUtil.isEmpty(strListType)) strListMode = getAttr(cMapping, "listenertype");
+						int listType = ConfigWebUtil.toListenerType(strListType, -1);
 
-							String primary = getAttr(cMapping, "primary");
+						short inspTemp = inspectTemplate(cMapping);
+						int insTempSlow = Caster.toIntValue(getAttr(cMapping, "inspectTemplateIntervalSlow"), -1);
+						int insTempFast = Caster.toIntValue(getAttr(cMapping, "inspectTemplateIntervalFast"), -1);
 
-							boolean physicalFirst = archive == null || !"archive".equalsIgnoreCase(primary);
-							hasSet = true;
-							list.add(new MappingImpl(config, virtual, physical, archive, inspTemp, insTempSlow, insTempFast, physicalFirst, hidden, readonly, true, false, true,
-									null, listMode, listType));
-						}
-						catch (Throwable t) {
-							ExceptionUtil.rethrowIfNecessary(t);
-							log(config, log, t);
-						}
+						String primary = getAttr(cMapping, "primary");
+
+						boolean physicalFirst = archive == null || !"archive".equalsIgnoreCase(primary);
+						hasSet = true;
+						list.add(new MappingImpl(config, virtual, physical, archive, inspTemp, insTempSlow, insTempFast, physicalFirst, hidden, readonly, true, false, true, null,
+								listMode, listType));
 					}
-					mappings = list.toArray(new Mapping[list.size()]);
-					config.setComponentMappings(mappings);
+					catch (Throwable t) {
+						ExceptionUtil.rethrowIfNecessary(t);
+						log(config, log, t);
+					}
 				}
-				else {
-					// we make sure we always have that mapping
-					config.setComponentMappings(new Mapping[] { new MappingImpl(config, "/default-component", "{lucee-config}/components/", null, ConfigPro.INSPECT_UNDEFINED,
-							ConfigPro.INSPECT_INTERVAL_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED, true, true, true, true, false, true, null, -1, -1) });
-				}
-			}
-
-			if (!hasSet) {
-				MappingImpl m = new MappingImpl(config, "/default", "{lucee-config}/components/", null, ConfigPro.INSPECT_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED,
-						ConfigPro.INSPECT_INTERVAL_UNDEFINED, true, false, false, true, false, true, null, -1, -1);
-				config.setComponentMappings(new Mapping[] { m.cloneReadOnly(config) });
+				mappings = list.toArray(new Mapping[list.size()]);
 			}
 
 		}
@@ -3800,6 +3660,13 @@ public final class ConfigWebFactory extends ConfigFactory {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
+
+		if (mappings == null) {
+			mappings = new Mapping[] { new MappingImpl(config, "/default-component", "{lucee-config}/components/", null, ConfigPro.INSPECT_UNDEFINED,
+					ConfigPro.INSPECT_INTERVAL_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED, true, true, true, true, false, true, null, -1, -1) };
+		}
+		return mappings;
+
 	}
 
 	public static void loadProxy(ConfigServerImpl config, Struct root, Log log) {
