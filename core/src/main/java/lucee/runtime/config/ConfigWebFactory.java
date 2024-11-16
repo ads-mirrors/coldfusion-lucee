@@ -4689,7 +4689,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	private static void _loadScheduler(ConfigServer configServer, ConfigImpl config, Struct root, Log log) {
 		try {
 			if (config instanceof ConfigServer) {
-				short mode = ((ConfigServerImpl) config).getAdminMode();
+				short mode = config.getAdminMode();
 				// short mode = ConfigWebUtil.toAdminMode(getAttr(root, "mode"), ConfigImpl.ADMINMODE_SINGLE);
 				if (mode == ConfigImpl.ADMINMODE_MULTI) return;
 			}
@@ -4885,7 +4885,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 			// max records logged
 			String strMax = getAttr(root, "debuggingMaxRecordsLogged");
-			if (StringUtil.isEmpty(str)) str = getAttr(root, "debuggingShowMaxRecordsLogged");
+			if (StringUtil.isEmpty(strMax)) strMax = getAttr(root, "debuggingShowMaxRecordsLogged");
 			if (hasAccess && !StringUtil.isEmpty(strMax)) {
 				config.setDebugMaxRecordsLogged(Caster.toIntValue(strMax, 10));
 			}
