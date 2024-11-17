@@ -1027,6 +1027,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 						mapping.getInspectTemplateRaw(), mapping.getInspectTemplateAutoIntervalRaw(true), mapping.getInspectTemplateAutoIntervalRaw(false), mapping.isTopLevel(),
 						mapping.getListenerMode(), mapping.getListenerType(), mapping.isReadonly());
 				store();
+				Admin.getConfigServerImpl(config).resetMappings();
 			}
 
 		}
@@ -2069,6 +2070,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doRemoveMapping() throws PageException {
 		admin.removeMapping(getString("admin", action, "virtual"));
 		store();
+		Admin.getConfigServerImpl(config).resetMappings();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -2102,6 +2104,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 
 		);
 		store();
+		Admin.getConfigServerImpl(config).resetMappings();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -4397,6 +4400,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doUpdateExtensionProvider() throws PageException, MalformedURLException {
 		admin.updateExtensionProvider(getString("admin", "UpdateExtensionProvider", "url"));
 		store();
+		getConfigServerImpl(config).resetRHExtensionProviders();
 	}
 
 	private void doUpdateRHExtensionProvider() throws PageException {
@@ -4407,6 +4411,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 			throw Caster.toPageException(e);
 		}
 		store();
+		getConfigServerImpl(config).resetRHExtensionProviders();
 	}
 
 	private void doUpdateExtensionInfo() throws PageException {
@@ -4428,11 +4433,13 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doRemoveExtensionProvider() throws PageException {
 		admin.removeExtensionProvider(getString("admin", "RemoveExtensionProvider", "url"));
 		store();
+		getConfigServerImpl(config).resetRHExtensionProviders();
 	}
 
 	private void doRemoveRHExtensionProvider() throws PageException {
 		admin.removeRHExtensionProvider(getString("admin", "RemoveRHExtensionProvider", "url"));
 		store();
+		getConfigServerImpl(config).resetRHExtensionProviders();
 	}
 
 	/**

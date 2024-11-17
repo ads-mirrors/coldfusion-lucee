@@ -275,8 +275,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private boolean initPassword = true;
 	private String salt;
 
-	private Mapping[] uncheckedMappings = null;
-	private Mapping[] mappings = new Mapping[0];
+	private Mapping[] uncheckedMappings;
+	private Mapping[] mappings;
 	private Mapping[] uncheckedCustomTagMappings;
 	private Mapping[] customTagMappings;
 	private Mapping[] uncheckedComponentMappings;
@@ -356,7 +356,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private Boolean errorStatusCode;
 	private Integer localMode;
 
-	private RHExtensionProvider[] rhextensionProviders = Constants.RH_EXTENSION_PROVIDERS;
+	private RHExtensionProvider[] rhextensionProviders;
 
 	private List<ExtensionDefintion> extensionsDefs;
 	private RHExtension[] rhextensions = RHEXTENSIONS_EMPTY;
@@ -1426,12 +1426,28 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public Mapping[] getMappings() {
+		if (mappings == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getMappings")) {
+				if (mappings == null) {
+					close(this.uncheckedMappings);
+					this.mappings = initMappings(this.uncheckedMappings = ConfigWebFactory.loadMappings(this, root, getLog()));
+				}
+			}
+		}
 		return mappings;
 	}
 
-	protected void setMappings(Mapping[] mappings) {
-		close(this.uncheckedMappings);
-		this.mappings = initMappings(this.uncheckedMappings = ConfigWebUtil.sort(mappings));
+	public ConfigImpl resetMappings() {
+		if (mappings != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getMappings")) {
+				if (mappings != null) {
+					close(this.uncheckedMappings);
+					this.mappings = null;
+					this.uncheckedMappings = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -1440,7 +1456,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getCustomTagMappings")) {
 				if (customTagMappings == null) {
 					close(this.uncheckedCustomTagMappings);
-					this.customTagMappings = initMappings(this.customTagMappings = ConfigWebFactory.loadCustomTagsMappings(this, root, getLog()));
+					this.customTagMappings = initMappings(this.uncheckedCustomTagMappings = ConfigWebFactory.loadCustomTagsMappings(this, root, getLog()));
 				}
 			}
 		}
@@ -3796,14 +3812,30 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		throw new RuntimeException("no longer supported, use getRHExtensionProviders() instead.");
 	}
 
-	protected void setRHExtensionProviders(RHExtensionProvider[] extensionProviders) {
-		this.rhextensionProviders = extensionProviders;
-	}
-
 	@Override
 	public RHExtensionProvider[] getRHExtensionProviders() {
+		if (rhextensionProviders == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getRHExtensionProviders")) {
+				if (rhextensionProviders == null) {
+					rhextensionProviders = ConfigWebFactory.loadExtensionProviders(this, root, getLog());
+				}
+			}
+		}
 		return rhextensionProviders;
 	}
+
+	public ConfigImpl resetRHExtensionProviders() {
+		if (rhextensionProviders != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getRHExtensionProviders")) {
+				if (rhextensionProviders != null) {
+					rhextensionProviders = null;
+				}
+			}
+		}
+		return this;
+	}
+
+	// = Constants.RH_EXTENSION_PROVIDERS;
 
 	@Override
 	public Extension[] getExtensions() {

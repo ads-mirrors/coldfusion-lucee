@@ -576,6 +576,7 @@ public final class ConfigAdmin {
 		admin._updateMapping(virtual, physical, archive, primary, inspect, inspectTemplateIntervalSlow, inspectTemplateIntervalFast, toplevel, listenerMode, listenerType,
 				readonly);
 		admin._store();
+		Admin.getConfigServerImpl(config).resetMappings();
 		if (reload) admin._reload();
 	}
 

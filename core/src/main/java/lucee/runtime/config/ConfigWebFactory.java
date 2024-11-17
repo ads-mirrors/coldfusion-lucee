@@ -331,14 +331,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 
 		if (!essentialOnly) {
-			_loadMappings(config, root, log); // it is important this runs after
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded mappings");
-
-			_loadExtensionProviders(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded extensions");
-		}
-
-		if (!essentialOnly) {
 			_loadDataSources(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded datasources");
 
@@ -1130,11 +1122,12 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param configServer
 	 * @param config
 	 * @param doc
+	 * @return
 	 * @throws IOException
 	 */
-	private static void _loadMappings(ConfigServerImpl config, Struct root, Log log) throws IOException {
+	public static Mapping[] loadMappings(ConfigImpl config, Struct root, Log log) {
+		Map<String, Mapping> mappings = MapFactory.<String, Mapping>getConcurrentMap();
 		try {
-			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_MAPPING);
 			Struct _mappings = Caster.toStruct(root.get("mappings", null), null);
 			if (_mappings == null) _mappings = Caster.toStruct(root.get("CFMappings", null), null);
 			if (_mappings == null) _mappings = ConfigWebUtil.getAsStruct("mappings", root);
@@ -1144,124 +1137,118 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 			// alias CFMappings
 
-			Map<String, Mapping> mappings = MapFactory.<String, Mapping>getConcurrentMap();
 			Mapping tmp;
 
 			boolean finished = true;
+			boolean hasServerContext = false;
+			boolean hasWebContext = false;
+			if (_mappings != null) {
+				Iterator<Entry<Key, Object>> it = _mappings.entryIterator();
+				Entry<Key, Object> e;
+				Struct el;
+				while (it.hasNext()) {
+					try {
+						e = it.next();
+						el = Caster.toStruct(e.getValue(), null);
+						if (el == null) continue;
 
-			if (hasAccess) {
-				boolean hasServerContext = false;
-				boolean hasWebContext = false;
-				if (_mappings != null) {
-					Iterator<Entry<Key, Object>> it = _mappings.entryIterator();
-					Entry<Key, Object> e;
-					Struct el;
-					while (it.hasNext()) {
-						try {
-							e = it.next();
-							el = Caster.toStruct(e.getValue(), null);
-							if (el == null) continue;
+						String virtual = e.getKey().getString();
+						String physical = getAttr(el, "physical");
+						String archive = getAttr(el, "archive");
+						String strListType = getAttr(el, "listenerType");
+						if (StringUtil.isEmpty(strListType)) strListType = getAttr(el, "listener-type");
+						if (StringUtil.isEmpty(strListType)) strListType = getAttr(el, "listenertype");
 
-							String virtual = e.getKey().getString();
-							String physical = getAttr(el, "physical");
-							String archive = getAttr(el, "archive");
-							String strListType = getAttr(el, "listenerType");
-							if (StringUtil.isEmpty(strListType)) strListType = getAttr(el, "listener-type");
-							if (StringUtil.isEmpty(strListType)) strListType = getAttr(el, "listenertype");
+						String strListMode = getAttr(el, "listenerMode");
+						if (StringUtil.isEmpty(strListMode)) strListMode = getAttr(el, "listener-mode");
+						if (StringUtil.isEmpty(strListMode)) strListMode = getAttr(el, "listenermode");
 
-							String strListMode = getAttr(el, "listenerMode");
-							if (StringUtil.isEmpty(strListMode)) strListMode = getAttr(el, "listener-mode");
-							if (StringUtil.isEmpty(strListMode)) strListMode = getAttr(el, "listenermode");
+						boolean readonly = toBoolean(getAttr(el, "readonly"), false);
+						boolean hidden = toBoolean(getAttr(el, "hidden"), false);
+						boolean toplevel = toBoolean(getAttr(el, "toplevel"), true);
 
-							boolean readonly = toBoolean(getAttr(el, "readonly"), false);
-							boolean hidden = toBoolean(getAttr(el, "hidden"), false);
-							boolean toplevel = toBoolean(getAttr(el, "toplevel"), true);
-
-							{
-								if ("/lucee-server/".equalsIgnoreCase(virtual) || "/lucee-server-context/".equalsIgnoreCase(virtual)) {
-									hasServerContext = true;
-								}
-								else if ("/lucee/".equalsIgnoreCase(virtual)) {
-									hasWebContext = true;
-								}
+						{
+							if ("/lucee-server/".equalsIgnoreCase(virtual) || "/lucee-server-context/".equalsIgnoreCase(virtual)) {
+								hasServerContext = true;
 							}
-
-							// lucee
-							if ("/lucee/".equalsIgnoreCase(virtual)) {
-								if (StringUtil.isEmpty(strListType, true)) strListType = "modern";
-								if (StringUtil.isEmpty(strListMode, true)) strListMode = "curr2root";
-								toplevel = true;
-							}
-
-							int listenerMode = ConfigWebUtil.toListenerMode(strListMode, -1);
-							int listenerType = ConfigWebUtil.toListenerType(strListType, -1);
-							ApplicationListener listener = ConfigWebUtil.loadListener(listenerType, null);
-							if (listener != null || listenerMode != -1) {
-								// type
-								if (config.getMode() == ConfigPro.MODE_STRICT) listener = new ModernAppListener();
-								else if (listener == null) listener = ConfigWebUtil.loadListener(ConfigWebUtil.toListenerType(config.getApplicationListener().getType(), -1), null);
-								if (listener == null)// this should never be true
-									listener = new ModernAppListener();
-
-								// mode
-								if (listenerMode == -1) {
-									listenerMode = config.getApplicationListener().getMode();
-								}
-								listener.setMode(listenerMode);
-
-							}
-
-							// physical!=null &&
-							if ((physical != null || archive != null)) {
-
-								short insTemp = inspectTemplate(el);
-
-								int insTempSlow = Caster.toIntValue(getAttr(el, "inspectTemplateIntervalSlow"), ConfigPro.INSPECT_INTERVAL_UNDEFINED);
-								int insTempFast = Caster.toIntValue(getAttr(el, "inspectTemplateIntervalFast"), ConfigPro.INSPECT_INTERVAL_UNDEFINED);
-
-								if ("/lucee/".equalsIgnoreCase(virtual) || "/lucee".equalsIgnoreCase(virtual) || "/lucee-server/".equalsIgnoreCase(virtual)
-										|| "/lucee-server-context".equalsIgnoreCase(virtual))
-									insTemp = ConfigPro.INSPECT_AUTO;
-
-								String primary = getAttr(el, "primary");
-								boolean physicalFirst = primary == null || !"archive".equalsIgnoreCase(primary);
-
-								tmp = new MappingImpl(config, virtual, physical, archive, insTemp, insTempSlow, insTempFast, physicalFirst, hidden, readonly, toplevel, false,
-										false, listener, listenerMode, listenerType);
-								mappings.put(tmp.getVirtualLowerCase(), tmp);
-								if (virtual.equals("/")) {
-									finished = true;
-									// break;
-								}
+							else if ("/lucee/".equalsIgnoreCase(virtual)) {
+								hasWebContext = true;
 							}
 						}
-						catch (Throwable t) {
-							ExceptionUtil.rethrowIfNecessary(t);
-							log(config, log, t);
+
+						// lucee
+						if ("/lucee/".equalsIgnoreCase(virtual)) {
+							if (StringUtil.isEmpty(strListType, true)) strListType = "modern";
+							if (StringUtil.isEmpty(strListMode, true)) strListMode = "curr2root";
+							toplevel = true;
 						}
+
+						int listenerMode = ConfigWebUtil.toListenerMode(strListMode, -1);
+						int listenerType = ConfigWebUtil.toListenerType(strListType, -1);
+						ApplicationListener listener = ConfigWebUtil.loadListener(listenerType, null);
+						if (listener != null || listenerMode != -1) {
+							// type
+							if (listener == null) listener = ConfigWebUtil.loadListener(ConfigWebUtil.toListenerType(config.getApplicationListener().getType(), -1), null);
+							if (listener == null) listener = new ModernAppListener();
+
+							// mode
+							if (listenerMode == -1) {
+								listenerMode = config.getApplicationListener().getMode();
+							}
+							listener.setMode(listenerMode);
+
+						}
+
+						// physical!=null &&
+						if ((physical != null || archive != null)) {
+
+							short insTemp = inspectTemplate(el);
+
+							int insTempSlow = Caster.toIntValue(getAttr(el, "inspectTemplateIntervalSlow"), ConfigPro.INSPECT_INTERVAL_UNDEFINED);
+							int insTempFast = Caster.toIntValue(getAttr(el, "inspectTemplateIntervalFast"), ConfigPro.INSPECT_INTERVAL_UNDEFINED);
+
+							if ("/lucee/".equalsIgnoreCase(virtual) || "/lucee".equalsIgnoreCase(virtual) || "/lucee-server/".equalsIgnoreCase(virtual)
+									|| "/lucee-server-context".equalsIgnoreCase(virtual))
+								insTemp = ConfigPro.INSPECT_AUTO;
+
+							String primary = getAttr(el, "primary");
+							boolean physicalFirst = primary == null || !"archive".equalsIgnoreCase(primary);
+
+							tmp = new MappingImpl(config, virtual, physical, archive, insTemp, insTempSlow, insTempFast, physicalFirst, hidden, readonly, toplevel, false, false,
+									listener, listenerMode, listenerType);
+							mappings.put(tmp.getVirtualLowerCase(), tmp);
+							if (virtual.equals("/")) {
+								finished = true;
+								// break;
+							}
+						}
+					}
+					catch (Throwable t) {
+						ExceptionUtil.rethrowIfNecessary(t);
+						log(config, log, t);
 					}
 				}
+			}
 
-				// set default lucee-server-context
-				{
-					if (!hasServerContext) {
-						ApplicationListener listener = ConfigWebUtil.loadListener(ApplicationListener.TYPE_MODERN, null);
-						listener.setMode(ApplicationListener.MODE_CURRENT2ROOT);
+			// set default lucee-server-context
+			{
+				if (!hasServerContext) {
+					ApplicationListener listener = ConfigWebUtil.loadListener(ApplicationListener.TYPE_MODERN, null);
+					listener.setMode(ApplicationListener.MODE_CURRENT2ROOT);
 
-						tmp = new MappingImpl(config, "/lucee-server", "{lucee-server}/context/", null, ConfigPro.INSPECT_AUTO, ConfigPro.INSPECT_INTERVAL_UNDEFINED,
-								ConfigPro.INSPECT_INTERVAL_UNDEFINED, true, false, true, true, false, false, listener, ApplicationListener.MODE_CURRENT2ROOT,
-								ApplicationListener.TYPE_MODERN);
-						mappings.put(tmp.getVirtualLowerCase(), tmp);
-					}
-					if (!hasWebContext) {
-						ApplicationListener listener = ConfigWebUtil.loadListener(ApplicationListener.TYPE_MODERN, null);
-						listener.setMode(ApplicationListener.MODE_CURRENT2ROOT);
+					tmp = new MappingImpl(config, "/lucee-server", "{lucee-server}/context/", null, ConfigPro.INSPECT_AUTO, ConfigPro.INSPECT_INTERVAL_UNDEFINED,
+							ConfigPro.INSPECT_INTERVAL_UNDEFINED, true, false, true, true, false, false, listener, ApplicationListener.MODE_CURRENT2ROOT,
+							ApplicationListener.TYPE_MODERN);
+					mappings.put(tmp.getVirtualLowerCase(), tmp);
+				}
+				if (!hasWebContext) {
+					ApplicationListener listener = ConfigWebUtil.loadListener(ApplicationListener.TYPE_MODERN, null);
+					listener.setMode(ApplicationListener.MODE_CURRENT2ROOT);
 
-						tmp = new MappingImpl(config, "/lucee", "{lucee-config}/context/", "{lucee-config}/context/lucee-context.lar", ConfigPro.INSPECT_AUTO,
-								ConfigPro.INSPECT_INTERVAL_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED, true, false, true, true, false, false, listener,
-								ApplicationListener.MODE_CURRENT2ROOT, ApplicationListener.TYPE_MODERN);
-						mappings.put(tmp.getVirtualLowerCase(), tmp);
-					}
+					tmp = new MappingImpl(config, "/lucee", "{lucee-config}/context/", "{lucee-config}/context/lucee-context.lar", ConfigPro.INSPECT_AUTO,
+							ConfigPro.INSPECT_INTERVAL_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED, true, false, true, true, false, false, listener,
+							ApplicationListener.MODE_CURRENT2ROOT, ApplicationListener.TYPE_MODERN);
+					mappings.put(tmp.getVirtualLowerCase(), tmp);
 				}
 			}
 
@@ -1270,14 +1257,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 						true, true, false, false, null, -1, -1);
 				mappings.put("/", tmp);
 			}
-
-			Mapping[] arrMapping = new Mapping[mappings.size()];
-			int index = 0;
-			Iterator it = mappings.keySet().iterator();
-			while (it.hasNext()) {
-				arrMapping[index++] = mappings.get(it.next());
-			}
-			config.setMappings(arrMapping);
 			// config.setMappings((Mapping[]) mappings.toArray(new
 			// Mapping[mappings.size()]));
 		}
@@ -1285,6 +1264,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
+		return mappings.values().toArray(new Mapping[mappings.size()]);
 	}
 
 	private static short inspectTemplate(Struct data) {
@@ -3545,45 +3525,42 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadExtensionProviders(ConfigServerImpl config, Struct root, Log log) {
+	public static RHExtensionProvider[] loadExtensionProviders(ConfigImpl config, Struct root, Log log) {
+		Map<RHExtensionProvider, String> providers = new LinkedHashMap<RHExtensionProvider, String>();
 		try {
+			// providers
+			Array xmlProviders = ConfigWebUtil.getAsArray("extensionProviders", root);
+			String strProvider;
 
-			// RH Providers
-			{
-				// providers
-				Array xmlProviders = ConfigWebUtil.getAsArray("extensionProviders", root);
-				String strProvider;
-				Map<RHExtensionProvider, String> providers = new LinkedHashMap<RHExtensionProvider, String>();
+			for (int i = 0; i < Constants.RH_EXTENSION_PROVIDERS.length; i++) {
+				providers.put(Constants.RH_EXTENSION_PROVIDERS[i], "");
+			}
+			if (xmlProviders != null) {
+				Iterator<?> it = xmlProviders.valueIterator();
+				String url;
+				while (it.hasNext()) {
+					url = Caster.toString(it.next(), null);
+					if (StringUtil.isEmpty(url, true)) continue;
 
-				for (int i = 0; i < Constants.RH_EXTENSION_PROVIDERS.length; i++) {
-					providers.put(Constants.RH_EXTENSION_PROVIDERS[i], "");
-				}
-				if (xmlProviders != null) {
-					Iterator<?> it = xmlProviders.valueIterator();
-					String url;
-					while (it.hasNext()) {
-						url = Caster.toString(it.next(), null);
-						if (StringUtil.isEmpty(url, true)) continue;
-
-						try {
-							providers.put(new RHExtensionProvider(url.trim(), false), "");
-						}
-						catch (MalformedURLException e) {
-							LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), ConfigWebFactory.class.getName(), e);
-						}
-						catch (Throwable t) {
-							ExceptionUtil.rethrowIfNecessary(t);
-							log(config, log, t);
-						}
+					try {
+						providers.put(new RHExtensionProvider(url.trim(), false), "");
+					}
+					catch (MalformedURLException e) {
+						LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), ConfigWebFactory.class.getName(), e);
+					}
+					catch (Throwable t) {
+						ExceptionUtil.rethrowIfNecessary(t);
+						log(config, log, t);
 					}
 				}
-				config.setRHExtensionProviders(providers.keySet().toArray(new RHExtensionProvider[providers.size()]));
 			}
+
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
+		return providers.keySet().toArray(new RHExtensionProvider[providers.size()]);
 	}
 
 	/**
