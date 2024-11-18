@@ -22,7 +22,6 @@ import static lucee.runtime.db.DatasourceManagerImpl.QOQ_DATASOURCE_NAME;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -187,7 +186,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 	private static final String TEMPLATE_EXTENSION = "cfm";
 	private static final String COMPONENT_EXTENSION = "cfc";
 	private static final String COMPONENT_EXTENSION_LUCEE = "lucee";
-	private static final long GB1 = 1024 * 1024 * 1024;
 	public static final boolean LOG = true;
 	private static final int DEFAULT_MAX_CONNECTION = 100;
 	public static final String DEFAULT_LOCATION = Constants.DEFAULT_UPDATE_URL.toExternalForm();
@@ -277,23 +275,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			if (createSaltAndPW(root, config, essentialOnly)) reload = true;
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "fixed salt");
 
-			// delete to big felix.log (there is also code in the loader to do this, but if the loader is not
-			// updated ...)
-			if (!essentialOnly) {
-				try {
-					ConfigServerImpl _cs = config;
-					File rr = _cs.getEngine().getCFMLEngineFactory().getResourceRoot();
-					File log = new File(rr, "context/logs/felix.log");
-					if (log.isFile() && log.length() > GB1) {
-						if (log.delete()) ResourceUtil.touch(log);
-
-					}
-				}
-				catch (Throwable t) {
-					ExceptionUtil.rethrowIfNecessary(t);
-					log(config, null, t);
-				}
-			}
 			// reload when an old version of xml got updated
 			if (reload) {
 				root = reload(root, config, null);

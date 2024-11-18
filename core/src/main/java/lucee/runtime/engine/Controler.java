@@ -19,6 +19,7 @@
  **/
 package lucee.runtime.engine;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -234,6 +235,21 @@ public final class Controler extends ParentThreasRefThread {
 		if (do5Minute) {
 			try {
 				System.gc();
+			}
+			catch (Throwable t) {
+				ExceptionUtil.rethrowIfNecessary(t);
+				if (log != null) log.error("controler", t);
+			}
+		}
+
+		if (doHour) {
+			// check felix.log file size
+			try {
+				File rr = configServer.getEngine().getCFMLEngineFactory().getResourceRoot();
+				File felixLog = new File(rr, "context/logs/felix.log");
+				if (felixLog.isFile() && felixLog.length() > 1024 * 1024 * 1024) {
+					if (felixLog.delete()) ResourceUtil.touch(felixLog);
+				}
 			}
 			catch (Throwable t) {
 				ExceptionUtil.rethrowIfNecessary(t);
