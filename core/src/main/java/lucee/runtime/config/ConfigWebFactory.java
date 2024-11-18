@@ -2447,20 +2447,9 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 			Struct _clients = ConfigWebUtil.getAsStruct("remoteClients", root);
 
-			// usage
-			Struct sct = ConfigWebUtil.getAsStruct(_clients, true, "usage");// config.setRemoteClientUsage(toStruct(strUsage));
-			config.setRemoteClientUsage(sct);
-
 			// max-threads
 			int maxThreads = Caster.toIntValue(getAttr(_clients, "maxThreads"), -1);
 			if (maxThreads < 1) maxThreads = 20;
-
-			// directory
-			String strDir = SystemUtil.getSystemPropOrEnvVar("lucee.task.directory", null);
-			if (StringUtil.isEmpty(strDir)) strDir = _clients != null ? getAttr(_clients, "directory") : null;
-			Resource file = ConfigWebUtil.getFile(config.getRootDirectory(), strDir, "client-task", config.getConfigDir(), FileUtil.TYPE_DIR, ResourceUtil.LEVEL_GRAND_PARENT_FILE,
-					config);
-			config.setRemoteClientDirectory(file);
 
 			Array clients = null;
 			Struct client;

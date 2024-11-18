@@ -5011,6 +5011,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 
 		);
 		store();
+		getConfigServerImpl(config).resetRemoteClientUsage();
 	}
 
 	private void doRemoveRemoteClientUsage() throws PageException {
@@ -5018,6 +5019,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 
 		);
 		store();
+		getConfigServerImpl(config).resetRemoteClientUsage();
 	}
 
 	private String getCallerId() throws IOException {

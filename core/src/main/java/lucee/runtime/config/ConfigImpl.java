@@ -45,6 +45,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
 import lucee.aprint;
+import lucee.print;
 import lucee.commons.date.TimeZoneConstants;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.FileUtil;
@@ -187,7 +188,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private Map<String, DataSource> datasourcesAll;
 	private Map<String, DataSource> datasourcesNoQoQ;
 
-	private Map<String, CacheConnection> caches = new HashMap<String, CacheConnection>();
+	private Map<String, CacheConnection> caches;
 
 	private CacheConnection defaultCacheFunction = null;
 	private CacheConnection defaultCacheObject = null;
@@ -2769,9 +2770,9 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	public ConfigImpl resetDataSources() {
-		if (datasourcesAll != null) {
+		if (datasourcesAll != null || datasourcesNoQoQ != null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getDataSources")) {
-				if (datasourcesAll != null) {
+				if (datasourcesAll != null || datasourcesNoQoQ != null) {
 					datasourcesAll = null;
 					datasourcesNoQoQ = null;
 				}
@@ -2807,6 +2808,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public DataSource getDataSource(String datasource, DataSource defaultValue) {
+		print.e(getDataSourcesAll().keySet());
+
 		DataSource ds = (datasource == null) ? null : (DataSource) getDataSourcesAll().get(datasource.toLowerCase());
 		if (ds != null) return ds;
 		return defaultValue;
@@ -3740,20 +3743,36 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return remoteClientSpoolerEngine;
 	}
 
-	protected void setRemoteClientDirectory(Resource remoteClientDirectory) {
-		this.remoteClientDirectory = remoteClientDirectory;
-	}
-
 	/**
 	 * @return the remoteClientDirectory
 	 */
 	@Override
 	public Resource getRemoteClientDirectory() {
 		if (remoteClientDirectory == null) {
-			return ConfigWebUtil.getFile(getRootDirectory(), "client-task", "client-task", getConfigDir(), FileUtil.TYPE_DIR, ResourceUtil.LEVEL_GRAND_PARENT_FILE, this);
+			synchronized (SystemUtil.createToken("ConfigImpl", "getRemoteClientDirectory")) {
+				if (remoteClientDirectory == null) {
+					String strDir = SystemUtil.getSystemPropOrEnvVar("lucee.task.directory", null);
+					if (StringUtil.isEmpty(strDir)) {
+						Struct _clients = ConfigWebUtil.getAsStruct("remoteClients", root);
+						strDir = _clients != null ? ConfigWebFactory.getAttr(_clients, "directory") : null;
+					}
+					remoteClientDirectory = ConfigWebUtil.getFile(getRootDirectory(), strDir, "client-task", getConfigDir(), FileUtil.TYPE_DIR,
+							ResourceUtil.LEVEL_GRAND_PARENT_FILE, this);
+				}
+			}
 		}
-
 		return remoteClientDirectory;
+	}
+
+	public ConfigImpl resetRemoteClientDirectory() {
+		if (remoteClientDirectory != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getRemoteClientDirectory")) {
+				if (remoteClientDirectory != null) {
+					remoteClientDirectory = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	protected void setSpoolerEngine(SpoolerEngine spoolerEngine) {
@@ -3926,12 +3945,30 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public Struct getRemoteClientUsage() {
-		if (remoteClientUsage == null) remoteClientUsage = new StructImpl();
+		if (remoteClientUsage == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getRemoteClientUsage")) {
+				if (remoteClientUsage == null) {
+					Struct _clients = ConfigWebUtil.getAsStruct("remoteClients", root);
+					Struct sct = ConfigWebUtil.getAsStruct(_clients, true, "usage");// config.setRemoteClientUsage(toStruct(strUsage));
+					if (sct == null) remoteClientUsage = new StructImpl();
+					else remoteClientUsage = sct;
+
+				}
+			}
+		}
 		return remoteClientUsage;
 	}
 
-	protected void setRemoteClientUsage(Struct remoteClientUsage) {
-		this.remoteClientUsage = remoteClientUsage;
+	public ConfigImpl resetRemoteClientUsage() {
+		if (remoteClientUsage != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getRemoteClientUsage")) {
+				if (remoteClientUsage != null) {
+					remoteClientUsage = null;
+
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -4153,7 +4190,14 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	@Override
-	public Map<String, CacheConnection> getCacheConnections() {
+	public Map<String, CacheConnection> getCacheConnections() {// = new HashMap<String, CacheConnection>()
+		if (caches == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
+				if (caches == null) {
+					ConfigWebFactory.loadCache(this, root, getLog());
+				}
+			}
+		}
 		return caches;
 	}
 
@@ -4446,6 +4490,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	public ConfigImpl resetCaches() {
 		synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
+			caches = null;
+
 			defaultCacheFunction = null;
 			defaultCacheObject = null;
 			defaultCacheTemplate = null;
