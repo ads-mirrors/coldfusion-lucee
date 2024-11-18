@@ -382,7 +382,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	protected Map<String, Mapping> tagMappings = new ConcurrentHashMap<String, Mapping>();
 
 	private Boolean typeChecking;
-	private String cacheMD5;
+
 	private Boolean executionLogEnabled;
 	private ExecutionLogFactory executionLogFactory;
 	private Map<String, ORMEngine> ormengines = new HashMap<String, ORMEngine>();
@@ -4152,6 +4152,25 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return "";
 	}
 
+	@Override
+	public Map<String, CacheConnection> getCacheConnections() {
+		return caches;
+	}
+
+	/**
+	 * creates a new RamCache, please make sure to finalize.
+	 * 
+	 * @param arguments possible arguments are "timeToLiveSeconds", "timeToIdleSeconds" and
+	 *            "controlInterval"
+	 * @throws IOException
+	 */
+	public Cache createRAMCache(Struct arguments) throws IOException {
+		RamCache rc = new RamCache();
+		if (arguments == null) arguments = new StructImpl();
+		rc.init(this, "" + CreateUniqueId.invoke(), arguments);
+		return rc;
+	}
+
 	protected void setCaches(Map<String, CacheConnection> caches) {
 		// TOD find a better way for this ethos
 
@@ -4219,42 +4238,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		else if (StringUtil.isEmpty(cacheDefaultConnectionNameWebservice) && defaultCacheWebservice != null) {
 			defaultCacheWebservice = null;
 		}
-
-	}
-
-	@Override
-	public Map<String, CacheConnection> getCacheConnections() {
-		return caches;
-	}
-
-	// used by argus cache FUTURE add to interface
-	/**
-	 * creates a new RamCache, please make sure to finalize.
-	 * 
-	 * @param arguments possible arguments are "timeToLiveSeconds", "timeToIdleSeconds" and
-	 *            "controlInterval"
-	 * @throws IOException
-	 */
-	public Cache createRAMCache(Struct arguments) throws IOException {
-		RamCache rc = new RamCache();
-		if (arguments == null) arguments = new StructImpl();
-		rc.init(this, "" + CreateUniqueId.invoke(), arguments);
-		return rc;
-	}
-
-	@Override
-	public CacheConnection getCacheDefaultConnection(int type) {
-		if (type == CACHE_TYPE_FUNCTION) return defaultCacheFunction;
-		if (type == CACHE_TYPE_OBJECT) return defaultCacheObject;
-		if (type == CACHE_TYPE_TEMPLATE) return defaultCacheTemplate;
-		if (type == CACHE_TYPE_QUERY) return defaultCacheQuery;
-		if (type == CACHE_TYPE_RESOURCE) return defaultCacheResource;
-		if (type == CACHE_TYPE_INCLUDE) return defaultCacheInclude;
-		if (type == CACHE_TYPE_HTTP) return defaultCacheHTTP;
-		if (type == CACHE_TYPE_FILE) return defaultCacheFile;
-		if (type == CACHE_TYPE_WEBSERVICE) return defaultCacheWebservice;
-
-		return null;
 	}
 
 	protected void setCacheDefaultConnectionName(int type, String cacheDefaultConnectionName) {
@@ -4270,25 +4253,220 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	@Override
-	public String getCacheDefaultConnectionName(int type) {
-		if (type == CACHE_TYPE_FUNCTION) return cacheDefaultConnectionNameFunction;
-		if (type == CACHE_TYPE_OBJECT) return cacheDefaultConnectionNameObject;
-		if (type == CACHE_TYPE_TEMPLATE) return cacheDefaultConnectionNameTemplate;
-		if (type == CACHE_TYPE_QUERY) return cacheDefaultConnectionNameQuery;
-		if (type == CACHE_TYPE_RESOURCE) return cacheDefaultConnectionNameResource;
-		if (type == CACHE_TYPE_INCLUDE) return cacheDefaultConnectionNameInclude;
-		if (type == CACHE_TYPE_HTTP) return cacheDefaultConnectionNameHTTP;
-		if (type == CACHE_TYPE_FILE) return cacheDefaultConnectionNameFile;
-		if (type == CACHE_TYPE_WEBSERVICE) return cacheDefaultConnectionNameWebservice;
+	public CacheConnection getCacheDefaultConnection(int type) {
+		if (type == CACHE_TYPE_FUNCTION) {
+			if (defaultCacheFunction == null) {
+				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
+					if (defaultCacheFunction == null) {
+						ConfigWebFactory.loadCache(this, root, getLog());
+					}
+				}
+			}
+			return defaultCacheFunction;
+		}
+		if (type == CACHE_TYPE_OBJECT) {
+			if (defaultCacheObject == null) {
+				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
+					if (defaultCacheObject == null) {
+						ConfigWebFactory.loadCache(this, root, getLog());
+					}
+				}
+			}
+			return defaultCacheObject;
+		}
+		if (type == CACHE_TYPE_TEMPLATE) {
+			if (defaultCacheTemplate == null) {
+				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
+					if (defaultCacheTemplate == null) {
+						ConfigWebFactory.loadCache(this, root, getLog());
+					}
+				}
+			}
+			return defaultCacheTemplate;
+		}
+		if (type == CACHE_TYPE_QUERY) {
+			if (defaultCacheQuery == null) {
+				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
+					if (defaultCacheQuery == null) {
+						ConfigWebFactory.loadCache(this, root, getLog());
+					}
+				}
+			}
+			return defaultCacheQuery;
+		}
+		if (type == CACHE_TYPE_RESOURCE) {
+			if (defaultCacheResource == null) {
+				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
+					if (defaultCacheResource == null) {
+						ConfigWebFactory.loadCache(this, root, getLog());
+					}
+				}
+			}
+			return defaultCacheResource;
+		}
+		if (type == CACHE_TYPE_INCLUDE) {
+			if (defaultCacheInclude == null) {
+				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
+					if (defaultCacheInclude == null) {
+						ConfigWebFactory.loadCache(this, root, getLog());
+					}
+				}
+			}
+			return defaultCacheInclude;
+		}
+		if (type == CACHE_TYPE_HTTP) {
+			if (defaultCacheHTTP == null) {
+				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
+					if (defaultCacheHTTP == null) {
+						ConfigWebFactory.loadCache(this, root, getLog());
+					}
+				}
+			}
+			return defaultCacheHTTP;
+		}
+		if (type == CACHE_TYPE_FILE) {
+			if (defaultCacheFile == null) {
+				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
+					if (defaultCacheFile == null) {
+						ConfigWebFactory.loadCache(this, root, getLog());
+					}
+				}
+			}
+			return defaultCacheFile;
+		}
+		if (type == CACHE_TYPE_WEBSERVICE) {
+			if (defaultCacheWebservice == null) {
+				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
+					if (defaultCacheWebservice == null) {
+						ConfigWebFactory.loadCache(this, root, getLog());
+					}
+				}
+			}
+			return defaultCacheWebservice;
+		}
+
 		return null;
 	}
 
-	public String getCacheMD5() {
-		return cacheMD5;
+	@Override
+	public String getCacheDefaultConnectionName(int type) {
+
+		if (type == CACHE_TYPE_FUNCTION) {
+			if (cacheDefaultConnectionNameFunction == null) {
+				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
+					if (cacheDefaultConnectionNameFunction == null) {
+						ConfigWebFactory.loadCache(this, root, getLog());
+					}
+				}
+			}
+			return cacheDefaultConnectionNameFunction;
+		}
+		if (type == CACHE_TYPE_OBJECT) {
+			if (cacheDefaultConnectionNameObject == null) {
+				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
+					if (cacheDefaultConnectionNameObject == null) {
+						ConfigWebFactory.loadCache(this, root, getLog());
+					}
+				}
+			}
+			return cacheDefaultConnectionNameObject;
+		}
+		if (type == CACHE_TYPE_TEMPLATE) {
+			if (cacheDefaultConnectionNameTemplate == null) {
+				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
+					if (cacheDefaultConnectionNameTemplate == null) {
+						ConfigWebFactory.loadCache(this, root, getLog());
+					}
+				}
+			}
+			return cacheDefaultConnectionNameTemplate;
+		}
+		if (type == CACHE_TYPE_QUERY) {
+			if (cacheDefaultConnectionNameQuery == null) {
+				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
+					if (cacheDefaultConnectionNameQuery == null) {
+						ConfigWebFactory.loadCache(this, root, getLog());
+					}
+				}
+			}
+			return cacheDefaultConnectionNameQuery;
+		}
+		if (type == CACHE_TYPE_RESOURCE) {
+			if (cacheDefaultConnectionNameResource == null) {
+				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
+					if (cacheDefaultConnectionNameResource == null) {
+						ConfigWebFactory.loadCache(this, root, getLog());
+					}
+				}
+			}
+			return cacheDefaultConnectionNameResource;
+		}
+		if (type == CACHE_TYPE_INCLUDE) {
+			if (cacheDefaultConnectionNameInclude == null) {
+				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
+					if (cacheDefaultConnectionNameInclude == null) {
+						ConfigWebFactory.loadCache(this, root, getLog());
+					}
+				}
+			}
+			return cacheDefaultConnectionNameInclude;
+		}
+		if (type == CACHE_TYPE_HTTP) {
+			if (cacheDefaultConnectionNameHTTP == null) {
+				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
+					if (cacheDefaultConnectionNameHTTP == null) {
+						ConfigWebFactory.loadCache(this, root, getLog());
+					}
+				}
+			}
+			return cacheDefaultConnectionNameHTTP;
+		}
+		if (type == CACHE_TYPE_FILE) {
+			if (cacheDefaultConnectionNameFile == null) {
+				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
+					if (cacheDefaultConnectionNameFile == null) {
+						ConfigWebFactory.loadCache(this, root, getLog());
+					}
+				}
+			}
+			return cacheDefaultConnectionNameFile;
+		}
+		if (type == CACHE_TYPE_WEBSERVICE) {
+			if (cacheDefaultConnectionNameWebservice == null) {
+				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
+					if (cacheDefaultConnectionNameWebservice == null) {
+						ConfigWebFactory.loadCache(this, root, getLog());
+					}
+				}
+			}
+			return cacheDefaultConnectionNameWebservice;
+		}
+		return null;
 	}
 
-	public void setCacheMD5(String cacheMD5) {
-		this.cacheMD5 = cacheMD5;
+	public ConfigImpl resetCaches() {
+		synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
+			defaultCacheFunction = null;
+			defaultCacheObject = null;
+			defaultCacheTemplate = null;
+			defaultCacheQuery = null;
+			defaultCacheResource = null;
+			defaultCacheInclude = null;
+			defaultCacheHTTP = null;
+			defaultCacheFile = null;
+			defaultCacheWebservice = null;
+
+			cacheDefaultConnectionNameFunction = null;
+			cacheDefaultConnectionNameObject = null;
+			cacheDefaultConnectionNameTemplate = null;
+			cacheDefaultConnectionNameQuery = null;
+			cacheDefaultConnectionNameResource = null;
+			cacheDefaultConnectionNameInclude = null;
+			cacheDefaultConnectionNameHTTP = null;
+			cacheDefaultConnectionNameFile = null;
+			cacheDefaultConnectionNameWebservice = null;
+		}
+		return this;
 	}
 
 	@Override
@@ -5567,23 +5745,32 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return deployDir;
 	}
 
-	/*
-	 * public boolean installExtension(ExtensionDefintion ed) throws PageException { return
-	 * DeployHandler.deployExtension(this, ed, getLog("deploy"),true); }
-	 */
-
-	public void setCacheDefinitions(Map<String, ClassDefinition> caches) {
-		this.cacheDefinitions = caches;
-	}
-
 	@Override
 	public Map<String, ClassDefinition> getCacheDefinitions() {
-		return this.cacheDefinitions;
+		if (cacheDefinitions == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefinitions")) {
+				if (cacheDefinitions == null) {
+					cacheDefinitions = ConfigWebFactory.loadCacheDefintions(this, root, getLog());
+				}
+			}
+		}
+		return cacheDefinitions;
+	}
+
+	public ConfigImpl resetCacheDefinitions() {
+		if (cacheDefinitions != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefinitions")) {
+				if (cacheDefinitions != null) {
+					cacheDefinitions = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
 	public ClassDefinition getCacheDefinition(String className) {
-		return this.cacheDefinitions.get(className);
+		return getCacheDefinitions().get(className);
 	}
 
 	@Override

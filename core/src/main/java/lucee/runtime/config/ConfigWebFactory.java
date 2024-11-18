@@ -329,13 +329,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 
 		if (!essentialOnly) {
-
-			_loadCache(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded cache");
-
-		}
-
-		if (!essentialOnly) {
 			_loadTag(config, root, log); // load tlds
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded tags");
 
@@ -351,9 +344,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			settings(config, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded settings2");
 
-			_loadMonitors(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded monitors");
-
+			((CFMLEngineImpl) config.getEngine()).touchMonitor(config);
 		}
 
 		config.setLoadTime(System.currentTimeMillis());
@@ -1740,43 +1731,47 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return map.values().toArray(new JDBCDriver[map.size()]);
 	}
 
-	private static void _loadCache(ConfigServerImpl config, Struct root, Log log) {
+	public static Map<String, ClassDefinition> loadCacheDefintions(ConfigImpl config, Struct root, Log log) {
+		Map<String, ClassDefinition> map = new HashMap<String, ClassDefinition>();
 		try {
-			Struct defaultCache = ConfigWebUtil.getAsStruct("cache", root);
 
-			// load cache defintions
-			{
-				Map<String, ClassDefinition> map = new HashMap<String, ClassDefinition>();
+			// first add the server drivers, so they can be overwritten
+			ClassDefinition cd;
 
-				// first add the server drivers, so they can be overwritten
-				ClassDefinition cd;
+			Array caches = ConfigWebUtil.getAsArray("cacheClasses", root);
+			if (caches != null) {
+				Iterator<?> it = caches.getIterator();
+				Struct cache;
+				while (it.hasNext()) {
+					try {
+						cache = Caster.toStruct(it.next());
+						if (cache == null) continue;
+						cd = getClassDefinition(cache, "", config.getIdentification());
 
-				Array caches = ConfigWebUtil.getAsArray("cacheClasses", root);
-				if (caches != null) {
-					Iterator<?> it = caches.getIterator();
-					Struct cache;
-					while (it.hasNext()) {
-						try {
-							cache = Caster.toStruct(it.next());
-							if (cache == null) continue;
-							cd = getClassDefinition(cache, "", config.getIdentification());
-
-							// check if it is a bundle
-							if (!cd.isBundle()) {
-								log.error("Cache", "[" + cd + "] does not have bundle info");
-								continue;
-							}
-							map.put(cd.getClassName(), cd);
+						// check if it is a bundle
+						if (!cd.isBundle()) {
+							log.error("Cache", "[" + cd + "] does not have bundle info");
+							continue;
 						}
-						catch (Throwable t) {
-							ExceptionUtil.rethrowIfNecessary(t);
-							log(config, log, t);
-						}
+						map.put(cd.getClassName(), cd);
+					}
+					catch (Throwable t) {
+						ExceptionUtil.rethrowIfNecessary(t);
+						log(config, log, t);
 					}
 				}
-				config.setCacheDefinitions(map);
 			}
+		}
+		catch (Throwable t) {
+			ExceptionUtil.rethrowIfNecessary(t);
+			log(config, log, t);
+		}
+		return map;
+	}
 
+	public static void loadCache(ConfigImpl config, Struct root, Log log) {
+		try {
+			Struct defaultCache = ConfigWebUtil.getAsStruct("cache", root);
 			Map<String, CacheConnection> caches = new HashMap<String, CacheConnection>();
 
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManagerImpl.TYPE_CACHE);
@@ -1814,12 +1809,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 				for (int ct: ConfigPro.CACHE_TYPES_MAX) {
 					sb.append(config.getCacheDefaultConnectionName(ct)).append(';');
 				}
-
-				String md5 = eCaches != null ? getMD5(eCaches, sb.toString(), "") : "";
-				if (md5.equals(config.getCacheMD5())) {
-					return;
-				}
-				config.setCacheMD5(md5);
 			}
 
 			// cache connections
@@ -1902,28 +1891,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 						}
 					}
 				}
-				// call static init
-				// Iterator<Entry<ClassDefinition, List<CacheConnection>>> it = _caches.entrySet().iterator();
-				// Entry<ClassDefinition, List<CacheConnection>> entry;
-				// List<CacheConnection> list;
-				// ClassDefinition _cd;
-				/*
-				 * while (it.hasNext()) { entry = it.next(); list = entry.getValue(); _cd = entry.getKey();
-				 * 
-				 * try { Method m = _cd.getClazz().getMethod("init", new Class[] { Config.class, String[].class,
-				 * Struct[].class }); if (Modifier.isStatic(m.getModifiers())) m.invoke(null, new Object[] { config,
-				 * _toCacheNames(list), _toArguments(list) }); else
-				 * LogUtil.logGlobal(ThreadLocalPageContext.getConfig(configServer == null ? config : configServer),
-				 * Log.LEVEL_ERROR, ConfigWebFactory.class.getName(),
-				 * "method [init(Config,String[],Struct[]):void] for class [" + _cd.toString() + "] is not static");
-				 * } catch (InvocationTargetException e) { log.error("Cache", e.getTargetException()); } catch
-				 * (RuntimeException e) { log.error("Cache", e); } catch (NoSuchMethodException e) {
-				 * log.error("Cache",
-				 * "missing method [public static init(Config,String[],Struct[]):void] for class [" + _cd.toString()
-				 * + "] "); } catch (Throwable e) { ExceptionUtil.rethrowIfNecessary(e); log.error("Cache", e); }
-				 * 
-				 * }
-				 */
 			}
 			config.setCaches(caches);
 		}
@@ -3056,13 +3023,11 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadMonitors(ConfigServerImpl config, Struct root, Log log) {
+	public static void loadMonitors(ConfigImpl config, Struct root, Log log) {
 		try {
 			// only load in server context
-			ConfigServerImpl configServer = config;
+			ConfigServerImpl configServer = (ConfigServerImpl) config;
 			Struct parent = ConfigWebUtil.getAsStruct("monitoring", root);
-			Boolean enabled = Caster.toBoolean(getAttr(parent, "enabled"), null);
-			if (enabled != null) configServer.setMonitoringEnabled(enabled.booleanValue());
 			Array children = ConfigWebUtil.getAsArray("monitor", parent);
 
 			java.util.List<IntervallMonitor> intervalls = new ArrayList<IntervallMonitor>();
@@ -3133,7 +3098,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			ActionMonitorCollector actionMonitorCollector = ActionMonitorFatory.getActionMonitorCollector(configServer, actions.toArray(new MonitorTemp[actions.size()]));
 			configServer.setActionMonitorCollector(actionMonitorCollector);
 
-			((CFMLEngineImpl) configServer.getEngine()).touchMonitor(configServer);
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);

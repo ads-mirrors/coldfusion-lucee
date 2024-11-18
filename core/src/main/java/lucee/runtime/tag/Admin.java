@@ -2725,6 +2725,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		admin.updateCacheConnection(getString("admin", action, "name"), cd, toCacheConstant("default"), getStruct("admin", action, "custom"), getBoolV("readOnly", false),
 				getBoolV("storage", false));
 		store();
+		getConfigServerImpl(config).resetCaches().resetCacheDefinitions();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -2789,6 +2790,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		admin.updateCacheDefaultConnection(ConfigPro.CACHE_TYPE_FILE, getString("admin", action, "file"));
 		admin.updateCacheDefaultConnection(ConfigPro.CACHE_TYPE_WEBSERVICE, getString("admin", action, "webservice"));
 		store();
+		getConfigServerImpl(config).resetCacheDefinitions().resetCaches();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -2803,6 +2805,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		admin.removeCacheDefaultConnection(ConfigPro.CACHE_TYPE_FILE);
 		admin.removeCacheDefaultConnection(ConfigPro.CACHE_TYPE_WEBSERVICE);
 		store();
+		getConfigServerImpl(config).resetCacheDefinitions().resetCaches();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -3846,6 +3849,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doRemoveCacheConnection() throws PageException {
 		admin.removeCacheConnection(getString("admin", action, "name"));
 		store();
+		getConfigServerImpl(config).resetCaches().resetCacheDefinitions();
 		adminSync.broadcast(attributes, config);
 	}
 

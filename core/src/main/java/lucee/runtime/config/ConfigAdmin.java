@@ -4827,6 +4827,7 @@ public final class ConfigAdmin {
 					ClassDefinition cd = ClassDefinitionImpl.toClassDefinition(map, false, config.getIdentification());
 					if (cd != null && cd.isBundle()) {
 						_updateCache(cd);
+						Admin.getConfigServerImpl(config).resetCacheDefinitions();
 						reloadNecessary = true;
 					}
 					logger.info("extension", "Update cache [" + cd + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");

@@ -116,7 +116,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 	private IntervallMonitor[] intervallMonitors;
 	private ActionMonitorCollector actionMonitorCollector;
 
-	private boolean monitoringEnabled = false;
+	private Boolean monitoringEnabled;
 	private int delay = -1;
 	private Boolean captcha;
 	private Boolean rememberMe;
@@ -495,60 +495,110 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		return threadQueue;
 	}
 
-	@Override
-	public RequestMonitor[] getRequestMonitors() {
-		return requestMonitors;
-	}
-
-	@Override
-	public RequestMonitor getRequestMonitor(String name) throws ApplicationException {
-		if (requestMonitors != null) for (int i = 0; i < requestMonitors.length; i++) {
-			if (requestMonitors[i].getName().equalsIgnoreCase(name)) return requestMonitors[i];
-		}
-		throw new ApplicationException("there is no request monitor registered with name [" + name + "]");
-	}
-
 	protected void setRequestMonitors(RequestMonitor[] monitors) {
 		this.requestMonitors = monitors;
-	}
-
-	@Override
-	public IntervallMonitor[] getIntervallMonitors() {
-		return intervallMonitors;
-	}
-
-	@Override
-	public IntervallMonitor getIntervallMonitor(String name) throws ApplicationException {
-		if (intervallMonitors != null) for (int i = 0; i < intervallMonitors.length; i++) {
-			if (intervallMonitors[i].getName().equalsIgnoreCase(name)) return intervallMonitors[i];
-		}
-		throw new ApplicationException("there is no intervall monitor registered with name [" + name + "]");
 	}
 
 	protected void setIntervallMonitors(IntervallMonitor[] monitors) {
 		this.intervallMonitors = monitors;
 	}
 
-	public void setActionMonitorCollector(ActionMonitorCollector actionMonitorCollector) {
+	protected void setActionMonitorCollector(ActionMonitorCollector actionMonitorCollector) {
 		this.actionMonitorCollector = actionMonitorCollector;
 	}
 
+	@Override
+	public RequestMonitor[] getRequestMonitors() {
+		if (requestMonitors == null) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "monitors")) {
+				if (requestMonitors == null) {
+					ConfigWebFactory.loadMonitors(this, root, getLog());
+				}
+			}
+		}
+		return requestMonitors;
+	}
+
+	@Override
+	public RequestMonitor getRequestMonitor(String name) throws ApplicationException {
+		for (RequestMonitor rm: getRequestMonitors()) {
+			if (rm.getName().equalsIgnoreCase(name)) return rm;
+		}
+		throw new ApplicationException("there is no request monitor registered with name [" + name + "]");
+	}
+
+	@Override
+	public IntervallMonitor[] getIntervallMonitors() {
+		if (intervallMonitors == null) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "monitors")) {
+				if (intervallMonitors == null) {
+					ConfigWebFactory.loadMonitors(this, root, getLog());
+				}
+			}
+		}
+		return intervallMonitors;
+	}
+
+	@Override
+	public IntervallMonitor getIntervallMonitor(String name) throws ApplicationException {
+		for (IntervallMonitor im: getIntervallMonitors()) {
+			if (im.getName().equalsIgnoreCase(name)) return im;
+		}
+		throw new ApplicationException("there is no intervall monitor registered with name [" + name + "]");
+	}
+
 	public ActionMonitorCollector getActionMonitorCollector() {
+		if (actionMonitorCollector == null) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "monitors")) {
+				if (actionMonitorCollector == null) {
+					ConfigWebFactory.loadMonitors(this, root, getLog());
+				}
+			}
+		}
 		return actionMonitorCollector;
 	}
 
 	@Override
 	public ActionMonitor getActionMonitor(String name) {
-		return actionMonitorCollector == null ? null : actionMonitorCollector.getActionMonitor(name);
+		ActionMonitorCollector am = getActionMonitorCollector();
+		return am == null ? null : am.getActionMonitor(name);
+	}
+
+	public ConfigServerImpl resetMonitors() {
+		if (actionMonitorCollector != null) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "monitors")) {
+				if (actionMonitorCollector != null) {
+					requestMonitors = null;
+					intervallMonitors = null;
+					actionMonitorCollector = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
 	public boolean isMonitoringEnabled() {
+		if (monitoringEnabled == null) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "isMonitoringEnabled")) {
+				if (monitoringEnabled == null) {
+					Struct parent = ConfigWebUtil.getAsStruct("monitoring", root);
+					monitoringEnabled = Caster.toBoolean(ConfigWebFactory.getAttr(parent, "enabled"), Boolean.FALSE);
+				}
+			}
+		}
 		return monitoringEnabled;
 	}
 
-	protected void setMonitoringEnabled(boolean monitoringEnabled) {
-		this.monitoringEnabled = monitoringEnabled;
+	public ConfigServerImpl resetMonitoringEnabled() {
+		if (monitoringEnabled != null) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "isMonitoringEnabled")) {
+				if (monitoringEnabled != null) {
+					monitoringEnabled = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
