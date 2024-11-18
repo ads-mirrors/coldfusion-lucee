@@ -2716,6 +2716,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		admin.updateDataSource(id, name, newName, cd, dsn, username, password, host, database, port, connLimit, idleTimeout, liveTimeout, metaCacheTimeout, blob, clob, allow,
 				validate, storage, timezone, custom, dbdriver, ps, literalTimestampWithTSOffset, alwaysSetTimeout, requestExclusive, alwaysResetConnections);
 		store();
+		getConfigServerImpl(config).resetDataSources();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -2975,6 +2976,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doRemoveDatasource() throws PageException {
 		admin.removeDataSource(getString("admin", action, "name"));
 		store();
+		getConfigServerImpl(config).resetDataSources();
 		adminSync.broadcast(attributes, config);
 	}
 

@@ -329,8 +329,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 
 		if (!essentialOnly) {
-			_loadDataSources(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded datasources");
 
 			_loadCache(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded cache");
@@ -1520,17 +1518,17 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param configServer
 	 * @param config
 	 * @param doc
+	 * @return
 	 * @throws BundleException
 	 * @throws ClassNotFoundException
 	 */
-	private static void _loadDataSources(ConfigImpl config, Struct root, Log log) {
+	public static Map<String, DataSource> loadDataSources(ConfigImpl config, Struct root, Log log) {
+		Map<String, DataSource> datasources = new HashMap<String, DataSource>();
 		try {
 
 			// When set to true, makes JDBC use a representation for DATE data that
 			// is compatible with the Oracle8i database.
 			System.setProperty("oracle.jdbc.V8Compatible", "true");
-
-			Map<String, DataSource> datasources = new HashMap<String, DataSource>();
 
 			// Default query of query DB
 			try {
@@ -1637,12 +1635,13 @@ public final class ConfigWebFactory extends ConfigFactory {
 					}
 				}
 			}
-			config.setDataSources(datasources);
+
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
+		return datasources;
 	}
 
 	private static ClassDefinition patchJDBCClass(ConfigImpl config, ClassDefinition cd) {

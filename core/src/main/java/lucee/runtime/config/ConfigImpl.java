@@ -184,7 +184,9 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private final Map<String, PhysicalClassLoader> rpcClassLoaders = new ConcurrentHashMap<String, PhysicalClassLoader>();
 	private PhysicalClassLoader directClassLoader;
-	private Map<String, DataSource> datasources = new HashMap<String, DataSource>();
+	private Map<String, DataSource> datasourcesAll;
+	private Map<String, DataSource> datasourcesNoQoQ;
+
 	private Map<String, CacheConnection> caches = new HashMap<String, CacheConnection>();
 
 	private CacheConnection defaultCacheFunction = null;
@@ -2055,19 +2057,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		this.spoolInterval = spoolInterval;
 	}
 
-	/**
-	 * sets the locale
-	 * 
-	 * @param strLocale
-	 */
-
-	/**
-	 * @param datasources The datasources to set
-	 */
-	protected void setDataSources(Map<String, DataSource> datasources) {
-		this.datasources = datasources;
-	}
-
 	@Override
 	public Collection<String> getAIEngineFactoryNames() {
 		return getAIEngineFactories().keySet();
@@ -2750,6 +2739,48 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	@Override
+	public Map<String, DataSource> getDataSourcesAsMap() {
+		if (datasourcesNoQoQ == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getDataSources")) {
+				if (datasourcesNoQoQ == null) {
+					Map<String, DataSource> map = new HashMap<String, DataSource>();
+					Iterator<Entry<String, DataSource>> it = getDataSourcesAll().entrySet().iterator();
+					Entry<String, DataSource> entry;
+					while (it.hasNext()) {
+						entry = it.next();
+						if (!entry.getKey().equals(QOQ_DATASOURCE_NAME)) map.put(entry.getKey(), entry.getValue());
+					}
+					datasourcesNoQoQ = map;
+				}
+			}
+		}
+		return datasourcesNoQoQ;
+	}
+
+	private Map<String, DataSource> getDataSourcesAll() {
+		if (datasourcesAll == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getDataSources")) {
+				if (datasourcesAll == null) {
+					datasourcesAll = ConfigWebFactory.loadDataSources(this, root, getLog());
+				}
+			}
+		}
+		return datasourcesAll;
+	}
+
+	public ConfigImpl resetDataSources() {
+		if (datasourcesAll != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getDataSources")) {
+				if (datasourcesAll != null) {
+					datasourcesAll = null;
+					datasourcesNoQoQ = null;
+				}
+			}
+		}
+		return this;
+	}
+
+	@Override
 	public DataSource[] getDataSources() {
 		Map<String, DataSource> map = getDataSourcesAsMap();
 		Iterator<DataSource> it = map.values().iterator();
@@ -2763,15 +2794,22 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	@Override
-	public Map<String, DataSource> getDataSourcesAsMap() {
-		Map<String, DataSource> map = new HashMap<String, DataSource>();
-		Iterator<Entry<String, DataSource>> it = datasources.entrySet().iterator();
-		Entry<String, DataSource> entry;
-		while (it.hasNext()) {
-			entry = it.next();
-			if (!entry.getKey().equals(QOQ_DATASOURCE_NAME)) map.put(entry.getKey(), entry.getValue());
-		}
-		return map;
+	public DataSource getDataSource(String datasource) throws DatabaseException {
+		DataSource ds = (datasource == null) ? null : (DataSource) getDataSourcesAll().get(datasource.toLowerCase());
+		if (ds != null) return ds;
+
+		// create error detail
+		DatabaseException de = new DatabaseException("datasource [" + datasource + "] doesn't exist", null, null, null);
+		de.setDetail(ExceptionUtil.createSoundexDetail(datasource, getDataSourcesAll().keySet().iterator(), "datasource names"));
+		de.setAdditional(KeyConstants._Datasource, datasource);
+		throw de;
+	}
+
+	@Override
+	public DataSource getDataSource(String datasource, DataSource defaultValue) {
+		DataSource ds = (datasource == null) ? null : (DataSource) getDataSourcesAll().get(datasource.toLowerCase());
+		if (ds != null) return ds;
+		return defaultValue;
 	}
 
 	/**
@@ -3333,25 +3371,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	public void flushCTPathCache() {
 		if (ctPatchCache != null) ctPatchCache.clear();
-	}
-
-	@Override
-	public DataSource getDataSource(String datasource) throws DatabaseException {
-		DataSource ds = (datasource == null) ? null : (DataSource) datasources.get(datasource.toLowerCase());
-		if (ds != null) return ds;
-
-		// create error detail
-		DatabaseException de = new DatabaseException("datasource [" + datasource + "] doesn't exist", null, null, null);
-		de.setDetail(ExceptionUtil.createSoundexDetail(datasource, datasources.keySet().iterator(), "datasource names"));
-		de.setAdditional(KeyConstants._Datasource, datasource);
-		throw de;
-	}
-
-	@Override
-	public DataSource getDataSource(String datasource, DataSource defaultValue) {
-		DataSource ds = (datasource == null) ? null : (DataSource) datasources.get(datasource.toLowerCase());
-		if (ds != null) return ds;
-		return defaultValue;
 	}
 
 	@Override
