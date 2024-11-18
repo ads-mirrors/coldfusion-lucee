@@ -1994,10 +1994,6 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 		return cs.getConfigDir();
 	}
 
-	public String getCacheMD5() {
-		return cs.getCacheMD5();
-	}
-
 	public ComponentMetaData getComponentMetadata(String arg0) {
 		return cs.getComponentMetadata(arg0);
 	}
