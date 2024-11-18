@@ -330,9 +330,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			_loadScheduler(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded scheduled tasks");
 
-			_loadSetting(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded setting");
-
 			settings(config, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded settings2");
 
@@ -2379,75 +2376,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			log(config, log, t);
 		}
 		return Constants.DEFAULT_UPDATE_URL;
-	}
-
-	private static void _loadSetting(ConfigServerImpl config, Struct root, Log log) {
-		try {
-			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
-
-			// suppress whitespace
-			String str = getAttr(root, "suppressContent");
-
-			if (!StringUtil.isEmpty(str) && hasAccess) {
-				config.setSuppressContent(toBoolean(str, false));
-			}
-
-			// CFML Writer
-			str = SystemUtil.getSystemPropOrEnvVar("lucee.cfml.writer", null);
-			if (StringUtil.isEmpty(str)) {
-				str = getAttr(root, "cfmlWriter");
-			}
-			if (!StringUtil.isEmpty(str) && hasAccess) {
-				if ("white-space".equalsIgnoreCase(str)) config.setCFMLWriterType(ConfigPro.CFML_WRITER_WS);
-				else if ("white-space-pref".equalsIgnoreCase(str)) config.setCFMLWriterType(ConfigPro.CFML_WRITER_WS_PREF);
-				else if ("regular".equalsIgnoreCase(str)) config.setCFMLWriterType(ConfigPro.CFML_WRITER_REFULAR);
-				// FUTURE add support for classes implementing CFMLWriter interface
-			}
-
-			// show version
-			str = getAttr(root, "showVersion");
-			if (!StringUtil.isEmpty(str) && hasAccess) {
-				config.setShowVersion(toBoolean(str, false));
-			}
-
-			// close connection
-			str = getAttr(root, "closeConnection");
-			if (!StringUtil.isEmpty(str) && hasAccess) {
-				config.setCloseConnection(toBoolean(str, false));
-			}
-
-			// content-length
-			str = getAttr(root, "contentLength");
-			if (!StringUtil.isEmpty(str) && hasAccess) {
-				config.setContentLength(toBoolean(str, true));
-			}
-
-			str = getAttr(root, "bufferTagBodyOutput");
-			Boolean b = Caster.toBoolean(str, null);
-			if (b != null && hasAccess) {
-				config.setBufferOutput(b.booleanValue());
-			}
-
-			// allow-compression
-			str = SystemUtil.getSystemPropOrEnvVar("lucee.allow.compression", null);
-			if (StringUtil.isEmpty(str)) {
-				str = getAttr(root, "allowCompression");
-			}
-			if (!StringUtil.isEmpty(str) && hasAccess) {
-				config.setAllowCompression(toBoolean(str, ConfigPro.DEFAULT_ALLOW_COMPRESSION));
-			}
-
-			// mode
-			String developMode = getAttr(root, "developMode");
-			if (!StringUtil.isEmpty(developMode) && hasAccess) {
-				config.setDevelopMode(toBoolean(developMode, ConfigPro.DEFAULT_DEVELOP_MODE));
-			}
-
-		}
-		catch (Throwable t) {
-			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
-		}
 	}
 
 	public static RemoteClient[] loadRemoteClients(ConfigImpl config, Struct root, Log log) {

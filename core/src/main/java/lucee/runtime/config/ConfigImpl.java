@@ -229,8 +229,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private Integer debugOptions;
 
 	private boolean suppresswhitespace = false;
-	private boolean suppressContent = false;
-	private boolean showVersion = false;
+	private Boolean suppressContent;
+	private Boolean showVersion;
 
 	private Resource tempDirectory;
 	private boolean tempDirectoryReload;
@@ -242,7 +242,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private Boolean sessionManagement;
 	private Boolean clientManagement;
 	private Boolean clientCookies;
-	private boolean developMode = ConfigImpl.DEFAULT_DEVELOP_MODE;
+	private Boolean developMode;
 	private Boolean domainCookies;
 
 	private Resource configFile;
@@ -344,9 +344,9 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private Double version = null;
 
-	private boolean closeConnection = false;
-	private boolean contentLength = true;
-	private boolean allowCompression = ConfigImpl.DEFAULT_ALLOW_COMPRESSION;
+	private Boolean closeConnection;
+	private Boolean contentLength;
+	private Boolean allowCompression;
 
 	private Boolean doLocalCustomTag;
 
@@ -402,7 +402,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private Boolean useCTPathCache;
 	private lucee.runtime.rest.Mapping[] restMappings;
 
-	protected int writerType = CFML_WRITER_REFULAR;
+	protected Integer writerType;
 	private long configFileLastModified;
 	private Boolean checkForChangesInConfigFile;
 	// protected String apiKey=null;
@@ -853,7 +853,29 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public boolean isDevelopMode() {
+		if (developMode == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "isDevelopMode")) {
+				if (developMode == null) {
+					String str = ConfigWebFactory.getAttr(root, "developMode");
+					if (!StringUtil.isEmpty(str, true)) {
+						developMode = Caster.toBoolean(str.trim(), ConfigPro.DEFAULT_DEVELOP_MODE);
+					}
+					else developMode = ConfigPro.DEFAULT_DEVELOP_MODE;
+				}
+			}
+		}
 		return developMode;
+	}
+
+	public ConfigImpl resetDevelopMode() {
+		if (developMode != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "isDevelopMode")) {
+				if (developMode != null) {
+					developMode = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -1951,13 +1973,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	/**
-	 * @param developMode
-	 */
-	protected void setDevelopMode(boolean developMode) {
-		this.developMode = developMode;
-	}
-
-	/**
 	 * @param spoolEnable The spoolEnable to set.
 	 */
 	protected void setMailSpoolEnable(boolean spoolEnable) {
@@ -2629,11 +2644,29 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public boolean isSuppressContent() {
+		if (suppressContent == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "isSuppressContent")) {
+				if (suppressContent == null) {
+					String str = ConfigWebFactory.getAttr(root, "suppressContent");
+					if (!StringUtil.isEmpty(str, true)) {
+						suppressContent = Caster.toBoolean(str, Boolean.FALSE);
+					}
+					else suppressContent = Boolean.FALSE;
+				}
+			}
+		}
 		return suppressContent;
 	}
 
-	protected void setSuppressContent(boolean suppressContent) {
-		this.suppressContent = suppressContent;
+	public ConfigImpl resetSuppressContent() {
+		if (suppressContent != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "isSuppressContent")) {
+				if (suppressContent != null) {
+					suppressContent = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -2658,7 +2691,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 				}
 			}
 		}
-
 		return templateCharset;
 	}
 
@@ -3699,29 +3731,86 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public boolean closeConnection() {
+		if (closeConnection == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "closeConnection")) {
+				if (closeConnection == null) {
+					String str = ConfigWebFactory.getAttr(root, "closeConnection");
+					if (!StringUtil.isEmpty(str)) {
+						closeConnection = Caster.toBoolean(str, Boolean.FALSE);
+					}
+					else closeConnection = Boolean.FALSE;
+				}
+			}
+		}
 		return closeConnection;
 	}
 
-	protected void setCloseConnection(boolean closeConnection) {
-		this.closeConnection = closeConnection;
+	public ConfigImpl resetConnection() {
+		if (closeConnection != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "closeConnection")) {
+				if (closeConnection != null) {
+					closeConnection = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
 	public boolean contentLength() {
+		if (contentLength == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "contentLength")) {
+				if (contentLength == null) {
+					String str = ConfigWebFactory.getAttr(root, "contentLength");
+					if (!StringUtil.isEmpty(str)) {
+						contentLength = Caster.toBoolean(str, Boolean.TRUE);
+					}
+					else contentLength = Boolean.TRUE;
+				}
+			}
+		}
 		return contentLength;
+	}
+
+	public ConfigImpl resetContentLength() {
+		if (contentLength != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "contentLength")) {
+				if (contentLength != null) {
+					contentLength = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
 	public boolean allowCompression() {
+		if (allowCompression == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "allowCompression")) {
+				if (allowCompression == null) {
+					String str = SystemUtil.getSystemPropOrEnvVar("lucee.allow.compression", null);
+					if (StringUtil.isEmpty(str)) {
+						str = ConfigWebFactory.getAttr(root, "allowCompression");
+					}
+					if (!StringUtil.isEmpty(str)) {
+						allowCompression = Caster.toBoolean(str, ConfigImpl.DEFAULT_ALLOW_COMPRESSION);
+					}
+					else allowCompression = ConfigImpl.DEFAULT_ALLOW_COMPRESSION;
+				}
+			}
+		}
 		return allowCompression;
 	}
 
-	protected void setAllowCompression(boolean allowCompression) {
-		this.allowCompression = allowCompression;
-	}
-
-	protected void setContentLength(boolean contentLength) {
-		this.contentLength = contentLength;
+	public ConfigImpl resetAllowCompression() {
+		if (allowCompression != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "allowCompression")) {
+				if (allowCompression != null) {
+					allowCompression = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	/**
@@ -3756,19 +3845,33 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 */
 	@Override
 	public boolean isShowVersion() {
+		if (showVersion == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "isShowVersion")) {
+				if (showVersion == null) {
+					String str = ConfigWebFactory.getAttr(root, "showVersion");
+					if (!StringUtil.isEmpty(str)) {
+						showVersion = Caster.toBoolean(str, Boolean.FALSE);
+					}
+					else showVersion = Boolean.FALSE;
+				}
+			}
+		}
 		return showVersion;
 	}
 
-	/**
-	 * @param showVersion the showVersion to set
-	 */
-	protected void setShowVersion(boolean showVersion) {
-		this.showVersion = showVersion;
+	public ConfigImpl resetShowVersion() {
+		if (showVersion != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "isShowVersion")) {
+				if (showVersion != null) {
+					showVersion = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
 	public RemoteClient[] getRemoteClients() {
-		print.ds();
 		if (remoteClients == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getRemoteClients")) {
 				if (remoteClients == null) {
@@ -5291,18 +5394,42 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return this;
 	}
 
-	// do not move to Config interface, do instead getCFMLWriterClass
-	protected void setCFMLWriterType(int writerType) {
-		this.writerType = writerType;
-	}
-
 	// do not move to Config interface, do instead setCFMLWriterClass
 	@Override
 	public int getCFMLWriterType() {
+		if (writerType == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCFMLWriterType")) {
+				if (writerType == null) {
+					String str = SystemUtil.getSystemPropOrEnvVar("lucee.cfml.writer", null);
+					if (StringUtil.isEmpty(str)) {
+						str = ConfigWebFactory.getAttr(root, "cfmlWriter");
+					}
+					if (!StringUtil.isEmpty(str, true)) {
+						str = str.trim();
+						if ("white-space".equalsIgnoreCase(str)) writerType = ConfigPro.CFML_WRITER_WS;
+						else if ("white-space-pref".equalsIgnoreCase(str)) writerType = ConfigPro.CFML_WRITER_WS_PREF;
+						else if ("regular".equalsIgnoreCase(str)) writerType = ConfigPro.CFML_WRITER_REFULAR;
+						else writerType = ConfigPro.CFML_WRITER_REFULAR;
+					}
+					else writerType = ConfigPro.CFML_WRITER_REFULAR;
+				}
+			}
+		}
 		return writerType;
 	}
 
-	private boolean bufferOutput = DEFAULT_BUFFER_TAG_BODY_OUTPUT;
+	public ConfigImpl resetCFMLWriterType() {
+		if (writerType != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCFMLWriterType")) {
+				if (writerType != null) {
+					writerType = null;
+				}
+			}
+		}
+		return this;
+	}
+
+	private Boolean bufferOutput;
 
 	private Integer externalizeStringGTE;
 	private Map<String, BundleDefinition> extensionBundles;
@@ -5311,11 +5438,29 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public boolean getBufferOutput() {
+		if (bufferOutput == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getBufferOutput")) {
+				if (bufferOutput == null) {
+					String str = ConfigWebFactory.getAttr(root, "bufferTagBodyOutput");
+					if (!StringUtil.isEmpty(str, true)) {
+						bufferOutput = Caster.toBoolean(str.trim(), DEFAULT_BUFFER_TAG_BODY_OUTPUT);
+					}
+					else bufferOutput = DEFAULT_BUFFER_TAG_BODY_OUTPUT;
+				}
+			}
+		}
 		return bufferOutput;
 	}
 
-	protected void setBufferOutput(boolean bufferOutput) {
-		this.bufferOutput = bufferOutput;
+	public ConfigImpl resetBufferOutput() {
+		if (bufferOutput != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getBufferOutput")) {
+				if (bufferOutput != null) {
+					bufferOutput = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	public int getDebugOptions() {

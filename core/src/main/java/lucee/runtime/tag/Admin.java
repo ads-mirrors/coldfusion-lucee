@@ -4223,6 +4223,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 
 		admin.updateMode(getBoolObject("admin", action, "mode"));
 		store();
+		getConfigServerImpl(config).resetDevelopMode();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -4258,6 +4259,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		admin.updateContentLength(getBoolObject("admin", action, "contentLength"));
 		admin.updateBufferOutput(getBoolObject("admin", action, "bufferOutput"));
 		store();
+		getConfigServerImpl(config).resetShowVersion().resetContentLength().resetBufferOutput().resetAllowCompression().resetCFMLWriterType().resetSuppressContent();
 		adminSync.broadcast(attributes, config);
 	}
 
