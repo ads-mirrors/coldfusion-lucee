@@ -2632,6 +2632,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 
 		admin.updateJDBCDriver(label, id, cd, dsn);
 		store();
+		getConfigServerImpl(config).resetJDBCDrivers();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -2952,6 +2953,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doUpdatePSQ() throws PageException {
 		admin.updatePSQ(getBoolObject("admin", action, "psq"));
 		store();
+		getConfigServerImpl(config).resetPSQL();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -2962,6 +2964,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doRemoveJDBCDriver() throws PageException {
 		admin.removeJDBCDriver(getString("admin", action, "class"));
 		store();
+		getConfigServerImpl(config).resetJDBCDrivers();
 		adminSync.broadcast(attributes, config);
 	}
 

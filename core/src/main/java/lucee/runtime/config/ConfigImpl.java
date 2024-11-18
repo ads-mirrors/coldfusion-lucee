@@ -268,7 +268,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private Locale locale;
 
-	private boolean psq = false;
+	private Boolean psq;
 	private boolean debugShowUsage;
 
 	private Map<String, String> errorTemplates;
@@ -1048,11 +1048,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	@Override
-	public boolean getPSQL() {
-		return psq;
-	}
-
-	@Override
 	public int getQueryVarUsage() {
 		if (varUsage == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getQueryVarUsage")) {
@@ -1069,6 +1064,34 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getQueryVarUsage")) {
 				if (varUsage != null) {
 					varUsage = null;
+				}
+			}
+		}
+		return this;
+	}
+
+	@Override
+	public boolean getPSQL() {
+		if (psq == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getPSQL")) {
+				if (psq == null) {
+					// PSQ
+					String strPSQ = ConfigWebFactory.getAttr(root, "preserveSingleQuote");
+					if (!StringUtil.isEmpty(strPSQ)) {
+						psq = Caster.toBoolean(strPSQ, Boolean.FALSE);
+					}
+					else psq = Boolean.FALSE;
+				}
+			}
+		}
+		return psq;
+	}
+
+	public ConfigImpl resetPSQL() {
+		if (psq != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getPSQL")) {
+				if (psq != null) {
+					psq = null;
 				}
 			}
 		}
@@ -1947,14 +1970,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 */
 	protected void setMailTimeout(int mailTimeout) {
 		this.mailTimeout = mailTimeout;
-	}
-
-	/**
-	 * @param psq (preserve single quote) sets if sql string inside a cfquery will be preserved for
-	 *            Single Quotes
-	 */
-	protected void setPSQL(boolean psq) {
-		this.psq = psq;
 	}
 
 	@Override
@@ -5350,18 +5365,32 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return extensionBundles.values();
 	}
 
-	protected void setJDBCDrivers(JDBCDriver[] drivers) {
-		this.drivers = drivers;
-	}
-
 	@Override
 	public JDBCDriver[] getJDBCDrivers() {
+		if (drivers == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getJDBCDrivers")) {
+				if (drivers == null) {
+					drivers = ConfigWebFactory.loadJDBCDrivers(this, root, getLog());
+				}
+			}
+		}
 		return drivers;
+	}
+
+	public ConfigImpl resetJDBCDrivers() {
+		if (drivers != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getJDBCDrivers")) {
+				if (drivers != null) {
+					drivers = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
 	public JDBCDriver getJDBCDriverByClassName(String className, JDBCDriver defaultValue) {
-		for (JDBCDriver d: drivers) {
+		for (JDBCDriver d: getJDBCDrivers()) {
 			if (d.cd.getClassName().equals(className)) return d;
 		}
 		return defaultValue;
@@ -5370,7 +5399,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	@Override
 	public JDBCDriver getJDBCDriverById(String id, JDBCDriver defaultValue) {
 		if (!StringUtil.isEmpty(id)) {
-			for (JDBCDriver d: drivers) {
+			for (JDBCDriver d: getJDBCDrivers()) {
 				if (d.id != null && d.id.equalsIgnoreCase(id)) return d;
 			}
 		}
@@ -5379,7 +5408,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public JDBCDriver getJDBCDriverByBundle(String bundleName, Version version, JDBCDriver defaultValue) {
-		for (JDBCDriver d: drivers) {
+		for (JDBCDriver d: getJDBCDrivers()) {
 			if (d.cd.getName().equals(bundleName) && (version == null || version.equals(d.cd.getVersion()))) return d;
 		}
 		return defaultValue;
@@ -5387,8 +5416,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public JDBCDriver getJDBCDriverByCD(ClassDefinition cd, JDBCDriver defaultValue) {
-		for (JDBCDriver d: drivers) {
-
+		for (JDBCDriver d: getJDBCDrivers()) {
 			if (d.cd.getId().equals(cd.getId())) return d; // TODO comparing cd objects directly?
 		}
 		return defaultValue;

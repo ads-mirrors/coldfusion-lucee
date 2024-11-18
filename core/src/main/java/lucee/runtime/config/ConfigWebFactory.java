@@ -309,8 +309,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		config.setLastModified();
 
 		Log log = config.getLog("application");
-		// loadServerLibDesc(cs, config, doc,log);
-		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded loggers");
 
 		if (!essentialOnly) {
 			_loadResourceProvider(config, root, log);
@@ -1525,10 +1523,8 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @throws BundleException
 	 * @throws ClassNotFoundException
 	 */
-	private static void _loadDataSources(ConfigServerImpl config, Struct root, Log log) {
+	private static void _loadDataSources(ConfigImpl config, Struct root, Log log) {
 		try {
-			// load JDBC Driver definition
-			config.setJDBCDrivers(_loadJDBCDrivers(config, root, log));
 
 			// When set to true, makes JDBC use a representation for DATE data that
 			// is compatible with the Oracle8i database.
@@ -1559,12 +1555,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 			// Databases
 			// Struct parent = ConfigWebUtil.getAsStruct("dataSources", root);
-
-			// PSQ
-			String strPSQ = getAttr(root, "preserveSingleQuote");
-			if (access != SecurityManager.VALUE_NO && !StringUtil.isEmpty(strPSQ)) {
-				config.setPSQL(toBoolean(strPSQ, true));
-			}
 
 			// Data Sources
 			Struct dataSources = ConfigWebUtil.getAsStruct(root, false, "dataSources");
@@ -1691,7 +1681,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return cd;
 	}
 
-	public static JDBCDriver[] _loadJDBCDrivers(ConfigImpl config, Struct root, Log log) {
+	public static JDBCDriver[] loadJDBCDrivers(ConfigImpl config, Struct root, Log log) {
 		Map<String, JDBCDriver> map = new HashMap<String, JDBCDriver>();
 		try {
 			// first add the server drivers, so they can be overwritten
