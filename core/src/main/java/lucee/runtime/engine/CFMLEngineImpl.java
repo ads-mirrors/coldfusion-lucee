@@ -145,6 +145,7 @@ import lucee.runtime.op.OperationImpl;
 import lucee.runtime.op.StringsImpl;
 import lucee.runtime.osgi.OSGiUtil;
 import lucee.runtime.schedule.SchedulerImpl;
+import lucee.runtime.tag.Admin;
 import lucee.runtime.thread.SerializableCookie;
 import lucee.runtime.thread.ThreadUtil;
 import lucee.runtime.type.Struct;
@@ -1298,7 +1299,10 @@ public final class CFMLEngineImpl implements CFMLEngine {
 
 					// scheduled tasks
 					SchedulerImpl scheduler = ((SchedulerImpl) config.getScheduler());
-					if (scheduler != null) scheduler.stop();
+					if (scheduler != null) {
+						if (config == null) scheduler.stop();
+						else Admin.getConfigServerImpl(config).resetScheduler();
+					}
 
 					// scopes
 					try {

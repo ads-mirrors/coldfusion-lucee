@@ -74,7 +74,6 @@ import lucee.commons.lang.SerializableObject;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.lang.types.RefBoolean;
 import lucee.commons.net.IPRange;
-import lucee.loader.engine.CFMLEngine;
 import lucee.runtime.CIPage;
 import lucee.runtime.Component;
 import lucee.runtime.Mapping;
@@ -469,6 +468,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private boolean newVersion;
 	private Integer debugMaxRecordsLogged;
+	private Array scheduledTasks;
 	protected Struct root;
 
 	/**
@@ -1396,16 +1396,37 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 */
 	@Override
 	public Scheduler getScheduler() {
-		// TODO make sure that there is always a scheduler
-
+		// MUST reset scheduler
 		if (scheduler == null) {
-			try {
-				return new SchedulerImpl(ConfigWebUtil.getEngine(this), this, new ArrayImpl());
-			}
-			catch (PageException e) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getScheduler")) {
+				if (scheduler == null) {
+					try {
+						scheduler = new SchedulerImpl(ConfigWebUtil.getEngine(this), this, getScheduledTasks());
+					}
+					catch (PageException e) {
+						try {
+							scheduler = new SchedulerImpl(ConfigWebUtil.getEngine(this), this, new ArrayImpl());
+						}
+						catch (PageException e1) {
+						}
+					}
+				}
 			}
 		}
 		return scheduler;
+	}
+
+	public ConfigImpl resetScheduler() {
+		if (scheduler != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getScheduler")) {
+				if (scheduler != null) {
+					SchedulerImpl tmp = scheduler;
+					scheduler = null;
+					tmp.stop();
+				}
+			}
+		}
+		return this;
 	}
 
 	/**
@@ -1432,6 +1453,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getPassword")) {
 				if (!initPassword) {
 					initPassword = true;
+					password = null;
 				}
 			}
 		}
@@ -1527,6 +1549,29 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 					close(this.uncheckedComponentMappings);
 					this.componentMappings = null;
 					this.uncheckedComponentMappings = null;
+				}
+			}
+		}
+		return this;
+	}
+
+	public Array getScheduledTasks() {
+		if (scheduledTasks == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getScheduledTasks")) {
+				if (scheduledTasks == null) {
+					this.scheduledTasks = ConfigWebUtil.getAsArray("scheduledTasks", root);
+					if (this.scheduledTasks == null) this.scheduledTasks = new ArrayImpl();
+				}
+			}
+		}
+		return scheduledTasks;
+	}
+
+	public ConfigImpl resetScheduledTasks() {
+		if (scheduledTasks != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getScheduledTasks")) {
+				if (scheduledTasks != null) {
+					this.scheduledTasks = null;
 				}
 			}
 		}
@@ -2056,19 +2101,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 * @param logger
 	 * @throws PageException
 	 */
-	protected void setScheduler(CFMLEngine engine, Array scheduledTasks) throws PageException {
-		if (scheduledTasks == null) {
-			if (this.scheduler == null) this.scheduler = new SchedulerImpl(engine, this, new ArrayImpl());
-			return;
-		}
-
-		try {
-			if (this.scheduler == null) this.scheduler = new SchedulerImpl(engine, this, scheduledTasks);
-		}
-		catch (Exception e) {
-			throw Caster.toPageException(e);
-		}
-	}
 
 	/**
 	 * @param spoolInterval The spoolInterval to set.
@@ -6187,9 +6219,9 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	public ConfigImpl resetStartups() {
-		if (startups == null) {
+		if (startups != null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getStartups")) {
-				if (startups == null) {
+				if (startups != null) {
 					startups = null;
 				}
 			}

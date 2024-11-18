@@ -327,9 +327,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			_loadTag(config, root, log); // load tlds
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded tags");
 
-			_loadScheduler(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded scheduled tasks");
-
 			settings(config, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded settings2");
 
@@ -3055,26 +3052,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			log(config, log, t);
 		}
 		return "{lucee-web}/search/";
-	}
-
-	/**
-	 * @param configServer
-	 * @param config
-	 * @param doc
-	 * @param isEventGatewayContext
-	 * @throws IOException
-	 * @throws PageException
-	 */
-	private static void _loadScheduler(ConfigServerImpl config, Struct root, Log log) {
-		try {
-			Resource configDir = config.getConfigDir();
-			Array scheduledTasks = ConfigWebUtil.getAsArray("scheduledTasks", root);
-			config.setScheduler(config.getEngine(), scheduledTasks);
-		}
-		catch (Throwable t) {
-			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
-		}
 	}
 
 	public static int loadDebugOptions(ConfigImpl config, Struct root, Log log) {
