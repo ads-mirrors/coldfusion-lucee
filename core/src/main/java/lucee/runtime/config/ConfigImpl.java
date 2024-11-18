@@ -367,7 +367,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private List<ExtensionDefintion> extensionsDefs;
 	private RHExtension[] rhextensions = RHEXTENSIONS_EMPTY;
 	private String extensionsMD5;
-	private boolean allowRealPath = true;
+	private Boolean allowRealPath;
 
 	private DumpWriterEntry[] dmpWriterEntries;
 	private Class clusterClass = ClusterNotSupported.class;// ClusterRemoteNotSupported.class;//
@@ -4119,12 +4119,36 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public boolean allowRealPath() {
+		if (allowRealPath == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "allowRealPath")) {
+				if (allowRealPath == null) {
+					Struct fileSystem = ConfigWebUtil.getAsStruct("fileSystem", root);
+					if (fileSystem != null) {
+						String strAllowRealPath = ConfigWebFactory.getAttr(fileSystem, "allowRealpath");
+						if (!StringUtil.isEmpty(strAllowRealPath, true)) {
+							allowRealPath = Caster.toBoolean(strAllowRealPath.trim(), Boolean.TRUE);
+						}
+						else allowRealPath = Boolean.TRUE;
+					}
+					else allowRealPath = Boolean.TRUE;
+				}
+			}
+		}
 		return allowRealPath;
 	}
 
-	protected void setAllowRealPath(boolean allowRealPath) {
-		this.allowRealPath = allowRealPath;
+	public ConfigImpl resetAllowRealPath() {
+		if (allowRealPath != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "allowRealPath")) {
+				if (allowRealPath != null) {
+					allowRealPath = null;
+
+				}
+			}
+		}
+		return this;
 	}
+	// = true
 
 	/**
 	 * @return the classClusterScope

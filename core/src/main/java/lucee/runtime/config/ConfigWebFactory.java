@@ -305,8 +305,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 
 		if (!essentialOnly) {
-			_loadTag(config, root, log); // load tlds
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded tags");
 
 			settings(config, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded settings2");
@@ -2030,41 +2028,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return (m.getVirtual() + ":" + m.getStrPhysical() + ":" + m.getStrArchive()).toLowerCase();
 	}
 
-	private static void _loadTag(ConfigServerImpl config, Struct root, Log log) {
-		try {
-			{
-				Array tags = ConfigWebUtil.getAsArray("tags", root);
-				Struct tag;
-				ClassDefinition cd;
-				String nss, ns, n;
-				if (tags != null) {
-					Iterator<?> it = tags.getIterator();
-					while (it.hasNext()) {
-						try {
-							tag = Caster.toStruct(it.next(), null);
-							if (tag == null) continue;
-
-							ns = getAttr(tag, "namespace");
-							nss = getAttr(tag, "namespaceSeperator");
-							n = getAttr(tag, "name");
-							cd = getClassDefinition(tag, "", config.getIdentification());
-							config.addTag(ns, nss, n, cd);
-						}
-						catch (Throwable t) {
-							ExceptionUtil.rethrowIfNecessary(t);
-							log(config, log, t);
-						}
-					}
-				}
-			}
-
-		}
-		catch (Throwable t) {
-			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
-		}
-	}
-
 	/**
 	 * @param configServer
 	 * @param config
@@ -2076,8 +2039,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 	private static void _loadFilesystem(ConfigServerImpl config, Struct root, boolean doNew, Log log) {
 		try {
 			Resource configDir = config.getConfigDir();
-
-			String strAllowRealPath = null;
 
 			String strDefaultFLDDirectory = null;
 			String strDefaultTLDDirectory = null;
@@ -2102,7 +2063,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 			// get library directories
 			if (fileSystem != null) {
-				strAllowRealPath = getAttr(fileSystem, "allowRealpath");
 				if (StringUtil.isEmpty(strDefaultTLDDirectory)) strDefaultTLDDirectory = ConfigWebUtil.translateOldPath(getAttr(fileSystem, "tldDirectory"));
 				if (StringUtil.isEmpty(strDefaultFLDDirectory)) strDefaultFLDDirectory = ConfigWebUtil.translateOldPath(getAttr(fileSystem, "flddirectory"));
 				if (StringUtil.isEmpty(strDefaultTagDirectory)) strDefaultTagDirectory = ConfigWebUtil.translateOldPath(getAttr(fileSystem, "tagDirectory"));
@@ -2161,11 +2121,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 				}
 			}
 			config.setTagDirectory(listTags);
-
-			// allow realpath
-			if (!StringUtil.isEmpty(strAllowRealPath, true)) {
-				config.setAllowRealPath(Caster.toBooleanValue(strAllowRealPath, true));
-			}
 
 			// FUNCTIONS
 
