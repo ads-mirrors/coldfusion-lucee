@@ -208,8 +208,10 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private String cacheDefaultConnectionNameWebservice = null;
 
 	private TagLib[] cfmlTlds;
-
 	private FunctionLib cfmlFlds;
+
+	private Resource tldFile;
+	private Resource fldFile;
 
 	private Short scopeType;
 	private Boolean allowImplicidQueryCall;
@@ -305,9 +307,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private CharSet webCharset;
 
 	private CharSet mailDefaultCharset;
-
-	private Resource tldFile;
-	private Resource fldFile;
 
 	private Resources resources = new ResourcesImpl();
 	private Map<String, Class<CacheHandler>> cacheHandlerClasses;
@@ -598,26 +597,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 * 
 	 * @Override public String[] getTemplateExtensions() { return Constants.TEMPLATE_EXTENSIONS; }
 	 */
-
-	protected void setFLDs(FunctionLib flds) {
-		cfmlFlds = flds;
-	}
-
-	/**
-	 * return all Function Library Deskriptors
-	 * 
-	 * @return Array of Function Library Deskriptors
-	 */
-	@Override
-	public FunctionLib getFLDs() {
-		return cfmlFlds;
-	}
-
-	@Override
-	@Deprecated
-	public FunctionLib[] getFLDs(int dialect) { // used in the image extension
-		return new FunctionLib[] { cfmlFlds };
-	}
 
 	/**
 	 * return all Tag Library Deskriptors
@@ -1882,6 +1861,26 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return tl.getNameSpaceAndSeparator().toLowerCase();
 	}
 
+	protected void setFLDs(FunctionLib flds) {
+		cfmlFlds = flds;
+	}
+
+	/**
+	 * return all Function Library Deskriptors
+	 * 
+	 * @return Array of Function Library Deskriptors
+	 */
+	@Override
+	public FunctionLib getFLDs() {
+		return cfmlFlds;
+	}
+
+	@Override
+	@Deprecated
+	public FunctionLib[] getFLDs(int dialect) { // used in the image extension
+		return new FunctionLib[] { cfmlFlds };
+	}
+
 	protected void setFldFile(Resource fileFld) throws FunctionLibException {
 		if (fileFld == null) return;
 		this.fldFile = fileFld;
@@ -1907,6 +1906,11 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			fl = FunctionLibFactory.loadFromFile(fileFld, getIdentification());
 			overwrite(cfmlFlds, fl);
 		}
+	}
+
+	@Override
+	public Resource getFldFile() {
+		return fldFile;
 	}
 
 	private void overwrite(FunctionLib existingFL, FunctionLib newFL) {
@@ -2544,11 +2548,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	public abstract URL getUpdateLocation();
 
 	@Override
-	public Resource getClassDirectory() {
-		return deployDirectory;
-	}
-
-	@Override
 	public Resource getLibraryDirectory() {
 		Resource dir = getConfigDir().getRealResource("lib");
 		if (!dir.exists()) dir.mkdir();
@@ -2569,30 +2568,32 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return dir;
 	}
 
-	/**
-	 * set the deploy directory, directory where lucee deploy transalted cfml classes (java and class
-	 * files)
-	 * 
-	 * @param strDeployDirectory deploy directory
-	 * @throws ExpressionException
-	 */
-	protected void setDeployDirectory(String strDeployDirectory) throws ExpressionException {
-		setDeployDirectory(resources.getResource(strDeployDirectory));
+	@Override
+	public Resource getClassDirectory() {
+		if (deployDirectory == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getClassDirectory")) {
+				if (deployDirectory == null) {
+					String strDeployDirectory = null;
+					Struct fileSystem = ConfigWebUtil.getAsStruct("fileSystem", root);
+					if (fileSystem != null) {
+						strDeployDirectory = ConfigWebUtil.translateOldPath(ConfigWebFactory.getAttr(fileSystem, "deployDirectory"));
+					}
+					deployDirectory = ConfigWebUtil.getFile(configDir, strDeployDirectory, "cfclasses", configDir, FileUtil.TYPE_DIR, ResourceUtil.LEVEL_GRAND_PARENT_FILE, this);
+				}
+			}
+		}
+		return deployDirectory;
 	}
 
-	/**
-	 * set the deploy directory, directory where lucee deploy transalted cfml classes (java and class
-	 * files)
-	 * 
-	 * @param deployDirectory deploy directory
-	 * @throws ExpressionException
-	 * @throws ExpressionException
-	 */
-	protected void setDeployDirectory(Resource deployDirectory) throws ExpressionException {
-		if (!isDirectory(deployDirectory)) {
-			throw new ExpressionException("deploy directory " + deployDirectory + " doesn't exist or is not a directory");
+	public ConfigImpl resetClassDirectory() {
+		if (deployDirectory != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getClassDirectory")) {
+				if (deployDirectory != null) {
+					deployDirectory = null;
+				}
+			}
 		}
-		this.deployDirectory = deployDirectory;
+		return this;
 	}
 
 	@Override
@@ -2726,11 +2727,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 		}
 		return this;
-	}
-
-	@Override
-	public Resource getFldFile() {
-		return fldFile;
 	}
 
 	@Override

@@ -2135,10 +2135,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			Resource configDir = config.getConfigDir();
 
 			String strAllowRealPath = null;
-			String strDeployDirectory = null;
-			// String strTempDirectory=null;
 
-			// system.property or env var
 			String strDefaultFLDDirectory = null;
 			String strDefaultTLDDirectory = null;
 			String strDefaultFuncDirectory = null;
@@ -2163,7 +2160,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			// get library directories
 			if (fileSystem != null) {
 				strAllowRealPath = getAttr(fileSystem, "allowRealpath");
-				strDeployDirectory = ConfigWebUtil.translateOldPath(getAttr(fileSystem, "deployDirectory"));
 				if (StringUtil.isEmpty(strDefaultTLDDirectory)) strDefaultTLDDirectory = ConfigWebUtil.translateOldPath(getAttr(fileSystem, "tldDirectory"));
 				if (StringUtil.isEmpty(strDefaultFLDDirectory)) strDefaultFLDDirectory = ConfigWebUtil.translateOldPath(getAttr(fileSystem, "flddirectory"));
 				if (StringUtil.isEmpty(strDefaultTagDirectory)) strDefaultTagDirectory = ConfigWebUtil.translateOldPath(getAttr(fileSystem, "tagDirectory"));
@@ -2181,12 +2177,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			if (StringUtil.isEmpty(strDefaultTLDDirectory)) strDefaultTLDDirectory = "{lucee-config}/library/tld/";
 			if (StringUtil.isEmpty(strDefaultFuncDirectory)) strDefaultFuncDirectory = "{lucee-config}/library/function/";
 			if (StringUtil.isEmpty(strDefaultTagDirectory)) strDefaultTagDirectory = "{lucee-config}/library/tag/";
-
-			// Deploy Dir
-			Resource dd = ConfigWebUtil.getFile(configDir, strDeployDirectory, "cfclasses", configDir, FileUtil.TYPE_DIR, ResourceUtil.LEVEL_GRAND_PARENT_FILE, config);
-			config.setDeployDirectory(dd);
-
-			// TAG
 
 			// init TLDS
 			{
