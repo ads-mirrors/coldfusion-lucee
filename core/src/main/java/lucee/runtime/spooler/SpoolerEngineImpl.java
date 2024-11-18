@@ -49,6 +49,7 @@ import lucee.runtime.exp.DatabaseException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Duplicator;
+import lucee.runtime.tag.Admin;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.Collection;
 import lucee.runtime.type.Query;
@@ -78,25 +79,23 @@ public class SpoolerEngineImpl implements SpoolerEngine {
 	private final SerializableObject token = new SerializableObject();
 	private SpoolerThread thread;
 	// private ExecutionPlan[] plans;
-	private Resource _persisDirectory;
 	private long count = 0;
-	private Log log;
+	private Log logX;
 	private int add = 0;
 
-	private Resource closedDirectory;
-	private Resource openDirectory;
+	// private Resource closedDirectory;
+	// private Resource openDirectory;
 
-	private int maxThreads;
+	// private int maxThreads;
 
 	private boolean init;
 
-	public SpoolerEngineImpl(Resource persisDirectory, String label, Log log, int maxThreads) {
-		this._persisDirectory = persisDirectory;
-		closedDirectory = persisDirectory.getRealResource("closed");
-		openDirectory = persisDirectory.getRealResource("open");
-		this.maxThreads = maxThreads;
+	private Config config;
+
+	public SpoolerEngineImpl(Config config, String label) {
+
+		this.config = config;
 		this.label = label;
-		this.log = log;
 	}
 
 	public void init(ConfigWeb config) {
@@ -105,20 +104,11 @@ public class SpoolerEngineImpl implements SpoolerEngine {
 		init = true;
 	}
 
-	/*
-	 * private void calculateSize() { closedCount=calculateSize(closedDirectory);
-	 * openCount=calculateSize(openDirectory); }
-	 */
-
-	public void setMaxThreads(int maxThreads) {
-		this.maxThreads = maxThreads;
-	}
-
 	/**
 	 * @return the maxThreads
 	 */
 	public int getMaxThreads() {
-		return maxThreads;
+		return Admin.getConfigServerImpl(config).getRemoteClientMaxThreads();
 	}
 
 	private int calculateSize(Resource res) {
@@ -250,8 +240,8 @@ public class SpoolerEngineImpl implements SpoolerEngine {
 			SpoolerTaskListener listener = taskp.getListener();
 			if (listener != null) listener.listen(config, e, before);
 		}
-		if (e == null) log.log(Log.LEVEL_INFO, "remote-client", "successfully executed: " + task.subject());
-		else log.log(Log.LEVEL_ERROR, "remote-client", "failed to execute: " + task.subject(), e);
+		if (e == null) LogUtil.logx(config, Log.LEVEL_INFO, "remote-client", "successfully executed: " + task.subject(), "remoteclient", "application");
+		else LogUtil.log(config, "remote-client", e, Log.LEVEL_ERROR, "remoteclient", "application");
 	}
 
 	private Resource getFile(ConfigWeb config, SpoolerTask task) {
@@ -292,12 +282,20 @@ public class SpoolerEngineImpl implements SpoolerEngine {
 
 	@Override
 	public Query getOpenTasksAsQuery(int startrow, int maxrow) throws PageException {
-		return getTasksAsQuery(createQuery(), openDirectory, startrow, maxrow);
+		return getTasksAsQuery(createQuery(), getOpenDirectory(), startrow, maxrow);
+	}
+
+	private Resource getOpenDirectory() {
+		return config.getRemoteClientDirectory().getRealResource("open");
+	}
+
+	private Resource getClosedDirectory() {
+		return config.getRemoteClientDirectory().getRealResource("closed");
 	}
 
 	@Override
 	public Query getClosedTasksAsQuery(int startrow, int maxrow) throws PageException {
-		return getTasksAsQuery(createQuery(), closedDirectory, startrow, maxrow);
+		return getTasksAsQuery(createQuery(), getClosedDirectory(), startrow, maxrow);
 	}
 
 	@Override
@@ -306,7 +304,7 @@ public class SpoolerEngineImpl implements SpoolerEngine {
 
 		Query query = createQuery();
 		// print.o(startrow+":"+maxrow);
-		getTasksAsQuery(query, openDirectory, startrow, maxrow);
+		getTasksAsQuery(query, getOpenDirectory(), startrow, maxrow);
 		int records = query.getRecordcount();
 		// no open tasks
 		if (records == 0) {
@@ -317,18 +315,18 @@ public class SpoolerEngineImpl implements SpoolerEngine {
 			startrow = 1;
 			maxrow -= records;
 		}
-		if (maxrow > 0) getTasksAsQuery(query, closedDirectory, startrow, maxrow);
+		if (maxrow > 0) getTasksAsQuery(query, getClosedDirectory(), startrow, maxrow);
 		return query;
 	}
 
 	@Override
 	public int getOpenTaskCount() {
-		return calculateSize(openDirectory);
+		return calculateSize(getOpenDirectory());
 	}
 
 	@Override
 	public int getClosedTaskCount() {
-		return calculateSize(closedDirectory);
+		return calculateSize(getClosedDirectory());
 	}
 
 	private Query getTasksAsQuery(Query qry, Resource dir, int startrow, int maxrow) {
@@ -459,11 +457,11 @@ public class SpoolerEngineImpl implements SpoolerEngine {
 
 			while (getOpenTaskCount() > 0) {
 				adds = engine.adds();
-				taskNames = openDirectory.list(FILTER);
+				taskNames = getOpenDirectory().list(FILTER);
 				// tasks=engine.getOpenTasks();
 				nextExection = Long.MAX_VALUE;
 				for (int i = 0; i < taskNames.length; i++) {
-					task = getTaskByName(openDirectory, taskNames[i]);
+					task = getTaskByName(getOpenDirectory(), taskNames[i]);
 					if (task == null) continue;
 
 					if (task.nextExecution() <= System.currentTimeMillis()) {
@@ -568,11 +566,11 @@ public class SpoolerEngineImpl implements SpoolerEngine {
 	}
 
 	public void removeAll() {
-		ResourceUtil.removeChildrenEL(openDirectory, false);
-		ResourceUtil.removeChildrenEL(closedDirectory, false);
+		ResourceUtil.removeChildrenEL(getOpenDirectory(), false);
+		ResourceUtil.removeChildrenEL(getOpenDirectory(), false);
 		SystemUtil.wait(this, 100);
-		ResourceUtil.removeChildrenEL(openDirectory, false);
-		ResourceUtil.removeChildrenEL(closedDirectory, false);
+		ResourceUtil.removeChildrenEL(getOpenDirectory(), false);
+		ResourceUtil.removeChildrenEL(getOpenDirectory(), false);
 	}
 
 	public int adds() {
@@ -582,8 +580,8 @@ public class SpoolerEngineImpl implements SpoolerEngine {
 
 	@Override
 	public void remove(String id) {
-		SpoolerTask task = getTaskById(openDirectory, id);
-		if (task == null) task = getTaskById(closedDirectory, id);
+		SpoolerTask task = getTaskById(getOpenDirectory(), id);
+		if (task == null) task = getTaskById(getOpenDirectory(), id);
 		if (task != null) remove(task);
 	}
 
@@ -599,8 +597,8 @@ public class SpoolerEngineImpl implements SpoolerEngine {
 	 */
 	@Override
 	public PageException execute(String id) {
-		SpoolerTask task = getTaskById(openDirectory, id);
-		if (task == null) task = getTaskById(closedDirectory, id);
+		SpoolerTask task = getTaskById(getOpenDirectory(), id);
+		if (task == null) task = getTaskById(getOpenDirectory(), id);
 		if (task != null) {
 			return execute(task);
 		}
@@ -651,21 +649,9 @@ public class SpoolerEngineImpl implements SpoolerEngine {
 		this.label = label;
 	}
 
-	public void setPersisDirectory(Resource persisDirectory) {
-		this._persisDirectory = persisDirectory;
-	}
-
 	public Resource getPersisDirectory(ConfigWeb config) {
-		if (_persisDirectory == null) {
-			_persisDirectory = config.getRemoteClientDirectory();
-		}
-		return _persisDirectory;
+		return config.getRemoteClientDirectory();
 	}
-
-	public void setLog(Log log) {
-		this.log = log;
-	}
-
 }
 
 class TaskFileFilter implements ResourceNameFilter {

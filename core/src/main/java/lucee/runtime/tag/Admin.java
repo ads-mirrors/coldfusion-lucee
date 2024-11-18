@@ -2288,6 +2288,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		}
 		admin.setTaskMaxThreads(i);
 		store();
+		getConfigServerImpl(config).resetRemoteClientMaxThreads();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -2825,6 +2826,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		admin.removeResourceProvider(getString("admin", action, "scheme"));
 
 		store();
+		getConfigServerImpl(config).resetResources();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -2844,6 +2846,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 
 		// admin.updateResourceProvider(scheme,clazz,arguments);
 		store();
+		getConfigServerImpl(config).resetResources();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -3017,6 +3020,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doRemoveRemoteClient() throws PageException {
 		admin.removeRemoteClient(getString("admin", action, "url"));
 		store();
+		getConfigServerImpl(config).resetRemoteClients();
 	}
 
 	private void doRemoveSpoolerTask() throws PageException {
@@ -4851,14 +4855,13 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	}
 
 	private void doUpdateRemoteClient() throws PageException {
-
 		admin.updateRemoteClient(getString("admin", action, "label"), getString("admin", action, "url"), getString("admin", action, "remotetype"),
 				getString("admin", action, "securityKey"), getString("admin", action, "usage"), getString("admin", action, "adminPassword"), getString("ServerUsername", ""),
 				getString("ServerPassword", ""), getString("proxyServer", ""), getString("proxyUsername", ""), getString("proxyPassword", ""), getString("proxyPort", "")
 
 		);
-
 		store();
+		getConfigServerImpl(config).resetRemoteClients();
 	}
 
 	private void doReadBundle() throws PageException {

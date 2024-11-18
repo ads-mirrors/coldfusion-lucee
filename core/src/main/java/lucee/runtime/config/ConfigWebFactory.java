@@ -65,6 +65,7 @@ import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.log.LoggerAndSourceData;
 import lucee.commons.io.res.Resource;
+import lucee.commons.io.res.ResourceProvider;
 import lucee.commons.io.res.filter.ExtensionResourceFilter;
 import lucee.commons.io.res.type.cfml.CFMLResourceProvider;
 import lucee.commons.io.res.type.s3.DummyS3ResourceProvider;
@@ -165,7 +166,6 @@ import lucee.runtime.search.DummySearchEngine;
 import lucee.runtime.search.SearchEngine;
 import lucee.runtime.security.SecurityManager;
 import lucee.runtime.security.SecurityManagerImpl;
-import lucee.runtime.spooler.SpoolerEngineImpl;
 import lucee.runtime.tag.listener.TagListener;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.Collection.Key;
@@ -310,11 +310,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 		Log log = config.getLog("application");
 
-		if (!essentialOnly) {
-			_loadResourceProvider(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded resource providers");
-		}
-
 		_loadFilesystem(config, root, doNew, log); // load this before execute any code, what for example loadxtension does (json)
 		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded filesystem");
 
@@ -337,9 +332,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 			_loadSetting(config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded setting");
-
-			_loadRemoteClient(config, root, log);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded remote clients");
 
 			settings(config, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded settings2");
@@ -401,10 +393,8 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return root;
 	}
 
-	private static void _loadResourceProvider(ConfigServerImpl config, Struct root, Log log) {
+	public static ResourceProvider loadDefaultResourceProvider(ConfigImpl config, Struct root, Log log) {
 		try {
-			config.clearResourceProviders();
-			Array providers = ConfigWebUtil.getAsArray("resourceProviders", root);
 			Array defaultProviders = ConfigWebUtil.getAsArray("defaultResourceProvider", root);
 
 			// Default Resource Provider
@@ -417,7 +407,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 				// class
 				if (defProv.hasClass()) {
-					config.setDefaultResourceProvider(defProv.getClazz(), toArguments(defaultProvider, "arguments", true, false));
+					return toDefaultResourceProvider(defProv.getClazz(), toArguments(defaultProvider, "arguments", true, false));
 				}
 
 				// component
@@ -425,9 +415,31 @@ public final class ConfigWebFactory extends ConfigFactory {
 					strDefaultProviderComponent = strDefaultProviderComponent.trim();
 					Map<String, String> args = toArguments(defaultProvider, "arguments", true, false);
 					args.put("component", strDefaultProviderComponent);
-					config.setDefaultResourceProvider(CFMLResourceProvider.class, args);
+					return toDefaultResourceProvider(CFMLResourceProvider.class, args);
 				}
 			}
+		}
+		catch (Throwable t) {
+			ExceptionUtil.rethrowIfNecessary(t);
+			log(config, log, t);
+		}
+		return null;
+	}
+
+	private static ResourceProvider toDefaultResourceProvider(Class defaultProviderClass, Map arguments) throws ClassException {
+		Object o = ClassUtil.loadInstance(defaultProviderClass);
+		if (o instanceof ResourceProvider) {
+			ResourceProvider rp = (ResourceProvider) o;
+			rp.init(null, arguments);
+			return rp;
+		}
+		else throw new ClassException("object [" + Caster.toClassName(o) + "] must implement the interface " + ResourceProvider.class.getName());
+	}
+
+	public static void loadResourceProvider(ConfigImpl config, Struct root, Log log) {
+		try {
+			Array providers = ConfigWebUtil.getAsArray("resourceProviders", root);
+
 			// Resource Provider
 			boolean hasZip = false;
 			if (providers != null && providers.size() > 0) {
@@ -2438,25 +2450,18 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	private static void _loadRemoteClient(ConfigServerImpl config, Struct root, Log log) {
+	public static RemoteClient[] loadRemoteClients(ConfigImpl config, Struct root, Log log) {
+		java.util.List<RemoteClient> list = new ArrayList<RemoteClient>();
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManagerImpl.TYPE_REMOTE);
 
-			// SNSN
-			// RemoteClientUsage
-
 			Struct _clients = ConfigWebUtil.getAsStruct("remoteClients", root);
-
-			// max-threads
-			int maxThreads = Caster.toIntValue(getAttr(_clients, "maxThreads"), -1);
-			if (maxThreads < 1) maxThreads = 20;
 
 			Array clients = null;
 			Struct client;
 
 			if (hasAccess && _clients != null) clients = ConfigWebUtil.getAsArray("remoteClient", _clients);
 
-			java.util.List<RemoteClient> list = new ArrayList<RemoteClient>();
 			if (clients != null) {
 				Iterator<?> it = clients.getIterator();
 				while (it.hasNext()) {
@@ -2503,28 +2508,13 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 				}
 			}
-			if (list.size() > 0) config.setRemoteClients(list.toArray(new RemoteClient[list.size()]));
-			else config.setRemoteClients(new RemoteClient[0]);
-
-			// init spooler engine
-			Resource dir = config.getRemoteClientDirectory();
-			if (dir != null && !dir.exists()) dir.mkdirs();
-
-			SpoolerEngineImpl se = (SpoolerEngineImpl) config.getSpoolerEngine();
-			if (se == null) {
-				config.setSpoolerEngine(se = new SpoolerEngineImpl(dir, "Remote Client Spooler", ThreadLocalPageContext.getLog(config, "remoteclient"), maxThreads));
-			}
-			else {
-				se.setLog(ThreadLocalPageContext.getLog(config, "remoteclient"));
-				se.setPersisDirectory(dir);
-				se.setMaxThreads(maxThreads);
-			}
-
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
+
+		return list.toArray(new RemoteClient[list.size()]);
 	}
 
 	public static PrintStream loadErr(ConfigImpl config, Struct root, Log log) {

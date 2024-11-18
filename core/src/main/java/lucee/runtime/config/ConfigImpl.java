@@ -145,6 +145,7 @@ import lucee.runtime.schedule.SchedulerImpl;
 import lucee.runtime.search.SearchEngine;
 import lucee.runtime.security.SecurityManager;
 import lucee.runtime.spooler.SpoolerEngine;
+import lucee.runtime.spooler.SpoolerEngineImpl;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.ArrayImpl;
 import lucee.runtime.type.Collection.Key;
@@ -312,11 +313,14 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private CharSet mailDefaultCharset;
 
 	private Resources resources = new ResourcesImpl();
+	private boolean initResource = true;
 	private Map<String, Class<CacheHandler>> cacheHandlerClasses;
 
 	private ApplicationListener applicationListener;
 
 	private Integer scriptProtect;
+
+	private ResourceProvider defaultResourceProvider;
 
 	private ProxyData proxy = null;
 
@@ -353,6 +357,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private SpoolerEngine remoteClientSpoolerEngine;
 
 	private Resource remoteClientDirectory;
+	private Integer remoteClientMaxThreads;
 
 	private Boolean allowURLRequestTimeout;
 	private Boolean errorStatusCode;
@@ -529,7 +534,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		clearApplicationCache();
 		clearLoggers(null);
 		clearComponentMetadata();
-		clearResourceProviders();
 		baseComponentPageSource = null;
 	}
 
@@ -2856,21 +2860,18 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		this.mailDefaultCharset = CharsetUtil.toCharSet(mailDefaultCharset);
 	}
 
-	protected void setDefaultResourceProvider(Class defaultProviderClass, Map arguments) throws ClassException {
-		Object o = ClassUtil.loadInstance(defaultProviderClass);
-		if (o instanceof ResourceProvider) {
-			ResourceProvider rp = (ResourceProvider) o;
-			rp.init(null, arguments);
-			setDefaultResourceProvider(rp);
-		}
-		else throw new ClassException("object [" + Caster.toClassName(o) + "] must implement the interface " + ResourceProvider.class.getName());
-	}
-
 	/**
 	 * @param defaultResourceProvider the defaultResourceProvider to set
 	 */
 	protected void setDefaultResourceProvider(ResourceProvider defaultResourceProvider) {
-		resources.registerDefaultResourceProvider(defaultResourceProvider);
+		if (defaultResourceProvider == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCacheHandlers")) {
+				if (cacheHandlerClasses == null) {
+					cacheHandlerClasses = ConfigWebFactory.loadCacheHandler(this, root, getLog());
+				}
+			}
+		}
+		getResources().registerDefaultResourceProvider(defaultResourceProvider);
 	}
 
 	/**
@@ -2878,7 +2879,29 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 */
 	@Override
 	public ResourceProvider getDefaultResourceProvider() {
+		Resources resources = getResources();
+		if (defaultResourceProvider == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getDefaultResourceProvider")) {
+				if (defaultResourceProvider == null) {
+					defaultResourceProvider = ConfigWebFactory.loadDefaultResourceProvider(this, root, getLog());
+					if (defaultResourceProvider == null) defaultResourceProvider = ResourcesImpl.getFileResourceProvider();
+					if (defaultResourceProvider != resources.getDefaultResourceProvider()) resources.registerDefaultResourceProvider(defaultResourceProvider);
+				}
+			}
+		}
 		return resources.getDefaultResourceProvider();
+	}
+
+	public ConfigImpl resetDefaultResourceProvider() {
+		if (defaultResourceProvider != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getDefaultResourceProvider")) {
+				if (defaultResourceProvider != null) {
+					defaultResourceProvider = null;
+					getResources().registerDefaultResourceProvider(ResourcesImpl.getFileResourceProvider());
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -2904,12 +2927,33 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return this;
 	}
 
-	protected void addResourceProvider(String strProviderScheme, ClassDefinition cd, Map arguments) {
-		((ResourcesImpl) resources).registerResourceProvider(strProviderScheme, cd, arguments);
+	private Resources getResources() {
+		if (initResource) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getResources")) {
+				if (initResource) {
+					ConfigWebFactory.loadResourceProvider(this, root, getLog());
+					initResource = false;
+					cacheHandlerClasses = null;
+				}
+			}
+		}
+		return resources;
 	}
 
-	public void clearResourceProviders() {
-		resources.reset();
+	public ConfigImpl resetResources() {
+		if (!initResource) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getResources")) {
+				if (!initResource) {
+					initResource = true;
+					resources.reset();
+				}
+			}
+		}
+		return this;
+	}
+
+	protected void addResourceProvider(String strProviderScheme, ClassDefinition cd, Map arguments) {
+		((ResourcesImpl) resources).registerResourceProvider(strProviderScheme, cd, arguments);
 	}
 
 	/**
@@ -2917,7 +2961,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 */
 	@Override
 	public ResourceProvider[] getResourceProviders() {
-		return resources.getResourceProviders();
+		return getResources().getResourceProviders();
 	}
 
 	/**
@@ -2925,27 +2969,21 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 */
 	@Override
 	public ResourceProviderFactory[] getResourceProviderFactories() {
-		return ((ResourcesImpl) resources).getResourceProviderFactories();
+		return ((ResourcesImpl) getResources()).getResourceProviderFactories();
 	}
 
 	@Override
 	public boolean hasResourceProvider(String scheme) {
-		ResourceProviderFactory[] factories = ((ResourcesImpl) resources).getResourceProviderFactories();
+		ResourceProviderFactory[] factories = ((ResourcesImpl) getResources()).getResourceProviderFactories();
 		for (int i = 0; i < factories.length; i++) {
 			if (factories[i].getScheme().equalsIgnoreCase(scheme)) return true;
 		}
 		return false;
 	}
 
-	protected void setResourceProviderFactories(ResourceProviderFactory[] resourceProviderFactories) {
-		for (int i = 0; i < resourceProviderFactories.length; i++) {
-			((ResourcesImpl) resources).registerResourceProvider(resourceProviderFactories[i]);
-		}
-	}
-
 	@Override
 	public Resource getResource(String path) {
-		return resources.getResource(path);
+		return getResources().getResource(path);
 	}
 
 	@Override
@@ -3728,26 +3766,69 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		this.showVersion = showVersion;
 	}
 
-	protected void setRemoteClients(RemoteClient[] remoteClients) {
-		this.remoteClients = remoteClients;
-	}
-
 	@Override
 	public RemoteClient[] getRemoteClients() {
-		if (remoteClients == null) return new RemoteClient[0];
+		print.ds();
+		if (remoteClients == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getRemoteClients")) {
+				if (remoteClients == null) {
+					remoteClients = ConfigWebFactory.loadRemoteClients(this, root, getLog());
+				}
+			}
+		}
 		return remoteClients;
+	}
+
+	public ConfigImpl resetRemoteClients() {
+		if (remoteClients != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getRemoteClients")) {
+				if (remoteClients != null) {
+					remoteClients = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
 	public SpoolerEngine getSpoolerEngine() {
+		if (remoteClientSpoolerEngine == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getSpoolerEngine")) {
+				if (remoteClientSpoolerEngine == null) {
+					remoteClientSpoolerEngine = new SpoolerEngineImpl(this, "Remote Client Spooler");
+				}
+			}
+		}
 		return remoteClientSpoolerEngine;
 	}
 
-	/**
-	 * @return the remoteClientDirectory
-	 */
+	public int getRemoteClientMaxThreads() {
+		if (remoteClientMaxThreads == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getRemoteClientMaxThreads")) {
+				if (remoteClientMaxThreads == null) {
+					Struct _clients = ConfigWebUtil.getAsStruct("remoteClients", root);
+					remoteClientMaxThreads = Caster.toInteger(ConfigWebFactory.getAttr(_clients, "maxThreads"), 20);
+				}
+			}
+		}
+		return remoteClientMaxThreads;
+	}
+
+	public ConfigImpl resetRemoteClientMaxThreads() {
+		if (remoteClientMaxThreads != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getRemoteClientMaxThreads")) {
+				if (remoteClientMaxThreads != null) {
+					remoteClientMaxThreads = null;
+				}
+			}
+		}
+		return this;
+	}
+
+	//
 	@Override
 	public Resource getRemoteClientDirectory() {
+		print.ds();
 		if (remoteClientDirectory == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getRemoteClientDirectory")) {
 				if (remoteClientDirectory == null) {
@@ -3758,6 +3839,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 					}
 					remoteClientDirectory = ConfigWebUtil.getFile(getRootDirectory(), strDir, "client-task", getConfigDir(), FileUtil.TYPE_DIR,
 							ResourceUtil.LEVEL_GRAND_PARENT_FILE, this);
+
+					if (!remoteClientDirectory.exists()) remoteClientDirectory.mkdirs();
 				}
 			}
 		}
@@ -3775,26 +3858,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return this;
 	}
 
-	protected void setSpoolerEngine(SpoolerEngine spoolerEngine) {
-		this.remoteClientSpoolerEngine = spoolerEngine;
-	}
-
-	/*
-	 * *
-	 * 
-	 * @return the structCase / public int getStructCase() { return structCase; }
-	 */
-
-	/*
-	 * *
-	 * 
-	 * @param structCase the structCase to set / protected void setStructCase(int structCase) {
-	 * this.structCase = structCase; }
-	 */
-
-	/**
-	 * @return if error status code will be returned or not
-	 */
 	@Override
 	public boolean getErrorStatusCode() {
 		if (errorStatusCode == null) {
@@ -4161,11 +4224,13 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public int getInspectTemplateAutoInterval(boolean slow) {
-		if (inspectTemplateAutoIntervalSlow == -1) {
+		if (inspectTemplateAutoIntervalSlow == ConfigPro.INSPECT_INTERVAL_UNDEFINED) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getInspectTemplateAutoInterval")) {
-				if (inspectTemplateAutoIntervalSlow == -1) {
+				if (inspectTemplateAutoIntervalSlow == ConfigPro.INSPECT_INTERVAL_UNDEFINED) {
 					inspectTemplateAutoIntervalFast = Caster.toIntValue(ConfigWebFactory.getAttr(root, "inspectTemplateIntervalFast"), ConfigPro.INSPECT_INTERVAL_FAST);
+					if (inspectTemplateAutoIntervalFast <= 0) inspectTemplateAutoIntervalFast = ConfigPro.INSPECT_INTERVAL_FAST;
 					inspectTemplateAutoIntervalSlow = Caster.toIntValue(ConfigWebFactory.getAttr(root, "inspectTemplateIntervalSlow"), ConfigPro.INSPECT_INTERVAL_SLOW);
+					if (inspectTemplateAutoIntervalSlow <= 0) inspectTemplateAutoIntervalSlow = ConfigPro.INSPECT_INTERVAL_SLOW;
 				}
 			}
 		}
@@ -4173,11 +4238,11 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	public ConfigImpl resetInspectTemplateAutoInterval() {
-		if (inspectTemplateAutoIntervalSlow != -1) {
+		if (inspectTemplateAutoIntervalSlow != ConfigPro.INSPECT_INTERVAL_UNDEFINED) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getInspectTemplateAutoInterval")) {
-				if (inspectTemplateAutoIntervalSlow != -1) {
-					inspectTemplateAutoIntervalSlow = -1;
-					inspectTemplateAutoIntervalFast = -1;
+				if (inspectTemplateAutoIntervalSlow != ConfigPro.INSPECT_INTERVAL_UNDEFINED) {
+					inspectTemplateAutoIntervalSlow = ConfigPro.INSPECT_INTERVAL_UNDEFINED;
+					inspectTemplateAutoIntervalFast = ConfigPro.INSPECT_INTERVAL_UNDEFINED;
 				}
 			}
 		}
