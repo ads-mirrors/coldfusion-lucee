@@ -6489,7 +6489,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		for (Method method: methods) {
 			if (!method.getName().startsWith("reset") || method.getName().equals("reset") || method.getName().equals("resetAll") || method.getArgumentCount() != 0) continue;
 			method.invoke(this);
-			print.e("reset: " + method.getName());
 		}
 	}
 }
