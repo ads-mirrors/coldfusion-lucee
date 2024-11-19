@@ -348,7 +348,7 @@ public final class PageSourceImpl implements PageSource {
 						}
 						if (!same) {
 							LogUtil.log(pc, Log.LEVEL_DEBUG, "compile", "recompile [" + getDisplayPath() + "] because loaded page has changed");
-							pcn.set(page = compile(config, mapping.getClassRootDirectory(), page, false, pc.ignoreScopes()));
+							pcn.set(page = compile(config, mapping.getClassRootDirectory(), page, false, pc.ignoreScopes(), false));
 							page.setPageSource(this);
 						}
 					}
@@ -368,7 +368,7 @@ public final class PageSourceImpl implements PageSource {
 			if (flush || !classFile.exists()) {
 				LogUtil.log(pc, Log.LEVEL_DEBUG, "compile", "compile [" + getDisplayPath() + "] no previous class file or flush");
 
-				pcn.set(page = compile(config, classRootDir, null, false, pc.ignoreScopes()));
+				pcn.set(page = compile(config, classRootDir, null, false, pc.ignoreScopes(), false));
 				flush = false;
 				isNew = true;
 			}
@@ -406,7 +406,7 @@ public final class PageSourceImpl implements PageSource {
 				}
 				if (page == null) {
 					LogUtil.log(pc, Log.LEVEL_DEBUG, "compile", "compile  [" + getDisplayPath() + "] in case loading of the class fails");
-					pcn.set(page = compile(config, classRootDir, null, false, pc.ignoreScopes()));
+					pcn.set(page = compile(config, classRootDir, null, false, pc.ignoreScopes(), false));
 					isNew = true;
 				}
 			}
@@ -415,7 +415,7 @@ public final class PageSourceImpl implements PageSource {
 			if (!isNew && (srcLastModified != page.getSourceLastModified() || page.getVersion() != pc.getConfig().getFactory().getEngine().getInfo().getFullVersionInfo())) {
 				isNew = true;
 				LogUtil.log(pc, Log.LEVEL_DEBUG, "compile", "recompile [" + getDisplayPath() + "] because unloaded page has changed");
-				pcn.set(page = compile(config, classRootDir, page, false, pc.ignoreScopes()));
+				pcn.set(page = compile(config, classRootDir, page, false, pc.ignoreScopes(), false));
 			}
 			page.setPageSource(this);
 			page.setLoadType(LOAD_PHYSICAL);
@@ -459,7 +459,8 @@ public final class PageSourceImpl implements PageSource {
 		return page != null && load == page.getLoadType();
 	}
 
-	private synchronized Page compile(ConfigWeb config, Resource classRootDir, Page existing, boolean returnValue, boolean ignoreScopes) throws TemplateException {
+	private synchronized Page compile(ConfigWeb config, Resource classRootDir, Page existing, boolean returnValue, boolean ignoreScopes, boolean secondTry)
+			throws TemplateException {
 		try {
 			return _compile(config, classRootDir, existing, returnValue, ignoreScopes, false);
 		}
@@ -477,6 +478,7 @@ public final class PageSourceImpl implements PageSource {
 				throw new TemplateException("There is too much code inside the template [" + getDisplayPath() + "], " + Constants.NAME
 						+ " was not able to break it into pieces, move parts of your code to an include or an external component/function", msg);
 			}
+			if (!secondTry) return compile(config, classRootDir, existing, returnValue, ignoreScopes, true);
 			TemplateException te = new TemplateException("ClassFormatError:" + e.getMessage());
 			ExceptionUtil.initCauseEL(te, e);
 			throw te;
