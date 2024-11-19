@@ -1966,8 +1966,8 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 		return cs.getScriptMapping();
 	}
 
-	public void resetRPCClassLoader() {
-		cs.resetRPCClassLoader();
+	public void clearRPCClassLoader() {
+		cs.clearRPCClassLoader();
 	}
 
 	public PageSource[] getPageSources(PageContext arg0, Mapping[] arg1, String arg2, boolean arg3, boolean arg4, boolean arg5, boolean arg6, boolean arg7) {

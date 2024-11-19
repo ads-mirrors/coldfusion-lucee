@@ -161,6 +161,7 @@ import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 import lucee.runtime.type.util.UDFUtil;
 import lucee.runtime.video.VideoExecuterNotSupported;
+import lucee.transformer.dynamic.meta.Method;
 import lucee.transformer.library.function.FunctionLib;
 import lucee.transformer.library.function.FunctionLibException;
 import lucee.transformer.library.function.FunctionLibFactory;
@@ -522,19 +523,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 		}
 		return this;
-	}
-
-	@Override
-	public void reset() {
-		// resources.reset();
-		ormengines.clear();
-		clearFunctionCache();
-		clearCTCache();
-		clearComponentCache();
-		clearApplicationCache();
-		clearLoggers(null);
-		clearComponentMetadata();
-		baseComponentPageSource = null;
 	}
 
 	@Override
@@ -3270,7 +3258,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return directClassLoader;
 	}
 
-	public void resetRPCClassLoader() {
+	public void clearRPCClassLoader() {
 		rpcClassLoaders.clear();
 	}
 
@@ -6480,5 +6468,28 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	public boolean newVersion() {
 		return newVersion;
+	}
+
+	@Override
+	public void reset() {
+		// resources.reset();
+		ormengines.clear();
+		clearFunctionCache();
+		clearCTCache();
+		clearComponentCache();
+		clearApplicationCache();
+		clearLoggers(null);
+		clearComponentMetadata();
+		baseComponentPageSource = null;
+	}
+
+	public void resetAll() throws IOException {
+		List<Method> methods = Reflector.getMethods(this.getClass());
+
+		for (Method method: methods) {
+			if (!method.getName().startsWith("reset") || method.getName().equals("reset") || method.getName().equals("resetAll") || method.getArgumentCount() != 0) continue;
+			method.invoke(this);
+			print.e("reset: " + method.getName());
+		}
 	}
 }

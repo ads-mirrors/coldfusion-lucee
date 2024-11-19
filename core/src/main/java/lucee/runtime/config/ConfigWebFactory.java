@@ -311,7 +311,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 			((CFMLEngineImpl) config.getEngine()).touchMonitor(config);
 		}
-
 		config.setLoadTime(System.currentTimeMillis());
 	}
 

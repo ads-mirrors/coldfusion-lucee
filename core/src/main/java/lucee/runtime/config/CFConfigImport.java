@@ -14,6 +14,7 @@ import lucee.loader.util.Util;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.interpreter.JSONExpressionInterpreter;
 import lucee.runtime.op.Caster;
+import lucee.runtime.tag.Admin;
 import lucee.runtime.type.Collection;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.KeyImpl;
@@ -141,6 +142,7 @@ public class CFConfigImport {
 
 			admin.updateConfig(json, flushExistingData);
 			admin.storeAndReload();
+			Admin.getConfigServerImpl(config).resetAll();
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
