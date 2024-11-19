@@ -290,8 +290,8 @@ public final class ConfigWebFactory extends ConfigFactory {
 		config.setLastModified();
 
 		Log log = config.getLog("application");
-
 		_loadFilesystem(config, root, doNew, log); // load this before execute any code, what for example loadxtension does (json)
+
 		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded filesystem");
 
 		if (!essentialOnly) {
@@ -414,7 +414,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			Array providers = ConfigWebUtil.getAsArray("resourceProviders", root);
 
 			// Resource Provider
-			boolean hasZip = false;
+			boolean hasZip = false, hasS3 = false;
 			if (providers != null && providers.size() > 0) {
 				ClassDefinition prov;
 				String strProviderCFC;
@@ -434,11 +434,9 @@ public final class ConfigWebFactory extends ConfigFactory {
 						if (StringUtil.isEmpty(strProviderCFC)) strProviderCFC = getAttr(provider, "class");
 
 						// ignore OLD S3 extension from 4.0
-						// lucee.commons.io.res.type.s3.S3ResourceProvider
 						if ("lucee.extension.io.resource.type.s3.S3ResourceProvider".equals(prov.getClassName())
 								|| "lucee.commons.io.res.type.s3.S3ResourceProvider".equals(prov.getClassName()))
 							continue;
-						// prov=new ClassDefinitionImpl(S3ResourceProvider.class);
 
 						strProviderScheme = getAttr(provider, "scheme");
 						// class
@@ -453,6 +451,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 							}
 							else if ("https".equalsIgnoreCase(strProviderScheme)) hasHTTPs = true;
 							else if ("zip".equalsIgnoreCase(strProviderScheme)) hasZip = true;
+							else if ("s3".equalsIgnoreCase(strProviderScheme)) hasS3 = true;
 						}
 
 						// cfc
@@ -484,8 +483,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 				config.addResourceProvider("zip", new ClassDefinitionImpl<>(ZipResourceProvider.class), args);
 			}
 
-			// we make sure we have the default on server level
-			if (!config.hasResourceProvider("s3")) {
+			if (!hasS3) {
 				ClassDefinition s3Class = new ClassDefinitionImpl(DummyS3ResourceProvider.class);
 				Map<String, String> args = new HashMap<>();
 				args.put("lock-timeout", "10000");
