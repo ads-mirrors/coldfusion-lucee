@@ -1,12 +1,15 @@
 package lucee.runtime.config;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import lucee.commons.io.SystemUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.net.URLDecoder;
 import lucee.runtime.exp.PageException;
+import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.ArrayImpl;
@@ -21,7 +24,26 @@ import lucee.runtime.type.util.ListUtil;
  * way
  */
 public class ConfigWebUtilPatch {
-	public static Struct getAsStruct(Struct input, boolean allowCSSString, String... names) {
+
+	public static int STYLE_NONE = 0;
+	public static int STYLE_CCS = 1; // a:1;b:2
+	public static int STYLE_URL = 2; // a=1&b=2
+
+	public static Map<String, String> getAsMap(Struct input, int style, String... names) throws PageException {
+		Struct sct = getAsStruct(input, style, names);
+		if (sct == null) return null;
+		if (sct.isEmpty()) return new HashMap<>();
+		Map<String, String> map = new HashMap<>();
+		Iterator<Entry<Key, Object>> it = sct.entryIterator();
+		Entry<Key, Object> e;
+		while (it.hasNext()) {
+			e = it.next();
+			map.put(e.getKey().getString(), Caster.toString(e.getValue()));
+		}
+		return map;
+	}
+
+	public static Struct getAsStruct(Struct input, int style, String... names) {
 		Struct sct = null;
 		if (input == null) return sct;
 
@@ -32,16 +54,25 @@ public class ConfigWebUtilPatch {
 				break;
 			}
 		}
-
-		if (allowCSSString && sct == null) {
-			for (String name: names) {
-				obj = input.get(name, null);
-				if (obj instanceof CharSequence && !StringUtil.isEmpty(obj.toString(), true)) {
-					sct = toStruct(obj.toString().trim());
-					if (!sct.isEmpty()) break;
+		if (sct == null) {
+			if (STYLE_CCS == style) {
+				for (String name: names) {
+					obj = input.get(name, null);
+					if (obj instanceof CharSequence && !StringUtil.isEmpty(obj.toString(), true)) {
+						sct = toStruct(obj.toString().trim(), ';', ':');
+						if (!sct.isEmpty()) break;
+					}
 				}
 			}
-
+			else if (STYLE_URL == style) {
+				for (String name: names) {
+					obj = input.get(name, null);
+					if (obj instanceof CharSequence && !StringUtil.isEmpty(obj.toString(), true)) {
+						sct = toStruct(obj.toString().trim(), '&', '=');
+						if (!sct.isEmpty()) break;
+					}
+				}
+			}
 		}
 
 		if (sct == null) {
@@ -52,14 +83,14 @@ public class ConfigWebUtilPatch {
 		return (Struct) replaceConfigPlaceHolders(sct);
 	}
 
-	public static Struct toStruct(String str) {
+	public static Struct toStruct(String str, char entriesSeparator, char entrySeparator) {
 
 		Struct sct = new StructImpl(StructImpl.TYPE_LINKED);
 		try {
-			String[] arr = ListUtil.toStringArray(ListUtil.listToArrayRemoveEmpty(str, '&'));
+			String[] arr = ListUtil.toStringArray(ListUtil.listToArrayRemoveEmpty(str, entriesSeparator));
 			String[] item;
 			for (int i = 0; i < arr.length; i++) {
-				item = ListUtil.toStringArray(ListUtil.listToArrayRemoveEmpty(arr[i], '='));
+				item = ListUtil.toStringArray(ListUtil.listToArrayRemoveEmpty(arr[i], entrySeparator));
 				if (item.length == 2) sct.setEL(KeyImpl.init(URLDecoder.decode(item[0], true).trim()), replaceConfigPlaceHolder(URLDecoder.decode(item[1], true)));
 				else if (item.length == 1) sct.setEL(KeyImpl.init(URLDecoder.decode(item[0], true).trim()), "");
 			}

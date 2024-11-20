@@ -773,13 +773,13 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 				// class
 				if (defProv.hasClass()) {
-					config.setDefaultResourceProvider(defProv.getClazz(), toArguments(getAttr(defaultProvider, "arguments"), true));
+					config.setDefaultResourceProvider(defProv.getClazz(), ConfigWebUtilPatch.getAsMap(defaultProvider, ConfigWebUtilPatch.STYLE_CCS, "arguments"));
 				}
 
 				// component
 				else if (!StringUtil.isEmpty(strDefaultProviderComponent)) {
 					strDefaultProviderComponent = strDefaultProviderComponent.trim();
-					Map<String, String> args = toArguments(getAttr(defaultProvider, "arguments"), true);
+					Map<String, String> args = ConfigWebUtilPatch.getAsMap(defaultProvider, ConfigWebUtilPatch.STYLE_CCS, "arguments");
 					args.put("component", strDefaultProviderComponent);
 					config.setDefaultResourceProvider(CFMLResourceProvider.class, args);
 				}
@@ -815,12 +815,12 @@ public final class ConfigWebFactory extends ConfigFactory {
 						// class
 						if (prov.hasClass() && !StringUtil.isEmpty(strProviderScheme)) {
 							strProviderScheme = strProviderScheme.trim().toLowerCase();
-							config.addResourceProvider(strProviderScheme, prov, toArguments(getAttr(provider, "arguments"), true));
+							config.addResourceProvider(strProviderScheme, prov, ConfigWebUtilPatch.getAsMap(provider, ConfigWebUtilPatch.STYLE_CCS, "arguments"));
 
 							// patch for user not having
 							if ("http".equalsIgnoreCase(strProviderScheme)) {
 								httpClass = prov;
-								httpArgs = toArguments(getAttr(provider, "arguments"), true);
+								httpArgs = ConfigWebUtilPatch.getAsMap(provider, ConfigWebUtilPatch.STYLE_CCS, "arguments");
 							}
 							else if ("https".equalsIgnoreCase(strProviderScheme)) hasHTTPs = true;
 						}
@@ -829,7 +829,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 						else if (!StringUtil.isEmpty(strProviderCFC) && !StringUtil.isEmpty(strProviderScheme)) {
 							strProviderCFC = strProviderCFC.trim();
 							strProviderScheme = strProviderScheme.trim().toLowerCase();
-							Map<String, String> args = toArguments(getAttr(provider, "arguments"), true);
+							Map<String, String> args = ConfigWebUtilPatch.getAsMap(provider, ConfigWebUtilPatch.STYLE_CCS, "arguments");
 							args.put("component", strProviderCFC);
 							config.addResourceProvider(strProviderScheme, new ClassDefinitionImpl(CFMLResourceProvider.class), args);
 						}
@@ -849,7 +849,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 				// we make sure we have the default on server level
 				if (!hasCS && !config.hasResourceProvider("s3")) {
 					ClassDefinition s3Class = new ClassDefinitionImpl(DummyS3ResourceProvider.class);
-					config.addResourceProvider("s3", s3Class, toArguments("lock-timeout:10000;", false));
+					config.addResourceProvider("s3", s3Class, cssStringToMap("lock-timeout:10000;", false, false));
 				}
 			}
 		}
@@ -1029,11 +1029,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
-	}
-
-	static Map<String, String> toArguments(String attributes, boolean decode) {
-		return cssStringToMap(attributes, decode, false);
-
 	}
 
 	public static Map<String, String> cssStringToMap(String attributes, boolean decode, boolean lowerKeys) {
@@ -2056,8 +2051,10 @@ public final class ConfigWebFactory extends ConfigFactory {
 		try {
 			// loggers
 			Struct loggers = ConfigWebUtil.getAsStruct("loggers", root);
-			String name, appenderArgs, tmp, layoutArgs;
+			String name, tmp;
+			Map<String, String> appenderArgs, layoutArgs;
 			ClassDefinition cdAppender, cdLayout;
+
 			int level = Log.LEVEL_ERROR;
 			boolean readOnly = false;
 			Iterator<Entry<Key, Object>> itt = loggers.entryIterator();
@@ -2080,8 +2077,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 					else if (!cdAppender.isBundle()) {
 						cdAppender = config.getLogEngine().appenderClassDefintion(cdAppender.getClassName());
 					}
-					appenderArgs = StringUtil.trim(getAttr(child, "appenderArguments"), "");
-
+					appenderArgs = ConfigWebUtilPatch.getAsMap(child, ConfigWebUtilPatch.STYLE_CCS, "appenderArguments");
 					// layout
 					cdLayout = getClassDefinition(child, "layout", config.getIdentification());
 					if (!cdLayout.hasClass()) {
@@ -2091,21 +2087,18 @@ public final class ConfigWebFactory extends ConfigFactory {
 					else if (!cdLayout.isBundle()) {
 						cdLayout = config.getLogEngine().layoutClassDefintion(cdLayout.getClassName());
 					}
-					layoutArgs = StringUtil.trim(getAttr(child, "layoutArguments"), "");
-
+					layoutArgs = ConfigWebUtilPatch.getAsMap(child, ConfigWebUtilPatch.STYLE_CCS, "layoutArguments");
 					String strLevel = getAttr(child, "level");
 					if (StringUtil.isEmpty(strLevel, true)) strLevel = getAttr(child, "logLevel");
 					level = LogUtil.toLevel(StringUtil.trim(strLevel, ""), Log.LEVEL_ERROR);
 					readOnly = Caster.toBooleanValue(getAttr(child, "readOnly"), false);
 					// ignore when no appender/name is defined
 					if (cdAppender.hasClass() && !StringUtil.isEmpty(name)) {
-						Map<String, String> appArgs = cssStringToMap(appenderArgs, true, true);
 						existing.add(name.toLowerCase());
 						if (cdLayout.hasClass()) {
-							Map<String, String> layArgs = cssStringToMap(layoutArgs, true, true);
-							config.addLogger(name, level, cdAppender, appArgs, cdLayout, layArgs, readOnly, false);
+							config.addLogger(name, level, cdAppender, appenderArgs, cdLayout, layoutArgs, readOnly, false);
 						}
-						else config.addLogger(name, level, cdAppender, appArgs, null, null, readOnly, false);
+						else config.addLogger(name, level, cdAppender, appenderArgs, null, null, readOnly, false);
 					}
 				}
 				catch (Throwable t) {
@@ -2212,11 +2205,8 @@ public final class ConfigWebFactory extends ConfigFactory {
 				if (clazz != null) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(configServer == null ? config : configServer), Log.LEVEL_INFO,
 						ConfigWebFactory.class.getName(), "loaded ExecutionLog class " + clazz.getName());
 
-				// arguments
-				String strArgs = getAttr(el, "arguments");
-				if (StringUtil.isEmpty(strArgs)) strArgs = getAttr(el, "classArguments");
-				Map<String, String> args = toArguments(strArgs, true);
-
+				// arguments"classArguments"
+				Map<String, String> args = ConfigWebUtilPatch.getAsMap(el, ConfigWebUtilPatch.STYLE_CCS, "arguments", "classArguments");
 				config.setExecutionLogFactory(new ExecutionLogFactory(clazz, args));
 			}
 			else {
@@ -2368,7 +2358,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 								Caster.toLongValue(getAttr(dataSource, "metaCacheTimeout"), 60000), toBoolean(getAttr(dataSource, "blob"), true),
 								toBoolean(getAttr(dataSource, "clob"), true), Caster.toIntValue(getAttr(dataSource, "allow"), DataSource.ALLOW_ALL),
 								toBoolean(getAttr(dataSource, "validate"), false), toBoolean(getAttr(dataSource, "storage"), false), getAttr(dataSource, "timezone"),
-								ConfigWebUtilPatch.getAsStruct(dataSource, true, "custom"), getAttr(dataSource, "dbdriver"),
+								ConfigWebUtilPatch.getAsStruct(dataSource, ConfigWebUtilPatch.STYLE_URL, "custom"), getAttr(dataSource, "dbdriver"),
 								ParamSyntax.toParamSyntax(dataSource, ParamSyntax.DEFAULT), toBoolean(getAttr(dataSource, "literalTimestampWithTSOffset"), false),
 								toBoolean(getAttr(dataSource, "alwaysSetTimeout"), false), toBoolean(getAttr(dataSource, "requestExclusive"), false),
 								toBoolean(getAttr(dataSource, "alwaysResetConnections"), false)
@@ -2623,7 +2613,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 						}
 
 						{
-							Struct custom = ConfigWebUtilPatch.getAsStruct(data, true, "custom");
+							Struct custom = ConfigWebUtilPatch.getAsStruct(data, ConfigWebUtilPatch.STYLE_URL, "custom");
 
 							// Workaround for old EHCache class definitions
 							if (cd.getClassName() != null && cd.getClassName().endsWith(".EHCacheLite")) {
@@ -2799,7 +2789,8 @@ public final class ConfigWebFactory extends ConfigFactory {
 						id = e.getKey().getLowerString();
 
 						ge = new GatewayEntryImpl(id, getClassDefinition(eConnection, "", config.getIdentification()), getAttr(eConnection, "cfcPath"),
-								getAttr(eConnection, "listenerCFCPath"), getAttr(eConnection, "startupMode"), ConfigWebUtilPatch.getAsStruct(eConnection, true, "custom"),
+								getAttr(eConnection, "listenerCFCPath"), getAttr(eConnection, "startupMode"),
+								ConfigWebUtilPatch.getAsStruct(eConnection, ConfigWebUtilPatch.STYLE_URL, "custom"),
 								Caster.toBooleanValue(getAttr(eConnection, "readOnly"), false));
 
 						if (!StringUtil.isEmpty(id)) {
@@ -3691,7 +3682,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			// usage
 			String strUsage = getAttr(_clients, "usage");
 			Struct sct;
-			if (!StringUtil.isEmpty(strUsage)) sct = ConfigWebUtilPatch.getAsStruct(_clients, true, "custom");// config.setRemoteClientUsage(toStruct(strUsage));
+			if (!StringUtil.isEmpty(strUsage)) sct = ConfigWebUtilPatch.getAsStruct(_clients, ConfigWebUtilPatch.STYLE_URL, "custom");// config.setRemoteClientUsage(toStruct(strUsage));
 			else sct = new StructImpl();
 			// TODO make this generic
 			if (configServer != null) {
@@ -4700,7 +4691,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 						if (e == null) continue;
 						id = getAttr(e, "id");
 						list.put(id, new DebugEntry(id, getAttr(e, "type"), getAttr(e, "iprange"), getAttr(e, "label"), getAttr(e, "path"), getAttr(e, "fullname"),
-								ConfigWebUtilPatch.getAsStruct(e, true, "custom")));
+								ConfigWebUtilPatch.getAsStruct(e, ConfigWebUtilPatch.STYLE_URL, "custom")));
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
