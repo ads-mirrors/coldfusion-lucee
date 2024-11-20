@@ -29,6 +29,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.rest.Mapping;
 import lucee.runtime.rest.RestUtil;
+import lucee.runtime.tag.Admin;
 
 public class RestInitApplication {
 
@@ -87,6 +88,7 @@ public class RestInitApplication {
 			ConfigAdmin admin = ConfigAdmin.newInstance(pc.getConfig(), webAdminPassword);
 			admin.updateRestMapping(virtual, dir.getAbsolutePath(), defaultMapping);
 			admin.storeAndReload();
+			Admin.getConfigServerImpl(pc.getConfig()).resetRestMappings();
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);

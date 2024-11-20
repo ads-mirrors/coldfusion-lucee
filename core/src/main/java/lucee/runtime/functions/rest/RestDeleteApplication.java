@@ -30,6 +30,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.rest.Mapping;
 import lucee.runtime.rest.RestUtil;
+import lucee.runtime.tag.Admin;
 
 public class RestDeleteApplication {
 	public static String call(PageContext pc, String dirPath) throws PageException {
@@ -51,6 +52,7 @@ public class RestDeleteApplication {
 				if (RestUtil.isMatch(pc, mapping, dir)) {
 					admin.removeRestMapping(mapping.getVirtual());
 					admin.storeAndReload();
+					Admin.getConfigServerImpl(config).resetRestMappings();
 				}
 			}
 		}

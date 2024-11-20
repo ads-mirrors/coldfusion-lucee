@@ -25,6 +25,7 @@ import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.BIF;
 import lucee.runtime.op.Caster;
+import lucee.runtime.tag.Admin;
 
 /**
  * implements BIF CacheRegionRemove. This function only exists for compatibility with other CFML
@@ -47,6 +48,7 @@ public class CacheRegionRemove extends BIF {
 			ConfigAdmin adminConfig = ConfigAdmin.newInstance(pc.getConfig(), webAdminPassword);
 			adminConfig.removeCacheConnection(cacheName);
 			adminConfig.storeAndReload();
+			Admin.getConfigServerImpl(pc.getConfig()).resetCaches().resetCacheDefinitions();
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);

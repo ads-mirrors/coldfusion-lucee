@@ -6484,6 +6484,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	public void resetAll() throws IOException {
+		print.ds();
 		List<Method> methods = Reflector.getMethods(this.getClass());
 
 		for (Method method: methods) {

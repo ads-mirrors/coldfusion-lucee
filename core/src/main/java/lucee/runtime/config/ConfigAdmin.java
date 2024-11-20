@@ -5081,7 +5081,10 @@ public final class ConfigAdmin {
 			// reload
 			// if(reloadNecessary){
 			reloadNecessary = true;
-			if (reload && reloadNecessary) _storeAndReload();
+			if (reload && reloadNecessary) {
+				_storeAndReload();
+				Admin.getConfigServerImpl(config).resetAll();
+			}
 			else _store();
 			// }
 		}
