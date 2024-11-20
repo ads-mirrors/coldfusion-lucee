@@ -1751,12 +1751,10 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return map;
 	}
 
-	public static void loadCache(ConfigImpl config, Struct root, Log log) {
+	public static Map<Integer, String> loadCacheDefaultConnectionNames(ConfigImpl config, Struct root, Log log) {
+		Map<Integer, String> names = new HashMap<>();
 		try {
 			Struct defaultCache = ConfigWebUtil.getAsStruct("cache", root);
-			Map<String, CacheConnection> caches = new HashMap<String, CacheConnection>();
-
-			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManagerImpl.TYPE_CACHE);
 
 			// default cache
 			for (int i = 0; i < ConfigPro.CACHE_TYPES_MAX.length; i++) {
@@ -1764,34 +1762,26 @@ public final class ConfigWebFactory extends ConfigFactory {
 					String def = getAttr(defaultCache, "default" + StringUtil.ucFirst(ConfigPro.STRING_CACHE_TYPES_MAX[i]));
 					if (StringUtil.isEmpty(def, true)) def = getAttr(root, "cacheDefault" + StringUtil.ucFirst(ConfigPro.STRING_CACHE_TYPES_MAX[i]));
 
-					if (hasAccess && !StringUtil.isEmpty(def, true)) {
-						config.setCacheDefaultConnectionName(ConfigPro.CACHE_TYPES_MAX[i], def.trim());
+					if (!StringUtil.isEmpty(def, true)) {
+						names.put(ConfigPro.CACHE_TYPES_MAX[i], def.trim());
 					}
-					else {
-						config.setCacheDefaultConnectionName(+ConfigPro.CACHE_TYPES_MAX[i], "");
-					}
-
 				}
 				catch (Throwable t) {
 					ExceptionUtil.rethrowIfNecessary(t);
 					log(config, log, t);
 				}
 			}
+		}
+		catch (Throwable t) {
+			ExceptionUtil.rethrowIfNecessary(t);
+			log(config, log, t);
+		}
+		return names;
+	}
 
-			{
-				Struct eCaches = ConfigWebUtil.getAsStruct("caches", root);
-
-				// check if we have an update or not
-				StringBuilder sb = new StringBuilder();
-				for (Entry<String, ClassDefinition> e: config.getCacheDefinitions().entrySet()) {
-					sb.append(e.getKey()).append(':').append(e.getValue().toString()).append(';');
-				}
-				// defaults
-				sb.append("defaults:");
-				for (int ct: ConfigPro.CACHE_TYPES_MAX) {
-					sb.append(config.getCacheDefaultConnectionName(ct)).append(';');
-				}
-			}
+	public static Map<String, CacheConnection> loadCacheCacheConnections(ConfigImpl config, Struct root, Log log) {
+		Map<String, CacheConnection> caches = new HashMap<String, CacheConnection>();
+		try {
 
 			// cache connections
 			Struct conns = ConfigWebUtil.getAsStruct("caches", root);
@@ -1802,7 +1792,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			CacheConnection cc;
 			// Class cacheClazz;
 			// caches
-			if (hasAccess) {
+			{
 				Iterator<Entry<Key, Object>> it = conns.entryIterator();
 				Entry<Key, Object> entry;
 				Struct data;
@@ -1874,12 +1864,12 @@ public final class ConfigWebFactory extends ConfigFactory {
 					}
 				}
 			}
-			config.setCaches(caches);
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
+		return caches;
 	}
 
 	private static String getMD5(Struct data, String cacheDef, String parentMD5) {

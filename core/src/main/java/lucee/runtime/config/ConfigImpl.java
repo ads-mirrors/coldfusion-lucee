@@ -189,27 +189,10 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private Map<String, DataSource> datasourcesAll;
 	private Map<String, DataSource> datasourcesNoQoQ;
 
-	private Map<String, CacheConnection> caches;
+	private Map<String, CacheConnection> cacheConnection;
 
-	private CacheConnection defaultCacheFunction = null;
-	private CacheConnection defaultCacheObject = null;
-	private CacheConnection defaultCacheTemplate = null;
-	private CacheConnection defaultCacheQuery = null;
-	private CacheConnection defaultCacheResource = null;
-	private CacheConnection defaultCacheInclude = null;
-	private CacheConnection defaultCacheHTTP = null;
-	private CacheConnection defaultCacheFile = null;
-	private CacheConnection defaultCacheWebservice = null;
-
-	private String cacheDefaultConnectionNameFunction = null;
-	private String cacheDefaultConnectionNameObject = null;
-	private String cacheDefaultConnectionNameTemplate = null;
-	private String cacheDefaultConnectionNameQuery = null;
-	private String cacheDefaultConnectionNameResource = null;
-	private String cacheDefaultConnectionNameInclude = null;
-	private String cacheDefaultConnectionNameHTTP = null;
-	private String cacheDefaultConnectionNameFile = null;
-	private String cacheDefaultConnectionNameWebservice = null;
+	private Map<Integer, String> cacheDefaultConnectionNames = null;
+	private Map<Integer, CacheConnection> cacheDefaultConnection = null;
 
 	private TagLib[] cfmlTlds;
 	private FunctionLib cfmlFlds;
@@ -4401,29 +4384,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return "";
 	}
 
-	@Override
-	public Map<String, CacheConnection> getCacheConnections() {// = new HashMap<String, CacheConnection>()
-		if (caches == null) {
-			synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
-				if (caches == null) {
-					ConfigWebFactory.loadCache(this, root, getLog());
-				}
-			}
-		}
-		return caches;
-	}
-
-	public ConfigImpl resetCacheConnections() {// = new HashMap<String, CacheConnection>()
-		if (caches != null) {
-			synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
-				if (caches != null) {
-					caches = null;
-				}
-			}
-		}
-		return this;
-	}
-
 	/**
 	 * creates a new RamCache, please make sure to finalize.
 	 * 
@@ -4438,303 +4398,110 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return rc;
 	}
 
-	protected void setCaches(Map<String, CacheConnection> caches) {
-		// TOD find a better way for this ethos
-
-		this.caches = caches;
-		Iterator<Entry<String, CacheConnection>> it = caches.entrySet().iterator();
-		Entry<String, CacheConnection> entry;
-		CacheConnection cc;
-		while (it.hasNext()) {
-			entry = it.next();
-			cc = entry.getValue();
-			if (cc.getName().equalsIgnoreCase(cacheDefaultConnectionNameTemplate)) {
-				defaultCacheTemplate = cc;
-			}
-			else if (cc.getName().equalsIgnoreCase(cacheDefaultConnectionNameFunction)) {
-				defaultCacheFunction = cc;
-			}
-			else if (cc.getName().equalsIgnoreCase(cacheDefaultConnectionNameQuery)) {
-				defaultCacheQuery = cc;
-			}
-			else if (cc.getName().equalsIgnoreCase(cacheDefaultConnectionNameResource)) {
-				defaultCacheResource = cc;
-			}
-			else if (cc.getName().equalsIgnoreCase(cacheDefaultConnectionNameObject)) {
-				defaultCacheObject = cc;
-			}
-			else if (cc.getName().equalsIgnoreCase(cacheDefaultConnectionNameInclude)) {
-				defaultCacheInclude = cc;
-			}
-			else if (cc.getName().equalsIgnoreCase(cacheDefaultConnectionNameHTTP)) {
-				defaultCacheHTTP = cc;
-			}
-			else if (cc.getName().equalsIgnoreCase(cacheDefaultConnectionNameFile)) {
-				defaultCacheFile = cc;
-			}
-			else if (cc.getName().equalsIgnoreCase(cacheDefaultConnectionNameWebservice)) {
-				defaultCacheWebservice = cc;
-			}
-		}
-
-		// when default was set to null
-		if (StringUtil.isEmpty(cacheDefaultConnectionNameTemplate) && defaultCacheTemplate != null) {
-			defaultCacheTemplate = null;
-		}
-		else if (StringUtil.isEmpty(cacheDefaultConnectionNameFunction) && defaultCacheFunction != null) {
-			defaultCacheFunction = null;
-		}
-		else if (StringUtil.isEmpty(cacheDefaultConnectionNameQuery) && defaultCacheQuery != null) {
-			defaultCacheQuery = null;
-		}
-		else if (StringUtil.isEmpty(cacheDefaultConnectionNameResource) && defaultCacheResource != null) {
-			defaultCacheResource = null;
-		}
-		else if (StringUtil.isEmpty(cacheDefaultConnectionNameObject) && defaultCacheObject != null) {
-			defaultCacheObject = null;
-		}
-		else if (StringUtil.isEmpty(cacheDefaultConnectionNameInclude) && defaultCacheInclude != null) {
-			defaultCacheInclude = null;
-		}
-		else if (StringUtil.isEmpty(cacheDefaultConnectionNameHTTP) && defaultCacheHTTP != null) {
-			defaultCacheHTTP = null;
-		}
-		else if (StringUtil.isEmpty(cacheDefaultConnectionNameFile) && defaultCacheFile != null) {
-			defaultCacheFile = null;
-		}
-		else if (StringUtil.isEmpty(cacheDefaultConnectionNameWebservice) && defaultCacheWebservice != null) {
-			defaultCacheWebservice = null;
-		}
-	}
-
-	protected void setCacheDefaultConnectionName(int type, String cacheDefaultConnectionName) {
-		if (type == CACHE_TYPE_FUNCTION) cacheDefaultConnectionNameFunction = cacheDefaultConnectionName;
-		else if (type == CACHE_TYPE_OBJECT) cacheDefaultConnectionNameObject = cacheDefaultConnectionName;
-		else if (type == CACHE_TYPE_TEMPLATE) cacheDefaultConnectionNameTemplate = cacheDefaultConnectionName;
-		else if (type == CACHE_TYPE_QUERY) cacheDefaultConnectionNameQuery = cacheDefaultConnectionName;
-		else if (type == CACHE_TYPE_RESOURCE) cacheDefaultConnectionNameResource = cacheDefaultConnectionName;
-		else if (type == CACHE_TYPE_INCLUDE) cacheDefaultConnectionNameInclude = cacheDefaultConnectionName;
-		else if (type == CACHE_TYPE_HTTP) cacheDefaultConnectionNameHTTP = cacheDefaultConnectionName;
-		else if (type == CACHE_TYPE_FILE) cacheDefaultConnectionNameFile = cacheDefaultConnectionName;
-		else if (type == CACHE_TYPE_WEBSERVICE) cacheDefaultConnectionNameWebservice = cacheDefaultConnectionName;
-	}
-
-	@Override
-	public CacheConnection getCacheDefaultConnection(int type) {
-		if (type == CACHE_TYPE_FUNCTION) {
-			if (defaultCacheFunction == null) {
-				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
-					if (defaultCacheFunction == null) {
-						ConfigWebFactory.loadCache(this, root, getLog());
-					}
+	public Map<Integer, String> getCacheDefaultConnectionNames() {
+		if (cacheDefaultConnectionNames == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnectionName")) {
+				if (cacheDefaultConnectionNames == null) {
+					cacheDefaultConnectionNames = ConfigWebFactory.loadCacheDefaultConnectionNames(this, root, getLog());
 				}
 			}
-			return defaultCacheFunction;
 		}
-		if (type == CACHE_TYPE_OBJECT) {
-			if (defaultCacheObject == null) {
-				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
-					if (defaultCacheObject == null) {
-						ConfigWebFactory.loadCache(this, root, getLog());
-					}
-				}
-			}
-			return defaultCacheObject;
-		}
-		if (type == CACHE_TYPE_TEMPLATE) {
-			if (defaultCacheTemplate == null) {
-				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
-					if (defaultCacheTemplate == null) {
-						ConfigWebFactory.loadCache(this, root, getLog());
-					}
-				}
-			}
-			return defaultCacheTemplate;
-		}
-		if (type == CACHE_TYPE_QUERY) {
-			if (defaultCacheQuery == null) {
-				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
-					if (defaultCacheQuery == null) {
-						ConfigWebFactory.loadCache(this, root, getLog());
-					}
-				}
-			}
-			return defaultCacheQuery;
-		}
-		if (type == CACHE_TYPE_RESOURCE) {
-			if (defaultCacheResource == null) {
-				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
-					if (defaultCacheResource == null) {
-						ConfigWebFactory.loadCache(this, root, getLog());
-					}
-				}
-			}
-			return defaultCacheResource;
-		}
-		if (type == CACHE_TYPE_INCLUDE) {
-			if (defaultCacheInclude == null) {
-				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
-					if (defaultCacheInclude == null) {
-						ConfigWebFactory.loadCache(this, root, getLog());
-					}
-				}
-			}
-			return defaultCacheInclude;
-		}
-		if (type == CACHE_TYPE_HTTP) {
-			if (defaultCacheHTTP == null) {
-				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
-					if (defaultCacheHTTP == null) {
-						ConfigWebFactory.loadCache(this, root, getLog());
-					}
-				}
-			}
-			return defaultCacheHTTP;
-		}
-		if (type == CACHE_TYPE_FILE) {
-			if (defaultCacheFile == null) {
-				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
-					if (defaultCacheFile == null) {
-						ConfigWebFactory.loadCache(this, root, getLog());
-					}
-				}
-			}
-			return defaultCacheFile;
-		}
-		if (type == CACHE_TYPE_WEBSERVICE) {
-			if (defaultCacheWebservice == null) {
-				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
-					if (defaultCacheWebservice == null) {
-						ConfigWebFactory.loadCache(this, root, getLog());
-					}
-				}
-			}
-			return defaultCacheWebservice;
-		}
-
-		return null;
+		return cacheDefaultConnectionNames;
 	}
 
 	@Override
 	public String getCacheDefaultConnectionName(int type) {
+		String res = getCacheDefaultConnectionNames().get(type);
+		if (StringUtil.isEmpty(res, true)) return "";
+		return res.trim();
+	}
 
-		if (type == CACHE_TYPE_FUNCTION) {
-			if (cacheDefaultConnectionNameFunction == null) {
-				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
-					if (cacheDefaultConnectionNameFunction == null) {
-						ConfigWebFactory.loadCache(this, root, getLog());
-					}
+	public ConfigImpl resetCacheDefaultConnectionNames() {
+		if (cacheDefaultConnectionNames != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnectionName")) {
+				if (cacheDefaultConnectionNames != null) {
+					cacheDefaultConnectionNames = null;
 				}
 			}
-			return cacheDefaultConnectionNameFunction;
 		}
-		if (type == CACHE_TYPE_OBJECT) {
-			if (cacheDefaultConnectionNameObject == null) {
-				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
-					if (cacheDefaultConnectionNameObject == null) {
-						ConfigWebFactory.loadCache(this, root, getLog());
+		return this;
+	}
+
+	public Map<Integer, CacheConnection> getCacheDefaultConnections() {
+		if (cacheDefaultConnection == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
+				if (cacheDefaultConnection == null) {
+
+					Map<Integer, String> names = getCacheDefaultConnectionNames();
+					Map<Integer, CacheConnection> tmp = new HashMap<>();
+
+					CacheConnection cc;
+					for (Entry<String, CacheConnection> entry: getCacheConnections().entrySet()) {
+						cc = entry.getValue();
+
+						for (Entry<Integer, String> e: names.entrySet()) {
+							if (cc.getName().equalsIgnoreCase(e.getValue())) {
+								tmp.put(e.getKey(), cc);
+							}
+						}
 					}
+
+					// when default was set to null
+					/*
+					 * for (Entry<Integer, String> e: names.entrySet()) { if (StringUtil.isEmpty(e.getValue()) &&
+					 * tmp.get(e.getKey()) != null) { tmp.remove(e.getKey()); } }
+					 */
+					cacheDefaultConnection = tmp;
 				}
 			}
-			return cacheDefaultConnectionNameObject;
 		}
-		if (type == CACHE_TYPE_TEMPLATE) {
-			if (cacheDefaultConnectionNameTemplate == null) {
-				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
-					if (cacheDefaultConnectionNameTemplate == null) {
-						ConfigWebFactory.loadCache(this, root, getLog());
-					}
-				}
-			}
-			return cacheDefaultConnectionNameTemplate;
-		}
-		if (type == CACHE_TYPE_QUERY) {
-			if (cacheDefaultConnectionNameQuery == null) {
-				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
-					if (cacheDefaultConnectionNameQuery == null) {
-						ConfigWebFactory.loadCache(this, root, getLog());
-					}
-				}
-			}
-			return cacheDefaultConnectionNameQuery;
-		}
-		if (type == CACHE_TYPE_RESOURCE) {
-			if (cacheDefaultConnectionNameResource == null) {
-				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
-					if (cacheDefaultConnectionNameResource == null) {
-						ConfigWebFactory.loadCache(this, root, getLog());
-					}
-				}
-			}
-			return cacheDefaultConnectionNameResource;
-		}
-		if (type == CACHE_TYPE_INCLUDE) {
-			if (cacheDefaultConnectionNameInclude == null) {
-				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
-					if (cacheDefaultConnectionNameInclude == null) {
-						ConfigWebFactory.loadCache(this, root, getLog());
-					}
-				}
-			}
-			return cacheDefaultConnectionNameInclude;
-		}
-		if (type == CACHE_TYPE_HTTP) {
-			if (cacheDefaultConnectionNameHTTP == null) {
-				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
-					if (cacheDefaultConnectionNameHTTP == null) {
-						ConfigWebFactory.loadCache(this, root, getLog());
-					}
-				}
-			}
-			return cacheDefaultConnectionNameHTTP;
-		}
-		if (type == CACHE_TYPE_FILE) {
-			if (cacheDefaultConnectionNameFile == null) {
-				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
-					if (cacheDefaultConnectionNameFile == null) {
-						ConfigWebFactory.loadCache(this, root, getLog());
-					}
-				}
-			}
-			return cacheDefaultConnectionNameFile;
-		}
-		if (type == CACHE_TYPE_WEBSERVICE) {
-			if (cacheDefaultConnectionNameWebservice == null) {
-				synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
-					if (cacheDefaultConnectionNameWebservice == null) {
-						ConfigWebFactory.loadCache(this, root, getLog());
-					}
-				}
-			}
-			return cacheDefaultConnectionNameWebservice;
-		}
-		return null;
+		return cacheDefaultConnection;
+	}
+
+	@Override
+	public CacheConnection getCacheDefaultConnection(int type) {
+		return getCacheDefaultConnections().get(type);
 	}
 
 	public ConfigImpl resetCacheDefaultConnections() {
-		synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
-			caches = null;
-
-			defaultCacheFunction = null;
-			defaultCacheObject = null;
-			defaultCacheTemplate = null;
-			defaultCacheQuery = null;
-			defaultCacheResource = null;
-			defaultCacheInclude = null;
-			defaultCacheHTTP = null;
-			defaultCacheFile = null;
-			defaultCacheWebservice = null;
-
-			cacheDefaultConnectionNameFunction = null;
-			cacheDefaultConnectionNameObject = null;
-			cacheDefaultConnectionNameTemplate = null;
-			cacheDefaultConnectionNameQuery = null;
-			cacheDefaultConnectionNameResource = null;
-			cacheDefaultConnectionNameInclude = null;
-			cacheDefaultConnectionNameHTTP = null;
-			cacheDefaultConnectionNameFile = null;
-			cacheDefaultConnectionNameWebservice = null;
+		if (cacheDefaultConnection != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
+				if (cacheDefaultConnection != null) {
+					cacheDefaultConnection = null;
+				}
+			}
 		}
+		return this;
+	}
+
+	@Override
+	public Map<String, CacheConnection> getCacheConnections() {// = new HashMap<String, CacheConnection>()
+		if (cacheConnection == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCacheConnections")) {
+				if (cacheConnection == null) {
+					cacheConnection = ConfigWebFactory.loadCacheCacheConnections(this, root, getLog());
+				}
+			}
+		}
+		return cacheConnection;
+	}
+
+	public ConfigImpl resetCacheConnections() {// = new HashMap<String, CacheConnection>()
+		if (cacheConnection != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCacheConnections")) {
+				if (cacheConnection != null) {
+					cacheConnection = null;
+				}
+			}
+		}
+		return this;
+	}
+
+	public ConfigImpl resetCacheAll() {
+		resetCacheDefaultConnectionNames();
+		resetCacheDefaultConnections();
+		resetCacheConnections();
+		resetCacheDefinitions();
 		return this;
 	}
 
