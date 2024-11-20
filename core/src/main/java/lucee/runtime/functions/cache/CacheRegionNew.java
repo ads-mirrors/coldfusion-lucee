@@ -81,7 +81,7 @@ public class CacheRegionNew extends BIF {
 			adminConfig.updateCacheConnection(cacheName, new ClassDefinitionImpl("org.lucee.extension.cache.eh.EHCache", null, null, pc.getConfig().getIdentification()),
 					Config.CACHE_TYPE_NONE, properties, false, false);
 			adminConfig.storeAndReload();
-			Admin.getConfigServerImpl(pc.getConfig()).resetCaches().resetCacheDefinitions();
+			Admin.getConfigServerImpl(pc.getConfig()).resetCacheDefaultConnections().resetCacheDefinitions().resetCacheDefaultConnections().resetCacheConnections();
 		}
 		catch (Exception e) {
 			if (throwOnError) throw Caster.toPageException(e);

@@ -4413,6 +4413,17 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return caches;
 	}
 
+	public ConfigImpl resetCacheConnections() {// = new HashMap<String, CacheConnection>()
+		if (caches != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
+				if (caches != null) {
+					caches = null;
+				}
+			}
+		}
+		return this;
+	}
+
 	/**
 	 * creates a new RamCache, please make sure to finalize.
 	 * 
@@ -4700,7 +4711,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return null;
 	}
 
-	public ConfigImpl resetCaches() {
+	public ConfigImpl resetCacheDefaultConnections() {
 		synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnection")) {
 			caches = null;
 
