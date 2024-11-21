@@ -399,8 +399,35 @@ public abstract class ConfigFactory {
 			moveAsBool("useShadow", "componentUseVariablesScope", component, root);
 
 			// mappings
-			Array ctMappings = ConfigWebUtil.getAsArray("mapping", component);
-			add(ctMappings, "componentMappings", root);
+			Array comMappings = ConfigWebUtil.getAsArray("mapping", component);
+			add(comMappings, "componentMappings", root);
+
+			// remove and add default mappings
+			Array arr = Caster.toArray(root.get("componentMappings", null), null);
+			Struct sct = null;
+			String v;
+			boolean hasDefault = false;
+			if (arr != null && arr.size() > 0) {
+				arr.size();
+				for (int i = arr.size(); i > 0; i--) {
+					sct = Caster.toStruct(arr.get(i, null), null);
+					if (sct != null) {
+						v = Caster.toString(sct.get("physical", null), null);
+						if ("{lucee-web}/components/".equals(v) || "{lucee-server}/components/".equals(v)) arr.removeEL(i);
+						else if ("{lucee-config}/components/".equals(v)) hasDefault = true;
+					}
+				}
+			}
+			if (!hasDefault) {
+				sct = new StructImpl();
+				sct.setEL("inspectTemplate", "never");
+				sct.setEL("physical", "{lucee-config}/components/");
+				try {
+					arr.insert(1, sct);
+				}
+				catch (PageException e) {
+				}
+			}
 			rem("mapping", component);
 		}
 
@@ -417,6 +444,34 @@ public abstract class ConfigFactory {
 			move("customTagExtensions", "customTagExtensions", ct, root);
 			Array ctMappings = ConfigWebUtil.getAsArray("mapping", ct);
 			add(ctMappings, "customTagMappings", root);
+
+			// remove and add default mappings
+			Array arr = Caster.toArray(root.get("customTagMappings", null), null);
+			Struct sct = null;
+			String v;
+			boolean hasDefault = false;
+			if (arr != null && arr.size() > 0) {
+				arr.size();
+				for (int i = arr.size(); i > 0; i--) {
+					sct = Caster.toStruct(arr.get(i, null), null);
+					if (sct != null) {
+						v = Caster.toString(sct.get("physical", null), null);
+						if ("{lucee-web}/customtags/".equals(v) || "{lucee-server}/customtags/".equals(v)) arr.removeEL(i);
+						else if ("{lucee-config}/customtags/".equals(v)) hasDefault = true;
+					}
+				}
+			}
+			if (!hasDefault) {
+				sct = new StructImpl();
+				sct.setEL("inspectTemplate", "never");
+				sct.setEL("physical", "{lucee-config}/customtags/");
+				try {
+					arr.insert(1, sct);
+				}
+				catch (PageException e) {
+				}
+			}
+
 			rem("mapping", ct);
 		}
 
