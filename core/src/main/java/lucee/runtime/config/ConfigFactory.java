@@ -396,15 +396,29 @@ public abstract class ConfigFactory {
 			Struct sct = null;
 			String v;
 			boolean hasDefault = false;
+			boolean hasDefaultServer = false;
 			if (arr != null && arr.size() > 0) {
-				arr.size();
 				for (int i = arr.size(); i > 0; i--) {
 					sct = Caster.toStruct(arr.get(i, null), null);
 					if (sct != null) {
 						v = Caster.toString(sct.get("physical", null), null);
-						if ("{lucee-web}/components/".equals(v) || "{lucee-server}/components/".equals(v)) arr.removeEL(i);
+						if ("{lucee-web}/components/".equals(v)) {
+							sct.setEL("physical", "{lucee-config}/components/");
+							hasDefault = true;
+						}
+						if ("{lucee-server}/components/".equals(v)) hasDefaultServer = true;
 						else if ("{lucee-config}/components/".equals(v)) hasDefault = true;
 					}
+				}
+			}
+			if (!hasDefaultServer) {
+				sct = new StructImpl();
+				sct.setEL("inspectTemplate", "never");
+				sct.setEL("physical", "{lucee-server}/components/");
+				try {
+					arr.insert(1, sct);
+				}
+				catch (PageException e) {
 				}
 			}
 			if (!hasDefault) {
@@ -440,15 +454,30 @@ public abstract class ConfigFactory {
 			Struct sct = null;
 			String v;
 			boolean hasDefault = false;
+			boolean hasDefaultServer = false;
 			if (arr != null && arr.size() > 0) {
 				arr.size();
 				for (int i = arr.size(); i > 0; i--) {
 					sct = Caster.toStruct(arr.get(i, null), null);
 					if (sct != null) {
 						v = Caster.toString(sct.get("physical", null), null);
-						if ("{lucee-web}/customtags/".equals(v) || "{lucee-server}/customtags/".equals(v)) arr.removeEL(i);
+						if ("{lucee-web}/customtags/".equals(v)) {
+							hasDefault = true;
+							sct.setEL("physical", "{lucee-config}/customtags/");
+						}
+						else if ("{lucee-server}/customtags/".equals(v)) hasDefaultServer = true;
 						else if ("{lucee-config}/customtags/".equals(v)) hasDefault = true;
 					}
+				}
+			}
+			if (!hasDefaultServer) {
+				sct = new StructImpl();
+				sct.setEL("inspectTemplate", "never");
+				sct.setEL("physical", "{lucee-server}/customtags/");
+				try {
+					arr.insert(1, sct);
+				}
+				catch (PageException e) {
 				}
 			}
 			if (!hasDefault) {

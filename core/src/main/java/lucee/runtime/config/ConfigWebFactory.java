@@ -2961,6 +2961,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			Mapping[] mappings = null;
 			if (hasAccess) {
 				boolean hasDefault = config instanceof ConfigWeb;
+				boolean hasDefaultServer = config instanceof ConfigWeb;
 				if (ctMappings.size() > 0) {
 					Iterator<Object> it = ctMappings.valueIterator();
 					List<Mapping> list = new ArrayList<>();
@@ -2975,7 +2976,8 @@ public final class ConfigWebFactory extends ConfigFactory {
 							String archive = getAttr(ctMapping, "archive");
 							boolean readonly = toBoolean(getAttr(ctMapping, "readonly"), false);
 							boolean hidden = toBoolean(getAttr(ctMapping, "hidden"), false);
-							if ("{lucee-web}/customtags/".equals(physical) || "{lucee-server}/customtags/".equals(physical)) continue;
+							if ("{lucee-web}/customtags/".equals(physical)) physical = "{lucee-config}/customtags/";
+							if ("{lucee-server}/customtags/".equals(physical)) hasDefaultServer = true;
 							if ("{lucee-config}/customtags/".equals(physical)) hasDefault = true;
 							short inspTemp = inspectTemplate(ctMapping);
 
@@ -2993,6 +2995,10 @@ public final class ConfigWebFactory extends ConfigFactory {
 					if (!hasDefault) {
 						list.add(new MappingImpl(config, "/default", "{lucee-config}/customtags/", null, ConfigPro.INSPECT_NEVER, true, false, true, true, false, true, null, -1,
 								-1));
+					}
+					if (!hasDefaultServer) {
+						list.add(new MappingImpl(config, "/default-server", "{lucee-server}/customtags/", null, ConfigPro.INSPECT_NEVER, true, false, true, true, false, true, null,
+								-1, -1));
 					}
 					mappings = list.toArray(new Mapping[list.size()]);
 					config.setCustomTagMappings(mappings);
@@ -5186,6 +5192,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			Mapping[] mappings = null;
 			if (hasAccess) {
 				boolean hasDefault = config instanceof ConfigWeb;
+				boolean hasDefaultServer = config instanceof ConfigWeb;
 				if (compMappings.size() > 0) {
 					Iterator<Object> it = compMappings.valueIterator();
 					List<Mapping> list = new ArrayList<>();
@@ -5200,7 +5207,10 @@ public final class ConfigWebFactory extends ConfigFactory {
 							String archive = getAttr(cMapping, "archive");
 							boolean readonly = toBoolean(getAttr(cMapping, "readonly"), false);
 							boolean hidden = toBoolean(getAttr(cMapping, "hidden"), false);
-							if ("{lucee-web}/components/".equals(physical) || "{lucee-server}/components/".equals(physical)) continue;
+
+							if ("{lucee-web}/components/".equals(physical)) physical = "{lucee-config}/components/";
+
+							if ("{lucee-server}/components/".equals(physical)) hasDefaultServer = true;
 							if ("{lucee-config}/components/".equals(physical)) hasDefault = true;
 
 							String strListMode = getAttr(cMapping, "listenerMode");
@@ -5229,6 +5239,10 @@ public final class ConfigWebFactory extends ConfigFactory {
 					if (!hasDefault) {
 						list.add(new MappingImpl(config, "/default", "{lucee-config}/components/", null, ConfigPro.INSPECT_NEVER, true, false, true, true, false, true, null, -1,
 								-1));
+					}
+					if (!hasDefaultServer) {
+						list.add(new MappingImpl(config, "/default-server", "{lucee-server}/components/", null, ConfigPro.INSPECT_NEVER, true, false, true, true, false, true, null,
+								-1, -1));
 					}
 					mappings = list.toArray(new Mapping[list.size()]);
 					config.setComponentMappings(mappings);
