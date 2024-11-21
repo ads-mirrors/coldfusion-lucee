@@ -406,7 +406,7 @@ public abstract class ConfigFactory {
 			Array arr = Caster.toArray(root.get("componentMappings", null), null);
 			Struct sct = null;
 			String v;
-			boolean hasDefault = false;
+			boolean hasDefault = config instanceof ConfigWeb;
 			if (arr != null && arr.size() > 0) {
 				arr.size();
 				for (int i = arr.size(); i > 0; i--) {
@@ -449,7 +449,7 @@ public abstract class ConfigFactory {
 			Array arr = Caster.toArray(root.get("customTagMappings", null), null);
 			Struct sct = null;
 			String v;
-			boolean hasDefault = false;
+			boolean hasDefault = config instanceof ConfigWeb;
 			if (arr != null && arr.size() > 0) {
 				arr.size();
 				for (int i = arr.size(); i > 0; i--) {
@@ -691,14 +691,42 @@ public abstract class ConfigFactory {
 		{
 			Struct mappings = ConfigWebUtil.getAsStruct("mappings", root);
 			Array mapping = ConfigWebUtil.getAsArray("mapping", mappings);
-
+			String virtual;
+			boolean hasDefault = config instanceof ConfigWeb;
+			boolean hasDefaultServer = config instanceof ConfigWeb;
 			Key[] keys = mapping.keys();
 			for (int i = keys.length - 1; i >= 0; i--) {
 				Key k = keys[i];
 				Struct data = Caster.toStruct(mapping.get(k, null), null);
 				if (data == null) continue;
-				add(data, Caster.toString(data.remove(KeyConstants._virtual, null), null), mappings);
+				virtual = Caster.toString(data.remove(KeyConstants._virtual, null), null);
+				if ("/lucee/".equals(virtual)) hasDefault = true;
+				else if ("/lucee-server/".equals(virtual)) hasDefaultServer = true;
+				add(data, virtual, mappings);
 				mapping.remove(k, null);
+
+			}
+			if (!hasDefault) {
+				Struct data = new StructImpl();
+				data.setEL(KeyConstants._readonly, Boolean.TRUE);
+				data.setEL("physical", "{lucee-config}/context/");
+				data.setEL("archive", "{lucee-config}/context/lucee-context.lar");
+				data.setEL(KeyConstants._primary, "physical");
+				data.setEL("listenerMode", "modern");
+				data.setEL("listenerType", "curr2root");
+				data.setEL("inspectTemplate", "once");
+				add(data, "/lucee/", mappings);
+			}
+			if (!hasDefaultServer) {
+				Struct data = new StructImpl();
+				data.setEL(KeyConstants._readonly, Boolean.TRUE);
+				data.setEL("physical", "{lucee-server}/context/");
+				data.setEL("archive", "");
+				data.setEL(KeyConstants._primary, "physical");
+				data.setEL("listenerMode", "modern");
+				data.setEL("listenerType", "curr2root");
+				data.setEL("inspectTemplate", "once");
+				add(data, "/lucee-server/", mappings);
 			}
 		}
 

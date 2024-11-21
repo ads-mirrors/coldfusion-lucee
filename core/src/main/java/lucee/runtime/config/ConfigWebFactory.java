@@ -1792,6 +1792,8 @@ public final class ConfigWebFactory extends ConfigFactory {
 			if (hasAccess) {
 				boolean hasServerContext = false;
 				boolean hasWebContext = false;
+				boolean hasDefault = config instanceof ConfigWeb;
+				boolean hasDefaultServer = config instanceof ConfigWeb;
 				if (_mappings != null) {
 					Iterator<Entry<Key, Object>> it = _mappings.entryIterator();
 					Entry<Key, Object> e;
@@ -1803,6 +1805,10 @@ public final class ConfigWebFactory extends ConfigFactory {
 							if (el == null) continue;
 
 							String virtual = e.getKey().getString();
+
+							if ("/lucee/".equals(virtual)) hasDefault = true;
+							else if ("/lucee-server/".equals(virtual)) hasDefaultServer = true;
+
 							String physical = getAttr(el, "physical");
 							String archive = getAttr(el, "archive");
 							String strListType = getAttr(el, "listenerType");
@@ -1880,6 +1886,17 @@ public final class ConfigWebFactory extends ConfigFactory {
 							log(config, log, t);
 						}
 					}
+				}
+
+				if (!hasDefault) {
+					tmp = new MappingImpl(config, "/lucee/", "{lucee-config}/context/", "{lucee-config}/context/lucee-context.lar", ConfigPro.INSPECT_AUTO,
+							ConfigPro.INSPECT_INTERVAL_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED, true, false, true, true, false, false, null, -1, -1);
+					mappings.put(tmp.getVirtualLowerCase(), tmp);
+				}
+				if (!hasDefaultServer) {
+					tmp = new MappingImpl(config, "/lucee-server/", "{lucee-server}/context/", "", ConfigPro.INSPECT_AUTO, ConfigPro.INSPECT_INTERVAL_UNDEFINED,
+							ConfigPro.INSPECT_INTERVAL_UNDEFINED, true, false, true, true, false, false, null, -1, -1);
+					mappings.put(tmp.getVirtualLowerCase(), tmp);
 				}
 
 				// set default lucee-server-context
