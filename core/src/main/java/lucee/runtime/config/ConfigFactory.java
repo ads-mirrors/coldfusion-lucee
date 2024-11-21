@@ -316,12 +316,13 @@ public abstract class ConfigFactory {
 
 		//////////////////// caches ////////////////////
 		{
-			Struct cache = ConfigWebUtil.getAsStruct("cache", root);
 			Struct caches = ConfigWebUtil.getAsStruct("caches", root);
-			Array conns = ConfigWebUtil.getAsArray("connection", cache);
+			Array acache = ConfigWebUtil.getAsArray("cache", caches);
 
-			// classes
-			move("cache", "cacheClasses", caches, root);
+			add(acache, "cacheClasses", root);
+
+			Struct cache = ConfigWebUtil.getAsStruct("cache", root);
+			Array conns = ConfigWebUtil.getAsArray("connection", cache);
 
 			// defaults
 			for (String type: ConfigPro.STRING_CACHE_TYPES_MAX) {
