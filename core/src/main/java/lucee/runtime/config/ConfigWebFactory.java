@@ -2931,7 +2931,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			boolean hasSet = false;
 			Mapping[] mappings = null;
 			if (hasAccess) {
-				boolean hasDefault = false;
+				boolean hasDefault = config instanceof ConfigWeb;
 				if (ctMappings.size() > 0) {
 					Iterator<Object> it = ctMappings.valueIterator();
 					List<Mapping> list = new ArrayList<>();
@@ -5264,7 +5264,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			hasSet = false;
 			Mapping[] mappings = null;
 			if (hasAccess) {
-				boolean hasDefault = false;
+				boolean hasDefault = config instanceof ConfigWeb;
 				if (compMappings.size() > 0) {
 					Iterator<Object> it = compMappings.valueIterator();
 					List<Mapping> list = new ArrayList<>();
