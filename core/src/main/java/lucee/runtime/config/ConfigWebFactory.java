@@ -210,7 +210,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		factory.setConfig(configServer, configWeb);
 
 		// createContextFiles(configDir, servletConfig, doNew);
-		settings(configWeb, ThreadLocalPageContext.getLog(configWeb, "application"));
+		settings(configWeb);
 		((ThreadQueueImpl) configWeb.getThreadQueue()).setMode(configWeb.getQueueEnable() ? ThreadQueuePro.MODE_ENABLED : ThreadQueuePro.MODE_DISABLED);
 
 		// call web.cfc for this context
@@ -250,7 +250,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			throws PageException, IOException, TagLibException, FunctionLibException, BundleException {
 
 		cwi.reload();
-		settings(cwi, null);
+		settings(cwi);
 		return;
 	}
 
@@ -284,29 +284,28 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, null, t);
+			log(config, t);
 		}
 
 		config.setLastModified();
 
-		Log log = config.getLog("application");
-		_loadFilesystem(config, root, doNew, log); // load this before execute any code, what for example loadxtension does (json)
+		_loadFilesystem(config, root, doNew); // load this before execute any code, what for example loadxtension does (json)
 
 		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded filesystem");
 
 		if (!essentialOnly) {
-			_loadExtensionBundles(config, root, log);
+			_loadExtensionBundles(config, root);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded extension");
 
 		}
 		else {
-			_loadExtensionDefinition(config, root, log);
+			_loadExtensionDefinition(config, root);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded extension definitions");
 		}
 
 		if (!essentialOnly) {
 
-			settings(config, log);
+			settings(config);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded settings2");
 
 			((CFMLEngineImpl) config.getEngine()).touchMonitor(config);
@@ -365,7 +364,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return root;
 	}
 
-	public static ResourceProvider loadDefaultResourceProvider(ConfigImpl config, Struct root, Log log) {
+	public static ResourceProvider loadDefaultResourceProvider(ConfigImpl config, Struct root) {
 		try {
 			Array defaultProviders = ConfigWebUtil.getAsArray("defaultResourceProvider", root);
 
@@ -393,7 +392,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return null;
 	}
@@ -408,7 +407,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		else throw new ClassException("object [" + Caster.toClassName(o) + "] must implement the interface " + ResourceProvider.class.getName());
 	}
 
-	public static void loadResourceProvider(ConfigImpl config, Struct root, Log log) {
+	public static void loadResourceProvider(ConfigImpl config, Struct root) {
 		try {
 			Array providers = ConfigWebUtil.getAsArray("resourceProviders", root);
 
@@ -464,7 +463,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
-						log(config, log, t);
+						log(config, t);
 					}
 				}
 
@@ -491,7 +490,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 	}
 
@@ -519,7 +518,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return cd;
 	}
 
-	public static HashMap<String, Class<CacheHandler>> loadCacheHandler(ConfigImpl config, Struct root, Log log) {
+	public static HashMap<String, Class<CacheHandler>> loadCacheHandler(ConfigImpl config, Struct root) {
 		HashMap<String, Class<CacheHandler>> cacheHandlers = new HashMap<String, Class<CacheHandler>>();
 
 		try {
@@ -551,20 +550,20 @@ public final class ConfigWebFactory extends ConfigFactory {
 							}
 							catch (Throwable t) {
 								ExceptionUtil.rethrowIfNecessary(t);
-								log.error("Cache-Handler", t);
+								log(config, t);
 							}
 						}
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
-						log(config, log, t);
+						log(config, t);
 					}
 				}
 			}
 		}
 		catch (Throwable th) {
 			ExceptionUtil.rethrowIfNecessary(th);
-			log(config, log, th);
+			log(config, th);
 		}
 		return cacheHandlers;
 	}
@@ -578,7 +577,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		else throw new ClassException("object [" + Caster.toClassName(o) + "] must implement the interface " + CacheHandler.class.getName());
 	}
 
-	public static Map<String, AIEngineFactory> loadAI(ConfigImpl config, Struct root, Log log, Map<String, AIEngineFactory> defaultValue) {
+	public static Map<String, AIEngineFactory> loadAI(ConfigImpl config, Struct root, Map<String, AIEngineFactory> defaultValue) {
 		try {
 			// we only load this for the server context
 			Struct ai = ConfigWebUtil.getAsStruct(root, false, "ai");
@@ -611,19 +610,19 @@ public final class ConfigWebFactory extends ConfigFactory {
 						}
 					}
 					catch (Exception e) {
-						log(config, log, e);
+						log(config, e);
 					}
 				}
 				return engines;
 			}
 		}
 		catch (Exception ex) {
-			log(config, log, ex);
+			log(config, ex);
 		}
 		return defaultValue;
 	}
 
-	public static DumpWriterEntry[] loadDumpWriter(ConfigImpl config, Struct root, Log log, DumpWriterEntry[] defaultValue) {
+	public static DumpWriterEntry[] loadDumpWriter(ConfigImpl config, Struct root, DumpWriterEntry[] defaultValue) {
 		try {
 			Array writers = ConfigWebUtil.getAsArray("dumpWriters", root);
 
@@ -658,7 +657,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
-						log(config, log, t);
+						log(config, t);
 					}
 				}
 			}
@@ -680,7 +679,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return defaultValue;
 	}
@@ -746,7 +745,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return URLDecoder.decode(str, false);
 	}
 
-	public static ConfigListener loadListener(ConfigServerImpl config, Struct root, Log log, ConfigListener defaultValue) {
+	public static ConfigListener loadListener(ConfigServerImpl config, Struct root, ConfigListener defaultValue) {
 		try {
 			Struct listener = ConfigWebUtil.getAsStruct("listener", root);
 			ClassDefinition cd = listener != null ? getClassDefinition(listener, "", config.getIdentification()) : null;
@@ -763,24 +762,24 @@ public final class ConfigWebFactory extends ConfigFactory {
 				}
 				catch (Throwable t) {
 					ExceptionUtil.rethrowIfNecessary(t);
-					log(config, log, t);
+					log(config, t);
 				}
 			}
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return defaultValue;
 	}
 
-	private static void settings(ConfigPro config, Log log) {
+	private static void settings(ConfigPro config) {
 		try {
 			doCheckChangesInLibraries(config);
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 	}
 
@@ -824,7 +823,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param doc
 	 * @return
 	 */
-	public static int loadSecurity(ConfigImpl config, Struct root, Log log) {
+	public static int loadSecurity(ConfigImpl config, Struct root) {
 		try {
 			Struct security = ConfigWebUtil.getAsStruct("security", root);
 			int vu = ConfigPro.QUERY_VAR_USAGE_UNDEFINED;
@@ -840,12 +839,12 @@ public final class ConfigWebFactory extends ConfigFactory {
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			t.printStackTrace();
-			log(config, log, t);
+			log(config, t);
 		}
 		return ConfigPro.QUERY_VAR_USAGE_IGNORE;
 	}
 
-	private static Resource[] _loadFileAccess(Config config, Array fileAccesses, Log log) {
+	private static Resource[] _loadFileAccess(Config config, Array fileAccesses) {
 		if (fileAccesses.size() == 0) return new Resource[0];
 		java.util.List<Resource> reses = new ArrayList<Resource>();
 		String path;
@@ -865,7 +864,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			}
 			catch (Throwable t) {
 				ExceptionUtil.rethrowIfNecessary(t);
-				log(config, log, t);
+				log(config, t);
 			}
 		}
 		// temp directory should be always accessible, even when access is local
@@ -1094,7 +1093,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @return
 	 * @throws IOException
 	 */
-	public static Mapping[] loadMappings(ConfigImpl config, Struct root, Log log) {
+	public static Mapping[] loadMappings(ConfigImpl config, Struct root) {
 		Map<String, Mapping> mappings = MapFactory.<String, Mapping>getConcurrentMap();
 		try {
 			Struct _mappings = Caster.toStruct(root.get("mappings", null), null);
@@ -1194,7 +1193,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
-						log(config, log, t);
+						log(config, t);
 					}
 				}
 			}
@@ -1231,7 +1230,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return mappings.values().toArray(new Mapping[mappings.size()]);
 	}
@@ -1254,7 +1253,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return ConfigWebUtil.inspectTemplate(strInsTemp, ConfigPro.INSPECT_UNDEFINED);
 	}
 
-	public static lucee.runtime.rest.Mapping[] loadRestMappings(ConfigImpl config, Struct root, Log log) {
+	public static lucee.runtime.rest.Mapping[] loadRestMappings(ConfigImpl config, Struct root) {
 		Map<String, lucee.runtime.rest.Mapping> mappings = new HashMap<String, lucee.runtime.rest.Mapping>();
 		try {
 			boolean hasAccess = true;// MUST
@@ -1289,7 +1288,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
-						log(config, log, t);
+						log(config, t);
 					}
 				}
 			}
@@ -1304,7 +1303,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		lucee.runtime.rest.Mapping[] arr = mappings.values().toArray(new lucee.runtime.rest.Mapping[mappings.size()]);
 
@@ -1410,7 +1409,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return las;
 	}
 
-	public static ExecutionLogFactory loadExeLog(ConfigImpl config, Struct root, Log log) {
+	public static ExecutionLogFactory loadExeLog(ConfigImpl config, Struct root) {
 		try {
 			Struct el = ConfigWebUtil.getAsStruct("executionLog", root);
 			boolean hasChanged = false;
@@ -1430,7 +1429,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 				}
 			}
 			catch (IOException e) {
-				log(config, log, e);
+				log(config, e);
 			}
 
 			if (hasChanged) {
@@ -1438,7 +1437,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 					if (config.getClassDirectory().exists()) config.getClassDirectory().remove(true);
 				}
 				catch (IOException e) {
-					log(config, log, e);
+					log(config, e);
 				}
 			}
 
@@ -1480,7 +1479,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return new ExecutionLogFactory(ConsoleExecutionLog.class, new HashMap<String, String>());
 	}
@@ -1495,7 +1494,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @throws BundleException
 	 * @throws ClassNotFoundException
 	 */
-	public static Map<String, DataSource> loadDataSources(ConfigImpl config, Struct root, Log log) {
+	public static Map<String, DataSource> loadDataSources(ConfigImpl config, Struct root) {
 		Map<String, DataSource> datasources = new HashMap<String, DataSource>();
 		try {
 
@@ -1512,7 +1511,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			}
 			catch (Throwable t) {
 				ExceptionUtil.rethrowIfNecessary(t);
-				log.error("Datasource", t);
+				log(config, t);
 			}
 
 			SecurityManager sm = config.getSecurityManager();
@@ -1604,7 +1603,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 					}
 					catch (Throwable th) {
 						ExceptionUtil.rethrowIfNecessary(th);
-						log.error("Datasource", th);
+						log(config, th);
 					}
 				}
 			}
@@ -1612,7 +1611,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return datasources;
 	}
@@ -1653,7 +1652,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		return cd;
 	}
 
-	public static JDBCDriver[] loadJDBCDrivers(ConfigImpl config, Struct root, Log log) {
+	public static JDBCDriver[] loadJDBCDrivers(ConfigImpl config, Struct root) {
 		Map<String, JDBCDriver> map = new HashMap<String, JDBCDriver>();
 		try {
 			// first add the server drivers, so they can be overwritten
@@ -1689,31 +1688,31 @@ public final class ConfigWebFactory extends ConfigFactory {
 					connStr = getAttr(driver, "connectionString");
 					// check if label exists
 					if (StringUtil.isEmpty(label)) {
-						if (log != null) log.error("Datasource", "missing label for jdbc driver [" + cd.getClassName() + "]");
+						log(config, "missing label for jdbc driver [" + cd.getClassName() + "]");
 						continue;
 					}
 
 					// check if it is a bundle
 					if (!cd.isBundle()) {
-						if (log != null) log.error("Datasource", "jdbc driver [" + label + "] does not describe a bundle");
+						log(config, "jdbc driver [" + label + "] does not describe a bundle");
 						continue;
 					}
 					map.put(cd.toString(), new JDBCDriver(label, id, connStr, cd));
 				}
 				catch (Throwable t) {
 					ExceptionUtil.rethrowIfNecessary(t);
-					log(config, log, t);
+					log(config, t);
 				}
 			}
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return map.values().toArray(new JDBCDriver[map.size()]);
 	}
 
-	public static Map<String, ClassDefinition> loadCacheDefintions(ConfigImpl config, Struct root, Log log) {
+	public static Map<String, ClassDefinition> loadCacheDefintions(ConfigImpl config, Struct root) {
 		Map<String, ClassDefinition> map = new HashMap<String, ClassDefinition>();
 		try {
 
@@ -1732,26 +1731,26 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 						// check if it is a bundle
 						if (!cd.isBundle()) {
-							log.error("Cache", "[" + cd + "] does not have bundle info");
+							log(config, "[" + cd + "] does not have bundle info");
 							continue;
 						}
 						map.put(cd.getClassName(), cd);
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
-						log(config, log, t);
+						log(config, t);
 					}
 				}
 			}
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return map;
 	}
 
-	public static Map<Integer, String> loadCacheDefaultConnectionNames(ConfigImpl config, Struct root, Log log) {
+	public static Map<Integer, String> loadCacheDefaultConnectionNames(ConfigImpl config, Struct root) {
 		Map<Integer, String> names = new HashMap<>();
 		try {
 			Struct defaultCache = ConfigWebUtil.getAsStruct("cache", root);
@@ -1768,18 +1767,18 @@ public final class ConfigWebFactory extends ConfigFactory {
 				}
 				catch (Throwable t) {
 					ExceptionUtil.rethrowIfNecessary(t);
-					log(config, log, t);
+					log(config, t);
 				}
 			}
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return names;
 	}
 
-	public static Map<String, CacheConnection> loadCacheCacheConnections(ConfigImpl config, Struct root, Log log) {
+	public static Map<String, CacheConnection> loadCacheCacheConnections(ConfigImpl config, Struct root) {
 		Map<String, CacheConnection> caches = new HashMap<String, CacheConnection>();
 		try {
 
@@ -1832,7 +1831,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
-						log(config, log, t);
+						log(config, t);
 					}
 				}
 			}
@@ -1859,7 +1858,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 						}
 						catch (Throwable t) {
 							ExceptionUtil.rethrowIfNecessary(t);
-							log(config, log, t);
+							log(config, t);
 						}
 					}
 				}
@@ -1867,7 +1866,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return caches;
 	}
@@ -1881,17 +1880,17 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	public static GatewayMap loadGatewayEL(ConfigImpl config, Struct root, Log log) {
+	public static GatewayMap loadGatewayEL(ConfigImpl config, Struct root) {
 		try {
-			return loadGateway(config, root, log);
+			return loadGateway(config, root);
 		}
 		catch (Exception e) {
-			log(config, log, e);
+			log(config, e);
 			return new GatewayMap();
 		}
 	}
 
-	public static GatewayMap loadGateway(final ConfigImpl config, Struct root, Log log) {
+	public static GatewayMap loadGateway(final ConfigImpl config, Struct root) {
 		GatewayMap mapGateways = new GatewayMap();
 		boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManagerImpl.TYPE_GATEWAY);
 		GatewayEntry ge;
@@ -1926,13 +1925,13 @@ public final class ConfigWebFactory extends ConfigFactory {
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
-						log(config, log, t);
+						log(config, t);
 					}
 				}
 			}
 			catch (Throwable t) {
 				ExceptionUtil.rethrowIfNecessary(t);
-				log(config, log, t);
+				log(config, t);
 			}
 		}
 		return mapGateways;
@@ -1959,7 +1958,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @return
 	 * @throws IOException
 	 */
-	public static Mapping[] loadCustomTagsMappings(ConfigImpl config, Struct root, Log log) {
+	public static Mapping[] loadCustomTagsMappings(ConfigImpl config, Struct root) {
 		Mapping[] mappings = null;
 		try {
 			// Struct customTag = ConfigWebUtil.getAsStruct("customTag", root);
@@ -1995,7 +1994,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
-						log(config, log, t);
+						log(config, t);
 					}
 				}
 				if (!hasDefault) {
@@ -2008,7 +2007,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		if (mappings == null) {
 			mappings = new Mapping[] { new MappingImpl(config, "/default-customtags", "{lucee-config}/customtags/", null, ConfigPro.INSPECT_UNDEFINED,
@@ -2030,7 +2029,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @throws TagLibException
 	 * @throws FunctionLibException
 	 */
-	private static void _loadFilesystem(ConfigServerImpl config, Struct root, boolean doNew, Log log) {
+	private static void _loadFilesystem(ConfigServerImpl config, Struct root, boolean doNew) {
 		try {
 			Resource configDir = config.getConfigDir();
 
@@ -2110,7 +2109,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
-						log(config, log, t);
+						log(config, t);
 					}
 				}
 			}
@@ -2155,7 +2154,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
-						log(config, log, t);
+						log(config, t);
 					}
 				}
 			}
@@ -2163,7 +2162,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 	}
 
@@ -2193,7 +2192,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 				}
 				catch (Throwable t) {
 					ExceptionUtil.rethrowIfNecessary(t);
-					log(config, null, t);
+					log(config, t);
 				}
 			}
 
@@ -2281,7 +2280,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param doc
 	 * @return
 	 */
-	public static URL loadUpdate(ConfigImpl config, Struct root, Log log) {
+	public static URL loadUpdate(ConfigImpl config, Struct root) {
 		try {
 			// Server
 			if (root != null) {
@@ -2300,12 +2299,12 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return Constants.DEFAULT_UPDATE_URL;
 	}
 
-	public static RemoteClient[] loadRemoteClients(ConfigImpl config, Struct root, Log log) {
+	public static RemoteClient[] loadRemoteClients(ConfigImpl config, Struct root) {
 		java.util.List<RemoteClient> list = new ArrayList<RemoteClient>();
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManagerImpl.TYPE_REMOTE);
@@ -2358,7 +2357,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
-						log(config, log, t);
+						log(config, t);
 					}
 
 				}
@@ -2366,13 +2365,13 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 
 		return list.toArray(new RemoteClient[list.size()]);
 	}
 
-	public static PrintStream loadErr(ConfigImpl config, Struct root, Log log) {
+	public static PrintStream loadErr(ConfigImpl config, Struct root) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
 
@@ -2383,12 +2382,12 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return null;
 	}
 
-	public static PrintStream loadOut(ConfigImpl config, Struct root, Log log) {
+	public static PrintStream loadOut(ConfigImpl config, Struct root) {
 		try {
 
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
@@ -2402,7 +2401,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return null;
 	}
@@ -2462,7 +2461,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param config
 	 * @param doc
 	 */
-	public static TimeZone loadTimezone(ConfigImpl config, Struct root, Log log, TimeZone defaultValue) {
+	public static TimeZone loadTimezone(ConfigImpl config, Struct root, TimeZone defaultValue) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
 
@@ -2481,12 +2480,12 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return defaultValue;
 	}
 
-	public static Locale loadLocale(ConfigImpl config, Struct root, Log log, Locale defaultValue) {
+	public static Locale loadLocale(ConfigImpl config, Struct root, Locale defaultValue) {
 		if (ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING)) {
 			try {
 				// locale
@@ -2496,13 +2495,13 @@ public final class ConfigWebFactory extends ConfigFactory {
 			}
 			catch (Throwable t) {
 				ExceptionUtil.rethrowIfNecessary(t);
-				log(config, log, t);
+				log(config, t);
 			}
 		}
 		return defaultValue;
 	}
 
-	public static ClassDefinition loadWS(ConfigImpl config, Struct root, Log log, ClassDefinition defaultValue) {
+	public static ClassDefinition loadWS(ConfigImpl config, Struct root, ClassDefinition defaultValue) {
 		try {
 			Struct ws = ConfigWebUtil.getAsStruct("webservice", root);
 			ClassDefinition cd = ws != null ? getClassDefinition(ws, "", config.getIdentification()) : null;
@@ -2512,12 +2511,12 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return defaultValue;
 	}
 
-	public static ClassDefinition loadORMClass(ConfigImpl config, Struct root, Log log) {
+	public static ClassDefinition loadORMClass(ConfigImpl config, Struct root) {
 
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManagerImpl.TYPE_ORM);
@@ -2541,12 +2540,12 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return DUMMY_ORM_ENGINE;
 	}
 
-	public static ORMConfiguration loadORMConfig(ConfigImpl config, Struct root, Log log, ORMConfiguration defaultValue) {
+	public static ORMConfiguration loadORMConfig(ConfigImpl config, Struct root, ORMConfiguration defaultValue) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManagerImpl.TYPE_ORM);
 			Struct orm = ConfigWebUtil.getAsStruct("orm", root);
@@ -2558,12 +2557,12 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return defaultValue;
 	}
 
-	public static short loadJava(ConfigImpl config, Struct root, Log log, short defaultValue) {
+	public static short loadJava(ConfigImpl config, Struct root, short defaultValue) {
 		try {
 
 			String strCompileType = getAttr(root, "compileType");
@@ -2580,12 +2579,12 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return defaultValue;
 	}
 
-	public static JavaSettings loadJavaSettings(ConfigImpl config, Struct root, Log log, JavaSettings defaultValue) {
+	public static JavaSettings loadJavaSettings(ConfigImpl config, Struct root, JavaSettings defaultValue) {
 		try {
 
 			Resource lib = config.getLibraryDirectory();
@@ -2600,12 +2599,12 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return defaultValue;
 	}
 
-	public static Struct loadConstants(ConfigImpl config, Struct root, Log log, Struct defaultValue) {
+	public static Struct loadConstants(ConfigImpl config, Struct root, Struct defaultValue) {
 		try {
 			Struct constants = ConfigWebUtil.getAsStruct("constants", root);
 
@@ -2630,7 +2629,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
-						log(config, log, t);
+						log(config, t);
 					}
 
 				}
@@ -2639,13 +2638,14 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return defaultValue;
 	}
 
-	public static void log(Config config, Log log, Throwable e) {
+	public static void log(Config config, Throwable e) {
 		try {
+			Log log = ((ConfigPro) config).getLog("application", false);
 			if (log != null) log.error("configuration", e);
 			else {
 				LogUtil.logGlobal(config, ConfigWebFactory.class.getName(), e);
@@ -2657,7 +2657,21 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 	}
 
-	public static Map<String, Startup> loadStartupHook(ConfigImpl config, Struct root, Log log) {
+	public static void log(Config config, String message) {
+		try {
+			Log log = ((ConfigPro) config).getLog("application", false);
+			if (log != null) log.error("configuration", message);
+			else {
+				LogUtil.logGlobal(config, Log.LEVEL_ERROR, ConfigWebFactory.class.getName(), message);
+			}
+		}
+		catch (Throwable th) {
+			ExceptionUtil.rethrowIfNecessary(th);
+			th.printStackTrace();
+		}
+	}
+
+	public static Map<String, Startup> loadStartupHook(ConfigImpl config, Struct root) {
 		Map<String, Startup> startups = new HashMap<>();
 		try {
 			Array children = ConfigWebUtil.getAsArray("startupHooks", root);
@@ -2701,13 +2715,13 @@ public final class ConfigWebFactory extends ConfigFactory {
 				}
 				catch (Throwable t) {
 					ExceptionUtil.rethrowIfNecessary(t);
-					log(config, log, t);
+					log(config, t);
 				}
 			}
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return startups;
 	}
@@ -2718,7 +2732,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param doc
 	 * @throws IOException
 	 */
-	public static void loadMail(ConfigImpl config, Struct root, Log log) { // does no init values
+	public static void loadMail(ConfigImpl config, Struct root) { // does no init values
 
 		boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_MAIL);
 
@@ -2734,7 +2748,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 			config.setMailSendPartial(false);
 		}
 
@@ -2750,7 +2764,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 			config.setUserSet(true);
 		}
 
@@ -2766,7 +2780,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 			config.setMailSpoolInterval(30);
 		}
 
@@ -2782,7 +2796,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 			config.setMailDefaultEncoding(CharsetUtil.UTF8);
 		}
 
@@ -2798,7 +2812,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 			config.setMailSpoolEnable(true);
 		}
 
@@ -2814,7 +2828,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 			config.setMailTimeout(30);
 		}
 
@@ -2844,7 +2858,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
-						log(config, log, t);
+						log(config, t);
 					}
 				}
 			}
@@ -2852,12 +2866,12 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 			config.setMailServers(servers.toArray(new Server[servers.size()]));
 		}
 	}
 
-	public static void loadMonitors(ConfigImpl config, Struct root, Log log) {
+	public static void loadMonitors(ConfigImpl config, Struct root) {
 		try {
 			// only load in server context
 			ConfigServerImpl configServer = (ConfigServerImpl) config;
@@ -2924,7 +2938,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 				}
 				catch (Throwable t) {
 					ExceptionUtil.rethrowIfNecessary(t);
-					log(config, log, t);
+					log(config, t);
 				}
 			}
 			configServer.setRequestMonitors(requests.toArray(new RequestMonitor[requests.size()]));
@@ -2935,7 +2949,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 	}
 
@@ -2946,7 +2960,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @return
 	 * @throws PageException
 	 */
-	public static ClassDefinition<SearchEngine> loadSearchClass(ConfigImpl config, Struct root, Log log) {
+	public static ClassDefinition<SearchEngine> loadSearchClass(ConfigImpl config, Struct root) {
 		try {
 			Struct search = ConfigWebUtil.getAsStruct("search", root);
 
@@ -2960,12 +2974,12 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return new ClassDefinitionImpl(DummySearchEngine.class);
 	}
 
-	public static String loadSearchDir(ConfigImpl config, Struct root, Log log) {
+	public static String loadSearchDir(ConfigImpl config, Struct root) {
 		try {
 			Struct search = ConfigWebUtil.getAsStruct("search", root);
 
@@ -2979,12 +2993,12 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return "{lucee-web}/search/";
 	}
 
-	public static int loadDebugOptions(ConfigImpl config, Struct root, Log log) {
+	public static int loadDebugOptions(ConfigImpl config, Struct root) {
 		int options = 0;
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_DEBUGGING);
@@ -3066,7 +3080,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return options;
 	}
@@ -3084,7 +3098,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param doc
 	 * @return
 	 */
-	public static Map<String, CFXTagClass> loadCFX(ConfigImpl config, Struct root, Log log) {
+	public static Map<String, CFXTagClass> loadCFX(ConfigImpl config, Struct root) {
 		Map<String, CFXTagClass> map = MapFactory.<String, CFXTagClass>getConcurrentMap();
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_CFX_SETTING);
@@ -3117,7 +3131,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
-						log(config, log, t);
+						log(config, t);
 					}
 				}
 
@@ -3125,7 +3139,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return map;
 	}
@@ -3138,9 +3152,9 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param doc
 	 * @param log
 	 */
-	private static void _loadExtensionBundles(ConfigServerImpl config, Struct root, Log log) {
+	private static void _loadExtensionBundles(ConfigServerImpl config, Struct root) {
 		Log deployLog = config.getLog("deploy");
-		if (deployLog != null) log = deployLog;
+
 		try {
 			Array children = ConfigWebUtil.getAsArray("extensions", root);
 			String md5 = CollectionUtil.md5(children);
@@ -3155,7 +3169,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			}
 			catch (Throwable t) {
 				ExceptionUtil.rethrowIfNecessary(t);
-				log(config, log, t);
+				log(config, t);
 			}
 
 			String strBundles;
@@ -3209,7 +3223,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 				}
 				catch (Throwable t) {
 					ExceptionUtil.rethrowIfNecessary(t);
-					log(config, log, t);
+					log(config, t);
 					continue;
 				}
 			}
@@ -3223,13 +3237,13 @@ public final class ConfigWebFactory extends ConfigFactory {
 						// is maybe a diff version installed?
 						RHExtension ext = RHExtension.getInstance(config, r);
 						if (!installedIds.contains(ext.getId())) {
-							if (log != null) log.info("extension",
+							if (deployLog != null) deployLog.info("extension",
 									"Found the extension [" + ext + "] in the installed folder that is not present in the configuration in any version, so we will uninstall it");
 							ConfigAdmin._removeRHExtension(config, ext, null, true);
-							if (log != null) log.info("extension", "removed extension [" + ext + "]");
+							if (deployLog != null) deployLog.info("extension", "removed extension [" + ext + "]");
 						}
 						else {
-							if (log != null) log.info("extension", "Found the extension [" + ext
+							if (deployLog != null) deployLog.info("extension", "Found the extension [" + ext
 									+ "] in the installed folder that is in a different version in the configuraton, so we delete that extension file.");
 							r.delete();
 						}
@@ -3242,15 +3256,14 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 	}
 
-	private static void _loadExtensionDefinition(ConfigServerImpl config, Struct root, Log log) {
+	private static void _loadExtensionDefinition(ConfigServerImpl config, Struct root) {
 
 		try {
 			Log deployLog = config.getLog("deploy");
-			if (deployLog != null) log = deployLog;
 			Array children = ConfigWebUtil.getAsArray("extensions", root);
 			// set
 			Map<String, String> child;
@@ -3271,18 +3284,18 @@ public final class ConfigWebFactory extends ConfigFactory {
 					extensions.add(RHExtension.toExtensionDefinition(config, id, child));
 				}
 				catch (Exception e) {
-					log(config, log, e);
+					log(config, e);
 				}
 			}
 			if (extensions != null) config.setExtensionDefinitions(extensions);
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 	}
 
-	public static RHExtensionProvider[] loadExtensionProviders(ConfigImpl config, Struct root, Log log) {
+	public static RHExtensionProvider[] loadExtensionProviders(ConfigImpl config, Struct root) {
 		Map<RHExtensionProvider, String> providers = new LinkedHashMap<RHExtensionProvider, String>();
 		try {
 			// providers
@@ -3307,7 +3320,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
-						log(config, log, t);
+						log(config, t);
 					}
 				}
 			}
@@ -3315,7 +3328,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return providers.keySet().toArray(new RHExtensionProvider[providers.size()]);
 	}
@@ -3327,7 +3340,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @return
 	 * @throws IOException
 	 */
-	public static Mapping[] loadComponentMappings(ConfigImpl config, Struct root, Log log) {
+	public static Mapping[] loadComponentMappings(ConfigImpl config, Struct root) {
 		Mapping[] mappings = null;
 		try {
 			boolean hasSet = false;
@@ -3376,7 +3389,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
-						log(config, log, t);
+						log(config, t);
 					}
 				}
 				if (!hasDefault) {
@@ -3389,7 +3402,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 
 		if (mappings == null) {
@@ -3400,7 +3413,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 	}
 
-	public static void loadProxy(ConfigServerImpl config, Struct root, Log log) {
+	public static void loadProxy(ConfigServerImpl config, Struct root) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
 			Struct proxy = ConfigWebUtil.getAsStruct("proxy", root);
@@ -3426,11 +3439,11 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 	}
 
-	public static boolean loadError(ConfigImpl config, Struct root, Log log, boolean defaultValue) {
+	public static boolean loadError(ConfigImpl config, Struct root, boolean defaultValue) {
 		try {
 			// Struct error = ConfigWebUtil.getAsStruct("error", root);
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_DEBUGGING);
@@ -3445,12 +3458,12 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return defaultValue;
 	}
 
-	public static Regex loadRegex(ConfigImpl config, Struct root, Log log, Regex defaultValue) {
+	public static Regex loadRegex(ConfigImpl config, Struct root, Regex defaultValue) {
 		try {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
 
@@ -3465,7 +3478,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, log, t);
+			log(config, t);
 		}
 		return defaultValue;
 	}

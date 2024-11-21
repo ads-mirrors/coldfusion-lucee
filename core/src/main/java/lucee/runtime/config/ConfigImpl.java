@@ -490,7 +490,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (compileType == -1) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getCompileType")) {
 				if (compileType == -1) {
-					ConfigWebFactory.loadJava(this, root, getLog(), RECOMPILE_NEVER);
+					ConfigWebFactory.loadJava(this, root, RECOMPILE_NEVER);
 				}
 			}
 		}
@@ -935,7 +935,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (spoolEnable == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "mail")) {
 				if (spoolEnable == null) {
-					ConfigWebFactory.loadMail(this, root, getLog());
+					ConfigWebFactory.loadMail(this, root);
 				}
 			}
 		}
@@ -959,7 +959,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (sendPartial == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "mail")) {
 				if (sendPartial == null) {
-					ConfigWebFactory.loadMail(this, root, getLog());
+					ConfigWebFactory.loadMail(this, root);
 				}
 			}
 		}
@@ -983,7 +983,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (userSet == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "mail")) {
 				if (userSet == null) {
-					ConfigWebFactory.loadMail(this, root, getLog());
+					ConfigWebFactory.loadMail(this, root);
 				}
 			}
 		}
@@ -1006,7 +1006,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (mailServers == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "mail")) {
 				if (mailServers == null) {
-					ConfigWebFactory.loadMail(this, root, getLog());
+					ConfigWebFactory.loadMail(this, root);
 				}
 			}
 		}
@@ -1029,7 +1029,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (mailTimeout == -1) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "mail")) {
 				if (mailTimeout == -1) {
-					ConfigWebFactory.loadMail(this, root, getLog());
+					ConfigWebFactory.loadMail(this, root);
 				}
 			}
 		}
@@ -1052,7 +1052,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (varUsage == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getQueryVarUsage")) {
 				if (varUsage == null) {
-					varUsage = ConfigWebFactory.loadSecurity(this, root, getLog());
+					varUsage = ConfigWebFactory.loadSecurity(this, root);
 				}
 			}
 		}
@@ -1128,7 +1128,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (locale == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getLocale")) {
 				if (locale == null) {
-					locale = ConfigWebFactory.loadLocale(this, root, getLog(), Locale.US);
+					locale = ConfigWebFactory.loadLocale(this, root, Locale.US);
 				}
 			}
 		}
@@ -1309,7 +1309,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (spoolInterval == -1) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "mail")) {
 				if (spoolInterval == -1) {
-					ConfigWebFactory.loadMail(this, root, getLog());
+					ConfigWebFactory.loadMail(this, root);
 				}
 			}
 		}
@@ -1332,7 +1332,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (timeZone == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getTimeZone")) {
 				if (timeZone == null) {
-					timeZone = ConfigWebFactory.loadTimezone(this, root, getLog(), null);
+					timeZone = ConfigWebFactory.loadTimezone(this, root, null);
 					if (timeZone == null) timeZone = TimeZone.getDefault();
 					// there was no system default, so we use UTC
 					if (timeZone == null) {
@@ -1454,7 +1454,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getMappings")) {
 				if (mappings == null) {
 					close(this.uncheckedMappings);
-					this.mappings = initMappings(this.uncheckedMappings = ConfigWebFactory.loadMappings(this, root, getLog()));
+					this.mappings = initMappings(this.uncheckedMappings = ConfigWebFactory.loadMappings(this, root));
 				}
 			}
 		}
@@ -1480,7 +1480,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getCustomTagMappings")) {
 				if (customTagMappings == null) {
 					close(this.uncheckedCustomTagMappings);
-					this.customTagMappings = initMappings(this.uncheckedCustomTagMappings = ConfigWebFactory.loadCustomTagsMappings(this, root, getLog()));
+					this.customTagMappings = initMappings(this.uncheckedCustomTagMappings = ConfigWebFactory.loadCustomTagsMappings(this, root));
 				}
 			}
 		}
@@ -1506,7 +1506,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getComponentMappings")) {
 				if (componentMappings == null) {
 					close(this.uncheckedComponentMappings);
-					this.componentMappings = initMappings(this.uncheckedComponentMappings = ConfigWebFactory.loadComponentMappings(this, root, getLog()));
+					this.componentMappings = initMappings(this.uncheckedComponentMappings = ConfigWebFactory.loadComponentMappings(this, root));
 				}
 			}
 		}
@@ -1583,7 +1583,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (restMappings == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getRestMappings")) {
 				if (restMappings == null) {
-					restMappings = ConfigWebFactory.loadRestMappings(this, root, getLog());
+					restMappings = ConfigWebFactory.loadRestMappings(this, root);
 				}
 			}
 		}
@@ -2045,7 +2045,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
-						ConfigWebFactory.log(this, getLog(), t);
+						ConfigWebFactory.log(this, t);
 					}
 				}
 			}
@@ -2094,7 +2094,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (aiEngineFactories == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getAIEngineFactories")) {
 				if (aiEngineFactories == null) {
-					aiEngineFactories = ConfigWebFactory.loadAI(this, root, getLog(), null);
+					aiEngineFactories = ConfigWebFactory.loadAI(this, root, null);
 					if (aiEngineFactories == null) aiEngineFactories = new HashMap<>();
 				}
 			}
@@ -2111,15 +2111,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 		}
 		return this;
-	}
-
-	protected Log getLog() {
-		try {
-			return getLog("application", false);
-		}
-		catch (PageException e) {
-			return null;
-		}
 	}
 
 	/**
@@ -2168,7 +2159,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (cfxTagPool == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getCFXTagPool")) {
 				if (cfxTagPool == null) {
-					cfxTagPool = new CFXTagPoolImpl(ConfigWebFactory.loadCFX(this, root, getLog()));
+					cfxTagPool = new CFXTagPoolImpl(ConfigWebFactory.loadCFX(this, root));
 				}
 			}
 		}
@@ -2377,7 +2368,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (searchEngineClassDef == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getSearchEngineClassDefinition")) {
 				if (searchEngineClassDef == null) {
-					searchEngineClassDef = ConfigWebFactory.loadSearchClass(this, root, getLog());
+					searchEngineClassDef = ConfigWebFactory.loadSearchClass(this, root);
 				}
 			}
 		}
@@ -2400,7 +2391,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (searchEngineDirectory == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getSearchEngineDirectory")) {
 				if (searchEngineDirectory == null) {
-					searchEngineDirectory = ConfigWebFactory.loadSearchDir(this, root, getLog());
+					searchEngineDirectory = ConfigWebFactory.loadSearchDir(this, root);
 				}
 			}
 		}
@@ -2801,7 +2792,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (datasourcesAll == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getDataSources")) {
 				if (datasourcesAll == null) {
-					datasourcesAll = ConfigWebFactory.loadDataSources(this, root, getLog());
+					datasourcesAll = ConfigWebFactory.loadDataSources(this, root);
 				}
 			}
 		}
@@ -2866,7 +2857,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (mailDefaultCharset == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "mail")) {
 				if (mailDefaultCharset == null) {
-					ConfigWebFactory.loadMail(this, root, getLog());
+					ConfigWebFactory.loadMail(this, root);
 				}
 			}
 		}
@@ -2902,7 +2893,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (defaultResourceProvider == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getCacheHandlers")) {
 				if (cacheHandlerClasses == null) {
-					cacheHandlerClasses = ConfigWebFactory.loadCacheHandler(this, root, getLog());
+					cacheHandlerClasses = ConfigWebFactory.loadCacheHandler(this, root);
 				}
 			}
 		}
@@ -2918,7 +2909,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (defaultResourceProvider == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getDefaultResourceProvider")) {
 				if (defaultResourceProvider == null) {
-					defaultResourceProvider = ConfigWebFactory.loadDefaultResourceProvider(this, root, getLog());
+					defaultResourceProvider = ConfigWebFactory.loadDefaultResourceProvider(this, root);
 					if (defaultResourceProvider == null) defaultResourceProvider = ResourcesImpl.getFileResourceProvider();
 					if (defaultResourceProvider != resources.getDefaultResourceProvider()) resources.registerDefaultResourceProvider(defaultResourceProvider);
 				}
@@ -2944,7 +2935,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (cacheHandlerClasses == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getCacheHandlers")) {
 				if (cacheHandlerClasses == null) {
-					cacheHandlerClasses = ConfigWebFactory.loadCacheHandler(this, root, getLog());
+					cacheHandlerClasses = ConfigWebFactory.loadCacheHandler(this, root);
 				}
 			}
 		}
@@ -2966,7 +2957,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (initResource) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getResources")) {
 				if (initResource) {
-					ConfigWebFactory.loadResourceProvider(this, root, getLog());
+					ConfigWebFactory.loadResourceProvider(this, root);
 					initResource = false;
 					cacheHandlerClasses = null;
 				}
@@ -3307,7 +3298,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (dmpWriterEntries == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getDumpWritersEntries")) {
 				if (dmpWriterEntries == null) {
-					dmpWriterEntries = ConfigWebFactory.loadDumpWriter(this, root, getLog(), null);
+					dmpWriterEntries = ConfigWebFactory.loadDumpWriter(this, root, null);
 					// MUST handle default value was returned
 				}
 			}
@@ -3454,7 +3445,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (err == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getErrWriter")) {
 				if (err == null) {
-					PrintStream tmp = ConfigWebFactory.loadErr(this, root, getLog());
+					PrintStream tmp = ConfigWebFactory.loadErr(this, root);
 					if (tmp == null) {
 						err = SystemUtil.getPrintWriter(SystemUtil.ERR);
 					}
@@ -3485,7 +3476,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (out == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getOutWriter")) {
 				if (out == null) {
-					PrintStream tmp = ConfigWebFactory.loadOut(this, root, getLog());
+					PrintStream tmp = ConfigWebFactory.loadOut(this, root);
 					if (tmp == null) {
 						out = SystemUtil.getPrintWriter(SystemUtil.OUT);
 					}
@@ -3711,7 +3702,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
-						ConfigWebFactory.log(this, getLog(), t);
+						ConfigWebFactory.log(this, t);
 					}
 					if (version == null) version = DEFAULT_VERSION;
 				}
@@ -3824,7 +3815,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (constants == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getConstants")) {
 				if (constants == null) {
-					constants = ConfigWebFactory.loadConstants(this, root, getLog(), null);
+					constants = ConfigWebFactory.loadConstants(this, root, null);
 					if (constants == null) constants = new StructImpl();
 				}
 			}
@@ -3878,7 +3869,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (remoteClients == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getRemoteClients")) {
 				if (remoteClients == null) {
-					remoteClients = ConfigWebFactory.loadRemoteClients(this, root, getLog());
+					remoteClients = ConfigWebFactory.loadRemoteClients(this, root);
 				}
 			}
 		}
@@ -3969,7 +3960,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (errorStatusCode == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getErrorStatusCode")) {
 				if (errorStatusCode == null) {
-					errorStatusCode = ConfigWebFactory.loadError(this, root, getLog(), true);
+					errorStatusCode = ConfigWebFactory.loadError(this, root, true);
 				}
 			}
 		}
@@ -4035,7 +4026,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (rhextensionProviders == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getRHExtensionProviders")) {
 				if (rhextensionProviders == null) {
-					rhextensionProviders = ConfigWebFactory.loadExtensionProviders(this, root, getLog());
+					rhextensionProviders = ConfigWebFactory.loadExtensionProviders(this, root);
 				}
 			}
 		}
@@ -4402,7 +4393,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (cacheDefaultConnectionNames == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefaultConnectionName")) {
 				if (cacheDefaultConnectionNames == null) {
-					cacheDefaultConnectionNames = ConfigWebFactory.loadCacheDefaultConnectionNames(this, root, getLog());
+					cacheDefaultConnectionNames = ConfigWebFactory.loadCacheDefaultConnectionNames(this, root);
 				}
 			}
 		}
@@ -4479,7 +4470,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (cacheConnection == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getCacheConnections")) {
 				if (cacheConnection == null) {
-					cacheConnection = ConfigWebFactory.loadCacheCacheConnections(this, root, getLog());
+					cacheConnection = ConfigWebFactory.loadCacheCacheConnections(this, root);
 				}
 			}
 		}
@@ -4534,7 +4525,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (executionLogFactory == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getExecutionLogFactory")) {
 				if (executionLogFactory == null) {
-					executionLogFactory = ConfigWebFactory.loadExeLog(this, root, getLog());
+					executionLogFactory = ConfigWebFactory.loadExeLog(this, root);
 				}
 			}
 		}
@@ -4610,7 +4601,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (cdORMEngine == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getORMEngineClassDefintion")) {
 				if (cdORMEngine == null) {
-					cdORMEngine = ConfigWebFactory.loadORMClass(this, root, getLog());
+					cdORMEngine = ConfigWebFactory.loadORMClass(this, root);
 				}
 			}
 		}
@@ -4637,7 +4628,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (ormConfig == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getORMConfig")) {
 				if (ormConfig == null) {
-					ormConfig = ConfigWebFactory.loadORMConfig(this, root, getLog(), null);
+					ormConfig = ConfigWebFactory.loadORMConfig(this, root, null);
 				}
 			}
 		}
@@ -5013,7 +5004,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 							}
 							catch (Throwable t) {
 								ExceptionUtil.rethrowIfNecessary(t);
-								ConfigWebFactory.log(this, getLog(), t);
+								ConfigWebFactory.log(this, t);
 							}
 						}
 					}
@@ -5289,7 +5280,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (debugOptions == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getDebugOptions")) {
 				if (debugOptions == null) {
-					debugOptions = ConfigWebFactory.loadDebugOptions(this, root, getLog());
+					debugOptions = ConfigWebFactory.loadDebugOptions(this, root);
 				}
 			}
 		}
@@ -5533,7 +5524,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 						}
 						catch (Throwable t) {
 							ExceptionUtil.rethrowIfNecessary(t);
-							ConfigWebFactory.log(this, getLog(), t);
+							ConfigWebFactory.log(this, t);
 						}
 					}
 					cachedWithins = map;
@@ -5645,7 +5636,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (drivers == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getJDBCDrivers")) {
 				if (drivers == null) {
-					drivers = ConfigWebFactory.loadJDBCDrivers(this, root, getLog());
+					drivers = ConfigWebFactory.loadJDBCDrivers(this, root);
 				}
 			}
 		}
@@ -5828,7 +5819,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (cacheDefinitions == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getCacheDefinitions")) {
 				if (cacheDefinitions == null) {
-					cacheDefinitions = ConfigWebFactory.loadCacheDefintions(this, root, getLog());
+					cacheDefinitions = ConfigWebFactory.loadCacheDefintions(this, root);
 				}
 			}
 		}
@@ -5874,7 +5865,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (gatewayEntries == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getGatewayEntries")) {
 				if (gatewayEntries == null) {
-					gatewayEntries = ConfigWebFactory.loadGatewayEL(this, root, getLog());
+					gatewayEntries = ConfigWebFactory.loadGatewayEL(this, root);
 				}
 			}
 		}
@@ -5899,7 +5890,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (initWsHandlerCD) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getWSHandlerClassDefinition")) {
 				if (initWsHandlerCD) {
-					wsHandlerCD = ConfigWebFactory.loadWS(this, root, getLog(), null);
+					wsHandlerCD = ConfigWebFactory.loadWS(this, root, null);
 					initWsHandlerCD = false;
 				}
 			}
@@ -6001,7 +5992,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (startups == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getStartups")) {
 				if (startups == null) {
-					startups = ConfigWebFactory.loadStartupHook(this, root, getLog());
+					startups = ConfigWebFactory.loadStartupHook(this, root);
 				}
 			}
 		}
@@ -6023,7 +6014,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	public Regex getRegex() {
 		if (regex == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getRegex")) {
-				if (regex == null) regex = ConfigWebFactory.loadRegex(this, root, getLog(), null);
+				if (regex == null) regex = ConfigWebFactory.loadRegex(this, root, null);
 				if (regex == null) regex = RegexFactory.toRegex(RegexFactory.TYPE_PERL, null);
 			}
 		}
@@ -6094,7 +6085,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
-						ConfigWebFactory.log(this, getLog(), t);
+						ConfigWebFactory.log(this, t);
 					}
 				}
 				if (mainLoggerName == null) mainLoggerName = "application";
@@ -6183,7 +6174,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (javaSettings == null) {
 			synchronized (javaSettingsInstances) {
 				if (javaSettings == null) {
-					javaSettings = ConfigWebFactory.loadJavaSettings(this, root, getLog(), null);
+					javaSettings = ConfigWebFactory.loadJavaSettings(this, root, null);
 					if (javaSettings == null) javaSettings = JavaSettingsImpl.getInstance(this, new StructImpl(), null);
 				}
 			}

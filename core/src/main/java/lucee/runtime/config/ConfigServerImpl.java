@@ -191,7 +191,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		if (initConfigListener) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getConfigListener")) {
 				if (initConfigListener) {
-					configListener = ConfigWebFactory.loadListener(this, root, getLog(), null);
+					configListener = ConfigWebFactory.loadListener(this, root, null);
 					initConfigListener = false;
 				}
 			}
@@ -432,7 +432,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		if (updateLocation == null) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "getUpdateLocation")) {
 				if (updateLocation == null) {
-					updateLocation = ConfigWebFactory.loadUpdate(this, root, getLog());
+					updateLocation = ConfigWebFactory.loadUpdate(this, root);
 				}
 			}
 		}
@@ -512,7 +512,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		if (requestMonitors == null) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "monitors")) {
 				if (requestMonitors == null) {
-					ConfigWebFactory.loadMonitors(this, root, getLog());
+					ConfigWebFactory.loadMonitors(this, root);
 				}
 			}
 		}
@@ -532,7 +532,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		if (intervallMonitors == null) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "monitors")) {
 				if (intervallMonitors == null) {
-					ConfigWebFactory.loadMonitors(this, root, getLog());
+					ConfigWebFactory.loadMonitors(this, root);
 				}
 			}
 		}
@@ -551,7 +551,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		if (actionMonitorCollector == null) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "monitors")) {
 				if (actionMonitorCollector == null) {
-					ConfigWebFactory.loadMonitors(this, root, getLog());
+					ConfigWebFactory.loadMonitors(this, root);
 				}
 			}
 		}
