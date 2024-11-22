@@ -62,9 +62,9 @@ import lucee.commons.lang.types.RefInteger;
 import lucee.commons.lang.types.RefIntegerImpl;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigAdmin;
+import lucee.runtime.config.ConfigFactoryImpl;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.ConfigWeb;
-import lucee.runtime.config.ConfigFactoryImpl;
 import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.config.ConfigWebUtil;
 import lucee.runtime.config.Constants;
@@ -929,7 +929,7 @@ public class RHExtension implements Serializable {
 			}
 		}
 
-		if (config instanceof ConfigWebPro && ((ConfigWebPro) config).isSingle()) return;
+		if (config instanceof ConfigWebPro) return;
 		// extension defined in xml
 		RHExtension[] xmlArrExtensions = ((ConfigPro) config).getRHExtensions();
 		if (xmlArrExtensions.length == getPhysicalExtensionCount(config)) return; // all is OK

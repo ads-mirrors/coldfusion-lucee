@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.osgi.framework.BundleException;
 import org.xml.sax.SAXException;
 
-import lucee.commons.io.res.Resource;
 import lucee.commons.lock.KeyLock;
 import lucee.runtime.CIPage;
 import lucee.runtime.Mapping;
@@ -97,9 +96,7 @@ public interface ConfigWebPro extends ConfigWeb, ConfigPro {
 
 	public void resetServerFunctionMappings();
 
-	public boolean isSingle();
-
-	public Resource getWebConfigDir() throws PageException;
+	// public boolean isSingle();
 
 	public ServletConfig getServletConfig();
 

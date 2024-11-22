@@ -63,7 +63,6 @@ import lucee.runtime.db.JDBCDriver;
 import lucee.runtime.debug.DebuggerPool;
 import lucee.runtime.dump.DumpWriter;
 import lucee.runtime.dump.DumpWriterEntry;
-import lucee.runtime.engine.CFMLEngineImpl;
 import lucee.runtime.engine.ExecutionLogFactory;
 import lucee.runtime.engine.ThreadQueue;
 import lucee.runtime.exp.DatabaseException;
@@ -121,7 +120,6 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	private Resource rootDir;
 	private Mapping[] mappings;
 	private lucee.runtime.rest.Mapping[] restMappings;
-	private Resource configDirWeb;
 
 	public ConfigWebImpl(CFMLFactoryImpl factory, ConfigServerImpl cs, ServletConfig config) {
 		setInstance(factory, cs, config);
@@ -132,7 +130,6 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 		this.factory = factory;
 		this.cs = cs;
 		this.config = config;
-		this.configDirWeb = null;
 		helper = new ConfigWebHelper(cs, this);
 
 		reload();
@@ -1930,23 +1927,6 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	@Override
 	public void resetServerFunctionMappings() {
 
-	}
-
-	@Override
-	public boolean isSingle() {
-		return true;
-	}
-
-	@Override
-	public Resource getWebConfigDir() throws PageException {
-		if (configDirWeb == null) {
-			synchronized (SystemUtil.createToken("ConfigWebImpl", "getWebConfigDir")) {
-				if (configDirWeb == null) {
-					this.configDirWeb = CFMLEngineImpl.getConfigWebDirectory(config, cs);
-				}
-			}
-		}
-		return this.configDirWeb;
 	}
 
 	@Override
