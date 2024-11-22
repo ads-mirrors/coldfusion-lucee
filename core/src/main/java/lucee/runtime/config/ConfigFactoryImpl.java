@@ -199,13 +199,13 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 	public static final ClassDefinition<DummyORMEngine> DUMMY_ORM_ENGINE = new ClassDefinitionImpl<DummyORMEngine>(DummyORMEngine.class);
 	public static final String[] CONFIG_FILE_NAMES = new String[] { ".CFConfig.json", "config.json" };
 
-	public static ConfigWebPro newInstanceWeb(CFMLEngine engine, CFMLFactoryImpl factory, ConfigServerImpl configServer, Resource configDirWeb, ServletConfig servletConfig,
+	public static ConfigWebPro newInstanceWeb(CFMLEngine engine, CFMLFactoryImpl factory, ConfigServerImpl configServer, ServletConfig servletConfig,
 			ConfigWebImpl existingToUpdate) throws PageException {
 
 		Resource configDir = configServer.getConfigDir();
 		double start = SystemUtil.millis();
-		ConfigWebPro configWeb = existingToUpdate != null ? existingToUpdate.setInstance(factory, configServer, servletConfig, configDirWeb)
-				: new ConfigWebImpl(factory, configServer, servletConfig, configDirWeb);
+		ConfigWebPro configWeb = existingToUpdate != null ? existingToUpdate.setInstance(factory, configServer, servletConfig)
+				: new ConfigWebImpl(factory, configServer, servletConfig);
 		factory.setConfig(configServer, configWeb);
 
 		((ThreadQueueImpl) configWeb.getThreadQueue()).setMode(configWeb.getQueueEnable() ? ThreadQueuePro.MODE_ENABLED : ThreadQueuePro.MODE_DISABLED);

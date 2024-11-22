@@ -80,8 +80,6 @@ import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.Md5;
 import lucee.commons.lang.Pair;
 import lucee.commons.lang.StringUtil;
-import lucee.commons.lang.types.RefBoolean;
-import lucee.commons.lang.types.RefBooleanImpl;
 import lucee.commons.net.HTTPUtil;
 import lucee.commons.net.http.httpclient.HTTPEngine4Impl;
 import lucee.intergral.fusiondebug.server.FDControllerImpl;
@@ -905,10 +903,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 		try {
 			CFMLFactoryImpl factory = new CFMLFactoryImpl(this, sg);
 			if (ConfigFactoryImpl.LOG) LogUtil.log(configServer, Log.LEVEL_INFO, "startup", "Init factory");
-
-			RefBoolean isCustomSetting = new RefBooleanImpl();
-			Resource configDir = getConfigDirectory(sg, configServer, countExistingContextes, isCustomSetting);
-			ConfigWebPro config = ConfigFactoryImpl.newInstanceWeb(this, factory, configServer, configDir, sg, null);
+			ConfigWebPro config = ConfigFactoryImpl.newInstanceWeb(this, factory, configServer, sg, null);
 
 			if (ConfigFactoryImpl.LOG) LogUtil.log(configServer, Log.LEVEL_INFO, "startup", "Loaded config");
 			factory.setConfig(configServer, config);
@@ -927,28 +922,21 @@ public final class CFMLEngineImpl implements CFMLEngine {
 	 * @param countExistingContextes
 	 * @return return path to directory
 	 */
-	private Resource getConfigDirectory(ServletConfig sg, ConfigServerImpl configServer, int countExistingContextes, RefBoolean isCustomSetting) throws PageServletException {
-		isCustomSetting.setValue(true);
+	public static Resource getConfigWebDirectory(ServletConfig sg, ConfigServerImpl configServer) throws PageException {
+		boolean isCustomSetting = true;
 		ServletContext sc = sg.getServletContext();
 		String strConfig = sg.getInitParameter("configuration");
 		if (StringUtil.isEmpty(strConfig)) strConfig = sg.getInitParameter("lucee-web-directory");
 		if (StringUtil.isEmpty(strConfig)) strConfig = System.getProperty("lucee.web.dir");
 
 		if (StringUtil.isEmpty(strConfig)) {
-			isCustomSetting.setValue(false);
+			isCustomSetting = false;
 			strConfig = "{web-root-directory}/WEB-INF/lucee/";
 		}
 		// only for backward compatibility
 		else if (strConfig.startsWith("/WEB-INF/lucee/")) strConfig = "{web-root-directory}" + strConfig;
 
 		strConfig = StringUtil.removeQuotes(strConfig, true);
-
-		// static path is not allowed
-		if (countExistingContextes > 1 && strConfig != null && strConfig.indexOf('{') == -1) {
-			String text = "Static path [" + strConfig + "] for servlet init param [lucee-web-directory] is not allowed, path must use a web-context specific placeholder.";
-			LogUtil.log(configServer, Log.LEVEL_ERROR, CFMLEngineImpl.class.getName(), text);
-			throw new PageServletException(new ApplicationException(text));
-		}
 		strConfig = SystemUtil.parsePlaceHolder(strConfig, sc, configServer.getLabels());
 
 		ResourceProvider frp = ResourcesImpl.getFileResourceProvider();
@@ -960,17 +948,17 @@ public final class CFMLEngineImpl implements CFMLEngine {
 			configDir = ResourceUtil.createResource(res = frp.getResource(strConfig), FileUtil.LEVEL_GRAND_PARENT_FILE, FileUtil.TYPE_DIR);
 		}
 
-		if (configDir == null && !isCustomSetting.toBooleanValue()) {
+		if (configDir == null && !isCustomSetting) {
 			try {
 				res.createDirectory(true);
 				configDir = res;
 			}
 			catch (IOException e) {
-				throw new PageServletException(Caster.toPageException(e));
+				throw Caster.toPageException(e);
 			}
 		}
 		if (configDir == null) {
-			throw new PageServletException(new ApplicationException("path [" + strConfig + "] is invalid"));
+			throw new ApplicationException("path [" + strConfig + "] is invalid");
 		}
 
 		if (!configDir.exists() || ResourceUtil.isEmptyDirectory(configDir, null)) {

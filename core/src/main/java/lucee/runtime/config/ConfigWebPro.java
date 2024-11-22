@@ -99,7 +99,7 @@ public interface ConfigWebPro extends ConfigWeb, ConfigPro {
 
 	public boolean isSingle();
 
-	public Resource getWebConfigDir();
+	public Resource getWebConfigDir() throws PageException;
 
 	public ServletConfig getServletConfig();
 

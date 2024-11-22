@@ -63,6 +63,7 @@ import lucee.runtime.db.JDBCDriver;
 import lucee.runtime.debug.DebuggerPool;
 import lucee.runtime.dump.DumpWriter;
 import lucee.runtime.dump.DumpWriterEntry;
+import lucee.runtime.engine.CFMLEngineImpl;
 import lucee.runtime.engine.ExecutionLogFactory;
 import lucee.runtime.engine.ThreadQueue;
 import lucee.runtime.exp.DatabaseException;
@@ -122,22 +123,16 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	private lucee.runtime.rest.Mapping[] restMappings;
 	private Resource configDirWeb;
 
-	public ConfigWebImpl(CFMLFactoryImpl factory, ConfigServerImpl cs, ServletConfig config, Resource configDirWeb) {
-		setInstance(factory, cs, config, configDirWeb);
+	public ConfigWebImpl(CFMLFactoryImpl factory, ConfigServerImpl cs, ServletConfig config) {
+		setInstance(factory, cs, config);
 	}
 
-	public ConfigWebPro setInstance(CFMLFactoryImpl factory, ConfigServerImpl cs, ServletConfig config, Resource configDirWeb) {
+	public ConfigWebPro setInstance(CFMLFactoryImpl factory, ConfigServerImpl cs, ServletConfig config) {
 		this.id = null;
 		this.factory = factory;
 		this.cs = cs;
 		this.config = config;
-		this.configDirWeb = configDirWeb;
-		ResourceProvider frp = ResourcesImpl.getFileResourceProvider();
-		this.rootDir = frp.getResource(ReqRspUtil.getRootPath(config.getServletContext()));
-
-		// Fix for tomcat
-		if (this.rootDir.getName().equals(".") || this.rootDir.getName().equals("..")) this.rootDir = this.rootDir.getParentResource();
-
+		this.configDirWeb = null;
 		helper = new ConfigWebHelper(cs, this);
 
 		reload();
@@ -584,6 +579,17 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 
 	@Override
 	public Resource getRootDirectory() {
+		if (rootDir == null) {
+			synchronized (SystemUtil.createToken("ConfigWebImpl", "getRootDirectory")) {
+				if (rootDir == null) {
+					ResourceProvider frp = ResourcesImpl.getFileResourceProvider();
+					this.rootDir = frp.getResource(ReqRspUtil.getRootPath(config.getServletContext()));
+
+					// Fix for tomcat
+					if (this.rootDir.getName().equals(".") || this.rootDir.getName().equals("..")) this.rootDir = this.rootDir.getParentResource();
+				}
+			}
+		}
 		return rootDir;
 	}
 
@@ -1932,7 +1938,14 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	}
 
 	@Override
-	public Resource getWebConfigDir() {
+	public Resource getWebConfigDir() throws PageException {
+		if (configDirWeb == null) {
+			synchronized (SystemUtil.createToken("ConfigWebImpl", "getWebConfigDir")) {
+				if (configDirWeb == null) {
+					this.configDirWeb = CFMLEngineImpl.getConfigWebDirectory(config, cs);
+				}
+			}
+		}
 		return this.configDirWeb;
 	}
 
