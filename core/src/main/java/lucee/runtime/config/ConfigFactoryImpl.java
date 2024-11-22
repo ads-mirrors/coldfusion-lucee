@@ -25,6 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -65,8 +66,10 @@ import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.log.LoggerAndSourceData;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.ResourceProvider;
+import lucee.commons.io.res.ResourcesImpl;
 import lucee.commons.io.res.filter.ExtensionResourceFilter;
 import lucee.commons.io.res.type.cfml.CFMLResourceProvider;
+import lucee.commons.io.res.type.file.FileResource;
 import lucee.commons.io.res.type.s3.DummyS3ResourceProvider;
 import lucee.commons.io.res.type.zip.ZipResourceProvider;
 import lucee.commons.io.res.util.ResourceUtil;
@@ -79,6 +82,7 @@ import lucee.commons.net.HTTPUtil;
 import lucee.commons.net.URLDecoder;
 import lucee.loader.engine.CFMLEngine;
 import lucee.loader.engine.CFMLEngineFactory;
+import lucee.runtime.CFMLFactory;
 import lucee.runtime.CFMLFactoryImpl;
 import lucee.runtime.Mapping;
 import lucee.runtime.MappingImpl;
@@ -92,7 +96,9 @@ import lucee.runtime.cache.tag.request.RequestCacheHandler;
 import lucee.runtime.cache.tag.timespan.TimespanCacheHandler;
 import lucee.runtime.cfx.customtag.CFXTagClass;
 import lucee.runtime.cfx.customtag.JavaCFXTagClass;
+import lucee.runtime.component.ImportDefintion;
 import lucee.runtime.config.ConfigBase.Startup;
+import lucee.runtime.config.component.ComponentFactory;
 import lucee.runtime.config.gateway.GatewayMap;
 import lucee.runtime.converter.ConverterException;
 import lucee.runtime.converter.JSONConverter;
@@ -115,9 +121,11 @@ import lucee.runtime.engine.ExecutionLog;
 import lucee.runtime.engine.ExecutionLogFactory;
 import lucee.runtime.engine.InfoImpl;
 import lucee.runtime.engine.ThreadLocalConfig;
+import lucee.runtime.engine.ThreadLocalConfigServer;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.engine.ThreadQueueImpl;
 import lucee.runtime.engine.ThreadQueuePro;
+import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.extension.ExtensionDefintion;
@@ -185,11 +193,11 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 
 	private static final String TEMPLATE_EXTENSION = "cfm";
 	private static final String COMPONENT_EXTENSION = "cfc";
-	private static final String COMPONENT_EXTENSION_LUCEE = "lucee";
 	public static final boolean LOG = true;
 	private static final int DEFAULT_MAX_CONNECTION = 100;
 	public static final String DEFAULT_LOCATION = Constants.DEFAULT_UPDATE_URL.toExternalForm();
-	public static final ClassDefinition DUMMY_ORM_ENGINE = new ClassDefinitionImpl(DummyORMEngine.class);;
+	public static final ClassDefinition<DummyORMEngine> DUMMY_ORM_ENGINE = new ClassDefinitionImpl<DummyORMEngine>(DummyORMEngine.class);
+	public static final String[] CONFIG_FILE_NAMES = new String[] { ".CFConfig.json", "config.json" };
 
 	public static ConfigWebPro newInstanceSingle(CFMLEngine engine, CFMLFactoryImpl factory, ConfigServerImpl configServer, Resource configDirWeb, ServletConfig servletConfig,
 			ConfigWebImpl existingToUpdate) throws PageException {
@@ -197,14 +205,12 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		Resource configDir = configServer.getConfigDir();
 
 		LogUtil.logGlobal(configServer, Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(),
-				"===================================================================\n" + "WEB CONTEXT (SINGLE) (" + createLabel(configServer, servletConfig) + ")\n"
+				"===================================================================\n" + "WEB CONTEXT (" + createLabel(configServer, servletConfig) + ")\n"
 						+ "-------------------------------------------------------------------\n" + "- config:" + configDir + "\n" + "- webroot:"
 						+ ReqRspUtil.getRootPath(servletConfig.getServletContext()) + "\n" + "- label:" + createLabel(configServer, servletConfig) + "\n"
 						+ "===================================================================\n"
 
 		);
-
-		boolean doNew = configServer.getUpdateInfo().updateType != NEW_NONE;
 		ConfigWebPro configWeb = existingToUpdate != null ? existingToUpdate.setInstance(factory, configServer, servletConfig, configDirWeb)
 				: new ConfigWebImpl(factory, configServer, servletConfig, configDirWeb);
 		factory.setConfig(configServer, configWeb);
@@ -221,22 +227,14 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		return configWeb;
 	}
 
-	private static String createLabel(ConfigServerImpl configServer, ServletConfig servletConfig) {
-		String hash = SystemUtil.hash(servletConfig.getServletContext());
-		Map<String, String> labels = configServer.getLabels();
-		String label = null;
-		if (labels != null) {
-			label = labels.get(hash);
-		}
-		if (label == null) label = hash;
-		return label;
-	}
-
 	/**
-	 * reloads the Config Object
+	 * creates a new ServletConfig Impl Object
 	 * 
-	 * @param cs
-	 * @param force
+	 * @param engine
+	 * @param initContextes
+	 * @param contextes
+	 * @param configDir
+	 * @return new Instance
 	 * @throws SAXException
 	 * @throws ClassNotFoundException
 	 * @throws PageException
@@ -244,14 +242,135 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 	 * @throws TagLibException
 	 * @throws FunctionLibException
 	 * @throws BundleException
-	 * @throws NoSuchAlgorithmException
-	 */ // MUST
-	public static void reloadInstance(CFMLEngine engine, ConfigServerImpl cs, ConfigWebImpl cwi, boolean force)
-			throws PageException, IOException, TagLibException, FunctionLibException, BundleException {
+	 * @throws ConverterException
+	 */
+	public static ConfigServerImpl newInstance(CFMLEngineImpl engine, Map<String, CFMLFactory> initContextes, Map<String, CFMLFactory> contextes, Resource configDir,
+			ConfigServerImpl existing, boolean essentialOnly)
+			throws SAXException, ClassException, PageException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
+		if (ThreadLocalPageContext.insideServerNewInstance()) throw new ApplicationException("already inside server.newInstance");
+		try {
+			ThreadLocalPageContext.insideServerNewInstance(true);
+			boolean isCLI = SystemUtil.isCLICall();
+			if (isCLI) {
+				Resource logs = configDir.getRealResource("logs");
+				logs.mkdirs();
+				Resource out = logs.getRealResource("out");
+				Resource err = logs.getRealResource("err");
+				ResourceUtil.touch(out);
+				ResourceUtil.touch(err);
+				if (logs instanceof FileResource) {
+					SystemUtil.setPrintWriter(SystemUtil.OUT, new PrintWriter((FileResource) out));
+					SystemUtil.setPrintWriter(SystemUtil.ERR, new PrintWriter((FileResource) err));
+				}
+				else {
+					SystemUtil.setPrintWriter(SystemUtil.OUT, new PrintWriter(IOUtil.getWriter(out, "UTF-8")));
+					SystemUtil.setPrintWriter(SystemUtil.ERR, new PrintWriter(IOUtil.getWriter(err, "UTF-8")));
+				}
+			}
+			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(),
+					"===================================================================\n" + "SERVER CONTEXT\n"
+							+ "-------------------------------------------------------------------\n" + "- config:" + configDir + "\n" + "- loader-version:"
+							+ SystemUtil.getLoaderVersion() + "\n" + "- core-version:" + engine.getInfo().getVersion() + "\n"
+							+ "===================================================================\n"
 
-		cwi.reload();
-		settings(cwi);
-		return;
+			);
+			UpdateInfo ui = getNew(engine, configDir, essentialOnly, UpdateInfo.NEW_NONE);
+			boolean doNew = ui.updateType != NEW_NONE;
+
+			Resource configFileOld = configDir.getRealResource("lucee-server.xml");
+
+			// config file
+			Resource configFileNew = getConfigFile(configDir, true);
+
+			boolean hasConfigOld = false;
+			boolean hasConfigNew = configFileNew.exists() && configFileNew.length() > 0;
+
+			if (!hasConfigNew) {
+				LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(),
+						"has no json server context config [" + configFileNew + "]");
+				hasConfigOld = configFileOld.exists() && configFileOld.length() > 0;
+				LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(),
+						"has " + (hasConfigOld ? "" : "no ") + "xml server context config [" + configFileOld + "]");
+			}
+			ConfigServerImpl config = existing != null ? existing : new ConfigServerImpl(engine, initContextes, contextes, configDir, configFileNew, ui, essentialOnly, doNew);
+			ThreadLocalConfigServer.register(config);
+			// translate to new
+			if (!hasConfigNew) {
+				if (hasConfigOld) {
+					LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(), "convert server context xml config to json");
+					try {
+						translateConfigFile(config, configFileOld, configFileNew, "multi", true);
+					}
+					catch (IOException e) {
+						LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), ConfigFactoryImpl.class.getName(), e);
+						throw e;
+					}
+					catch (ConverterException e) {
+						LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), ConfigFactoryImpl.class.getName(), e);
+						throw e;
+					}
+					catch (SAXException e) {
+						LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), ConfigFactoryImpl.class.getName(), e);
+						throw e;
+					}
+				}
+				// create config file
+				else {
+					LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(),
+							"create new server context json config file [" + configFileNew + "]");
+					createConfigFile("server", configFileNew);
+					hasConfigNew = true;
+				}
+			}
+			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(), "load config file");
+			Struct root = loadDocumentCreateIfFails(configFileNew, "server");
+			config.setRoot(root);
+			// admin mode
+			load(config, root, false, doNew, essentialOnly);
+
+			if (!essentialOnly) {
+				createContextFiles(configDir, config, doNew);
+				((CFMLEngineImpl) ConfigWebUtil.getEngine(config)).onStart(config, false);
+			}
+
+			return config;
+		}
+		finally {
+			ThreadLocalPageContext.insideServerNewInstance(false);
+			ThreadLocalConfigServer.release();
+		}
+	}
+
+	/**
+	 * reloads the Config Object
+	 * 
+	 * @param configServer
+	 * @throws SAXException
+	 * @throws ClassNotFoundException
+	 * @throws PageException
+	 * @throws IOException
+	 * @throws TagLibException
+	 * @throws FunctionLibException
+	 * @throws BundleException
+	 */
+	public static void reloadInstance(CFMLEngine engine, ConfigServerImpl configServer)
+			throws ClassException, PageException, IOException, TagLibException, FunctionLibException, BundleException {
+		boolean quick = CFMLEngineImpl.quick(engine);
+		Resource configFile = configServer.getConfigFile();
+		if (configFile == null) return;
+		if (second(configServer.getLoadTime()) > second(configFile.lastModified())) {
+			if (!configServer.getConfigDir().getRealResource("password.txt").isFile()) return;
+		}
+		int iDoNew = getNew(engine, configServer.getConfigDir(), quick, UpdateInfo.NEW_NONE).updateType;
+		boolean doNew = iDoNew != NEW_NONE;
+		Struct root = loadDocumentCreateIfFails(configFile, "server");
+		configServer.setRoot(root);
+		load(configServer, root, true, doNew, quick);
+		((CFMLEngineImpl) ConfigWebUtil.getEngine(configServer)).onStart(configServer, true);
+	}
+
+	private static long second(long ms) {
+		return ms / 1000;
 	}
 
 	/**
@@ -266,6 +385,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 	 * @throws BundleException
 	 */
 	synchronized static void load(ConfigServerImpl config, Struct root, boolean isReload, boolean doNew, boolean essentialOnly) throws IOException {
+		ConfigBase.onlyFirstMatch = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.mapping.first", null), true); // changed behaviour in 6.0
 		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(), "start reading config");
 		ThreadLocalConfig.register(config);
 		boolean reload = false;
@@ -310,7 +430,41 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 
 			((CFMLEngineImpl) config.getEngine()).touchMonitor(config);
 		}
+		loadLabel(config, root);
 		config.setLoadTime(System.currentTimeMillis());
+	}
+
+	private static String createLabel(ConfigServerImpl configServer, ServletConfig servletConfig) {
+		String hash = SystemUtil.hash(servletConfig.getServletContext());
+		Map<String, String> labels = configServer.getLabels();
+		String label = null;
+		if (labels != null) {
+			label = labels.get(hash);
+		}
+		if (label == null) label = hash;
+		return label;
+	}
+
+	/**
+	 * reloads the Config Object
+	 * 
+	 * @param cs
+	 * @param force
+	 * @throws SAXException
+	 * @throws ClassNotFoundException
+	 * @throws PageException
+	 * @throws IOException
+	 * @throws TagLibException
+	 * @throws FunctionLibException
+	 * @throws BundleException
+	 * @throws NoSuchAlgorithmException
+	 */ // MUST
+	public static void reloadInstance(CFMLEngine engine, ConfigServerImpl cs, ConfigWebImpl cwi, boolean force)
+			throws PageException, IOException, TagLibException, FunctionLibException, BundleException {
+
+		cwi.reload();
+		settings(cwi);
+		return;
 	}
 
 	private static boolean createSaltAndPW(Struct root, Config config, boolean essentialOnly) {
@@ -3535,6 +3689,206 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		}
 		return null;
 
+	}
+
+	public static Resource getConfigFile(Resource configDir, boolean server) throws IOException {
+		if (server) {
+			// lucee.base.config
+			String customCFConfig = SystemUtil.getSystemPropOrEnvVar("lucee.base.config", null);
+			Resource configFile = null;
+			if (!StringUtil.isEmpty(customCFConfig, true)) {
+
+				configFile = ResourcesImpl.getFileResourceProvider().getResource(customCFConfig.trim());
+
+				if (configFile.isFile()) {
+					LogUtil.log(Log.LEVEL_INFO, "deploy", "config", "using config File : " + configFile);
+					return configFile;
+				}
+				throw new IOException(
+						"the config file [" + configFile + "] defined with the environment variable [LUCEE_BASE_CONFIG] or system property [-Dlucee.base.config] does not exist.");
+			}
+		}
+		Resource res;
+		for (String cf: ConfigFactoryImpl.CONFIG_FILE_NAMES) {
+			res = configDir.getRealResource(cf);
+			if (res.isFile()) return res;
+		}
+
+		// default location
+		return configDir.getRealResource(ConfigFactoryImpl.CONFIG_FILE_NAMES[0]);
+	}
+
+	public static boolean isConfigFileName(String fileName) {
+		for (String fn: ConfigFactoryImpl.CONFIG_FILE_NAMES) {
+			if (fn.equalsIgnoreCase(fileName)) return true;
+		}
+		return false;
+	}
+
+	private static void loadLabel(ConfigServerImpl configServer, Struct root) {
+		Array children = ConfigWebUtil.getAsArray("labels", "label", root);
+
+		Map<String, String> labels = new HashMap<String, String>();
+		if (children != null) {
+			Iterator<?> it = children.getIterator();
+			Struct data;
+			while (it.hasNext()) {
+				data = Caster.toStruct(it.next(), null);
+				if (data == null) continue;
+				String id = ConfigWebUtil.getAsString("id", data, null);
+				String name = ConfigWebUtil.getAsString("name", data, null);
+				if (id != null && name != null) {
+					labels.put(id, name);
+				}
+			}
+		}
+		configServer.setLabels(labels);
+	}
+
+	private static void createContextFiles(Resource configDir, ConfigServer config, boolean doNew) {
+		// context
+		{
+			Resource contextDir = configDir.getRealResource("context");
+			// lucee-admin (only deploy if enabled)
+			if (Caster.toBoolean(SystemUtil.getSystemPropOrEnvVar("lucee.admin.enabled", "true"), true)) {
+				Resource f = contextDir.getRealResource("lucee-admin.lar");
+				if (!f.exists() || doNew) createFileFromResourceEL("/resource/context/lucee-admin.lar", f);
+				else ConfigFactoryImpl.createFileFromResourceCheckSizeDiffEL("/resource/context/lucee-admin.lar", f);
+			}
+
+			create("/resource/context/",
+					new String[] { "lucee-context.lar", "lucee-doc.lar", "component-dump.cfm", "Application.cfc", "form.cfm", "graph.cfm", "wddx.cfm", "admin.cfm" }, contextDir,
+					doNew);
+		}
+
+		// customtags
+		if (doNew) {
+			Resource ctDir = configDir.getRealResource("customtags");
+			if (!ctDir.exists()) ctDir.mkdirs();
+		}
+
+		// gateway
+		if (doNew) {
+			Resource gwDir = configDir.getRealResource("components/lucee/extension/gateway/");
+			create("/resource/context/gateway/", new String[] { "TaskGateway.cfc", "DummyGateway.cfc", "DirectoryWatcher.cfc", "DirectoryWatcherListener.cfc", "WatchService.cfc",
+					"MailWatcher.cfc", "MailWatcherListener.cfc", "AsynchronousEvents.cfc", "AsynchronousEventsListener.cfc" }, gwDir, doNew);
+		}
+
+		// error
+		if (doNew) {
+			Resource errorDir = configDir.getRealResource("context/templates/error");
+			create("/resource/context/templates/error/", new String[] { "error.cfm", "error-neo.cfm", "error-public.cfm" }, errorDir, doNew);
+		}
+
+		// display
+		if (doNew) {
+			Resource displayDir = configDir.getRealResource("context/templates/display");
+			if (!displayDir.exists()) displayDir.mkdirs();
+		}
+
+		// Debug
+		if (doNew) {
+			Resource debug = configDir.getRealResource("context/admin/debug");
+			create("/resource/context/admin/debug/", new String[] { "Debug.cfc", "Field.cfc", "Group.cfc", "Classic.cfc", "Simple.cfc", "Modern.cfc", "Comment.cfc" }, debug,
+					doNew);
+		}
+
+		// Info
+		if (doNew) {
+			Resource info = configDir.getRealResource("context/admin/info");
+			create("/resource/context/admin/info/", new String[] { "Info.cfc" }, info, doNew);
+		}
+
+		Resource wcdDir = configDir.getRealResource("web-context-deployment/admin");
+		try {
+			ResourceUtil.deleteEmptyFolders(wcdDir);
+		}
+		catch (IOException e) {
+			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), ConfigFactoryImpl.class.getName(), e);
+		}
+
+		// Security / SSL
+		Resource secDir = configDir.getRealResource("security");
+		Resource res = create("/resource/security/", "cacerts", secDir, false);
+		if (SystemUtil.getSystemPropOrEnvVar("lucee.use.lucee.SSL.TrustStore", "").equalsIgnoreCase("true"))
+			System.setProperty("javax.net.ssl.trustStore", res.toString());/* JAVJAK */
+		// Allow using system proxies
+		if (!SystemUtil.getSystemPropOrEnvVar("lucee.disable.systemProxies", "").equalsIgnoreCase("true")) System.setProperty("java.net.useSystemProxies", "true"); // it defaults
+																																									// to false
+
+		// deploy org.lucee.cfml components
+		if (doNew) {
+			ImportDefintion _import = ((ConfigPro) config).getComponentDefaultImport();
+			String path = _import.getPackageAsPath();
+			Resource components = config.getConfigDir().getRealResource("components");
+			Resource dir = components.getRealResource(path);
+			ComponentFactory.deploy(dir, doNew);
+		}
+
+		createContextFilesAdmin(configDir, config, doNew);
+	}
+
+	private static void createContextFilesAdmin(Resource configDir, ConfigServer config, boolean doNew) {
+
+		// Plugin
+		if (doNew) {
+			Resource pluginDir = configDir.getRealResource("context/admin/plugin");
+			create("/resource/context/admin/plugin/", new String[] { "Plugin.cfc" }, pluginDir, doNew);
+		}
+		// Plugin Note
+		if (doNew) {
+			Resource note = configDir.getRealResource("context/admin/plugin/Note");
+			create("/resource/context/admin/plugin/Note/", new String[] { "language.xml", "overview.cfm", "Action.cfc" }, note, doNew);
+		}
+
+		// DB Drivers types
+		if (doNew) {
+			Resource typesDir = configDir.getRealResource("context/admin/dbdriver/types");
+			create("/resource/context/admin/dbdriver/types/", new String[] { "IDriver.cfc", "Driver.cfc", "IDatasource.cfc", "IDriverSelector.cfc", "Field.cfc" }, typesDir, doNew);
+		}
+
+		if (doNew) {
+			Resource dbDir = configDir.getRealResource("context/admin/dbdriver");
+			create("/resource/context/admin/dbdriver/", new String[] { "Other.cfc" }, dbDir, doNew);
+		}
+
+		// Cache Drivers
+		if (doNew) {
+			Resource cDir = configDir.getRealResource("context/admin/cdriver");
+			create("/resource/context/admin/cdriver/", new String[] { "Cache.cfc", "RamCache.cfc", "Field.cfc", "Group.cfc" }, cDir, doNew);
+		}
+
+		// AI Drivers
+		if (doNew) {
+			Resource aiDir = configDir.getRealResource("context/admin/aidriver");
+			create("/resource/context/admin/aidriver/", new String[] { "AI.cfc", "Gemini.cfc", "OpenAI.cfc", "Field.cfc", "Group.cfc" }, aiDir, doNew);
+		}
+
+		// Mail Server Drivers
+		if (doNew) {
+			Resource msDir = configDir.getRealResource("context/admin/mailservers");
+			create("/resource/context/admin/mailservers/",
+					new String[] { "Other.cfc", "GMail.cfc", "GMX.cfc", "iCloud.cfc", "Yahoo.cfc", "Outlook.cfc", "MailCom.cfc", "MailServer.cfc" }, msDir, doNew);
+		}
+		// Gateway Drivers
+		if (doNew) {
+			Resource gDir = configDir.getRealResource("context/admin/gdriver");
+			create("/resource/context/admin/gdriver/",
+					new String[] { "TaskGatewayDriver.cfc", "AsynchronousEvents.cfc", "DirectoryWatcher.cfc", "MailWatcher.cfc", "Gateway.cfc", "Field.cfc", "Group.cfc" }, gDir,
+					doNew);
+		}
+		// Logging/appender
+		if (doNew) {
+			Resource app = configDir.getRealResource("context/admin/logging/appender");
+			create("/resource/context/admin/logging/appender/",
+					new String[] { "DatasourceAppender.cfc", "ConsoleAppender.cfc", "ResourceAppender.cfc", "Appender.cfc", "Field.cfc", "Group.cfc" }, app, doNew);
+		}
+		// Logging/layout
+		if (doNew) {
+			Resource lay = configDir.getRealResource("context/admin/logging/layout");
+			create("/resource/context/admin/logging/layout/", new String[] { "DatadogLayout.cfc", "ClassicLayout.cfc", "HTMLLayout.cfc", "PatternLayout.cfc", "XMLLayout.cfc",
+					"JsonLayout.cfc", "Layout.cfc", "Field.cfc", "Group.cfc" }, lay, doNew);
+		}
 	}
 
 	public static class Path {

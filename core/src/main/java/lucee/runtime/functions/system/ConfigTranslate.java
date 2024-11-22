@@ -10,10 +10,9 @@ import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
-import lucee.runtime.config.ConfigPro;
-import lucee.runtime.config.ConfigServerFactory;
-import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.config.ConfigFactoryImpl;
+import lucee.runtime.config.ConfigPro;
+import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.converter.ConverterException;
 import lucee.runtime.exp.FunctionException;
@@ -55,10 +54,10 @@ public class ConfigTranslate extends BIF {
 			if (!StringUtil.isEmpty(target, true)) {
 				if ("web".equalsIgnoreCase(target.trim())) {
 					Resource dir = ((ConfigWebPro) config).getWebConfigDir();
-					trg = ConfigServerFactory.getConfigFile(dir, false);
+					trg = ConfigFactoryImpl.getConfigFile(dir, false);
 				}
 				else if ("server".equalsIgnoreCase(target.trim())) {
-					trg = ConfigServerFactory.getConfigFile(pc.getConfig().getConfigServerDir(), true);
+					trg = ConfigFactoryImpl.getConfigFile(pc.getConfig().getConfigServerDir(), true);
 				}
 				if (trg == null) trg = Caster.toResource(pc, target, false);
 				if (!trg.getParentResource().isDirectory())

@@ -10,7 +10,7 @@ import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.config.CFConfigImport;
-import lucee.runtime.config.ConfigServerFactory;
+import lucee.runtime.config.ConfigFactoryImpl;
 import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.BIF;
@@ -30,7 +30,7 @@ public class ConfigImport extends BIF {
 		if (pathOrData instanceof CharSequence) res = ResourceUtil.toResourceExisting(pc, pathOrData.toString());
 		else if (pathOrData instanceof Map) data = Caster.toStruct(pathOrData);
 		else throw new FunctionException(pc, "ConfigFileImport", "first", "pathOrData",
-				"Invalid value for argument pathOrData, the argument must contain a string that points to a " + ConfigServerFactory.CONFIG_FILE_NAMES[0]
+				"Invalid value for argument pathOrData, the argument must contain a string that points to a " + ConfigFactoryImpl.CONFIG_FILE_NAMES[0]
 						+ " file or a struct containing the data itself.",
 				null);
 

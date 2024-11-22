@@ -1092,7 +1092,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		CFMLEngine engine = ConfigWebUtil.getEngine(this);
 		ConfigWeb[] webs = getConfigWebs();
 		try {
-			ConfigServerFactory.reloadInstance(engine, this);
+			ConfigFactoryImpl.reloadInstance(engine, this);
 			for (ConfigWeb web: webs) {
 				ConfigFactoryImpl.reloadInstance(engine, this, (ConfigWebImpl) web, true);
 			}

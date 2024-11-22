@@ -91,7 +91,7 @@ public abstract class ConfigFactory {
 
 		// if the config got deleted, we need to make sure the required extension get installed again
 		boolean deleted = false;
-		if (readOnly && !ConfigServerFactory.getConfigFile(contextDir, true).exists()) {
+		if (readOnly && !ConfigFactoryImpl.getConfigFile(contextDir, true).exists()) {
 			deleted = resOldVersion.delete();
 		}
 

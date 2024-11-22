@@ -352,7 +352,7 @@ public final class ConfigAdmin {
 		if (config instanceof ConfigServerImpl) {
 
 			ConfigServerImpl cs = (ConfigServerImpl) config;
-			ConfigServerFactory.reloadInstance(engine, cs);
+			ConfigFactoryImpl.reloadInstance(engine, cs);
 			ConfigWeb[] webs = cs.getConfigWebs();
 			for (ConfigWeb web: webs) {
 				ConfigFactoryImpl.reloadInstance(engine, (ConfigServerImpl) config, (ConfigWebImpl) web, true);

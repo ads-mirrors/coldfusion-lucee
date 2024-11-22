@@ -104,12 +104,11 @@ import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigAdmin;
 import lucee.runtime.config.ConfigFactory;
 import lucee.runtime.config.ConfigFactory.UpdateInfo;
+import lucee.runtime.config.ConfigFactoryImpl;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.ConfigServer;
-import lucee.runtime.config.ConfigServerFactory;
 import lucee.runtime.config.ConfigServerImpl;
 import lucee.runtime.config.ConfigWeb;
-import lucee.runtime.config.ConfigFactoryImpl;
 import lucee.runtime.config.ConfigWebImpl;
 import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.config.DeployHandler;
@@ -870,7 +869,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 			try {
 				Resource context = getSeverContextConfigDirectory(factory);
 				DynamicInvoker.getInstance(context);
-				ConfigServerImpl tmp = ConfigServerFactory.newInstance(this, initContextes, contextes, context, existing, essentialOnly);
+				ConfigServerImpl tmp = ConfigFactoryImpl.newInstance(this, initContextes, contextes, context, existing, essentialOnly);
 				if (essentialOnly) {
 					return tmp;
 				}
