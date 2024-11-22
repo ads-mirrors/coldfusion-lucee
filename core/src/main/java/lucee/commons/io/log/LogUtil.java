@@ -35,6 +35,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.PageContextImpl;
 import lucee.runtime.PageSource;
 import lucee.runtime.config.Config;
+import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.config.ConfigWebUtil;
 import lucee.runtime.engine.ThreadLocalPageContext;
@@ -206,6 +207,11 @@ public final class LogUtil {
 
 		logGlobal(ThreadLocalPageContext.getConfig(config), level, logName + ":" + type, msg);
 
+	}
+
+	public static void log(ConfigPro cw, Log log, String type, Exception e) {
+		if (log != null) log.error(type, e);
+		else log(cw, type, e);
 	}
 
 	public static void log(PageContext pc, int level, String logName, String type, String msg) {

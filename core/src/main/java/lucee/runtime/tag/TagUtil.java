@@ -31,6 +31,7 @@ import javax.servlet.jsp.tagext.Tag;
 import org.osgi.framework.BundleException;
 
 import lucee.commons.io.DevNullOutputStream;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.ClassException;
 import lucee.commons.lang.ClassUtil;
 import lucee.commons.lang.ExceptionUtil;
@@ -44,7 +45,6 @@ import lucee.runtime.PageContextImpl;
 import lucee.runtime.PageSource;
 import lucee.runtime.component.ComponentLoader;
 import lucee.runtime.config.ConfigPro;
-import lucee.runtime.config.ConfigWebFactory;
 import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.ApplicationException;
@@ -260,7 +260,7 @@ public class TagUtil {
 
 		}
 		catch (Exception e) {
-			ConfigWebFactory.log(cw, log, e);
+			LogUtil.log(cw, log, "tag", e);
 		}
 		finally {
 			pc.getConfig().getFactory().releaseLuceePageContext(pc, true);
