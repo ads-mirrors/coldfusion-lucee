@@ -20,6 +20,9 @@ package lucee.loader.osgi;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -28,6 +31,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -47,25 +54,14 @@ public class BundleLoader {
 	public static BundleCollection loadBundles(final CFMLEngineFactory engFac, final File cacheRootDir, final File jarDirectory, final File rc, final BundleCollection old)
 			throws IOException, BundleException {
 		// if (rc.getName().toLowerCase().toLowerCase().indexOf("ehcache") != -1)
-		// System. err.println(rc.getName());
-
 		final JarFile jf = new JarFile(rc);// TODO this should work in any case, but we should still improve this code
 		try {
 			// Manifest
 			final Manifest mani = jf.getManifest();
 			if (mani == null) throw new IOException("lucee core [" + rc + "] is invalid, there is no META-INF/MANIFEST.MF File");
 			final Attributes attrs = mani.getMainAttributes();
-
 			// default properties
 			final Properties defProp = loadDefaultProperties(jf);
-
-			// Get data from Manifest and default.properties
-
-			// Lucee Core Version
-			// String rcv = unwrap(defProp.getProperty("lucee.core.version"));
-			// if(Util.isEmpty(rcv)) throw new IOException("lucee core ["+rc+"] is invalid, no core version is
-			// defined in the {Lucee-Core}/default.properties File");
-			// int version = CFMLEngineFactory.toInVersion(rcv);
 
 			// read the config from default.properties
 			final Map<String, Object> config = new HashMap<>();
@@ -91,6 +87,7 @@ public class BundleLoader {
 				felix = engFac.getFelix(cacheRootDir, config);
 			}
 			else felix = engFac.getFelix(cacheRootDir, config);
+
 			final BundleContext bc = felix.getBundleContext();
 
 			// get bundle needed for that core
@@ -112,38 +109,13 @@ public class BundleLoader {
 			boolean always = "always".equalsIgnoreCase(doDownload);
 
 			// Add Required Bundles
-			Entry<String, String> e;
-			File f;
-			String id;
-			final List<Bundle> bundles = new ArrayList<>();
-			Iterator<Entry<String, String>> it = requiredBundles.entrySet().iterator();
-			while (it.hasNext()) {
-				e = it.next();
-				id = e.getKey() + "|" + e.getValue();
-				f = always ? null : availableBundles.get(id);
-				if (f == null) {
-					f = engFac.downloadBundle(e.getKey(), e.getValue(), null);
-				}
-				bundles.add(BundleUtil.addBundle(engFac, bc, f, null));
-			}
+			final List<Bundle> bundles = addRequiredBundles(requiredBundles, availableBundles, always, engFac, bc);
 
 			// Add Required Bundle Fragments
-			final List<Bundle> fragments = new ArrayList<>();
-			it = requiredBundleFragments.entrySet().iterator();
-			while (it.hasNext()) {
-				e = it.next();
-				id = e.getKey() + "|" + e.getValue();
-				f = always ? null : availableBundles.get(id);
-				if (f == null) {
-					f = engFac.downloadBundle(e.getKey(), e.getValue(), null); // if identification is not defined, it is loaded from the CFMLEngine
-				}
-				fragments.add(BundleUtil.addBundle(engFac, bc, f, null));
-			}
+			addRequiredBundles(requiredBundleFragments, availableBundles, always, engFac, bc);
 
 			// Add Lucee core Bundle
-			Bundle bundle;
-			// bundles.add(bundle = BundleUtil.addBundle(engFac, bc, rc,null));
-			bundle = BundleUtil.addBundle(engFac, bc, rc, null);
+			Bundle bundle = BundleUtil.addBundle(engFac, bc, rc, null);
 
 			// Start the bundles
 			BundleUtil.start(engFac, bundles);
@@ -160,19 +132,138 @@ public class BundleLoader {
 		}
 	}
 
-	private static Map<String, File> loadAvailableBundles(final File jarDirectory) {
-		final Map<String, File> rtn = new HashMap<>();
-		final File[] jars = jarDirectory.listFiles();
-		if (jars != null) for (File jar: jars) {
-			if (!jar.isFile() || !jar.getName().endsWith(".jar")) continue;
+	public static List<Bundle> addRequiredBundles(Map<String, String> requiredBundles, Map<String, File> availableBundles, boolean always, CFMLEngineFactory engFac,
+			BundleContext bc) {
+		List<Bundle> bundles = new ArrayList<>();
+		Iterator<Entry<String, String>> it = requiredBundles.entrySet().iterator();
+
+		// Use regular threads
+		ExecutorService executor = createExecutorService(requiredBundles.size());
+		List<Future<Bundle>> futures = new ArrayList<>();
+
+		while (it.hasNext()) {
+			Entry<String, String> e = it.next();
+			futures.add(executor.submit(() -> {
+				String id = e.getKey() + "|" + e.getValue();
+				File f = always ? null : availableBundles.get(id);
+				if (f == null) {
+					f = engFac.downloadBundle(e.getKey(), e.getValue(), null);
+				}
+				return BundleUtil.addBundle(engFac, bc, f, null);
+			}));
+		}
+
+		for (Future<Bundle> future: futures) {
 			try {
-				rtn.put(loadBundleInfo(jar), jar);
+				bundles.add(future.get());
 			}
-			catch (final IOException ioe) {
-				new Exception("Error loading bundle info for [" + jar.toString() + "]", ioe).printStackTrace();
+			catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		}
+
+		executor.shutdown();
+		return bundles;
+	}
+
+	private static Map<String, File> loadAvailableBundles(final File jarDirectory) {
+		final Map<String, File> rtn = new ConcurrentHashMap<>();
+		final File[] jars = jarDirectory.listFiles();
+
+		if (jars != null) {
+			// Create a thread pool with a fixed number of threads
+			// ExecutorService executor = Executors.newFixedThreadPool(Math.min(jars.length,
+			// Runtime.getRuntime().availableProcessors()));
+			ExecutorService executor = createExecutorService(jars.length);
+			try {
+				List<Future<?>> futures = new ArrayList<>();
+				for (File jar: jars) {
+					if (!jar.isFile() || !jar.getName().endsWith(".jar")) continue;
+
+					// Submit tasks for processing each jar file
+					futures.add(executor.submit(() -> {
+						try {
+							rtn.put(loadBundleInfo(jar), jar);
+						}
+						catch (IOException ioe) {
+							// Log the exception
+							new Exception("Error loading bundle info for [" + jar.toString() + "]", ioe).printStackTrace();
+						}
+					}));
+				}
+				// Wait for all tasks to complete
+				for (Future<?> future: futures) {
+					try {
+						future.get();
+					}
+					catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}
+			finally {
+				executor.shutdown(); // Ensure the executor is properly shut down
 			}
 		}
 		return rtn;
+	}
+
+	private static Map<String, File> loadAvailableBundlesSerial(final File jarDirectory) {
+		final Map<String, File> rtn = new HashMap<>();
+		final File[] jars = jarDirectory.listFiles();
+		if (jars != null) {
+			for (File jar: jars) {
+				if (!jar.isFile() || !jar.getName().endsWith(".jar")) continue;
+				try {
+					rtn.put(loadBundleInfo(jar), jar);
+				}
+				catch (final IOException ioe) {
+					new Exception("Error loading bundle info for [" + jar.toString() + "]", ioe).printStackTrace();
+				}
+			}
+		}
+		return rtn;
+	}
+
+	public static ExecutorService createExecutorService(int maxThreads) {
+
+		if (parseJavaVersion(System.getProperty("java.version")) >= 19) {
+			// FUTURE use newVirtualThreadPerTaskExecutor natively
+			try {
+				MethodHandles.Lookup lookup = MethodHandles.lookup();
+				MethodType methodType = MethodType.methodType(ExecutorService.class);
+				MethodHandle methodHandle = lookup.findStatic(Executors.class, "newVirtualThreadPerTaskExecutor", methodType);
+				return (ExecutorService) methodHandle.invoke();
+			}
+			catch (Throwable e) {
+				if (e instanceof ThreadDeath) throw (ThreadDeath) e;
+			}
+		}
+		return Executors.newFixedThreadPool(maxThreads);
+	}
+
+	private static int parseJavaVersion(String version) {
+		if (version.startsWith("1.")) {
+			// For older Java versions like 1.8
+			version = version.substring(2);
+		}
+		int dotIndex = version.indexOf(".");
+		int dashIndex = version.indexOf("-");
+		// Get the version number before the first dot or dash
+		try {
+			if (dotIndex > 0) {
+				return Integer.parseInt(version.substring(0, dotIndex));
+			}
+			else if (dashIndex > 0) {
+				return Integer.parseInt(version.substring(0, dashIndex));
+			}
+			else {
+				return Integer.parseInt(version);
+			}
+		}
+		catch (NumberFormatException e) {
+			throw new IllegalArgumentException("Invalid Java version: " + version, e);
+		}
 	}
 
 	public static String loadBundleInfo(final File jar) throws IOException {
