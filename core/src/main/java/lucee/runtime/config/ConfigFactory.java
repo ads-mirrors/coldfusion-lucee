@@ -138,8 +138,8 @@ public abstract class ConfigFactory {
 
 	public static class UpdateInfo {
 
-		public static final UpdateInfo NEW_NONE = new UpdateInfo(ConfigWebFactory.NEW_NONE);
-		public static final UpdateInfo NEW_FRESH = new UpdateInfo(ConfigWebFactory.NEW_FRESH);
+		public static final UpdateInfo NEW_NONE = new UpdateInfo(ConfigFactoryImpl.NEW_NONE);
+		public static final UpdateInfo NEW_FRESH = new UpdateInfo(ConfigFactoryImpl.NEW_FRESH);
 
 		public final Version oldVersion;
 		public final int updateType;
@@ -155,10 +155,10 @@ public abstract class ConfigFactory {
 		}
 
 		public String getUpdateTypeAsString() {
-			if (updateType == ConfigWebFactory.NEW_NONE) return "new-none";
-			if (updateType == ConfigWebFactory.NEW_FRESH) return "new-fresh";
-			if (updateType == ConfigWebFactory.NEW_FROM4) return "new-from4";
-			if (updateType == ConfigWebFactory.NEW_MINOR) return "new-minor";
+			if (updateType == ConfigFactoryImpl.NEW_NONE) return "new-none";
+			if (updateType == ConfigFactoryImpl.NEW_FRESH) return "new-fresh";
+			if (updateType == ConfigFactoryImpl.NEW_FROM4) return "new-from4";
+			if (updateType == ConfigFactoryImpl.NEW_MINOR) return "new-minor";
 			return "unkown:" + updateType;
 		}
 
@@ -746,7 +746,7 @@ public abstract class ConfigFactory {
 			Struct scheduler = ConfigWebUtil.getAsStruct("scheduler", root);
 
 			// set scheduler
-			Resource schedulerDir = ConfigWebUtil.getFile(config.getRootDirectory(), ConfigWebFactory.getAttr(scheduler, "directory"), "scheduler", configDir, FileUtil.TYPE_DIR,
+			Resource schedulerDir = ConfigWebUtil.getFile(config.getRootDirectory(), ConfigFactoryImpl.getAttr(scheduler, "directory"), "scheduler", configDir, FileUtil.TYPE_DIR,
 					ResourceUtil.LEVEL_GRAND_PARENT_FILE, config);
 			Resource schedulerFile = schedulerDir.getRealResource("scheduler.xml");
 			if (schedulerFile.isFile()) {
@@ -980,9 +980,9 @@ public abstract class ConfigFactory {
 	}
 
 	static String createVirtual(Struct data) {
-		String str = ConfigWebFactory.getAttr(data, "virtual");
+		String str = ConfigFactoryImpl.getAttr(data, "virtual");
 		if (!StringUtil.isEmpty(str)) return str;
-		return createVirtual(ConfigWebFactory.getAttr(data, "physical"), ConfigWebFactory.getAttr(data, "archive"));
+		return createVirtual(ConfigFactoryImpl.getAttr(data, "physical"), ConfigFactoryImpl.getAttr(data, "archive"));
 	}
 
 	private static String createVirtual(String physical, String archive) {

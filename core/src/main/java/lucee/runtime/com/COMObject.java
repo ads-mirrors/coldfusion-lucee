@@ -31,7 +31,7 @@ import lucee.commons.io.SystemUtil;
 import lucee.commons.io.res.Resource;
 import lucee.runtime.PageContext;
 import lucee.runtime.config.Config;
-import lucee.runtime.config.ConfigWebFactory;
+import lucee.runtime.config.ConfigFactoryImpl;
 import lucee.runtime.dump.DumpData;
 import lucee.runtime.dump.DumpProperties;
 import lucee.runtime.dump.DumpTable;
@@ -64,7 +64,7 @@ public final class COMObject implements Objects, Iteratorable {
 				Resource jacob = binDir.getRealResource(name);
 				if (!jacob.exists()) {
 					if (!binDir.exists()) binDir.mkdirs();
-					ConfigWebFactory.createFileFromResourceEL("/resource/bin/windows" + ((SystemUtil.getJREArch() == SystemUtil.ARCH_64) ? "64" : "32") + "/" + name, jacob);
+					ConfigFactoryImpl.createFileFromResourceEL("/resource/bin/windows" + ((SystemUtil.getJREArch() == SystemUtil.ARCH_64) ? "64" : "32") + "/" + name, jacob);
 				}
 				System.setProperty(LibraryLoader.JACOB_DLL_PATH, jacob.getAbsolutePath());
 				System.setProperty(LibraryLoader.JACOB_DLL_NAME, name);

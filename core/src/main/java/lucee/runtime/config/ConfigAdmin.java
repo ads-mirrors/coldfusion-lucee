@@ -278,13 +278,13 @@ public final class ConfigAdmin {
 	private ConfigAdmin(ConfigPro config, Password password) throws IOException, PageException {
 		this.config = config;
 		this.password = password;
-		root = ConfigWebFactory.loadDocument(config.getConfigFile());
+		root = ConfigFactoryImpl.loadDocument(config.getConfigFile());
 	}
 
 	private ConfigAdmin(ConfigPro config, Password password, boolean optionalPW) throws IOException, PageException {
 		this.config = config;
 		this.password = password;
-		root = ConfigWebFactory.loadDocument(config.getConfigFile());
+		root = ConfigFactoryImpl.loadDocument(config.getConfigFile());
 		this.optionalPW = optionalPW;
 	}
 
@@ -355,13 +355,13 @@ public final class ConfigAdmin {
 			ConfigServerFactory.reloadInstance(engine, cs);
 			ConfigWeb[] webs = cs.getConfigWebs();
 			for (ConfigWeb web: webs) {
-				ConfigWebFactory.reloadInstance(engine, (ConfigServerImpl) config, (ConfigWebImpl) web, true);
+				ConfigFactoryImpl.reloadInstance(engine, (ConfigServerImpl) config, (ConfigWebImpl) web, true);
 
 			}
 		}
 		else if (config instanceof ConfigWebImpl) {
 			ConfigServerImpl cs = ((ConfigWebImpl) config).getConfigServerImpl();
-			ConfigWebFactory.reloadInstance(engine, cs, (ConfigWebImpl) config, false);
+			ConfigFactoryImpl.reloadInstance(engine, cs, (ConfigWebImpl) config, false);
 		}
 	}
 
@@ -1192,9 +1192,9 @@ public final class ConfigAdmin {
 	}
 
 	public static String createVirtual(Struct data) {
-		String str = ConfigWebFactory.getAttr(data, "virtual");
+		String str = ConfigFactoryImpl.getAttr(data, "virtual");
 		if (!StringUtil.isEmpty(str)) return str;
-		return createVirtual(ConfigWebFactory.getAttr(data, "physical"), ConfigWebFactory.getAttr(data, "archive"));
+		return createVirtual(ConfigFactoryImpl.getAttr(data, "physical"), ConfigFactoryImpl.getAttr(data, "archive"));
 	}
 
 	public static String createVirtual(String physical, String archive) {

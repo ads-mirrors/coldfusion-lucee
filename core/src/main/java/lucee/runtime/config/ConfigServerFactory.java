@@ -251,7 +251,7 @@ public final class ConfigServerFactory extends ConfigFactory {
 	static void load(ConfigServerImpl configServer, Struct root, boolean isReload, boolean doNew, boolean essentialOnly)
 			throws ClassException, PageException, IOException, TagLibException, FunctionLibException, BundleException {
 		ConfigBase.onlyFirstMatch = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.mapping.first", null), true); // changed behaviour in 6.0
-		ConfigWebFactory.load(configServer, root, isReload, doNew, essentialOnly);
+		ConfigFactoryImpl.load(configServer, root, isReload, doNew, essentialOnly);
 		loadLabel(configServer, root);
 	}
 
@@ -285,7 +285,7 @@ public final class ConfigServerFactory extends ConfigFactory {
 			if (Caster.toBoolean(SystemUtil.getSystemPropOrEnvVar("lucee.admin.enabled", "true"), true)) {
 				Resource f = contextDir.getRealResource("lucee-admin.lar");
 				if (!f.exists() || doNew) createFileFromResourceEL("/resource/context/lucee-admin.lar", f);
-				else ConfigWebFactory.createFileFromResourceCheckSizeDiffEL("/resource/context/lucee-admin.lar", f);
+				else ConfigFactoryImpl.createFileFromResourceCheckSizeDiffEL("/resource/context/lucee-admin.lar", f);
 			}
 
 			create("/resource/context/",

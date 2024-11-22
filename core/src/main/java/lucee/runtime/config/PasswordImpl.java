@@ -131,8 +131,8 @@ public class PasswordImpl implements Password {
 
 		// first we look for the hashed and salted password
 		// preferred adminDefaultHSPW adminHSPW
-		String pw = ConfigWebFactory.getAttr(data, prefix + "hspw");
-		if (StringUtil.isEmpty(pw, true)) pw = ConfigWebFactory.getAttr(data, prefixOlder + "hspw");
+		String pw = ConfigFactoryImpl.getAttr(data, prefix + "hspw");
+		if (StringUtil.isEmpty(pw, true)) pw = ConfigFactoryImpl.getAttr(data, prefixOlder + "hspw");
 		if (!StringUtil.isEmpty(pw, true)) {
 			// password is only of use when there is a salt as well
 			if (salt == null) return null;
@@ -141,17 +141,17 @@ public class PasswordImpl implements Password {
 
 		// fall back to password that is hashed but not salted
 		// preferred adminDefaultPW adminPW
-		pw = ConfigWebFactory.getAttr(data, prefix + "pw");
-		if (StringUtil.isEmpty(pw, true)) pw = ConfigWebFactory.getAttr(data, prefixOlder + "pw");
+		pw = ConfigFactoryImpl.getAttr(data, prefix + "pw");
+		if (StringUtil.isEmpty(pw, true)) pw = ConfigFactoryImpl.getAttr(data, prefixOlder + "pw");
 		if (!StringUtil.isEmpty(pw, true)) {
 			return new PasswordImpl(ORIGIN_HASHED, pw, null, HASHED);
 		}
 
 		// fall back to encrypted password
 		// preferred adminDefaultPassword adminPassword
-		String pwEnc = ConfigWebFactory.getAttr(data, prefix + "Password");
-		if (StringUtil.isEmpty(pwEnc, true)) pwEnc = ConfigWebFactory.getAttr(data, prefixOlder + "Password");
-		if (isDefault && StringUtil.isEmpty(pwEnc, true)) pwEnc = ConfigWebFactory.getAttr(data, "adminPasswordDefault");
+		String pwEnc = ConfigFactoryImpl.getAttr(data, prefix + "Password");
+		if (StringUtil.isEmpty(pwEnc, true)) pwEnc = ConfigFactoryImpl.getAttr(data, prefixOlder + "Password");
+		if (isDefault && StringUtil.isEmpty(pwEnc, true)) pwEnc = ConfigFactoryImpl.getAttr(data, "adminPasswordDefault");
 		if (!StringUtil.isEmpty(pwEnc, true)) {
 			String rawPassword = new BlowfishEasy("tpwisgh").decryptString(pwEnc);
 			return new PasswordImpl(ORIGIN_ENCRYPTED, rawPassword, salt);

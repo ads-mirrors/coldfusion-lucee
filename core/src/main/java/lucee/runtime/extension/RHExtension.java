@@ -64,7 +64,7 @@ import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigAdmin;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.ConfigWeb;
-import lucee.runtime.config.ConfigWebFactory;
+import lucee.runtime.config.ConfigFactoryImpl;
 import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.config.ConfigWebUtil;
 import lucee.runtime.config.Constants;
@@ -603,34 +603,34 @@ public class RHExtension implements Serializable {
 		Log logger = ThreadLocalPageContext.getLog(config, "deploy");
 		Info info = ConfigWebUtil.getEngine(config).getInfo();
 
-		readSymbolicName(label, ConfigWebFactory.getAttr(data, "symbolicName", "symbolic-name"));
-		readName(label, ConfigWebFactory.getAttr(data, "name"));
+		readSymbolicName(label, ConfigFactoryImpl.getAttr(data, "symbolicName", "symbolic-name"));
+		readName(label, ConfigFactoryImpl.getAttr(data, "name"));
 		label = name;
-		readVersion(label, ConfigWebFactory.getAttr(data, "version"));
+		readVersion(label, ConfigFactoryImpl.getAttr(data, "version"));
 		label += " : " + version;
-		readId(label, StringUtil.isEmpty(id) ? ConfigWebFactory.getAttr(data, "id") : id);
-		description = ConfigWebFactory.getAttr(data, "description");
-		trial = Caster.toBooleanValue(ConfigWebFactory.getAttr(data, "trial"), false);
-		if (_img == null) _img = ConfigWebFactory.getAttr(data, "image");
+		readId(label, StringUtil.isEmpty(id) ? ConfigFactoryImpl.getAttr(data, "id") : id);
+		description = ConfigFactoryImpl.getAttr(data, "description");
+		trial = Caster.toBooleanValue(ConfigFactoryImpl.getAttr(data, "trial"), false);
+		if (_img == null) _img = ConfigFactoryImpl.getAttr(data, "image");
 		image = _img;
-		String cat = ConfigWebFactory.getAttr(data, "category");
-		if (StringUtil.isEmpty(cat, true)) cat = ConfigWebFactory.getAttr(data, "categories");
+		String cat = ConfigFactoryImpl.getAttr(data, "category");
+		if (StringUtil.isEmpty(cat, true)) cat = ConfigFactoryImpl.getAttr(data, "categories");
 		readCategories(label, cat);
-		readCoreVersion(label, ConfigWebFactory.getAttr(data, "luceeCoreVersion", "lucee-core-version"), info);
-		readLoaderVersion(label, ConfigWebFactory.getAttr(data, "luceeLoaderVersion", "lucee-loader-version"));
-		startBundles = Caster.toBooleanValue(ConfigWebFactory.getAttr(data, "startBundles", "start-bundles"), true);
+		readCoreVersion(label, ConfigFactoryImpl.getAttr(data, "luceeCoreVersion", "lucee-core-version"), info);
+		readLoaderVersion(label, ConfigFactoryImpl.getAttr(data, "luceeLoaderVersion", "lucee-loader-version"));
+		startBundles = Caster.toBooleanValue(ConfigFactoryImpl.getAttr(data, "startBundles", "start-bundles"), true);
 
-		readAMF(label, ConfigWebFactory.getAttr(data, "amf"), logger);
-		readResource(label, ConfigWebFactory.getAttr(data, "resource"), logger);
-		readSearch(label, ConfigWebFactory.getAttr(data, "search"), logger);
-		readORM(label, ConfigWebFactory.getAttr(data, "orm"), logger);
-		readWebservice(label, ConfigWebFactory.getAttr(data, "webservice"), logger);
-		readMonitor(label, ConfigWebFactory.getAttr(data, "monitor"), logger);
-		readCache(label, ConfigWebFactory.getAttr(data, "cache"), logger);
-		readCacheHandler(label, ConfigWebFactory.getAttr(data, "cacheHandler", "cache-handler"), logger);
-		readJDBC(label, ConfigWebFactory.getAttr(data, "jdbc"), logger);
-		readMapping(label, ConfigWebFactory.getAttr(data, "mapping"), logger);
-		readEventGatewayInstances(label, ConfigWebFactory.getAttr(data, "eventGatewayInstance", "event-gateway-instance"), logger);
+		readAMF(label, ConfigFactoryImpl.getAttr(data, "amf"), logger);
+		readResource(label, ConfigFactoryImpl.getAttr(data, "resource"), logger);
+		readSearch(label, ConfigFactoryImpl.getAttr(data, "search"), logger);
+		readORM(label, ConfigFactoryImpl.getAttr(data, "orm"), logger);
+		readWebservice(label, ConfigFactoryImpl.getAttr(data, "webservice"), logger);
+		readMonitor(label, ConfigFactoryImpl.getAttr(data, "monitor"), logger);
+		readCache(label, ConfigFactoryImpl.getAttr(data, "cache"), logger);
+		readCacheHandler(label, ConfigFactoryImpl.getAttr(data, "cacheHandler", "cache-handler"), logger);
+		readJDBC(label, ConfigFactoryImpl.getAttr(data, "jdbc"), logger);
+		readMapping(label, ConfigFactoryImpl.getAttr(data, "mapping"), logger);
+		readEventGatewayInstances(label, ConfigFactoryImpl.getAttr(data, "eventGatewayInstance", "event-gateway-instance"), logger);
 	}
 
 	private void readMapping(String label, String str, Log logger) {

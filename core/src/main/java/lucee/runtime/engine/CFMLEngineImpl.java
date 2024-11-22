@@ -109,7 +109,7 @@ import lucee.runtime.config.ConfigServer;
 import lucee.runtime.config.ConfigServerFactory;
 import lucee.runtime.config.ConfigServerImpl;
 import lucee.runtime.config.ConfigWeb;
-import lucee.runtime.config.ConfigWebFactory;
+import lucee.runtime.config.ConfigFactoryImpl;
 import lucee.runtime.config.ConfigWebImpl;
 import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.config.DeployHandler;
@@ -420,14 +420,14 @@ public final class CFMLEngineImpl implements CFMLEngine {
 			}
 			if (!extensionsToRemove.isEmpty()) {
 				// remove extension that are not valid (to new for current version)
-				LogUtil.log(Log.LEVEL_ERROR, "deploy", ConfigWebFactory.class.getName(), "Uninstall extension(s) ["
+				LogUtil.log(Log.LEVEL_ERROR, "deploy", ConfigFactoryImpl.class.getName(), "Uninstall extension(s) ["
 						+ lucee.runtime.type.util.ListUtil.toList(extensionsToRemove, ", ") + "] because they are not supported for the current Lucee version.");
 				try {
 					ConfigAdmin.removeRHExtensions(null, null, lucee.runtime.type.util.ListUtil.toStringArray(extensionsToRemove), false);
 					if (configDir != null) ConfigFactory.updateRequiredExtension(this, configDir, null);
 				}
 				catch (Exception e) {
-					LogUtil.log("debug", ConfigWebFactory.class.getName(), e);
+					LogUtil.log("debug", ConfigFactoryImpl.class.getName(), e);
 				}
 			}
 		}
@@ -506,7 +506,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 						}
 					}
 					catch (Exception e) {
-						LogUtil.log("debug", ConfigWebFactory.class.getName(), e);
+						LogUtil.log("debug", ConfigFactoryImpl.class.getName(), e);
 					}
 				}
 			}
@@ -905,13 +905,13 @@ public final class CFMLEngineImpl implements CFMLEngine {
 	private CFMLFactoryImpl loadJSPFactory(ConfigServerImpl configServer, ServletConfig sg, int countExistingContextes) throws PageServletException {
 		try {
 			CFMLFactoryImpl factory = new CFMLFactoryImpl(this, sg);
-			if (ConfigWebFactory.LOG) LogUtil.log(configServer, Log.LEVEL_INFO, "startup", "Init factory");
+			if (ConfigFactoryImpl.LOG) LogUtil.log(configServer, Log.LEVEL_INFO, "startup", "Init factory");
 
 			RefBoolean isCustomSetting = new RefBooleanImpl();
 			Resource configDir = getConfigDirectory(sg, configServer, countExistingContextes, isCustomSetting);
-			ConfigWebPro config = ConfigWebFactory.newInstanceSingle(this, factory, configServer, configDir, sg, null);
+			ConfigWebPro config = ConfigFactoryImpl.newInstanceSingle(this, factory, configServer, configDir, sg, null);
 
-			if (ConfigWebFactory.LOG) LogUtil.log(configServer, Log.LEVEL_INFO, "startup", "Loaded config");
+			if (ConfigFactoryImpl.LOG) LogUtil.log(configServer, Log.LEVEL_INFO, "startup", "Loaded config");
 			factory.setConfig(configServer, config);
 			return factory;
 		}

@@ -13,7 +13,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.ConfigServerFactory;
 import lucee.runtime.config.ConfigWeb;
-import lucee.runtime.config.ConfigWebFactory;
+import lucee.runtime.config.ConfigFactoryImpl;
 import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.converter.ConverterException;
 import lucee.runtime.exp.FunctionException;
@@ -81,7 +81,7 @@ public class ConfigTranslate extends BIF {
 			// charset TODO use it to load the path
 			Charset cs = StringUtil.isEmpty(charset, true) ? pc.getResourceCharset() : CharsetUtil.toCharset(charset);
 
-			return ConfigWebFactory.translateConfigFile((ConfigPro) pc.getConfig(), src, trg, mode, null);
+			return ConfigFactoryImpl.translateConfigFile((ConfigPro) pc.getConfig(), src, trg, mode, null);
 		}
 		catch (IOException ioe) {
 			throw Caster.toPageException(ioe);

@@ -181,7 +181,7 @@ import lucee.transformer.library.function.FunctionLibException;
 import lucee.transformer.library.tag.TagLib;
 import lucee.transformer.library.tag.TagLibException;
 
-public final class ConfigWebFactory extends ConfigFactory {
+public final class ConfigFactoryImpl extends ConfigFactory {
 
 	private static final String TEMPLATE_EXTENSION = "cfm";
 	private static final String COMPONENT_EXTENSION = "cfc";
@@ -196,7 +196,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 		Resource configDir = configServer.getConfigDir();
 
-		LogUtil.logGlobal(configServer, Log.LEVEL_INFO, ConfigWebFactory.class.getName(),
+		LogUtil.logGlobal(configServer, Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(),
 				"===================================================================\n" + "WEB CONTEXT (SINGLE) (" + createLabel(configServer, servletConfig) + ")\n"
 						+ "-------------------------------------------------------------------\n" + "- config:" + configDir + "\n" + "- webroot:"
 						+ ReqRspUtil.getRootPath(servletConfig.getServletContext()) + "\n" + "- label:" + createLabel(configServer, servletConfig) + "\n"
@@ -266,14 +266,14 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @throws BundleException
 	 */
 	synchronized static void load(ConfigServerImpl config, Struct root, boolean isReload, boolean doNew, boolean essentialOnly) throws IOException {
-		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_INFO, ConfigWebFactory.class.getName(), "start reading config");
+		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(), "start reading config");
 		ThreadLocalConfig.register(config);
 		boolean reload = false;
 		// load PW
 		try {
 
 			if (createSaltAndPW(root, config, essentialOnly)) reload = true;
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "fixed salt");
+			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigFactoryImpl.class.getName(), "fixed salt");
 
 			// reload when an old version of xml got updated
 			if (reload) {
@@ -291,22 +291,22 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 		_loadFilesystem(config, root, doNew); // load this before execute any code, what for example loadxtension does (json)
 
-		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded filesystem");
+		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigFactoryImpl.class.getName(), "loaded filesystem");
 
 		if (!essentialOnly) {
 			_loadExtensionBundles(config, root);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded extension");
+			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigFactoryImpl.class.getName(), "loaded extension");
 
 		}
 		else {
 			_loadExtensionDefinition(config, root);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded extension definitions");
+			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigFactoryImpl.class.getName(), "loaded extension definitions");
 		}
 
 		if (!essentialOnly) {
 
 			settings(config);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded settings2");
+			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigFactoryImpl.class.getName(), "loaded settings2");
 
 			((CFMLEngineImpl) config.getEngine()).touchMonitor(config);
 		}
@@ -359,8 +359,8 @@ public final class ConfigWebFactory extends ConfigFactory {
 		JSONConverter json = new JSONConverter(true, CharsetUtil.UTF8, JSONDateFormat.PATTERN_CF, false);
 		String str = json.serialize(null, root, SerializationSettings.SERIALIZE_AS_ROW, true);
 		IOUtil.write(config.getConfigFile(), str, CharsetUtil.UTF8, false);
-		root = ConfigWebFactory.loadDocumentCreateIfFails(config.getConfigFile(), "web");
-		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_INFO, ConfigWebFactory.class.getName(), "reloading configuration");
+		root = ConfigFactoryImpl.loadDocumentCreateIfFails(config.getConfigFile(), "web");
+		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(), "reloading configuration");
 		return root;
 	}
 
@@ -799,7 +799,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 				}
 			}
 			catch (Exception ioe) {
-				LogUtil.logGlobal(config, ConfigWebFactory.class.getName(), ioe);
+				LogUtil.logGlobal(config, ConfigFactoryImpl.class.getName(), ioe);
 			}
 			if (StringUtil.isEmpty(securityKey)) securityKey = UUID.randomUUID().toString();
 
@@ -812,7 +812,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			LogUtil.logGlobal(config, ConfigWebFactory.class.getName(), t);
+			LogUtil.logGlobal(config, ConfigFactoryImpl.class.getName(), t);
 		}
 		return defaultValue;
 	}
@@ -928,9 +928,9 @@ public final class ConfigWebFactory extends ConfigFactory {
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_ERROR, ConfigWebFactory.class.getName(), resource);
-			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_ERROR, ConfigWebFactory.class.getName(), file + "");
-			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), ConfigWebFactory.class.getName(), t);
+			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_ERROR, ConfigFactoryImpl.class.getName(), resource);
+			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_ERROR, ConfigFactoryImpl.class.getName(), file + "");
+			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), ConfigFactoryImpl.class.getName(), t);
 		}
 	}
 
@@ -951,9 +951,9 @@ public final class ConfigWebFactory extends ConfigFactory {
 			long srcSize = barr.length;
 			if (srcSize == trgSize) return;
 
-			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "update file:" + file);
-			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), " - source:" + srcSize);
-			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), " - target:" + trgSize);
+			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_DEBUG, ConfigFactoryImpl.class.getName(), "update file:" + file);
+			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_DEBUG, ConfigFactoryImpl.class.getName(), " - source:" + srcSize);
+			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_DEBUG, ConfigFactoryImpl.class.getName(), " - target:" + trgSize);
 
 		}
 		else file.createNewFile();
@@ -1381,13 +1381,13 @@ public final class ConfigWebFactory extends ConfigFactory {
 				}
 				catch (Throwable t) {
 					ExceptionUtil.rethrowIfNecessary(t);
-					LogUtil.logGlobal(config, ConfigWebFactory.class.getName(), t);
+					LogUtil.logGlobal(config, ConfigFactoryImpl.class.getName(), t);
 				}
 			}
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
-			LogUtil.logGlobal(config, ConfigWebFactory.class.getName(), t);
+			LogUtil.logGlobal(config, ConfigFactoryImpl.class.getName(), t);
 		}
 		return loggerMap;
 	}
@@ -1457,18 +1457,18 @@ public final class ConfigWebFactory extends ConfigFactory {
 						}
 						else {
 							clazz = ConsoleExecutionLog.class;
-							LogUtil.logGlobal(config, Log.LEVEL_ERROR, ConfigWebFactory.class.getName(),
+							LogUtil.logGlobal(config, Log.LEVEL_ERROR, ConfigFactoryImpl.class.getName(),
 									"class [" + strClass + "] must implement the interface " + ExecutionLog.class.getName());
 						}
 					}
 				}
 				catch (Throwable t) {
 					ExceptionUtil.rethrowIfNecessary(t);
-					LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), ConfigWebFactory.class.getName(), t);
+					LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), ConfigFactoryImpl.class.getName(), t);
 					clazz = ConsoleExecutionLog.class;
 				}
 				if (clazz != null)
-					LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_INFO, ConfigWebFactory.class.getName(), "loaded ExecutionLog class " + clazz.getName());
+					LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(), "loaded ExecutionLog class " + clazz.getName());
 
 				// arguments
 				Map<String, String> args = toArguments(el, "arguments", true, false);
@@ -1825,7 +1825,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 							if (!StringUtil.isEmpty(name)) {
 								caches.put(name.getLowerString(), cc);
 							}
-							else LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_ERROR, ConfigWebFactory.class.getName(), "missing cache name");
+							else LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_ERROR, ConfigFactoryImpl.class.getName(), "missing cache name");
 
 						}
 					}
@@ -1919,7 +1919,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 							mapGateways.put(id.toLowerCase(), ge);
 						}
 						else {
-							LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_ERROR, ConfigWebFactory.class.getName(), "missing id");
+							LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_ERROR, ConfigFactoryImpl.class.getName(), "missing id");
 
 						}
 					}
@@ -2267,7 +2267,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 					src.copyTo(trg, false);
 				}
 				catch (IOException e) {
-					LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), ConfigWebFactory.class.getName(), e);
+					LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), ConfigFactoryImpl.class.getName(), e);
 				}
 			}
 
@@ -2648,7 +2648,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			Log log = ((ConfigPro) config).getLog("application", false);
 			if (log != null) log.error("configuration", e);
 			else {
-				LogUtil.logGlobal(config, ConfigWebFactory.class.getName(), e);
+				LogUtil.logGlobal(config, ConfigFactoryImpl.class.getName(), e);
 			}
 		}
 		catch (Throwable th) {
@@ -2662,7 +2662,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			Log log = ((ConfigPro) config).getLog("application", false);
 			if (log != null) log.error("configuration", message);
 			else {
-				LogUtil.logGlobal(config, Log.LEVEL_ERROR, ConfigWebFactory.class.getName(), message);
+				LogUtil.logGlobal(config, Log.LEVEL_ERROR, ConfigFactoryImpl.class.getName(), message);
 			}
 		}
 		catch (Throwable th) {
@@ -2910,7 +2910,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 							ConstructorInstance constr = Reflector.getConstructorInstance(clazz, new Object[] { configServer });
 							if (constr.getConstructor(null) != null) obj = constr.invoke();
 							else obj = ClassUtil.newInstance(clazz);
-							LogUtil.logGlobal(ThreadLocalPageContext.getConfig(configServer == null ? config : configServer), Log.LEVEL_INFO, ConfigWebFactory.class.getName(),
+							LogUtil.logGlobal(ThreadLocalPageContext.getConfig(configServer == null ? config : configServer), Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(),
 									"loaded " + (strType) + " monitor [" + clazz.getName() + "]");
 							if (type == IntervallMonitor.TYPE_INTERVAL) {
 								IntervallMonitor m = obj instanceof IntervallMonitor ? (IntervallMonitor) obj : new IntervallMonitorWrap(obj);
@@ -2925,14 +2925,14 @@ public final class ConfigWebFactory extends ConfigFactory {
 								RequestMonitorPro m = new RequestMonitorProImpl(obj instanceof RequestMonitor ? (RequestMonitor) obj : new RequestMonitorWrap(obj));
 								if (async) m = new AsyncRequestMonitor(m);
 								m.init(configServer, name, _log);
-								LogUtil.logGlobal(ThreadLocalPageContext.getConfig(configServer == null ? config : configServer), Log.LEVEL_INFO, ConfigWebFactory.class.getName(),
+								LogUtil.logGlobal(ThreadLocalPageContext.getConfig(configServer == null ? config : configServer), Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(),
 										"initialize " + (strType) + " monitor [" + clazz.getName() + "]");
 								requests.add(m);
 							}
 						}
 						catch (Throwable t) {
 							ExceptionUtil.rethrowIfNecessary(t);
-							LogUtil.logGlobal(ThreadLocalPageContext.getConfig(configServer == null ? config : configServer), ConfigWebFactory.class.getName(), t);
+							LogUtil.logGlobal(ThreadLocalPageContext.getConfig(configServer == null ? config : configServer), ConfigFactoryImpl.class.getName(), t);
 						}
 					}
 				}
@@ -3316,7 +3316,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 						providers.put(new RHExtensionProvider(url.trim(), false), "");
 					}
 					catch (MalformedURLException e) {
-						LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), ConfigWebFactory.class.getName(), e);
+						LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), ConfigFactoryImpl.class.getName(), e);
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);

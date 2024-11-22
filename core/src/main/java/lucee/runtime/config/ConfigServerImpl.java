@@ -191,7 +191,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		if (initConfigListener) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getConfigListener")) {
 				if (initConfigListener) {
-					configListener = ConfigWebFactory.loadListener(this, root, null);
+					configListener = ConfigFactoryImpl.loadListener(this, root, null);
 					initConfigListener = false;
 				}
 			}
@@ -321,7 +321,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 				if (defaultSecurityManager == null) {
 					Struct security = ConfigWebUtil.getAsStruct("security", root);
 					if (security != null) {
-						defaultSecurityManager = ConfigWebFactory._toSecurityManagerSingle(security);
+						defaultSecurityManager = ConfigFactoryImpl._toSecurityManagerSingle(security);
 					}
 					else defaultSecurityManager = SecurityManagerImpl.getOpenSecurityManager();
 				}
@@ -402,7 +402,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		if (updateType == null) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "getUpdateType")) {
 				if (updateType == null) {
-					String ut = ConfigWebFactory.getAttr(root, "updateType");
+					String ut = ConfigFactoryImpl.getAttr(root, "updateType");
 					if (StringUtil.isEmpty(ut, true)) updateType = "manual";
 					else updateType = ut.trim();
 				}
@@ -432,7 +432,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		if (updateLocation == null) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "getUpdateLocation")) {
 				if (updateLocation == null) {
-					updateLocation = ConfigWebFactory.loadUpdate(this, root);
+					updateLocation = ConfigFactoryImpl.loadUpdate(this, root);
 				}
 			}
 		}
@@ -512,7 +512,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		if (requestMonitors == null) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "monitors")) {
 				if (requestMonitors == null) {
-					ConfigWebFactory.loadMonitors(this, root);
+					ConfigFactoryImpl.loadMonitors(this, root);
 				}
 			}
 		}
@@ -532,7 +532,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		if (intervallMonitors == null) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "monitors")) {
 				if (intervallMonitors == null) {
-					ConfigWebFactory.loadMonitors(this, root);
+					ConfigFactoryImpl.loadMonitors(this, root);
 				}
 			}
 		}
@@ -551,7 +551,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		if (actionMonitorCollector == null) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "monitors")) {
 				if (actionMonitorCollector == null) {
-					ConfigWebFactory.loadMonitors(this, root);
+					ConfigFactoryImpl.loadMonitors(this, root);
 				}
 			}
 		}
@@ -583,7 +583,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "isMonitoringEnabled")) {
 				if (monitoringEnabled == null) {
 					Struct parent = ConfigWebUtil.getAsStruct("monitoring", root);
-					monitoringEnabled = Caster.toBoolean(ConfigWebFactory.getAttr(parent, "enabled"), Boolean.FALSE);
+					monitoringEnabled = Caster.toBoolean(ConfigFactoryImpl.getAttr(parent, "enabled"), Boolean.FALSE);
 				}
 			}
 		}
@@ -606,7 +606,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		if (delay == -1) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "getLoginDelay")) {
 				if (delay == -1) {
-					delay = Caster.toIntValue(ConfigWebFactory.getAttr(root, "loginDelay"), 1);
+					delay = Caster.toIntValue(ConfigFactoryImpl.getAttr(root, "loginDelay"), 1);
 				}
 			}
 		}
@@ -629,7 +629,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		if (captcha == null) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "getLoginCaptcha")) {
 				if (captcha == null) {
-					captcha = Caster.toBooleanValue(ConfigWebFactory.getAttr(root, "loginCaptcha"), false);
+					captcha = Caster.toBooleanValue(ConfigFactoryImpl.getAttr(root, "loginCaptcha"), false);
 				}
 			}
 		}
@@ -652,7 +652,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		if (rememberMe == null) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "getRememberMe")) {
 				if (rememberMe == null) {
-					rememberMe = Caster.toBooleanValue(ConfigWebFactory.getAttr(root, "loginRememberme"), true);
+					rememberMe = Caster.toBooleanValue(ConfigFactoryImpl.getAttr(root, "loginRememberme"), true);
 				}
 			}
 		}
@@ -675,7 +675,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		if (classicStyle == null) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "getDateCasterClassicStyle")) {
 				if (classicStyle == null) {
-					String strClassicDateParsing = ConfigWebFactory.getAttr(root, "classicDateParsing");
+					String strClassicDateParsing = ConfigFactoryImpl.getAttr(root, "classicDateParsing");
 					classicStyle = Caster.toBoolean(strClassicDateParsing, Boolean.FALSE);
 				}
 			}
@@ -862,7 +862,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		if (authKeys == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getAuthenticationKeys")) {
 				if (authKeys == null) {
-					String keyList = ConfigWebFactory.getAttr(root, "authKeys");
+					String keyList = ConfigFactoryImpl.getAttr(root, "authKeys");
 					if (!StringUtil.isEmpty(keyList)) {
 						String[] keys = ListUtil.trimItems(ListUtil.toStringArray(ListUtil.toListRemoveEmpty(keyList, ',')));
 						for (int i = 0; i < keys.length; i++) {
@@ -923,7 +923,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		if (id == null) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "id")) {
 				if (id == null) {
-					id = ConfigWebFactory.loadId(this, root, null, null);
+					id = ConfigFactoryImpl.loadId(this, root, null, null);
 					id.getId();
 				}
 			}
@@ -1094,7 +1094,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		try {
 			ConfigServerFactory.reloadInstance(engine, this);
 			for (ConfigWeb web: webs) {
-				ConfigWebFactory.reloadInstance(engine, this, (ConfigWebImpl) web, true);
+				ConfigFactoryImpl.reloadInstance(engine, this, (ConfigWebImpl) web, true);
 			}
 
 		}

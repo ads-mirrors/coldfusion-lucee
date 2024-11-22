@@ -71,7 +71,7 @@ import lucee.loader.osgi.BundleCollection;
 import lucee.loader.osgi.BundleUtil;
 import lucee.loader.util.Util;
 import lucee.runtime.config.Config;
-import lucee.runtime.config.ConfigWebFactory;
+import lucee.runtime.config.ConfigFactoryImpl;
 import lucee.runtime.config.ConfigWebUtil;
 import lucee.runtime.config.Identification;
 import lucee.runtime.config.s3.BundleProvider;
@@ -802,7 +802,7 @@ public class OSGiUtil {
 			}
 		}
 		else {
-			upLoc = " (" + ConfigWebFactory.DEFAULT_LOCATION + ")";
+			upLoc = " (" + ConfigFactoryImpl.DEFAULT_LOCATION + ")";
 		}
 		String bundleError = "";
 		String parentBundle = parents == null ? " " : String.join(",", parents);
