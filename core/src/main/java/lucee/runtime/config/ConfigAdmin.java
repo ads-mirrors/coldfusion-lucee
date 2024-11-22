@@ -3617,7 +3617,7 @@ public final class ConfigAdmin {
 		}
 	}
 
-	public void changeVersionTo(Version version, Password password, IdentificationWeb id) throws PageException {
+	public void changeVersionTo(Version version, Password password, Identification id) throws PageException {
 		checkWriteAccess();
 		ConfigServerImpl cs = (ConfigServerImpl) ConfigWebUtil.getConfigServer(config, password);
 
@@ -3667,7 +3667,7 @@ public final class ConfigAdmin {
 		}
 	}
 
-	public void mvnChangeVersionTo(Version version, Password password, IdentificationWeb id) throws PageException {
+	public void mvnChangeVersionTo(Version version, Password password, Identification id) throws PageException {
 		checkWriteAccess();
 		ConfigServerImpl cs = (ConfigServerImpl) ConfigWebUtil.getConfigServer(config, password);
 

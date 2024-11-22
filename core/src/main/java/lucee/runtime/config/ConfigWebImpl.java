@@ -1760,7 +1760,7 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 
 	@Override
 	public short getPasswordSource() {
-		return ConfigWebInner.PASSWORD_ORIGIN_SERVER;
+		return ConfigWebPro.PASSWORD_ORIGIN_SERVER;
 	}
 
 	@Override

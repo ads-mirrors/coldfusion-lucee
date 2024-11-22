@@ -1450,4 +1450,11 @@ public final class ConfigWebUtil {
 		}
 
 	}
+
+	public static ConfigServerImpl getConfigServerImpl(Config config) {
+		if (config instanceof ConfigServerImpl) return (ConfigServerImpl) config;
+		if (config instanceof ConfigWebImpl) return ((ConfigWebImpl) config).getConfigServerImpl();
+		// MUST remove
+		throw new RuntimeException("getConfigServerImpl: " + config.getClass().getName());
+	}
 }
