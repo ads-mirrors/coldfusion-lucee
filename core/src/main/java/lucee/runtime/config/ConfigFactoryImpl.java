@@ -54,7 +54,6 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.xml.sax.SAXException;
 
-import lucee.print;
 import lucee.commons.collection.MapFactory;
 import lucee.commons.date.TimeZoneConstants;
 import lucee.commons.date.TimeZoneUtil;
@@ -335,12 +334,6 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 							+ Caster.toString(SystemUtil.millis() - start) + " ms\n" + "===================================================================\n"
 
 			);
-			print.ds("\n===================================================================\n" + "SERVER CONTEXT\n"
-					+ "-------------------------------------------------------------------\n" + "- config:" + configDir + "\n" + "- loader-version:" + SystemUtil.getLoaderVersion()
-					+ "\n" + "- core-version:" + engine.getInfo().getVersion() + "\n" + "- start-time:" + Caster.toString(SystemUtil.millis() - start) + " ms\n"
-					+ "===================================================================\n"
-
-			);
 
 			return config;
 		}
@@ -461,7 +454,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		return;
 	}
 
-	private static boolean createSaltAndPW(Struct root, Config config, boolean essentialOnly) {
+	private static boolean createSaltAndPW(Struct root, ConfigServerImpl config, boolean essentialOnly) {
 		if (root == null) return false;
 
 		// salt
@@ -475,11 +468,10 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		}
 
 		// no password yet
-		if (!essentialOnly && config instanceof ConfigServer && StringUtil.isEmpty(root.get("hspw", ""), true) && StringUtil.isEmpty(root.get("adminhspw", ""), true)
-				&& StringUtil.isEmpty(root.get("pw", ""), true) && StringUtil.isEmpty(root.get("adminpw", ""), true) && StringUtil.isEmpty(root.get("password", ""), true)
+		if (!essentialOnly && StringUtil.isEmpty(root.get("hspw", ""), true) && StringUtil.isEmpty(root.get("adminhspw", ""), true) && StringUtil.isEmpty(root.get("pw", ""), true)
+				&& StringUtil.isEmpty(root.get("adminpw", ""), true) && StringUtil.isEmpty(root.get("password", ""), true)
 				&& StringUtil.isEmpty(root.get("adminpassword", ""), true)) {
-			ConfigServer cs = (ConfigServer) config;
-			Resource pwFile = cs.getConfigDir().getRealResource("password.txt");
+			Resource pwFile = config.getConfigDir().getRealResource("password.txt");
 			if (pwFile.isFile()) {
 				try {
 					String pw = IOUtil.toString(pwFile, (Charset) null);
@@ -492,7 +484,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 					}
 				}
 				catch (IOException e) {
-					LogUtil.logGlobal(cs, "application", e);
+					LogUtil.logGlobal(config, "application", e);
 				}
 			}
 			else {
