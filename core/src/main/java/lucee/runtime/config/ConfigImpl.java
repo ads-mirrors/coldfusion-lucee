@@ -583,7 +583,26 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 */
 	@Override
 	public TagLib[] getTLDs() {
+		if (cfmlTlds == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getTLDs")) {
+				if (cfmlTlds == null) {
+					ConfigFactoryImpl.loadTag(this, root, newVersion());
+				}
+			}
+		}
 		return cfmlTlds;
+	}
+
+	public ConfigImpl resetTLDs() {
+		if (cfmlTlds != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getTLDs")) {
+				if (cfmlTlds != null) {
+					cfmlTlds = null;
+					tldFile = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
@@ -1688,7 +1707,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		this.password = password;
 	}
 
-	protected void addTag(String nameSpace, String nameSpaceSeperator, String name, ClassDefinition cd) {
+	protected void addTagXXX(String nameSpace, String nameSpaceSeperator, String name, ClassDefinition cd) {
 
 		TagLib[] tlds = cfmlTlds;
 		for (int i = 0; i < tlds.length; i++) {
@@ -1944,13 +1963,32 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 */
 	@Override
 	public FunctionLib getFLDs() {
+		if (cfmlFlds == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getFLDs")) {
+				if (cfmlFlds == null) {
+					ConfigFactoryImpl.loadFunctions(this, root, newVersion());
+				}
+			}
+		}
 		return cfmlFlds;
+	}
+
+	public ConfigImpl resetFLDs() {
+		if (cfmlFlds != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getFLDs")) {
+				if (cfmlFlds != null) {
+					cfmlFlds = null;
+					fldFile = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override
 	@Deprecated
 	public FunctionLib[] getFLDs(int dialect) { // used in the image extension
-		return new FunctionLib[] { cfmlFlds };
+		return new FunctionLib[] { getFLDs() };
 	}
 
 	protected void setFldFile(Resource fileFld) throws FunctionLibException {
@@ -1982,6 +2020,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public Resource getFldFile() {
+		getFLDs(); // will trigger the load of this variable
+
 		return fldFile;
 	}
 
@@ -2770,6 +2810,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public Resource getTldFile() {
+		getTLDs();
 		return tldFile;
 	}
 

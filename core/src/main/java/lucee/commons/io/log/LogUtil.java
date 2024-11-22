@@ -18,6 +18,7 @@
  **/
 package lucee.commons.io.log;
 
+import java.io.File;
 import java.util.Date;
 
 import lucee.aprint;
@@ -29,12 +30,11 @@ import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.lang.SystemOut;
+import lucee.loader.engine.CFMLEngineFactory;
 import lucee.runtime.PageContext;
 import lucee.runtime.PageContextImpl;
 import lucee.runtime.PageSource;
 import lucee.runtime.config.Config;
-import lucee.runtime.config.ConfigPro;
-import lucee.runtime.config.ConfigServerImpl;
 import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.engine.ThreadLocalPageContext;
@@ -208,11 +208,6 @@ public final class LogUtil {
 
 	}
 
-	public static void log(ConfigPro cw, Log log, String type, Exception e) {
-		if (log != null) log.error(type, e);
-		else log(cw, type, e);
-	}
-
 	public static void log(PageContext pc, int level, String logName, String type, String msg) {
 		Log log = ThreadLocalPageContext.getLog(pc, logName);
 		if (log != null) log.log(level, type, msg);
@@ -222,15 +217,15 @@ public final class LogUtil {
 	}
 
 	public static void logGlobal(Config config, int level, String type, String msg) {
-		ConfigServerImpl cs = ConfigUtil.getConfigServerImpl(config);
 		try {
+			CFMLEngineFactory factory = ConfigUtil.getCFMLEngineFactory(config);
 			Resource log;
 			boolean check = false;
 			if (level > Log.LEVEL_DEBUG) {
 				if (ERR == null) {
-					synchronized (cs) {
+					synchronized (factory) {
 						if (ERR == null) {
-							ERR = cs.getConfigDir().getRealResource("logs/err.log");
+							ERR = ResourceUtil.toResource(new File(factory.getResourceRoot(), "context/logs/err.log"));
 							check = true;
 						}
 					}
@@ -239,9 +234,9 @@ public final class LogUtil {
 			}
 			else {
 				if (OUT == null) {
-					synchronized (cs) {
+					synchronized (factory) {
 						if (OUT == null) {
-							OUT = cs.getConfigDir().getRealResource("logs/out.log");
+							OUT = ResourceUtil.toResource(new File(factory.getResourceRoot(), "context/logs/out.log"));
 							check = true;
 						}
 					}

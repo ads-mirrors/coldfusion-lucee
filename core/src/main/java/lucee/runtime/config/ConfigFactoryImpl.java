@@ -279,10 +279,9 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 			boolean hasConfigNew = configFileNew.exists() && configFileNew.length() > 0;
 
 			if (!hasConfigNew) {
-				LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(),
-						"has no json server context config [" + configFileNew + "]");
+				LogUtil.logGlobal(null, Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(), "has no json server context config [" + configFileNew + "]");
 				hasConfigOld = configFileOld.exists() && configFileOld.length() > 0;
-				LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(),
+				LogUtil.logGlobal(null, Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(),
 						"has " + (hasConfigOld ? "" : "no ") + "xml server context config [" + configFileOld + "]");
 			}
 			ConfigServerImpl config = existing != null ? existing : new ConfigServerImpl(engine, initContextes, contextes, configDir, configFileNew, ui, essentialOnly, doNew);
@@ -290,7 +289,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 			// translate to new
 			if (!hasConfigNew) {
 				if (hasConfigOld) {
-					LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(), "convert server context xml config to json");
+					LogUtil.logGlobal(null, Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(), "convert server context xml config to json");
 					try {
 						translateConfigFile(config, configFileOld, configFileNew, "multi", true);
 					}
@@ -414,8 +413,6 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 
 		config.setLastModified();
 
-		_loadFilesystem(config, root, doNew); // load this before execute any code, what for example loadxtension does (json)
-
 		if (LOG) log(config, "loaded filesystem");
 
 		if (!essentialOnly) {
@@ -430,7 +427,6 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		if (!essentialOnly) {
 			((CFMLEngineImpl) config.getEngine()).touchMonitor(config);
 		}
-		log(config, COMPONENT_EXTENSION);
 		config.setLoadTime(System.currentTimeMillis());
 	}
 
@@ -2131,27 +2127,18 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 	 * @throws TagLibException
 	 * @throws FunctionLibException
 	 */
-	private static void _loadFilesystem(ConfigServerImpl config, Struct root, boolean doNew) {
+	public static void loadTag(ConfigImpl config, Struct root, boolean doNew) {
 		try {
 			Resource configDir = config.getConfigDir();
-
-			String strDefaultFLDDirectory = null;
 			String strDefaultTLDDirectory = null;
-			String strDefaultFuncDirectory = null;
 			String strDefaultTagDirectory = null;
-			String strFuncDirectory = null;
 			String strTagDirectory = null;
 
 			// only read in server context
-			strDefaultFLDDirectory = SystemUtil.getSystemPropOrEnvVar("lucee.library.fld", null);
 			strDefaultTLDDirectory = SystemUtil.getSystemPropOrEnvVar("lucee.library.tld", null);
-			strDefaultFuncDirectory = SystemUtil.getSystemPropOrEnvVar("lucee.library.function", null);
 			strDefaultTagDirectory = SystemUtil.getSystemPropOrEnvVar("lucee.library.tag", null);
-			if (StringUtil.isEmpty(strDefaultFLDDirectory)) strDefaultFLDDirectory = SystemUtil.getSystemPropOrEnvVar("lucee.library.default.fld", null);
 			if (StringUtil.isEmpty(strDefaultTLDDirectory)) strDefaultTLDDirectory = SystemUtil.getSystemPropOrEnvVar("lucee.library.default.tld", null);
-			if (StringUtil.isEmpty(strDefaultFuncDirectory)) strDefaultFuncDirectory = SystemUtil.getSystemPropOrEnvVar("lucee.library.default.function", null);
 			if (StringUtil.isEmpty(strDefaultTagDirectory)) strDefaultTagDirectory = SystemUtil.getSystemPropOrEnvVar("lucee.library.default.tag", null);
-			strFuncDirectory = SystemUtil.getSystemPropOrEnvVar("lucee.library.additional.function", null);
 			strTagDirectory = SystemUtil.getSystemPropOrEnvVar("lucee.library.additional.tag", null);
 
 			Struct fileSystem = ConfigUtil.getAsStruct("fileSystem", root);
@@ -2159,27 +2146,19 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 			// get library directories
 			if (fileSystem != null) {
 				if (StringUtil.isEmpty(strDefaultTLDDirectory)) strDefaultTLDDirectory = ConfigUtil.translateOldPath(getAttr(fileSystem, "tldDirectory"));
-				if (StringUtil.isEmpty(strDefaultFLDDirectory)) strDefaultFLDDirectory = ConfigUtil.translateOldPath(getAttr(fileSystem, "flddirectory"));
 				if (StringUtil.isEmpty(strDefaultTagDirectory)) strDefaultTagDirectory = ConfigUtil.translateOldPath(getAttr(fileSystem, "tagDirectory"));
-				if (StringUtil.isEmpty(strDefaultFuncDirectory)) strDefaultFuncDirectory = ConfigUtil.translateOldPath(getAttr(fileSystem, "functionDirectory"));
 				if (StringUtil.isEmpty(strDefaultTLDDirectory)) strDefaultTLDDirectory = ConfigUtil.translateOldPath(getAttr(fileSystem, "tldDefaultDirectory"));
-				if (StringUtil.isEmpty(strDefaultFLDDirectory)) strDefaultFLDDirectory = ConfigUtil.translateOldPath(getAttr(fileSystem, "fldDefaultDirectory"));
 				if (StringUtil.isEmpty(strDefaultTagDirectory)) strDefaultTagDirectory = ConfigUtil.translateOldPath(getAttr(fileSystem, "tagDefaultDirectory"));
-				if (StringUtil.isEmpty(strDefaultFuncDirectory)) strDefaultFuncDirectory = ConfigUtil.translateOldPath(getAttr(fileSystem, "functionDefaultDirectory"));
 				if (StringUtil.isEmpty(strTagDirectory)) strTagDirectory = ConfigUtil.translateOldPath(getAttr(fileSystem, "tagAddionalDirectory"));
-				if (StringUtil.isEmpty(strFuncDirectory)) strFuncDirectory = ConfigUtil.translateOldPath(getAttr(fileSystem, "functionAddionalDirectory"));
 			}
 
 			// set default directories if necessary
-			if (StringUtil.isEmpty(strDefaultFLDDirectory)) strDefaultFLDDirectory = "{lucee-config}/library/fld/";
 			if (StringUtil.isEmpty(strDefaultTLDDirectory)) strDefaultTLDDirectory = "{lucee-config}/library/tld/";
-			if (StringUtil.isEmpty(strDefaultFuncDirectory)) strDefaultFuncDirectory = "{lucee-config}/library/function/";
 			if (StringUtil.isEmpty(strDefaultTagDirectory)) strDefaultTagDirectory = "{lucee-config}/library/tag/";
 
 			// init TLDS
 			{
-				ConfigServerImpl cs = config;
-				config.setTLDs(ConfigUtil.duplicate(new TagLib[] { cs.coreTLDs }, false));
+				config.setTLDs(ConfigUtil.duplicate(new TagLib[] { ConfigUtil.getConfigServerImpl(config).coreTLDs }, false));
 			}
 
 			// TLD Dir
@@ -2216,13 +2195,46 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 				}
 			}
 			config.setTagDirectory(listTags);
+		}
+		catch (Throwable t) {
+			ExceptionUtil.rethrowIfNecessary(t);
+			log(config, t);
+		}
+	}
 
-			// FUNCTIONS
+	public static void loadFunctions(ConfigImpl config, Struct root, boolean doNew) {
+		try {
+			Resource configDir = config.getConfigDir();
+
+			String strDefaultFLDDirectory = null;
+			String strDefaultFuncDirectory = null;
+			String strFuncDirectory = null;
+
+			// only read in server context
+			strDefaultFLDDirectory = SystemUtil.getSystemPropOrEnvVar("lucee.library.fld", null);
+			strDefaultFuncDirectory = SystemUtil.getSystemPropOrEnvVar("lucee.library.function", null);
+			if (StringUtil.isEmpty(strDefaultFLDDirectory)) strDefaultFLDDirectory = SystemUtil.getSystemPropOrEnvVar("lucee.library.default.fld", null);
+			if (StringUtil.isEmpty(strDefaultFuncDirectory)) strDefaultFuncDirectory = SystemUtil.getSystemPropOrEnvVar("lucee.library.default.function", null);
+			strFuncDirectory = SystemUtil.getSystemPropOrEnvVar("lucee.library.additional.function", null);
+
+			Struct fileSystem = ConfigUtil.getAsStruct("fileSystem", root);
+
+			// get library directories
+			if (fileSystem != null) {
+				if (StringUtil.isEmpty(strDefaultFLDDirectory)) strDefaultFLDDirectory = ConfigUtil.translateOldPath(getAttr(fileSystem, "flddirectory"));
+				if (StringUtil.isEmpty(strDefaultFuncDirectory)) strDefaultFuncDirectory = ConfigUtil.translateOldPath(getAttr(fileSystem, "functionDirectory"));
+				if (StringUtil.isEmpty(strDefaultFLDDirectory)) strDefaultFLDDirectory = ConfigUtil.translateOldPath(getAttr(fileSystem, "fldDefaultDirectory"));
+				if (StringUtil.isEmpty(strDefaultFuncDirectory)) strDefaultFuncDirectory = ConfigUtil.translateOldPath(getAttr(fileSystem, "functionDefaultDirectory"));
+				if (StringUtil.isEmpty(strFuncDirectory)) strFuncDirectory = ConfigUtil.translateOldPath(getAttr(fileSystem, "functionAddionalDirectory"));
+			}
+
+			// set default directories if necessary
+			if (StringUtil.isEmpty(strDefaultFLDDirectory)) strDefaultFLDDirectory = "{lucee-config}/library/fld/";
+			if (StringUtil.isEmpty(strDefaultFuncDirectory)) strDefaultFuncDirectory = "{lucee-config}/library/function/";
 
 			// Init flds
 			{
-				ConfigServerImpl cs = config;
-				config.setFLDs(cs.coreFLDs.duplicate(false));
+				config.setFLDs(ConfigUtil.getConfigServerImpl(config).coreFLDs.duplicate(false));
 
 			}
 

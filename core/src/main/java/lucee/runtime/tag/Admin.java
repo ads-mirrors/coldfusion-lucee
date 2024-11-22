@@ -4711,6 +4711,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 			throw Caster.toPageException(e);
 		}
 		store();
+		ConfigUtil.getConfigServerImpl(config).resetTLDs().resetFLDs();
 		((ConfigWebPro) pageContext.getConfig()).resetServerFunctionMappings();
 	}
 

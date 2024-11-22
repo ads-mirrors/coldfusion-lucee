@@ -239,7 +239,7 @@ public class TagUtil {
 	 * @param cs
 	 * @param config
 	 */
-	public static void addTagMetaData(ConfigWebPro cw, lucee.commons.io.log.Log log) {
+	public static void addTagMetaData(ConfigWebPro cw) {
 
 		PageContextImpl pc = null;
 		try {
@@ -260,7 +260,7 @@ public class TagUtil {
 
 		}
 		catch (Exception e) {
-			LogUtil.log(cw, log, "tag", e);
+			LogUtil.log(cw, "tag", e);
 		}
 		finally {
 			pc.getConfig().getFactory().releaseLuceePageContext(pc, true);
