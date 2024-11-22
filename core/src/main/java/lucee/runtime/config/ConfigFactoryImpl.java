@@ -199,24 +199,15 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 	public static final ClassDefinition<DummyORMEngine> DUMMY_ORM_ENGINE = new ClassDefinitionImpl<DummyORMEngine>(DummyORMEngine.class);
 	public static final String[] CONFIG_FILE_NAMES = new String[] { ".CFConfig.json", "config.json" };
 
-	public static ConfigWebPro newInstanceSingle(CFMLEngine engine, CFMLFactoryImpl factory, ConfigServerImpl configServer, Resource configDirWeb, ServletConfig servletConfig,
+	public static ConfigWebPro newInstanceWeb(CFMLEngine engine, CFMLFactoryImpl factory, ConfigServerImpl configServer, Resource configDirWeb, ServletConfig servletConfig,
 			ConfigWebImpl existingToUpdate) throws PageException {
 
 		Resource configDir = configServer.getConfigDir();
-
-		LogUtil.logGlobal(configServer, Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(),
-				"===================================================================\n" + "WEB CONTEXT (" + createLabel(configServer, servletConfig) + ")\n"
-						+ "-------------------------------------------------------------------\n" + "- config:" + configDir + "\n" + "- webroot:"
-						+ ReqRspUtil.getRootPath(servletConfig.getServletContext()) + "\n" + "- label:" + createLabel(configServer, servletConfig) + "\n"
-						+ "===================================================================\n"
-
-		);
+		double start = SystemUtil.millis();
 		ConfigWebPro configWeb = existingToUpdate != null ? existingToUpdate.setInstance(factory, configServer, servletConfig, configDirWeb)
 				: new ConfigWebImpl(factory, configServer, servletConfig, configDirWeb);
 		factory.setConfig(configServer, configWeb);
 
-		// createContextFiles(configDir, servletConfig, doNew);
-		// settings(configWeb);
 		((ThreadQueueImpl) configWeb.getThreadQueue()).setMode(configWeb.getQueueEnable() ? ThreadQueuePro.MODE_ENABLED : ThreadQueuePro.MODE_DISABLED);
 
 		// call web.cfc for this context
@@ -224,6 +215,13 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 
 		((GatewayEngineImpl) configWeb.getGatewayEngine()).autoStart();
 
+		LogUtil.logGlobal(configServer, Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(),
+				"\n===================================================================\n" + "WEB CONTEXT (" + createLabel(configServer, servletConfig) + ")\n"
+						+ "-------------------------------------------------------------------\n" + "- config:" + configDir + "\n" + "- webroot:"
+						+ ReqRspUtil.getRootPath(servletConfig.getServletContext()) + "\n" + "- label:" + createLabel(configServer, servletConfig) + "\n" + "- start-time:"
+						+ Caster.toString(SystemUtil.millis() - start) + " ms\n" + "===================================================================\n"
+
+		);
 		return configWeb;
 	}
 
@@ -244,11 +242,12 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 	 * @throws BundleException
 	 * @throws ConverterException
 	 */
-	public static ConfigServerImpl newInstance(CFMLEngineImpl engine, Map<String, CFMLFactory> initContextes, Map<String, CFMLFactory> contextes, Resource configDir,
+	public static ConfigServerImpl newInstanceServer(CFMLEngineImpl engine, Map<String, CFMLFactory> initContextes, Map<String, CFMLFactory> contextes, Resource configDir,
 			ConfigServerImpl existing, boolean essentialOnly)
 			throws SAXException, ClassException, PageException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
 		if (ThreadLocalPageContext.insideServerNewInstance()) throw new ApplicationException("already inside server.newInstance");
 		try {
+			double start = SystemUtil.millis();
 			ThreadLocalPageContext.insideServerNewInstance(true);
 			boolean isCLI = SystemUtil.isCLICall();
 			if (isCLI) {
@@ -267,13 +266,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 					SystemUtil.setPrintWriter(SystemUtil.ERR, new PrintWriter(IOUtil.getWriter(err, "UTF-8")));
 				}
 			}
-			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(),
-					"===================================================================\n" + "SERVER CONTEXT\n"
-							+ "-------------------------------------------------------------------\n" + "- config:" + configDir + "\n" + "- loader-version:"
-							+ SystemUtil.getLoaderVersion() + "\n" + "- core-version:" + engine.getInfo().getVersion() + "\n"
-							+ "===================================================================\n"
 
-			);
 			UpdateInfo ui = getNew(engine, configDir, essentialOnly, UpdateInfo.NEW_NONE);
 			boolean doNew = ui.updateType != NEW_NONE;
 
@@ -332,7 +325,13 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 				createContextFiles(configDir, config, doNew);
 				((CFMLEngineImpl) ConfigWebUtil.getEngine(config)).onStart(config, false);
 			}
+			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(),
+					"\n===================================================================\n" + "SERVER CONTEXT\n"
+							+ "-------------------------------------------------------------------\n" + "- config:" + configDir + "\n" + "- loader-version:"
+							+ SystemUtil.getLoaderVersion() + "\n" + "- core-version:" + engine.getInfo().getVersion() + "\n" + "- start-time:"
+							+ Caster.toString(SystemUtil.millis() - start) + " ms\n" + "===================================================================\n"
 
+			);
 			return config;
 		}
 		finally {

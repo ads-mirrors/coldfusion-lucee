@@ -869,7 +869,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 			try {
 				Resource context = getSeverContextConfigDirectory(factory);
 				DynamicInvoker.getInstance(context);
-				ConfigServerImpl tmp = ConfigFactoryImpl.newInstance(this, initContextes, contextes, context, existing, essentialOnly);
+				ConfigServerImpl tmp = ConfigFactoryImpl.newInstanceServer(this, initContextes, contextes, context, existing, essentialOnly);
 				if (essentialOnly) {
 					return tmp;
 				}
@@ -908,7 +908,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 
 			RefBoolean isCustomSetting = new RefBooleanImpl();
 			Resource configDir = getConfigDirectory(sg, configServer, countExistingContextes, isCustomSetting);
-			ConfigWebPro config = ConfigFactoryImpl.newInstanceSingle(this, factory, configServer, configDir, sg, null);
+			ConfigWebPro config = ConfigFactoryImpl.newInstanceWeb(this, factory, configServer, configDir, sg, null);
 
 			if (ConfigFactoryImpl.LOG) LogUtil.log(configServer, Log.LEVEL_INFO, "startup", "Loaded config");
 			factory.setConfig(configServer, config);
