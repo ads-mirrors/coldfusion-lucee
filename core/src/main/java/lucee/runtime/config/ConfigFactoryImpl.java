@@ -216,7 +216,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		factory.setConfig(configServer, configWeb);
 
 		// createContextFiles(configDir, servletConfig, doNew);
-		settings(configWeb);
+		// settings(configWeb);
 		((ThreadQueueImpl) configWeb.getThreadQueue()).setMode(configWeb.getQueueEnable() ? ThreadQueuePro.MODE_ENABLED : ThreadQueuePro.MODE_DISABLED);
 
 		// call web.cfc for this context
