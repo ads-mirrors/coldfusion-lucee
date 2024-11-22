@@ -100,10 +100,10 @@ import lucee.runtime.config.ConfigFactoryImpl;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.ConfigServer;
 import lucee.runtime.config.ConfigServerImpl;
+import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.config.ConfigWebImpl;
 import lucee.runtime.config.ConfigWebPro;
-import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.config.Constants;
 import lucee.runtime.config.DatasourceConnPool;
 import lucee.runtime.config.DebugEntry;
@@ -1303,6 +1303,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		if (config instanceof ConfigServer) {
 			if (admin.updateLabel(getString("admin", action, "hash"), getString("admin", action, "label"))) {
 				store();
+				ConfigUtil.getConfigServerImpl(config).resetLabels();
 				adminSync.broadcast(attributes, config);
 			}
 		}

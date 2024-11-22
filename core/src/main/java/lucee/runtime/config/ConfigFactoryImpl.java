@@ -51,6 +51,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.xml.sax.SAXException;
 
+import lucee.print;
 import lucee.commons.collection.MapFactory;
 import lucee.commons.date.TimeZoneConstants;
 import lucee.commons.date.TimeZoneUtil;
@@ -214,8 +215,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		((CFMLEngineImpl) ConfigUtil.getEngine(configWeb)).onStart(configWeb, false);
 
 		((GatewayEngineImpl) configWeb.getGatewayEngine()).autoStart();
-
-		LogUtil.logGlobal(configServer, Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(),
+		log(configServer,
 				"\n===================================================================\n" + "WEB CONTEXT (" + createLabel(configServer, servletConfig) + ")\n"
 						+ "-------------------------------------------------------------------\n" + "- config:" + configDir + "\n" + "- webroot:"
 						+ ReqRspUtil.getRootPath(servletConfig.getServletContext()) + "\n" + "- label:" + createLabel(configServer, servletConfig) + "\n" + "- start-time:"
@@ -325,13 +325,20 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 				createContextFiles(configDir, config, doNew);
 				((CFMLEngineImpl) ConfigUtil.getEngine(config)).onStart(config, false);
 			}
-			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(),
+			log(config,
 					"\n===================================================================\n" + "SERVER CONTEXT\n"
 							+ "-------------------------------------------------------------------\n" + "- config:" + configDir + "\n" + "- loader-version:"
 							+ SystemUtil.getLoaderVersion() + "\n" + "- core-version:" + engine.getInfo().getVersion() + "\n" + "- start-time:"
 							+ Caster.toString(SystemUtil.millis() - start) + " ms\n" + "===================================================================\n"
 
 			);
+			print.ds("\n===================================================================\n" + "SERVER CONTEXT\n"
+					+ "-------------------------------------------------------------------\n" + "- config:" + configDir + "\n" + "- loader-version:" + SystemUtil.getLoaderVersion()
+					+ "\n" + "- core-version:" + engine.getInfo().getVersion() + "\n" + "- start-time:" + Caster.toString(SystemUtil.millis() - start) + " ms\n"
+					+ "===================================================================\n"
+
+			);
+
 			return config;
 		}
 		finally {
@@ -390,9 +397,8 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		boolean reload = false;
 		// load PW
 		try {
-
 			if (createSaltAndPW(root, config, essentialOnly)) reload = true;
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigFactoryImpl.class.getName(), "fixed salt");
+			if (LOG) log(config, "fixed salt");
 
 			// reload when an old version of xml got updated
 			if (reload) {
@@ -410,26 +416,21 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 
 		_loadFilesystem(config, root, doNew); // load this before execute any code, what for example loadxtension does (json)
 
-		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigFactoryImpl.class.getName(), "loaded filesystem");
+		if (LOG) log(config, "loaded filesystem");
 
 		if (!essentialOnly) {
 			_loadExtensionBundles(config, root);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigFactoryImpl.class.getName(), "loaded extension");
-
+			if (LOG) log(config, "loaded extension");
 		}
 		else {
 			_loadExtensionDefinition(config, root);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigFactoryImpl.class.getName(), "loaded extension definitions");
+			if (LOG) log(config, "loaded extension definitions");
 		}
 
 		if (!essentialOnly) {
-
-			settings(config);
-			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(config), Log.LEVEL_DEBUG, ConfigFactoryImpl.class.getName(), "loaded settings2");
-
 			((CFMLEngineImpl) config.getEngine()).touchMonitor(config);
 		}
-		loadLabel(config, root);
+		log(config, COMPONENT_EXTENSION);
 		config.setLoadTime(System.currentTimeMillis());
 	}
 
@@ -462,7 +463,6 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 			throws PageException, IOException, TagLibException, FunctionLibException, BundleException {
 
 		cwi.reload();
-		settings(cwi);
 		return;
 	}
 
@@ -926,16 +926,6 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		return defaultValue;
 	}
 
-	private static void settings(ConfigPro config) {
-		try {
-			doCheckChangesInLibraries(config);
-		}
-		catch (Throwable t) {
-			ExceptionUtil.rethrowIfNecessary(t);
-			log(config, t);
-		}
-	}
-
 	public static IdentificationServerImpl loadId(ConfigServerImpl config, Struct root, Log log, IdentificationServerImpl defaultValue) {
 		try {
 
@@ -1113,7 +1103,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		IOUtil.copy(new ByteArrayInputStream(barr), file, true);
 	}
 
-	private static void doCheckChangesInLibraries(ConfigPro config) {
+	public static String doCheckChangesInLibraries(ConfigServerImpl config) {
 		// create current hash from libs
 		TagLib[] tlds = config.getTLDs();
 		FunctionLib flds = config.getFLDs();
@@ -1163,57 +1153,16 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		// fld
 		sb.append(flds.getHash());
 
-		if (!(config instanceof ConfigServer)) {
-			boolean hasChanged = false;
-
-			try {
-				String hashValue = HashUtil.create64BitHashAsString(sb.toString());
-				// check and compare lib version file
-				Resource libHash = config.getConfigDir().getRealResource("lib-hash");
-				if (!libHash.exists()) {
-					libHash.createNewFile();
-					IOUtil.write(libHash, hashValue, SystemUtil.getCharset(), false);
-					hasChanged = true;
-				}
-				else if (!IOUtil.toString(libHash, SystemUtil.getCharset()).equals(hashValue)) {
-					IOUtil.write(libHash, hashValue, SystemUtil.getCharset(), false);
-					hasChanged = true;
-				}
-			}
-			catch (IOException e) {
-			}
-			// change Compile type
-			if (hasChanged) {
-
-				try {
-					// first we delete the physical classes
-					if (config.getClassDirectory().isDirectory()) config.getClassDirectory().remove(true);
-
-					// now we force the pagepools to flush
-					flushPageSourcePool(config.getMappings());
-					flushPageSourcePool(config.getCustomTagMappings());
-					flushPageSourcePool(config.getComponentMappings());
-					flushPageSourcePool(config.getFunctionMappings());
-					flushPageSourcePool(config.getTagMappings());
-				}
-				catch (IOException e) {
-					e.printStackTrace(config.getErrWriter());
-				}
-			}
-		}
-		else {
-			((ConfigServerImpl) config).setLibHash(HashUtil.create64BitHashAsString(sb.toString()));
-		}
-
+		return HashUtil.create64BitHashAsString(sb.toString());
 	}
 
-	private static void flushPageSourcePool(Mapping... mappings) {
-		for (int i = 0; i < mappings.length; i++) {
+	public static void flushPageSourcePool(Mapping... mappings) {
+		if (mappings != null) for (int i = 0; i < mappings.length; i++) {
 			if (mappings[i] instanceof MappingImpl) ((MappingImpl) mappings[i]).flush(); // FUTURE make "flush" part of the interface
 		}
 	}
 
-	private static void flushPageSourcePool(Collection<Mapping> mappings) {
+	public static void flushPageSourcePool(Collection<Mapping> mappings) {
 		Iterator<Mapping> it = mappings.iterator();
 		Mapping m;
 		while (it.hasNext()) {
@@ -1741,8 +1690,8 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 
 						}
 						setDatasource(config, datasources, e.getKey().getString(), cd, getAttr(dataSource, "host"), getAttr(dataSource, "database"),
-								Caster.toIntValue(getAttr(dataSource, "port"), -1), dsn, getAttr(dataSource, "username"), ConfigUtil.decrypt(getAttr(dataSource, "password")),
-								null, Caster.toIntValue(getAttr(dataSource, "connectionLimit"), DEFAULT_MAX_CONNECTION), idle,
+								Caster.toIntValue(getAttr(dataSource, "port"), -1), dsn, getAttr(dataSource, "username"), ConfigUtil.decrypt(getAttr(dataSource, "password")), null,
+								Caster.toIntValue(getAttr(dataSource, "connectionLimit"), DEFAULT_MAX_CONNECTION), idle,
 								Caster.toIntValue(getAttr(dataSource, "liveTimeout"), defLive), Caster.toIntValue(getAttr(dataSource, "minIdle"), 0),
 								Caster.toIntValue(getAttr(dataSource, "maxIdle"), 0), Caster.toIntValue(getAttr(dataSource, "maxTotal"), 0),
 								Caster.toLongValue(getAttr(dataSource, "metaCacheTimeout"), 60000), toBoolean(getAttr(dataSource, "blob"), true),
@@ -2798,11 +2747,9 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 
 	public static void log(Config config, Throwable e) {
 		try {
-			Log log = ((ConfigPro) config).getLog("application", false);
-			if (log != null) log.error("configuration", e);
-			else {
-				LogUtil.logGlobal(config, ConfigFactoryImpl.class.getName(), e);
-			}
+			// Log log = ((ConfigPro) config).getLog("application", false);
+			// if (log != null) log.error("configuration", e);
+			LogUtil.logGlobal(config, ConfigFactoryImpl.class.getName(), e);
 		}
 		catch (Throwable th) {
 			ExceptionUtil.rethrowIfNecessary(th);
@@ -2812,11 +2759,9 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 
 	public static void log(Config config, String message) {
 		try {
-			Log log = ((ConfigPro) config).getLog("application", false);
-			if (log != null) log.error("configuration", message);
-			else {
-				LogUtil.logGlobal(config, Log.LEVEL_ERROR, ConfigFactoryImpl.class.getName(), message);
-			}
+			// Log log = ((ConfigPro) config).getLog("application", false);
+			// if (log != null) log.error("configuration", message);
+			LogUtil.logGlobal(config, Log.LEVEL_ERROR, ConfigFactoryImpl.class.getName(), message);
 		}
 		catch (Throwable th) {
 			ExceptionUtil.rethrowIfNecessary(th);
@@ -3724,7 +3669,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		return false;
 	}
 
-	private static void loadLabel(ConfigServerImpl configServer, Struct root) {
+	public static Map<String, String> loadLabel(ConfigImpl configServer, Struct root) {
 		Array children = ConfigUtil.getAsArray("labels", "label", root);
 
 		Map<String, String> labels = new HashMap<String, String>();
@@ -3741,7 +3686,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 				}
 			}
 		}
-		configServer.setLabels(labels);
+		return labels;
 	}
 
 	private static void createContextFiles(Resource configDir, ConfigServer config, boolean doNew) {

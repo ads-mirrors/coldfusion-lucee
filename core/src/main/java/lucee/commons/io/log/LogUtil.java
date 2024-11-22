@@ -18,7 +18,6 @@
  **/
 package lucee.commons.io.log;
 
-import java.io.File;
 import java.util.Date;
 
 import lucee.aprint;
@@ -30,14 +29,14 @@ import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.lang.SystemOut;
-import lucee.loader.engine.CFMLEngineFactory;
 import lucee.runtime.PageContext;
 import lucee.runtime.PageContextImpl;
 import lucee.runtime.PageSource;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
-import lucee.runtime.config.ConfigWeb;
+import lucee.runtime.config.ConfigServerImpl;
 import lucee.runtime.config.ConfigUtil;
+import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.engine.ThreadLocalPageContext;
 
 /**
@@ -223,15 +222,15 @@ public final class LogUtil {
 	}
 
 	public static void logGlobal(Config config, int level, String type, String msg) {
+		ConfigServerImpl cs = ConfigUtil.getConfigServerImpl(config);
 		try {
-			CFMLEngineFactory factory = ConfigUtil.getCFMLEngineFactory(config);
 			Resource log;
 			boolean check = false;
 			if (level > Log.LEVEL_DEBUG) {
 				if (ERR == null) {
-					synchronized (factory) {
+					synchronized (cs) {
 						if (ERR == null) {
-							ERR = ResourceUtil.toResource(new File(factory.getResourceRoot(), "context/logs/err.log"));
+							ERR = cs.getConfigDir().getRealResource("logs/err.log");
 							check = true;
 						}
 					}
@@ -240,9 +239,9 @@ public final class LogUtil {
 			}
 			else {
 				if (OUT == null) {
-					synchronized (factory) {
+					synchronized (cs) {
 						if (OUT == null) {
-							OUT = ResourceUtil.toResource(new File(factory.getResourceRoot(), "context/logs/out.log"));
+							OUT = cs.getConfigDir().getRealResource("logs/out.log");
 							check = true;
 						}
 					}

@@ -1819,6 +1819,10 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 
 	public void reload() {
 		synchronized (this) {
+			if (mappings != null) {
+				ConfigFactoryImpl.flushPageSourcePool(mappings);
+			}
+
 			createMapping();
 			createRestMapping();
 		}

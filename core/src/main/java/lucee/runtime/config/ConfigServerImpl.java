@@ -473,13 +473,28 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		return sm;
 	}
 
-	public void setLabels(Map<String, String> labels) {
-		this.labels = labels;
+	public Map<String, String> getLabels() {
+		if (labels == null) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "getLabels")) {
+				if (labels == null) {
+					labels = ConfigFactoryImpl.loadLabel(null, root);
+				}
+			}
+
+			labels = new HashMap<String, String>();
+		}
+		return labels;
 	}
 
-	public Map<String, String> getLabels() {
-		if (labels == null) labels = new HashMap<String, String>();
-		return labels;
+	public ConfigServerImpl resetLabels() {
+		if (labels != null) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "getLabels")) {
+				if (labels != null) {
+					labels = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	private ThreadQueue threadQueue = new ThreadQueueImpl(ThreadQueuePro.MODE_BLOCKING, null); // before the queue is loaded we block all requests
@@ -988,11 +1003,15 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		return rtn.values();
 	}
 
-	protected void setLibHash(String libHash) {
-		this.libHash = libHash;
-	}
-
 	protected String getLibHash() {
+		if (libHash == null) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "getLibHash")) {
+				if (libHash == null) {
+					libHash = ConfigFactoryImpl.doCheckChangesInLibraries(this);
+				}
+			}
+		}
+
 		return libHash;
 	}
 

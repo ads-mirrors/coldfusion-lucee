@@ -1465,6 +1465,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (mappings != null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getMappings")) {
 				if (mappings != null) {
+					ConfigFactoryImpl.flushPageSourcePool(mappings);
 					close(this.uncheckedMappings);
 					this.mappings = null;
 					this.uncheckedMappings = null;
@@ -1491,6 +1492,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (customTagMappings != null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getCustomTagMappings")) {
 				if (customTagMappings != null) {
+					ConfigFactoryImpl.flushPageSourcePool(customTagMappings);
+
 					close(this.uncheckedCustomTagMappings);
 					this.customTagMappings = null;
 					this.uncheckedCustomTagMappings = null;
@@ -1517,6 +1520,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (componentMappings != null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getComponentMappings")) {
 				if (componentMappings != null) {
+					ConfigFactoryImpl.flushPageSourcePool(componentMappings);
 					close(this.uncheckedComponentMappings);
 					this.componentMappings = null;
 					this.uncheckedComponentMappings = null;
@@ -3933,8 +3937,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 						Struct _clients = ConfigUtil.getAsStruct("remoteClients", root);
 						strDir = _clients != null ? ConfigFactoryImpl.getAttr(_clients, "directory") : null;
 					}
-					remoteClientDirectory = ConfigUtil.getFile(getRootDirectory(), strDir, "client-task", getConfigDir(), FileUtil.TYPE_DIR,
-							ResourceUtil.LEVEL_GRAND_PARENT_FILE, this);
+					remoteClientDirectory = ConfigUtil.getFile(getRootDirectory(), strDir, "client-task", getConfigDir(), FileUtil.TYPE_DIR, ResourceUtil.LEVEL_GRAND_PARENT_FILE,
+							this);
 
 					if (!remoteClientDirectory.exists()) remoteClientDirectory.mkdirs();
 				}
@@ -4224,6 +4228,9 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	@Override
 	public Collection<Mapping> getTagMappings() {
 		return tagMappings.values();
+
+		// MUST 7 flushPageSourcePool(config.getTagMappings());
+
 	}
 
 	@Override
@@ -4249,6 +4256,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	@Override
 	public Collection<Mapping> getFunctionMappings() {
 		return functionMappings.values();
+
+		// MUST 7 ConfigWebFactory.flushPageSourcePool(config.getFunctionMappings());
 	}
 
 	/*
