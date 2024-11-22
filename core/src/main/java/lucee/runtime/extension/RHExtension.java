@@ -64,9 +64,9 @@ import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigAdmin;
 import lucee.runtime.config.ConfigFactoryImpl;
 import lucee.runtime.config.ConfigPro;
+import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.config.ConfigWebPro;
-import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.config.Constants;
 import lucee.runtime.config.DeployHandler;
 import lucee.runtime.converter.ConverterException;
@@ -199,6 +199,21 @@ public class RHExtension implements Serializable {
 	public boolean softLoaded = false;
 
 	private static Map<String, RHExtension> instances = new ConcurrentHashMap<>();
+
+	public static RHExtension getInstance(Config config, Resource ext, RHExtension defaultValue) {
+		RHExtension instance = instances.get(ext.getAbsolutePath());
+		if (instance == null) {
+			try {
+				instance = new RHExtension(config, ext);
+			}
+			catch (Exception e) {
+				return defaultValue;
+			}
+			instances.put(instance.getId() + ":" + instance.getVersion(), instance);
+			instances.put(ext.getAbsolutePath(), instance);
+		}
+		return instance;
+	}
 
 	public static RHExtension getInstance(Config config, Resource ext) throws PageException, IOException, BundleException, ConverterException {
 		RHExtension instance = instances.get(ext.getAbsolutePath());
@@ -1459,7 +1474,7 @@ public class RHExtension implements Serializable {
 		if (!extensionFile.exists()) {
 			Config c = ThreadLocalPageContext.getConfig();
 			if (c != null) {
-				Resource res = DeployHandler.getExtension(c, new ExtensionDefintion(id, version), null);
+				Resource res = DeployHandler.getExtension(c, new ExtensionDefintion(this, id, version), null);
 				if (res != null && res.exists()) {
 					try {
 						IOUtil.copy(res, extensionFile);
@@ -1653,15 +1668,16 @@ public class RHExtension implements Serializable {
 	}
 
 	public ExtensionDefintion toExtensionDefinition() {
-		ExtensionDefintion ed = new ExtensionDefintion(getId(), getVersion());
+		ExtensionDefintion ed = new ExtensionDefintion(this, getId(), getVersion());
 		ed.setParam("symbolic-name", getSymbolicName());
 		ed.setParam("description", getDescription());
+		if (extensionFile != null) ed.setSource(null, extensionFile);
 		return ed;
 	}
 
 	@Override
 	public String toString() {
-		ExtensionDefintion ed = new ExtensionDefintion(getId(), getVersion());
+		ExtensionDefintion ed = new ExtensionDefintion(this, getId(), getVersion());
 		ed.setParam("symbolic-name", getSymbolicName());
 		ed.setParam("description", getDescription());
 		return ed.toString();

@@ -4660,7 +4660,7 @@ public final class ConfigAdmin {
 			else {
 				removeRHExtension(config, existingRH, rhext, true);
 			}
-
+			ConfigUtil.getConfigServerImpl(config).resetExtensionDefinitions().resetRHExtensions();
 		}
 		// INSTALL
 		try {
@@ -4701,12 +4701,14 @@ public final class ConfigAdmin {
 				if (!entry.isDirectory() && startsWith(path, type, "flds") && (StringUtil.endsWithIgnoreCase(path, ".fld") || StringUtil.endsWithIgnoreCase(path, ".fldx"))) {
 					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy fld [" + fileName + "]");
 					updateFLD(zis, fileName, false);
+					ConfigUtil.getConfigServerImpl(config).resetFLDs();
 					reloadNecessary = true;
 				}
 				// tlds
 				if (!entry.isDirectory() && startsWith(path, type, "tlds") && (StringUtil.endsWithIgnoreCase(path, ".tld") || StringUtil.endsWithIgnoreCase(path, ".tldx"))) {
 					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy tld/tldx [" + fileName + "]");
 					updateTLD(zis, fileName, false);
+					ConfigUtil.getConfigServerImpl(config).resetTLDs();
 					reloadNecessary = true;
 				}
 
@@ -4715,7 +4717,7 @@ public final class ConfigAdmin {
 					String sub = subFolder(entry);
 					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy tag [" + sub + "]");
 					updateTag(zis, sub, false);
-					// clearTags=true;
+					ConfigUtil.getConfigServerImpl(config).resetTLDs();
 					reloadNecessary = true;
 				}
 
@@ -4724,7 +4726,7 @@ public final class ConfigAdmin {
 					String sub = subFolder(entry);
 					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy function [" + sub + "]");
 					updateFunction(zis, sub, false);
-					// clearFunction=true;
+					ConfigUtil.getConfigServerImpl(config).resetFLDs();
 					reloadNecessary = true;
 				}
 
@@ -4733,8 +4735,8 @@ public final class ConfigAdmin {
 					String sub = subFolder(entry);
 					logger.log(Log.LEVEL_DEBUG, "extension", "deploy mapping " + sub);
 					updateArchive(zis, sub, false);
+					ConfigUtil.getConfigServerImpl(config).resetMappings();
 					reloadNecessary = true;
-					// clearFunction=true;
 				}
 
 				// event-gateway
@@ -4743,6 +4745,7 @@ public final class ConfigAdmin {
 					String sub = subFolder(entry);
 					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy event-gateway [" + sub + "]");
 					updateEventGateway(zis, sub, false);
+					ConfigUtil.getConfigServerImpl(config).resetGatewayEntries();
 				}
 
 				// context
@@ -4818,6 +4821,7 @@ public final class ConfigAdmin {
 					if (cd != null && cd.isBundle()) {
 						_updateCache(cd);
 						Admin.getConfigServerImpl(config).resetCacheDefinitions();
+						ConfigUtil.getConfigServerImpl(config).resetCacheAll();
 						reloadNecessary = true;
 					}
 					logger.info("extension", "Update cache [" + cd + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
@@ -4870,6 +4874,7 @@ public final class ConfigAdmin {
 						copyButIgnoreClassDef(map, args);
 						args.remove("scheme");
 						_updateResourceProvider(scheme, cd, args);
+						ConfigUtil.getConfigServerImpl(config).resetResources();
 						reloadNecessary = true;
 					}
 					logger.info("extension", "Update resource provider [" + scheme + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
@@ -4886,6 +4891,7 @@ public final class ConfigAdmin {
 
 					if (cd != null && cd.hasClass()) {
 						_updateORMEngine(cd);
+						ConfigUtil.getConfigServerImpl(config).resetORMConfig().resetORMEngineClassDefintion();
 						reloadNecessary = true;
 					}
 					logger.info("extension", "Update orm engine [" + cd + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
@@ -4918,6 +4924,7 @@ public final class ConfigAdmin {
 					if (cd != null && cd.hasClass()) {
 						_updateMonitorEnabled(true);
 						_updateMonitor(cd, map.get("type"), map.get("name"), true);
+						ConfigUtil.getConfigServerImpl(config).resetMonitors().resetMonitoringEnabled();
 						reloadNecessary = true;
 					}
 					logger.info("extension", "Update monitor engine [" + cd + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
@@ -4937,6 +4944,7 @@ public final class ConfigAdmin {
 					if (StringUtil.isEmpty(_dsn, true)) _dsn = map.get("dsn");
 					if (cd != null && cd.isBundle()) {
 						_updateJDBCDriver(_label, _id, cd, _dsn);
+						ConfigUtil.getConfigServerImpl(config).resetJDBCDrivers();
 						reloadNecessary = true;
 					}
 					logger.info("extension", "Update JDBC Driver [" + _label + ":" + cd + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
@@ -5015,6 +5023,7 @@ public final class ConfigAdmin {
 					toplevel = Caster.toBooleanValue(map.get("toplevel"), false);
 					readonly = Caster.toBooleanValue(map.get("readonly"), false);
 					_updateMapping(virtual, physical, archive, primary, inspect, inspectTemplateIntervalSlow, inspectTemplateIntervalFast, toplevel, lmode, ltype, readonly);
+					ConfigUtil.getConfigServerImpl(config).resetMappings();
 					reloadNecessary = true;
 
 					logger.debug("extension", "Update Mapping [" + virtual + "]");
@@ -5062,6 +5071,7 @@ public final class ConfigAdmin {
 
 					if (!StringUtil.isEmpty(id) && (!StringUtil.isEmpty(cfcPath) || (cd != null && cd.hasClass()))) {
 						_updateGatewayEntry(id, cd, cfcPath, listenerCfcPath, startupMode, custom, readOnly);
+						ConfigUtil.getConfigServerImpl(config).resetGatewayEntries();
 					}
 
 					logger.info("extension", "Update event gateway entry [" + id + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
@@ -5073,7 +5083,7 @@ public final class ConfigAdmin {
 			reloadNecessary = true;
 			if (reload && reloadNecessary) {
 				_storeAndReload();
-				Admin.getConfigServerImpl(config).resetAll();
+				// ConfigUtil.getConfigServerImpl(config).resetAll();
 			}
 			else _store();
 			// }

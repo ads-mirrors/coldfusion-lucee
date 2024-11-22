@@ -197,7 +197,11 @@ public class ThreadUtil {
 	}
 
 	public static ExecutorService createExecutorService(int maxThreads) {
-		if (ALLOW_FUTURE_THREADS && SystemUtil.JAVA_VERSION >= SystemUtil.JAVA_VERSION_19) {
+		return createExecutorService(maxThreads, ALLOW_FUTURE_THREADS);
+	}
+
+	public static ExecutorService createExecutorService(int maxThreads, boolean allowFuture) {
+		if (allowFuture && SystemUtil.JAVA_VERSION >= SystemUtil.JAVA_VERSION_19) {
 			// FUTURE use newVirtualThreadPerTaskExecutor natively
 			try {
 				MethodHandles.Lookup lookup = MethodHandles.lookup();

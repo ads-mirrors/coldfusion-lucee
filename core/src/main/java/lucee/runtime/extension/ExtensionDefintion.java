@@ -37,21 +37,11 @@ public class ExtensionDefintion {
 		setParam("version", version);
 	}
 
-	/*
-	 * public static ExtensionDefintion getInstanceEL(Config config, Element el) { try { return
-	 * getInstance(config, el); } catch (Exception e) { return null; } }
-	 * 
-	 * 
-	 * public static ExtensionDefintion getInstance(Config config, Element el) throws PageException,
-	 * IOException, BundleException { String id=el.getAttribute("id"); String
-	 * version=el.getAttribute("version"); if(!StringUtil.isEmpty(id) && !StringUtil.isEmpty(version)) {
-	 * Resource res = RHExtension.toResource(config, el); ExtensionDefintion ed = new
-	 * ExtensionDefintion(id, version); ed.setSource(config, res); return ed; }
-	 * 
-	 * RHExtension rhe=new RHExtension(config,el); id=rhe.getId(); version=rhe.getVersion();
-	 * 
-	 * ExtensionDefintion ed=new ExtensionDefintion(id,version); ed.setSource(rhe); return ed; }
-	 */
+	public ExtensionDefintion(RHExtension rhe, String id, String version) {
+		this.rhe = rhe;
+		this.id = id;
+		setParam("version", version);
+	}
 
 	public void setId(String id) {
 		this.id = id;
@@ -120,11 +110,22 @@ public class ExtensionDefintion {
 
 	public void setSource(RHExtension rhe) {
 		this.rhe = rhe;
+		if (rhe.getExtensionFile() != null) this.source = rhe.getExtensionFile();
 	}
 
 	public void setSource(Config config, Resource source) {
 		this.config = config;
 		this.source = source;
+	}
+
+	public RHExtension toRHExtension(RHExtension defaultValue) {
+		if (rhe != null) return rhe;
+
+		if (source == null) {
+			return defaultValue;
+		}
+		rhe = RHExtension.getInstance(config, source, defaultValue);
+		return rhe;
 	}
 
 	public RHExtension toRHExtension() throws PageException, IOException, BundleException, ConverterException {

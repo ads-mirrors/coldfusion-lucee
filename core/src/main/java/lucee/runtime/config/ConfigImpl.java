@@ -4100,22 +4100,39 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return rhextensions;
 	}
 
+	public ConfigImpl resetRHExtensions() {
+		return this;
+	}
+
 	public String getExtensionsMD5() {
 		return extensionsMD5;
 	}
 
 	protected void setExtensions(RHExtension[] extensions, String md5) {
-		this.extensionsDefs = null;
 		this.rhextensions = extensions;
 		this.extensionsMD5 = md5;
 	}
 
-	protected void setExtensionDefinitions(List<ExtensionDefintion> extensionsDefs) {
-		this.extensionsDefs = extensionsDefs;
+	public List<ExtensionDefintion> getExtensionDefinitions() {
+		if (extensionsDefs == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getExtensionDefinitions")) {
+				if (extensionsDefs == null) {
+					extensionsDefs = ConfigFactoryImpl.loadExtensionDefinition(this, root);
+				}
+			}
+		}
+		return this.extensionsDefs;
 	}
 
-	public List<ExtensionDefintion> getExtensionDefinitions() {
-		return this.extensionsDefs;
+	public ConfigImpl resetExtensionDefinitions() {
+		if (extensionsDefs != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getExtensionDefinitions")) {
+				if (extensionsDefs != null) {
+					extensionsDefs = null;
+				}
+			}
+		}
+		return this;
 	}
 
 	@Override

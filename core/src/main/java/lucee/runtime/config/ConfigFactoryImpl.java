@@ -44,6 +44,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import javax.servlet.ServletConfig;
 
@@ -175,6 +178,7 @@ import lucee.runtime.search.SearchEngine;
 import lucee.runtime.security.SecurityManager;
 import lucee.runtime.security.SecurityManagerImpl;
 import lucee.runtime.tag.listener.TagListener;
+import lucee.runtime.thread.ThreadUtil;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.Struct;
@@ -414,14 +418,9 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		config.setLastModified();
 
 		if (LOG) log(config, "loaded filesystem");
-
 		if (!essentialOnly) {
 			_loadExtensionBundles(config, root);
 			if (LOG) log(config, "loaded extension");
-		}
-		else {
-			_loadExtensionDefinition(config, root);
-			if (LOG) log(config, "loaded extension definitions");
 		}
 
 		if (!essentialOnly) {
@@ -1355,7 +1354,6 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		Map<String, lucee.runtime.rest.Mapping> mappings = new HashMap<String, lucee.runtime.rest.Mapping>();
 		try {
 			boolean hasAccess = true;// MUST
-			// ConfigWebUtil.hasAccess(config,SecurityManager.TYPE_REST);
 			Struct el = ConfigUtil.getAsStruct("rest", root);
 
 			Array _mappings = ConfigUtil.getAsArray("mapping", el);
@@ -1622,7 +1620,6 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 			}
 
 			// Databases
-			// Struct parent = ConfigWebUtil.getAsStruct("dataSources", root);
 
 			// Data Sources
 			Struct dataSources = ConfigUtil.getAsStruct(root, false, "dataSources");
@@ -2059,7 +2056,6 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 	public static Mapping[] loadCustomTagsMappings(ConfigImpl config, Struct root) {
 		Mapping[] mappings = null;
 		try {
-			// Struct customTag = ConfigWebUtil.getAsStruct("customTag", root);
 			Array ctMappings = ConfigUtil.getAsArray("customTagMappings", root);
 			boolean hasDefault = false;
 
@@ -3271,7 +3267,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 			if (md5.equals(config.getExtensionsMD5())) {
 				return;
 			}
-
+			// config.getExtensionDefinitions();
 			boolean firstLoad = config.getExtensionsMD5() == null;
 
 			try {
@@ -3370,8 +3366,64 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		}
 	}
 
-	private static void _loadExtensionDefinition(ConfigServerImpl config, Struct root) {
+	public static List<ExtensionDefintion> loadExtensionDefinition(ConfigImpl config, Struct root) {
+		List<ExtensionDefintion> extensions = new ArrayList<>();
 
+		try {
+			Log deployLog = config.getLog("deploy");
+			Array children = ConfigUtil.getAsArray("extensions", root);
+			RHExtension.removeDuplicates(children);
+			if (children.size() > 0) {
+				// Use a thread pool for processing
+				ExecutorService executor = ThreadUtil.createExecutorService(children.size(), true);
+				Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+				List<Future<ExtensionDefintion>> futures = new ArrayList<>();
+
+				Iterator<Object> it = children.valueIterator();
+				while (it.hasNext()) {
+					Struct childSct = Caster.toStruct(it.next(), null);
+					if (childSct == null) continue;
+
+					// Submit each task to the thread pool
+					futures.add(executor.submit(() -> {
+						Map<String, String> child = Caster.toStringMap(childSct, null);
+						if (child == null) return null;
+
+						String id = Caster.toString(childSct.get(KeyConstants._id, null), null);
+						try {
+							return RHExtension.toExtensionDefinition(config, id, child);
+						}
+						catch (Exception e) {
+							log(config, e);
+							return null;
+						}
+					}));
+				}
+
+				// Collect results
+				for (Future<ExtensionDefintion> future: futures) {
+					try {
+						ExtensionDefintion extDef = future.get();
+						if (extDef != null) {
+							extensions.add(extDef);
+						}
+					}
+					catch (Exception ex) {
+						log(config, ex);
+					}
+				}
+				executor.shutdown();
+			}
+		}
+		catch (Throwable t) {
+			ExceptionUtil.rethrowIfNecessary(t);
+			log(config, t);
+		}
+		return extensions;
+	}
+
+	public static List<ExtensionDefintion> loadExtensionDefinitionSerial(ConfigImpl config, Struct root) {
+		List<ExtensionDefintion> extensions = new ArrayList<>();
 		try {
 			Log deployLog = config.getLog("deploy");
 			Array children = ConfigUtil.getAsArray("extensions", root);
@@ -3380,7 +3432,6 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 			Struct childSct;
 			String id;
 			Iterator<Object> it = children.valueIterator();
-			List<ExtensionDefintion> extensions = null;
 			while (it.hasNext()) {
 				childSct = Caster.toStruct(it.next(), null);
 				if (childSct == null) continue;
@@ -3390,19 +3441,18 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 				id = Caster.toString(childSct.get(KeyConstants._id, null), null);
 
 				try {
-					if (extensions == null) extensions = new ArrayList<>();
 					extensions.add(RHExtension.toExtensionDefinition(config, id, child));
 				}
 				catch (Exception e) {
 					log(config, e);
 				}
 			}
-			if (extensions != null) config.setExtensionDefinitions(extensions);
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, t);
 		}
+		return extensions;
 	}
 
 	public static RHExtensionProvider[] loadExtensionProviders(ConfigImpl config, Struct root) {
