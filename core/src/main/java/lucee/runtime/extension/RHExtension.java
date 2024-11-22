@@ -66,7 +66,7 @@ import lucee.runtime.config.ConfigFactoryImpl;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.config.ConfigWebPro;
-import lucee.runtime.config.ConfigWebUtil;
+import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.config.Constants;
 import lucee.runtime.config.DeployHandler;
 import lucee.runtime.converter.ConverterException;
@@ -561,7 +561,7 @@ public class RHExtension implements Serializable {
 		boolean isWeb = config instanceof ConfigWeb;
 		type = isWeb ? "web" : "server";
 		Log logger = ThreadLocalPageContext.getLog(config, "deploy");
-		Info info = ConfigWebUtil.getEngine(config).getInfo();
+		Info info = ConfigUtil.getEngine(config).getInfo();
 
 		Attributes attr = manifest.getMainAttributes();
 
@@ -601,7 +601,7 @@ public class RHExtension implements Serializable {
 		type = isWeb ? "web" : "server";
 
 		Log logger = ThreadLocalPageContext.getLog(config, "deploy");
-		Info info = ConfigWebUtil.getEngine(config).getInfo();
+		Info info = ConfigUtil.getEngine(config).getInfo();
 
 		readSymbolicName(label, ConfigFactoryImpl.getAttr(data, "symbolicName", "symbolic-name"));
 		readName(label, ConfigFactoryImpl.getAttr(data, "name"));
@@ -751,7 +751,7 @@ public class RHExtension implements Serializable {
 	}
 
 	public void validate(Config config) throws ApplicationException {
-		validate(ConfigWebUtil.getEngine(config).getInfo());
+		validate(ConfigUtil.getEngine(config).getInfo());
 	}
 
 	public void validate(Info info) throws ApplicationException {

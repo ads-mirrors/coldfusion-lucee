@@ -319,7 +319,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		if (defaultSecurityManager == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getDefaultSecurityManager")) {
 				if (defaultSecurityManager == null) {
-					Struct security = ConfigWebUtil.getAsStruct("security", root);
+					Struct security = ConfigUtil.getAsStruct("security", root);
 					if (security != null) {
 						defaultSecurityManager = ConfigFactoryImpl._toSecurityManagerSingle(security);
 					}
@@ -582,7 +582,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		if (monitoringEnabled == null) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "isMonitoringEnabled")) {
 				if (monitoringEnabled == null) {
-					Struct parent = ConfigWebUtil.getAsStruct("monitoring", root);
+					Struct parent = ConfigUtil.getAsStruct("monitoring", root);
 					monitoringEnabled = Caster.toBoolean(ConfigFactoryImpl.getAttr(parent, "enabled"), Boolean.FALSE);
 				}
 			}
@@ -1089,7 +1089,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 
 	@Override
 	public void checkPassword() throws PageException {
-		CFMLEngine engine = ConfigWebUtil.getEngine(this);
+		CFMLEngine engine = ConfigUtil.getEngine(this);
 		ConfigWeb[] webs = getConfigWebs();
 		try {
 			ConfigFactoryImpl.reloadInstance(engine, this);

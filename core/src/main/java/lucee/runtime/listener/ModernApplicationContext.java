@@ -58,7 +58,7 @@ import lucee.runtime.component.Member;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.ConfigWeb;
-import lucee.runtime.config.ConfigWebUtil;
+import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.db.ClassDefinition;
 import lucee.runtime.db.DataSource;
 import lucee.runtime.engine.ThreadLocalPageContext;
@@ -308,11 +308,11 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 		if (scopeCascading == null) {
 			Object o = get(component, KeyConstants._scopeCascading, null);
 			if (o != null) {
-				scopeCascading = ConfigWebUtil.toScopeCascading(Caster.toString(o, null), config.getScopeCascadingType());
+				scopeCascading = ConfigUtil.toScopeCascading(Caster.toString(o, null), config.getScopeCascadingType());
 			}
 			else {
 				Boolean b = Caster.toBoolean(get(component, KeyConstants._searchImplicitScopes, null), null);
-				if (b != null) scopeCascading = ConfigWebUtil.toScopeCascading(b);
+				if (b != null) scopeCascading = ConfigUtil.toScopeCascading(b);
 				else scopeCascading = config.getScopeCascadingType();
 			}
 		}

@@ -90,7 +90,7 @@ import lucee.runtime.cfx.customtag.CFXTagPoolImpl;
 import lucee.runtime.component.ImportDefintion;
 import lucee.runtime.component.ImportDefintionImpl;
 import lucee.runtime.config.ConfigFactoryImpl.Path;
-import lucee.runtime.config.ConfigWebUtil.CacheElement;
+import lucee.runtime.config.ConfigUtil.CacheElement;
 import lucee.runtime.config.gateway.GatewayMap;
 import lucee.runtime.customtag.InitFile;
 import lucee.runtime.db.ClassDefinition;
@@ -544,7 +544,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 					// Cascading
 					String strScopeCascadingType = ConfigFactoryImpl.getAttr(root, "scopeCascading");
 					if (!StringUtil.isEmpty(strScopeCascadingType)) {
-						scopeType = ConfigWebUtil.toScopeCascading(strScopeCascadingType, Config.SCOPE_STANDARD);
+						scopeType = ConfigUtil.toScopeCascading(strScopeCascadingType, Config.SCOPE_STANDARD);
 					}
 					else scopeType = SCOPE_STANDARD;
 				}
@@ -634,7 +634,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 					if (b == null) b = Caster.toBoolean(SystemUtil.getSystemPropOrEnvVar("lucee.security.isdefined", null), null);
 					if (b == null) b = Caster.toBoolean(SystemUtil.getSystemPropOrEnvVar("lucee.isdefined.limit", null), null);
 					if (b == null) {
-						Struct security = ConfigWebUtil.getAsStruct("security", root);
+						Struct security = ConfigUtil.getAsStruct("security", root);
 						if (security != null) {
 							b = Caster.toBoolean(ConfigFactoryImpl.getAttr(security, "limitEvaluation"), null);
 						}
@@ -1372,11 +1372,11 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getScheduler")) {
 				if (scheduler == null) {
 					try {
-						scheduler = new SchedulerImpl(ConfigWebUtil.getEngine(this), this, getScheduledTasks());
+						scheduler = new SchedulerImpl(ConfigUtil.getEngine(this), this, getScheduledTasks());
 					}
 					catch (PageException e) {
 						try {
-							scheduler = new SchedulerImpl(ConfigWebUtil.getEngine(this), this, new ArrayImpl());
+							scheduler = new SchedulerImpl(ConfigUtil.getEngine(this), this, new ArrayImpl());
 						}
 						catch (PageException e1) {
 						}
@@ -1530,7 +1530,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (scheduledTasks == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getScheduledTasks")) {
 				if (scheduledTasks == null) {
-					this.scheduledTasks = ConfigWebUtil.getAsArray("scheduledTasks", root);
+					this.scheduledTasks = ConfigUtil.getAsArray("scheduledTasks", root);
 					if (this.scheduledTasks == null) this.scheduledTasks = new ArrayImpl();
 				}
 			}
@@ -1609,7 +1609,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	@Override
 	public PageSource getPageSourceExisting(PageContext pc, Mapping[] mappings, String realPath, boolean onlyTopLevel, boolean useSpecialMappings, boolean useDefaultMapping,
 			boolean onlyPhysicalExisting) {
-		return ConfigWebUtil.getPageSourceExisting(pc, this, mappings, realPath, onlyTopLevel, useSpecialMappings, useDefaultMapping, onlyPhysicalExisting);
+		return ConfigUtil.getPageSourceExisting(pc, this, mappings, realPath, onlyTopLevel, useSpecialMappings, useDefaultMapping, onlyPhysicalExisting);
 	}
 
 	@Override
@@ -1625,13 +1625,13 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	public PageSource[] getPageSources(PageContext pc, Mapping[] appMappings, String realPath, boolean onlyTopLevel, boolean useSpecialMappings, boolean useDefaultMapping,
 			boolean useComponentMappings, boolean onlyFirstMatch) {
-		return ConfigWebUtil.getPageSources(pc, this, appMappings, realPath, onlyTopLevel, useSpecialMappings, useDefaultMapping, useComponentMappings, onlyFirstMatch);
+		return ConfigUtil.getPageSources(pc, this, appMappings, realPath, onlyTopLevel, useSpecialMappings, useDefaultMapping, useComponentMappings, onlyFirstMatch);
 	}
 
 	@Override
 	public Resource[] getResources(PageContext pc, Mapping[] mappings, String realPath, boolean onlyTopLevel, boolean useSpecialMappings, boolean useDefaultMapping,
 			boolean useComponentMappings, boolean onlyFirstMatch) {
-		return ConfigWebUtil.getResources(pc, this, mappings, realPath, onlyTopLevel, useSpecialMappings, useDefaultMapping, useComponentMappings, onlyFirstMatch);
+		return ConfigUtil.getResources(pc, this, mappings, realPath, onlyTopLevel, useSpecialMappings, useDefaultMapping, useComponentMappings, onlyFirstMatch);
 	}
 
 	/**
@@ -1661,7 +1661,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public PageSource toPageSource(Mapping[] mappings, Resource res, PageSource defaultValue) {
-		return ConfigWebUtil.toPageSource(this, mappings, res, defaultValue);
+		return ConfigUtil.toPageSource(this, mappings, res, defaultValue);
 	}
 
 	@Override
@@ -2017,15 +2017,15 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 				if (tempDirectory == null) {
 					try {
 						Resource configDir = getConfigDir();
-						String strTempDirectory = ConfigWebUtil.translateOldPath(ConfigFactoryImpl.getAttr(root, "tempDirectory"));
+						String strTempDirectory = ConfigUtil.translateOldPath(ConfigFactoryImpl.getAttr(root, "tempDirectory"));
 
 						Resource cst = null;
 						// Temp Dir
 						if (!StringUtil.isEmpty(strTempDirectory)) {
-							cst = ConfigWebUtil.getFile(configDir, strTempDirectory, null, configDir, FileUtil.TYPE_DIR, ResourceUtil.LEVEL_GRAND_PARENT_FILE, this);
+							cst = ConfigUtil.getFile(configDir, strTempDirectory, null, configDir, FileUtil.TYPE_DIR, ResourceUtil.LEVEL_GRAND_PARENT_FILE, this);
 						}
 						if (cst == null) {
-							cst = ConfigWebUtil.getFile(configDir, "temp", null, configDir, FileUtil.TYPE_DIR, ResourceUtil.LEVEL_GRAND_PARENT_FILE, this);
+							cst = ConfigUtil.getFile(configDir, "temp", null, configDir, FileUtil.TYPE_DIR, ResourceUtil.LEVEL_GRAND_PARENT_FILE, this);
 						}
 
 						if (!isDirectory(cst) || !cst.isWriteable()) {
@@ -2294,7 +2294,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (restList == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getRestList")) {
 				if (restList == null) {
-					Struct rest = ConfigWebUtil.getAsStruct("rest", root);
+					Struct rest = ConfigUtil.getAsStruct("rest", root);
 					restList = rest != null ? Caster.toBoolean(ConfigFactoryImpl.getAttr(rest, "list"), Boolean.FALSE) : Boolean.FALSE;
 				}
 			}
@@ -2499,7 +2499,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getErrorTemplate")) {
 				if (errorTemplates == null) {
 					Map<String, String> tmp = new HashMap<String, String>();
-					boolean hasAccess = ConfigWebUtil.hasAccess(this, SecurityManager.TYPE_DEBUGGING);
+					boolean hasAccess = ConfigUtil.hasAccess(this, SecurityManager.TYPE_DEBUGGING);
 
 					// 500
 					String template500 = ConfigFactoryImpl.getAttr(root, "errorGeneralTemplate");
@@ -2592,11 +2592,11 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getClassDirectory")) {
 				if (deployDirectory == null) {
 					String strDeployDirectory = null;
-					Struct fileSystem = ConfigWebUtil.getAsStruct("fileSystem", root);
+					Struct fileSystem = ConfigUtil.getAsStruct("fileSystem", root);
 					if (fileSystem != null) {
-						strDeployDirectory = ConfigWebUtil.translateOldPath(ConfigFactoryImpl.getAttr(fileSystem, "deployDirectory"));
+						strDeployDirectory = ConfigUtil.translateOldPath(ConfigFactoryImpl.getAttr(fileSystem, "deployDirectory"));
 					}
-					deployDirectory = ConfigWebUtil.getFile(configDir, strDeployDirectory, "cfclasses", configDir, FileUtil.TYPE_DIR, ResourceUtil.LEVEL_GRAND_PARENT_FILE, this);
+					deployDirectory = ConfigUtil.getFile(configDir, strDeployDirectory, "cfclasses", configDir, FileUtil.TYPE_DIR, ResourceUtil.LEVEL_GRAND_PARENT_FILE, this);
 				}
 			}
 		}
@@ -3023,14 +3023,14 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 					String strLT = SystemUtil.getSystemPropOrEnvVar("lucee.listener.type", null);
 					if (StringUtil.isEmpty(strLT)) strLT = SystemUtil.getSystemPropOrEnvVar("lucee.application.listener", null);
 					if (StringUtil.isEmpty(strLT)) strLT = ConfigFactoryImpl.getAttr(root, new String[] { "listenerType", "applicationListener" });
-					listener = ConfigWebUtil.loadListener(strLT, null);
+					listener = ConfigUtil.loadListener(strLT, null);
 					if (listener == null) listener = new MixedAppListener();
 
 					// mode
 					String strLM = SystemUtil.getSystemPropOrEnvVar("lucee.listener.mode", null);
 					if (StringUtil.isEmpty(strLM)) strLM = SystemUtil.getSystemPropOrEnvVar("lucee.application.mode", null);
 					if (StringUtil.isEmpty(strLM)) strLM = ConfigFactoryImpl.getAttr(root, new String[] { "listenerMode", "applicationMode" });
-					int listenerMode = ConfigWebUtil.toListenerMode(strLM, -1);
+					int listenerMode = ConfigUtil.toListenerMode(strLM, -1);
 					if (listenerMode == -1) listenerMode = ApplicationListener.MODE_CURRENT2ROOT;
 
 					listener.setMode(listenerMode);
@@ -3138,8 +3138,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 					Resource configDir = getConfigDir();
 					String strClientDirectory = ConfigFactoryImpl.getAttr(root, "clientDirectory");
 					if (!StringUtil.isEmpty(strClientDirectory, true)) {
-						strClientDirectory = ConfigWebUtil.translateOldPath(strClientDirectory.trim());
-						clientScopeDir = ConfigWebUtil.getFile(configDir, strClientDirectory, "client-scope", configDir, FileUtil.TYPE_DIR, ResourceUtil.LEVEL_PARENT_FILE, this);
+						strClientDirectory = ConfigUtil.translateOldPath(strClientDirectory.trim());
+						clientScopeDir = ConfigUtil.getFile(configDir, strClientDirectory, "client-scope", configDir, FileUtil.TYPE_DIR, ResourceUtil.LEVEL_PARENT_FILE, this);
 					}
 					else {
 						clientScopeDir = configDir.getRealResource("client-scope");
@@ -3244,8 +3244,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 					Resource configDir = getConfigDir();
 					String strCacheDirectory = ConfigFactoryImpl.getAttr(root, "cacheDirectory");
 					if (!StringUtil.isEmpty(strCacheDirectory)) {
-						strCacheDirectory = ConfigWebUtil.translateOldPath(strCacheDirectory);
-						Resource res = ConfigWebUtil.getFile(configDir, strCacheDirectory, "cache", configDir, FileUtil.TYPE_DIR, ResourceUtil.LEVEL_GRAND_PARENT_FILE, this);
+						strCacheDirectory = ConfigUtil.translateOldPath(strCacheDirectory);
+						Resource res = ConfigUtil.getFile(configDir, strCacheDirectory, "cache", configDir, FileUtil.TYPE_DIR, ResourceUtil.LEVEL_GRAND_PARENT_FILE, this);
 						cacheDir = res;
 					}
 					else {
@@ -3404,7 +3404,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (useCTPathCache == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "useCTPathCache")) {
 				if (useCTPathCache == null) {
-					if (ConfigWebUtil.hasAccess(this, SecurityManager.TYPE_CUSTOM_TAG)) {
+					if (ConfigUtil.hasAccess(this, SecurityManager.TYPE_CUSTOM_TAG)) {
 						String strDoPathcache = ConfigFactoryImpl.getAttr(root, "customTagUseCachePath");
 						if (!StringUtil.isEmpty(strDoPathcache, true)) {
 							useCTPathCache = Caster.toBooleanValue(strDoPathcache.trim(), true);
@@ -3559,7 +3559,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 						doLocalCustomTag = Boolean.FALSE;
 					}
 					else {
-						if (ConfigWebUtil.hasAccess(this, SecurityManager.TYPE_CUSTOM_TAG)) {
+						if (ConfigUtil.hasAccess(this, SecurityManager.TYPE_CUSTOM_TAG)) {
 							String strDoCTLocalSearch = ConfigFactoryImpl.getAttr(root, "customTagLocalSearch");
 							if (!StringUtil.isEmpty(strDoCTLocalSearch)) {
 								doLocalCustomTag = Caster.toBooleanValue(strDoCTLocalSearch.trim(), true);
@@ -3594,7 +3594,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 						customTagExtensions = Constants.getExtensions();
 					}
 					else {
-						if (ConfigWebUtil.hasAccess(this, SecurityManager.TYPE_CUSTOM_TAG)) {
+						if (ConfigUtil.hasAccess(this, SecurityManager.TYPE_CUSTOM_TAG)) {
 							String strExtensions = ConfigFactoryImpl.getAttr(root, "customTagExtensions");
 							if (!StringUtil.isEmpty(strExtensions)) {
 								try {
@@ -3663,7 +3663,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 						doCustomTagDeepSearch = Boolean.FALSE;
 					}
 					else {
-						if (ConfigWebUtil.hasAccess(this, SecurityManager.TYPE_CUSTOM_TAG)) {
+						if (ConfigUtil.hasAccess(this, SecurityManager.TYPE_CUSTOM_TAG)) {
 							String strDoCTDeepSearch = ConfigFactoryImpl.getAttr(root, "customTagDeepSearch");
 							if (!StringUtil.isEmpty(strDoCTDeepSearch)) {
 								doCustomTagDeepSearch = Caster.toBooleanValue(strDoCTDeepSearch.trim(), false);
@@ -3903,7 +3903,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (remoteClientMaxThreads == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getRemoteClientMaxThreads")) {
 				if (remoteClientMaxThreads == null) {
-					Struct _clients = ConfigWebUtil.getAsStruct("remoteClients", root);
+					Struct _clients = ConfigUtil.getAsStruct("remoteClients", root);
 					remoteClientMaxThreads = Caster.toInteger(ConfigFactoryImpl.getAttr(_clients, "maxThreads"), 20);
 				}
 			}
@@ -3930,10 +3930,10 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 				if (remoteClientDirectory == null) {
 					String strDir = SystemUtil.getSystemPropOrEnvVar("lucee.task.directory", null);
 					if (StringUtil.isEmpty(strDir)) {
-						Struct _clients = ConfigWebUtil.getAsStruct("remoteClients", root);
+						Struct _clients = ConfigUtil.getAsStruct("remoteClients", root);
 						strDir = _clients != null ? ConfigFactoryImpl.getAttr(_clients, "directory") : null;
 					}
-					remoteClientDirectory = ConfigWebUtil.getFile(getRootDirectory(), strDir, "client-task", getConfigDir(), FileUtil.TYPE_DIR,
+					remoteClientDirectory = ConfigUtil.getFile(getRootDirectory(), strDir, "client-task", getConfigDir(), FileUtil.TYPE_DIR,
 							ResourceUtil.LEVEL_GRAND_PARENT_FILE, this);
 
 					if (!remoteClientDirectory.exists()) remoteClientDirectory.mkdirs();
@@ -4083,7 +4083,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (allowRealPath == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "allowRealPath")) {
 				if (allowRealPath == null) {
-					Struct fileSystem = ConfigWebUtil.getAsStruct("fileSystem", root);
+					Struct fileSystem = ConfigUtil.getAsStruct("fileSystem", root);
 					if (fileSystem != null) {
 						String strAllowRealPath = ConfigFactoryImpl.getAttr(fileSystem, "allowRealpath");
 						if (!StringUtil.isEmpty(strAllowRealPath, true)) {
@@ -4131,8 +4131,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (remoteClientUsage == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getRemoteClientUsage")) {
 				if (remoteClientUsage == null) {
-					Struct _clients = ConfigWebUtil.getAsStruct("remoteClients", root);
-					Struct sct = ConfigWebUtil.getAsStruct(_clients, true, "usage");// config.setRemoteClientUsage(toStruct(strUsage));
+					Struct _clients = ConfigUtil.getAsStruct("remoteClients", root);
+					Struct sct = ConfigUtil.getAsStruct(_clients, true, "usage");// config.setRemoteClientUsage(toStruct(strUsage));
 					if (sct == null) remoteClientUsage = new StructImpl();
 					else remoteClientUsage = sct;
 
@@ -4296,7 +4296,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 				if (inspectTemplate == -1) {
 					String strInspectTemplate = ConfigFactoryImpl.getAttr(root, "inspectTemplate");
 					if (!StringUtil.isEmpty(strInspectTemplate, true)) {
-						inspectTemplate = ConfigWebUtil.inspectTemplate(strInspectTemplate, ConfigPro.INSPECT_AUTO);
+						inspectTemplate = ConfigUtil.inspectTemplate(strInspectTemplate, ConfigPro.INSPECT_AUTO);
 					}
 					if (inspectTemplate == -1) inspectTemplate = INSPECT_AUTO;
 				}
@@ -4500,7 +4500,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (executionLogEnabled == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getExecutionLogEnabled")) {
 				if (executionLogEnabled == null) {
-					Struct sct = ConfigWebUtil.getAsStruct("executionLog", root);
+					Struct sct = ConfigUtil.getAsStruct("executionLog", root);
 					executionLogEnabled = Caster.toBoolean(ConfigFactoryImpl.getAttr(sct, "enabled"), Boolean.FALSE);
 				}
 			}
@@ -4646,7 +4646,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	private Map<String, SoftReference<PageSource>> componentPathCache = null;// new ArrayList<Page>();
-	private Map<String, SoftReference<ConfigWebUtil.CacheElement>> applicationPathCache = null;// new ArrayList<Page>();
+	private Map<String, SoftReference<ConfigUtil.CacheElement>> applicationPathCache = null;// new ArrayList<Page>();
 	private Map<String, SoftReference<InitFile>> ctPatchCache = null;// new ArrayList<Page>();
 	private Map<String, SoftReference<UDF>> udfCache = new ConcurrentHashMap<String, SoftReference<UDF>>();
 
@@ -4986,7 +4986,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (debugEntries == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getDebugEntries")) {
 				if (debugEntries == null) {
-					Array entries = ConfigWebUtil.getAsArray("debugTemplates", root);
+					Array entries = ConfigUtil.getAsArray("debugTemplates", root);
 					Map<String, DebugEntry> list = new HashMap<String, DebugEntry>();
 
 					String id;
@@ -5000,7 +5000,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 								id = ConfigFactoryImpl.getAttr(e, "id");
 								list.put(id,
 										new DebugEntry(id, ConfigFactoryImpl.getAttr(e, "type"), ConfigFactoryImpl.getAttr(e, "iprange"), ConfigFactoryImpl.getAttr(e, "label"),
-												ConfigFactoryImpl.getAttr(e, "path"), ConfigFactoryImpl.getAttr(e, "fullname"), ConfigWebUtil.getAsStruct(e, true, "custom")));
+												ConfigFactoryImpl.getAttr(e, "path"), ConfigFactoryImpl.getAttr(e, "fullname"), ConfigUtil.getAsStruct(e, true, "custom")));
 							}
 							catch (Throwable t) {
 								ExceptionUtil.rethrowIfNecessary(t);
@@ -5801,7 +5801,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			// config server
 			else {
 				try {
-					File file = new File(ConfigWebUtil.getCFMLEngineFactory(this).getResourceRoot(), "deploy");
+					File file = new File(ConfigUtil.getCFMLEngineFactory(this).getResourceRoot(), "deploy");
 					if (!file.exists()) file.mkdirs();
 					deployDir = ResourcesImpl.getFileResourceProvider().getResource(file.getAbsolutePath());
 				}

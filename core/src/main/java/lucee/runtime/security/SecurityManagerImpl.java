@@ -26,7 +26,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.PageContextImpl;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigWeb;
-import lucee.runtime.config.ConfigWebUtil;
+import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.config.Password;
 import lucee.runtime.config.PasswordImpl;
 import lucee.runtime.engine.ThreadLocalPageContext;
@@ -417,7 +417,7 @@ public final class SecurityManagerImpl implements Cloneable, SecurityManager {
 
 		if (config == null || spw == null) return false;
 		try {
-			ConfigWebUtil.getConfigServer(config, spw);
+			ConfigUtil.getConfigServer(config, spw);
 			return true;
 		}
 		catch (PageException e) {

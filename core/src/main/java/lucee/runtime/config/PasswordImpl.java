@@ -285,8 +285,8 @@ public class PasswordImpl implements Password {
 			admin.storeAndReload();
 		}
 		else {
-			ConfigWebUtil.checkPassword(config, "write", passwordOld);
-			ConfigWebUtil.checkGeneralWriteAccess(config, passwordOld);
+			ConfigUtil.checkPassword(config, "write", passwordOld);
+			ConfigUtil.checkGeneralWriteAccess(config, passwordOld);
 			ConfigAdmin admin = ConfigAdmin.newInstance(config, passwordOld);
 			admin.setPassword(passwordNew);
 			admin.storeAndReload();

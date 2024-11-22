@@ -78,7 +78,7 @@ import lucee.runtime.type.util.ListUtil;
 import lucee.transformer.library.function.FunctionLib;
 import lucee.transformer.library.tag.TagLib;
 
-public final class ConfigWebUtil {
+public final class ConfigUtil {
 
 	private static String enckey;
 
@@ -132,7 +132,7 @@ public final class ConfigWebUtil {
 		}
 		catch (IOException ioe) {
 			if (throwError) throw ioe;
-			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(cs), ConfigWebUtil.class.getName(), ioe);
+			LogUtil.logGlobal(ThreadLocalPageContext.getConfig(cs), ConfigUtil.class.getName(), ioe);
 		}
 	}
 
@@ -173,7 +173,7 @@ public final class ConfigWebUtil {
 			if (_src.isFile()) {
 				if (_src.length() != _trg.length()) {
 					_src.copyTo(_trg, false);
-					LogUtil.logGlobal(ThreadLocalPageContext.getConfig(cw), Log.LEVEL_DEBUG, ConfigWebUtil.class.getName(), "write file:" + _trg);
+					LogUtil.logGlobal(ThreadLocalPageContext.getConfig(cw), Log.LEVEL_DEBUG, ConfigUtil.class.getName(), "write file:" + _trg);
 
 				}
 			}

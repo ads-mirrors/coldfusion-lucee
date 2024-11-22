@@ -103,7 +103,7 @@ import lucee.runtime.config.ConfigServerImpl;
 import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.config.ConfigWebImpl;
 import lucee.runtime.config.ConfigWebPro;
-import lucee.runtime.config.ConfigWebUtil;
+import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.config.Constants;
 import lucee.runtime.config.DatasourceConnPool;
 import lucee.runtime.config.DebugEntry;
@@ -592,8 +592,8 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		}
 
 		if (check("connect", ACCESS_FREE)) {
-			ConfigWebUtil.checkPassword(config, null, password);
-			ConfigWebUtil.checkGeneralReadAccess(config, password);
+			ConfigUtil.checkPassword(config, null, password);
+			ConfigUtil.checkGeneralReadAccess(config, password);
 
 			ConfigServerImpl csi = Admin.getConfigServerImpl(config);
 			// ConfigServerFactory.createContextFilesAdmin(config.getConfigDir(), csi, csi.newVersion());
@@ -864,8 +864,8 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	}
 
 	private boolean check2(short accessRW) throws SecurityException {
-		if (accessRW == ACCESS_READ) ConfigWebUtil.checkGeneralReadAccess(config, password);
-		else if (accessRW == ACCESS_WRITE) ConfigWebUtil.checkGeneralWriteAccess(config, password);
+		if (accessRW == ACCESS_READ) ConfigUtil.checkGeneralReadAccess(config, password);
+		else if (accessRW == ACCESS_WRITE) ConfigUtil.checkGeneralWriteAccess(config, password);
 		/*
 		 * else if(accessRW==CHECK_PW) { ConfigWebUtil.checkGeneralReadAccess(config,password);
 		 * ConfigWebUtil.checkPassword(config,null,password); }
@@ -998,9 +998,9 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 			attrs.putValue("mapping-physical-first", Caster.toString(mapping.isPhysicalFirst()));
 			attrs.putValue("mapping-readonly", Caster.toString(mapping.isReadonly()));
 			attrs.putValue("mapping-top-level", Caster.toString(mapping.isTopLevel()));
-			attrs.putValue("mapping-inspect", ConfigWebUtil.inspectTemplate(mapping.getInspectTemplateRaw(), ""));
-			attrs.putValue("mapping-listener-type", ConfigWebUtil.toListenerType(mapping.getListenerType(), ""));
-			attrs.putValue("mapping-listener-mode", ConfigWebUtil.toListenerMode(mapping.getListenerMode(), ""));
+			attrs.putValue("mapping-inspect", ConfigUtil.inspectTemplate(mapping.getInspectTemplateRaw(), ""));
+			attrs.putValue("mapping-listener-type", ConfigUtil.toListenerType(mapping.getListenerType(), ""));
+			attrs.putValue("mapping-listener-mode", ConfigUtil.toListenerMode(mapping.getListenerMode(), ""));
 
 			mani.createFile(true);
 			IOUtil.write(mani, ManifestUtil.toString(mf, 100, null, null), "UTF-8", false);
@@ -1203,7 +1203,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	}
 
 	private void doListAuthKey() throws PageException {
-		ConfigServerImpl cs = config instanceof ConfigServer ? (ConfigServerImpl) config : (ConfigServerImpl) ConfigWebUtil.getConfigServer(config, password);
+		ConfigServerImpl cs = config instanceof ConfigServer ? (ConfigServerImpl) config : (ConfigServerImpl) ConfigUtil.getConfigServer(config, password);
 		pageContext.setVariable(getString("admin", action, "returnVariable"), Caster.toArray(cs.getAuthenticationKeys()));
 	}
 
@@ -1282,7 +1282,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	}
 
 	private Resource getContextDirectory() throws PageException {
-		ConfigServerImpl cs = (ConfigServerImpl) ConfigWebUtil.getConfigServer(config, password);
+		ConfigServerImpl cs = (ConfigServerImpl) ConfigUtil.getConfigServer(config, password);
 		Resource dist = cs.getConfigDir().getRealResource("distribution");
 		dist.mkdirs();
 		return dist;
@@ -1313,7 +1313,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		String strRealpath = getString("admin", action, "destination");
 		Resource src = ResourceUtil.toResourceExisting(pageContext, strSrc);
 
-		ConfigServerImpl server = (ConfigServerImpl) ConfigWebUtil.getConfigServer(config, password);
+		ConfigServerImpl server = (ConfigServerImpl) ConfigUtil.getConfigServer(config, password);
 		Resource trg, p;
 		Resource deploy = server.getConfigDir().getRealResource("web-context-deployment");
 		deploy.mkdirs();
@@ -1328,13 +1328,13 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 
 		ConfigWeb[] webs = server.getConfigWebs();
 		for (int i = 0; i < webs.length; i++) {
-			ConfigWebUtil.deployWebContext(server, webs[i], true);
+			ConfigUtil.deployWebContext(server, webs[i], true);
 		}
 	}
 
 	private void doRemoveContext() throws PageException {
 		String strRealpath = getString("admin", action, "destination");
-		ConfigServerImpl server = config instanceof ConfigServer ? (ConfigServerImpl) config : (ConfigServerImpl) ConfigWebUtil.getConfigServer(config, password);
+		ConfigServerImpl server = config instanceof ConfigServer ? (ConfigServerImpl) config : (ConfigServerImpl) ConfigUtil.getConfigServer(config, password);
 
 		try {
 			admin.removeContext(server, true, ThreadLocalPageContext.getLog(pageContext, "deploy"), strRealpath);
@@ -1673,14 +1673,14 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	 * 
 	 */
 	private void doGetDefaultSecurityManager() throws PageException {
-		ConfigServer cs = ConfigWebUtil.getConfigServer(config, password);
+		ConfigServer cs = ConfigUtil.getConfigServer(config, password);
 
 		SecurityManager dsm = cs.getDefaultSecurityManager();
 		_fillSecData(dsm);
 	}
 
 	private void doGetSecurityManager() throws PageException {
-		ConfigServer cs = ConfigWebUtil.getConfigServer(config, password);
+		ConfigServer cs = ConfigUtil.getConfigServer(config, password);
 		SecurityManager sm = cs.getSecurityManager(getString("admin", action, "id"));
 		_fillSecData(sm);
 	}
@@ -1972,7 +1972,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	 */
 	private void doUpdateComponentMapping() throws PageException {
 		admin.updateComponentMapping(getString("virtual", ""), getString("physical", ""), getString("archive", ""), getString("primary", "physical"),
-				ConfigWebUtil.inspectTemplate(getString("inspect", ""), ConfigPro.INSPECT_UNDEFINED), getInt("inspectTemplateIntervalSlow", ConfigPro.INSPECT_INTERVAL_UNDEFINED),
+				ConfigUtil.inspectTemplate(getString("inspect", ""), ConfigPro.INSPECT_UNDEFINED), getInt("inspectTemplateIntervalSlow", ConfigPro.INSPECT_INTERVAL_UNDEFINED),
 				getInt("inspectTemplateIntervalFast", ConfigPro.INSPECT_INTERVAL_UNDEFINED));
 		store();
 		getConfigServerImpl(config).resetComponentMappings();
@@ -1995,7 +1995,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	 */
 	private void doUpdateCustomTag() throws PageException {
 		admin.updateCustomTag(getString("admin", action, "virtual"), getString("admin", action, "physical"), getString("admin", action, "archive"),
-				getString("admin", action, "primary"), ConfigWebUtil.inspectTemplate(getString("inspect", ""), ConfigPro.INSPECT_UNDEFINED),
+				getString("admin", action, "primary"), ConfigUtil.inspectTemplate(getString("inspect", ""), ConfigPro.INSPECT_UNDEFINED),
 				getInt("inspectTemplateIntervalSlow", ConfigPro.INSPECT_INTERVAL_UNDEFINED), getInt("inspectTemplateIntervalFast", ConfigPro.INSPECT_INTERVAL_UNDEFINED));
 		store();
 		getConfigServerImpl(config).resetCustomTagMappings();
@@ -2033,7 +2033,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 			qry.setAt("hidden", row, Caster.toBoolean(m.isHidden()));
 			qry.setAt("physicalFirst", row, Caster.toBoolean(m.isPhysicalFirst()));
 			qry.setAt("readonly", row, Caster.toBoolean(m.isReadonly()));
-			qry.setAt("inspect", row, ConfigWebUtil.inspectTemplate(m.getInspectTemplateRaw(), ""));
+			qry.setAt("inspect", row, ConfigUtil.inspectTemplate(m.getInspectTemplateRaw(), ""));
 			qry.setAt("inspectTemplateIntervalSlow", row, m.getInspectTemplateAutoInterval(true));
 			qry.setAt("inspectTemplateIntervalFast", row, m.getInspectTemplateAutoInterval(false));
 		}
@@ -2056,7 +2056,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 			qry.setAt("hidden", row, Caster.toBoolean(m.isHidden()));
 			qry.setAt("physicalFirst", row, Caster.toBoolean(m.isPhysicalFirst()));
 			qry.setAt("readonly", row, Caster.toBoolean(m.isReadonly()));
-			qry.setAt("inspect", row, ConfigWebUtil.inspectTemplate(m.getInspectTemplateRaw(), ""));
+			qry.setAt("inspect", row, ConfigUtil.inspectTemplate(m.getInspectTemplateRaw(), ""));
 			qry.setAt("inspectTemplateIntervalSlow", row, m.getInspectTemplateAutoInterval(true));
 			qry.setAt("inspectTemplateIntervalFast", row, m.getInspectTemplateAutoInterval(false));
 		}
@@ -2097,10 +2097,10 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 
 	private void doUpdateMapping() throws PageException {
 		admin.updateMapping(getString("admin", action, "virtual"), getString("admin", action, "physical"), getString("admin", action, "archive"),
-				getString("admin", action, "primary"), ConfigWebUtil.inspectTemplate(getString("inspect", ""), ConfigPro.INSPECT_UNDEFINED),
+				getString("admin", action, "primary"), ConfigUtil.inspectTemplate(getString("inspect", ""), ConfigPro.INSPECT_UNDEFINED),
 				getInt("inspectTemplateIntervalSlow", ConfigPro.INSPECT_INTERVAL_UNDEFINED), getInt("inspectTemplateIntervalFast", ConfigPro.INSPECT_INTERVAL_UNDEFINED),
-				Caster.toBooleanValue(getString("toplevel", "true")), ConfigWebUtil.toListenerMode(getString("listenerMode", ""), -1),
-				ConfigWebUtil.toListenerType(getString("listenerType", ""), -1), Caster.toBooleanValue(getString("readonly", "false"))
+				Caster.toBooleanValue(getString("toplevel", "true")), ConfigUtil.toListenerMode(getString("listenerMode", ""), -1),
+				ConfigUtil.toListenerType(getString("listenerType", ""), -1), Caster.toBooleanValue(getString("readonly", "false"))
 
 		);
 		store();
@@ -2130,7 +2130,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 			sct.set(KeyConstants._hidden, Caster.toBoolean(m.isHidden()));
 			sct.set("physicalFirst", Caster.toBoolean(m.isPhysicalFirst()));
 			sct.set("readonly", Caster.toBoolean(m.isReadonly()));
-			sct.set("inspect", ConfigWebUtil.inspectTemplate(m.getInspectTemplateRaw(), ""));
+			sct.set("inspect", ConfigUtil.inspectTemplate(m.getInspectTemplateRaw(), ""));
 			sct.set("inspectTemplateIntervalSlow", m.getInspectTemplateAutoInterval(true));
 			sct.set("inspectTemplateIntervalFast", m.getInspectTemplateAutoInterval(false));
 			sct.set("toplevel", Caster.toBoolean(m.isTopLevel()));
@@ -2172,12 +2172,12 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 			qry.setAt("hidden", row, Caster.toBoolean(m.isHidden()));
 			qry.setAt("physicalFirst", row, Caster.toBoolean(m.isPhysicalFirst()));
 			qry.setAt("readonly", row, Caster.toBoolean(m.isReadonly()));
-			qry.setAt("inspect", row, ConfigWebUtil.inspectTemplate(m.getInspectTemplateRaw(), ""));
+			qry.setAt("inspect", row, ConfigUtil.inspectTemplate(m.getInspectTemplateRaw(), ""));
 			qry.setAt("inspectTemplateIntervalSlow", row, m.getInspectTemplateAutoInterval(true));
 			qry.setAt("inspectTemplateIntervalFast", row, m.getInspectTemplateAutoInterval(false));
 			qry.setAt("toplevel", row, Caster.toBoolean(m.isTopLevel()));
-			qry.setAt("listenerType", row, ConfigWebUtil.toListenerType(m.getListenerType(), "inherit"));
-			qry.setAt("listenerMode", row, ConfigWebUtil.toListenerMode(m.getListenerMode(), "inherit"));
+			qry.setAt("listenerType", row, ConfigUtil.toListenerType(m.getListenerType(), "inherit"));
+			qry.setAt("listenerMode", row, ConfigUtil.toListenerMode(m.getListenerMode(), "inherit"));
 		}
 		pageContext.setVariable(getString("admin", action, "returnVariable"), qry);
 	}
@@ -2338,7 +2338,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 			qry.setAt("id", row, s instanceof ServerImpl ? ((ServerImpl) s).getId() : -1);
 			qry.setAt("hostname", row, s.getHostName());
 			qry.setAt("password", row, s.isReadOnly() ? "" : s.getPassword());
-			qry.setAt("passwordEncrypted", row, s.isReadOnly() ? "" : ConfigWebUtil.encrypt(s.getPassword()));
+			qry.setAt("passwordEncrypted", row, s.isReadOnly() ? "" : ConfigUtil.encrypt(s.getPassword()));
 			qry.setAt("username", row, s.isReadOnly() ? "" : s.getUsername());
 			qry.setAt("port", row, Caster.toInteger(s.getPort()));
 			qry.setAt("readonly", row, Caster.toBoolean(s.isReadOnly()));
@@ -3349,7 +3349,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 			}
 		}
 
-		CFMLEngine engine = ConfigWebUtil.getEngine(config);
+		CFMLEngine engine = ConfigUtil.getEngine(config);
 		BundleCollection coreBundles = engine.getBundleCollection();
 		java.util.Collection<BundleDefinition> extBundles = config.getAllExtensionBundleDefintions();
 
@@ -3426,7 +3426,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	}
 
 	private void doGetBundles() throws PageException {
-		CFMLEngine engine = ConfigWebUtil.getEngine(config);
+		CFMLEngine engine = ConfigUtil.getEngine(config);
 		BundleCollection coreBundles = engine.getBundleCollection();
 		java.util.Collection<BundleDefinition> extBundles = config.getAllExtensionBundleDefintions();
 
@@ -3931,7 +3931,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 				sct.setEL(KeyConstants._dsnTranslated, d.getDsnTranslated());
 				sct.setEL(KeyConstants._timezone, toStringTimeZone(d.getTimeZone()));
 				sct.setEL(KeyConstants._password, d.getPassword());
-				sct.setEL(KeyConstants._passwordEncrypted, ConfigWebUtil.encrypt(d.getPassword()));
+				sct.setEL(KeyConstants._passwordEncrypted, ConfigUtil.encrypt(d.getPassword()));
 				sct.setEL(KeyConstants._username, d.getUsername());
 				sct.setEL(KeyConstants._readonly, Caster.toBoolean(d.isReadOnly()));
 				sct.setEL(KeyConstants._select, Boolean.valueOf(d.hasAllow(DataSource.ALLOW_SELECT)));
@@ -4143,7 +4143,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 			qry.setAt("timezone", row, toStringTimeZone(d.getTimeZone()));
 			qry.setAt(KeyConstants._password, row, d.getPassword());
 
-			qry.setAt("passwordEncrypted", row, ConfigWebUtil.encrypt(d.getPassword()));
+			qry.setAt("passwordEncrypted", row, ConfigUtil.encrypt(d.getPassword()));
 			qry.setAt(KeyConstants._username, row, d.getUsername());
 			qry.setAt(KeyConstants._readonly, row, Caster.toBoolean(d.isReadOnly()));
 			qry.setAt(KeyConstants._select, row, Boolean.valueOf(d.hasAllow(DataSource.ALLOW_SELECT)));

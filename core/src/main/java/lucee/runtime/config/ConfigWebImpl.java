@@ -404,24 +404,24 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	@Override
 	public PageSource getPageSourceExisting(PageContext pc, Mapping[] mappings, String realPath, boolean onlyTopLevel, boolean useSpecialMappings, boolean useDefaultMapping,
 			boolean onlyPhysicalExisting) {
-		return ConfigWebUtil.getPageSourceExisting(pc, this, mappings, realPath, onlyTopLevel, useSpecialMappings, useDefaultMapping, onlyPhysicalExisting);
+		return ConfigUtil.getPageSourceExisting(pc, this, mappings, realPath, onlyTopLevel, useSpecialMappings, useDefaultMapping, onlyPhysicalExisting);
 	}
 
 	@Override
 	public PageSource[] getPageSources(PageContext pc, Mapping[] mappings, String realPath, boolean onlyTopLevel, boolean useSpecialMappings, boolean useDefaultMapping) {
-		return ConfigWebUtil.getPageSources(pc, this, mappings, realPath, onlyTopLevel, useSpecialMappings, useDefaultMapping, false, onlyFirstMatch);
+		return ConfigUtil.getPageSources(pc, this, mappings, realPath, onlyTopLevel, useSpecialMappings, useDefaultMapping, false, onlyFirstMatch);
 	}
 
 	@Override
 	public PageSource[] getPageSources(PageContext pc, Mapping[] mappings, String realPath, boolean onlyTopLevel, boolean useSpecialMappings, boolean useDefaultMapping,
 			boolean useComponentMappings) {
-		return ConfigWebUtil.getPageSources(pc, this, mappings, realPath, onlyTopLevel, useSpecialMappings, useDefaultMapping, useComponentMappings, onlyFirstMatch);
+		return ConfigUtil.getPageSources(pc, this, mappings, realPath, onlyTopLevel, useSpecialMappings, useDefaultMapping, useComponentMappings, onlyFirstMatch);
 	}
 
 	@Override
 	public Resource[] getResources(PageContext pc, Mapping[] mappings, String realPath, boolean onlyTopLevel, boolean useSpecialMappings, boolean useDefaultMapping,
 			boolean useComponentMappings, boolean onlyFirstMatch) {
-		return ConfigWebUtil.getResources(pc, this, mappings, realPath, onlyTopLevel, useSpecialMappings, useDefaultMapping, useComponentMappings, onlyFirstMatch);
+		return ConfigUtil.getResources(pc, this, mappings, realPath, onlyTopLevel, useSpecialMappings, useDefaultMapping, useComponentMappings, onlyFirstMatch);
 	}
 
 	@Override
@@ -441,7 +441,7 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 
 	@Override
 	public PageSource toPageSource(Mapping[] mappings, Resource res, PageSource defaultValue) {
-		return ConfigWebUtil.toPageSource(this, mappings, res, defaultValue);
+		return ConfigUtil.toPageSource(this, mappings, res, defaultValue);
 	}
 
 	@Override
@@ -1875,7 +1875,7 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 			}
 			mappings.put("/", m);
 		}
-		this.mappings = ConfigWebUtil.sort(mappings.values().toArray(new Mapping[mappings.size()]));
+		this.mappings = ConfigUtil.sort(mappings.values().toArray(new Mapping[mappings.size()]));
 	}
 
 	private void createRestMapping() {
