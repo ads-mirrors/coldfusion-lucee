@@ -3925,7 +3925,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	//
 	@Override
 	public Resource getRemoteClientDirectory() {
-		print.ds();
 		if (remoteClientDirectory == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getRemoteClientDirectory")) {
 				if (remoteClientDirectory == null) {
@@ -4999,8 +4998,9 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 								e = Caster.toStruct(it.next(), null);
 								if (e == null) continue;
 								id = ConfigFactoryImpl.getAttr(e, "id");
-								list.put(id, new DebugEntry(id, ConfigFactoryImpl.getAttr(e, "type"), ConfigFactoryImpl.getAttr(e, "iprange"), ConfigFactoryImpl.getAttr(e, "label"),
-										ConfigFactoryImpl.getAttr(e, "path"), ConfigFactoryImpl.getAttr(e, "fullname"), ConfigWebUtil.getAsStruct(e, true, "custom")));
+								list.put(id,
+										new DebugEntry(id, ConfigFactoryImpl.getAttr(e, "type"), ConfigFactoryImpl.getAttr(e, "iprange"), ConfigFactoryImpl.getAttr(e, "label"),
+												ConfigFactoryImpl.getAttr(e, "path"), ConfigFactoryImpl.getAttr(e, "fullname"), ConfigWebUtil.getAsStruct(e, true, "custom")));
 							}
 							catch (Throwable t) {
 								ExceptionUtil.rethrowIfNecessary(t);
