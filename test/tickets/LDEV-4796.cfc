@@ -19,7 +19,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip=true {
 			
 
 
-			   expect(isNull(ConfigWebUtil.getFile(config, config.getConfigDir(), path, ResourceUtil.TYPE_FILE))).toBeFalse();
+			   expect(isNull(ConfigUtil.getFile(config, config.getConfigDir(), path, ResourceUtil.TYPE_FILE))).toBeFalse();
 			});
 
 

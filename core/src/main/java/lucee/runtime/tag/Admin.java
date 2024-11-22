@@ -866,10 +866,6 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private boolean check2(short accessRW) throws SecurityException {
 		if (accessRW == ACCESS_READ) ConfigUtil.checkGeneralReadAccess(config, password);
 		else if (accessRW == ACCESS_WRITE) ConfigUtil.checkGeneralWriteAccess(config, password);
-		/*
-		 * else if(accessRW==CHECK_PW) { ConfigWebUtil.checkGeneralReadAccess(config,password);
-		 * ConfigWebUtil.checkPassword(config,null,password); }
-		 */
 		return true;
 	}
 

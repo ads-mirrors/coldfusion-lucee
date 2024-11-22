@@ -390,15 +390,6 @@ public final class Controler extends ParentThreasRefThread {
 					ExceptionUtil.rethrowIfNecessary(t);
 					if (log != null) log.error("controler", t);
 				}
-				// Memory usage
-				// clear Query Cache
-				/*
-				 * try{ ConfigWebUtil.getCacheHandlerFactories(config).query.clean(null);
-				 * ConfigWebUtil.getCacheHandlerFactories(config).include.clean(null);
-				 * ConfigWebUtil.getCacheHandlerFactories(config).function.clean(null);
-				 * //cfmlFactory.getDefaultQueryCache().clearUnused(null); }catch(Throwable
-				 * t){ExceptionUtil.rethrowIfNecessary(t);}
-				 */
 
 				try {
 					doCheckMappings(config);

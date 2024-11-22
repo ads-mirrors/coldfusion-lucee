@@ -66,7 +66,6 @@ public class InstrumentationFactory {
 	public static synchronized Instrumentation getInstrumentation(final Config config) {
 
 		final Log log = ThreadLocalPageContext.getLog(config, "application");
-		// final CFMLEngine engine = ConfigWebUtil.getEngine(config);
 		Instrumentation instr = _getInstrumentation(log, config);
 
 		// agent already exist

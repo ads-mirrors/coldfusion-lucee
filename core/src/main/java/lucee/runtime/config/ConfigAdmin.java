@@ -829,7 +829,7 @@ public final class ConfigAdmin {
 
 	public void updateRestMapping(String virtual, String physical, boolean _default) throws ExpressionException, SecurityException {
 		checkWriteAccess();
-		boolean hasAccess = true;// TODO ConfigWebUtil.hasAccess(config,SecurityManager.TYPE_REST);
+		boolean hasAccess = true;
 		virtual = virtual.trim();
 		physical = physical.trim();
 		if (!hasAccess) throw new SecurityException("no access to update REST mapping");
@@ -1223,7 +1223,7 @@ public final class ConfigAdmin {
 		if (fileLib.length() != resJar.length()) {
 			IOUtil.closeEL(config.getClassLoader());
 			ResourceUtil.copy(resJar, fileLib);
-			// NEXT if (reloadWhenClassicJar) ConfigWebUtil.reloadLib(config);
+			// NEXT if (reloadWhenClassicJar) ConfigUtil.reloadLib(config);
 		}
 	}
 
@@ -2876,16 +2876,6 @@ public final class ConfigAdmin {
 		if (!StringUtil.isEmpty(password)) proxy.setEL("password", password);
 	}
 
-	/*
-	 * public void removeProxy() throws SecurityException { boolean
-	 * hasAccess=ConfigWebUtil.hasAccess(config,SecurityManager.TYPE_SETTING); if(!hasAccess) throw new
-	 * SecurityException("no access to remove proxy settings");
-	 * 
-	 * Element proxy=_getRootElement("proxy"); proxy.removeAttribute("server");
-	 * proxy.removeAttribute("port"); proxy.removeAttribute("username");
-	 * proxy.removeAttribute("password"); }
-	 */
-
 	/**
 	 * enable or desable session management
 	 * 
@@ -3454,7 +3444,7 @@ public final class ConfigAdmin {
 
 	public void updateRestList(Boolean list) throws SecurityException {
 		checkWriteAccess();
-		boolean hasAccess = true;// TODO ConfigWebUtil.hasAccess(config,SecurityManager.TYPE_REST);
+		boolean hasAccess = true;
 		if (!hasAccess) throw new SecurityException("no access to update rest setting");
 
 		Struct rest = _getRootElement("rest");
@@ -5800,9 +5790,6 @@ public final class ConfigAdmin {
 
 	public void updateLogSettings(String name, int level, ClassDefinition appenderCD, Struct appenderArgs, ClassDefinition layoutCD, Struct layoutArgs) throws PageException {
 		checkWriteAccess();
-		// TODO
-		// boolean hasAccess=ConfigWebUtil.hasAccess(config,SecurityManagerImpl.TYPE_GATEWAY);
-		// if(!hasAccess) throw new SecurityException("no access to update gateway entry");
 
 		// check parameters
 		name = name.trim();
