@@ -83,6 +83,38 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			});
 
 
+
+			it( title='test default mappings', body=function( currentSpec ) {				
+				var pc=getPageContext();
+				var c=pc.getConfig();
+
+				var before=arrayLen(c.getMappings());
+				var virtual="/testMappings"&createUniqueID();
+				admin
+					action="updateMapping"
+					type="web"
+					password="#request.WEBADMINPASSWORD#"
+					virtual=virtual
+					physical="#getDirectoryFromPath(getCurrentTemplatePath())#"
+					toplevel="true"
+					archive=""
+					primary="physical"
+					trusted="no";
+			  
+				var after=arrayLen(c.getMappings());
+				var has=false;
+				loop array=c.getMappings() item="mapping" {
+					if(virtual==mapping.virtual)has=true;
+				}
+
+
+				expect(has).toBeTrue();
+				expect(before+1==after).toBeTrue();
+			});
+
+
+
+
 		});
 	}
 
