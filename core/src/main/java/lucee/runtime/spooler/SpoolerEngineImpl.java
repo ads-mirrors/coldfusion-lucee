@@ -108,7 +108,7 @@ public class SpoolerEngineImpl implements SpoolerEngine {
 	 * @return the maxThreads
 	 */
 	public int getMaxThreads() {
-		return Admin.getConfigServerImpl(config).getRemoteClientMaxThreads();
+		return ConfigUtil.getConfigServerImpl(config).getRemoteClientMaxThreads();
 	}
 
 	private int calculateSize(Resource res) {

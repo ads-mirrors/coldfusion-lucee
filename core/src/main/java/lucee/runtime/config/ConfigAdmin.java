@@ -134,7 +134,6 @@ import lucee.runtime.search.SearchEngine;
 import lucee.runtime.security.SecurityManager;
 import lucee.runtime.security.SecurityManagerImpl;
 import lucee.runtime.security.SerialNumber;
-import lucee.runtime.tag.Admin;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.ArrayImpl;
 import lucee.runtime.type.Collection;
@@ -585,7 +584,7 @@ public final class ConfigAdmin {
 		ConfigAdmin admin = new ConfigAdmin(config, null, true);
 		admin._updateComponentMapping(virtual, physical, archive, primary, inspect, inspectTemplateIntervalSlow, inspectTemplateIntervalFast);
 		admin._store();
-		Admin.getConfigServerImpl(config).resetComponentMappings();
+		ConfigUtil.getConfigServerImpl(config).resetComponentMappings();
 		if (reload) admin._reload();
 	}
 
@@ -594,7 +593,7 @@ public final class ConfigAdmin {
 		ConfigAdmin admin = new ConfigAdmin(config, null, true);
 		admin._updateCustomTag(virtual, physical, archive, primary, inspect, inspectTemplateIntervalSlow, inspectTemplateIntervalFast);
 		admin._store();
-		Admin.getConfigServerImpl(config).resetCustomTagMappings();
+		ConfigUtil.getConfigServerImpl(config).resetCustomTagMappings();
 		if (reload) admin._reload();
 	}
 
@@ -1868,7 +1867,7 @@ public final class ConfigAdmin {
 		ConfigAdmin admin = new ConfigAdmin(config, null, true);
 		admin._removeSearchEngine();
 		admin._store();
-		Admin.getConfigServerImpl(config).resetSearchEngineClassDefinition().resetSearchEngineDirectory();
+		ConfigUtil.getConfigServerImpl(config).resetSearchEngineClassDefinition().resetSearchEngineDirectory();
 		if (reload) admin._reload();
 	}
 
@@ -1900,7 +1899,7 @@ public final class ConfigAdmin {
 		ConfigAdmin admin = new ConfigAdmin(config, null, true);
 		admin._removeORMEngine();
 		admin._store();
-		Admin.getConfigServerImpl(config).resetORMEngineClassDefintion().resetORMConfig();
+		ConfigUtil.getConfigServerImpl(config).resetORMEngineClassDefintion().resetORMConfig();
 		if (reload) admin._reload();
 	}
 
@@ -4200,7 +4199,7 @@ public final class ConfigAdmin {
 		ConfigAdmin admin = new ConfigAdmin(config, null, true);
 		admin._removeCacheHandler(id);
 		admin._store();
-		Admin.getConfigServerImpl(config).resetCacheHandlers();
+		ConfigUtil.getConfigServerImpl(config).resetCacheHandlers();
 		if (reload) admin._reload();
 	}
 
@@ -4820,7 +4819,7 @@ public final class ConfigAdmin {
 					ClassDefinition cd = ClassDefinitionImpl.toClassDefinition(map, false, config.getIdentification());
 					if (cd != null && cd.isBundle()) {
 						_updateCache(cd);
-						Admin.getConfigServerImpl(config).resetCacheDefinitions();
+						ConfigUtil.getConfigServerImpl(config).resetCacheDefinitions();
 						ConfigUtil.getConfigServerImpl(config).resetCacheAll();
 						reloadNecessary = true;
 					}
@@ -4838,7 +4837,7 @@ public final class ConfigAdmin {
 					String _id = map.get("id");
 					if (!StringUtil.isEmpty(_id) && cd != null && cd.hasClass()) {
 						_updateCacheHandler(_id, cd);
-						Admin.getConfigServerImpl(config).resetCacheHandlers();
+						ConfigUtil.getConfigServerImpl(config).resetCacheHandlers();
 						reloadNecessary = true;
 					}
 					logger.info("extension", "Update cache handler [" + cd + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
@@ -4854,7 +4853,7 @@ public final class ConfigAdmin {
 					ClassDefinition cd = ClassDefinitionImpl.toClassDefinition(map, false, config.getIdentification());
 					if (cd != null && cd.hasClass()) {
 						_updateSearchEngine(cd);
-						Admin.getConfigServerImpl(config).resetSearchEngineClassDefinition().resetSearchEngineDirectory();
+						ConfigUtil.getConfigServerImpl(config).resetSearchEngineClassDefinition().resetSearchEngineDirectory();
 						reloadNecessary = true;
 					}
 					logger.info("extension", "Update search engine [" + cd + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
@@ -4963,14 +4962,14 @@ public final class ConfigAdmin {
 					// class
 					if (cd != null && cd.isBundle()) {
 						_updateStartupHook(cd);
-						Admin.getConfigServerImpl(config).resetStartups();
+						ConfigUtil.getConfigServerImpl(config).resetStartups();
 						reloadNecessary = true;
 						logger.info("extension", "Update Startup Hook [" + cd + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
 					}
 					// component
 					else if (!StringUtil.isEmpty(cfc, true)) {
 						_updateStartupHook(cfc);
-						Admin.getConfigServerImpl(config).resetStartups();
+						ConfigUtil.getConfigServerImpl(config).resetStartups();
 						reloadNecessary = true;
 						logger.info("extension", "Update Startup Hook [" + cfc + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
 					}
@@ -5185,7 +5184,7 @@ public final class ConfigAdmin {
 
 					if (!StringUtil.isEmpty(_id) && cd != null && cd.hasClass()) {
 						_removeCacheHandler(_id);
-						Admin.getConfigServerImpl(config).resetCacheHandlers();
+						ConfigUtil.getConfigServerImpl(config).resetCacheHandlers();
 						// reload=true;
 					}
 					logger.info("extension", "Remove cache handler [" + cd + "] from extension [" + rhe.getName() + ":" + rhe.getVersion() + "]");
@@ -5312,11 +5311,11 @@ public final class ConfigAdmin {
 
 					if (cd != null && cd.isBundle()) {
 						_removeStartupHook(cd);
-						Admin.getConfigServerImpl(config).resetStartups();
+						ConfigUtil.getConfigServerImpl(config).resetStartups();
 					}
 					else if (!StringUtil.isEmpty(cfc, true)) {
 						_removeStartupHook(cfc);
-						Admin.getConfigServerImpl(config).resetStartups();
+						ConfigUtil.getConfigServerImpl(config).resetStartups();
 					}
 					logger.info("extension", "Remove Startup Hook [" + cd + "] from extension [" + rhe.getName() + ":" + rhe.getVersion() + "]");
 				}

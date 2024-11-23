@@ -595,7 +595,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 			ConfigUtil.checkPassword(config, null, password);
 			ConfigUtil.checkGeneralReadAccess(config, password);
 
-			ConfigServerImpl csi = Admin.getConfigServerImpl(config);
+			ConfigServerImpl csi = ConfigUtil.getConfigServerImpl(config);
 			// ConfigServerFactory.createContextFilesAdmin(config.getConfigDir(), csi, csi.newVersion());
 			try {
 				if (config instanceof ConfigServer) ((PageContextImpl) pageContext).setServerPassword(password);
@@ -4297,7 +4297,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		ClassDefinition cd = ClassDefinitionImpl.toClassDefinitionImpl(attributes, null, true, config.getIdentification());
 		admin.updateCacheHandler(getString("admin", "updateCacheHandler", "id"), cd);
 		store();
-		Admin.getConfigServerImpl(config).resetCacheHandlers();
+		ConfigUtil.getConfigServerImpl(config).resetCacheHandlers();
 		adminSync.broadcast(attributes, config);
 	}
 
@@ -4318,7 +4318,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doRemoveCacheHandler() throws PageException {
 		admin.removeCacheHandler(getString("admin", "removeCacheHandler", "id"));
 		store();
-		Admin.getConfigServerImpl(config).resetCacheHandlers();
+		ConfigUtil.getConfigServerImpl(config).resetCacheHandlers();
 		adminSync.broadcast(attributes, config);
 	}
 

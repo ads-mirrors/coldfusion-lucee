@@ -1288,7 +1288,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 					SchedulerImpl scheduler = ((SchedulerImpl) config.getScheduler());
 					if (scheduler != null) {
 						if (config == null) scheduler.stop();
-						else Admin.getConfigServerImpl(config).resetScheduler();
+						else ConfigUtil.getConfigServerImpl(config).resetScheduler();
 					}
 
 					// scopes

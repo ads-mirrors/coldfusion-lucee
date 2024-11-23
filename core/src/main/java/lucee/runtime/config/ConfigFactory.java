@@ -55,7 +55,6 @@ import lucee.runtime.listener.SerializationSettings;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
 import lucee.runtime.osgi.OSGiUtil;
-import lucee.runtime.tag.Admin;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.ArrayImpl;
 import lucee.runtime.type.Collection;
@@ -707,7 +706,7 @@ public abstract class ConfigFactory {
 			Struct monitoring = ConfigUtil.getAsStruct("monitoring", root);
 			Array monitor = ConfigUtil.getAsArray("monitor", monitoring);
 			moveAsBool("enabled", "monitorEnable", monitoring, root);
-			Admin.getConfigServerImpl(config).resetMonitoringEnabled();
+			ConfigUtil.getConfigServerImpl(config).resetMonitoringEnabled();
 			Struct monitors = ConfigUtil.getAsStruct("monitors", root);
 			Key[] keys = monitor.keys();
 			for (int i = keys.length - 1; i >= 0; i--) {
@@ -717,7 +716,7 @@ public abstract class ConfigFactory {
 				add(data, Caster.toString(data.remove(KeyConstants._name, null), null), monitors);
 				monitor.remove(k, null);
 			}
-			Admin.getConfigServerImpl(config).resetMonitors();
+			ConfigUtil.getConfigServerImpl(config).resetMonitors();
 		}
 
 		//////////////////// queue ////////////////////
