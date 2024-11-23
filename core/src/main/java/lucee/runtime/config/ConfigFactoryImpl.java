@@ -208,7 +208,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 
 		Resource configDir = configServer.getConfigDir();
 		double start = SystemUtil.millis();
-		ConfigWebPro configWeb = existingToUpdate != null ? existingToUpdate.setInstance(factory, configServer, servletConfig)
+		ConfigWebPro configWeb = existingToUpdate != null ? existingToUpdate.setInstance(factory, configServer, servletConfig, true)
 				: new ConfigWebImpl(factory, configServer, servletConfig);
 		factory.setConfig(configServer, configWeb);
 

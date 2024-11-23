@@ -122,17 +122,17 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	private lucee.runtime.rest.Mapping[] restMappings;
 
 	public ConfigWebImpl(CFMLFactoryImpl factory, ConfigServerImpl cs, ServletConfig config) {
-		setInstance(factory, cs, config);
+		setInstance(factory, cs, config, false);
 	}
 
-	public ConfigWebPro setInstance(CFMLFactoryImpl factory, ConfigServerImpl cs, ServletConfig config) {
+	public ConfigWebPro setInstance(CFMLFactoryImpl factory, ConfigServerImpl cs, ServletConfig config, boolean reload) {
 		this.id = null;
 		this.factory = factory;
 		this.cs = cs;
 		this.config = config;
 		helper = new ConfigWebHelper(cs, this);
 
-		reload();
+		if (reload) reload();
 		return this;
 	}
 
@@ -374,16 +374,6 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	@Override
 	public boolean passwordEqual(Password password) {
 		return cs.passwordEqual(password);
-	}
-
-	@Override
-	public Mapping[] getMappings() {
-		if (mappings == null) {
-			synchronized (this) {
-				if (mappings == null) createMapping();
-			}
-		}
-		return mappings;// cs.getMappings();
 	}
 
 	@Override
@@ -1810,65 +1800,56 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 		synchronized (this) {
 			if (mappings != null) {
 				ConfigFactoryImpl.flushPageSourcePool(mappings);
+				// resetMappings(false);// MUST 7 iss that needed?
 			}
-
-			createMapping();
 			createRestMapping();
 		}
 	}
 
-	private void createMapping() {
-		Map<String, Mapping> existing = getExistingMappings();
+	@Override
+	public Mapping[] getMappings() {
+		if (mappings == null) {
+			synchronized (SystemUtil.createToken("ConfigWebImpl", "getMappings")) {
+				if (mappings == null) {
+					Mapping[] existing = cs.getMappings();
+					// Mapping
+					Map<String, Mapping> mappings = MapFactory.<String, Mapping>getConcurrentMap(existing.length + 1);
+					boolean finished = false;
 
-		// Mapping
-		Map<String, Mapping> mappings = MapFactory.<String, Mapping>getConcurrentMap();
-		Mapping tmp;
-		boolean finished = false;
-		Mapping ex;
-		Mapping[] sm = cs.getMappings();
-		if (sm != null) {
-			for (int i = 0; i < sm.length; i++) {
-				if (!sm[i].isHidden()) {
-					if ("/".equals(sm[i].getVirtual())) finished = true;
-					ex = existing.get(sm[i].getVirtualLowerCase());
-					if (ex != null && ex.equals(sm[i])) {
-						mappings.put(ex.getVirtualLowerCase(), ex);
-						continue;
-					}
-					else if (sm[i] instanceof MappingImpl) {
-						tmp = ((MappingImpl) sm[i]).cloneReadOnly(this);
-						mappings.put(tmp.getVirtualLowerCase(), tmp);
-
-					}
-					else {
-						tmp = sm[i];
-						mappings.put(tmp.getVirtualLowerCase(), tmp);
+					for (Mapping m: existing) {
+						if ("/".equals(m.getVirtual())) finished = true;
+						mappings.put(m.getVirtualLowerCase(), m);
 					}
 
-					if (ex instanceof MappingImpl) {
-						((MappingImpl) ex).flush();
+					if (!finished) {
+						Mapping m;
+						if (ResourceUtil.isUNCPath(getRootDirectory().getPath())) {
+							m = new MappingImpl(this, "/", getRootDirectory().getPath(), null, ConfigPro.INSPECT_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED,
+									ConfigPro.INSPECT_INTERVAL_UNDEFINED, true, true, true, true, false, false, null, -1, -1);
+						}
+						else {
+							m = new MappingImpl(this, "/", "/", null, ConfigPro.INSPECT_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED, true,
+									true, true, true, false, false, null, -1, -1, true, true);
+						}
+						mappings.put("/", m);
 					}
-
+					this.mappings = ConfigUtil.sort(mappings.values().toArray(new Mapping[mappings.size()]));
 				}
 			}
 		}
-		if (!finished) {
-			Mapping m;
-			if (ResourceUtil.isUNCPath(getRootDirectory().getPath())) {
-				m = new MappingImpl(this, "/", getRootDirectory().getPath(), null, ConfigPro.INSPECT_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED,
-						ConfigPro.INSPECT_INTERVAL_UNDEFINED, true, true, true, true, false, false, null, -1, -1);
+		return mappings;
+	}
+
+	public ConfigWebImpl resetMappings() {
+		if (mappings != null) {
+			synchronized (SystemUtil.createToken("ConfigWebImpl", "getMappings")) {
+				if (mappings != null) {
+					mappings = null;
+					cs.resetMappings();
+				}
 			}
-			else {
-				m = new MappingImpl(this, "/", "/", null, ConfigPro.INSPECT_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED, true, true, true,
-						true, false, false, null, -1, -1, true, true);
-			}
-			ex = existing.get("/");
-			if (ex != null && ex.equals(m)) {
-				m = ex;
-			}
-			mappings.put("/", m);
 		}
-		this.mappings = ConfigUtil.sort(mappings.values().toArray(new Mapping[mappings.size()]));
+		return this;
 	}
 
 	private void createRestMapping() {
@@ -1889,17 +1870,6 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 			}
 		}
 		this.restMappings = mappings.values().toArray(new lucee.runtime.rest.Mapping[mappings.size()]);
-	}
-
-	private Map<String, Mapping> getExistingMappings() {
-		Map<String, Mapping> mappings = MapFactory.<String, Mapping>getConcurrentMap();
-
-		if (this.mappings != null) {
-			for (Mapping m: this.mappings) {
-				mappings.put(m.getVirtualLowerCase(), m);
-			}
-		}
-		return mappings;
 	}
 
 	@Override

@@ -576,7 +576,7 @@ public final class ConfigAdmin {
 		admin._updateMapping(virtual, physical, archive, primary, inspect, inspectTemplateIntervalSlow, inspectTemplateIntervalFast, toplevel, listenerMode, listenerType,
 				readonly);
 		admin._store();
-		Admin.getConfigServerImpl(config).resetMappings();
+		ConfigUtil.getConfigWebImpl(config).resetMappings();
 		if (reload) admin._reload();
 	}
 
@@ -4735,7 +4735,7 @@ public final class ConfigAdmin {
 					String sub = subFolder(entry);
 					logger.log(Log.LEVEL_DEBUG, "extension", "deploy mapping " + sub);
 					updateArchive(zis, sub, false);
-					ConfigUtil.getConfigServerImpl(config).resetMappings();
+					ConfigUtil.getConfigWebImpl(config).resetMappings();
 					reloadNecessary = true;
 				}
 
@@ -5023,7 +5023,7 @@ public final class ConfigAdmin {
 					toplevel = Caster.toBooleanValue(map.get("toplevel"), false);
 					readonly = Caster.toBooleanValue(map.get("readonly"), false);
 					_updateMapping(virtual, physical, archive, primary, inspect, inspectTemplateIntervalSlow, inspectTemplateIntervalFast, toplevel, lmode, ltype, readonly);
-					ConfigUtil.getConfigServerImpl(config).resetMappings();
+					ConfigUtil.getConfigWebImpl(config).resetMappings();
 					reloadNecessary = true;
 
 					logger.debug("extension", "Update Mapping [" + virtual + "]");
