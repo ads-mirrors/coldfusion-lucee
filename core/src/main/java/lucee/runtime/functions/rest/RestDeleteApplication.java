@@ -23,6 +23,7 @@ import lucee.commons.io.res.util.ResourceUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.cache.CacheUtil;
 import lucee.runtime.config.ConfigAdmin;
+import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.config.Password;
 import lucee.runtime.exp.FunctionException;
@@ -30,7 +31,6 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.rest.Mapping;
 import lucee.runtime.rest.RestUtil;
-import lucee.runtime.tag.Admin;
 
 public class RestDeleteApplication {
 	public static String call(PageContext pc, String dirPath) throws PageException {

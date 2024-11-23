@@ -22,12 +22,12 @@ import lucee.runtime.cache.CacheUtil;
 //import lucee.runtime.cache.eh.EHCache;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigAdmin;
+import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.config.Password;
 import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.BIF;
 import lucee.runtime.op.Caster;
-import lucee.runtime.tag.Admin;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.transformer.library.ClassDefinitionImpl;
@@ -81,7 +81,7 @@ public class CacheRegionNew extends BIF {
 			adminConfig.updateCacheConnection(cacheName, new ClassDefinitionImpl("org.lucee.extension.cache.eh.EHCache", null, null, pc.getConfig().getIdentification()),
 					Config.CACHE_TYPE_NONE, properties, false, false);
 			adminConfig.storeAndReload();
-			Admin.getConfigServerImpl(pc.getConfig()).resetCacheAll();
+			ConfigUtil.getConfigServerImpl(pc.getConfig()).resetCacheAll();
 		}
 		catch (Exception e) {
 			if (throwOnError) throw Caster.toPageException(e);
