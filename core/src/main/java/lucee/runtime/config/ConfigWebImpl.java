@@ -119,7 +119,6 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	private SCCWIdentificationWeb id;
 	private Resource rootDir;
 	private Mapping[] mappings;
-	private lucee.runtime.rest.Mapping[] restMappings;
 
 	public ConfigWebImpl(CFMLFactoryImpl factory, ConfigServerImpl cs, ServletConfig config) {
 		setInstance(factory, cs, config, false);
@@ -374,16 +373,6 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	@Override
 	public boolean passwordEqual(Password password) {
 		return cs.passwordEqual(password);
-	}
-
-	@Override
-	public lucee.runtime.rest.Mapping[] getRestMappings() {
-		if (restMappings == null) {
-			synchronized (this) {
-				if (restMappings == null) createRestMapping();
-			}
-		}
-		return restMappings;
 	}
 
 	@Override
@@ -1799,10 +1788,10 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	public void reload() {
 		synchronized (this) {
 			if (mappings != null) {
+				// MUST 7 is that needed?
 				ConfigFactoryImpl.flushPageSourcePool(mappings);
-				// resetMappings(false);// MUST 7 iss that needed?
+				// resetMappings(false);// MUST 7 is that needed?
 			}
-			createRestMapping();
 		}
 	}
 
@@ -1852,24 +1841,9 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 		return this;
 	}
 
-	private void createRestMapping() {
-		Map<String, lucee.runtime.rest.Mapping> mappings = MapFactory.<String, lucee.runtime.rest.Mapping>getConcurrentMap();
-		lucee.runtime.rest.Mapping[] sm = cs.getRestMappings();
-		lucee.runtime.rest.Mapping tmp;
-		if (sm != null) {
-			for (int i = 0; i < sm.length; i++) {
-				try {
-					// if (!sm[i].isHidden()) {
-					tmp = sm[i].duplicate(this, Boolean.TRUE);
-					mappings.put(tmp.getVirtual(), tmp);
-					// }
-				}
-				catch (Exception e) {
-
-				}
-			}
-		}
-		this.restMappings = mappings.values().toArray(new lucee.runtime.rest.Mapping[mappings.size()]);
+	@Override
+	public lucee.runtime.rest.Mapping[] getRestMappings() {
+		return cs.getRestMappings();
 	}
 
 	@Override
