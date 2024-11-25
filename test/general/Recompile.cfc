@@ -48,6 +48,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 	private function writeFile(string template, string data){
 		var curr=getDirectoryFromPath(getCurrenttemplatepath());
 		var path=curr&template;
+		var parent=getDirectoryFromPath(path);
+		DirectoryCreate(parent, true, true);
 		fileWrite(path,data);
 	}
 
