@@ -1804,10 +1804,20 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 					// Mapping
 					Map<String, Mapping> mappings = MapFactory.<String, Mapping>getConcurrentMap(existing.length + 1);
 					boolean finished = false;
+					String str;
+					boolean cloneIt;
+					Mapping tmp;
 					for (Mapping m: existing) {
 						if ("/".equals(m.getVirtual())) finished = true;
-						MappingImpl tmp = ((MappingImpl) m).cloneReadOnly(this);
+						cloneIt = false;
 
+						str = m.getStrPhysical();
+						if (str != null && str.indexOf('{') != -1) cloneIt = true;
+						if (!cloneIt) {
+							str = m.getStrArchive();
+							if (str != null && str.indexOf('{') != -1) cloneIt = true;
+						}
+						tmp = cloneIt ? ((MappingImpl) m).cloneReadOnly(this) : m;
 						mappings.put(tmp.getVirtualLowerCase(), tmp);
 					}
 					if (!finished) {
