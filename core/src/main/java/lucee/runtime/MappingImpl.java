@@ -44,9 +44,9 @@ import lucee.commons.lang.StringUtil;
 import lucee.loader.engine.CFMLEngine;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
+import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.config.ConfigWebPro;
-import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.listener.ApplicationListener;
@@ -608,10 +608,35 @@ public final class MappingImpl implements Mapping {
 	}
 
 	private String toString(boolean forCompare) {
-		return new StringBuilder().append("StrPhysical:").append(getStrPhysical()).append(";StrArchive:").append(getStrArchive()).append(";Virtual:").append(getVirtual())
-				.append(";Archive:").append(getArchive()).append(";Physical:").append(getPhysical()).append(";topLevel:").append(topLevel).append(";inspect:")
-				.append(ConfigUtil.inspectTemplate(getInspectTemplateRaw(), "")).append(";config-inspect:").append(ConfigUtil.inspectTemplate(getConfigInspectTemplate(), ""))
-				.append(";physicalFirst:").append(physicalFirst).append(";hidden:").append(hidden).append(";readonly:").append(forCompare ? "" : readonly).append(";").toString();
+		return new StringBuilder()
+
+				.append("StrPhysical:").append(getStrPhysical())
+
+				.append(";StrArchive:").append(getStrArchive())
+
+				.append(";Virtual:").append(getVirtual())
+
+				.append(";Archive:").append(getArchive())
+
+				.append(";Physical:").append(getPhysical())
+
+				.append(";topLevel:").append(topLevel)
+
+				.append(";inspect:").append(ConfigUtil.inspectTemplate(getInspectTemplateRaw(), ""))
+
+				.append(";inspect-slow:").append(inspectTemplateAutoIntervalSlow)
+
+				.append(";inspect-fast:").append(inspectTemplateAutoIntervalFast)
+
+				.append(";config-inspect:").append(ConfigUtil.inspectTemplate(getConfigInspectTemplate(), ""))
+
+				.append(";physicalFirst:").append(physicalFirst)
+
+				.append(";hidden:").append(hidden)
+
+				.append(";readonly:").append(forCompare ? "" : readonly)
+
+				.append(";").toString();
 
 	}
 

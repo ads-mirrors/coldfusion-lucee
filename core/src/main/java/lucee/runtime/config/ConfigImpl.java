@@ -45,7 +45,6 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
 import lucee.aprint;
-import lucee.print;
 import lucee.commons.date.TimeZoneConstants;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.FileUtil;
@@ -1480,6 +1479,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return mappings;
 	}
 
+	@Override
 	public ConfigImpl resetMappings() {
 		if (mappings != null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getMappings")) {
@@ -2883,8 +2883,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public DataSource getDataSource(String datasource, DataSource defaultValue) {
-		print.e(getDataSourcesAll().keySet());
-
 		DataSource ds = (datasource == null) ? null : (DataSource) getDataSourcesAll().get(datasource.toLowerCase());
 		if (ds != null) return ds;
 		return defaultValue;
@@ -4285,6 +4283,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 */
 	@Override
 	public Collection<Mapping> getTagMappings() {
+		getTLDs();
 		return tagMappings.values();
 
 		// MUST 7 flushPageSourcePool(config.getTagMappings());
@@ -4293,26 +4292,31 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public Mapping getTagMapping(String mappingName) {
+		getTLDs();
 		return tagMappings.get(mappingName);
 	}
 
 	@Override
 	public Mapping getDefaultTagMapping() {
+		getTLDs();
 		return defaultTagMapping;
 	}
 
 	@Override
 	public Mapping getFunctionMapping(String mappingName) {
+		getFLDs();
 		return functionMappings.get(mappingName);
 	}
 
 	@Override
 	public Mapping getDefaultFunctionMapping() {
+		getFLDs();
 		return defaultFunctionMapping;
 	}
 
 	@Override
 	public Collection<Mapping> getFunctionMappings() {
+		getFLDs();
 		return functionMappings.values();
 
 		// MUST 7 ConfigWebFactory.flushPageSourcePool(config.getFunctionMappings());
@@ -5682,7 +5686,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			for (RHExtension rhe: rhes) {
 				BundleInfo[] bis;
 				try {
-					bis = rhe.getBundles();
+					bis = rhe.getMetadata().getBundles();
 				}
 				catch (Exception e) {
 					continue;
@@ -6320,7 +6324,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	public void resetAll() throws IOException {
-		print.ds();
 		List<Method> methods = Reflector.getMethods(this.getClass());
 
 		for (Method method: methods) {

@@ -119,6 +119,7 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	private SCCWIdentificationWeb id;
 	private Resource rootDir;
 	private Mapping[] mappings;
+	private Mapping ext;
 
 	public ConfigWebImpl(CFMLFactoryImpl factory, ConfigServerImpl cs, ServletConfig config) {
 		setInstance(factory, cs, config, false);
@@ -1795,33 +1796,41 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 		}
 	}
 
+	private Map<String, Mapping> existing = MapFactory.<String, Mapping>getConcurrentMap();
+
 	@Override
 	public Mapping[] getMappings() {
 		if (mappings == null) {
 			synchronized (SystemUtil.createToken("ConfigWebImpl", "getMappings")) {
 				if (mappings == null) {
-					Mapping[] existing = cs.getMappings();
+					Mapping[] serverMappings = cs.getMappings();
 					// Mapping
-					Map<String, Mapping> mappings = MapFactory.<String, Mapping>getConcurrentMap(existing.length + 1);
+					Map<String, Mapping> mappings = MapFactory.<String, Mapping>getConcurrentMap(serverMappings.length + 1);
 					boolean finished = false;
 					String str;
 					boolean cloneIt;
-					Mapping tmp;
-					for (Mapping m: existing) {
+					Mapping ex;
+					for (Mapping m: serverMappings) {
 						if ("/".equals(m.getVirtual())) finished = true;
 						cloneIt = false;
-
 						str = m.getStrPhysical();
 						if (str != null && str.indexOf('{') != -1) cloneIt = true;
 						if (!cloneIt) {
 							str = m.getStrArchive();
 							if (str != null && str.indexOf('{') != -1) cloneIt = true;
 						}
-						tmp = cloneIt ? ((MappingImpl) m).cloneReadOnly(this) : m;
-						mappings.put(tmp.getVirtualLowerCase(), tmp);
+						m = cloneIt ? ((MappingImpl) m).cloneReadOnly(this) : m;
+
+						ex = this.existing.get(m.getVirtualLowerCase());
+						if (ex != null && ex.equals(m)) {
+							mappings.put(ex.getVirtualLowerCase(), ex);
+						}
+						else {
+							mappings.put(m.getVirtualLowerCase(), m);
+							this.existing.put(m.getVirtualLowerCase(), m);
+						}
 					}
 					if (!finished) {
-
 						Mapping m;
 						if (ResourceUtil.isUNCPath(getRootDirectory().getPath())) {
 							m = new MappingImpl(this, "/", getRootDirectory().getPath(), null, ConfigPro.INSPECT_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED,
@@ -1829,9 +1838,17 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 						}
 						else {
 							m = new MappingImpl(this, "/", "/", null, ConfigPro.INSPECT_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED, true,
-									true, true, true, false, false, null, -1, -1, true, true);
+									true, true, true, false, false, null, -1, -1);
 						}
-						mappings.put("/", m);
+
+						ex = this.existing.get("/");
+						if (ex != null && ex.equals(m)) {
+							mappings.put("/", ex);
+						}
+						else {
+							mappings.put("/", m);
+							this.existing.put(m.getVirtualLowerCase(), m);
+						}
 					}
 					this.mappings = ConfigUtil.sort(mappings.values().toArray(new Mapping[mappings.size()]));
 				}
@@ -1845,6 +1862,7 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 		if (mappings != null) {
 			synchronized (SystemUtil.createToken("ConfigWebImpl", "getMappings")) {
 				if (mappings != null) {
+					ConfigFactoryImpl.flushPageSourcePool(mappings);
 					mappings = null;
 					cs.resetMappings();
 				}

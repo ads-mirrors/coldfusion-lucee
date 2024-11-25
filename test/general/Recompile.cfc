@@ -42,6 +42,50 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 
 
 
+			it(title="rewrite CFML template and update mappings along he way (causes new mappings)", body=function() {
+				
+				writeFile("javaSettings/test.cfm","1");
+				savecontent variable="local.c" {
+					include "javaSettings/test.cfm";
+				}
+    			expect(c).toBe("1");
+				sleep(2500); // some os have a not very precise time stamp (i.e. Windows)
+				InspectTemplates();
+				writeFile("javaSettings/test.cfm","10");
+				savecontent variable="local.d" {
+					include "javaSettings/test.cfm";
+				}
+    			expect(d).toBe("10");
+
+
+				var virtual="/testMappingsRecompile";
+				admin
+					action="updateMapping"
+					type="web"
+					password="#request.WEBADMINPASSWORD#"
+					virtual=virtual
+					physical="#getDirectoryFromPath(getCurrentTemplatePath())#"
+					toplevel="true"
+					archive=""
+					primary="physical"
+					trusted="no";
+
+				writeFile("javaSettings/test.cfm","1");
+				savecontent variable="local.c" {
+					include "javaSettings/test.cfm";
+				}
+				expect(c).toBe("1");
+				sleep(2500); // some os have a not very precise time stamp (i.e. Windows)
+				InspectTemplates();
+				writeFile("javaSettings/test.cfm","10");
+				savecontent variable="local.d" {
+					include "javaSettings/test.cfm";
+				}
+				expect(d).toBe("10");
+			});
+
+
+
 		});
 	}
 

@@ -6,6 +6,7 @@ import java.util.Iterator;
 import lucee.runtime.Mapping;
 import lucee.runtime.MappingImpl;
 import lucee.runtime.PageContext;
+import lucee.runtime.PageSource;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigServer;
 import lucee.runtime.config.ConfigWeb;
@@ -47,6 +48,13 @@ public final class InspectTemplates extends BIF implements Function {
 				reset(config, ac.getComponentMappings());
 				reset(config, ac.getCustomTagMappings());
 			}
+
+			// in case we have a flush in mean time
+			PageSource ps = pc.getCurrentPageSource(null);
+			if (ps != null) {
+				Mapping m = ps.getMapping();
+				if (m != null) reset(m);
+			}
 		}
 
 		// config
@@ -63,18 +71,18 @@ public final class InspectTemplates extends BIF implements Function {
 		if (mappings == null) return;
 		Iterator<Mapping> it = mappings.iterator();
 		while (it.hasNext()) {
-			reset(config, it.next());
+			reset(it.next());
 		}
 	}
 
 	public static void reset(Config config, Mapping[] mappings) {
 		if (mappings == null) return;
 		for (int i = 0; i < mappings.length; i++) {
-			reset(config, mappings[i]);
+			reset(mappings[i]);
 		}
 	}
 
-	public static void reset(Config config, Mapping mapping) {
+	public static void reset(Mapping mapping) {
 		if (mapping == null) return;
 		(((MappingImpl) mapping)).resetPages(null);
 	}

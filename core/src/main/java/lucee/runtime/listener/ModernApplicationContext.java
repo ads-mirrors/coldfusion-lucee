@@ -32,7 +32,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 
-import lucee.print;
 import lucee.commons.date.TimeZoneUtil;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.log.Log;
@@ -57,8 +56,8 @@ import lucee.runtime.cache.CacheUtil;
 import lucee.runtime.component.Member;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
-import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.config.ConfigUtil;
+import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.db.ClassDefinition;
 import lucee.runtime.db.DataSource;
 import lucee.runtime.engine.ThreadLocalPageContext;
@@ -287,8 +286,6 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 		initContext(pc);
 
 		// ORM
-		print.e("orm:" + ((ConfigPro) config).getORMEngineClassDefintion());
-		print.e("has:" + ((ConfigPro) config).hasORMEngine());
 		// if (((ConfigPro) config).hasORMEngine()) {
 		pc.addPageSource(component.getPageSource(), true);
 		try {

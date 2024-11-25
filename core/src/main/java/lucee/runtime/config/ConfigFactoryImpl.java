@@ -3296,13 +3296,13 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 					// we force a new installation if we have switched from single to multi mode, because extension can
 					// act completely different if that is the case
 					rhe = RHExtension.installExtension(config, id, Caster.toString(child.get(KeyConstants._version, null), null), res, false);
-					if (rhe.getStartBundles()) {
+					if (rhe.getMetadata().isStartBundles()) {
 						if (!firstLoad) {
 							rhe.deployBundles(config, true);
 						}
 						else {
 							try {
-								BundleInfo[] bundles = rhe.getBundles();
+								BundleInfo[] bundles = rhe.getMetadata().getBundles();
 								if (bundles != null) {
 									for (BundleInfo bi: bundles) {
 										OSGiUtil.loadBundleFromLocal(bi.getSymbolicName(), bi.getVersion(), null, false, null);

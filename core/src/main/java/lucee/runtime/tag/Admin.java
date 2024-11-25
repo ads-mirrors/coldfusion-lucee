@@ -2484,7 +2484,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		String id = getString("admin", action, "id");
 		if (StringUtil.isEmpty(id, true)) throw new ApplicationException("Extension ID cannot be empty");
 		for (RHExtension ext: extensions) {
-			if (id.equals(ext.getId()) || id.equals(ext.getSymbolicName())) {
+			if (id.equals(ext.getId()) || id.equals(ext.getMetadata().getSymbolicName())) {
 				pageContext.setVariable(getString("admin", action, "returnVariable"), ext.toStruct());
 				return;
 			}
@@ -3564,11 +3564,11 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		BundleInfo[] bundles;
 		for (RHExtension e: extensions) {
 			try {
-				bundles = e.getBundles();
+				bundles = e.getMetadata().getBundles();
 				if (bundles != null) {
 					for (BundleInfo b: bundles) {
 						if (_eq(bd.getName(), bd.getVersion(), b.getSymbolicName(), b.getVersion())) {
-							set.add(e.getName());
+							set.add(e.getMetadata().getName());
 						}
 					}
 				}

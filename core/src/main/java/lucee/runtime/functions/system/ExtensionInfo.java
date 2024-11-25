@@ -7,6 +7,7 @@ import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.BIF;
 import lucee.runtime.ext.function.Function;
+import lucee.runtime.extension.ExtensionMetadata;
 import lucee.runtime.extension.RHExtension;
 import lucee.runtime.op.Caster;
 import lucee.runtime.osgi.BundleInfo;
@@ -47,34 +48,36 @@ public class ExtensionInfo extends BIF implements Function {
 	private static Struct getInfo(String id, RHExtension[] extensions) throws PageException {
 		Struct sct = new StructImpl();
 		for (RHExtension ext: extensions) {
-			if (ext.getId().equalsIgnoreCase(id) || ext.getSymbolicName().equalsIgnoreCase(id)) {
-				String ver = ext.getVersion().toString();
-				String sName = ext.getSymbolicName();
-				sct.set(KeyConstants._id, ext.getId());
-				sct.set(SYMBOLIC_NAME, sName);
-				sct.set(KeyConstants._name, ext.getName());
-				sct.set(KeyConstants._image, ext.getImage());
-				sct.set(KeyConstants._description, ext.getDescription());
-				sct.set(KeyConstants._version, ver == null ? null : ver);
-				sct.set(TRIAL, ext.isTrial());
-				sct.set(RELEASE_TYPE, RHExtension.toReleaseType(ext.getReleaseType(), "all"));
-				try {
-					sct.set(FLDS, Caster.toArray(ext.getFlds()));
-					sct.set(TLDS, Caster.toArray(ext.getTlds()));
-					sct.set(FUNCTIONS, Caster.toArray(ext.getFunctions()));
-					sct.set(ARCHIVES, Caster.toArray(ext.getArchives()));
-					sct.set(TAGS, Caster.toArray(ext.getTags()));
-					sct.set(CONTEXTS, Caster.toArray(ext.getContexts()));
-					sct.set(WEBCONTEXTS, Caster.toArray(ext.getWebContexts()));
-					sct.set(CONFIG, Caster.toArray(ext.getConfigs()));
-					sct.set(EVENT_GATEWAYS, Caster.toArray(ext.getEventGateways()));
-					sct.set(CATEGORIES, Caster.toArray(ext.getCategories()));
-					sct.set(APPLICATIONS, Caster.toArray(ext.getApplications()));
-					sct.set(KeyConstants._components, Caster.toArray(ext.getComponents()));
-					sct.set(PLUGINS, Caster.toArray(ext.getPlugins()));
-					sct.set(START_BUNDLES, Caster.toBoolean(ext.getStartBundles()));
+			if (ext.getId().equalsIgnoreCase(id) || ext.getMetadata().getSymbolicName().equalsIgnoreCase(id)) {
 
-					BundleInfo[] bfs = ext.getBundles();
+				ExtensionMetadata md = ext.getMetadata();
+				String ver = md.getVersion().toString();
+				String sName = md.getSymbolicName();
+				sct.set(KeyConstants._id, md.getId());
+				sct.set(SYMBOLIC_NAME, sName);
+				sct.set(KeyConstants._name, md.getName());
+				sct.set(KeyConstants._image, md.getImage());
+				sct.set(KeyConstants._description, md.getDescription());
+				sct.set(KeyConstants._version, ver == null ? null : ver);
+				sct.set(TRIAL, md.isTrial());
+				sct.set(RELEASE_TYPE, RHExtension.toReleaseType(md.getReleaseType(), "all"));
+				try {
+					sct.set(FLDS, Caster.toArray(md.getFlds()));
+					sct.set(TLDS, Caster.toArray(md.getTlds()));
+					sct.set(FUNCTIONS, Caster.toArray(md.getFunctions()));
+					sct.set(ARCHIVES, Caster.toArray(md.getArchives()));
+					sct.set(TAGS, Caster.toArray(md.getTags()));
+					sct.set(CONTEXTS, Caster.toArray(md.getContexts()));
+					sct.set(WEBCONTEXTS, Caster.toArray(md.getWebContexts()));
+					sct.set(CONFIG, Caster.toArray(md.getConfigs()));
+					sct.set(EVENT_GATEWAYS, Caster.toArray(md.getEventGateways()));
+					sct.set(CATEGORIES, Caster.toArray(md.getCategories()));
+					sct.set(APPLICATIONS, Caster.toArray(md.getApplications()));
+					sct.set(KeyConstants._components, Caster.toArray(md.getComponents()));
+					sct.set(PLUGINS, Caster.toArray(md.getPlugins()));
+					sct.set(START_BUNDLES, Caster.toBoolean(md.isStartBundles()));
+
+					BundleInfo[] bfs = md.getBundles();
 					Query qryBundles = new QueryImpl(new Key[] { KeyConstants._name, KeyConstants._version }, bfs == null ? 0 : bfs.length, "bundles");
 					if (bfs != null) {
 						for (int i = 0; i < bfs.length; i++) {

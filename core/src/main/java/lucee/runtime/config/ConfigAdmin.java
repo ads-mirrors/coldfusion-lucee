@@ -4449,7 +4449,7 @@ public final class ConfigAdmin {
 				continue;
 			}
 
-			if (id.equalsIgnoreCase(rhe.getId()) || id.equalsIgnoreCase(rhe.getSymbolicName())) {
+			if (id.equalsIgnoreCase(rhe.getId()) || id.equalsIgnoreCase(rhe.getMetadata().getSymbolicName())) {
 				removeRHExtension(config, rhe, null, true);
 				children.removeEL(key);
 			}
@@ -4639,7 +4639,8 @@ public final class ConfigAdmin {
 		// MUST 7 rest all values set
 		try {
 			if (!force && _hasRHExtensionInstalled((ConfigPro) config, rhext.toExtensionDefinition()) != null) {
-				throw new ApplicationException("the extension " + rhext.getName() + " (id: " + rhext.getId() + ") in version " + rhext.getVersion() + " is already installed");
+				throw new ApplicationException(
+						"the extension " + rhext.getMetadata().getName() + " (id: " + rhext.getId() + ") in version " + rhext.getVersion() + " is already installed");
 			}
 		}
 		catch (Exception e) {
@@ -4799,10 +4800,10 @@ public final class ConfigAdmin {
 			////////////////////////////////////////////
 
 			// load the bundles
-			if (rhext.getStartBundles()) {
+			if (rhext.getMetadata().isStartBundles()) {
 				rhext.deployBundles(ci, true);
 
-				BundleInfo[] bfs = rhext.getBundles();
+				BundleInfo[] bfs = rhext.getMetadata().getBundles();
 				if (bfs != null) {
 					for (BundleInfo bf: bfs) {
 						OSGiUtil.loadBundleFromLocal(bf.getSymbolicName(), bf.getVersion(), null, false, null);
@@ -4823,7 +4824,7 @@ public final class ConfigAdmin {
 						ConfigUtil.getConfigServerImpl(config).resetCacheAll();
 						reloadNecessary = true;
 					}
-					logger.info("extension", "Update cache [" + cd + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
+					logger.info("extension", "Update cache [" + cd + "] from extension [" + rhext.getMetadata().getName() + ":" + rhext.getVersion() + "]");
 				}
 			}
 
@@ -4840,7 +4841,7 @@ public final class ConfigAdmin {
 						ConfigUtil.getConfigServerImpl(config).resetCacheHandlers();
 						reloadNecessary = true;
 					}
-					logger.info("extension", "Update cache handler [" + cd + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
+					logger.info("extension", "Update cache handler [" + cd + "] from extension [" + rhext.getMetadata().getName() + ":" + rhext.getVersion() + "]");
 				}
 			}
 
@@ -4856,7 +4857,7 @@ public final class ConfigAdmin {
 						ConfigUtil.getConfigServerImpl(config).resetSearchEngineClassDefinition().resetSearchEngineDirectory();
 						reloadNecessary = true;
 					}
-					logger.info("extension", "Update search engine [" + cd + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
+					logger.info("extension", "Update search engine [" + cd + "] from extension [" + rhext.getMetadata().getName() + ":" + rhext.getVersion() + "]");
 				}
 			}
 
@@ -4876,7 +4877,7 @@ public final class ConfigAdmin {
 						ConfigUtil.getConfigServerImpl(config).resetResources();
 						reloadNecessary = true;
 					}
-					logger.info("extension", "Update resource provider [" + scheme + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
+					logger.info("extension", "Update resource provider [" + scheme + "] from extension [" + rhext.getMetadata().getName() + ":" + rhext.getVersion() + "]");
 				}
 			}
 
@@ -4893,7 +4894,7 @@ public final class ConfigAdmin {
 						ConfigUtil.getConfigServerImpl(config).resetORMConfig().resetORMEngineClassDefintion();
 						reloadNecessary = true;
 					}
-					logger.info("extension", "Update orm engine [" + cd + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
+					logger.info("extension", "Update orm engine [" + cd + "] from extension [" + rhext.getMetadata().getName() + ":" + rhext.getVersion() + "]");
 				}
 			}
 
@@ -4909,7 +4910,7 @@ public final class ConfigAdmin {
 						_updateWebserviceHandler(cd);
 						reloadNecessary = true;
 					}
-					logger.info("extension", "Update webservice handler [" + cd + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
+					logger.info("extension", "Update webservice handler [" + cd + "] from extension [" + rhext.getMetadata().getName() + ":" + rhext.getVersion() + "]");
 				}
 			}
 
@@ -4926,7 +4927,7 @@ public final class ConfigAdmin {
 						ConfigUtil.getConfigServerImpl(config).resetMonitors().resetMonitoringEnabled();
 						reloadNecessary = true;
 					}
-					logger.info("extension", "Update monitor engine [" + cd + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
+					logger.info("extension", "Update monitor engine [" + cd + "] from extension [" + rhext.getMetadata().getName() + ":" + rhext.getVersion() + "]");
 				}
 			}
 
@@ -4946,7 +4947,7 @@ public final class ConfigAdmin {
 						ConfigUtil.getConfigServerImpl(config).resetJDBCDrivers();
 						reloadNecessary = true;
 					}
-					logger.info("extension", "Update JDBC Driver [" + _label + ":" + cd + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
+					logger.info("extension", "Update JDBC Driver [" + _label + ":" + cd + "] from extension [" + rhext.getMetadata().getName() + ":" + rhext.getVersion() + "]");
 				}
 			}
 
@@ -4964,14 +4965,14 @@ public final class ConfigAdmin {
 						_updateStartupHook(cd);
 						ConfigUtil.getConfigServerImpl(config).resetStartups();
 						reloadNecessary = true;
-						logger.info("extension", "Update Startup Hook [" + cd + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
+						logger.info("extension", "Update Startup Hook [" + cd + "] from extension [" + rhext.getMetadata().getName() + ":" + rhext.getVersion() + "]");
 					}
 					// component
 					else if (!StringUtil.isEmpty(cfc, true)) {
 						_updateStartupHook(cfc);
 						ConfigUtil.getConfigServerImpl(config).resetStartups();
 						reloadNecessary = true;
-						logger.info("extension", "Update Startup Hook [" + cfc + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
+						logger.info("extension", "Update Startup Hook [" + cfc + "] from extension [" + rhext.getMetadata().getName() + ":" + rhext.getVersion() + "]");
 					}
 				}
 			}
@@ -5073,7 +5074,7 @@ public final class ConfigAdmin {
 						ConfigUtil.getConfigServerImpl(config).resetGatewayEntries();
 					}
 
-					logger.info("extension", "Update event gateway entry [" + id + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
+					logger.info("extension", "Update event gateway entry [" + id + "] from extension [" + rhext.getMetadata().getName() + ":" + rhext.getVersion() + "]");
 				}
 			}
 
@@ -5131,10 +5132,10 @@ public final class ConfigAdmin {
 
 		try {
 			// remove the bundles
-			BundleDefinition[] candidatesToRemove = OSGiUtil.toBundleDefinitions(rhe.getBundles(EMPTY));
+			BundleDefinition[] candidatesToRemove = OSGiUtil.toBundleDefinitions(rhe.getMetadata().getBundles(EMPTY));
 			if (replacementRH != null) {
 				// spare bundles used in the new extension as well
-				Map<String, BundleDefinition> notRemove = toMap(OSGiUtil.toBundleDefinitions(replacementRH.getBundles(EMPTY)));
+				Map<String, BundleDefinition> notRemove = toMap(OSGiUtil.toBundleDefinitions(replacementRH.getMetadata().getBundles(EMPTY)));
 				List<BundleDefinition> tmp = new ArrayList<OSGiUtil.BundleDefinition>();
 				String key;
 				for (int i = 0; i < candidatesToRemove.length; i++) {
@@ -5147,31 +5148,31 @@ public final class ConfigAdmin {
 			ConfigAdmin.cleanBundles(rhe, ci, candidatesToRemove);
 
 			// FLD
-			removeFLDs(logger, rhe.getFlds()); // MUST check if others use one of this fld
+			removeFLDs(logger, rhe.getMetadata().getFlds()); // MUST check if others use one of this fld
 
 			// TLD
-			removeTLDs(logger, rhe.getTlds()); // MUST check if others use one of this tld
+			removeTLDs(logger, rhe.getMetadata().getTlds()); // MUST check if others use one of this tld
 
 			// Tag
-			removeTags(logger, rhe.getTags());
+			removeTags(logger, rhe.getMetadata().getTags());
 
 			// Functions
-			removeFunctions(logger, rhe.getFunctions());
+			removeFunctions(logger, rhe.getMetadata().getFunctions());
 
 			// Event Gateway
-			removeEventGateways(logger, rhe.getEventGateways());
+			removeEventGateways(logger, rhe.getMetadata().getEventGateways());
 
 			// context
-			removeContext(config, false, logger, rhe.getContexts()); // MUST check if others use one of this
+			removeContext(config, false, logger, rhe.getMetadata().getContexts()); // MUST check if others use one of this
 
 			// web contextS
-			removeWebContexts(config, false, logger, rhe.getWebContexts()); // MUST check if others use one of this
+			removeWebContexts(config, false, logger, rhe.getMetadata().getWebContexts()); // MUST check if others use one of this
 
 			// applications
-			removeApplications(config, logger, rhe.getApplications()); // MUST check if others use one of this
+			removeApplications(config, logger, rhe.getMetadata().getApplications()); // MUST check if others use one of this
 
 			// plugins
-			removePlugins(config, logger, rhe.getPlugins()); // MUST check if others use one of this
+			removePlugins(config, logger, rhe.getMetadata().getPlugins()); // MUST check if others use one of this
 
 			// remove cache handler
 			if (!ArrayUtil.isEmpty(rhe.getCacheHandlers())) {
@@ -5187,7 +5188,7 @@ public final class ConfigAdmin {
 						ConfigUtil.getConfigServerImpl(config).resetCacheHandlers();
 						// reload=true;
 					}
-					logger.info("extension", "Remove cache handler [" + cd + "] from extension [" + rhe.getName() + ":" + rhe.getVersion() + "]");
+					logger.info("extension", "Remove cache handler [" + cd + "] from extension [" + rhe.getMetadata().getName() + ":" + rhe.getVersion() + "]");
 				}
 			}
 
@@ -5202,7 +5203,7 @@ public final class ConfigAdmin {
 						_removeCache(cd);
 						// reload=true;
 					}
-					logger.info("extension", "Remove cache handler [" + cd + "] from extension [" + rhe.getName() + ":" + rhe.getVersion() + "]");
+					logger.info("extension", "Remove cache handler [" + cd + "] from extension [" + rhe.getMetadata().getName() + ":" + rhe.getVersion() + "]");
 				}
 			}
 
@@ -5217,7 +5218,7 @@ public final class ConfigAdmin {
 						_removeSearchEngine();
 						// reload=true;
 					}
-					logger.info("extension", "Remove search engine [" + cd + "] from extension [" + rhe.getName() + ":" + rhe.getVersion() + "]");
+					logger.info("extension", "Remove search engine [" + cd + "] from extension [" + rhe.getMetadata().getName() + ":" + rhe.getVersion() + "]");
 				}
 			}
 
@@ -5232,7 +5233,7 @@ public final class ConfigAdmin {
 					if (cd != null && cd.hasClass()) {
 						_removeResourceProvider(scheme);
 					}
-					logger.info("extension", "Remove resource [" + cd + "] from extension [" + rhe.getName() + ":" + rhe.getVersion() + "]");
+					logger.info("extension", "Remove resource [" + cd + "] from extension [" + rhe.getMetadata().getName() + ":" + rhe.getVersion() + "]");
 				}
 			}
 
@@ -5248,7 +5249,7 @@ public final class ConfigAdmin {
 						_removeORMEngine();
 						// reload=true;
 					}
-					logger.info("extension", "Remove orm engine [" + cd + "] from extension [" + rhe.getName() + ":" + rhe.getVersion() + "]");
+					logger.info("extension", "Remove orm engine [" + cd + "] from extension [" + rhe.getMetadata().getName() + ":" + rhe.getVersion() + "]");
 				}
 			}
 
@@ -5264,7 +5265,7 @@ public final class ConfigAdmin {
 						_removeWebserviceHandler();
 						// reload=true;
 					}
-					logger.info("extension", "Remove webservice handler [" + cd + "] from extension [" + rhe.getName() + ":" + rhe.getVersion() + "]");
+					logger.info("extension", "Remove webservice handler [" + cd + "] from extension [" + rhe.getMetadata().getName() + ":" + rhe.getVersion() + "]");
 				}
 			}
 
@@ -5282,7 +5283,7 @@ public final class ConfigAdmin {
 					_removeMonitor(map.get("type"), name = map.get("name"));
 					// reload=true;
 					// }
-					logger.info("extension", "Remove monitor [" + name + "] from extension [" + rhe.getName() + ":" + rhe.getVersion() + "]");
+					logger.info("extension", "Remove monitor [" + name + "] from extension [" + rhe.getMetadata().getName() + ":" + rhe.getVersion() + "]");
 				}
 			}
 
@@ -5296,7 +5297,7 @@ public final class ConfigAdmin {
 					if (cd != null && cd.isBundle()) {
 						_removeJDBCDriver(cd);
 					}
-					logger.info("extension", "Remove JDBC Driver [" + cd + "] from extension [" + rhe.getName() + ":" + rhe.getVersion() + "]");
+					logger.info("extension", "Remove JDBC Driver [" + cd + "] from extension [" + rhe.getMetadata().getName() + ":" + rhe.getVersion() + "]");
 				}
 			}
 
@@ -5317,7 +5318,7 @@ public final class ConfigAdmin {
 						_removeStartupHook(cfc);
 						ConfigUtil.getConfigServerImpl(config).resetStartups();
 					}
-					logger.info("extension", "Remove Startup Hook [" + cd + "] from extension [" + rhe.getName() + ":" + rhe.getVersion() + "]");
+					logger.info("extension", "Remove Startup Hook [" + cd + "] from extension [" + rhe.getMetadata().getName() + ":" + rhe.getVersion() + "]");
 				}
 			}
 
@@ -6331,7 +6332,7 @@ public final class ConfigAdmin {
 		while (itt.hasNext()) {
 			_rhe = itt.next();
 			if (rhe != null && rhe.equals(_rhe)) continue;
-			BundleInfo[] bundles = _rhe.getBundles(null);
+			BundleInfo[] bundles = _rhe.getMetadata().getBundles(null);
 			if (bundles != null) {
 				for (BundleInfo bi: bundles) {
 					_cleanBundles(candiatesToRemove, bi.getSymbolicName(), bi.getVersion());
@@ -6419,7 +6420,7 @@ public final class ConfigAdmin {
 				if (ext.getId().equalsIgnoreCase(id)) {
 					old = RHExtension.toBundleDefinitions(ConfigUtil.getAsString("bundles", el, null)); // get existing bundles before populate new ones
 					ext.populate(el, false);
-					old = minus(old, OSGiUtil.toBundleDefinitions(ext.getBundles()));
+					old = minus(old, OSGiUtil.toBundleDefinitions(ext.getMetadata().getBundles()));
 					return old;
 				}
 			}
@@ -6446,7 +6447,7 @@ public final class ConfigAdmin {
 							if (_ext != null && _ext.getId().equalsIgnoreCase(ext.getId())) {
 								old = RHExtension.toBundleDefinitions(ConfigUtil.getAsString("bundles", el, null)); // get existing bundles before populate new ones
 								ext.populate(el, false);
-								old = minus(old, OSGiUtil.toBundleDefinitions(ext.getBundles()));
+								old = minus(old, OSGiUtil.toBundleDefinitions(ext.getMetadata().getBundles()));
 								return old;
 							}
 						}
