@@ -1458,12 +1458,17 @@ public final class ConfigUtil {
 		throw new RuntimeException("getConfigServerImpl: " + config.getClass().getName());
 	}
 
-	public static ConfigWebImpl getConfigWebImpl(Config config) {
+	/**
+	 * returns ConfigWeb if available, otherwise ConfigServer
+	 * 
+	 * @param config
+	 * @return
+	 */
+	public static ConfigPro getConfigWebIfPossible(Config config) {
 		if (config instanceof ConfigWebImpl) return ((ConfigWebImpl) config);
 		Config c = ThreadLocalPageContext.getConfig();
-		LogUtil.log(Log.LEVEL_ERROR, "config", "canno convert the following instance to a ConfigWebImpl: " + config.getClass().getName());
 		if (c instanceof ConfigWebImpl) return ((ConfigWebImpl) c);
-		// MUST remove
-		throw new RuntimeException("getConfigWebImpl: " + config.getClass().getName());
+
+		return getConfigServerImpl(config);
 	}
 }

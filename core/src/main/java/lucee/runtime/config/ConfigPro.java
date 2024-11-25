@@ -413,4 +413,6 @@ public interface ConfigPro extends Config {
 	public CFMLEngine getEngine();
 
 	public boolean getDateCasterClassicStyle();
+
+	public ConfigPro resetMappings();
 }

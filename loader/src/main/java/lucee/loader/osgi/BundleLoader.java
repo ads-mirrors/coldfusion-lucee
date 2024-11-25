@@ -170,7 +170,7 @@ public class BundleLoader {
 		final Map<String, File> rtn = new ConcurrentHashMap<>();
 		final File[] jars = jarDirectory.listFiles();
 
-		if (jars != null) {
+		if (jars != null && jars.length > 0) {
 			// Create a thread pool with a fixed number of threads
 			// ExecutorService executor = Executors.newFixedThreadPool(Math.min(jars.length,
 			// Runtime.getRuntime().availableProcessors()));
@@ -226,7 +226,9 @@ public class BundleLoader {
 	}
 
 	public static ExecutorService createExecutorService(int maxThreads) {
-
+		if (maxThreads <= 0) {
+			throw new IllegalArgumentException("Invalid value for maxThreads: " + maxThreads + ". The value must be greater than 0.");
+		}
 		if (parseJavaVersion(System.getProperty("java.version")) >= 19) {
 			// FUTURE use newVirtualThreadPerTaskExecutor natively
 			try {
