@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.osgi.framework.Version;
 
+import lucee.print;
 import lucee.commons.collection.MapFactory;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.cache.Cache;
@@ -1807,7 +1808,11 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 
 					for (Mapping m: existing) {
 						if ("/".equals(m.getVirtual())) finished = true;
-						mappings.put(m.getVirtualLowerCase(), m);
+
+						print.e(m.getVirtual() + ":" + m);
+						MappingImpl tmp = ((MappingImpl) m).cloneReadOnly(this);
+
+						mappings.put(tmp.getVirtualLowerCase(), tmp);
 					}
 
 					if (!finished) {
@@ -1827,6 +1832,60 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 			}
 		}
 		return mappings;
+	}
+
+	private void createMapping() {
+		Map<String, Mapping> existing = null;// getExistingMappings();
+
+		// Mapping
+		Map<String, Mapping> mappings = MapFactory.<String, Mapping>getConcurrentMap();
+		Mapping tmp;
+		boolean finished = false;
+		Mapping ex;
+		Mapping[] sm = cs.getMappings();
+		if (sm != null) {
+			for (int i = 0; i < sm.length; i++) {
+				if (!sm[i].isHidden()) {
+					if ("/".equals(sm[i].getVirtual())) finished = true;
+					ex = existing.get(sm[i].getVirtualLowerCase());
+					if (ex != null && ex.equals(sm[i])) {
+						mappings.put(ex.getVirtualLowerCase(), ex);
+						continue;
+					}
+					else if (sm[i] instanceof MappingImpl) {
+						tmp = ((MappingImpl) sm[i]).cloneReadOnly(this);
+						mappings.put(tmp.getVirtualLowerCase(), tmp);
+
+					}
+					else {
+						tmp = sm[i];
+						mappings.put(tmp.getVirtualLowerCase(), tmp);
+					}
+
+					if (ex instanceof MappingImpl) {
+						((MappingImpl) ex).flush();
+					}
+
+				}
+			}
+		}
+		if (!finished) {
+			Mapping m;
+			if (ResourceUtil.isUNCPath(getRootDirectory().getPath())) {
+				m = new MappingImpl(this, "/", getRootDirectory().getPath(), null, ConfigPro.INSPECT_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED,
+						ConfigPro.INSPECT_INTERVAL_UNDEFINED, true, true, true, true, false, false, null, -1, -1);
+			}
+			else {
+				m = new MappingImpl(this, "/", "/", null, ConfigPro.INSPECT_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED, ConfigPro.INSPECT_INTERVAL_UNDEFINED, true, true, true,
+						true, false, false, null, -1, -1, true, true);
+			}
+			ex = existing.get("/");
+			if (ex != null && ex.equals(m)) {
+				m = ex;
+			}
+			mappings.put("/", m);
+		}
+		this.mappings = ConfigUtil.sort(mappings.values().toArray(new Mapping[mappings.size()]));
 	}
 
 	public ConfigWebImpl resetMappings() {
