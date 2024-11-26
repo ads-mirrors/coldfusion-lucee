@@ -601,7 +601,7 @@ if(isNumeric(datasource.connectionLimit))optional.append('connectionLimit:#datas
 if(datasource.connectionTimeout NEQ 1)optional.append('connectionTimeout:#datasource.connectionTimeout# // default: 1; unit: minutes');
 if(isNumeric(datasource.liveTimeout) && datasource.liveTimeout>0)optional.append('liveTimeout:#datasource.liveTimeout# // default: -1; unit: minutes');
 if(datasource.metaCacheTimeout NEQ 60000)optional.append(',metaCacheTimeout:#datasource.metaCacheTimeout# // default: 60000; unit: milliseconds');
-if(len(datasource.timezone))optional.append("timezone:'#replace(datasource.timezone,"'","''","all")#'");
+if(len(datasource.timezone))optional.append("timezone:'#replace(datasource.timezone,"'","''","all")#' // default is same as lucee instance");
 if(datasource.storage) optional.append('storage:#datasource.storage# // default: false');
 if(datasource.readOnly) optional.append('readOnly:#datasource.readOnly# // default: false');
 if(!isNull(driver.literalTimestampWithTSOffset) && driver.literalTimestampWithTSOffset()) 
@@ -627,7 +627,8 @@ this.datasources["#datasource.name#"] = {
 	password: "#datasource.passwordEncrypted#",<cfif optional.len()>
 	
 	// optional settings
-	<cfloop array="#optional#" index="i" item="value">#replace(value, " // default", ", // default")#<cfif i LT optional.len()>
+	<cfloop array="#optional#" index="i" item="value"><cfif i LT optional.len()>#replace(value, " // default", ", // default")#
+	<cfelse>#value#
 	</cfif></cfloop></cfif>
 };
 </cfsavecontent>
