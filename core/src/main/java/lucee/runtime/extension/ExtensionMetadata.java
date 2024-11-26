@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import lucee.Info;
 import lucee.commons.io.log.Log;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.osgi.BundleInfo;
+import lucee.runtime.osgi.VersionRange;
+import lucee.runtime.type.util.ListUtil;
 
 public class ExtensionMetadata {
 	private static final String[] EMPTY = new String[0];
@@ -18,10 +21,12 @@ public class ExtensionMetadata {
 	private String symbolicName;
 	private String description;
 	private String type;
+
 	private boolean trial;
 	private String image;
 	private boolean startBundles;
 	private BundleInfo[] bundles;
+	private VersionRange minCoreVersion;
 
 	private String[] jars;
 	private String[] flds;
@@ -303,8 +308,9 @@ public class ExtensionMetadata {
 		return StringUtil.isEmpty(symbolicName) ? getId() : symbolicName;
 	}
 
-	public void setSymbolicName(String symbolicName) {
-		this.symbolicName = symbolicName;
+	public void setSymbolicName(String str) {
+		str = StringUtil.unwrap(str);
+		if (!StringUtil.isEmpty(str, true)) symbolicName = str.trim();
 	}
 
 	public int getReleaseType() {
@@ -329,6 +335,14 @@ public class ExtensionMetadata {
 
 	public void setTrial(boolean trial) {
 		this.trial = trial;
+	}
+
+	public VersionRange getMinCoreVersion() {
+		return minCoreVersion;
+	}
+
+	public void setMinCoreVersion(String str, Info info) {
+		this.minCoreVersion = StringUtil.isEmpty(str, true) ? null : new VersionRange(str);
 	}
 
 	public String getImage() {
@@ -371,8 +385,11 @@ public class ExtensionMetadata {
 		return categories == null ? EMPTY : categories;
 	}
 
-	public void setCategories(String[] categories) {
-		this.categories = categories;
+	public void setCategories(String cat) {
+		if (!StringUtil.isEmpty(cat, true)) {
+			this.categories = ListUtil.trimItems(ListUtil.listToStringArray(cat, ","));
+		}
+		else this.categories = null;
 	}
 
 	public String[] getWebContexts() {

@@ -128,8 +128,6 @@ public class RHExtension implements Serializable {
 
 	private Resource extensionFile;
 
-	private VersionRange minCoreVersion;
-
 	private double minLoaderVersion;
 
 	public boolean softLoaded = false;
@@ -516,7 +514,7 @@ public class RHExtension implements Serializable {
 
 		Attributes attr = manifest.getMainAttributes();
 
-		readSymbolicName(label, StringUtil.unwrap(attr.getValue("symbolic-name")));
+		metadata.setSymbolicName(StringUtil.unwrap(attr.getValue("symbolic-name")));
 		readName(label, StringUtil.unwrap(attr.getValue("name")));
 		label = metadata.getName();
 		readVersion(label, StringUtil.unwrap(attr.getValue("version")));
@@ -528,8 +526,8 @@ public class RHExtension implements Serializable {
 		metadata.setImage(_img);
 		String cat = StringUtil.unwrap(attr.getValue("category"));
 		if (StringUtil.isEmpty(cat, true)) cat = StringUtil.unwrap(attr.getValue("categories"));
-		readCategories(label, cat);
-		readCoreVersion(label, StringUtil.unwrap(attr.getValue("lucee-core-version")), info);
+		metadata.setCategories(cat);
+		metadata.setMinCoreVersion(StringUtil.unwrap(attr.getValue("lucee-core-version")), info);
 		readLoaderVersion(label, StringUtil.unwrap(attr.getValue("lucee-loader-version")));
 		metadata.setStartBundles(Caster.toBooleanValue(StringUtil.unwrap(attr.getValue("start-bundles")), true));
 
@@ -554,7 +552,7 @@ public class RHExtension implements Serializable {
 		Log logger = ThreadLocalPageContext.getLog(config, "deploy");
 		Info info = ConfigUtil.getEngine(config).getInfo();
 
-		readSymbolicName(label, ConfigFactoryImpl.getAttr(data, "symbolicName", "symbolic-name"));
+		metadata.setSymbolicName(ConfigFactoryImpl.getAttr(data, "symbolicName", "symbolic-name"));
 		readName(label, ConfigFactoryImpl.getAttr(data, "name"));
 		label = getMetadata().getName();
 		readVersion(label, ConfigFactoryImpl.getAttr(data, "version"));
@@ -566,8 +564,8 @@ public class RHExtension implements Serializable {
 		metadata.setImage(_img);
 		String cat = ConfigFactoryImpl.getAttr(data, "category");
 		if (StringUtil.isEmpty(cat, true)) cat = ConfigFactoryImpl.getAttr(data, "categories");
-		readCategories(label, cat);
-		readCoreVersion(label, ConfigFactoryImpl.getAttr(data, "luceeCoreVersion", "lucee-core-version"), info);
+		metadata.setCategories(cat);
+		metadata.setMinCoreVersion(ConfigFactoryImpl.getAttr(data, "luceeCoreVersion", "lucee-core-version"), info);
 		readLoaderVersion(label, ConfigFactoryImpl.getAttr(data, "luceeLoaderVersion", "lucee-loader-version"));
 		metadata.setStartBundles(Caster.toBooleanValue(ConfigFactoryImpl.getAttr(data, "startBundles", "start-bundles"), true));
 
@@ -594,23 +592,12 @@ public class RHExtension implements Serializable {
 		 */
 	}
 
-	private void readCoreVersion(String label, String str, Info info) {
-
-		minCoreVersion = StringUtil.isEmpty(str, true) ? null : new VersionRange(str);
-		/*
-		 * if (minCoreVersion != null && OSGiUtil.isNewerThan(minCoreVersion, info.getVersion())) { throw
-		 * new InvalidVersion("The Extension [" + label + "] cannot be loaded, " + Constants.NAME +
-		 * " Version must be at least [" + minCoreVersion.toString() + "], version is [" +
-		 * info.getVersion().toString() + "]."); }
-		 */
-	}
-
 	public void validate(Config config) throws ApplicationException {
 		validate(ConfigUtil.getEngine(config).getInfo());
 	}
 
 	public void validate(Info info) throws ApplicationException {
-
+		VersionRange minCoreVersion = metadata.getMinCoreVersion();
 		if (minCoreVersion != null && !minCoreVersion.isWithin(info.getVersion())) {
 			throw new InvalidVersion("The Extension [" + metadata.getName() + "] cannot be loaded, " + Constants.NAME + " Version must be at least [" + minCoreVersion.toString()
 					+ "], version is [" + info.getVersion().toString() + "].");
@@ -622,6 +609,7 @@ public class RHExtension implements Serializable {
 	}
 
 	public boolean isValidFor(Info info) {
+		VersionRange minCoreVersion = metadata.getMinCoreVersion();
 		if (minCoreVersion != null && !minCoreVersion.isWithin(info.getVersion())) {
 			return false;
 		}
@@ -629,13 +617,6 @@ public class RHExtension implements Serializable {
 			return false;
 		}
 		return true;
-	}
-
-	private void readCategories(String label, String cat) {
-		if (!StringUtil.isEmpty(cat, true)) {
-			metadata.setCategories(ListUtil.trimItems(ListUtil.listToStringArray(cat, ",")));
-		}
-		else metadata.setCategories(null);
 	}
 
 	private void readId(String label, String id) throws ApplicationException {
@@ -659,11 +640,6 @@ public class RHExtension implements Serializable {
 			throw new ApplicationException("The Extension [" + label + "] has no name defined, a name is necesary.");
 		}
 		metadata.setName(str.trim());
-	}
-
-	private void readSymbolicName(String label, String str) {
-		str = StringUtil.unwrap(str);
-		if (!StringUtil.isEmpty(str, true)) metadata.setSymbolicName(str.trim());
 	}
 
 	public void deployBundles(Config config, boolean load) throws IOException, BundleException {
@@ -881,6 +857,7 @@ public class RHExtension implements Serializable {
 		else el.removeEL(KeyImpl.init("categories"));
 
 		// core version
+		VersionRange minCoreVersion = metadata.getMinCoreVersion();
 		if (minCoreVersion != null) el.setEL("luceeCoreVersion", toStringForAttr(minCoreVersion.toString()));
 		else el.removeEL(KeyImpl.init("luceeCoreVersion"));
 
