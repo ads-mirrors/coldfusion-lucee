@@ -1,5 +1,10 @@
 package lucee.runtime.extension;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import lucee.commons.io.log.Log;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.osgi.BundleInfo;
 
@@ -32,6 +37,235 @@ public class ExtensionMetadata {
 	private String[] webContexts;
 	private String[] categories;
 	private String[] gateways;
+
+	private List<Map<String, String>> caches;
+	private String cachesRaw;
+
+	private List<Map<String, String>> cacheHandlers;
+	private String cacheHandlersRaw;
+
+	private List<Map<String, String>> orms;
+	private String ormsRaw;
+
+	private List<Map<String, String>> webservices;
+	private String webservicesRaw;
+
+	private List<Map<String, String>> monitors;
+	private String monitorsRaw;
+
+	private List<Map<String, String>> resources;
+	private String resourcesRaw;
+
+	private List<Map<String, String>> searchs;
+	private String searchsRaw;
+
+	private List<Map<String, String>> amfs;
+	private String amfsRaw;
+
+	private List<Map<String, String>> jdbcs;
+	private String jdbcsRaw;
+
+	private List<Map<String, String>> startupHooks;
+	private String startupHooksRaw;
+
+	private List<Map<String, String>> mappings;
+	private String mappingsRaw;
+
+	private List<Map<String, Object>> eventGatewayInstances;
+	private String eventGatewayInstancesRaw;
+
+	public List<Map<String, Object>> getEventGatewayInstances() {
+		return eventGatewayInstances;
+	}
+
+	public String getEventGatewayInstancesRaw() {
+		return eventGatewayInstancesRaw;
+	}
+
+	public void setEventGatewayInstances(String str, Log logger) {
+		if (!StringUtil.isEmpty(str, true)) {
+			eventGatewayInstances = RHExtension.toSettingsObj(logger, str);
+			eventGatewayInstancesRaw = str;
+		}
+		if (eventGatewayInstances == null) eventGatewayInstances = new ArrayList<Map<String, Object>>();
+	}
+
+	public List<Map<String, String>> getMappings() {
+		return mappings;
+	}
+
+	public String getMappingsRaw() {
+		return mappingsRaw;
+	}
+
+	public void setMapping(String str, Log logger) {
+		if (!StringUtil.isEmpty(str, true)) {
+			mappings = RHExtension.toSettings(logger, str);
+			mappingsRaw = str;
+		}
+		if (mappings == null) mappings = new ArrayList<Map<String, String>>();
+	}
+
+	public List<Map<String, String>> getStartupHooks() {
+		return startupHooks;
+	}
+
+	public String getStartupHooksRaw() {
+		return startupHooksRaw;
+	}
+
+	public void setStartupHook(String str, Log logger) {
+		if (!StringUtil.isEmpty(str, true)) {
+			startupHooks = RHExtension.toSettings(logger, str);
+			startupHooksRaw = str;
+		}
+		if (startupHooks == null) startupHooks = new ArrayList<Map<String, String>>();
+	}
+
+	public List<Map<String, String>> getJdbcs() {
+		return jdbcs;
+	}
+
+	public String getJdbcsRaw() {
+		return jdbcsRaw;
+	}
+
+	public void setJDBC(String str, Log logger) {
+		if (!StringUtil.isEmpty(str, true)) {
+			jdbcs = RHExtension.toSettings(logger, str);
+			jdbcsRaw = str;
+		}
+		if (jdbcs == null) jdbcs = new ArrayList<Map<String, String>>();
+	}
+
+	public List<Map<String, String>> getAMFs() {
+		return amfs;
+	}
+
+	public String getAMFsRaw() {
+		return amfsRaw;
+	}
+
+	public void setAMF(String str, Log logger) {
+		if (!StringUtil.isEmpty(str, true)) {
+			amfs = RHExtension.toSettings(logger, str);
+			amfsRaw = str;
+		}
+		if (amfs == null) amfs = new ArrayList<Map<String, String>>();
+	}
+
+	public List<Map<String, String>> getSearchs() {
+		return searchs;
+	}
+
+	public String getSearchsRaw() {
+		return searchsRaw;
+	}
+
+	public void setSearch(String str, Log logger) {
+		if (!StringUtil.isEmpty(str, true)) {
+			searchs = RHExtension.toSettings(logger, str);
+			searchsRaw = str;
+		}
+		if (searchs == null) searchs = new ArrayList<Map<String, String>>();
+	}
+
+	public List<Map<String, String>> getResources() {
+		return resources;
+	}
+
+	public String getResourcesRaw() {
+		return resourcesRaw;
+	}
+
+	public void setResource(String str, Log logger) {
+		if (!StringUtil.isEmpty(str, true)) {
+			resources = RHExtension.toSettings(logger, str);
+			resourcesRaw = str;
+		}
+		if (resources == null) resources = new ArrayList<Map<String, String>>();
+
+	}
+
+	public List<Map<String, String>> getMonitors() {
+		return monitors;
+	}
+
+	public String getMonitorsRaw() {
+		return monitorsRaw;
+	}
+
+	public void setMonitor(String str, Log logger) {
+		if (!StringUtil.isEmpty(str, true)) {
+			monitors = RHExtension.toSettings(logger, str);
+			monitorsRaw = str;
+		}
+		if (monitors == null) monitors = new ArrayList<Map<String, String>>();
+	}
+
+	public List<Map<String, String>> getWebservices() {
+		return webservices;
+	}
+
+	public String getWebservicesRaw() {
+		return webservicesRaw;
+	}
+
+	public void setWebservice(String str, Log logger) {
+		if (!StringUtil.isEmpty(str, true)) {
+			webservices = RHExtension.toSettings(logger, str);
+			webservicesRaw = str;
+		}
+		if (webservices == null) webservices = new ArrayList<Map<String, String>>();
+	}
+
+	public void setORM(String str, Log logger) {
+		if (!StringUtil.isEmpty(str, true)) {
+			orms = RHExtension.toSettings(logger, str);
+			ormsRaw = str;
+		}
+		if (orms == null) orms = new ArrayList<Map<String, String>>();
+	}
+
+	public List<Map<String, String>> getOrms() {
+		return orms;
+	}
+
+	public String getOrmsRaw() {
+		return ormsRaw;
+	}
+
+	public List<Map<String, String>> getCacheHandlers() {
+		return cacheHandlers;
+	}
+
+	public String getCacheHandlersRaw() {
+		return cacheHandlersRaw;
+	}
+
+	public void setCacheHandler(String str, Log logger) {
+		if (!StringUtil.isEmpty(str, true)) {
+			cacheHandlers = RHExtension.toSettings(logger, str);
+			cacheHandlersRaw = str;
+		}
+		if (cacheHandlers == null) cacheHandlers = new ArrayList<Map<String, String>>();
+	}
+
+	public List<Map<String, String>> getCaches() {
+		return caches;
+	}
+
+	public String getCachesRaw() {
+		return cachesRaw;
+	}
+
+	public void setCaches(String raw, Log log) {
+		if (!StringUtil.isEmpty(raw, true)) {
+			caches = RHExtension.toSettings(log, raw);
+			cachesRaw = raw;
+		}
+		if (caches == null) caches = new ArrayList<Map<String, String>>();
+	}
 
 	public String getId() {
 		return id;

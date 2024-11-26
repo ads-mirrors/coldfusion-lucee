@@ -4812,8 +4812,9 @@ public final class ConfigAdmin {
 			}
 
 			// update cache
-			if (!ArrayUtil.isEmpty(rhext.getCaches())) {
-				Iterator<Map<String, String>> itl = rhext.getCaches().iterator();
+			List<Map<String, String>> caches = rhext.getMetadata().getCaches();
+			if (!ArrayUtil.isEmpty(caches)) {
+				Iterator<Map<String, String>> itl = caches.iterator();
 				Map<String, String> map;
 				while (itl.hasNext()) {
 					map = itl.next();
@@ -4829,8 +4830,9 @@ public final class ConfigAdmin {
 			}
 
 			// update cache handler
-			if (!ArrayUtil.isEmpty(rhext.getCacheHandlers())) {
-				Iterator<Map<String, String>> itl = rhext.getCacheHandlers().iterator();
+			List<Map<String, String>> handlers = rhext.getMetadata().getCacheHandlers();
+			if (!ArrayUtil.isEmpty(handlers)) {
+				Iterator<Map<String, String>> itl = handlers.iterator();
 				Map<String, String> map;
 				while (itl.hasNext()) {
 					map = itl.next();
@@ -4846,8 +4848,9 @@ public final class ConfigAdmin {
 			}
 
 			// update Search
-			if (!ArrayUtil.isEmpty(rhext.getSearchs())) {
-				Iterator<Map<String, String>> itl = rhext.getSearchs().iterator();
+			List<Map<String, String>> searchs = rhext.getMetadata().getSearchs();
+			if (!ArrayUtil.isEmpty(searchs)) {
+				Iterator<Map<String, String>> itl = searchs.iterator();
 				Map<String, String> map;
 				while (itl.hasNext()) {
 					map = itl.next();
@@ -4862,8 +4865,9 @@ public final class ConfigAdmin {
 			}
 
 			// update Resource
-			if (!ArrayUtil.isEmpty(rhext.getResources())) {
-				Iterator<Map<String, String>> itl = rhext.getResources().iterator();
+			List<Map<String, String>> resources = rhext.getMetadata().getResources();
+			if (!ArrayUtil.isEmpty(resources)) {
+				Iterator<Map<String, String>> itl = resources.iterator();
 				Map<String, String> map;
 				while (itl.hasNext()) {
 					map = itl.next();
@@ -4882,8 +4886,9 @@ public final class ConfigAdmin {
 			}
 
 			// update orm
-			if (!ArrayUtil.isEmpty(rhext.getOrms())) {
-				Iterator<Map<String, String>> itl = rhext.getOrms().iterator();
+			List<Map<String, String>> orms = rhext.getMetadata().getOrms();
+			if (!ArrayUtil.isEmpty(orms)) {
+				Iterator<Map<String, String>> itl = orms.iterator();
 				Map<String, String> map;
 				while (itl.hasNext()) {
 					map = itl.next();
@@ -4899,8 +4904,9 @@ public final class ConfigAdmin {
 			}
 
 			// update webservice
-			if (!ArrayUtil.isEmpty(rhext.getWebservices())) {
-				Iterator<Map<String, String>> itl = rhext.getWebservices().iterator();
+			List<Map<String, String>> webservices = rhext.getMetadata().getWebservices();
+			if (!ArrayUtil.isEmpty(webservices)) {
+				Iterator<Map<String, String>> itl = webservices.iterator();
 				Map<String, String> map;
 				while (itl.hasNext()) {
 					map = itl.next();
@@ -4915,8 +4921,9 @@ public final class ConfigAdmin {
 			}
 
 			// update monitor
-			if (!ArrayUtil.isEmpty(rhext.getMonitors())) {
-				Iterator<Map<String, String>> itl = rhext.getMonitors().iterator();
+			List<Map<String, String>> monitors = rhext.getMetadata().getMonitors();
+			if (!ArrayUtil.isEmpty(monitors)) {
+				Iterator<Map<String, String>> itl = monitors.iterator();
 				Map<String, String> map;
 				while (itl.hasNext()) {
 					map = itl.next();
@@ -4932,8 +4939,9 @@ public final class ConfigAdmin {
 			}
 
 			// update jdbc
-			if (!ArrayUtil.isEmpty(rhext.getJdbcs())) {
-				Iterator<Map<String, String>> itl = rhext.getJdbcs().iterator();
+			List<Map<String, String>> jdbcs = rhext.getMetadata().getJdbcs();
+			if (!ArrayUtil.isEmpty(jdbcs)) {
+				Iterator<Map<String, String>> itl = jdbcs.iterator();
 				Map<String, String> map;
 				while (itl.hasNext()) {
 					map = itl.next();
@@ -4952,8 +4960,9 @@ public final class ConfigAdmin {
 			}
 
 			// update startup hook
-			if (!ArrayUtil.isEmpty(rhext.getStartupHooks())) {
-				Iterator<Map<String, String>> itl = rhext.getStartupHooks().iterator();
+			List<Map<String, String>> startupHooks = rhext.getMetadata().getStartupHooks();
+			if (!ArrayUtil.isEmpty(startupHooks)) {
+				Iterator<Map<String, String>> itl = startupHooks.iterator();
 				Map<String, String> map;
 				while (itl.hasNext()) {
 					map = itl.next();
@@ -4978,8 +4987,9 @@ public final class ConfigAdmin {
 			}
 
 			// update mapping
-			if (!ArrayUtil.isEmpty(rhext.getMappings())) {
-				Iterator<Map<String, String>> itl = rhext.getMappings().iterator();
+			List<Map<String, String>> mappings = rhext.getMetadata().getMappings();
+			if (!ArrayUtil.isEmpty(mappings)) {
+				Iterator<Map<String, String>> itl = mappings.iterator();
 				Map<String, String> map;
 
 				String virtual, physical, archive, primary;
@@ -5031,9 +5041,9 @@ public final class ConfigAdmin {
 			}
 
 			// update event-gateway-instance
-
-			if (!ArrayUtil.isEmpty(rhext.getEventGatewayInstances())) {
-				Iterator<Map<String, Object>> itl = rhext.getEventGatewayInstances().iterator();
+			List<Map<String, Object>> egs = rhext.getMetadata().getEventGatewayInstances();
+			if (!ArrayUtil.isEmpty(egs)) {
+				Iterator<Map<String, Object>> itl = egs.iterator();
 				Map<String, Object> map;
 				while (itl.hasNext()) {
 					map = itl.next();
@@ -5175,8 +5185,9 @@ public final class ConfigAdmin {
 			removePlugins(config, logger, rhe.getMetadata().getPlugins()); // MUST check if others use one of this
 
 			// remove cache handler
-			if (!ArrayUtil.isEmpty(rhe.getCacheHandlers())) {
-				Iterator<Map<String, String>> itl = rhe.getCacheHandlers().iterator();
+			List<Map<String, String>> handlers = rhe.getMetadata().getCacheHandlers();
+			if (!ArrayUtil.isEmpty(handlers)) {
+				Iterator<Map<String, String>> itl = handlers.iterator();
 				Map<String, String> map;
 				while (itl.hasNext()) {
 					map = itl.next();
@@ -5193,8 +5204,9 @@ public final class ConfigAdmin {
 			}
 
 			// remove cache
-			if (!ArrayUtil.isEmpty(rhe.getCaches())) {
-				Iterator<Map<String, String>> itl = rhe.getCaches().iterator();
+			List<Map<String, String>> caches = rhe.getMetadata().getCaches();
+			if (!ArrayUtil.isEmpty(caches)) {
+				Iterator<Map<String, String>> itl = caches.iterator();
 				Map<String, String> map;
 				while (itl.hasNext()) {
 					map = itl.next();
@@ -5208,8 +5220,9 @@ public final class ConfigAdmin {
 			}
 
 			// remove Search
-			if (!ArrayUtil.isEmpty(rhe.getSearchs())) {
-				Iterator<Map<String, String>> itl = rhe.getSearchs().iterator();
+			List<Map<String, String>> searchs = rhe.getMetadata().getSearchs();
+			if (!ArrayUtil.isEmpty(searchs)) {
+				Iterator<Map<String, String>> itl = searchs.iterator();
 				Map<String, String> map;
 				while (itl.hasNext()) {
 					map = itl.next();
@@ -5223,8 +5236,9 @@ public final class ConfigAdmin {
 			}
 
 			// remove resource
-			if (!ArrayUtil.isEmpty(rhe.getResources())) {
-				Iterator<Map<String, String>> itl = rhe.getResources().iterator();
+			List<Map<String, String>> resources = rhe.getMetadata().getResources();
+			if (!ArrayUtil.isEmpty(resources)) {
+				Iterator<Map<String, String>> itl = resources.iterator();
 				Map<String, String> map;
 				while (itl.hasNext()) {
 					map = itl.next();
@@ -5238,8 +5252,9 @@ public final class ConfigAdmin {
 			}
 
 			// remove orm
-			if (!ArrayUtil.isEmpty(rhe.getOrms())) {
-				Iterator<Map<String, String>> itl = rhe.getOrms().iterator();
+			List<Map<String, String>> orms = rhe.getMetadata().getOrms();
+			if (!ArrayUtil.isEmpty(orms)) {
+				Iterator<Map<String, String>> itl = orms.iterator();
 				Map<String, String> map;
 				while (itl.hasNext()) {
 					map = itl.next();
@@ -5254,8 +5269,9 @@ public final class ConfigAdmin {
 			}
 
 			// remove webservice
-			if (!ArrayUtil.isEmpty(rhe.getWebservices())) {
-				Iterator<Map<String, String>> itl = rhe.getWebservices().iterator();
+			List<Map<String, String>> webservices = rhe.getMetadata().getWebservices();
+			if (!ArrayUtil.isEmpty(webservices)) {
+				Iterator<Map<String, String>> itl = webservices.iterator();
 				Map<String, String> map;
 				while (itl.hasNext()) {
 					map = itl.next();
@@ -5270,8 +5286,9 @@ public final class ConfigAdmin {
 			}
 
 			// remove monitor
-			if (!ArrayUtil.isEmpty(rhe.getMonitors())) {
-				Iterator<Map<String, String>> itl = rhe.getMonitors().iterator();
+			List<Map<String, String>> monitors = rhe.getMetadata().getMonitors();
+			if (!ArrayUtil.isEmpty(monitors)) {
+				Iterator<Map<String, String>> itl = monitors.iterator();
 				Map<String, String> map;
 				String name;
 				while (itl.hasNext()) {
@@ -5288,8 +5305,9 @@ public final class ConfigAdmin {
 			}
 
 			// remove jdbc
-			if (!ArrayUtil.isEmpty(rhe.getJdbcs())) {
-				Iterator<Map<String, String>> itl = rhe.getJdbcs().iterator();
+			List<Map<String, String>> jdbcs = rhe.getMetadata().getJdbcs();
+			if (!ArrayUtil.isEmpty(jdbcs)) {
+				Iterator<Map<String, String>> itl = jdbcs.iterator();
 				Map<String, String> map;
 				while (itl.hasNext()) {
 					map = itl.next();
@@ -5302,8 +5320,9 @@ public final class ConfigAdmin {
 			}
 
 			// remove startup hook
-			if (!ArrayUtil.isEmpty(rhe.getStartupHooks())) {
-				Iterator<Map<String, String>> itl = rhe.getStartupHooks().iterator();
+			List<Map<String, String>> startupHooks = rhe.getMetadata().getStartupHooks();
+			if (!ArrayUtil.isEmpty(startupHooks)) {
+				Iterator<Map<String, String>> itl = startupHooks.iterator();
 				Map<String, String> map;
 				while (itl.hasNext()) {
 					map = itl.next();
@@ -5323,8 +5342,9 @@ public final class ConfigAdmin {
 			}
 
 			// remove mapping
-			if (!ArrayUtil.isEmpty(rhe.getMappings())) {
-				Iterator<Map<String, String>> itl = rhe.getMappings().iterator();
+			List<Map<String, String>> mappings = rhe.getMetadata().getMappings();
+			if (!ArrayUtil.isEmpty(mappings)) {
+				Iterator<Map<String, String>> itl = mappings.iterator();
 				Map<String, String> map;
 				String virtual;
 				while (itl.hasNext()) {
@@ -5336,8 +5356,9 @@ public final class ConfigAdmin {
 			}
 
 			// remove event-gateway-instance
-			if (!ArrayUtil.isEmpty(rhe.getEventGatewayInstances())) {
-				Iterator<Map<String, Object>> itl = rhe.getEventGatewayInstances().iterator();
+			List<Map<String, Object>> egs = rhe.getMetadata().getEventGatewayInstances();
+			if (!ArrayUtil.isEmpty(egs)) {
+				Iterator<Map<String, Object>> itl = egs.iterator();
 				Map<String, Object> map;
 				String id;
 				while (itl.hasNext()) {

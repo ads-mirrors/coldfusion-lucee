@@ -126,48 +126,11 @@ public class RHExtension implements Serializable {
 
 	private ExtensionMetadata metadata = new ExtensionMetadata();
 
-	private List<Map<String, String>> caches;
-	private List<Map<String, String>> cacheHandlers;
-	private List<Map<String, String>> orms;
-	private List<Map<String, String>> webservices;
-	private List<Map<String, String>> monitors;
-	private List<Map<String, String>> resources;
-	private List<Map<String, String>> searchs;
-	private List<Map<String, String>> amfs;
-	private List<Map<String, String>> jdbcs;
-	private List<Map<String, String>> startupHooks;
-	private List<Map<String, String>> mappings;
-	private List<Map<String, Object>> eventGatewayInstances;
-
 	private Resource extensionFile;
 
 	private VersionRange minCoreVersion;
 
 	private double minLoaderVersion;
-
-	private String amfsJson;
-
-	private String resourcesJson;
-	// private Config config;
-
-	private String searchsJson;
-
-	private String ormsJson;
-	private String webservicesJson;
-
-	private String monitorsJson;
-
-	private String cachesJson;
-
-	private String cacheHandlersJson;
-
-	private String jdbcsJson;
-
-	private String startupHooksJson;
-
-	private String mappingsJson;
-
-	private String eventGatewayInstancesJson;
 
 	public boolean softLoaded = false;
 
@@ -570,18 +533,18 @@ public class RHExtension implements Serializable {
 		readLoaderVersion(label, StringUtil.unwrap(attr.getValue("lucee-loader-version")));
 		metadata.setStartBundles(Caster.toBooleanValue(StringUtil.unwrap(attr.getValue("start-bundles")), true));
 
-		readAMF(label, StringUtil.unwrap(attr.getValue("amf")), logger);
-		readResource(label, StringUtil.unwrap(attr.getValue("resource")), logger);
-		readSearch(label, StringUtil.unwrap(attr.getValue("search")), logger);
-		readORM(label, StringUtil.unwrap(attr.getValue("orm")), logger);
-		readWebservice(label, StringUtil.unwrap(attr.getValue("webservice")), logger);
-		readMonitor(label, StringUtil.unwrap(attr.getValue("monitor")), logger);
-		readCache(label, StringUtil.unwrap(attr.getValue("cache")), logger);
-		readCacheHandler(label, StringUtil.unwrap(attr.getValue("cache-handler")), logger);
-		readJDBC(label, StringUtil.unwrap(attr.getValue("jdbc")), logger);
-		readStartupHook(label, StringUtil.unwrap(attr.getValue("startup-hook")), logger);
-		readMapping(label, StringUtil.unwrap(attr.getValue("mapping")), logger);
-		readEventGatewayInstances(label, StringUtil.unwrap(attr.getValue("event-gateway-instance")), logger);
+		metadata.setAMF(StringUtil.unwrap(attr.getValue("amf")), logger);
+		metadata.setResource(StringUtil.unwrap(attr.getValue("resource")), logger);
+		metadata.setSearch(StringUtil.unwrap(attr.getValue("search")), logger);
+		metadata.setORM(StringUtil.unwrap(attr.getValue("orm")), logger);
+		metadata.setWebservice(StringUtil.unwrap(attr.getValue("webservice")), logger);
+		metadata.setMonitor(StringUtil.unwrap(attr.getValue("monitor")), logger);
+		metadata.setCaches(StringUtil.unwrap(attr.getValue("cache")), logger);
+		metadata.setCacheHandler(StringUtil.unwrap(attr.getValue("cache-handler")), logger);
+		metadata.setJDBC(StringUtil.unwrap(attr.getValue("jdbc")), logger);
+		metadata.setStartupHook(StringUtil.unwrap(attr.getValue("startup-hook")), logger);
+		metadata.setMapping(StringUtil.unwrap(attr.getValue("mapping")), logger);
+		metadata.setEventGatewayInstances(StringUtil.unwrap(attr.getValue("event-gateway-instance")), logger);
 	}
 
 	private void readManifestConfig(Config config, String id, Struct data, String label, String _img) throws ApplicationException {
@@ -608,114 +571,18 @@ public class RHExtension implements Serializable {
 		readLoaderVersion(label, ConfigFactoryImpl.getAttr(data, "luceeLoaderVersion", "lucee-loader-version"));
 		metadata.setStartBundles(Caster.toBooleanValue(ConfigFactoryImpl.getAttr(data, "startBundles", "start-bundles"), true));
 
-		readAMF(label, ConfigFactoryImpl.getAttr(data, "amf"), logger);
-		readResource(label, ConfigFactoryImpl.getAttr(data, "resource"), logger);
-		readSearch(label, ConfigFactoryImpl.getAttr(data, "search"), logger);
-		readORM(label, ConfigFactoryImpl.getAttr(data, "orm"), logger);
-		readWebservice(label, ConfigFactoryImpl.getAttr(data, "webservice"), logger);
-		readMonitor(label, ConfigFactoryImpl.getAttr(data, "monitor"), logger);
-		readCache(label, ConfigFactoryImpl.getAttr(data, "cache"), logger);
-		readCacheHandler(label, ConfigFactoryImpl.getAttr(data, "cacheHandler", "cache-handler"), logger);
-		readJDBC(label, ConfigFactoryImpl.getAttr(data, "jdbc"), logger);
-		readMapping(label, ConfigFactoryImpl.getAttr(data, "mapping"), logger);
-		readEventGatewayInstances(label, ConfigFactoryImpl.getAttr(data, "eventGatewayInstance", "event-gateway-instance"), logger);
-	}
-
-	private void readMapping(String label, String str, Log logger) {
-		if (!StringUtil.isEmpty(str, true)) {
-			mappings = toSettings(logger, str);
-			mappingsJson = str;
-		}
-		if (mappings == null) mappings = new ArrayList<Map<String, String>>();
-	}
-
-	private void readEventGatewayInstances(String label, String str, Log logger) {
-		if (!StringUtil.isEmpty(str, true)) {
-			eventGatewayInstances = toSettingsObj(logger, str);
-			eventGatewayInstancesJson = str;
-		}
-		if (eventGatewayInstances == null) eventGatewayInstances = new ArrayList<Map<String, Object>>();
-	}
-
-	private void readJDBC(String label, String str, Log logger) {
-		if (!StringUtil.isEmpty(str, true)) {
-			jdbcs = toSettings(logger, str);
-			jdbcsJson = str;
-		}
-		if (jdbcs == null) jdbcs = new ArrayList<Map<String, String>>();
-	}
-
-	private void readStartupHook(String label, String str, Log logger) {
-		if (!StringUtil.isEmpty(str, true)) {
-			startupHooks = toSettings(logger, str);
-			startupHooksJson = str;
-		}
-		if (startupHooks == null) startupHooks = new ArrayList<Map<String, String>>();
-	}
-
-	private void readCacheHandler(String label, String str, Log logger) {
-		if (!StringUtil.isEmpty(str, true)) {
-			cacheHandlers = toSettings(logger, str);
-			cacheHandlersJson = str;
-		}
-		if (cacheHandlers == null) cacheHandlers = new ArrayList<Map<String, String>>();
-	}
-
-	private void readCache(String label, String str, Log logger) {
-		if (!StringUtil.isEmpty(str, true)) {
-			caches = toSettings(logger, str);
-			cachesJson = str;
-		}
-		if (caches == null) caches = new ArrayList<Map<String, String>>();
-	}
-
-	private void readMonitor(String label, String str, Log logger) {
-		if (!StringUtil.isEmpty(str, true)) {
-			monitors = toSettings(logger, str);
-			monitorsJson = str;
-		}
-		if (monitors == null) monitors = new ArrayList<Map<String, String>>();
-	}
-
-	private void readORM(String label, String str, Log logger) {
-		if (!StringUtil.isEmpty(str, true)) {
-			orms = toSettings(logger, str);
-			ormsJson = str;
-		}
-		if (orms == null) orms = new ArrayList<Map<String, String>>();
-	}
-
-	private void readWebservice(String label, String str, Log logger) {
-		if (!StringUtil.isEmpty(str, true)) {
-			webservices = toSettings(logger, str);
-			webservicesJson = str;
-		}
-		if (webservices == null) webservices = new ArrayList<Map<String, String>>();
-	}
-
-	private void readSearch(String label, String str, Log logger) {
-		if (!StringUtil.isEmpty(str, true)) {
-			searchs = toSettings(logger, str);
-			searchsJson = str;
-		}
-		if (searchs == null) searchs = new ArrayList<Map<String, String>>();
-	}
-
-	private void readResource(String label, String str, Log logger) {
-		if (!StringUtil.isEmpty(str, true)) {
-			resources = toSettings(logger, str);
-			resourcesJson = str;
-		}
-		if (resources == null) resources = new ArrayList<Map<String, String>>();
-
-	}
-
-	private void readAMF(String label, String str, Log logger) {
-		if (!StringUtil.isEmpty(str, true)) {
-			amfs = toSettings(logger, str);
-			amfsJson = str;
-		}
-		if (amfs == null) amfs = new ArrayList<Map<String, String>>();
+		metadata.setAMF(ConfigFactoryImpl.getAttr(data, "amf"), logger);
+		metadata.setResource(ConfigFactoryImpl.getAttr(data, "resource"), logger);
+		metadata.setSearch(ConfigFactoryImpl.getAttr(data, "search"), logger);
+		metadata.setORM(ConfigFactoryImpl.getAttr(data, "orm"), logger);
+		metadata.setWebservice(ConfigFactoryImpl.getAttr(data, "webservice"), logger);
+		metadata.setMonitor(ConfigFactoryImpl.getAttr(data, "monitor"), logger);
+		metadata.setCaches(ConfigFactoryImpl.getAttr(data, "cache"), logger);
+		metadata.setCacheHandler(ConfigFactoryImpl.getAttr(data, "cacheHandler", "cache-handler"), logger);
+		metadata.setJDBC(ConfigFactoryImpl.getAttr(data, "jdbc"), logger);
+		metadata.setStartupHook(ConfigFactoryImpl.getAttr(data, "startup-hook"), logger);
+		metadata.setMapping(ConfigFactoryImpl.getAttr(data, "mapping"), logger);
+		metadata.setEventGatewayInstances(ConfigFactoryImpl.getAttr(data, "eventGatewayInstance", "event-gateway-instance"), logger);
 	}
 
 	private void readLoaderVersion(String label, String str) {
@@ -1022,51 +889,51 @@ public class RHExtension implements Serializable {
 		else el.removeEL(KeyImpl.init("loaderVersion"));
 
 		// amf
-		if (!StringUtil.isEmpty(amfsJson)) el.setEL("amf", toStringForAttr(amfsJson));
+		if (!StringUtil.isEmpty(metadata.getAMFsRaw())) el.setEL("amf", toStringForAttr(metadata.getAMFsRaw()));
 		else el.removeEL(KeyImpl.init("amf"));
 
 		// resource
-		if (!StringUtil.isEmpty(resourcesJson)) el.setEL("resource", toStringForAttr(resourcesJson));
+		if (!StringUtil.isEmpty(metadata.getResourcesRaw())) el.setEL("resource", toStringForAttr(metadata.getResourcesRaw()));
 		else el.removeEL(KeyImpl.init("resource"));
 
 		// search
-		if (!StringUtil.isEmpty(searchsJson)) el.setEL("search", toStringForAttr(searchsJson));
+		if (!StringUtil.isEmpty(metadata.getSearchsRaw())) el.setEL("search", toStringForAttr(metadata.getSearchsRaw()));
 		else el.removeEL(KeyImpl.init("search"));
 
 		// orm
-		if (!StringUtil.isEmpty(ormsJson)) el.setEL("orm", toStringForAttr(ormsJson));
+		if (!StringUtil.isEmpty(metadata.getOrmsRaw())) el.setEL("orm", toStringForAttr(metadata.getOrmsRaw()));
 		else el.removeEL(KeyImpl.init("orm"));
 
 		// webservice
-		if (!StringUtil.isEmpty(webservicesJson)) el.setEL("webservice", toStringForAttr(webservicesJson));
+		if (!StringUtil.isEmpty(metadata.getWebservicesRaw())) el.setEL("webservice", toStringForAttr(metadata.getWebservicesRaw()));
 		else el.removeEL(KeyImpl.init("webservice"));
 
 		// monitor
-		if (!StringUtil.isEmpty(monitorsJson)) el.setEL("monitor", toStringForAttr(monitorsJson));
+		if (!StringUtil.isEmpty(metadata.getMonitorsRaw())) el.setEL("monitor", toStringForAttr(metadata.getMonitorsRaw()));
 		else el.removeEL(KeyImpl.init("monitor"));
 
 		// cache
-		if (!StringUtil.isEmpty(cachesJson)) el.setEL("cache", toStringForAttr(cachesJson));
+		if (!StringUtil.isEmpty(metadata.getCachesRaw())) el.setEL("cache", toStringForAttr(metadata.getCachesRaw()));
 		else el.removeEL(KeyImpl.init("cache"));
 
 		// cache-handler
-		if (!StringUtil.isEmpty(cacheHandlersJson)) el.setEL("cacheHandler", toStringForAttr(cacheHandlersJson));
+		if (!StringUtil.isEmpty(metadata.getCacheHandlersRaw())) el.setEL("cacheHandler", toStringForAttr(metadata.getCacheHandlersRaw()));
 		else el.removeEL(KeyImpl.init("cacheHandler"));
 
 		// jdbc
-		if (!StringUtil.isEmpty(jdbcsJson)) el.setEL("jdbc", toStringForAttr(jdbcsJson));
+		if (!StringUtil.isEmpty(metadata.getJdbcsRaw())) el.setEL("jdbc", toStringForAttr(metadata.getJdbcsRaw()));
 		else el.removeEL(KeyImpl.init("jdbc"));
 
 		// startup-hook
-		if (!StringUtil.isEmpty(startupHooksJson)) el.setEL("startupHook", toStringForAttr(startupHooksJson));
+		if (!StringUtil.isEmpty(metadata.getStartupHooksRaw())) el.setEL("startupHook", toStringForAttr(metadata.getStartupHooksRaw()));
 		else el.removeEL(KeyImpl.init("startupHook"));
 
 		// mapping
-		if (!StringUtil.isEmpty(mappingsJson)) el.setEL("mapping", toStringForAttr(mappingsJson));
+		if (!StringUtil.isEmpty(metadata.getMappingsRaw())) el.setEL("mapping", toStringForAttr(metadata.getMappingsRaw()));
 		else el.removeEL(KeyImpl.init("mapping"));
 
 		// event-gateway-instances
-		if (!StringUtil.isEmpty(eventGatewayInstancesJson)) el.setEL("eventGatewayInstances", toStringForAttr(eventGatewayInstancesJson));
+		if (!StringUtil.isEmpty(metadata.getEventGatewayInstancesRaw())) el.setEL("eventGatewayInstances", toStringForAttr(metadata.getEventGatewayInstancesRaw()));
 		else el.removeEL(KeyImpl.init("eventGatewayInstances"));
 	}
 
@@ -1239,13 +1106,13 @@ public class RHExtension implements Serializable {
 		}
 	}
 
-	private static List<Map<String, String>> toSettings(Log log, String str) {
+	public static List<Map<String, String>> toSettings(Log log, String str) {
 		List<Map<String, String>> list = new ArrayList<>();
 		_toSettings(list, log, str, true);
 		return list;
 	}
 
-	private static List<Map<String, Object>> toSettingsObj(Log log, String str) {
+	public static List<Map<String, Object>> toSettingsObj(Log log, String str) {
 		List<Map<String, Object>> list = new ArrayList<>();
 		_toSettings(list, log, str, false);
 		return list;
@@ -1309,54 +1176,6 @@ public class RHExtension implements Serializable {
 
 	public ExtensionMetadata getMetadata() {
 		return this.metadata;
-	}
-
-	public List<Map<String, String>> getCaches() {
-		return caches;
-	}
-
-	public List<Map<String, String>> getCacheHandlers() {
-		return cacheHandlers;
-	}
-
-	public List<Map<String, String>> getOrms() {
-		return orms;
-	}
-
-	public List<Map<String, String>> getWebservices() {
-		return webservices;
-	}
-
-	public List<Map<String, String>> getMonitors() {
-		return monitors;
-	}
-
-	public List<Map<String, String>> getSearchs() {
-		return searchs;
-	}
-
-	public List<Map<String, String>> getResources() {
-		return resources;
-	}
-
-	public List<Map<String, String>> getAMFs() {
-		return amfs;
-	}
-
-	public List<Map<String, String>> getJdbcs() {
-		return jdbcs;
-	}
-
-	public List<Map<String, String>> getStartupHooks() {
-		return startupHooks;
-	}
-
-	public List<Map<String, String>> getMappings() {
-		return mappings;
-	}
-
-	public List<Map<String, Object>> getEventGatewayInstances() {
-		return eventGatewayInstances;
 	}
 
 	public Resource getExtensionFile() {
