@@ -38,8 +38,8 @@ public class AIUtil {
 		return ae;
 	}
 
-	public static void valdate(AIEngine aie) throws PageException {
-		AISession session = aie.createSession("keep the answer short", aie.getTimeout());
+	public static void valdate(AIEngine aie, long timeout) throws PageException {
+		AISession session = aie.createSession("keep the answer short", timeout <= 0 ? aie.getTimeout() : timeout);
 		session.inquiry("ping");
 	}
 
@@ -53,9 +53,23 @@ public class AIUtil {
 		return names;
 	}
 
+	public static String findModelName(AIEngine aie, String name) throws PageException {
+		List<AIModel> models = aie.getModels();
+		for (AIModel m: models) {
+			if (m.getName().equalsIgnoreCase(name)) return m.getName();
+			if (m.getName().equalsIgnoreCase(name + ":latest")) return m.getName();
+			if (m.getLabel().equalsIgnoreCase(name)) return m.getName();
+		}
+		return null;
+	}
+
 	public static String getModelNamesAsStringList(AIEngine aie) throws PageException {
+		return getModelNamesAsStringList(getModelNames(aie));
+	}
+
+	public static String getModelNamesAsStringList(List<String> models) {
 		StringBuilder sb = new StringBuilder();
-		for (String name: getModelNames(aie)) {
+		for (String name: models) {
 			if (sb.length() > 0) sb.append(", ");
 			sb.append(name);
 		}

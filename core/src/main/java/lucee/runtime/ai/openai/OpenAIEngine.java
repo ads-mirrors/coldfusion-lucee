@@ -52,6 +52,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.CollectionUtil;
 import lucee.runtime.type.util.KeyConstants;
 
 public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
@@ -99,6 +100,7 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 	Struct properties;
 	String secretKey;
 	long timeout = DEFAULT_TIMEOUT;
+	long initTimeout = DEFAULT_TIMEOUT * 2;
 	String charset;
 	ProxyData proxy = null;
 	Map<String, String> formfields = null;
@@ -153,20 +155,31 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 
 		// timeout
 		timeout = Caster.toLongValue(properties.get(KeyConstants._timeout, null), DEFAULT_TIMEOUT);
+		initTimeout = Caster.toLongValue(properties.get("initTimeout", null), DEFAULT_TIMEOUT * 2);
 		// charset
 		charset = Caster.toString(properties.get(KeyConstants._charset, null), DEFAULT_CHARSET);
 		if (Util.isEmpty(charset, true)) charset = DEFAULT_CHARSET;
 		// model
 		model = Caster.toString(properties.get(KeyConstants._model, null), null);
 		if (Util.isEmpty(model, true)) {
+
 			// nice to have
 			String appendix = "";
 			try {
-				appendix = " Available models for this engine are [" + AIUtil.getModelNamesAsStringList(this) + "]";
+				List<String> models = AIUtil.getModelNames(this);
+				if (models.size() == 1) {
+					model = models.get(0);
+				}
+				else if (models.size() == 0) {
+					appendix = " There are no models availbale.";
+				}
+				else {
+					appendix = " Available models for this engine are [" + AIUtil.getModelNamesAsStringList(this) + "].";
+				}
 			}
 			catch (PageException pe) {
 			}
-			throw new ApplicationException("the property [model] is required for a OpenAI Engine!." + appendix);
+			if (Util.isEmpty(model, true)) throw new ApplicationException("the property [model] is required for a OpenAI Engine!." + appendix);
 		}
 		// temperature
 		temperature = Caster.toDouble(properties.get(KeyConstants._temperature, null), null);
@@ -176,7 +189,10 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 
 		// message
 		systemMessage = Caster.toString(properties.get(KeyConstants._message, null), null);
-		AIUtil.valdate(this);
+
+		// validate
+		boolean validate = Caster.toBooleanValue(properties.get(KeyConstants._validate, null), true);
+		if (validate) AIUtil.valdate(this, initTimeout);
 		return this;
 	}
 
@@ -216,15 +232,21 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 			if ("application/json".equals(ct.getMimeType())) {
 				String cs = ct.getCharset();
 				if (Util.isEmpty(cs, true)) cs = charset;
-
-				Struct raw = Caster.toStruct(new JSONExpressionInterpreter().interpret(null, rsp.getContentAsString(cs)));
+				String str = rsp.getContentAsString(cs);
+				Struct raw = Caster.toStruct(new JSONExpressionInterpreter().interpret(null, str));
 				throwIfError(raw);
 
-				Array data = Caster.toArray(raw.get(KeyConstants._data));
-				Iterator<Object> it = data.valueIterator();
 				List<AIModel> list = new ArrayList<>();
-				while (it.hasNext()) {
-					list.add(new OpenAIModel(Caster.toStruct(it.next()), charset));
+				Object o = raw.get(KeyConstants._data, null);
+				if (o != null) {
+					Array data = Caster.toArray(o);
+					Iterator<Object> it = data.valueIterator();
+					while (it.hasNext()) {
+						list.add(new OpenAIModel(Caster.toStruct(it.next()), charset));
+					}
+				}
+				else if (!CollectionUtil.hasKey(raw, KeyConstants._data)) {
+					throw new ApplicationException("unable to read models from response [" + str + "]");
 				}
 				return list;
 			}

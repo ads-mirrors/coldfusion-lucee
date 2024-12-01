@@ -2,6 +2,7 @@ package lucee.runtime.ai.openai;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URL;
 
@@ -16,6 +17,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import lucee.commons.io.CharsetUtil;
+import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.lang.mimetype.MimeType;
 import lucee.loader.util.Util;
@@ -48,11 +50,6 @@ public class OpenAISession extends AISessionSupport {
 		super(engine, timeout);
 		this.openaiEngine = engine;
 		this.systemMessage = systemMessage;
-	}
-
-	@Override
-	public Response inquiry(String message) throws PageException {
-		return inquiry(message, null);
 	}
 
 	@Override
@@ -91,7 +88,7 @@ public class OpenAISession extends AISessionSupport {
 			arr.append(msg);
 
 			Struct sct = new StructImpl(StructImpl.TYPE_LINKED);
-			sct.set(KeyConstants._model, openaiEngine.model);
+			sct.set(KeyConstants._model, openaiEngine.getModel());
 			sct.set(KeyConstants._messages, arr);
 			sct.set(KeyConstants._stream, listener != null);
 			if (openaiEngine.temperature != null) sct.set(KeyConstants._temperature, openaiEngine.temperature);
@@ -136,8 +133,8 @@ public class OpenAISession extends AISessionSupport {
 						// String cs = ct.getCharset();
 						// getContent(rsp, cs);
 						if (Util.isEmpty(cs, true)) cs = openaiEngine.charset;
-
-						Struct raw = Caster.toStruct(new JSONExpressionInterpreter().interpret(null, EntityUtils.toString(responseEntity, openaiEngine.charset)));
+						String rawStr = EntityUtils.toString(responseEntity, openaiEngine.charset);
+						Struct raw = Caster.toStruct(new JSONExpressionInterpreter().interpret(null, rawStr));
 
 						Struct err = Caster.toStruct(raw.get(KeyConstants._error, null), null);
 						if (err != null) {
@@ -178,6 +175,12 @@ public class OpenAISession extends AISessionSupport {
 					}
 				}
 			}
+		}
+		catch (SocketTimeoutException ste) {
+			ApplicationException ae = new ApplicationException(
+					"A timeout occurred while querying the AI Engine [" + openaiEngine.getLabel() + "]. The configured timeout was " + getTimeout() + " ms.");
+			ExceptionUtil.initCauseEL(ae, ste);
+			throw ae;
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);

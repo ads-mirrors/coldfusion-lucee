@@ -32,6 +32,7 @@ import lucee.runtime.op.OpUtil;
 import lucee.runtime.type.Collection;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.KeyImpl;
+import lucee.runtime.type.Struct;
 
 public class CollectionUtil {
 
@@ -172,5 +173,12 @@ public class CollectionUtil {
 	 */
 	public static String md5(Collection coll) throws NoSuchAlgorithmException {
 		return Hash.md5(coll.toString());
+	}
+
+	public static boolean hasKey(Struct sct, Key key) {
+		for (Object k: sct.keys()) {
+			if (key.equals(k)) return true;
+		}
+		return false;
 	}
 }
