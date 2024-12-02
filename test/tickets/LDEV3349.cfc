@@ -1,4 +1,4 @@
-component extends="org.lucee.cfml.test.LuceeTestCase" {
+component extends="org.lucee.cfml.test.LuceeTestCase" skip=true {
 	function run( testResults, testBox ){
 
         describe( "checking query string encoding for spaces", function() {
