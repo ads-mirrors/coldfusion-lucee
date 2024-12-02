@@ -121,9 +121,9 @@ public class GeminiSession extends AISessionSupport {
 					String msg = Caster.toString(err.get(KeyConstants._message, null), null);
 					String code = Caster.toString(err.get(KeyConstants._code, null), null);
 					String status = Caster.toString(err.get(KeyConstants._status, null), null);
-					if (!StringUtil.isEmpty(msg, true)) throw AIUtil.toException(getEngine(), msg, status, code);
+					if (!StringUtil.isEmpty(msg, true)) throw AIUtil.toException(getEngine(), msg, status, code, AIUtil.getStatusCode(rsp));
 					throw AIUtil.toException(getEngine(), getEngine().getLabel() + " did reposne with status code [" + rsp.getStatusCode() + "]", null,
-							Caster.toString(rsp.getStatusCode(), null));
+							Caster.toString(rsp.getStatusCode(), null), AIUtil.getStatusCode(rsp));
 				}
 
 				GeminiResponse response = new GeminiResponse(raw, cs);

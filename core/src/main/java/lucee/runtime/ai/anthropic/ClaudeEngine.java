@@ -12,7 +12,6 @@ import lucee.runtime.ai.AIEngineFactory;
 import lucee.runtime.ai.AIEngineSupport;
 import lucee.runtime.ai.AIModel;
 import lucee.runtime.ai.AISession;
-import lucee.runtime.ai.AIUtil;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.net.proxy.ProxyData;
@@ -123,14 +122,6 @@ public class ClaudeEngine extends AIEngineSupport {
 		// not supported by Claude YET
 		return new ArrayList<>();
 
-	}
-
-	private void throwIfError(Struct raw) throws PageException {
-		Struct err = Caster.toStruct(raw.get(KeyConstants._error, null), null);
-		if (err != null) {
-			throw AIUtil.toException(this, Caster.toString(err.get(KeyConstants._message)), Caster.toString(err.get(KeyConstants._type, null), null),
-					Caster.toString(err.get(KeyConstants._code, null), null));
-		}
 	}
 
 	@Override

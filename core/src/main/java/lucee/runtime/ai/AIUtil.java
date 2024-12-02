@@ -4,8 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.CloseableHttpResponse;
+
 import lucee.commons.io.res.ContentType;
 import lucee.commons.lang.StringUtil;
+import lucee.commons.net.http.HTTPResponse;
 import lucee.runtime.PageContext;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.ApplicationException;
@@ -23,7 +27,7 @@ public class AIUtil {
 	private static final Key CREATED_AT = KeyImpl.init("createdAt");
 	private static final Key STATUS_DETAILS = KeyImpl.init("statusDetails");
 
-	public static PageException toException(AIEngine engine, String msg, String type, String code) {
+	public static PageException toException(AIEngine engine, String msg, String type, String code, int statusCode) {
 		String appendix = "";
 		if ("model_not_found".equals(code) || msg.indexOf("models") != -1) {
 			try {
@@ -33,7 +37,7 @@ public class AIUtil {
 			}
 		}
 
-		PageException ae = new ApplicationException(msg + appendix, "type:" + type + ";code:" + code);
+		PageException ae = new ApplicationException(msg + appendix + "; type:" + type + "; code:" + code + "; status-code:" + statusCode);
 		ae.setErrorCode(code);
 		return ae;
 	}
@@ -145,5 +149,22 @@ public class AIUtil {
 	public static String createJsonContentType(String charset) {
 		if (StringUtil.isEmpty(charset, true)) return "application/json";
 		return "application/json; charset=" + charset.trim();
+	}
+
+	public static int getStatusCode(HTTPResponse response) {
+		if (response != null) {
+			return response.getStatusCode();
+		}
+		return -1;
+	}
+
+	public static int getStatusCode(CloseableHttpResponse response) {
+		if (response != null) {
+			StatusLine sl = response.getStatusLine();
+			if (sl != null) {
+				return sl.getStatusCode();
+			}
+		}
+		return -1;
 	}
 }

@@ -234,7 +234,7 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 				if (Util.isEmpty(cs, true)) cs = charset;
 				String str = rsp.getContentAsString(cs);
 				Struct raw = Caster.toStruct(new JSONExpressionInterpreter().interpret(null, str));
-				throwIfError(raw);
+				throwIfError(raw, AIUtil.getStatusCode(rsp));
 
 				List<AIModel> list = new ArrayList<>();
 				Object o = raw.get(KeyConstants._data, null);
@@ -258,11 +258,11 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 		}
 	}
 
-	private void throwIfError(Struct raw) throws PageException {
+	private void throwIfError(Struct raw, int statusCode) throws PageException {
 		Struct err = Caster.toStruct(raw.get(KeyConstants._error, null), null);
 		if (err != null) {
 			throw AIUtil.toException(this, Caster.toString(err.get(KeyConstants._message)), Caster.toString(err.get(KeyConstants._type, null), null),
-					Caster.toString(err.get(KeyConstants._code, null), null));
+					Caster.toString(err.get(KeyConstants._code, null), null), statusCode);
 		}
 	}
 
@@ -291,7 +291,7 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 					String responseString = EntityUtils.toString(responseEntity, charset);
 
 					Struct raw = Caster.toStruct(new JSONExpressionInterpreter().interpret(null, responseString));
-					throwIfError(raw);
+					throwIfError(raw, AIUtil.getStatusCode(response));
 					return raw;
 				}
 			}
@@ -342,7 +342,7 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 					 */
 
 					Struct raw = Caster.toStruct(new JSONExpressionInterpreter().interpret(null, responseString));
-					throwIfError(raw);
+					throwIfError(raw, AIUtil.getStatusCode(response));
 					return Caster.toString(raw.get(KeyConstants._id));
 
 				}
@@ -379,7 +379,7 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 					if ("application/json".equals(responseEntity.getContentType().getValue())) {
 						String responseString = EntityUtils.toString(responseEntity, charset);
 						Struct raw = Caster.toStruct(new JSONExpressionInterpreter().interpret(null, responseString));
-						throwIfError(raw);
+						throwIfError(raw, AIUtil.getStatusCode(response));
 						Array data = Caster.toArray(raw.get(KeyConstants._data));
 						Iterator<?> it = data.getIterator();
 						Struct sct;
@@ -436,7 +436,7 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 					if ("application/json".equals(responseEntity.getContentType().getValue())) {
 						String responseString = EntityUtils.toString(responseEntity, charset);
 						Struct sct = Caster.toStruct(new JSONExpressionInterpreter().interpret(null, responseString));
-						throwIfError(sct);
+						throwIfError(sct, AIUtil.getStatusCode(response));
 						return new AIFileSupport(
 
 								Caster.toString(sct.get(KeyConstants._object)),
@@ -490,7 +490,7 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 			if ("application/json".equals(responseEntity.getContentType().getValue())) {
 				String responseString = EntityUtils.toString(responseEntity, charset);
 				Struct sct = Caster.toStruct(new JSONExpressionInterpreter().interpret(null, responseString));
-				throwIfError(sct);
+				throwIfError(sct, AIUtil.getStatusCode(response));
 			}
 
 			// Return the InputStream, caller is responsible for closing it
@@ -520,7 +520,7 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 					if ("application/json".equals(responseEntity.getContentType().getValue())) {
 						String responseString = EntityUtils.toString(responseEntity, charset);
 						Struct sct = Caster.toStruct(new JSONExpressionInterpreter().interpret(null, responseString));
-						throwIfError(sct);
+						throwIfError(sct, AIUtil.getStatusCode(response));
 						return Caster.toBooleanValue(sct.get(KeyConstants._deleted));
 
 					}

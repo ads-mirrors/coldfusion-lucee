@@ -114,7 +114,7 @@ public class ClaudeSession extends AISessionSupport {
 					Struct err = Caster.toStruct(raw.get(KeyConstants._error, null), null);
 					if (err != null) {
 						throw AIUtil.toException(this.getEngine(), Caster.toString(err.get(KeyConstants._message)), Caster.toString(err.get(KeyConstants._type, null), null),
-								Caster.toString(err.get(KeyConstants._code, null), null));
+								Caster.toString(err.get(KeyConstants._code, null), null), AIUtil.getStatusCode(response));
 					}
 
 					// Create response object

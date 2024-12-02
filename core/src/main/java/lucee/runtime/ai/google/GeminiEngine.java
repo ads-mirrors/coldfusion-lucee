@@ -160,7 +160,7 @@ public class GeminiEngine extends AIEngineSupport {
 				Struct err = Caster.toStruct(raw.get(KeyConstants._error, null), null);
 				if (err != null) {
 					throw AIUtil.toException(this, Caster.toString(err.get(KeyConstants._message)), Caster.toString(err.get(KeyConstants._type, null), null),
-							Caster.toString(err.get(KeyConstants._code, null), null));
+							Caster.toString(err.get(KeyConstants._code, null), null), AIUtil.getStatusCode(rsp));
 				}
 				Array data = Caster.toArray(raw.get("models"));
 				Iterator<Object> it = data.valueIterator();
