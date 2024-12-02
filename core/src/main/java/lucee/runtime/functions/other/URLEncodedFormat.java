@@ -49,7 +49,7 @@ public final class URLEncodedFormat implements Function {
 	}
 
 	public static String invoke(String str, String encoding, boolean force) throws PageException {
-		if (!force && !ReqRspUtil.needEncoding(str, false)) return str;
+		if (!force && !ReqRspUtil.needEncoding(str)) return str;
 
 		try {
 			String enc = lucee.commons.net.URLEncoder.encode(str, encoding);

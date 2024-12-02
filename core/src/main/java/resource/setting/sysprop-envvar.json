@@ -368,5 +368,10 @@
         "sysprop": "lucee.template.charset",
         "envvar": "LUCEE_TEMPLATE_CHARSET",
         "desc": ""
+    },
+    {
+        "sysprop": "lucee.url.encodeAllowPlus",
+        "envvar": "LUCEE_URL_ENCODEALLOWPLUS",
+        "desc": "Lucee before 6.2 would attempt to re-encode a url param which contained a space. If the url param was already encoded, it would trigger re-encoding the param again, breaking it. This was avoidable previously by using cfhttp encodeurl=false, set to false to enable previous behaviour"
     }
 ]

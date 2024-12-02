@@ -45,7 +45,7 @@ public class URLEncode {
 
 	public static String invoke(String str, String encoding, boolean force) throws PageException {
 
-		if (!force && !ReqRspUtil.needEncoding(str, false)) return str;
+		if (!force && !ReqRspUtil.needEncoding(str)) return str;
 
 		try {
 
