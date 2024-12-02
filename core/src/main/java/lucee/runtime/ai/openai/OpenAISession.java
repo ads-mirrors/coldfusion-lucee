@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.SocketTimeoutException;
 import java.net.URI;
-import java.net.URL;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -102,8 +101,6 @@ public class OpenAISession extends AISessionSupport {
 
 			JSONConverter json = new JSONConverter(true, CharsetUtil.UTF8, JSONDateFormat.PATTERN_CF, false);
 			String str = json.serialize(null, sct, SerializationSettings.SERIALIZE_AS_COLUMN, null);
-			URL url = new URL(openaiEngine.getBaseURL(), "chat/completions");
-
 			try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
 				URI uri = new URI(openaiEngine.getBaseURL() + "chat/completions");
 				// Create HttpPost request
@@ -172,7 +169,8 @@ public class OpenAISession extends AISessionSupport {
 						return r;
 					}
 					else {
-						throw new ApplicationException("The AI did answer with the mime type [" + t + "] that is not supported, only [application/json] is supported");
+						throw new ApplicationException("The AI did answer (" + AIUtil.getStatusCode(response) + ") with the mime type [" + t
+								+ "] that is not supported, only [application/json] is supported");
 					}
 				}
 			}
