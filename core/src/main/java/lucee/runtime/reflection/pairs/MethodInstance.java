@@ -43,20 +43,22 @@ public final class MethodInstance {
 	private Key methodName;
 	private Object[] args;
 	private Pair<FunctionMember, Object> result;
+	private boolean convertComparsion;
 
-	public MethodInstance(Class clazz, Key methodName, Object[] args) {
+	public MethodInstance(Class clazz, Key methodName, Object[] args, boolean convertComparsion) {
 		this.clazz = clazz;
 		this.methodName = methodName;
 		this.args = args;
+		this.convertComparsion = convertComparsion;
 	}
 
 	public Object invoke(Object o) throws PageException, NoSuchMethodException, IOException {
 
 		if (o != null) {
-			if ("toString".equals(methodName.getString()) && args.length == 0) {
+			if (args.length == 0 && "toString".equals(methodName.getString())) {
 				return o.toString();
 			}
-			else if ("equals".equals(methodName.getString()) && args.length == 1) {
+			else if (args.length == 1 && "equals".equals(methodName.getString())) {
 				return o.equals(args[0]);
 			}
 		}
@@ -67,7 +69,7 @@ public final class MethodInstance {
 			if (!Clazz.allowReflection()) throw e;
 			LogUtil.log("dynamic", e);
 			DynamicInvoker di = DynamicInvoker.getExistingInstance();
-			lucee.transformer.dynamic.meta.Method method = Clazz.getMethodMatch(di.getClazz(clazz, true), methodName, args, true);
+			lucee.transformer.dynamic.meta.Method method = Clazz.getMethodMatch(di.getClazz(clazz, true), methodName, args, true, true);
 			try {
 				return ((LegacyMethod) method).getMethod().invoke(o, args);
 			}
@@ -104,6 +106,13 @@ public final class MethodInstance {
 	}
 
 	public boolean hasMethod() {
+		if (args.length == 0 && "toString".equals(methodName.getString())) {
+			return true;
+		}
+		else if (args.length == 1 && "equals".equals(methodName.getString())) {
+			return true;
+		}
+
 		try {
 			FunctionMember fm = getResult().getName();
 			return fm != null;
@@ -116,7 +125,7 @@ public final class MethodInstance {
 	private Pair<FunctionMember, Object> getResult() throws PageException {
 		if (result == null) {
 			try {
-				result = DynamicInvoker.getExistingInstance().createInstance(clazz, methodName, args);
+				result = DynamicInvoker.getExistingInstance().createInstance(clazz, methodName, args, convertComparsion);
 			}
 			catch (Throwable t) {
 				ExceptionUtil.rethrowIfNecessary(t);

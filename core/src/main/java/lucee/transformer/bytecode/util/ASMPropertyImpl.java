@@ -61,7 +61,7 @@ public final class ASMPropertyImpl implements ASMProperty {
 	 */
 	@Override
 	public String toString() {
-		return "class:" + (clazz == null ? null : clazz.getName()) + ";name:" + name + ";type:" + type.getClassName();
+		return "class:" + (clazz == null ? null : clazz.getName()) + ";name:" + name + ";type:" + ASMUtil.getClassName(type);
 	}
 
 	/**

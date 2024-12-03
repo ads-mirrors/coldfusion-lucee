@@ -346,7 +346,7 @@ public class JavaProxyFactory {
 			adapter.visitInsn(Opcodes.RETURN);
 			adapter.visitLabel(end);
 			adapter.visitLocalVariable("this", descriptor, null, begin, end, 0); // Correctly define 'this' as local variable 0
-			adapter.visitLocalVariable("pc", Types.PAGE_CONTEXT.getDescriptor(), null, begin, end, 1); // Define 'pc' as local variable 1
+			adapter.visitLocalVariable("pc", ASMUtil.getDescriptor(Types.PAGE_CONTEXT), null, begin, end, 1); // Define 'pc' as local variable 1
 			adapter.visitLocalVariable("config", CONFIG_WEB_NAME, null, begin, end, 1); // Correctly define 'config' as local variable 1
 			adapter.visitLocalVariable("cfc", COMPONENT_NAME, null, begin, end, 2); // Correctly define 'cfc' as local variable 2
 

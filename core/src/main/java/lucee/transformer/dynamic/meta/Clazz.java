@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.objectweb.asm.Type;
 
+import lucee.print;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.res.Resource;
@@ -26,6 +27,7 @@ import lucee.runtime.java.JavaObject;
 import lucee.runtime.op.Caster;
 import lucee.runtime.reflection.Reflector;
 import lucee.runtime.type.Collection;
+import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.dynamic.meta.dynamic.ClazzDynamic;
 import lucee.transformer.dynamic.meta.reflection.ClazzReflection;
 
@@ -60,7 +62,7 @@ public abstract class Clazz implements Serializable {
 
 	public static boolean allowReflection() {
 		if (allowReflection == null) {
-			allowReflection = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.allow.reflection", null), true);
+			allowReflection = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.allow.reflection", null), false);
 		}
 		return allowReflection;
 	}
@@ -88,14 +90,44 @@ public abstract class Clazz implements Serializable {
 	private static Map<String, SoftReference<Pair<Method, Boolean>>> cachedMethods = new ConcurrentHashMap<>();
 	private static RefInteger nirvana = new RefIntegerImpl();
 
-	public static Method getMethodMatch(Clazz clazz, final Collection.Key methodName, Object[] args, boolean convertArgument)
+	private static double cleanArgs = 0;
+	private static double checkAccessibility = 0;
+	private static double lmethods = 0;
+	private static double cache = 0;
+	private static double exact = 0;
+	private static double like = 0;
+	private static double convert = 0;
+	private static double lclasses = 0;
+	private static double lclasses2 = 0;
+	private static int count = 0;
+
+	public static Method getMethodMatch(Clazz clazz, final Collection.Key methodName, Object[] args, boolean convertArgument, boolean convertComparsion)
 			throws NoSuchMethodException, IOException, PageException {
-		// print.e("------ " + methodName + " -------");
-		// print.e(clazz.getDeclaringClass());
-		// print.e(args.length);
+
+		count++;
+		if ((count % 500) == 0) {
+			print.e("-------------------");
+			print.e("cleanArgs:" + cleanArgs);
+			print.e("checkAccessibility:" + checkAccessibility);
+			print.e("lmethods:" + lmethods);
+			print.e("cache:" + cache);
+			print.e("exact:" + exact);
+			print.e("like:" + like);
+			print.e("convert:" + convert);
+			print.e("lclasses:" + lclasses);
+			print.e("lclasses2:" + lclasses2);
+		}
+		double start = SystemUtil.millis();
+
 		args = Reflector.cleanArgs(args);
-		Reflector.checkAccessibility(clazz.getDeclaringClass(), methodName);
+
+		cleanArgs += (SystemUtil.millis() - start);
+		start = SystemUtil.millis();
 		List<Method> methods = clazz.getMethods(methodName.getString(), false, args.length);
+
+		lmethods += (SystemUtil.millis() - start);
+		start = SystemUtil.millis();
+
 		if (methods != null && methods.size() > 0) {
 			Class[] clazzArgs = Reflector.getClasses(args);
 
@@ -119,12 +151,18 @@ public abstract class Clazz implements Serializable {
 						Class[] trgArgs = p.getName().getArgumentClasses();
 						for (int x = 0; x < trgArgs.length; x++) {
 							if (args[x] != null) args[x] = Reflector.convert(args[x], Reflector.toReferenceClass(trgArgs[x]), nirvana);
-							// print.e("- " + clazzArgs[x].getName() + "->" + trgArgs[x].getName());
 						}
 					}
 					return p.getName();
 				}
 			}
+			cache += (SystemUtil.millis() - start);
+			start = SystemUtil.millis();
+
+			Reflector.checkAccessibility(clazz.getDeclaringClass(), methodName);
+
+			checkAccessibility += (SystemUtil.millis() - start);
+			start = SystemUtil.millis();
 
 			// exact comparsion
 			outer: for (Method m: methods) {
@@ -138,6 +176,8 @@ public abstract class Clazz implements Serializable {
 					return m;
 				}
 			}
+			exact += (SystemUtil.millis() - start);
+			start = SystemUtil.millis();
 
 			// like comparsion
 			outer: for (Method m: methods) {
@@ -151,31 +191,36 @@ public abstract class Clazz implements Serializable {
 					return m;
 				}
 			}
+			like += (SystemUtil.millis() - start);
+			start = SystemUtil.millis();
 
 			// convert comparsion
 			Pair<Method, Object[]> result = null;
 			int _rating = 0;
-			outer: for (Method m: methods) {
-				if (m != null) {
-					RefInteger rating = (methods.size() > 1) ? new RefIntegerImpl(0) : null;
-					Class[] parameterTypes = m.getArgumentClasses();
-					Object[] newArgs = new Object[args.length];
+			if (convertComparsion) {
+				outer: for (Method m: methods) {
+					if (m != null) {
+						RefInteger rating = (methods.size() > 1) ? new RefIntegerImpl(0) : null;
+						Class[] parameterTypes = m.getArgumentClasses();
+						Object[] newArgs = new Object[args.length];
 
-					for (int y = 0; y < parameterTypes.length; y++) {
-						try {
-							newArgs[y] = Reflector.convert(args[y], Reflector.toReferenceClass(parameterTypes[y]), rating);
+						for (int y = 0; y < parameterTypes.length; y++) {
+							try {
+								newArgs[y] = Reflector.convert(args[y], Reflector.toReferenceClass(parameterTypes[y]), rating);
+							}
+							catch (PageException e) {
+								continue outer;
+							}
 						}
-						catch (PageException e) {
-							continue outer;
+						if (result == null || rating.toInt() > _rating) {
+							if (rating != null) _rating = rating.toInt();
+							result = new Pair<Method, Object[]>(m, newArgs);
 						}
-					}
-					if (result == null || rating.toInt() > _rating) {
-						if (rating != null) _rating = rating.toInt();
-						result = new Pair<Method, Object[]>(m, newArgs);
 					}
 				}
 			}
-
+			convert += (SystemUtil.millis() - start);
+			start = SystemUtil.millis();
 			if (result != null) {
 				if (convertArgument) {
 					Object[] newArgs = result.getValue();
@@ -209,6 +254,9 @@ public abstract class Clazz implements Serializable {
 				}
 			}
 		}
+
+		lclasses += (SystemUtil.millis() - start);
+		start = SystemUtil.millis();
 		/*
 		 * the argument list contains objects created by createObject, that are no instantiated
 		 * (first,third,10th) and because this object have no constructor taking no arguments, Lucee cannot
@@ -267,11 +315,12 @@ public abstract class Clazz implements Serializable {
 		else {
 			msg.append("there are no methods with this name.");
 		}
-
+		lclasses2 += (SystemUtil.millis() - start);
+		start = SystemUtil.millis();
 		throw new NoSuchMethodException(msg.toString());
 	}
 
-	public static Constructor getConstructorMatch(Clazz clazz, Object[] args, boolean convertArgument) throws NoSuchMethodException, IOException {
+	public static Constructor getConstructorMatch(Clazz clazz, Object[] args, boolean convertArgument, boolean convertComparsion) throws NoSuchMethodException, IOException {
 		args = Reflector.cleanArgs(args);
 		List<Constructor> constructors = clazz.getConstructors(args.length);
 		if (constructors != null && constructors.size() > 0) {
@@ -300,24 +349,26 @@ public abstract class Clazz implements Serializable {
 			// convert comparsion
 			Pair<Constructor, Object[]> result = null;
 			int _rating = 0;
-			outer: for (Constructor c: constructors) {
-				if (c != null) {
-					RefInteger rating = (constructors.size() > 1) ? new RefIntegerImpl(0) : null;
-					Class[] parameterTypes = c.getArgumentClasses();
-					Object[] newArgs = new Object[args.length];
-					for (int y = 0; y < parameterTypes.length; y++) {
-						try {
-							newArgs[y] = Reflector.convert(args[y], Reflector.toReferenceClass(parameterTypes[y]), rating);
+			if (convertComparsion) {
+				outer: for (Constructor c: constructors) {
+					if (c != null) {
+						RefInteger rating = (constructors.size() > 1) ? new RefIntegerImpl(0) : null;
+						Class[] parameterTypes = c.getArgumentClasses();
+						Object[] newArgs = new Object[args.length];
+						for (int y = 0; y < parameterTypes.length; y++) {
+							try {
+								newArgs[y] = Reflector.convert(args[y], Reflector.toReferenceClass(parameterTypes[y]), rating);
+							}
+							catch (PageException e) {
+								continue outer;
+							}
 						}
-						catch (PageException e) {
-							continue outer;
+						if (result == null || rating.toInt() > _rating) {
+							if (rating != null) _rating = rating.toInt();
+							result = new Pair<Constructor, Object[]>(c, newArgs);
 						}
+						// return new ConstructorInstance(constructors[i],newArgs);
 					}
-					if (result == null || rating.toInt() > _rating) {
-						if (rating != null) _rating = rating.toInt();
-						result = new Pair<Constructor, Object[]>(c, newArgs);
-					}
-					// return new ConstructorInstance(constructors[i],newArgs);
 				}
 			}
 			if (result != null) {
@@ -329,9 +380,18 @@ public abstract class Clazz implements Serializable {
 				}
 				return result.getName();
 			}
+
+			// Exception
+			StringBuilder msg = new StringBuilder("No matching Constructor for ").append(clazz.getDeclaringClass().getName()).append("(")
+					.append(Reflector.getDspMethods(Reflector.getClasses(args))).append(") found.\n").append("We have the following constructors:\n");
+			for (Constructor c: constructors) {
+				msg.append("- <init>(").append(Reflector.getDspMethods(c.getArgumentClasses())).append(")\n");
+			}
+			throw new NoSuchMethodException(msg.toString());
 		}
+
 		throw new NoSuchMethodException(
-				"No matching Constructor for " + clazz.getDeclaringClass().getName() + "(" + Reflector.getDspMethods(Reflector.getClasses(args)) + ") found");
+				"No matching Constructor for " + clazz.getDeclaringClass().getName() + "(" + Reflector.getDspMethods(Reflector.getClasses(args)) + ") found.");
 	}
 
 	public static String id(FunctionMember fm) {
@@ -434,7 +494,7 @@ public abstract class Clazz implements Serializable {
 	}
 
 	public static Class toClass(ClassLoader cl, Type type) throws ClassException {
-		return ClassUtil.loadClass(cl, type.getClassName());
+		return ClassUtil.loadClass(cl, ASMUtil.getClassName(type));
 	}
 
 	public static String getPackagePrefix() {

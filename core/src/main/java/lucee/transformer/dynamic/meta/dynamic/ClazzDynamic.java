@@ -6,14 +6,15 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
-import java.util.ArrayList;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.felix.framework.BundleWiringImpl.BundleClassLoader;
 import org.objectweb.asm.ClassReader;
@@ -43,22 +44,27 @@ public class ClazzDynamic extends Clazz {
 	private static final long serialVersionUID = 862370302422701585L;
 
 	private transient Class clazz;
-	private static Map<String, SoftReference<ClazzDynamic>> classes = new ConcurrentHashMap<>();
-	private Map<String, FunctionMember> members;
+	// private static Map<String, SoftReference<ClazzDynamic>> classes = new ConcurrentHashMap<>();
+	private List<FunctionMember> methods;
+	private List<FunctionMember> declaredMethods;
+	private List<FunctionMember> constructors;
+	private List<FunctionMember> declaredConstructors;
 
 	private String clid;
-	private static Map<ClassLoader, SoftReference<String>> clids = new ConcurrentHashMap<>();
+	private static Map<ClassLoader, String> clids = new IdentityHashMap<>();
 	private static String systemId;
 
+	private static Map<Class, SoftReference<ClazzDynamic>> classes = new IdentityHashMap<>();
+
 	public static ClazzDynamic getInstance(Class clazz, Resource dir, Log log) throws IOException {
-		String id = generateClassLoderId(clazz);
-		String key = id == null ? clazz.getName() : (id + ":" + clazz.getName());
+
 		ClazzDynamic cd = null;
-		SoftReference<ClazzDynamic> sr = classes.get(key);
+		Reference<ClazzDynamic> sr = classes.get(clazz);
 		if (sr == null || (cd = sr.get()) == null) {
 			synchronized (clazz) {
-				sr = classes.get(key);
+				sr = classes.get(clazz);
 				if (sr == null || (cd = sr.get()) == null) {
+					String id = generateClassLoderId(clazz);
 					StringBuilder sbClassPath = new StringBuilder();
 					sbClassPath.append(clazz.getName().replace('.', '/')).append('-').append(id).append(".ser");
 					Resource ser = dir.getRealResource(getPackagePrefix() + sbClassPath.toString());
@@ -68,28 +74,30 @@ public class ClazzDynamic extends Clazz {
 							cd = (ClazzDynamic) deserialize(getClassLoader(clazz), ser.getInputStream());
 							cd.clazz = clazz;
 							if (log != null) log.info("dynamic", "loaded metadata for [" + clazz.getName() + "] from serialized file:" + ser);
-							classes.put(key, new SoftReference<ClazzDynamic>(cd));
+							classes.put(clazz, new SoftReference<ClazzDynamic>(cd));
 						}
 						catch (Exception e) {
 							if (log != null) log.error("dynamic", e);
 						}
 					}
 					if (cd == null) {
-						if (log != null) log.info("dynamic", "extract metadata from [" + clazz.getName() + "]");
-						cd = new ClazzDynamic(clazz, id, log);
-						if (id != null) {
-							ser.getParentResource().mkdirs();
-							serialize(cd, ser.getOutputStream());
-							if (log != null) log.info("dynamic", "stored metadata for [" + clazz.getName() + "] to serialized file:" + ser);
+						try {
+							if (log != null) log.info("dynamic", "extract metadata from [" + clazz.getName() + "]");
+							cd = new ClazzDynamic(clazz, id, log);
+							if (id != null) {
+								ser.getParentResource().mkdirs();
+								serialize(cd, ser.getOutputStream());
+								if (log != null) log.info("dynamic", "stored metadata for [" + clazz.getName() + "] to serialized file:" + ser);
+							}
+							classes.put(clazz, new SoftReference<ClazzDynamic>(cd));
 						}
-						classes.put(key, new SoftReference<ClazzDynamic>(cd));
-
+						catch (IOException ioe) {
+							// print.e(ioe);
+							throw ioe;
+						}
 					}
 				}
 			}
-		}
-		else {
-			if (log != null) log.info("dynamic", "found metadata for [" + clazz.getName() + "]in memory.");
 		}
 		return cd;
 	}
@@ -102,22 +110,18 @@ public class ClazzDynamic extends Clazz {
 			return systemId;
 		}
 
-		SoftReference<String> sr = clids.get(cl);
-		String id;
-		if (sr != null) {
-			id = sr.get();
-			if (id != null) return id;
-		}
+		String id = clids.get(cl);
+		if (id != null) return id;
 
 		if (cl instanceof BundleClassLoader) {
 			Bundle b = ((BundleClassLoader) cl).getBundle();
 			id = "b" + HashUtil.create64BitHashAsString(b.getSymbolicName() + ":" + b.getVersion() + ":" + jv, Character.MAX_RADIX);
-			clids.put(cl, new SoftReference<String>(id));
+			clids.put(cl, id);
 			return id;
 		}
 		if (cl instanceof PhysicalClassLoader) {
 			id = "p" + HashUtil.create64BitHashAsString(((PhysicalClassLoader) cl).getDirectory().getAbsolutePath() + ":" + jv, Character.MAX_RADIX);
-			clids.put(cl, new SoftReference<String>(id));
+			clids.put(cl, id);
 			return id;
 		}
 
@@ -125,7 +129,7 @@ public class ClazzDynamic extends Clazz {
 		CodeSource codeSource = protectionDomain.getCodeSource();
 		if (codeSource != null && codeSource.getLocation() != null) {
 			id = "j" + HashUtil.create64BitHashAsString(codeSource.getLocation().toString() + ":" + jv, Character.MAX_RADIX);
-			clids.put(cl, new SoftReference<String>(id));
+			clids.put(cl, id);
 			return id;
 		}
 		return null;
@@ -134,8 +138,23 @@ public class ClazzDynamic extends Clazz {
 	private ClazzDynamic(Class clazz, String clid, Log log) throws IOException {
 		this.clazz = clazz;
 		this.clid = clid;
-		this.members = new LinkedHashMap<>();
+		LinkedHashMap<String, FunctionMember> members = new LinkedHashMap<>();
 		_getFunctionMembers(clazz, members, log);
+
+		methods = new LinkedList<>();
+		declaredMethods = new LinkedList<>();
+		constructors = new LinkedList<>();
+		declaredConstructors = new LinkedList<>();
+		for (FunctionMember fm: members.values()) {
+			if (fm instanceof Method) {
+				if (clazz.getName().equals(fm.getDeclaringClassName())) declaredMethods.add(fm);
+				if (fm.isPublic()) methods.add(fm);
+			}
+			else if (fm instanceof Constructor) {
+				if (clazz.getName().equals(fm.getDeclaringClassName())) declaredConstructors.add(fm);
+				if (fm.isPublic()) constructors.add(fm);
+			}
+		}
 	}
 
 	@Override
@@ -150,15 +169,18 @@ public class ClazzDynamic extends Clazz {
 
 	@Override
 	public String id() {
+		if (clid == null) {
+			clid = generateClassLoderId(clazz);
+		}
+
 		return clid + ":" + clazz.getName();
 	}
 
 	@Override
 	public Method getDeclaredMethod(String methodName, Class[] arguments, boolean nameCaseSensitive) throws IOException, NoSuchMethodException {
 		Type[] types = toTypes(arguments);
-		outer: for (FunctionMember fm: members.values()) {
-			if (fm instanceof Method && clazz.getName().equals(fm.getDeclaringClassName())
-					&& (nameCaseSensitive ? methodName.equals(fm.getName()) : methodName.equalsIgnoreCase(fm.getName()))) {
+		outer: for (FunctionMember fm: declaredMethods) {
+			if (/* clazz.getName().equals(fm.getDeclaringClassName()) && */ (nameCaseSensitive ? methodName.equals(fm.getName()) : methodName.equalsIgnoreCase(fm.getName()))) {
 				Type[] args = ((FunctionMemberDynamic) fm).getArgumentTypes();
 				if (types.length == args.length) {
 					for (int i = 0; i < args.length; i++) {
@@ -174,8 +196,8 @@ public class ClazzDynamic extends Clazz {
 	@Override
 	public Method getMethod(String methodName, Class[] arguments, boolean nameCaseSensitive) throws IOException, NoSuchMethodException {
 		Type[] types = toTypes(arguments);
-		outer: for (FunctionMember fm: members.values()) {
-			if (fm.isPublic() && fm instanceof Method && (nameCaseSensitive ? methodName.equals(fm.getName()) : methodName.equalsIgnoreCase(fm.getName()))) {
+		outer: for (FunctionMember fm: methods) {
+			if (/* fm.isPublic() && */ (nameCaseSensitive ? methodName.equals(fm.getName()) : methodName.equalsIgnoreCase(fm.getName()))) {
 				Type[] args = ((FunctionMemberDynamic) fm).getArgumentTypes();
 				if (types.length == types.length) {
 					for (int i = 0; i < args.length; i++) {
@@ -191,8 +213,8 @@ public class ClazzDynamic extends Clazz {
 	@Override
 	public Constructor getConstructor(Class[] arguments) throws IOException, NoSuchMethodException {
 		Type[] types = toTypes(arguments);
-		outer: for (FunctionMember fm: members.values()) {
-			if (fm.isPublic() && fm instanceof Constructor && clazz.getName().equals(fm.getDeclaringClassName())) {
+		outer: for (FunctionMember fm: constructors) {
+			if (/* fm.isPublic() && */clazz.getName().equals(fm.getDeclaringClassName())) {
 				Type[] args = ((FunctionMemberDynamic) fm).getArgumentTypes();
 				if (types.length == args.length) {
 					for (int i = 0; i < args.length; i++) {
@@ -208,27 +230,31 @@ public class ClazzDynamic extends Clazz {
 	@Override
 	public Constructor getDeclaredConstructor(Class[] arguments) throws IOException, NoSuchMethodException {
 		Type[] types = toTypes(arguments);
-		outer: for (FunctionMember fm: members.values()) {
-			if (fm instanceof Constructor && clazz.getName().equals(fm.getDeclaringClassName())) {
-				Type[] args = ((FunctionMemberDynamic) fm).getArgumentTypes();
-				if (types.length == args.length) {
-					for (int i = 0; i < args.length; i++) {
-						if (!types[i].equals(args[i])) continue outer;
-					}
-					return (Constructor) fm;
+		outer: for (FunctionMember fm: declaredConstructors) {
+			// if (clazz.getName().equals(fm.getDeclaringClassName())) {
+			Type[] args = ((FunctionMemberDynamic) fm).getArgumentTypes();
+			if (types.length == args.length) {
+				for (int i = 0; i < args.length; i++) {
+					if (!types[i].equals(args[i])) continue outer;
 				}
+				return (Constructor) fm;
 			}
+			// }
 		}
 		throw new NoSuchMethodException("no matching constructor for (" + Clazz.toTypeNames(arguments) + ") found");
 	}
 
 	@Override
-	public List<Method> getMethods(String methodName, boolean nameCaseSensitive, int argumentLength) throws IOException {
-		List<Method> list = new ArrayList<>();
-		for (FunctionMember fm: members.values()) {
-			// print.e(fm.getName() + ":" + fm.isPublic());
-			if (fm.isPublic() && fm instanceof Method && (argumentLength < 0 || argumentLength == fm.getArguments().length)
-					&& (methodName == null || (nameCaseSensitive ? methodName.equals(fm.getName()) : methodName.equalsIgnoreCase(fm.getName())))) {
+	public List<Method> getMethods(String methodName, boolean nameCaseSensitive, int argumentLength) {
+		List<Method> list = new LinkedList<>();
+		for (FunctionMember fm: methods) {
+			if (/* fm.isPublic() && */
+
+			(argumentLength < 0 || argumentLength == fm.getArgumentCount()) &&
+
+					(methodName == null || (nameCaseSensitive ? methodName.equals(fm.getName()) : methodName.equalsIgnoreCase(fm.getName())))
+
+			) {
 				list.add((Method) fm);
 			}
 		}
@@ -237,33 +263,50 @@ public class ClazzDynamic extends Clazz {
 
 	@Override
 	public List<Method> getDeclaredMethods(String methodName, boolean nameCaseSensitive, int argumentLength) throws IOException {
-		List<Method> list = new ArrayList<>();
-		for (FunctionMember fm: members.values()) {
-			if (fm instanceof Method && clazz.getName().equals(fm.getDeclaringClassName()) && (argumentLength < 0 || argumentLength == fm.getArguments().length)
-					&& (methodName == null || (nameCaseSensitive ? methodName.equals(fm.getName()) : methodName.equalsIgnoreCase(fm.getName()))))
+		List<Method> list = new LinkedList<>();
+		for (FunctionMember fm: declaredMethods) {
+			if ((argumentLength < 0 || argumentLength == fm.getArgumentCount()) &&
+
+					(methodName == null || (nameCaseSensitive ? methodName.equals(fm.getName()) : methodName.equalsIgnoreCase(fm.getName())))
+
+			/* &&clazz.getName().equals(fm.getDeclaringClassName()) */
+
+			) {
 				list.add((Method) fm);
+			}
 		}
 		return list;
 	}
 
 	@Override
 	public List<Constructor> getConstructors(int argumentLength) throws IOException {
-		List<Constructor> list = new ArrayList<>();
+		List<Constructor> list = new LinkedList<>();
 
-		for (FunctionMember fm: members.values()) {
-			if (fm.isPublic() && fm instanceof Constructor && clazz.getName().equals(fm.getDeclaringClassName())
-					&& (argumentLength < 0 || argumentLength == fm.getArguments().length))
+		for (FunctionMember fm: constructors) {
+			if (/* fm.isPublic() && */
+
+			(argumentLength < 0 || argumentLength == fm.getArgumentCount()) &&
+
+					clazz.getName().equals(fm.getDeclaringClassName())
+
+			) {
 				list.add((Constructor) fm);
+			}
 		}
 		return list;
 	}
 
 	@Override
 	public List<Constructor> getDeclaredConstructors(int argumentLength) throws IOException {
-		List<Constructor> list = new ArrayList<>();
-		for (FunctionMember fm: members.values()) {
-			if (fm instanceof Constructor && clazz.getName().equals(fm.getDeclaringClassName()) && (argumentLength < 0 || argumentLength == fm.getArguments().length))
+		List<Constructor> list = new LinkedList<>();
+		for (FunctionMember fm: declaredConstructors) {
+			if ((argumentLength < 0 || argumentLength == fm.getArgumentCount())
+
+			/* && clazz.getName().equals(fm.getDeclaringClassName()) */
+
+			) {
 				list.add((Constructor) fm);
+			}
 		}
 		return list;
 	}
@@ -274,6 +317,11 @@ public class ClazzDynamic extends Clazz {
 		final ClassLoader cl = getClassLoader(clazz);
 		final RefInteger classAccess = new RefIntegerImpl();
 		ClassReader classReader;
+
+		if (cl instanceof lucee.commons.lang.PhysicalClassLoader) {
+
+		}
+
 		try {
 			classReader = new ClassReader(cl.getResourceAsStream(classPath));
 		}
@@ -295,7 +343,7 @@ public class ClazzDynamic extends Clazz {
 				if (interfaces != null && interfaces.length > 0) {
 					for (String interf: interfaces) {
 						try {
-							_getFunctionMembers(cl.loadClass(Type.getObjectType(interf).getClassName()), members, log);
+							_getFunctionMembers(cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), members, log);
 						}
 						catch (Exception e) {
 							if (log != null) log.error("dynamic", e);
@@ -304,7 +352,7 @@ public class ClazzDynamic extends Clazz {
 				}
 				if (superName != null) {
 					try {
-						_getFunctionMembers(cl.loadClass(Type.getObjectType(superName).getClassName()), members, log);
+						_getFunctionMembers(cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), members, log);
 					}
 					catch (IllegalArgumentException iae) {
 						String v = ASMUtil.getJavaVersionFromException(iae, null);

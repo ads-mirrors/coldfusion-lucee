@@ -434,7 +434,7 @@ public final class TagHelper {
 				}
 				else {
 					Type type = CastOther.getType(bc, attr.getType());
-					methodName = tag.getTagLibTag().getSetter(attr, type == null ? null : type.getClassName());
+					methodName = tag.getTagLibTag().getSetter(attr, type == null ? null : ASMUtil.getClassName(type));
 					adapter.loadLocal(currLocal);
 
 					TagHelper.writeNumberAsDouble(bc, attr, Types.isPrimitiveType(type) ? Expression.MODE_VALUE : Expression.MODE_REF);

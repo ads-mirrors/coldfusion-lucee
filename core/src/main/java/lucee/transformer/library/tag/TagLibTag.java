@@ -47,6 +47,7 @@ import lucee.transformer.bytecode.cast.CastOther;
 import lucee.transformer.bytecode.statement.tag.Attribute;
 import lucee.transformer.bytecode.statement.tag.Tag;
 import lucee.transformer.bytecode.statement.tag.TagOther;
+import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.cfml.attributes.AttributeEvaluator;
 import lucee.transformer.cfml.attributes.AttributeEvaluatorException;
 import lucee.transformer.cfml.evaluator.EvaluatorException;
@@ -781,7 +782,7 @@ public final class TagLibTag {
 		setter = "set" + StringUtil.ucFirst(attr.getName());
 		Class clazz;
 		try {
-			if (StringUtil.isEmpty(typeClassName)) typeClassName = CastOther.getType(null, attr.getType()).getClassName();
+			if (StringUtil.isEmpty(typeClassName)) typeClassName = ASMUtil.getClassName(CastOther.getType(null, attr.getType()));
 			clazz = getTagClassDefinition().getClazz();
 			Method m = ClassUtil.getMethodIgnoreCase(clazz, setter, new Class[] { ClassUtil.loadClass(typeClassName) });
 			setter = m.getName();

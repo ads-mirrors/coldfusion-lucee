@@ -90,70 +90,72 @@ public class MemberUtil {
 	// used in extension Image
 	public static Object call(PageContext pc, Object coll, Collection.Key methodName, Object[] args, final short[] types, String[] strTypes) throws PageException {
 		// look for members
-		short type;
-		String strType;
-		Map<Key, FunctionLibFunction> members = null;
 		boolean hasAny = false;
-		boolean isChked = false;
-		FunctionLibFunction member, tmp;
-		for (int i = 0; i <= types.length; i++) {
-			if (i == types.length) {
-				if (hasAny) break;
-				type = CFTypes.TYPE_ANY;
-				strType = "any";
-			}
-			else {
-				type = types[i];
-				strType = strTypes[i];
-				if (type == CFTypes.TYPE_ANY) hasAny = true;
-			}
-			members = getMembers(pc, type);
-			member = members.get(methodName);
-			if (!isChked && member == null) {
-				if (type == CFTypes.TYPE_NUMERIC) {
-					members = getMembers(pc, CFTypes.TYPE_STRING);
-					member = members.get(methodName);
+		if (!KeyConstants._toString.equals(methodName)) {
+			short type;
+			String strType;
+			Map<Key, FunctionLibFunction> members = null;
+			boolean isChked = false;
+			FunctionLibFunction member, tmp;
+			for (int i = 0; i <= types.length; i++) {
+				if (i == types.length) {
+					if (hasAny) break;
+					type = CFTypes.TYPE_ANY;
+					strType = "any";
 				}
-				else if (type == CFTypes.TYPE_STRING) {
-
-					members = getMembers(pc, CFTypes.TYPE_NUMERIC);
-					tmp = members.get(methodName);
-					if (tmp != null && Decision.isNumber(coll)) {
-						member = tmp;
+				else {
+					type = types[i];
+					strType = strTypes[i];
+					if (type == CFTypes.TYPE_ANY) hasAny = true;
+				}
+				members = getMembers(pc, type);
+				member = members.get(methodName);
+				if (!isChked && member == null) {
+					if (type == CFTypes.TYPE_NUMERIC) {
+						members = getMembers(pc, CFTypes.TYPE_STRING);
+						member = members.get(methodName);
 					}
-					if (member == null) {
-						members = getMembers(pc, CFTypes.TYPE_DATETIME);
+					else if (type == CFTypes.TYPE_STRING) {
+
+						members = getMembers(pc, CFTypes.TYPE_NUMERIC);
 						tmp = members.get(methodName);
-						if (tmp != null && args.length <= 3 && Caster.toString(coll).length() > 2 && !Decision.isInteger(coll, false) && Decision.isDateAdvanced(coll, false)) {
+						if (tmp != null && Decision.isNumber(coll)) {
 							member = tmp;
 						}
-					}
-				}
-
-				isChked = true;
-			}
-			if (member != null) {
-				List<FunctionLibFunctionArg> _args = member.getArg();
-				if (args.length < _args.size()) {
-					ArrayList<Ref> refs = new ArrayList<Ref>();
-
-					int pos = member.getMemberPosition();
-					FunctionLibFunctionArg flfa;
-					Iterator<FunctionLibFunctionArg> it = _args.iterator();
-					int glbIndex = 0, argIndex = -1;
-					while (it.hasNext()) {
-						glbIndex++;
-						flfa = it.next();
-						if (glbIndex == pos) {
-							refs.add(new Casting(strType, type, coll));
-						}
-						else if (args.length > ++argIndex) { // careful, argIndex is only incremented when condition above is false
-							refs.add(new Casting(flfa.getTypeAsString(), flfa.getType(), args[argIndex]));
+						if (member == null) {
+							members = getMembers(pc, CFTypes.TYPE_DATETIME);
+							tmp = members.get(methodName);
+							if (tmp != null && args.length <= 3 && Caster.toString(coll).length() > 2 && !Decision.isInteger(coll, false) && Decision.isDateAdvanced(coll, false)) {
+								member = tmp;
+							}
 						}
 					}
-					return new BIFCall(coll, member, refs.toArray(new Ref[refs.size()])).getValue(pc);
+
+					isChked = true;
 				}
-				else throw new FunctionException(pc, member.getName(), member.getArgMin(), _args.size(), args.length);
+				if (member != null) {
+					List<FunctionLibFunctionArg> _args = member.getArg();
+					if (args.length < _args.size()) {
+						ArrayList<Ref> refs = new ArrayList<Ref>();
+
+						int pos = member.getMemberPosition();
+						FunctionLibFunctionArg flfa;
+						Iterator<FunctionLibFunctionArg> it = _args.iterator();
+						int glbIndex = 0, argIndex = -1;
+						while (it.hasNext()) {
+							glbIndex++;
+							flfa = it.next();
+							if (glbIndex == pos) {
+								refs.add(new Casting(strType, type, coll));
+							}
+							else if (args.length > ++argIndex) { // careful, argIndex is only incremented when condition above is false
+								refs.add(new Casting(flfa.getTypeAsString(), flfa.getType(), args[argIndex]));
+							}
+						}
+						return new BIFCall(coll, member, refs.toArray(new Ref[refs.size()])).getValue(pc);
+					}
+					else throw new FunctionException(pc, member.getName(), member.getArgMin(), _args.size(), args.length);
+				}
 			}
 		}
 
@@ -189,7 +191,7 @@ public class MemberUtil {
 	}
 
 	private static Object callMethod(Object obj, Collection.Key methodName, Object[] args) throws PageException {
-		MethodInstance mi = Reflector.getMethodInstance(obj.getClass(), methodName, args);
+		MethodInstance mi = Reflector.getMethodInstance(obj.getClass(), methodName, args, false);
 		if (!mi.hasMethod()) return DEFAULT;
 		try {
 			return mi.invoke(obj);
