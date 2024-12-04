@@ -6,8 +6,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			});
 
 			it(title="checking acos(0.7) function", body = function( currentSpec ) {
-				var res="0.7953988301841436";
-				assertEquals(res,tostring(acos(0.7)));
+				if ( getApplicationSettings().preciseMath )
+					assertEquals("0.7953988301841436", toString(acos(0.7)));
+				else 
+					assertEquals("0.795398830184", toString(acos(0.7)));
+				
 			});
 
 			it(title="checking acos() function invalid range", body = function( currentSpec ) {

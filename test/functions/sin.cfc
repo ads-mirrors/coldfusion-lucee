@@ -4,7 +4,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 			it(title="Checking the sin() function", body=function( currentSpec ) {
 				var a = 90;
 				expect(sin(a)).toBe(0.8939966636005579);
-			});0.893996663601
+			});
 
 			it(title="Checking the sin() member function", body=function( currentSpec ) {
 				var a = 90;
@@ -18,7 +18,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 			it(title="Checking the sin() function to string", body=function( currentSpec ) {
 				var a = 90;
-				assertEquals("0.8939966636005579","#tostring(sin(a))#");
+				if ( getApplicationSettings().preciseMath )
+					expect("#tostring(sin(a))#").toBe("0.8939966636005579");
+				else
+					expect("#tostring(sin(a))#").toBe("0.893996663601");
+				
 			});
 		});
 	}
