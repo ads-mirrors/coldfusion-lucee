@@ -26,7 +26,6 @@ import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
-import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.SerializableObject;
 import lucee.commons.lang.StringUtil;
@@ -113,8 +112,6 @@ public class MavenUtil {
 		List<POM> dependencies = new ArrayList<>();
 		List<POM> parentDendencyManagement = null;
 
-		ExecutorService executor = ThreadUtil.createExecutorService(Runtime.getRuntime().availableProcessors());
-
 		if (parent != null) {
 			parentDendencyManagement = current.getDependencyManagement();
 			List<POM> tmp = parent.getDependencies();
@@ -124,13 +121,17 @@ public class MavenUtil {
 				}
 			}
 		}
-		if (rawDependencies != null) {
-			List<Future<POM>> futures = new ArrayList<>();
-			for (POMReader.Dependency rd: rawDependencies) {
-				GAVSO gavso = getDependency(rd, parent, current, properties, parentDendencyManagement, management);
-				if (gavso == null) continue;
+		if (rawDependencies != null && rawDependencies.size() > 0) {
 
+			List<Future<POM>> futures = new ArrayList<>();
+			final List<POM> pdm = parentDendencyManagement;
+			ExecutorService executor = ThreadUtil.createExecutorService(rawDependencies.size(), true);
+			for (POMReader.Dependency rd: rawDependencies) {
 				Future<POM> future = executor.submit(() -> {
+					GAVSO gavso = getDependency(rd, parent, current, properties, pdm, management);
+					if (gavso == null) {
+						return null; // Skip if no GAVSO is returned
+					}
 					POM p = POM.getInstance(localDirectory, current.getRepositories(), gavso.g, gavso.a, gavso.v, gavso.s, gavso.o, current.getDependencyScope(),
 							current.getDependencyScopeManagement(), log);
 					p.initXML();
@@ -140,14 +141,17 @@ public class MavenUtil {
 			}
 			try {
 				for (Future<POM> future: futures) {
-					dependencies.add(future.get()); // Wait for init to complete
+					POM dependency = future.get(); // Wait for init to complete
+					if (dependency != null) { // Only add non-null dependencies
+						dependencies.add(dependency);
+					}
 				}
 			}
 			catch (Exception e) {
 				throw ExceptionUtil.toIOException(e);
 			}
+			executor.shutdown();
 		}
-		executor.shutdown();
 		return dependencies;
 	}
 
@@ -346,7 +350,7 @@ public class MavenUtil {
 						URL url = pom.getArtifact(type, repositories);
 						if (log != null) log.info("maven", "download [" + url + "]");
 						try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-							HttpGet request = new HttpGet(pom.getArtifact(type, repositories).toExternalForm());
+							HttpGet request = new HttpGet(url.toExternalForm());
 							HttpResponse response = httpClient.execute(request);
 							HttpEntity entity = response.getEntity();
 							int sc = response.getStatusLine().getStatusCode();
@@ -374,7 +378,7 @@ public class MavenUtil {
 						}
 					}
 					catch (IOException ioe) {
-						ResourceUtil.deleteEmptyFoldersInside(pom.getLocalDirectory());
+						// MUST add again ResourceUtil.deleteEmptyFoldersInside(pom.getLocalDirectory());
 						throw ioe;
 					}
 				}
