@@ -1,12 +1,13 @@
 <cfsetting showdebugoutput="false"><cfscript>
+ts = now(); 
 // client
-if(isNull(client.startTime))client.startTime=now();
+if(isNull(client.startTime))client.startTime=ts;
 if(!isNull(client.time)) client.lastTime=client.time;
-client.time=now();
+client.time=ts;
 // session
-if(isNull(session.startTime))session.startTime=now();
+if(isNull(session.startTime))session.startTime=ts;
 if(!isNull(session.time)) session.lastTime=session.time;
-session.time=now();
+session.time=ts;
 
 
 
