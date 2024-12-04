@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.Vector;
 
+import lucee.print;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.ClassUtil;
@@ -630,6 +631,7 @@ public final class Reflector {
 		boolean digg = false;
 		for (int i = 0; i < args.length; i++) {
 			if (args[i] instanceof ObjectWrap) {
+				print.e("x---- unwrap: " + args[i].getClass().getName());
 				args[i] = ((ObjectWrap) args[i]).getEmbededObject(args[i]);
 			}
 			else if (args[i] instanceof Collection) {
@@ -639,6 +641,7 @@ public final class Reflector {
 		}
 
 		if (!digg) return args;
+		print.e("x---- digg: ");
 
 		ObjectIdentityHashSet done = new ObjectIdentityHashSet();
 		for (int i = 0; i < args.length; i++) {
@@ -652,6 +655,7 @@ public final class Reflector {
 		done.add(obj);
 		try {
 			if (obj instanceof ObjectWrap) {
+				print.e("x---- unwrap2: " + obj.getClass().getName());
 
 				return ((ObjectWrap) obj).getEmbededObject(obj);
 			}
@@ -680,6 +684,8 @@ public final class Reflector {
 		if (!change) return coll;
 
 		coll = coll.duplicate(false);
+		print.e("x---- duplicate: ");
+
 		Iterator<Entry<Key, Object>> eit = coll.entryIterator();
 		Entry<Key, Object> e;
 		while (eit.hasNext()) {

@@ -30,6 +30,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
 import lucee.aprint;
+import lucee.print;
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
@@ -141,29 +142,38 @@ public class DynamicInvoker {
 		return Clazz.getClazz(clazz, root, log, useReflection);
 	}
 
-	/*
-	 * private static double getClass = 0; private static double match = 0; private static double types
-	 * = 0; private static double getDeclaringClass = 0; private static double lclassPath = 0; private
-	 * static double pathName = 0; private static double clsLoader = 0; private static double
-	 * loadInstance = 0; private static int count = 0;
-	 */
+	private static double getClass = 0;
+	private static double match = 0;
+	private static double types = 0;
+	private static double getDeclaringClass = 0;
+	private static double lclassPath = 0;
+	private static double pathName = 0;
+	private static double clsLoader = 0;
+	private static double loadInstance = 0;
+	private static int count = 0;
 
 	public Pair<FunctionMember, Object> createInstance(Class<?> clazz, Key methodName, Object[] arguments, boolean convertComparsion) throws NoSuchMethodException, IOException,
 			UnmodifiableClassException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, SecurityException, PageException {
 
-		/*
-		 * count++; if ((count % 500) == 0) { print.e("-------------------"); print.e("getClass:" +
-		 * getClass); print.e("match:" + match); print.e("types:" + types); print.e("getDeclaringClass:" +
-		 * getDeclaringClass); print.e("lclassPath:" + lclassPath); print.e("pathName:" + pathName);
-		 * print.e("clsLoader:" + clsLoader); print.e("loadInstance:" + loadInstance); }
-		 */
+		count++;
+		if ((count % 500) == 0) {
+			print.e("-------------------");
+			print.e("getClass:" + getClass);
+			print.e("match:" + match);
+			print.e("types:" + types);
+			print.e("getDeclaringClass:" + getDeclaringClass);
+			print.e("lclassPath:" + lclassPath);
+			print.e("pathName:" + pathName);
+			print.e("clsLoader:" + clsLoader);
+			print.e("loadInstance:" + loadInstance);
+		}
 
-		// double start = SystemUtil.millis();
+		double start = SystemUtil.millis();
 		boolean isConstr = methodName == null;
 		Clazz clazzz = getClazz(clazz);
 
-		// getClass += (SystemUtil.millis() - start);
-		// start = SystemUtil.millis();
+		getClass += (SystemUtil.millis() - start);
+		start = SystemUtil.millis();
 
 		lucee.transformer.dynamic.meta.FunctionMember fm = null;
 		lucee.transformer.dynamic.meta.Method method = null;
@@ -175,15 +185,15 @@ public class DynamicInvoker {
 			// Clazz clazz, final Collection.Key methodName, final Object[] args, boolean convertArgument
 			fm = method = Clazz.getMethodMatch(clazzz, methodName, arguments, true, convertComparsion);
 		}
-		// match += (SystemUtil.millis() - start);
-		// start = SystemUtil.millis();
+		match += (SystemUtil.millis() - start);
+		start = SystemUtil.millis();
 
-		// types += (SystemUtil.millis() - start);
-		// start = SystemUtil.millis();
+		types += (SystemUtil.millis() - start);
+		start = SystemUtil.millis();
 		clazz = fm.getDeclaringClass(); // we wanna go as low as possible, to be as open as possible also this avoid not allow to access
 
-		// getDeclaringClass += (SystemUtil.millis() - start);
-		// start = SystemUtil.millis();
+		getDeclaringClass += (SystemUtil.millis() - start);
+		start = SystemUtil.millis();
 
 		StringBuilder sbClassPath = new StringBuilder();
 		sbClassPath.append(clazz.getName().replace('.', '/')).append('/').append(isConstr ? "____init____" : fm.getName());
@@ -194,17 +204,17 @@ public class DynamicInvoker {
 			}
 			sbClassPath.append('_').append(HashUtil.create64BitHashAsString(sbArgs, Character.MAX_RADIX));
 		}
-		// lclassPath += (SystemUtil.millis() - start);
-		// start = SystemUtil.millis();
+		lclassPath += (SystemUtil.millis() - start);
+		start = SystemUtil.millis();
 
 		String classPath = Clazz.getPackagePrefix() + sbClassPath.toString();// StringUtil.replace(sbClassPath.toString(), "javae/lang/", "java_lang/", false);
 		String className = classPath.replace('/', '.');
 
-		// pathName += (SystemUtil.millis() - start);
-		// start = SystemUtil.millis();
+		pathName += (SystemUtil.millis() - start);
+		start = SystemUtil.millis();
 		DynamicClassLoader loader = getCL(clazz);
-		// clsLoader += (SystemUtil.millis() - start);
-		// start = SystemUtil.millis();
+		clsLoader += (SystemUtil.millis() - start);
+		start = SystemUtil.millis();
 		if (loader.hasClass(className)) {
 			try {
 				return new Pair<FunctionMember, Object>(fm, loader.loadInstance(className));
@@ -213,11 +223,11 @@ public class DynamicInvoker {
 			catch (Exception e) {
 				// simply ignore when fail
 			}
-			/*
-			 * finally { loadInstance += (SystemUtil.millis() - start); start = SystemUtil.millis();
-			 * 
-			 * }
-			 */
+			finally {
+				loadInstance += (SystemUtil.millis() - start);
+				start = SystemUtil.millis();
+
+			}
 		}
 		synchronized (SystemUtil.createToken("dyninvocer", className)) {
 			Class[] parameterClasses = fm.getArgumentClasses();
