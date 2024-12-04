@@ -1,11 +1,24 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
 
-    function beforeAll(){
-        variables.preciseMath = getApplicationSettings().preciseMath;
-    };
+	function beforeAll(){
+		variables.preciseMath = getApplicationSettings().preciseMath;
+	};
+
+	function afterAll(){
+		application action="update" preciseMath=variables.preciseMath;
+	};
 
 	function run( testResults , testBox ) {
 		describe( title="Test suite for BitXOr()", body=function() {
+
+			beforeEach( function(){
+				application action="update" preciseMath=variables.preciseMath;
+			});
+
+			afterEach( function(){
+				application action="update" preciseMath=variables.preciseMath;
+			});
+
 			it(title="Checking BitXOr() function", body = function( currentSpec ) {
 				assertEquals("2",BitXOr(1, 3));
 			});
@@ -32,12 +45,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
                 // Both numbers are large and outside the standard int range
                 assertEquals("0", BitXOr("18446744073709551615", "18446744073709551615"));  // All bits are the same, so XOR results in 0
             });
-
             it(title="Checking BitXOr() function with different large numbers", body = function(currentSpec) {
-                if ( variables.preciseMath )
-                    assertEquals("18446744073709551614", BitXOr("18446744073709551615", "1"));  // 111...11111111 XOR 000...00000001 = 111...11111110
-                else
-                    assertEquals("9223372036854775807", BitXOr("18446744073709551615", "1"));  // 111...11111111 XOR 000...00000001 = 111...11111110
+                application action="update" preciseMath=true;
+                assertEquals("18446744073709551614", BitXOr("18446744073709551615", "1"));  // 111...11111111 XOR 000...00000001 = 111...11111110
+
+                application action="update" preciseMath=false;
+                assertEquals("9223372036854775807",  BitXOr("18446744073709551615", "1"));  // 111...11111111 XOR 000...00000001 = 111...11111110
             });
 
 		});
