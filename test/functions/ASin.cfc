@@ -2,8 +2,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function run( testResults , testBox ) {
 		describe( title="Test suite for ASin()", body=function() {
 			it(title="Checking ASin() function", body = function( currentSpec ) {
-				var res="0.3046926540153975"; 
-				assertEquals(res,tostring( asin(0.3) ));
+				if ( getApplicationSettings().preciseMath )
+					assertEquals("0.3046926540153975",tostring( asin(0.3) ));
+				else  
+					assertEquals("0.304692654015",tostring( asin(0.3) ));
 			});
 			it(title="Checking ASin() function invaid input", body = function( currentSpec ) {
 				try{

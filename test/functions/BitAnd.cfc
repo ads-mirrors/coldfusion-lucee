@@ -1,4 +1,9 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
+
+	function beforeAll(){
+		variables.preciseMath = getApplicationSettings().preciseMath;
+	};
+
 	function run( testResults , testBox ) {
 		describe( title="Test suite for BitAnd()", body=function() {
 			it(title="Checking BitAnd() function integers", body = function( currentSpec ) {
@@ -17,7 +22,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			it(title="Checking BitAnd() function float edge case ", body = function( currentSpec ) {
 				// they can be converted because they are below the threshold
 				assertEquals("0",BitAnd(1, 0.00000000000001));
-				assertEquals("1",BitAnd(1, 0.999999999999999));
+                if ( variables.preciseMath ) {
+                    assertEquals("1",BitAnd(1, 0.999999999999999));
+                } else {
+                    var Integer=createObject("java","java.lang.Integer");
+                    assertEquals("1",BitAnd(1, Integer.MAX_VALUE));
+                }
 			});
 
 			it("should correctly perform bitwise AND between two positive numbers", function() {

@@ -1,4 +1,9 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
+
+    function beforeAll(){
+        variables.preciseMath = getApplicationSettings().preciseMath;
+    };
+
 	function run( testResults , testBox ) {
 		describe( title="Test suite for BitXOr()", body=function() {
 			it(title="Checking BitXOr() function", body = function( currentSpec ) {
@@ -29,7 +34,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
             });
 
             it(title="Checking BitXOr() function with different large numbers", body = function(currentSpec) {
-                assertEquals("18446744073709551614", BitXOr("18446744073709551615", "1"));  // 111...11111111 XOR 000...00000001 = 111...11111110
+                if ( variables.preciseMath )
+                    assertEquals("18446744073709551614", BitXOr("18446744073709551615", "1"));  // 111...11111111 XOR 000...00000001 = 111...11111110
+                else
+                    assertEquals("9223372036854775807", BitXOr("18446744073709551615", "1"));  // 111...11111111 XOR 000...00000001 = 111...11111110
             });
 
 		});

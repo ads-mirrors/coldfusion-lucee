@@ -1,4 +1,9 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
+
+	function beforeAll(){
+		variables.preciseMath = getApplicationSettings().preciseMath;
+	};
+
 	function run( testResults , testBox ) {
 		describe( title="Test suite for BitOr()", body=function() {
 			it(title="Checking BitOr() function", body = function( currentSpec ) {
@@ -22,7 +27,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			});
 			
 			it("should handle bitwise OR where one number is the maximum integer value", function() {
-				expect( BitOr(2147483647, 1) ).toBe(2147483647);
+				if ( variables.preciseMath )
+					expect( BitOr(2147483647, 1) ).toBe(2147483647);
+				else
+					expect( BitOr(2147483647, 1) ).toBe(2147483648);
 			});
 			
 			it("should return the non-zero value when one number is zero", function() {
@@ -30,10 +38,16 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			});
 			
 			it("should correctly perform bitwise OR between two large String values", function() {
-				expect( BitOr("9223372036854775808", "9223372036854775807") ).toBe("18446744073709551615");
+				if ( variables.preciseMath )
+					expect( BitOr("9223372036854775808", "9223372036854775807") ).toBe("18446744073709551615");
+				else
+					expect( BitOr("9223372036854775808", "9223372036854775807") ).toBe("9223372036854775807");
 			});
 			it("should correctly perform bitwise OR between two large Number values", function() {
-				expect( BitOr(9223372036854775808, 9223372036854775807) ).toBe(18446744073709551615);
+				if ( variables.preciseMath )
+					expect( BitOr(9223372036854775808, 9223372036854775807) ).toBe(18446744073709551615);
+				else
+					expect( BitOr(9223372036854775808, 9223372036854775807) ).toBe(9223372036854775807);
 			});
 			
 			it("should correctly perform bitwise OR between a BigInteger and a smaller integer", function() {

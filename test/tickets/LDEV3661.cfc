@@ -14,7 +14,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				
 				var myJSON = '{"lat":20.12283319000001}';
 				var decoded = deserializeJSON( myJSON );
-				expect( serializeJSON( decoded ) ).toBe( '{"lat":20.12283319000001}' );
+				if ( getApplicationSettings().preciseMath )
+					expect( serializeJSON( decoded ) ).toBe( '{"lat":20.12283319000001}' );
+				else
+					expect( serializeJSON( decoded ) ).toBe( '{"lat":20.12283319}' );
 				
 			});
 
