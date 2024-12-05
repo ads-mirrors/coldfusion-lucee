@@ -54,6 +54,8 @@ import lucee.runtime.type.Struct;
 public class ThreadUtil {
 
 	private static final boolean ALLOW_FUTURE_THREADS = false;
+	private static final Class<?> THREAD_CLASS = Thread.class;
+	private static final Class<?> RUNNABLE_CLASS = Runnable.class;
 
 	// do not change, used in Redis extension
 	public static PageContextImpl clonePageContext(PageContext pc, OutputStream os, boolean stateless, boolean register2Thread, boolean register2RunningThreads) {
@@ -194,6 +196,29 @@ public class ThreadUtil {
 		if (stes == null || stes.length == 0) return defaultValue;
 		StackTraceElement ste = stes[0];
 		return ste.isNativeMethod();
+	}
+
+	public static Thread getThread(Runnable task) {
+		return getThread(task, ALLOW_FUTURE_THREADS);
+
+	}
+
+	public static Thread getThread(Runnable task, boolean allowVirtual) {
+		if (allowVirtual && SystemUtil.JAVA_VERSION >= SystemUtil.JAVA_VERSION_19) {
+			try {
+				// return Thread.ofVirtual().unstarted(task);
+				MethodHandles.Lookup lookup = MethodHandles.lookup();
+				MethodHandle ofVirtualHandle = lookup.findStatic(THREAD_CLASS, "ofVirtual", MethodType.methodType(THREAD_CLASS.getDeclaredClasses()[0]));
+				Object builder = ofVirtualHandle.invoke();
+				MethodHandle unstartedHandle = lookup.findVirtual(builder.getClass(), "unstarted", MethodType.methodType(THREAD_CLASS, RUNNABLE_CLASS));
+				return (Thread) unstartedHandle.invoke(builder, task);
+			}
+			catch (Throwable e) {
+				ExceptionUtil.rethrowIfNecessary(e);
+			}
+		}
+		return new Thread(task);
+
 	}
 
 	public static ExecutorService createExecutorService(int maxThreads) {

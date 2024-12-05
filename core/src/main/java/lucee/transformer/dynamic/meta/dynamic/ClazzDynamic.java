@@ -15,6 +15,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.felix.framework.BundleWiringImpl.BundleClassLoader;
 import org.objectweb.asm.ClassReader;
@@ -24,8 +25,10 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.osgi.framework.Bundle;
 
+import lucee.print;
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.IOUtil;
+import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.ExceptionUtil;
@@ -33,6 +36,7 @@ import lucee.commons.lang.PhysicalClassLoader;
 import lucee.commons.lang.types.RefInteger;
 import lucee.commons.lang.types.RefIntegerImpl;
 import lucee.runtime.converter.JavaConverter.ObjectInputStreamImpl;
+import lucee.runtime.thread.ThreadUtil;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.dynamic.meta.Clazz;
 import lucee.transformer.dynamic.meta.Constructor;
@@ -56,7 +60,31 @@ public class ClazzDynamic extends Clazz {
 
 	private static Map<Class, SoftReference<ClazzDynamic>> classes = new IdentityHashMap<>();
 
+	private static double generateClassLoderId = 0;
+	private static double path = 0;
+	private static double isFile = 0;
+	private static double deserialize = 0;
+	private static double put = 0;
+	private static double neww = 0;
+	private static double serialize = 0;
+	private static double done = 0;
+	private static int count = 0;
+
 	public static ClazzDynamic getInstance(Class clazz, Resource dir, Log log) throws IOException {
+
+		count++;
+		if ((count % 500) == 0) {
+			print.e("-------------------");
+			print.e("generateClassLoderId:" + generateClassLoderId);
+			print.e("path:" + path);
+			print.e("isFile:" + isFile);
+			print.e("deserialize:" + deserialize);
+			print.e("put:" + put);
+			print.e("neww:" + neww);
+			print.e("serialize:" + serialize);
+			print.e("done:" + done);
+		}
+		double start = SystemUtil.millis();
 
 		ClazzDynamic cd = null;
 		Reference<ClazzDynamic> sr = classes.get(clazz);
@@ -65,16 +93,27 @@ public class ClazzDynamic extends Clazz {
 				sr = classes.get(clazz);
 				if (sr == null || (cd = sr.get()) == null) {
 					String id = generateClassLoderId(clazz);
+					generateClassLoderId += (SystemUtil.millis() - start);
+					start = SystemUtil.millis();
 					StringBuilder sbClassPath = new StringBuilder();
 					sbClassPath.append(clazz.getName().replace('.', '/')).append('-').append(id).append(".ser");
 					Resource ser = dir.getRealResource(getPackagePrefix() + sbClassPath.toString());
+
+					path += (SystemUtil.millis() - start);
+					start = SystemUtil.millis();
 					if (id != null && ser.isFile()) {
+						isFile += (SystemUtil.millis() - start);
+						start = SystemUtil.millis();
 						if (log != null) log.info("dynamic", "found metadata for [" + clazz.getName() + "]in from serialized file:" + ser);
 						try {
 							cd = (ClazzDynamic) deserialize(getClassLoader(clazz), ser.getInputStream());
 							cd.clazz = clazz;
+							deserialize += (SystemUtil.millis() - start);
+							start = SystemUtil.millis();
 							if (log != null) log.info("dynamic", "loaded metadata for [" + clazz.getName() + "] from serialized file:" + ser);
 							classes.put(clazz, new SoftReference<ClazzDynamic>(cd));
+							put += (SystemUtil.millis() - start);
+							start = SystemUtil.millis();
 						}
 						catch (Exception e) {
 							if (log != null) log.error("dynamic", e);
@@ -84,12 +123,29 @@ public class ClazzDynamic extends Clazz {
 						try {
 							if (log != null) log.info("dynamic", "extract metadata from [" + clazz.getName() + "]");
 							cd = new ClazzDynamic(clazz, id, log);
+							neww += (SystemUtil.millis() - start);
+							start = SystemUtil.millis();
 							if (id != null) {
-								ser.getParentResource().mkdirs();
-								serialize(cd, ser.getOutputStream());
-								if (log != null) log.info("dynamic", "stored metadata for [" + clazz.getName() + "] to serialized file:" + ser);
+								final ClazzDynamic _cd = cd;
+								ThreadUtil.getThread(() -> {
+									// Thread.ofVirtual().start(() -> {
+									try {
+										ser.getParentResource().mkdirs();
+										serialize(_cd, ser.getOutputStream());
+										if (log != null) {
+											log.info("dynamic", "stored metadata for [" + clazz.getName() + "] to serialized file:" + ser);
+										}
+									}
+									catch (IOException e) {
+										if (log != null) {
+											log.error("dynamic", "Failed to serialize metadata for [" + clazz.getName() + "] to file: " + ser, e);
+										}
+									}
+								}, true).start();
+
+								serialize += (SystemUtil.millis() - start);
+								start = SystemUtil.millis();
 							}
-							classes.put(clazz, new SoftReference<ClazzDynamic>(cd));
 						}
 						catch (IOException ioe) {
 							// print.e(ioe);
@@ -99,6 +155,9 @@ public class ClazzDynamic extends Clazz {
 				}
 			}
 		}
+		done += (SystemUtil.millis() - start);
+		start = SystemUtil.millis();
+
 		return cd;
 	}
 
@@ -138,8 +197,7 @@ public class ClazzDynamic extends Clazz {
 	private ClazzDynamic(Class clazz, String clid, Log log) throws IOException {
 		this.clazz = clazz;
 		this.clid = clid;
-		LinkedHashMap<String, FunctionMember> members = new LinkedHashMap<>();
-		_getFunctionMembers(clazz, members, log);
+		LinkedHashMap<String, FunctionMember> members = _getFunctionMembers(clazz, log);
 
 		methods = new LinkedList<>();
 		declaredMethods = new LinkedList<>();
@@ -311,119 +369,135 @@ public class ClazzDynamic extends Clazz {
 		return list;
 	}
 
-	private static void _getFunctionMembers(final Class clazz, Map<String, FunctionMember> members, Log log) throws IOException {
+	private static Map<Class, LinkedHashMap<String, FunctionMember>> membersCollection = new IdentityHashMap<>();
 
-		final String classPath = clazz.getName().replace('.', '/') + ".class";
-		final ClassLoader cl = getClassLoader(clazz);
-		final RefInteger classAccess = new RefIntegerImpl();
-		ClassReader classReader;
+	private static LinkedHashMap<String, FunctionMember> _getFunctionMembers(final Class clazz, Log log) throws IOException {
 
-		if (cl instanceof lucee.commons.lang.PhysicalClassLoader) {
-
-		}
-
-		try {
-			classReader = new ClassReader(cl.getResourceAsStream(classPath));
-		}
-		catch (IOException ioe) {
-			if ("Class not found".equals(ioe.getMessage())) {
-				IOException tmp = new IOException("unable to load class path [" + classPath + "]");
-				ExceptionUtil.initCauseEL(tmp, ioe);
-				ioe = tmp;
-			}
-			throw ioe;
-		}
-
-		// Create a ClassVisitor to visit the methods
-		ClassVisitor visitor = new ClassVisitor(Opcodes.ASM9) {
-
-			@Override
-			public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-				classAccess.setValue(access);
-				if (interfaces != null && interfaces.length > 0) {
-					for (String interf: interfaces) {
-						try {
-							_getFunctionMembers(cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), members, log);
-						}
-						catch (Exception e) {
-							if (log != null) log.error("dynamic", e);
-						}
-					}
-				}
-				if (superName != null) {
+		LinkedHashMap<String, FunctionMember> members = membersCollection.get(clazz);
+		if (members == null) {
+			synchronized (SystemUtil.createToken("ClazzDynamic", clazz.getName())) {
+				members = membersCollection.get(clazz);
+				if (members == null) {
+					LinkedHashMap<String, FunctionMember> tmpMembers = new LinkedHashMap<>();
+					// Map<String, FunctionMember> members,
+					final String classPath = clazz.getName().replace('.', '/') + ".class";
+					final ClassLoader cl = getClassLoader(clazz);
+					final RefInteger classAccess = new RefIntegerImpl();
+					ClassReader classReader;
 					try {
-						_getFunctionMembers(cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), members, log);
+						// print.e("new:" + clazz);
+						classReader = new ClassReader(cl.getResourceAsStream(classPath));
 					}
-					catch (IllegalArgumentException iae) {
-						String v = ASMUtil.getJavaVersionFromException(iae, null);
-						if (v != null) {
-							throw new RuntimeException("The class [" + superName + "] was compiled with Java version [" + v + "], "
-									+ "which is not supported by the current version of ASM. The highest supported version is ["
-									+ ASMUtil.toStringVersionFromBytceodeVersion(ASMUtil.getMaxVersion(), "unknown") + "]. ");
-
+					catch (IOException ioe) {
+						if ("Class not found".equals(ioe.getMessage())) {
+							IOException tmp = new IOException("unable to load class path [" + classPath + "]");
+							ExceptionUtil.initCauseEL(tmp, ioe);
+							ioe = tmp;
 						}
-						throw iae;
+						throw ioe;
 					}
-					catch (RuntimeException re) {
-						throw re;
-					}
-					catch (Exception e) {
-						if (log != null) log.error("dynamic", e);
-					}
-				}
 
-				super.visit(version, access, name, signature, superName, interfaces);
-			}
+					// Create a ClassVisitor to visit the methods
+					ClassVisitor visitor = new ClassVisitor(Opcodes.ASM9) {
 
-			@Override
-			public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-				FunctionMember fmCurrent = FunctionMemberDynamic.createInstance(clazz, name, access, descriptor, exceptions, classAccess.toInt());
-				String id = Clazz.id(fmCurrent);
-				FunctionMember parent = members.get(id);
-				if (parent instanceof FunctionMemberDynamic) {
-					FunctionMemberDynamic fmParent = (FunctionMemberDynamic) parent;
-					// java.lang.Appendable
+						@Override
+						public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+							classAccess.setValue(access);
+							if (interfaces != null && interfaces.length > 0) {
+								for (String interf: interfaces) {
+									try {
+										add(tmpMembers, _getFunctionMembers(cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), log));
+									}
+									catch (Exception e) {
+										if (log != null) log.error("dynamic", e);
+									}
+								}
+							}
+							if (superName != null) {
+								try {
+									add(tmpMembers, _getFunctionMembers(cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), log));
+								}
+								catch (IllegalArgumentException iae) {
+									String v = ASMUtil.getJavaVersionFromException(iae, null);
+									if (v != null) {
+										throw new RuntimeException("The class [" + superName + "] was compiled with Java version [" + v + "], "
+												+ "which is not supported by the current version of ASM. The highest supported version is ["
+												+ ASMUtil.toStringVersionFromBytceodeVersion(ASMUtil.getMaxVersion(), "unknown") + "]. ");
 
-					Class tmpClass = fmParent.getDeclaringProviderClass(true);
-					if (tmpClass != null) {
-						Class rtnClass = null;
-						if (fmParent instanceof Method) {
+									}
+									throw iae;
+								}
+								catch (RuntimeException re) {
+									throw re;
+								}
+								catch (Exception e) {
+									if (log != null) log.error("dynamic", e);
+								}
+							}
 
-							Class tmpRtn = fmParent.getDeclaringProviderRtnClass(true);
-							rtnClass = tmpRtn;
+							super.visit(version, access, name, signature, superName, interfaces);
 						}
 
-						/*
-						 * if (name.equals("toLocalDateTime")) { print.e("xxxxxxxxxxxxxxx"); print.e(clazz + ":" + name +
-						 * ":" + descriptor); // print.e(Clazz.getAccessModifier(fmCurrent)); //
-						 * print.e(Clazz.getAccessModifier(fmParent)); print.e("curr: " +
-						 * Clazz.getAccessModifierAsString(fmCurrent)); print.e("parr: " +
-						 * Clazz.getAccessModifierAsString(fmParent)); print.e("DeclaringClassName: " +
-						 * fmCurrent.getDeclaringClassName()); print.e("getDeclaringProviderClassName: " +
-						 * fmCurrent.getDeclaringProviderClassNameWithSameAccess()); // print.e("-----------------" +
-						 * Clazz.compareAccess(fmd, fm)); }
-						 */
+						@Override
+						public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+							FunctionMember fmCurrent = FunctionMemberDynamic.createInstance(clazz, name, access, descriptor, exceptions, classAccess.toInt());
+							String id = Clazz.id(fmCurrent);
+							FunctionMember parent = tmpMembers.get(id);
+							if (parent instanceof FunctionMemberDynamic) {
+								FunctionMemberDynamic fmParent = (FunctionMemberDynamic) parent;
+								// java.lang.Appendable
 
-						Type tmpType = tmpClass != null ? Type.getType(tmpClass) : null;
-						Type rtnType = rtnClass != null ? Type.getType(rtnClass) : null;
+								Class tmpClass = fmParent.getDeclaringProviderClass(true);
+								if (tmpClass != null) {
+									Class rtnClass = null;
+									if (fmParent instanceof Method) {
 
-						if (Clazz.compareAccess(fmParent, fmCurrent) >= 0)
-							((FunctionMemberDynamic) fmCurrent).setDeclaringProviderClassWithSameAccess(tmpClass, tmpType, rtnClass, rtnType);
-						((FunctionMemberDynamic) fmCurrent).setDeclaringProviderClass(tmpClass, tmpType, rtnClass, rtnType);
+										Class tmpRtn = fmParent.getDeclaringProviderRtnClass(true);
+										rtnClass = tmpRtn;
+									}
 
-						/*
-						 * if (name.equals("nextElement")) { print.e(fm.getDeclaringProviderClassName());
-						 * print.e(fm.getDeclaringProviderClassNameWithSameAccess()); }
-						 */
-					}
+									/*
+									 * if (name.equals("toLocalDateTime")) { print.e("xxxxxxxxxxxxxxx"); print.e(clazz + ":" + name +
+									 * ":" + descriptor); // print.e(Clazz.getAccessModifier(fmCurrent)); //
+									 * print.e(Clazz.getAccessModifier(fmParent)); print.e("curr: " +
+									 * Clazz.getAccessModifierAsString(fmCurrent)); print.e("parr: " +
+									 * Clazz.getAccessModifierAsString(fmParent)); print.e("DeclaringClassName: " +
+									 * fmCurrent.getDeclaringClassName()); print.e("getDeclaringProviderClassName: " +
+									 * fmCurrent.getDeclaringProviderClassNameWithSameAccess()); // print.e("-----------------" +
+									 * Clazz.compareAccess(fmd, fm)); }
+									 */
+
+									Type tmpType = tmpClass != null ? Type.getType(tmpClass) : null;
+									Type rtnType = rtnClass != null ? Type.getType(rtnClass) : null;
+
+									if (Clazz.compareAccess(fmParent, fmCurrent) >= 0)
+										((FunctionMemberDynamic) fmCurrent).setDeclaringProviderClassWithSameAccess(tmpClass, tmpType, rtnClass, rtnType);
+									((FunctionMemberDynamic) fmCurrent).setDeclaringProviderClass(tmpClass, tmpType, rtnClass, rtnType);
+
+									/*
+									 * if (name.equals("nextElement")) { print.e(fm.getDeclaringProviderClassName());
+									 * print.e(fm.getDeclaringProviderClassNameWithSameAccess()); }
+									 */
+								}
+							}
+							tmpMembers.put(id, fmCurrent);
+
+							return super.visitMethod(access, name, descriptor, signature, exceptions);
+						}
+					};
+					// Start visiting the class
+					classReader.accept(visitor, 0);
+					membersCollection.put(clazz, members = tmpMembers);
 				}
-				members.put(id, fmCurrent);
-
-				return super.visitMethod(access, name, descriptor, signature, exceptions);
 			}
-		};
-		// Start visiting the class
-		classReader.accept(visitor, 0);
+		}
+		return members;
+	}
+
+	private static void add(LinkedHashMap<String, FunctionMember> members, LinkedHashMap<String, FunctionMember> rtn) {
+		for (Entry<String, FunctionMember> e: rtn.entrySet()) {
+			members.put(e.getKey(), e.getValue());
+		}
 	}
 
 	public static void serialize(Serializable o, OutputStream os) throws IOException {
