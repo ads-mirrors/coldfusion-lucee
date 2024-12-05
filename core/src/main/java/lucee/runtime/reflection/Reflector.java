@@ -37,7 +37,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.Vector;
 
-import lucee.print;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.ClassUtil;
@@ -56,7 +55,6 @@ import lucee.runtime.exp.SecurityException;
 import lucee.runtime.functions.conversion.DeserializeJSON;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
-import lucee.runtime.op.Duplicator;
 import lucee.runtime.op.OpUtil;
 import lucee.runtime.reflection.pairs.ConstructorInstance;
 import lucee.runtime.reflection.pairs.MethodInstance;
@@ -623,15 +621,23 @@ public final class Reflector {
 		return new ConstructorInstance(clazz, args, !exactMatchOnly);
 	}
 
+	static int count = 0;
+
 	public static Object[] cleanArgs(Object[] args) {
 		if (args == null) {
 			return new Object[0];
 		}
+		return args;
 
+	}
+
+	public static Object[] cleanArgsOld(Object[] args) {
+		if (args == null) {
+			return new Object[0];
+		}
 		boolean digg = false;
 		for (int i = 0; i < args.length; i++) {
 			if (args[i] instanceof ObjectWrap) {
-				print.e("x---- unwrap: " + args[i].getClass().getName());
 				args[i] = ((ObjectWrap) args[i]).getEmbededObject(args[i]);
 			}
 			else if (args[i] instanceof Collection) {
@@ -641,7 +647,6 @@ public final class Reflector {
 		}
 
 		if (!digg) return args;
-		print.e("x---- digg: ");
 
 		ObjectIdentityHashSet done = new ObjectIdentityHashSet();
 		for (int i = 0; i < args.length; i++) {
@@ -655,14 +660,9 @@ public final class Reflector {
 		done.add(obj);
 		try {
 			if (obj instanceof ObjectWrap) {
-				print.e("x---- unwrap2: " + obj.getClass().getName());
-
 				return ((ObjectWrap) obj).getEmbededObject(obj);
 			}
 			if (obj instanceof Collection) return _clean(done, (Collection) obj);
-			// if (obj instanceof Map) return _clean(done, (Map) obj);
-			// if (obj instanceof List) return _clean(done, (List) obj);
-			// if (obj instanceof Object[]) return _clean(done, (Object[]) obj);
 		}
 		finally {
 			done.remove(obj);
@@ -684,7 +684,6 @@ public final class Reflector {
 		if (!change) return coll;
 
 		coll = coll.duplicate(false);
-		print.e("x---- duplicate: ");
 
 		Iterator<Entry<Key, Object>> eit = coll.entryIterator();
 		Entry<Key, Object> e;
@@ -693,70 +692,6 @@ public final class Reflector {
 			coll.setEL(e.getKey(), _clean(done, e.getValue()));
 		}
 		return coll;
-	}
-
-	private static Object _clean(ObjectIdentityHashSet done, Map map) {
-		Iterator vit = map.values().iterator();
-		Object v;
-		boolean change = false;
-		while (vit.hasNext()) {
-			v = vit.next();
-			if (v != _clean(done, v)) {
-				change = true;
-				break;
-			}
-		}
-		if (!change) return map;
-
-		map = Duplicator.duplicateMap(map, false);
-		Iterator<Entry> eit = map.entrySet().iterator();
-		Entry e;
-		while (eit.hasNext()) {
-			e = eit.next();
-			map.put(e.getKey(), _clean(done, e.getValue()));
-		}
-
-		return map;
-	}
-
-	private static Object _clean(ObjectIdentityHashSet done, List list) {
-		Iterator it = list.iterator();
-		Object v;
-		boolean change = false;
-		while (it.hasNext()) {
-			v = it.next();
-			if (v != _clean(done, v)) {
-				change = true;
-				break;
-			}
-		}
-		if (!change) return list;
-
-		list = Duplicator.duplicateList(list, false);
-		it = list.iterator();
-		while (it.hasNext()) {
-			list.add(_clean(done, it.next()));
-		}
-
-		return list;
-	}
-
-	private static Object _clean(ObjectIdentityHashSet done, Object[] src) {
-		boolean change = false;
-		for (int i = 0; i < src.length; i++) {
-			if (src[i] != _clean(done, src[i])) {
-				change = true;
-				break;
-			}
-		}
-		if (!change) return src;
-
-		Object[] trg = new Object[src.length];
-		for (int i = 0; i < trg.length; i++) {
-			trg[i] = _clean(done, src[i]);
-		}
-
-		return trg;
 	}
 
 	public static MethodInstance getMethodInstance(Class clazz, final Collection.Key methodName, Object[] args, boolean exactMatchOnly) {

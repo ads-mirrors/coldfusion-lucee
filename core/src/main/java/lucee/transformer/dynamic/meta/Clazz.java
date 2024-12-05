@@ -81,7 +81,6 @@ public abstract class Clazz implements Serializable {
 			return ClazzDynamic.getInstance(clazz, root, log);
 		}
 		catch (Exception e) {
-			print.ds("xxxxxxxxxxxxxxxxx " + clazz);
 			if (log != null) log.error("dynamic", e);
 			if (allowReflection()) return new ClazzReflection(clazz);
 			else throw new RuntimeException(e);
