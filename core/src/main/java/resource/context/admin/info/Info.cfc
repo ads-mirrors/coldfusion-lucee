@@ -226,7 +226,7 @@ function loadRef() {
 			luceeRefData=JSON.parse(this.responseText.trim());
     	}
   	};
-  	xhttp.open("GET", "/debug/modern/reference.cfm", true);
+  	xhttp.open("GET", "/lucee/debug/modern/reference.cfm", true);
   	xhttp.send();
 }
 
@@ -395,7 +395,7 @@ function luceeSearch(val,type) {
     		el.innerHTML= this.responseText;
     	}
   	};
-  	xhttp.open("POST", "/debug/modern/reference.cfm", true);
+  	xhttp.open("POST", "/lucee/debug/modern/reference.cfm", true);
   	xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
   	xhttp.send("search=" + val + "&typ=" + type);
 }
@@ -430,7 +430,7 @@ function luceeSearchAI(val) {
   	};
 
 
-  	xhttp.open("POST", "/debug/modern/reference.cfm", true);
+  	xhttp.open("POST", "/lucee/debug/modern/reference.cfm", true);
   	//xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
 	var formData = new FormData();
 	formData.append("search", val);
