@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.objectweb.asm.Type;
 
-import lucee.print;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.res.Resource;
@@ -90,43 +89,32 @@ public abstract class Clazz implements Serializable {
 	private static Map<String, SoftReference<Pair<Method, Boolean>>> cachedMethods = new ConcurrentHashMap<>();
 	private static RefInteger nirvana = new RefIntegerImpl();
 
-	private static double cleanArgs = 0;
-	private static double checkAccessibility = 0;
-	private static double lmethods = 0;
-	private static double cache = 0;
-	private static double exact = 0;
-	private static double like = 0;
-	private static double convert = 0;
-	private static double lclasses = 0;
-	private static double lclasses2 = 0;
-	private static int count = 0;
+	/*
+	 * private static double cleanArgs = 0; private static double checkAccessibility = 0; private static
+	 * double lmethods = 0; private static double cache = 0; private static double exact = 0; private
+	 * static double like = 0; private static double convert = 0; private static double lclasses = 0;
+	 * private static double lclasses2 = 0; private static int count = 0;
+	 */
 
 	public static Method getMethodMatch(Clazz clazz, final Collection.Key methodName, Object[] args, boolean convertArgument, boolean convertComparsion)
 			throws NoSuchMethodException, IOException, PageException {
 
-		count++;
-		if ((count % 500) == 0) {
-			print.e("-------------------");
-			print.e("cleanArgs:" + cleanArgs);
-			print.e("checkAccessibility:" + checkAccessibility);
-			print.e("lmethods:" + lmethods);
-			print.e("cache:" + cache);
-			print.e("exact:" + exact);
-			print.e("like:" + like);
-			print.e("convert:" + convert);
-			print.e("lclasses:" + lclasses);
-			print.e("lclasses2:" + lclasses2);
-		}
-		double start = SystemUtil.millis();
+		/*
+		 * count++; if ((count % 500) == 0) { print.e("-------------------"); print.e("cleanArgs:" +
+		 * cleanArgs); print.e("checkAccessibility:" + checkAccessibility); print.e("lmethods:" + lmethods);
+		 * print.e("cache:" + cache); print.e("exact:" + exact); print.e("like:" + like); print.e("convert:"
+		 * + convert); print.e("lclasses:" + lclasses); print.e("lclasses2:" + lclasses2); } double start =
+		 * SystemUtil.millis();
+		 */
 
 		args = Reflector.cleanArgs(args);
 
-		cleanArgs += (SystemUtil.millis() - start);
-		start = SystemUtil.millis();
+		// cleanArgs += (SystemUtil.millis() - start);
+		// start = SystemUtil.millis();
 		List<Method> methods = clazz.getMethods(methodName.getString(), false, args.length);
 
-		lmethods += (SystemUtil.millis() - start);
-		start = SystemUtil.millis();
+		// lmethods += (SystemUtil.millis() - start);
+		// start = SystemUtil.millis();
 
 		if (methods != null && methods.size() > 0) {
 			Class[] clazzArgs = Reflector.getClasses(args);
@@ -156,13 +144,13 @@ public abstract class Clazz implements Serializable {
 					return p.getName();
 				}
 			}
-			cache += (SystemUtil.millis() - start);
-			start = SystemUtil.millis();
+			// cache += (SystemUtil.millis() - start);
+			// start = SystemUtil.millis();
 
 			Reflector.checkAccessibility(clazz.getDeclaringClass(), methodName);
 
-			checkAccessibility += (SystemUtil.millis() - start);
-			start = SystemUtil.millis();
+			// checkAccessibility += (SystemUtil.millis() - start);
+			// start = SystemUtil.millis();
 
 			// exact comparsion
 			outer: for (Method m: methods) {
@@ -176,8 +164,8 @@ public abstract class Clazz implements Serializable {
 					return m;
 				}
 			}
-			exact += (SystemUtil.millis() - start);
-			start = SystemUtil.millis();
+			// exact += (SystemUtil.millis() - start);
+			// start = SystemUtil.millis();
 
 			// like comparsion
 			outer: for (Method m: methods) {
@@ -191,8 +179,8 @@ public abstract class Clazz implements Serializable {
 					return m;
 				}
 			}
-			like += (SystemUtil.millis() - start);
-			start = SystemUtil.millis();
+			// like += (SystemUtil.millis() - start);
+			// start = SystemUtil.millis();
 
 			// convert comparsion
 			Pair<Method, Object[]> result = null;
@@ -219,8 +207,8 @@ public abstract class Clazz implements Serializable {
 					}
 				}
 			}
-			convert += (SystemUtil.millis() - start);
-			start = SystemUtil.millis();
+			// convert += (SystemUtil.millis() - start);
+			// start = SystemUtil.millis();
 			if (result != null) {
 				if (convertArgument) {
 					Object[] newArgs = result.getValue();
@@ -255,8 +243,8 @@ public abstract class Clazz implements Serializable {
 			}
 		}
 
-		lclasses += (SystemUtil.millis() - start);
-		start = SystemUtil.millis();
+		// lclasses += (SystemUtil.millis() - start);
+		// start = SystemUtil.millis();
 		/*
 		 * the argument list contains objects created by createObject, that are no instantiated
 		 * (first,third,10th) and because this object have no constructor taking no arguments, Lucee cannot
@@ -315,8 +303,8 @@ public abstract class Clazz implements Serializable {
 		else {
 			msg.append("there are no methods with this name.");
 		}
-		lclasses2 += (SystemUtil.millis() - start);
-		start = SystemUtil.millis();
+		// lclasses2 += (SystemUtil.millis() - start);
+		// start = SystemUtil.millis();
 		throw new NoSuchMethodException(msg.toString());
 	}
 

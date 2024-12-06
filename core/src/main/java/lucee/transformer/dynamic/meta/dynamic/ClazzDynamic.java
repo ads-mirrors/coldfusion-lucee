@@ -25,7 +25,6 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.osgi.framework.Bundle;
 
-import lucee.print;
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
@@ -60,31 +59,22 @@ public class ClazzDynamic extends Clazz {
 
 	private static Map<Class, SoftReference<ClazzDynamic>> classes = new IdentityHashMap<>();
 
-	private static double generateClassLoderId = 0;
-	private static double path = 0;
-	private static double isFile = 0;
-	private static double deserialize = 0;
-	private static double put = 0;
-	private static double neww = 0;
-	private static double serialize = 0;
-	private static double done = 0;
-	private static int count = 0;
+	/*
+	 * private static double generateClassLoderId = 0; private static double path = 0; private static
+	 * double isFile = 0; private static double deserialize = 0; private static double put = 0; private
+	 * static double neww = 0; private static double serialize = 0; private static double done = 0;
+	 * private static int count = 0;
+	 */
 
 	public static ClazzDynamic getInstance(Class clazz, Resource dir, Log log) throws IOException {
 
-		count++;
-		if ((count % 500) == 0) {
-			print.e("-------------------");
-			print.e("generateClassLoderId:" + generateClassLoderId);
-			print.e("path:" + path);
-			print.e("isFile:" + isFile);
-			print.e("deserialize:" + deserialize);
-			print.e("put:" + put);
-			print.e("neww:" + neww);
-			print.e("serialize:" + serialize);
-			print.e("done:" + done);
-		}
-		double start = SystemUtil.millis();
+		/*
+		 * count++; if ((count % 500) == 0) { print.e("-------------------");
+		 * print.e("generateClassLoderId:" + generateClassLoderId); print.e("path:" + path);
+		 * print.e("isFile:" + isFile); print.e("deserialize:" + deserialize); print.e("put:" + put);
+		 * print.e("neww:" + neww); print.e("serialize:" + serialize); print.e("done:" + done); } double
+		 * start = SystemUtil.millis();
+		 */
 
 		ClazzDynamic cd = null;
 		Reference<ClazzDynamic> sr = classes.get(clazz);
@@ -93,27 +83,27 @@ public class ClazzDynamic extends Clazz {
 				sr = classes.get(clazz);
 				if (sr == null || (cd = sr.get()) == null) {
 					String id = generateClassLoderId(clazz);
-					generateClassLoderId += (SystemUtil.millis() - start);
-					start = SystemUtil.millis();
+					// generateClassLoderId += (SystemUtil.millis() - start);
+					// start = SystemUtil.millis();
 					StringBuilder sbClassPath = new StringBuilder();
 					sbClassPath.append(clazz.getName().replace('.', '/')).append('-').append(id).append(".ser");
 					Resource ser = dir.getRealResource(getPackagePrefix() + sbClassPath.toString());
 
-					path += (SystemUtil.millis() - start);
-					start = SystemUtil.millis();
+					// path += (SystemUtil.millis() - start);
+					// start = SystemUtil.millis();
 					if (id != null && ser.isFile()) {
-						isFile += (SystemUtil.millis() - start);
-						start = SystemUtil.millis();
+						// isFile += (SystemUtil.millis() - start);
+						// start = SystemUtil.millis();
 						if (log != null) log.info("dynamic", "found metadata for [" + clazz.getName() + "]in from serialized file:" + ser);
 						try {
 							cd = (ClazzDynamic) deserialize(getClassLoader(clazz), ser.getInputStream());
 							cd.clazz = clazz;
-							deserialize += (SystemUtil.millis() - start);
-							start = SystemUtil.millis();
+							// deserialize += (SystemUtil.millis() - start);
+							// start = SystemUtil.millis();
 							if (log != null) log.info("dynamic", "loaded metadata for [" + clazz.getName() + "] from serialized file:" + ser);
 							classes.put(clazz, new SoftReference<ClazzDynamic>(cd));
-							put += (SystemUtil.millis() - start);
-							start = SystemUtil.millis();
+							// put += (SystemUtil.millis() - start);
+							// start = SystemUtil.millis();
 						}
 						catch (Exception e) {
 							if (log != null) log.error("dynamic", e);
@@ -123,8 +113,8 @@ public class ClazzDynamic extends Clazz {
 						try {
 							if (log != null) log.info("dynamic", "extract metadata from [" + clazz.getName() + "]");
 							cd = new ClazzDynamic(clazz, id, log);
-							neww += (SystemUtil.millis() - start);
-							start = SystemUtil.millis();
+							// neww += (SystemUtil.millis() - start);
+							// start = SystemUtil.millis();
 							if (id != null) {
 								final ClazzDynamic _cd = cd;
 								ThreadUtil.getThread(() -> {
@@ -143,8 +133,8 @@ public class ClazzDynamic extends Clazz {
 									}
 								}, true).start();
 
-								serialize += (SystemUtil.millis() - start);
-								start = SystemUtil.millis();
+								// serialize += (SystemUtil.millis() - start);
+								// start = SystemUtil.millis();
 							}
 						}
 						catch (IOException ioe) {
@@ -155,8 +145,8 @@ public class ClazzDynamic extends Clazz {
 				}
 			}
 		}
-		done += (SystemUtil.millis() - start);
-		start = SystemUtil.millis();
+		// done += (SystemUtil.millis() - start);
+		// start = SystemUtil.millis();
 
 		return cd;
 	}
