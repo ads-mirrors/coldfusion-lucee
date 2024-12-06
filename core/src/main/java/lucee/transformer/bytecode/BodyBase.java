@@ -20,7 +20,6 @@ package lucee.transformer.bytecode;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.objectweb.asm.Opcodes;
@@ -44,8 +43,7 @@ import lucee.transformer.expression.literal.LitString;
  */
 public class BodyBase extends StatementBaseNoFinal implements Body {
 
-	private static long counter = 0;
-	private LinkedList<Statement> statements = new LinkedList<Statement>();
+	private List<Statement> statements = new ArrayList<Statement>();
 	private Statement last = null;
 	// private int count=-1;
 	private final static int MAX_STATEMENTS = 206;

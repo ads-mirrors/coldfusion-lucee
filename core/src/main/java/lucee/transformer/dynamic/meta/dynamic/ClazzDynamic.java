@@ -48,10 +48,10 @@ public class ClazzDynamic extends Clazz {
 
 	private transient Class clazz;
 	// private static Map<String, SoftReference<ClazzDynamic>> classes = new ConcurrentHashMap<>();
-	private List<FunctionMember> methods;
-	private List<FunctionMember> declaredMethods;
-	private List<FunctionMember> constructors;
-	private List<FunctionMember> declaredConstructors;
+	private FunctionMember[] methods;
+	private FunctionMember[] declaredMethods;
+	private FunctionMember[] constructors;
+	private FunctionMember[] declaredConstructors;
 
 	private String clid;
 	private static Map<ClassLoader, String> clids = new IdentityHashMap<>();
@@ -189,20 +189,25 @@ public class ClazzDynamic extends Clazz {
 		this.clid = clid;
 		LinkedHashMap<String, FunctionMember> members = _getFunctionMembers(clazz, log);
 
-		methods = new LinkedList<>();
-		declaredMethods = new LinkedList<>();
-		constructors = new LinkedList<>();
-		declaredConstructors = new LinkedList<>();
+		LinkedList<FunctionMember> tmpMethods = new LinkedList<>();
+		LinkedList<FunctionMember> tmpDeclaredMethods = new LinkedList<>();
+		LinkedList<FunctionMember> tmpConstructors = new LinkedList<>();
+		LinkedList<FunctionMember> tmpDeclaredConstructors = new LinkedList<>();
 		for (FunctionMember fm: members.values()) {
 			if (fm instanceof Method) {
-				if (clazz.getName().equals(fm.getDeclaringClassName())) declaredMethods.add(fm);
-				if (fm.isPublic()) methods.add(fm);
+				if (clazz.getName().equals(fm.getDeclaringClassName())) tmpDeclaredMethods.add(fm);
+				if (fm.isPublic()) tmpMethods.add(fm);
 			}
 			else if (fm instanceof Constructor) {
-				if (clazz.getName().equals(fm.getDeclaringClassName())) declaredConstructors.add(fm);
-				if (fm.isPublic()) constructors.add(fm);
+				if (clazz.getName().equals(fm.getDeclaringClassName())) tmpDeclaredConstructors.add(fm);
+				if (fm.isPublic()) tmpConstructors.add(fm);
 			}
 		}
+		methods = tmpMethods.toArray(new FunctionMember[tmpMethods.size()]);
+		declaredMethods = tmpDeclaredMethods.toArray(new FunctionMember[tmpDeclaredMethods.size()]);
+		constructors = tmpConstructors.toArray(new FunctionMember[tmpConstructors.size()]);
+		declaredConstructors = tmpDeclaredConstructors.toArray(new FunctionMember[tmpDeclaredConstructors.size()]);
+
 	}
 
 	@Override
