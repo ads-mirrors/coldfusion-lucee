@@ -94,7 +94,6 @@ public final class PageSourceImpl implements PageSource {
 	private long lastAccess;
 	private RefIntegerSync accessCount = new RefIntegerSync();
 	private boolean flush = false;
-	private Log log;
 
 	private static class PageAndClassName {
 		private Page page;
@@ -112,53 +111,11 @@ public final class PageSourceImpl implements PageSource {
 
 	}
 
-	/**
-	 * constructor of the class
-	 * 
-	 * @param mapping
-	 * @param realPath
-	 */
-	PageSourceImpl(MappingImpl mapping, String realPath, Log log) {
-		this.mapping = mapping;
-		this.log = log;
-		realPath = realPath.replace('\\', '/');
-		if (realPath.indexOf("//") != -1) {
-			realPath = StringUtil.replace(realPath, "//", "/", false);
-		}
-
-		if (realPath.indexOf('/') != 0) {
-			if (realPath.startsWith("../")) {
-				isOutSide = true;
-			}
-			else if (realPath.startsWith("./")) {
-				realPath = realPath.substring(1);
-			}
-			else {
-				realPath = "/" + realPath;
-			}
-		}
-		this.relPath = realPath;
-		if (logAccessDirectory != null) dump();
-	}
-
-	/**
-	 * private constructor of the class
-	 * 
-	 * @param mapping
-	 * @param realPath
-	 * @param isOutSide
-	 */
-	PageSourceImpl(MappingImpl mapping, String realPath, boolean isOutSide) {
-		// recompileAlways=mapping.getConfig().getCompileType()==Config.RECOMPILE_ALWAYS;
-		// recompileAfterStartUp=mapping.getConfig().getCompileType()==Config.RECOMPILE_AFTER_STARTUP ||
-		// recompileAlways;
+	PageSourceImpl(MappingImpl mapping, String relPath, boolean isOutSide) {
 		this.mapping = mapping;
 		this.isOutSide = isOutSide;
-		if (realPath.indexOf("//") != -1) {
-			realPath = StringUtil.replace(realPath, "//", "/", false);
-		}
-		this.relPath = realPath;
-		if (logAccessDirectory != null) dump();
+		this.relPath = relPath;
+		// if (logAccessDirectory != null) dump();
 	}
 
 	private void dump() {
@@ -207,8 +164,28 @@ public final class PageSourceImpl implements PageSource {
 
 	public PageSource getParent() {
 		if (relPath.equals("/")) return null;
-		if (StringUtil.endsWith(relPath, '/')) return new PageSourceImpl(mapping, GetDirectoryFromPath.invoke(relPath.substring(0, relPath.length() - 1)), log);
-		return new PageSourceImpl(mapping, GetDirectoryFromPath.invoke(relPath), log);
+		if (StringUtil.endsWith(relPath, '/')) return getInstance(mapping, GetDirectoryFromPath.invoke(relPath.substring(0, relPath.length() - 1)));
+		return getInstance(mapping, GetDirectoryFromPath.invoke(relPath));
+	}
+
+	private static PageSource getInstance(MappingImpl mapping, String realPath) {
+		boolean isOutSide = false;
+		realPath = realPath.replace('\\', '/');
+		if (realPath.indexOf("//") != -1) {
+			realPath = StringUtil.replace(realPath, "//", "/", false);
+		}
+		if (realPath.indexOf('/') != 0) {
+			if (realPath.startsWith("../")) {
+				isOutSide = true;
+			}
+			else if (realPath.startsWith("./")) {
+				realPath = realPath.substring(1);
+			}
+			else {
+				realPath = "/" + realPath;
+			}
+		}
+		return mapping.getPageSource(realPath, isOutSide);
 	}
 
 	@Override
@@ -441,7 +418,7 @@ public final class PageSourceImpl implements PageSource {
 				synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
 					if (srcLastModified == 0 || srcLastModified != page.getSourceLastModified()) {// || (page instanceof PagePro && ((PagePro) page).getSourceLength() !=
 																									// srcFile.length())
-						if (LogUtil.doesDebug(log)) log.debug("page-source", "release [" + getDisplayPath() + "] from page source pool");
+						if (LogUtil.doesDebug(mapping.getLog())) mapping.getLog().debug("page-source", "release [" + getDisplayPath() + "] from page source pool");
 						resetLoaded();
 						flush();
 						return true;
@@ -453,7 +430,7 @@ public final class PageSourceImpl implements PageSource {
 	}
 
 	public void flush() {
-		if (LogUtil.doesDebug(log)) log.debug("page-source", "flush [" + getDisplayPath() + "]");
+		if (LogUtil.doesDebug(mapping.getLog())) mapping.getLog().debug("page-source", "flush [" + getDisplayPath() + "]");
 		pcn.page = null;
 		flush = true;
 	}
@@ -1185,7 +1162,7 @@ public final class PageSourceImpl implements PageSource {
 	}
 
 	public void resetLoaded() {
-		if (LogUtil.doesDebug(log)) log.debug("page-source", "reset loaded [" + getDisplayPath() + "]");
+		if (LogUtil.doesDebug(mapping.getLog())) mapping.getLog().debug("page-source", "reset loaded [" + getDisplayPath() + "]");
 		Page p = pcn.page;
 		if (p != null) p.setLoadType((byte) 0);
 	}
