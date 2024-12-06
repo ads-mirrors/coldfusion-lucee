@@ -8313,7 +8313,7 @@ The following things are considered to be empty:
 	<!-- len -->
 	<function>
 		<name>len</name>
-		<class>lucee.runtime.functions.string.Len</class>
+		<class>lucee.runtime.functions.string.LenNumber</class>
 		<description>Determines the length of a string, array or struct</description>
 		<argument>
 			<name>value</name>

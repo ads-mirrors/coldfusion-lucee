@@ -22,7 +22,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.Function;
-import lucee.runtime.functions.string.Len;
+import lucee.runtime.functions.string.LenNumber;
 import lucee.runtime.op.Caster;
 
 public class IsEmpty implements Function {
@@ -33,7 +33,7 @@ public class IsEmpty implements Function {
 		if (value == null) return true;
 		if (value instanceof Boolean || value instanceof Number) return false;
 
-		double len = Len.invoke(value, -1);
+		double len = LenNumber.invoke(value, -1);
 		if (len == -1) throw new FunctionException(pc, "isEmpty", 1, "variable", "this type  [" + Caster.toTypeName(value) + "] is not supported");
 		return len == 0;
 	}
