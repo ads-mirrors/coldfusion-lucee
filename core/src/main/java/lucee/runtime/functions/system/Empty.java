@@ -21,7 +21,7 @@ package lucee.runtime.functions.system;
 import lucee.runtime.PageContext;
 import lucee.runtime.exp.FunctionException;
 import lucee.runtime.ext.function.Function;
-import lucee.runtime.functions.string.Len;
+import lucee.runtime.functions.string.LenNumber;
 import lucee.runtime.interpreter.SecurityInterpreterException;
 import lucee.runtime.interpreter.VariableInterpreter;
 import lucee.runtime.op.Caster;
@@ -34,7 +34,7 @@ public class Empty implements Function {
 		Object res = VariableInterpreter.getVariableEL(pc, variableName, null);
 
 		if (res == null) return true;
-		double len = Len.invoke(res, -1);
+		double len = LenNumber.invoke(res, -1);
 		if (len == -1) throw new FunctionException(pc, "empty", 1, "variable", "this type  [" + Caster.toTypeName(res) + "] is not supported");
 		return len == 0;
 	}

@@ -21,46 +21,20 @@
  */
 package lucee.runtime.functions.string;
 
-import java.util.List;
-import java.util.Map;
-
 import lucee.runtime.PageContext;
 import lucee.runtime.exp.FunctionException;
 import lucee.runtime.ext.function.Function;
 import lucee.runtime.op.Caster;
-import lucee.runtime.type.Collection;
-import lucee.runtime.type.Query;
 
+@Deprecated
 public final class Len implements Function {
-
-	public static Number call(PageContext pc, String string) {
-		return Caster.toNumber(pc, string.length());
+	@Deprecated
+	public static double call(PageContext pc, String string) {
+		return string.length();
 	}
 
-	public static Number call(PageContext pc, Object obj) throws FunctionException {
-		int len = invoke(obj, -1);
-		if (len == -1) throw new FunctionException(pc, "len", 1, "object", "this type  [" + Caster.toTypeName(obj) + "] is not supported for returning the len");
-		return Caster.toNumber(pc, len);
-	}
-
-	public static int invoke(Object obj, int defaultValue) {
-		if (obj instanceof CharSequence) return ((CharSequence) obj).length();
-		if (obj instanceof Query) return ((Query) obj).getRecordcount();
-		if (obj instanceof Collection) return ((Collection) obj).size();
-		if (obj instanceof Map) return ((Map) obj).size();
-		if (obj instanceof List) return ((List) obj).size();
-		if (obj instanceof Object[]) return ((Object[]) obj).length;
-		if (obj instanceof short[]) return ((short[]) obj).length;
-		if (obj instanceof int[]) return ((int[]) obj).length;
-		if (obj instanceof float[]) return ((float[]) obj).length;
-		if (obj instanceof double[]) return ((double[]) obj).length;
-		if (obj instanceof long[]) return ((long[]) obj).length;
-		if (obj instanceof char[]) return ((char[]) obj).length;
-		if (obj instanceof boolean[]) return ((boolean[]) obj).length;
-		if (obj instanceof byte[]) return ((byte[]) obj).length;
-		String str = Caster.toString(obj, null);
-		if (str != null) return str.length();
-
-		return defaultValue;
+	@Deprecated
+	public static double call(PageContext pc, Object obj) throws FunctionException {
+		return Caster.toDoubleValue(LenNumber.call(pc, obj));
 	}
 }
