@@ -467,7 +467,7 @@ public class POM {
 		return list;
 	}
 
-	private static TreeNode<POM> getDependenciesX(POM pom, boolean recursive, int level, TreeNode<POM> node) throws IOException {
+	private static TreeNode<POM> getDependencies(POM pom, boolean recursive, int level, TreeNode<POM> node) throws IOException {
 		ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 		List<Future<Void>> futures = new ArrayList<>();
 		try {
@@ -494,7 +494,7 @@ public class POM {
 		}
 	}
 
-	private static TreeNode<POM> getDependencies(POM pom, boolean recursive, int level, TreeNode<POM> node) throws IOException {
+	private static TreeNode<POM> getDependenciesAsync(POM pom, boolean recursive, int level, TreeNode<POM> node) throws IOException {
 		ExecutorService executor = null;
 		try {
 			List<POM> deps = pom.getDependencies();
