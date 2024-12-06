@@ -48,10 +48,10 @@ public class ClazzDynamic extends Clazz {
 
 	private transient Class clazz;
 	// private static Map<String, SoftReference<ClazzDynamic>> classes = new ConcurrentHashMap<>();
-	private FunctionMember[] methods;
-	private FunctionMember[] declaredMethods;
-	private FunctionMember[] constructors;
-	private FunctionMember[] declaredConstructors;
+	private final FunctionMember[] methods;
+	private final FunctionMember[] declaredMethods;
+	private final FunctionMember[] constructors;
+	private final FunctionMember[] declaredConstructors;
 
 	private String clid;
 	private static Map<ClassLoader, String> clids = new IdentityHashMap<>();
