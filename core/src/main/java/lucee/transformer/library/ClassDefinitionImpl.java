@@ -33,6 +33,7 @@ import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.config.Identification;
 import lucee.runtime.db.ClassDefinition;
+import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.listener.JavaSettingsImpl;
 import lucee.runtime.op.Caster;
 import lucee.runtime.osgi.OSGiUtil;
@@ -178,7 +179,16 @@ public class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externalizabl
 		if (!forceLoadingClass && clazz != null) return clazz;
 
 		// regular class definition
-		if (name == null) return clazz = ClassUtil.loadClass(className);
+		if (name == null) {
+			try {
+				return clazz = ClassUtil.loadClass(ThreadLocalPageContext.getRPCClassLoader(forceLoadingClass), className);
+			}
+			catch (IOException e) {
+				ClassException ce = new ClassException(e.getMessage());
+				ExceptionUtil.initCauseEL(ce, e);
+				throw ce;
+			}
+		}
 
 		return clazz = ClassUtil.loadClassByBundle(className, name, version, id, JavaSettingsImpl.getBundleDirectories(null), versionOnlyMattersWhenDownloading);
 	}
@@ -186,7 +196,7 @@ public class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externalizabl
 	@Override
 	public Class<T> getClazz(Class<T> defaultValue) {
 		try {
-			return getClazz();
+			return getClazz(false);
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
