@@ -29,7 +29,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import lucee.print;
 import lucee.commons.io.IOUtil;
-import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
@@ -314,7 +313,8 @@ public final class PageSourceImpl implements PageSource {
 		if (page != null) {
 			// if(page!=null && !recompileAlways) {
 			if (srcLastModified != page.getSourceLastModified() || (page instanceof PagePro && ((PagePro) page).getSourceLength() != srcFile.length())) {
-				synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
+				synchronized (this) {
+					// synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
 					if (srcLastModified != page.getSourceLastModified() || (page instanceof PagePro && ((PagePro) page).getSourceLength() != srcFile.length())) {
 						// same size, maybe the content has not changed?
 						boolean same = false;
@@ -344,7 +344,8 @@ public final class PageSourceImpl implements PageSource {
 		Resource classRootDir = mapping.getClassRootDirectory();
 		Resource classFile = classRootDir.getRealResource(getJavaName() + ".class");
 		boolean isNew = false;
-		synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
+		synchronized (this) {
+			// synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
 			// new class
 			if (flush || !classFile.exists()) {
 				LogUtil.log(pc, Log.LEVEL_DEBUG, "compile", "compile [" + getDisplayPath() + "] no previous class file or flush");
@@ -415,7 +416,8 @@ public final class PageSourceImpl implements PageSource {
 			// if(page!=null && !recompileAlways) {
 
 			if (srcLastModified == 0 || srcLastModified != page.getSourceLastModified()) { // || (page instanceof PagePro && ((PagePro) page).getSourceLength() != srcFile.length())
-				synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
+				synchronized (this) {
+					// synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
 					if (srcLastModified == 0 || srcLastModified != page.getSourceLastModified()) {// || (page instanceof PagePro && ((PagePro) page).getSourceLength() !=
 																									// srcFile.length())
 						if (LogUtil.doesDebug(mapping.getLog())) mapping.getLog().debug("page-source", "release [" + getDisplayPath() + "] from page source pool");
@@ -613,7 +615,8 @@ public final class PageSourceImpl implements PageSource {
 			return null;
 		}
 		if (physcalSource == null) {
-			synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
+			synchronized (this) {
+				// synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
 				if (physcalSource == null) {
 					Resource tmp = mapping.getPhysical().getRealResource(relPath);
 					physcalSource = ResourceUtil.toExactResource(tmp);
@@ -635,7 +638,8 @@ public final class PageSourceImpl implements PageSource {
 	public Resource getArchiveFile() {
 		if (!mapping.hasArchive()) return null;
 		if (archiveSource == null) {
-			synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
+			synchronized (this) {
+				// synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
 				if (archiveSource == null) {
 					String path = "zip://" + mapping.getArchive().getAbsolutePath() + "!" + relPath;
 					archiveSource = ThreadLocalPageContext.getConfig().getResource(path);
@@ -649,7 +653,8 @@ public final class PageSourceImpl implements PageSource {
 
 		if (!mapping.hasArchive()) return null;
 		if (archiveClass == null) {
-			synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
+			synchronized (this) {
+				// synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
 				if (archiveClass == null) {
 					String path = "zip://" + mapping.getArchive().getAbsolutePath() + "!" + getJavaName() + ".class";
 					archiveClass = ThreadLocalPageContext.getConfig().getResource(path);
@@ -797,7 +802,8 @@ public final class PageSourceImpl implements PageSource {
 
 	private void createClassAndPackage() {
 		if (className == null) {
-			synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
+			synchronized (this) {
+				// synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
 				if (className == null) {
 					String str = relPath;
 					StringBuilder packageName = new StringBuilder();
