@@ -24,7 +24,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import lucee.print;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
@@ -459,7 +462,16 @@ public final class PageSourceImpl implements PageSource {
 		return page != null && load == page.getLoadType();
 	}
 
-	private synchronized Page compile(ConfigWeb config, Resource classRootDir, Page existing, boolean returnValue, boolean ignoreScopes) throws TemplateException {
+	private static Map<String, String> datas = new ConcurrentHashMap<>();
+
+	private Page compile(ConfigWeb config, Resource classRootDir, Page existing, boolean returnValue, boolean ignoreScopes) throws TemplateException {
+		print.e("->" + getDisplayPath());
+		String st = datas.get(getDisplayPath());
+		if (st != null) {
+			print.e("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
+			print.ds(st);
+		}
+		datas.put(getDisplayPath(), ExceptionUtil.getStacktrace(new Throwable(), false));
 		try {
 			return _compile(config, classRootDir, existing, returnValue, ignoreScopes, false);
 		}
@@ -485,6 +497,10 @@ public final class PageSourceImpl implements PageSource {
 			ExceptionUtil.rethrowIfNecessary(t);
 			if (t instanceof TemplateException) throw (TemplateException) t;
 			throw new PageRuntimeException(Caster.toPageException(t));
+		}
+		finally {
+			datas.remove(getDisplayPath());
+			print.e("<-" + getDisplayPath());
 		}
 	}
 
