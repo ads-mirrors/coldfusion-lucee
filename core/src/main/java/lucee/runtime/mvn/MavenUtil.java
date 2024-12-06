@@ -31,7 +31,10 @@ import lucee.commons.lang.SerializableObject;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.net.HTTPUtil;
 import lucee.runtime.mvn.POMReader.Dependency;
+import lucee.runtime.op.Caster;
 import lucee.runtime.thread.ThreadUtil;
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 
 public class MavenUtil {
@@ -212,7 +215,7 @@ public class MavenUtil {
 		// dependencies.add(p);
 	}
 
-	static class GAVSO {
+	public static class GAVSO {
 		public final String g;
 		public final String a;
 		public final String v;
@@ -233,6 +236,30 @@ public class MavenUtil {
 			this.v = v;
 			this.s = s;
 			this.o = o;
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+
+			if (!StringUtil.isEmpty(g, true)) sb.append(g);
+			if (!StringUtil.isEmpty(a, true)) {
+				if (!sb.isEmpty()) sb.append(':');
+				sb.append(a);
+			}
+			if (!StringUtil.isEmpty(v, true)) {
+				if (!sb.isEmpty()) sb.append(':');
+				sb.append(v);
+			}
+			if (!StringUtil.isEmpty(s, true)) {
+				if (!sb.isEmpty()) sb.append(':');
+				sb.append(s);
+			}
+			if (!StringUtil.isEmpty(o, true)) {
+				if (!sb.isEmpty()) sb.append(':');
+				sb.append(o);
+			}
+			return sb.toString();
 		}
 	}
 
@@ -447,4 +474,44 @@ public class MavenUtil {
 		}
 	}
 
+	public static GAVSO toGAVSO(Object obj, GAVSO defaultValue) {
+		Struct el = Caster.toStruct(obj, null);
+		if (el != null) {
+			String g = Caster.toString(el.get(KeyConstants._groupId, null), null);
+			String a = Caster.toString(el.get(KeyConstants._artifactId, null), null);
+
+			if (!StringUtil.isEmpty(g) && !StringUtil.isEmpty(a)) {
+				return new GAVSO(g, a,
+
+						Caster.toString(el.get(KeyConstants._version, null), null),
+
+						Caster.toString(el.get(KeyConstants._scope, null), null),
+
+						Caster.toString(el.get(KeyConstants._optional, null), null));
+			}
+			return defaultValue;
+		}
+		// gradle style?
+		String str = Caster.toString(obj, null);
+		if (!StringUtil.isEmpty(str)) {
+			String[] arr = ListUtil.listToStringArray(str, ':');
+			if (arr.length > 1 && arr.length < 6) {
+				return new GAVSO(
+
+						arr[0].trim(), // group
+
+						arr[1].trim(), // artifact
+
+						arr.length > 2 ? arr[2].trim() : null, // version
+
+						arr.length > 3 ? arr[3].trim() : null, // scope
+
+						arr.length > 4 ? arr[4].trim() : null // optional
+
+				);
+			}
+		}
+
+		return defaultValue;
+	}
 }

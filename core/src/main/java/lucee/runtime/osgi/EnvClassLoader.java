@@ -93,7 +93,6 @@ public class EnvClassLoader extends URLClassLoader {
 		// trace.trace("EnvClassLoader", "EnvClassLoader.getResource(" + name + "):" + (SystemUtil.millis()
 		// - start));
 		// }
-
 	}
 
 	@Override
