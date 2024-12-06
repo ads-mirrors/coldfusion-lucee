@@ -499,7 +499,7 @@ public class POM {
 		try {
 			List<POM> deps = pom.getDependencies();
 			if (deps != null && deps.size() > 0) {
-				executor = ThreadUtil.createExecutorService(deps.size(), true);
+				executor = ThreadUtil.createExecutorService(deps.size(), false);
 				List<Future<Pair<IOException, POM>>> futures = new ArrayList<>();
 				for (POM p: deps) {
 					if (!node.addChild(p)) continue;
