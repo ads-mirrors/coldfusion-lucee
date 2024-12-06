@@ -251,29 +251,38 @@ public final class XMLUtil {
 	private static TransformerFactory _newTransformerFactory() {
 
 		Thread.currentThread().setContextClassLoader(EnvClassLoader.getInstance((ConfigPro) ThreadLocalPageContext.getConfig()));
-		TransformerFactory factory = null;
-		Class clazz = null;
 		try {
-			clazz = ClassUtil.loadClass("com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
+			return TransformerFactory.newInstance();
 		}
-		catch (Exception e) {
-			try {
-				clazz = ClassUtil.loadClass("org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
-			}
-			catch (Exception ee) {
-			}
+		catch (Throwable t) {
+			LogUtil.log("xml", t);
+			ExceptionUtil.rethrowIfNecessary(t);
 		}
-		if (clazz != null) {
-			try {
-				factory = (TransformerFactory) ClassUtil.loadInstance(clazz);
-			}
-			catch (Exception e) {
-			}
-		}
-		if (factory == null) return factory = TransformerFactory.newInstance();
-		LogUtil.log(Log.LEVEL_INFO, "application", "xml", factory.getClass().getName() + " is used as TransformerFactory");
 
-		return factory;
+		try {
+			return (TransformerFactory) ClassUtil.loadInstance(ClassUtil.loadClass("com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl"));
+		}
+		catch (Throwable t) {
+			LogUtil.log("xml", t);
+			ExceptionUtil.rethrowIfNecessary(t);
+		}
+
+		try {
+			return (TransformerFactory) ClassUtil.loadInstance(ClassUtil.loadClass("org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl"));
+		}
+		catch (Throwable t) {
+			LogUtil.log("xml", t);
+			ExceptionUtil.rethrowIfNecessary(t);
+		}
+
+		try {
+			return (TransformerFactory) ClassUtil.loadInstance(ClassUtil.loadClass("org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl"));
+		}
+		catch (Throwable t) {
+			LogUtil.log("xml", t);
+			ExceptionUtil.rethrowIfNecessary(t);
+		}
+		return TransformerFactory.newInstance();
 	}
 
 	public static final Document parse(InputSource xml, InputSource validator, boolean isHtml) throws SAXException, IOException {
