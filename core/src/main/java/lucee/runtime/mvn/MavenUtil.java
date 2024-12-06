@@ -244,19 +244,19 @@ public class MavenUtil {
 
 			if (!StringUtil.isEmpty(g, true)) sb.append(g);
 			if (!StringUtil.isEmpty(a, true)) {
-				if (!sb.isEmpty()) sb.append(':');
+				if (sb.length() > 0) sb.append(':');
 				sb.append(a);
 			}
 			if (!StringUtil.isEmpty(v, true)) {
-				if (!sb.isEmpty()) sb.append(':');
+				if (sb.length() > 0) sb.append(':');
 				sb.append(v);
 			}
 			if (!StringUtil.isEmpty(s, true)) {
-				if (!sb.isEmpty()) sb.append(':');
+				if (sb.length() > 0) sb.append(':');
 				sb.append(s);
 			}
 			if (!StringUtil.isEmpty(o, true)) {
-				if (!sb.isEmpty()) sb.append(':');
+				if (sb.length() > 0) sb.append(':');
 				sb.append(o);
 			}
 			return sb.toString();
