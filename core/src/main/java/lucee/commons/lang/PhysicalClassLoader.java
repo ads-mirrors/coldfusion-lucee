@@ -56,6 +56,7 @@ import lucee.runtime.listener.SerializationSettings;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
+import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.bytecode.util.ClassRenamer;
 
 /**
@@ -299,14 +300,21 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 	}
 
 	private Class<?> _loadClass(String name, byte[] barr, boolean rename) {
-		Class<?> clazz = defineClass(name, barr, 0, barr.length);
-		if (clazz != null) {
-			if (!rename) loadedClasses.put(name, barr);
-			allLoadedClasses.put(name, barr);
+		try {
+			Class<?> clazz = defineClass(name, barr, 0, barr.length);
 
-			resolveClass(clazz);
+			if (clazz != null) {
+				if (!rename) loadedClasses.put(name, barr);
+				allLoadedClasses.put(name, barr);
+
+				resolveClass(clazz);
+			}
+			return clazz;
 		}
-		return clazz;
+		catch (ClassFormatError cfe) {
+			if (!ASMUtil.isValidBytecode(barr)) throw new RuntimeException("given bytcode for [" + name + "] is not valid");
+			throw cfe;
+		}
 	}
 
 	public Resource[] getJarResources() {

@@ -1313,4 +1313,22 @@ public final class ASMUtil {
 		}
 		return desc;
 	}
+
+	/**
+	 * Validates the given byte array using the ASM library.
+	 *
+	 * @param className the name of the class being validated
+	 * @param bytecode the byte array representing the class
+	 */
+	public static boolean isValidBytecode(byte[] bytecode) {
+		try {
+			ClassReader classReader = new ClassReader(bytecode);
+			// Simply parse the bytecode; will throw if invalid
+			classReader.accept(null, 0);
+			return true;
+		}
+		catch (Exception e) {
+			return false;
+		}
+	}
 }
