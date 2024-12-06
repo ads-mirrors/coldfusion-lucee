@@ -363,14 +363,18 @@ public final class PageSourceImpl implements PageSource {
 		Resource classRootDir = mapping.getClassRootDirectory();
 		Resource classFile = classRootDir.getRealResource(getJavaName() + ".class");
 		boolean isNew = false;
-		synchronized (this) {
+		{
 			// new class
 			if (flush || !classFile.exists()) {
-				LogUtil.log(pc, Log.LEVEL_DEBUG, "compile", "compile [" + getDisplayPath() + "] no previous class file or flush");
+				synchronized (this) {
+					if (flush || !classFile.exists()) {
+						LogUtil.log(pc, Log.LEVEL_DEBUG, "compile", "compile [" + getDisplayPath() + "] no previous class file or flush");
 
-				pcn.set(page = compile(config, classRootDir, null, false, pc.ignoreScopes()));
-				flush = false;
-				isNew = true;
+						pcn.set(page = compile(config, classRootDir, null, false, pc.ignoreScopes()));
+						flush = false;
+						isNew = true;
+					}
+				}
 			}
 			// load page
 			else {
@@ -405,17 +409,21 @@ public final class PageSourceImpl implements PageSource {
 					pcn.reset();
 				}
 				if (page == null) {
-					LogUtil.log(pc, Log.LEVEL_DEBUG, "compile", "compile  [" + getDisplayPath() + "] in case loading of the class fails");
-					pcn.set(page = compile(config, classRootDir, null, false, pc.ignoreScopes()));
-					isNew = true;
+					synchronized (this) {
+						LogUtil.log(pc, Log.LEVEL_DEBUG, "compile", "compile  [" + getDisplayPath() + "] in case loading of the class fails");
+						pcn.set(page = compile(config, classRootDir, null, false, pc.ignoreScopes()));
+						isNew = true;
+					}
 				}
 			}
 
 			// check if version changed or lasMod
 			if (!isNew && (srcLastModified != page.getSourceLastModified() || page.getVersion() != pc.getConfig().getFactory().getEngine().getInfo().getFullVersionInfo())) {
-				isNew = true;
-				LogUtil.log(pc, Log.LEVEL_DEBUG, "compile", "recompile [" + getDisplayPath() + "] because unloaded page has changed");
-				pcn.set(page = compile(config, classRootDir, page, false, pc.ignoreScopes()));
+				synchronized (this) {
+					isNew = true;
+					LogUtil.log(pc, Log.LEVEL_DEBUG, "compile", "recompile [" + getDisplayPath() + "] because unloaded page has changed");
+					pcn.set(page = compile(config, classRootDir, page, false, pc.ignoreScopes()));
+				}
 			}
 			page.setPageSource(this);
 			page.setLoadType(LOAD_PHYSICAL);
@@ -459,7 +467,7 @@ public final class PageSourceImpl implements PageSource {
 		return page != null && load == page.getLoadType();
 	}
 
-	private synchronized Page compile(ConfigWeb config, Resource classRootDir, Page existing, boolean returnValue, boolean ignoreScopes) throws TemplateException {
+	private Page compile(ConfigWeb config, Resource classRootDir, Page existing, boolean returnValue, boolean ignoreScopes) throws TemplateException {
 		try {
 			return _compile(config, classRootDir, existing, returnValue, ignoreScopes, false);
 		}
