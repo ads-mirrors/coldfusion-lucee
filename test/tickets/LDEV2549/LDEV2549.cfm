@@ -5,8 +5,8 @@
 
 <cfloop query="#test1#">
 	<cfscript>
-		systemOutput("", true);
-		systemOutput("#db#, #scene# [#test1.day#]", true);
+		//systemOutput("", true);
+		//systemOutput("#db#, #scene# [#test1.day#]", true);
 		param = {
 			value: test1.day
 		};

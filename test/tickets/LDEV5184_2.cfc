@@ -8,6 +8,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				
 				expect(request.testReq?:"undefined").toBe("test5148");
 				expect(result.testReq?:"undefined").toBe("test5148");
+				structDelete(request, "testReq");
 			});
 		});
 	}

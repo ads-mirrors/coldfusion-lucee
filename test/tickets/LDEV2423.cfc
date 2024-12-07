@@ -75,8 +75,8 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" labels="mssql" {
 					},
 					{dbtype="query", result="local.result"}
 				);
-				systemOutput( res, true );
-				systemOutput( result, true);
+				//systemOutput( res, true );
+				//systemOutput( result, true);
 				expect( res.recordCount ).toBe( 1 );
 			});
 
@@ -93,8 +93,8 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" labels="mssql" {
 					},
 					{dbtype="query", result="local.result"}
 				);
-				systemOutput( res, true );
-				systemOutput( result, true);
+				//systemOutput( res, true );
+				//systemOutput( result, true);
 				expect( res.recordCount ).toBe( 1 );
 			});
 		});
