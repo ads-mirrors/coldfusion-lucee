@@ -197,7 +197,7 @@ public final class Controler extends ParentThreasRefThread {
 	private static void dumpThreads() {
 		aprint.e("==================== THREAD DUMP " + new Date() + " ====================");
 		for (Entry<Thread, StackTraceElement[]> e: Thread.getAllStackTraces().entrySet()) {
-			aprint.e(e.getKey().getName() + ":" + e.getKey().getId());
+			aprint.e(e.getKey().getName() + ":" + e.getKey().getId() + " " + e.getKey().getState()); 
 			aprint.e(ExceptionUtil.getStacktrace(e.getValue()));
 			aprint.e("------------------------------------------------------------------");
 		}

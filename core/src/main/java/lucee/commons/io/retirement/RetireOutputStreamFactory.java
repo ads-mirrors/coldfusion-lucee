@@ -48,6 +48,7 @@ public class RetireOutputStreamFactory {
 		if (thread == null || !thread.isAlive()) {
 			thread = new RetireThread(timeout);
 			thread.start();
+			thread.setName("RetireOutputStreamCleaner");
 		}
 		else if (thread.sleepTime > timeout) {
 			thread.sleepTime = timeout;

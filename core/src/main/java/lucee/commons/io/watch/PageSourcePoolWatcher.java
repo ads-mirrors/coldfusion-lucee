@@ -32,6 +32,7 @@ public class PageSourcePoolWatcher {
 				if (thread == null || !thread.isAlive()) {
 					thread = new PageSourcePoolWatcherThread();
 					thread.setPriority(Thread.MIN_PRIORITY);
+					thread.setName("PageSourcePoolWatcher");
 					thread.start();
 				}
 			}

@@ -78,6 +78,7 @@ public class RamCache extends CacheSupport {
 			CFMLEngineImpl engine = CFMLEngineImpl.toCFMLEngineImpl(ConfigWebUtil.getEngine(config), null);
 			if (engine != null) {
 				controller = new Controler(engine, this);
+				controller.setName("RamCacheCleaner");
 				controller.start();
 			}
 		}
