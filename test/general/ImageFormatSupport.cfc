@@ -23,12 +23,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="image" {
 			if ( !fileExists( imagePath ) ) {
 				// directory!
 			} else if ( structKeyExists( readImageFormats, listLast( imagePath, "." ) ) ) {
-				systemOutput("ImageInfo  - #imagePath# ", true);
+				//systemOutput("ImageInfo  - #imagePath# ", true);
 				expect ( function(){
 					expect( imageInfo( imagePath ) ).toBeStruct( imagePath );
 				}).notToThrow( message=imagePath );
 			} else {
-				systemOutput("Image format not supported - #imagePath# ", true);
+				//systemOutput("Image format not supported - #imagePath# ", true);
 			}
 		}
 	}
@@ -43,7 +43,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="image" {
 					expect( isImage( imageRead( imagePath ) ) ).toBeTrue( imagePath );
 				}).notToThrow(message=imagePath );
 			} else {
-				systemOutput("Image format not supported - #imagePath# ", true);
+				//systemOutput("Image format not supported - #imagePath# ", true);
 			}
 		}
 	}

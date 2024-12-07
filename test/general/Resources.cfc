@@ -87,7 +87,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="s3,zip" {
 		var sdsd=sd&"test3/";
 		var sdsf=sd&"test4.txt";
 		var sdsdsf=sdsd&"test5.txt";
+		var error = {};
 		try{
+
 			directory directory="#dir#" action="list" name="children" recurse="no";
 			assertEquals(0,children.recordcount);
 
@@ -109,12 +111,14 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="s3,zip" {
 
 			directory directory="#dir#" action="list" name="children" recurse="yes" filter="*5.txt";
 			assertEquals(1,children.recordcount);
-		}
-		finally {
+		} catch ( e ){
+			error = e;
+		} finally {
 			if(directoryExists(sd))directory directory="#sd#" action="delete" recurse="yes";
 			if(fileExists(sf))file action="delete" file="#sf#";
-
 		}
+		if (structCount(error))
+			throw (message="dirList failed - #label#", cause=error);
 	}
 
 	private void function dirRename(string label,string dir){
@@ -126,6 +130,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="s3,zip" {
 		var sdsdNew=sd&"test3New/";
 		var sdsf=sd&"test4.txt";
 		var sdsdsf=sdsd&"test5.txt";
+		var error = {};
 		try{
 			directory directory="#sd#" action="create";
 			directory directory="#sdsd#" action="create";
@@ -143,16 +148,16 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="s3,zip" {
 			directory directory="#dir#" action="list" name="children" recurse="yes";
 			assertEquals("test1New,test2.txt,test3New,test4.txt,test5.txt",
 		  		ListSort( valueList(children.name),'text'));
-		}
-		finally {
-
-
-
+		} catch ( e ){
+			error = e;
+		} finally {
 			if(directoryExists(sdNew))directory directory="#sdNew#" action="delete" recurse="yes";
 			if(fileExists(sf)){
 				file action="delete" file="#sf#";
 			}
 		}
+		if (structCount(error))
+			throw (message="dirRename failed - #label#", cause=error);
 	}
 
 	private void function fileACopy(string label,string dir){
@@ -161,6 +166,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="s3,zip" {
 		var d=arguments.dir&"copy2.txt";
 		var sd=arguments.dir&"test1/";
 		var sdsf=sd&"test4.txt";
+		var error = {};
 		try{
 			directory directory="#sd#" action="create";
 			file action="write" file="#s#" output="aaa" addnewline="no" fixnewline="no";
@@ -170,12 +176,15 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="s3,zip" {
 			directory directory="#dir#" action="list" name="children" recurse="yes";
 			assertEquals("copy1.txt,copy2.txt,test1,test4.txt",
 			  		ListSort(valueList(children.name),'text'));
-		}
-		finally {
+		} catch ( e ){
+			error = e;
+		} finally {
 			if(directoryExists(sd))directory directory="#sd#" action="delete" recurse="yes";
 			if(fileExists(s))file action="delete" file="#s#";
 			if(fileExists(d))file action="delete" file="#d#";
 		}
+		if (structCount(error))
+			throw (message="fileACopy failed - #label#", cause=error);
 	}
 
 	private void function fileAMove(string label,string dir){
@@ -185,6 +194,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="s3,zip" {
 		var d=arguments.dir&"move2.txt";
 		var sd=arguments.dir&"test1/";
 		var sdsf=sd&"test4.txt";
+		var error = {};
 		try{
 			directory directory="#sd#" action="create";
 			file action="write" file="#s#" output="" addnewline="no" fixnewline="no";
@@ -194,38 +204,48 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="s3,zip" {
 			directory directory="#dir#" action="list" name="children" recurse="yes";
 			assertEquals("test1,test4.txt",
 			  		valueList(children.name));
-		}
-		finally {
+		} catch ( e ){
+			error = e;
+		} finally {
 			if(directoryExists(sd))directory directory="#sd#" action="delete" recurse="yes";
 		}
+		if (structCount(error))
+			throw (message="fileAMove failed - #label#", cause=error);
 	}
 
 	private void function fileAReadAppend(string label,string dir){
 		var content="";
 		var s=arguments.dir&"read.txt";
+		var error = {};
 		try {
 			file action="write" file="#s#" output="Write" addnewline="no" fixnewline="no";
 			file action="append" addnewline="no" file="#s#" output="Append" fixnewline="no";
 			file action="read" file="#s#" variable="content";
 			assertEquals("WriteAppend",content);
-		}
-		finally {
+		} catch ( e ){
+			error = e;
+		} finally {
 			if(fileExists(s))file action="delete" file="#s#";
 		}
+		if (structCount(error))
+			throw (message="fileAReadAppend failed - #label#", cause=error);
 	}
 
 	private void function fileAReadBinary(string label,string dir){
 		var content="";
 		var s=arguments.dir&"read.gif";
-
+		var error = {};
 		try {
 			file action="write" file="#s#" output="Susi" addnewline="no" fixnewline="no";
 			file action="readbinary" file="#s#" variable="content";
 			assertEquals("U3VzaQ==",ToBase64(content));
-		}
-		finally {
+		} catch ( e ){
+			error = e;
+		} finally {
 			if(fileExists(s))file action="delete" file="#s#";
 		}
+		if (structCount(error))
+			throw (message="fileAReadBinary failed - #label#", cause=error);
 	}
 
 
@@ -420,7 +440,8 @@ private function testResourceReadWrite(res) localMode=true {
 
 private function testResourceProvider(string path) localmode=true {
 	// first we ceate a resource object
-	res=createObject('java','lucee.commons.io.res.util.ResourceUtil').toResourceNotExisting(getPageContext(), path);
+	var res=createObject('java','lucee.commons.io.res.util.ResourceUtil').toResourceNotExisting(getPageContext(), path);
+	var error = {};
 
 	// delete when exists
 	if(res.exists()) res.remove(true);
@@ -436,44 +457,64 @@ private function testResourceProvider(string path) localmode=true {
 	try {
 		res.createDirectory(true);
 		testResourceFileCreateDelete(res);
+	} catch ( e ){
+		error = e;
+	} finally {
+		if(res.exists()) res.remove(true);
 	}
-	finally {if(res.exists()) res.remove(true);}
 
 	// test listening
 	try {
 		res.createDirectory(true);
 		testResourceListening(res);
+	} catch ( e ){
+		error = e;
+	} finally {
+		if(res.exists()) res.remove(true);
 	}
-	finally {if(res.exists()) res.remove(true);}
 
 	// test "is"
 	try {
 		res.createDirectory(true);
 		testResourceIS(res);
+	} catch ( e ){
+		error = e;
+	} finally {
+		if(res.exists()) res.remove(true);
 	}
-	finally {if(res.exists()) res.remove(true);}
 
 	// test move and copy
 	try {
 		res.createDirectory(true);
 		testResourceMoveCopy(res);
+	} catch ( e ){
+		error = e;
+	} finally {
+		if(res.exists()) res.remove(true);
 	}
-	finally {if(res.exists()) res.remove(true);}
 
 	// test Getter
 	try {
 		res.createDirectory(true);
 		testResourceGetter(res);
+	} catch ( e ){
+		error = e;
+	} finally {
+		if(res.exists()) res.remove(true);
 	}
-	finally {if(res.exists()) res.remove(true);}
 
 	// test read/write
 	try {
 		res.createDirectory(true);
 		testResourceReadWrite(res);
+	} catch ( e ){
+		error = e;
+	} finally {
+		if(res.exists()) res.remove(true);
 	}
-	finally {if(res.exists()) res.remove(true);}
 
+	if (structCount(error))
+		throw (message="testResourceProvider - #label#", cause=error);
 }
 
 
@@ -495,6 +536,7 @@ private function assertEqualPaths(string path1, string path2) {
 			directory directory="#dir#" action="delete" recurse="yes";
 		}
 		directory directory="#dir#" action="create";
+		var error = {};
 		try{
 			assertTrue(DirectoryExists(dir));
 			directoryCreateDelete(arguments.label,dir);
@@ -505,13 +547,14 @@ private function assertEqualPaths(string path1, string path2) {
 			fileAReadAppend(arguments.label,dir);
 			fileAReadBinary(arguments.label,dir);
 			testResourceProvider(dir&"testcaseres1");
-
 		} catch(e) {
-			systemOutput(e, true);
+			error = e;
 		}
 		finally {
 			if(directoryExists(dir)) directory directory="#dir#" action="delete" recurse="yes";
 		}
+		if (structCount(error))
+			throw (message="test failed", cause=error);
 		assertFalse(DirectoryExists(dir));
 
 	}
@@ -545,6 +588,7 @@ private function assertEqualPaths(string path1, string path2) {
 		var file=getTempFile( getTempDirectory(), "res-zip", "zip" );
 		//var file=getDirectoryFromPath(getCurrentTemplatePath())&"zip-"&getTickCount()&".zip";
 		var zipPath="zip://"&file&"!/";
+		var error = {};
 		try {
 			//first we create a zip we can use then as a filesystem
 			zip action="zip" file=file  {
@@ -552,20 +596,24 @@ private function assertEqualPaths(string path1, string path2) {
 			}
 			// now we use that zip
 			test("zip",zipPath);
+		} catch(e) {
+			error = e;
 		}
 		// now we delete that zip again
 		finally {
 			if (fileExists(file)) {
 				try {fileDelete(file);}catch(e) {}; // locked on windows LDEV-4700
 			}
-
 		}
+		if (structCount(error))
+			throw (message="testZip failed", cause=error);
 	}
 
 	public void function testZipAsMapping(){
 		var file=getTempFile( getTempDirectory(), "zip-as-mapping", "zip" );
 		//var file=getDirectoryFromPath(getCurrentTemplatePath())&"zip-"&getTickCount()&".zip";
 		var zipPath="zip://"&file&"!/";
+		var error = {};
 		try {
 			//first we create a zip we can use then as a filesystem
 			zip action="zip" file=file  {
@@ -576,6 +624,8 @@ private function assertEqualPaths(string path1, string path2) {
 			// now we use that zip
 			//throw expandPath("/testResZip/")&":"&file;
 			test("zip","/testreszip/");
+		} catch(e) {
+			error = e;
 		}
 		// now we delete that zip again
 		finally {
@@ -583,6 +633,8 @@ private function assertEqualPaths(string path1, string path2) {
 				try {fileDelete(file);}catch(e) {}; // locked on windows - LDEV-4700
 			}
 		}
+		if (structCount(error))
+			throw (message="testZipAsMapping failed", cause=error);
 	}
 
 	private struct function getCredentials() {

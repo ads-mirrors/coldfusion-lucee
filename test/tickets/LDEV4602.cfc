@@ -12,7 +12,7 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" {
 				var f=getTempFile(getDirectoryFromPath(getCurrentTemplatePath()), "ldev4602-stackoverflow", "cfm");
 				try {
 					fileWrite( f, arrayToList(a, chr(10) ) );  // approx 1.5mb of crap cfml
-					systemOutput( f );
+					// systemOutput( f );
 					silent {
 						cfinclude( template=listlast(f,"\/") ); // errors
 					}

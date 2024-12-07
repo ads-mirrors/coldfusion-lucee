@@ -10,7 +10,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="mappings" {
 			it( title="check mappings", body=function( currentSpec ) {
 				application action="update" name="LDEV4334-#CreateUniqueID()#";
 				res = mappingsTest( "LDEV4334/index.cfm", "with no mapping" );
-				debug(res);
+				//debug(res);
 			});
 
 			it( title="check mappings", body=function( currentSpec ) localmode=true {
@@ -19,7 +19,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="mappings" {
 				mappings[ "/susi"]=curr;
 				application action="update" mappings=mappings;
 				res = mappingsTest( "LDEV4334/index.cfm", "with single mapping" );
-				debug(res);
+				//debug(res);
 			});
 
 		});
@@ -48,10 +48,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="mappings" {
 		paths['contractPath( expandPath(#paths.base#) )'] =		contractPath( expandPath(paths.base) ) ;
 		paths['contractPath( expandPath( "./" & #paths.base #) )'] =	contractPath( expandPath( "./" & paths.base ) );
 		paths['contractPath( expandPath( "/" & #paths.base# ) )'] = 	contractPath( expandPath( "/" & paths.base ) );
+		/*
 		systemOutput("", true);
 		loop collection=paths key="local.key" value="local.value"{
 			systemOutput(key & chr(9) & value, true);
 		}
+		*/
 		return paths;
 	}
 }

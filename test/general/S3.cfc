@@ -41,6 +41,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="s3" {
 				var cred=getCredentials();
 				var dir="s3://#cred.ACCESS_KEY_ID#:#cred.SECRET_KEY#@/#cred.BUCKET_PREFIX#s3-#lcase( hash( CreateGUID() ) )#/";
 				var file=dir&"testmultithread.txt";
+				var error = {};
 				try {
 					if(!directoryExists(dir))directoryCreate(dir);
 					fileWrite(file, "Susi sorglos foehnte Ihr Haar!");
@@ -54,10 +55,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="s3" {
 					function(el, ix, arr) localMode=true {
 						var res=fileRead(el);
 					}, true, 100);
-				}
-				finally {
+				} catch ( e ){
+					error = e;
+				} finally {
 					if(directoryExists(dir))directoryDelete(dir, true);
 				}
+				if (structCount(error))
+					throw (message="testcase failed", cause=error);
 			});
 		});
 	}
