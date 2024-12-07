@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import lucee.commons.io.SystemUtil;
 import lucee.commons.lang.CFTypes;
 import lucee.runtime.PageContext;
 import lucee.runtime.config.NullSupportHelper;
@@ -63,6 +64,11 @@ public final class ArgumentImpl extends ScopeSupport implements Argument, ArrayP
 
 	private boolean bind;
 	private Set functionArgumentNames;
+	private static int argumentInitialCapacity;
+
+	static {
+		argumentInitialCapacity = Caster.toIntValue(SystemUtil.getSystemPropOrEnvVar("lucee.scope.arguments.capacity", "16"), 16);
+	}
 	// private boolean supportFunctionArguments;
 
 	/**
@@ -70,7 +76,7 @@ public final class ArgumentImpl extends ScopeSupport implements Argument, ArrayP
 	 */
 	public ArgumentImpl() {
 		// super("arguments", SCOPE_ARGUMENTS, StructImpl.TYPE_LINKED, 4);
-		super("arguments", SCOPE_ARGUMENTS, StructImpl.TYPE_LINKED_NOT_SYNC, 4);
+		super("arguments", SCOPE_ARGUMENTS, StructImpl.TYPE_LINKED_NOT_SYNC, argumentInitialCapacity);
 	}
 
 	@Override
