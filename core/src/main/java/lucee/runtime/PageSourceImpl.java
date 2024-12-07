@@ -24,12 +24,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-import lucee.print;
 import lucee.commons.io.IOUtil;
-import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
@@ -94,7 +90,6 @@ public final class PageSourceImpl implements PageSource {
 	private long lastAccess;
 	private RefIntegerSync accessCount = new RefIntegerSync();
 	private boolean flush = false;
-	private Log log;
 
 	private static class PageAndClassName {
 		private Page page;
@@ -112,53 +107,11 @@ public final class PageSourceImpl implements PageSource {
 
 	}
 
-	/**
-	 * constructor of the class
-	 * 
-	 * @param mapping
-	 * @param realPath
-	 */
-	PageSourceImpl(MappingImpl mapping, String realPath, Log log) {
-		this.mapping = mapping;
-		this.log = log;
-		realPath = realPath.replace('\\', '/');
-		if (realPath.indexOf("//") != -1) {
-			realPath = StringUtil.replace(realPath, "//", "/", false);
-		}
-
-		if (realPath.indexOf('/') != 0) {
-			if (realPath.startsWith("../")) {
-				isOutSide = true;
-			}
-			else if (realPath.startsWith("./")) {
-				realPath = realPath.substring(1);
-			}
-			else {
-				realPath = "/" + realPath;
-			}
-		}
-		this.relPath = realPath;
-		if (logAccessDirectory != null) dump();
-	}
-
-	/**
-	 * private constructor of the class
-	 * 
-	 * @param mapping
-	 * @param realPath
-	 * @param isOutSide
-	 */
-	PageSourceImpl(MappingImpl mapping, String realPath, boolean isOutSide) {
-		// recompileAlways=mapping.getConfig().getCompileType()==Config.RECOMPILE_ALWAYS;
-		// recompileAfterStartUp=mapping.getConfig().getCompileType()==Config.RECOMPILE_AFTER_STARTUP ||
-		// recompileAlways;
+	PageSourceImpl(MappingImpl mapping, String relPath, boolean isOutSide) {
 		this.mapping = mapping;
 		this.isOutSide = isOutSide;
-		if (realPath.indexOf("//") != -1) {
-			realPath = StringUtil.replace(realPath, "//", "/", false);
-		}
-		this.relPath = realPath;
-		if (logAccessDirectory != null) dump();
+		this.relPath = relPath;
+		// if (logAccessDirectory != null) dump();
 	}
 
 	private void dump() {
@@ -207,8 +160,28 @@ public final class PageSourceImpl implements PageSource {
 
 	public PageSource getParent() {
 		if (relPath.equals("/")) return null;
-		if (StringUtil.endsWith(relPath, '/')) return new PageSourceImpl(mapping, GetDirectoryFromPath.invoke(relPath.substring(0, relPath.length() - 1)), log);
-		return new PageSourceImpl(mapping, GetDirectoryFromPath.invoke(relPath), log);
+		if (StringUtil.endsWith(relPath, '/')) return getInstance(mapping, GetDirectoryFromPath.invoke(relPath.substring(0, relPath.length() - 1)));
+		return getInstance(mapping, GetDirectoryFromPath.invoke(relPath));
+	}
+
+	private static PageSource getInstance(MappingImpl mapping, String realPath) {
+		boolean isOutSide = false;
+		realPath = realPath.replace('\\', '/');
+		if (realPath.indexOf("//") != -1) {
+			realPath = StringUtil.replace(realPath, "//", "/", false);
+		}
+		if (realPath.indexOf('/') != 0) {
+			if (realPath.startsWith("../")) {
+				isOutSide = true;
+			}
+			else if (realPath.startsWith("./")) {
+				realPath = realPath.substring(1);
+			}
+			else {
+				realPath = "/" + realPath;
+			}
+		}
+		return mapping.getPageSource(realPath, isOutSide);
 	}
 
 	@Override
@@ -337,7 +310,8 @@ public final class PageSourceImpl implements PageSource {
 		if (page != null) {
 			// if(page!=null && !recompileAlways) {
 			if (srcLastModified != page.getSourceLastModified() || (page instanceof PagePro && ((PagePro) page).getSourceLength() != srcFile.length())) {
-				synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
+				synchronized (this) {
+					// synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
 					if (srcLastModified != page.getSourceLastModified() || (page instanceof PagePro && ((PagePro) page).getSourceLength() != srcFile.length())) {
 						// same size, maybe the content has not changed?
 						boolean same = false;
@@ -367,7 +341,8 @@ public final class PageSourceImpl implements PageSource {
 		Resource classRootDir = mapping.getClassRootDirectory();
 		Resource classFile = classRootDir.getRealResource(getJavaName() + ".class");
 		boolean isNew = false;
-		synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
+		synchronized (this) {
+			// synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
 			// new class
 			if (flush || !classFile.exists()) {
 				LogUtil.log(pc, Log.LEVEL_DEBUG, "compile", "compile [" + getDisplayPath() + "] no previous class file or flush");
@@ -438,10 +413,11 @@ public final class PageSourceImpl implements PageSource {
 			// if(page!=null && !recompileAlways) {
 
 			if (srcLastModified == 0 || srcLastModified != page.getSourceLastModified()) { // || (page instanceof PagePro && ((PagePro) page).getSourceLength() != srcFile.length())
-				synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
+				synchronized (this) {
+					// synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
 					if (srcLastModified == 0 || srcLastModified != page.getSourceLastModified()) {// || (page instanceof PagePro && ((PagePro) page).getSourceLength() !=
 																									// srcFile.length())
-						if (LogUtil.doesDebug(log)) log.debug("page-source", "release [" + getDisplayPath() + "] from page source pool");
+						if (LogUtil.doesDebug(mapping.getLog())) mapping.getLog().debug("page-source", "release [" + getDisplayPath() + "] from page source pool");
 						resetLoaded();
 						flush();
 						return true;
@@ -453,7 +429,7 @@ public final class PageSourceImpl implements PageSource {
 	}
 
 	public void flush() {
-		if (LogUtil.doesDebug(log)) log.debug("page-source", "flush [" + getDisplayPath() + "]");
+		if (LogUtil.doesDebug(mapping.getLog())) mapping.getLog().debug("page-source", "flush [" + getDisplayPath() + "]");
 		pcn.page = null;
 		flush = true;
 	}
@@ -463,16 +439,7 @@ public final class PageSourceImpl implements PageSource {
 		return page != null && load == page.getLoadType();
 	}
 
-	private static Map<String, String> datas = new ConcurrentHashMap<>();
-
 	private Page compile(ConfigWeb config, Resource classRootDir, Page existing, boolean returnValue, boolean ignoreScopes) throws TemplateException {
-		print.e("->" + getDisplayPath());
-		String st = datas.get(getDisplayPath());
-		if (st != null) {
-			print.e("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
-			print.ds(st);
-		}
-		datas.put(getDisplayPath(), ExceptionUtil.getStacktrace(new Throwable(), false));
 		try {
 			return _compile(config, classRootDir, existing, returnValue, ignoreScopes, false);
 		}
@@ -498,10 +465,6 @@ public final class PageSourceImpl implements PageSource {
 			ExceptionUtil.rethrowIfNecessary(t);
 			if (t instanceof TemplateException) throw (TemplateException) t;
 			throw new PageRuntimeException(Caster.toPageException(t));
-		}
-		finally {
-			datas.remove(getDisplayPath());
-			print.e("<-" + getDisplayPath());
 		}
 	}
 
@@ -636,7 +599,8 @@ public final class PageSourceImpl implements PageSource {
 			return null;
 		}
 		if (physcalSource == null) {
-			synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
+			synchronized (this) {
+				// synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
 				if (physcalSource == null) {
 					Resource tmp = mapping.getPhysical().getRealResource(relPath);
 					physcalSource = ResourceUtil.toExactResource(tmp);
@@ -658,7 +622,8 @@ public final class PageSourceImpl implements PageSource {
 	public Resource getArchiveFile() {
 		if (!mapping.hasArchive()) return null;
 		if (archiveSource == null) {
-			synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
+			synchronized (this) {
+				// synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
 				if (archiveSource == null) {
 					String path = "zip://" + mapping.getArchive().getAbsolutePath() + "!" + relPath;
 					archiveSource = ThreadLocalPageContext.getConfig().getResource(path);
@@ -672,7 +637,8 @@ public final class PageSourceImpl implements PageSource {
 
 		if (!mapping.hasArchive()) return null;
 		if (archiveClass == null) {
-			synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
+			synchronized (this) {
+				// synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
 				if (archiveClass == null) {
 					String path = "zip://" + mapping.getArchive().getAbsolutePath() + "!" + getJavaName() + ".class";
 					archiveClass = ThreadLocalPageContext.getConfig().getResource(path);
@@ -820,7 +786,8 @@ public final class PageSourceImpl implements PageSource {
 
 	private void createClassAndPackage() {
 		if (className == null) {
-			synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
+			synchronized (this) {
+				// synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
 				if (className == null) {
 					String str = relPath;
 					StringBuilder packageName = new StringBuilder();
@@ -1185,7 +1152,7 @@ public final class PageSourceImpl implements PageSource {
 	}
 
 	public void resetLoaded() {
-		if (LogUtil.doesDebug(log)) log.debug("page-source", "reset loaded [" + getDisplayPath() + "]");
+		if (LogUtil.doesDebug(mapping.getLog())) mapping.getLog().debug("page-source", "reset loaded [" + getDisplayPath() + "]");
 		Page p = pcn.page;
 		if (p != null) p.setLoadType((byte) 0);
 	}

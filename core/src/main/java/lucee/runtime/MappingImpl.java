@@ -34,6 +34,8 @@ import org.osgi.framework.BundleContext;
 
 import lucee.commons.io.FileUtil;
 import lucee.commons.io.IOUtil;
+import lucee.commons.io.SystemUtil;
+import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.ClassUtil;
@@ -108,6 +110,8 @@ public final class MappingImpl implements Mapping {
 
 	private short configInspect;
 
+	private Log log;
+
 	public MappingImpl(Config config, String virtual, String strPhysical, String strArchive, short inspect, int inspectTemplateAutoIntervalSlow,
 			int inspectTemplateAutoIntervalFast, boolean physicalFirst, boolean hidden, boolean readonly, boolean topLevel, boolean appMapping, boolean ignoreVirtual,
 			ApplicationListener appListener, int listenerMode, int listenerType) {
@@ -159,10 +163,15 @@ public final class MappingImpl implements Mapping {
 		else this.virtual = virtual;
 		this.lcVirtual = this.virtual.toLowerCase();
 		this.lcVirtualWithSlash = lcVirtual.endsWith("/") ? this.lcVirtual : this.lcVirtual + '/';
+		this.log = ThreadLocalPageContext.getLog(config, "application");
 	}
 
 	public long getStartTime() {
 		return startTime;
+	}
+
+	public Log getLog() {
+		return log;
 	}
 
 	private void initPhysical() {
@@ -466,13 +475,21 @@ public final class MappingImpl implements Mapping {
 
 	@Override
 	public PageSource getPageSource(String path, boolean isOut) {
+		if (path.indexOf("//") != -1) {
+			path = StringUtil.replace(path, "//", "/", false);
+		}
 		PageSource source = pageSourcePool.getPageSource(path, true);
-		if (source != null) return source;
+		if (source == null) {
+			synchronized (SystemUtil.createToken("MappingImpl", path)) {
+				source = pageSourcePool.getPageSource(path, true);
+				if (source == null) {
+					source = new PageSourceImpl(this, path, isOut);
+					pageSourcePool.setPage(path, source);
 
-		PageSourceImpl newSource = new PageSourceImpl(this, path, isOut);
-		pageSourcePool.setPage(path, newSource);
-
-		return newSource;// new PageSource(this,path);
+				}
+			}
+		}
+		return source;
 	}
 
 	/**
@@ -483,8 +500,7 @@ public final class MappingImpl implements Mapping {
 	 * @return
 	 */
 	public Resource getResource(String path, boolean isOut) {
-		// TODO rewrite so PageSourceImpl not need to be loaded
-		return new PageSourceImpl(this, path, isOut).getResource();
+		return getPageSource(path, isOut).getResource();
 	}
 
 	// to not delete,used for argus monitor!

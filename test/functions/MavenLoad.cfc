@@ -4,17 +4,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 			
 			it(title="load com.github.tjake", body=function( currentSpec ) {
 				var l=len(mavenLoad([
-					{
-						"groupId" : "com.github.tjake",
-						"artifactId" : "jlama-core",
-						"version" : "0.7.0"
-					},
-					{
-						"groupId" : "com.github.tjake",
-						"artifactId" : "jlama-native",
-						"classifier" : "windows-x86_64",
-						"version" : "0.7.0"
-					}
+					"com.github.tjake:jlama-core:0.7.0",
+					"com.github.tjake:jlama-native:0.7.0"
 				]));
 				expect(l).toBe(37);
 			});
