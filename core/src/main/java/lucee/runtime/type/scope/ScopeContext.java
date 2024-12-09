@@ -378,7 +378,7 @@ public final class ScopeContext {
 	private Struct getAllSessionScopes(Map<String, Scope> context, String appName) {
 		Iterator<Entry<String, Scope>> it = context.entrySet().iterator();
 		Entry<String, Scope> entry;
-		Struct sct = new StructImpl();
+		Struct sct = new StructImpl(Struct.TYPE_SYNC);
 		Session s;
 		while (it.hasNext()) {
 			entry = it.next();

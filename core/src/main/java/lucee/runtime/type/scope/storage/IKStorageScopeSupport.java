@@ -96,7 +96,7 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 	protected int type;
 	private long timeSpan = -1;
 	private String storage;
-	private Struct tokens = new StructImpl();
+	private Struct tokens = new StructImpl(Struct.TYPE_SYNC);
 	private long lastModified;
 
 	private IKHandler handler;

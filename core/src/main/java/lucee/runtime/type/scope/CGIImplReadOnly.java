@@ -76,7 +76,7 @@ public final class CGIImplReadOnly extends ReadOnlyStruct implements CGI, Script
 			KeyConstants._local_addr, KeyConstants._local_host };
 	private static Struct staticKeys;
 	static {
-		staticKeys = new StructImpl(StructImpl.TYPE_UNDEFINED, MathUtil.nextPowerOfTwo(keys.length, StructImpl.DEFAULT_INITIAL_CAPACITY));
+		staticKeys = new StructImpl(StructImpl.DEFAULT_TYPE, MathUtil.nextPowerOfTwo(keys.length, StructImpl.DEFAULT_INITIAL_CAPACITY));
 		for (int i = 0; i < keys.length; i++) {
 			staticKeys.setEL(keys[i], "");
 		}

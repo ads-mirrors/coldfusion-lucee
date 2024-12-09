@@ -49,7 +49,7 @@ public class ClosureScope extends ScopeSupport implements Variables, Externaliza
 	private boolean localAlways;
 
 	public ClosureScope(PageContext pc, Argument arg, Local local, Variables var) {
-		super("variables", SCOPE_VARIABLES, StructImpl.TYPE_UNDEFINED);
+		super("variables", SCOPE_VARIABLES, StructImpl.DEFAULT_TYPE);
 		arg.setBind(true);
 		local.setBind(true);
 		var.setBind(true);
@@ -64,7 +64,7 @@ public class ClosureScope extends ScopeSupport implements Variables, Externaliza
 	 * ONLY USED BY SERIALISATION
 	 */
 	public ClosureScope() {
-		super("variables", SCOPE_VARIABLES, StructImpl.TYPE_UNDEFINED);
+		super("variables", SCOPE_VARIABLES, StructImpl.DEFAULT_TYPE);
 	}
 
 	@Override

@@ -34,6 +34,7 @@ import org.apache.commons.collections4.map.ReferenceMap;
 
 import lucee.commons.collection.AccessOrderLimitedSizeMap;
 import lucee.commons.collection.MapFactory;
+import lucee.commons.io.SystemUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.math.MathUtil;
 import lucee.runtime.PageContext;
@@ -42,6 +43,7 @@ import lucee.runtime.dump.DumpData;
 import lucee.runtime.dump.DumpProperties;
 import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.PageException;
+import lucee.runtime.op.Caster;
 import lucee.runtime.op.Duplicator;
 import lucee.runtime.op.ThreadLocalDuplication;
 import lucee.runtime.type.it.StringIterator;
@@ -66,11 +68,17 @@ public class StructImpl extends StructSupport {
 	private Map<Collection.Key, Object> map;
 	private int type;
 
+	public static final int DEFAULT_TYPE;
+
+	static {
+		DEFAULT_TYPE = Caster.toIntValue(SystemUtil.getSystemPropOrEnvVar("lucee.struct.type", null), TYPE_REGULAR);
+	}
+
 	/**
 	 * default constructor
 	 */
 	public StructImpl() {
-		this(StructImpl.TYPE_UNDEFINED, DEFAULT_INITIAL_CAPACITY);// asx
+		this(StructImpl.DEFAULT_TYPE, DEFAULT_INITIAL_CAPACITY);// asx
 	}
 
 	/**
@@ -97,14 +105,20 @@ public class StructImpl extends StructSupport {
 	}
 
 	public StructImpl(int type, int initialCapacity, int max) {
-		if (type == TYPE_SYNC) map = MapFactory.getConcurrentMap(initialCapacity);
-		else if (type == TYPE_REGULAR) map = new HashMap<Collection.Key, Object>(initialCapacity);
-		else if (type == TYPE_WEAKED) map = Collections.synchronizedMap(new WeakHashMap<Collection.Key, Object>(initialCapacity));
+		// if (type == TYPE_UNDEFINED) type = DEFAULT_TYPE;
+		// if (type == TYPE_UNDEFINED) map = new HashMap<Collection.Key, Object>(initialCapacity);
+
+		if (type == TYPE_REGULAR) map = new HashMap<Collection.Key, Object>(initialCapacity);
+		else if (type == TYPE_SYNC) map = MapFactory.getConcurrentMap(initialCapacity);
 		else if (type == TYPE_SOFT) map = Collections.synchronizedMap(new ReferenceMap<Collection.Key, Object>(HARD, SOFT, initialCapacity, 0.75f));
 		else if (type == TYPE_LINKED) map = Collections.synchronizedMap(new LinkedHashMap<Collection.Key, Object>(initialCapacity));
 		else if (type == TYPE_LINKED_NOT_SYNC) map = new LinkedHashMap<Collection.Key, Object>(initialCapacity);
 		else if (type == TYPE_MAX) map = new AccessOrderLimitedSizeMap<Collection.Key, Object>(max, initialCapacity);
-		else map = MapFactory.getConcurrentMap(initialCapacity);
+		else if (type == TYPE_WEAKED) map = Collections.synchronizedMap(new WeakHashMap<Collection.Key, Object>(initialCapacity));
+		else {
+			map = new HashMap<Collection.Key, Object>(initialCapacity);
+		}
+		// map = MapFactory.getConcurrentMap(initialCapacity);
 		this.type = type;
 	}
 
@@ -263,7 +277,7 @@ public class StructImpl extends StructSupport {
 	}
 
 	public static Struct copy(Struct src, boolean deepCopy) {
-		return copy(src, new StructImpl(StructImpl.TYPE_UNDEFINED, MathUtil.nextPowerOfTwo(src.size(), StructImpl.DEFAULT_INITIAL_CAPACITY)), deepCopy);
+		return copy(src, new StructImpl(StructImpl.DEFAULT_TYPE, MathUtil.nextPowerOfTwo(src.size(), StructImpl.DEFAULT_INITIAL_CAPACITY)), deepCopy);
 	}
 
 	public static Struct copy(Struct src, Struct trg, boolean deepCopy) {

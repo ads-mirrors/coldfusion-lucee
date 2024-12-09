@@ -153,7 +153,7 @@ public abstract class StorageScopeImpl extends StructSupport implements StorageS
 		setTimeSpan(pc);
 
 		// lastvisit=System.currentTimeMillis();
-		if (sct == null) sct = new StructImpl();
+		if (sct == null) sct = new StructImpl(Struct.TYPE_SYNC);
 		sct.setEL(KeyConstants._cfid, pc.getCFID());
 		sct.setEL(KeyConstants._cftoken, pc.getCFToken());
 		sct.setEL(URLTOKEN, pc.getURLToken());
