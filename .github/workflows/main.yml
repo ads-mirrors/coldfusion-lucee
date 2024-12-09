@@ -16,14 +16,14 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
-      LUCEE_TEST_JAVA_VERSION:
-        description: Optional, otherwise, the build java version is used
-        required: false
-        type: string
       LUCEE_BUILD_JAVA_VERSION:
         required: true
         type: string
         default: '21'
+      LUCEE_TEST_JAVA_VERSION:
+        description: Optional Java Test version, default is the build java version
+        required: false
+        type: string
 
 #concurrency:
 #  group: ${{ github.head_ref }}
