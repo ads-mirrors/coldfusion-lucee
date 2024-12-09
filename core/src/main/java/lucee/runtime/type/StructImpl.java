@@ -71,7 +71,7 @@ public class StructImpl extends StructSupport {
 	public static final int DEFAULT_TYPE;
 
 	static {
-		DEFAULT_TYPE = StructNew.toType(SystemUtil.getSystemPropOrEnvVar("lucee.struct.type", null), TYPE_SYNC);
+		DEFAULT_TYPE = StructNew.toType(SystemUtil.getSystemPropOrEnvVar("lucee.struct.type", null), TYPE_REGULAR);
 	}
 
 	/**

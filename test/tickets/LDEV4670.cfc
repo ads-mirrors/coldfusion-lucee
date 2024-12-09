@@ -200,9 +200,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 		if ( remainingSessions.recordcount eq 0 )
 			return;
 		// systemOutput( "#timezone# has #remainingSessions.recordcount# sessions, expires: "
-				& epochToDate( remainingSessions.expires )
-				& ", now: #dateTimeFormat(now(), " yyyy-mm-dd HH:nn:ss:LLL", "UTC" )#",
-			 true );
+		//		& epochToDate( remainingSessions.expires )
+		//		& ", now: #dateTimeFormat(now(), " yyyy-mm-dd HH:nn:ss:LLL", "UTC" )#",
+		//	 true );
 		var epoch = dateTimeFormat( now(), 'epochms' );
 		// if ( len( remainingSessions.expires ) )
 			// systemOutput( "expires: " & remainingSessions.expires & ", now: #epoch#, diff: #epoch-remainingSessions.expires#",  true );
