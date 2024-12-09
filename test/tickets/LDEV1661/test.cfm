@@ -12,8 +12,7 @@
 		</cfquery>
 		<!--- <cfquery name="chkConfig">
 			SELECT @@global.time_zone, @@session.time_zone
-		</cfquery>
-		#systemOutput(chkConfig, true)# --->
+		</cfquery> --->
 		#selectRecord.myTimestamp#
 	<cfelseif FORM.Scene EQ 2>
 		<!--- update timestamp using createOdbcDateTime() --->

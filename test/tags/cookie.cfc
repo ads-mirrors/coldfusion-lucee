@@ -22,10 +22,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="cookie" skip=true	
 	}
 
 	private function dumpCookies(res){
-		systemOutput( "", true );
+		// systemOutput( "", true );
 		var c = arguments.res.headers["Set-Cookie"];
 		loop array=c item="local.cc"{
-			systemOutput( cc, true );
+			// systemOutput( cc, true );
 		}
 	}
 

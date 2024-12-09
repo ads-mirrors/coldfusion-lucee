@@ -5,7 +5,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"  labels="mysql" {
 		// Admin password
 		variables.adminPassword = request.WEBADMINPASSWORD;
 
-		systemOutput(variables.mySQL, true);
+		// systemOutput(variables.mySQL, true);
 		
 		return structisEmpty(variables.mySQL);
 	}

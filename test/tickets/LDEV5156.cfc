@@ -12,16 +12,16 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" skip="true" {
         rounds = 25000;
         TYPE_LINKED_NOT_SYNC = 100; //args
         TYPE_REGULAR = 3; // local
-        systemOutput(" ", true);
+        // systemOutput(" ", true);
         _testStructSize(fill=0, rounds=rounds);
-        systemOutput(" ---warm up complete--- ", true);
-        systemOutput(" --- test TYPE_REGULAR / local scope --- ", true);
+       //  systemOutput(" ---warm up complete--- ", true);
+        // systemOutput(" --- test TYPE_REGULAR / local scope --- ", true);
         _testStructSize(fill=0, rounds=rounds, structType=TYPE_REGULAR);
         _testStructSize(fill=2, rounds=rounds, structType=TYPE_REGULAR);
         _testStructSize(fill=4, rounds=rounds, structType=TYPE_REGULAR);
         _testStructSize(fill=8, rounds=rounds, structType=TYPE_REGULAR);
 
-        systemOutput(" --- test TYPE_LINKED_NOT_SYNC / arguments scope --- ", true);
+        // systemOutput(" --- test TYPE_LINKED_NOT_SYNC / arguments scope --- ", true);
         _testStructSize(fill=0, rounds=rounds, structType=TYPE_LINKED_NOT_SYNC);
         _testStructSize(fill=2, rounds=rounds, structType=TYPE_LINKED_NOT_SYNC);
         _testStructSize(fill=4, rounds=rounds, structType=TYPE_LINKED_NOT_SYNC);
@@ -45,7 +45,7 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" skip="true" {
                 arrayAppend(a, st);
                 /*
                 if (arrayLen(a) mod 5000 eq 0){
-                    systemOutput(a.len() & " ");
+                    // systemOutput(a.len() & " ");
                     // echo(a.len() & ", ");
                     flush;
                 }
@@ -54,11 +54,11 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" skip="true" {
             }
             //systemOutput(" ", true);
             if (initialCapacity < 10) initialCapacity = " #initialCapacity#"; //
-            systemOutput("initialCapacity: #initialCapacity#, fill: #arguments.fill#, rounds: #numberformat(rounds)#, took #numberformat(getTickCount()-s)# ms, ");
+            // systemOutput("initialCapacity: #initialCapacity#, fill: #arguments.fill#, rounds: #numberformat(rounds)#, took #numberformat(getTickCount()-s)# ms, ");
             r = reportMem( "", start.usage, "st" );
             for (rr in r.report){
-                if (rr contains "G1" || rr contains "Epsilon")
-                    systemOutput(rr, true);
+                // if (rr contains "G1" || rr contains "Epsilon")
+                    // systemOutput(rr, true);
             }
             //systemOutput(r.report, true);
             
@@ -68,7 +68,7 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" skip="true" {
             //systemOutput(" ", true);
         }
         
-        systemOutput("----", true);
+        // systemOutput("----", true);
         
     }
 

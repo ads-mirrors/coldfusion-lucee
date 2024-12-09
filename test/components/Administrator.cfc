@@ -1232,7 +1232,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			describe( title="test application listener functions", skip=true, body=function() {
 				beforeEach(function( currentSpec ){
 					getApplicationListener = adminWeb.getApplicationListener();
-					systemOutput("getApplicationListener: #getApplicationListener.toJson()#", true);
+					// systemOutput("getApplicationListener: #getApplicationListener.toJson()#", true);
 					assertEquals(isStruct(getApplicationListener), true);
 				});
 
@@ -1857,8 +1857,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 					updateAvailable=deserializeJson(http.filecontent);
 
 					if (arrayIsEmpty(updateAvailable.otherVersions)){
-
-						systemOutput("WARNING: updateAvailable.otherVersions is empty", true, true);
+						// systemOutput("WARNING: updateAvailable.otherVersions is empty", true, true);
 					}
 					else {
 

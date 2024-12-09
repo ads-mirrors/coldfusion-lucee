@@ -25,9 +25,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				var files = directoryList( dir, true, "query");
 				var st = QueryToStruct( files, "name" );
 
-				loop array=st index="local.item"{
-					systemOutput( item, true );
-				}
+				// loop array=st index="local.item"{
+				// 	systemOutput( item, true );
+				// }
 
 				arrayAppend( tests, _file( dir, "644.txt", "644" ) );
 				arrayAppend( tests, _file( dir, "743.txt", "743" ) );
@@ -37,18 +37,18 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				var files = directoryList( dir, true, "query");
 				var st = QueryToStruct( files, "name" );
 
-				loop collection=st item="local.item"{
-					systemOutput( item, true );
-				}
+				// loop collection=st item="local.item"{
+				// 	systemOutput( item, true );
+				// }
+				// loop array=tests item="local.test" {
+				// 	systemOutput( test, true );
+				// }
 				loop array=tests item="local.test" {
-					systemOutput( test, true );
-				}
-				loop array=tests item="local.test" {
-					systemOutput( test, true );
+				// 	systemOutput( test, true );
 					var key = mid( test.name, len( dir ) + 1 );
-					systemOutput( key, true );
+				// 	systemOutput( key, true );
 					expect( st ).toHaveKey( key );
-					systemOutput( st[ key ], true );
+				// 	systemOutput( st[ key ], true );
 					expect( test.mode ).toBe( st[ key ].mode );
 				}
 

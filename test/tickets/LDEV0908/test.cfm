@@ -6,7 +6,7 @@
 		result = EntityLoadByExample(obj,true);
 	} catch( any e){
 		msg = e.message&"";
-		systemOutput(e,1,1);
+		// systemOutput(e,1,1);
 	}
 	writeOutput(msg);
 </cfscript>

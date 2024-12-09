@@ -97,9 +97,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 	}
 
 	private function dumpResult(r){
-		systemOutput( "---", true );
-		systemOutput( r, true );
-		systemOutput( "---", true );
+		// systemOutput( "---", true );
+		// systemOutput( r, true );
+		// systemOutput( "---", true );
  	}
 
 	private string function createURI(string calledName){

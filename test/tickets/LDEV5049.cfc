@@ -16,9 +16,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip=true {
 
 				var parsedUrl = deserializeJSON( result.filecontent ); 
 
-				systemOutput( "", true );
-				systemOutput( qs, true );
-				systemOutput( parsedUrl, true );
+				// systemOutput( "", true );
+				// systemOutput( qs, true );
+				// systemOutput( parsedUrl, true );
 
 				expect( parsedUrl ).toHaveKey( "mt" );
 				expect( structCount( parsedUrl ) ).toBe( 1 );
@@ -33,9 +33,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip=true {
 
 				var parsedUrl = deserializeJSON( result.filecontent ); 
 
-				systemOutput( "", true );
-				systemOutput( qs, true );
-				systemOutput( parsedUrl, true );
+				// systemOutput( "", true );
+				// systemOutput( qs, true );
+				// systemOutput( parsedUrl, true );
 
 				expect( parsedUrl ).toHaveKey( "mt" );
 				expect( structCount( parsedUrl ) ).toBe( 1 );
@@ -50,9 +50,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip=true {
 
 				var parsedForm = deserializeJSON( result.filecontent ); 
 
-				systemOutput( "", true );
-				systemOutput( qs, true );
-				systemOutput( parsedForm, true );
+				// systemOutput( "", true );
+				// systemOutput( qs, true );
+				// systemOutput( parsedForm, true );
 
 				expect( parsedForm ).toHaveKey( "mt" );
 				expect( parsedForm ).toHaveKey( "fieldnames" );
@@ -68,9 +68,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip=true {
 
 				var parsedForm = deserializeJSON( result.filecontent ); 
 
-				systemOutput( "", true );
-				systemOutput( qs, true );
-				systemOutput( parsedForm, true );
+				// systemOutput( "", true );
+				// systemOutput( qs, true );
+				// systemOutput( parsedForm, true );
 
 				expect( parsedForm ).toHaveKey( "mt" );
 				expect( parsedForm ).toHaveKey( "fieldnames" );
@@ -86,9 +86,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip=true {
 
 				var parsedUrl = deserializeJSON( result.filecontent ); 
 
-				systemOutput( "", true );
-				systemOutput( qs, true );
-				systemOutput( parsedUrl, true );
+				// systemOutput( "", true );
+				// systemOutput( qs, true );
+				// systemOutput( parsedUrl, true );
 
 				expect( parsedUrl ).toHaveKey( "a" );
 				expect( parsedUrl["a"] ).toBe( "" );

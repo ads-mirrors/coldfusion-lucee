@@ -26,7 +26,7 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" labels="h2" skip="true" 
 				loop array=listToArray(names) item="local.k" {
 					var v=cfthread[k];
 					if(v.status!="completed"){
-						systemOutput(v, true);
+						// systemOutput(v, true);
 						hasError=true;
 						break;
 					}

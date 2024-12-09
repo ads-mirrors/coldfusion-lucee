@@ -36,7 +36,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" label="qoq" {
 					template:"#variables.uri#/ldev1525.cfm",
 					url: "scene=hsqldb&orderby=true"
 				);
-				systemOutput( local.result.filecontent, true );
+				// systemOutput( local.result.filecontent, true );
 				expect ( local.result.filecontent).toInclude("invalid ORDER BY expression");
 			});
 

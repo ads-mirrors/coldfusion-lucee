@@ -29,7 +29,7 @@
     <cfset x.XmlAttributes["xsi:type"] = "xsd:string"> 
     <cfset tmp = addSOAPResponseHeader("ignoredNameSpace", "ignoredName", x)>  
  		<cfcatch>
-        	<cfset systemOutput(cfcatch,true,true)>
+        	<!--- <cfset systemOutput(cfcatch,true,true)> --->
         </cfcatch>
     </cftry>
 	<cfreturn isSoapRequest()> 

@@ -61,11 +61,11 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" labels="mssql"{
 
 		if ( len( arguments._ds ) ) {
 			dbinfo name="db_info" datasource=arguments._ds type="version";
-			if ( debug )
-				systemOutput( db_info, true );
+			// if ( debug )
+			// 	systemOutput( db_info, true );
 		}
-		if ( debug )
-			systemOutput( "Using " & (arguments.useQueryExecute ? "queryExecute" : "cfquery"), true );
+		// if ( debug )
+		// 	systemOutput( "Using " & (arguments.useQueryExecute ? "queryExecute" : "cfquery"), true );
 
 		var params = {
 			name: "lucee"
@@ -93,8 +93,8 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" labels="mssql"{
 				}
 			}
 		}
-		if ( debug )
-			systemOutput( ins_result, true );
+		// if ( debug )
+		// 	systemOutput( ins_result, true );
 		expect( ins_result.generatedKey ).toBe( 1 );
 		expect( ins_result.identitycol ).toBe( 1 );
 
@@ -108,10 +108,10 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" labels="mssql"{
 			}
 		}
 		
-		if ( debug ) {
-			systemOutput( result, true );
-			systemOutput( qry, true );
-		}
+		// if ( debug ) {
+		// 	systemOutput( result, true );
+		// 	systemOutput( qry, true );
+		// }
 		expect( result.recordcount ).toBe( 1 );
 		expect( qry.recordcount ).toBe( 1 );
 		expect( qry.id ).toBe( 1 );

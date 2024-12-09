@@ -26,14 +26,14 @@
 	/*
 	settings = getApplicationSettings();
 
-	systemOutput( form.toJson(), true );
+	// systemOutput( form.toJson(), true );
 	if (structKeyExists(settings, "xmlFeatures" ) ) {
-		systemOutput( settings.xmlFeatures.toJson(), true );
+		// systemOutput( settings.xmlFeatures.toJson(), true );
 	} else {
-		systemOutput("xmlFeatures not set", true);
+		// systemOutput("xmlFeatures not set", true);
 	}
-	systemOutput( "LDEV1676.cfc:" & CallStackGet( "array" )[ 2 ].linenumber, true );
-	systemOutput( xml, true );
+	// systemOutput( "LDEV1676.cfc:" & CallStackGet( "array" )[ 2 ].linenumber, true );
+	// systemOutput( xml, true );
 	*/
 	try {
 		result = xmlSearch( xml, "/foo" )[1].xmltext;

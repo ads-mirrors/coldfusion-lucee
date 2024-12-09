@@ -36,7 +36,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="s3" skip="true" {
 				directoryDelete( baseWithBucketName, true );
 			}
 			catch(e) {
-				systemOutput(e);
+				// systemOutput(e);
 			}
 		}	
 	}
