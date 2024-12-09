@@ -57,7 +57,7 @@ public class ClazzDynamic extends Clazz {
 	private static Map<ClassLoader, String> clids = new IdentityHashMap<>();
 	private static String systemId;
 
-	private static Map<Class, SoftReference<ClazzDynamic>> classes = new IdentityHashMap<>();
+	private static Map<String, SoftReference<ClazzDynamic>> classes = new ConcurrentHashMap<>();
 
 	/*
 	 * private static double generateClassLoderId = 0; private static double path = 0; private static
@@ -77,12 +77,13 @@ public class ClazzDynamic extends Clazz {
 		 */
 
 		ClazzDynamic cd = null;
-		Reference<ClazzDynamic> sr = classes.get(clazz);
+		String id = generateClassLoderId(clazz);
+		String key = id + ":" + clazz.getName();
+		Reference<ClazzDynamic> sr = classes.get(key);
 		if (sr == null || (cd = sr.get()) == null) {
 			synchronized (clazz) {
-				sr = classes.get(clazz);
+				sr = classes.get(key);
 				if (sr == null || (cd = sr.get()) == null) {
-					String id = generateClassLoderId(clazz);
 					// generateClassLoderId += (SystemUtil.millis() - start);
 					// start = SystemUtil.millis();
 					StringBuilder sbClassPath = new StringBuilder();
@@ -101,7 +102,7 @@ public class ClazzDynamic extends Clazz {
 							// deserialize += (SystemUtil.millis() - start);
 							// start = SystemUtil.millis();
 							if (log != null) log.info("dynamic", "loaded metadata for [" + clazz.getName() + "] from serialized file:" + ser);
-							classes.put(clazz, new SoftReference<ClazzDynamic>(cd));
+							classes.put(key, new SoftReference<ClazzDynamic>(cd));
 							// put += (SystemUtil.millis() - start);
 							// start = SystemUtil.millis();
 						}
