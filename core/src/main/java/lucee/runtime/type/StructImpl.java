@@ -277,7 +277,7 @@ public class StructImpl extends StructSupport {
 	}
 
 	public static Struct copy(Struct src, boolean deepCopy) {
-		return copy(src, new StructImpl(StructImpl.DEFAULT_TYPE, MathUtil.nextPowerOfTwo(src.size(), StructImpl.DEFAULT_INITIAL_CAPACITY)), deepCopy);
+		return copy(src, new StructImpl(StructImpl.TYPE_SYNC, MathUtil.nextPowerOfTwo(src.size(), StructImpl.DEFAULT_INITIAL_CAPACITY)), deepCopy);
 	}
 
 	public static Struct copy(Struct src, Struct trg, boolean deepCopy) {

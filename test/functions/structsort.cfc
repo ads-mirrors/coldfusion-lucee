@@ -1,24 +1,24 @@
 component extends="org.lucee.cfml.test.LuceeTestCase" labels="struct" {
 
 	function run( testResults , testBox ) {
-		animals = {
-			cow: {
+		animals = [
+			cow: [
 				noise: "moo",
 				size: "large"
-			},
-			pig: {
+			],
+			pig: [
 				noise: "oink",
 				size: "MEDIUM"
-			},
-			cat: {
+			],
+			cat: [
 				noise: "MEOW",
 				Size: "small"
-			},
-			bat: {
+			],
+			bat: [
 				Noise:"kee",
 				size:"SMALL"
-			}
-		};
+			]
+		];
 		describe( title = "Test suite for structsort", body = function() {
 
 			it( title = 'Checking with structsort()',body = function( currentSpec ) {

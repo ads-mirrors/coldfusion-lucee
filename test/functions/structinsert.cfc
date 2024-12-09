@@ -1,7 +1,7 @@
 component extends = "org.lucee.cfml.test.LuceeTestCase" {
 
 	function run( testResults , testBox ) {
-		world = {"save":"water","clean":"wastes"};
+		world = ["save":"water","clean":"wastes"];
 		describe( title = "Test suite for structinsert", body = function() {
 
 			it( title = 'Test case for structinsert function',body = function( currentSpec ) {
@@ -12,12 +12,20 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" {
 			});
 
 			it( title = 'Test case for structinsert member function',body = function( currentSpec ) {
-				res = world.insert("find","way");
-				assertEquals('{"count":"money","find":"way","clean":"wastes","save":"money"}',serialize(res));
+				var res = world.insert("find","way");
+				assertEquals(len(res),4);
+				assertEquals(res.save,"money");
+				assertEquals(res.clean,"wastes");
+				assertEquals(res.count,"money");
+				assertEquals(res.find,"way");
+
 				res = world.insert("find","you",true);
-				assertEquals('{"count":"money","find":"you","clean":"wastes","save":"money"}',serialize(res));
+				assertEquals(len(res),4);
+				assertEquals(res.save,"money");
+				assertEquals(res.clean,"wastes");
+				assertEquals(res.count,"money");
+				assertEquals(res.find,"you");
 			});
 		});
 	}
-
 }

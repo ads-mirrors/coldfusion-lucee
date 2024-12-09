@@ -6,9 +6,17 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
                 expect(reFind("(f)(oo)", "bar", 1, false)).toBe(0);
                 expect(reFind("(f)(oo)", "bar", 1, false, "ALL")).toBe(0);
             });
-            it( title="reFind() no matches with regex type java and returnsubexpressions = true", body=function( currentSpec ){
-                expect(serializeJSON(reFind("(f)(oo)", "bar", 1, true))).toBe('{"match":[""],"len":[0],"pos":[0]}');
-                expect(serializeJSON(reFind("(f)(oo)", "bar", 1, true,"all"))).toBe('[{"match":[""],"len":[0],"pos":[0]}]');
+            it( title="reFind() no matches with regex type java and returnsubexpressions = true", body=function( currentSpec ) {
+                var res=reFind("(f)(oo)", "bar", 1, true);   
+                expect(res.len[1]).toBe(0);
+                expect(res.pos[1]).toBe(0);
+                expect(res.match[1]).toBe(''); 
+
+                var res=reFind("(f)(oo)", "bar", 1, true,"all");   
+                systemOutput(res,1,1);
+                expect(res.len[1]).toBe(0);
+                expect(res.pos[1]).toBe(0);
+                expect(res.match[1]).toBe('');
             });
             it( title="reFind() no matches with regex type perl", body=function( currentSpec ){
                 try{
@@ -23,8 +31,16 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
                 expect(serializeJSON(res)).toBe("[0,0]");
             });
             it( title="reFind() no matches with regex type perl and returnsubexpressions = true", body=function( currentSpec ){
-                    expect(serializeJSON(reFind("(f)(oo)", "bar", 1, true))).toBe('{"match":[""],"len":[0],"pos":[0]}');
-                    expect(serializeJSON(reFind("(f)(oo)", "bar", 1, true,"all"))).toBe('[{"match":[""],"len":[0],"pos":[0]}]');
+                var res=reFind("(f)(oo)", "bar", 1, true);    
+                expect(res.match[1]).toBe('');
+                expect(res.len[1]).toBe(0);
+                expect(res.pos[1]).toBe(0);
+                
+                var res=reFind("(f)(oo)", "bar", 1, true,"all");  
+                expect(res.match[1]).toBe('');
+                expect(res.len[1]).toBe(0);
+                expect(res.pos[1]).toBe(0);
+
             });
         });
     }

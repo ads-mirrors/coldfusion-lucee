@@ -4,8 +4,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
         variables.s = "a string";
         variables.i = 42;
         variables.pi = pi();
-        variables.st1 = {key1="value1",key2="value2"};
-        variables.st1bis = {key1="VAlue1",key2="value2"};
+        variables.st1 = [key1="value1",key2="value2"];
+        variables.st1bis = [key1="VAlue1",key2="value2"];
         variables.st1ref = st1;
         variables.st2 = {key2="value2"};
         variables.a1 = [1];

@@ -41,7 +41,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 				assertEquals("ordered,type", listSort( meta.keyList(), "text" ) );
 				assertEquals("unordered",meta.ordered);
-				assertEquals("unsynchronized",meta.type);
+				assertEquals("regular",meta.type);
 			});
 
 			it( title = 'Checking ordered struct', body = function( currentSpec ) {
