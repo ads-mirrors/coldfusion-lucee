@@ -170,7 +170,7 @@ public final class RegistryQuery {
 				String _value = StringUtil.substringEL(line, index + len + 1, "").trim();
 
 				if (_key.equals(NO_NAME)) _key = "";
-				if (_type == RegistryEntry.TYPE_DWORD) _value = String.valueOf(ParseNumber.invoke(_value.substring(2), "hex", 0));
+				if (_type == RegistryEntry.TYPE_DWORD) _value = String.valueOf(ParseNumber.invoke(null, _value.substring(2), "hex", 0));
 				RegistryEntry re = new RegistryEntry(_type, _key, _value);
 				if (type == RegistryEntry.TYPE_ANY || type == re.getType()) array.add(re);
 				// }
