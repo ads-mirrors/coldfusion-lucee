@@ -5639,7 +5639,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 				if (StringUtil.isEmpty(str, true)) str = SystemUtil.getSystemPropOrEnvVar("lucee.precise.math", null);
 
 				if (!StringUtil.isEmpty(str, true)) {
-					pm = Caster.toBooleanValue(str, hasCS ? configServer.getPreciseMath() : true);
+					pm = Caster.toBooleanValue(str, hasCS ? configServer.getPreciseMath() : false);
 				}
 			}
 			config.setPreciseMath(pm);
