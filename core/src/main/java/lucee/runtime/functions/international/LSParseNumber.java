@@ -41,14 +41,14 @@ public final class LSParseNumber implements Function {
 	private static Map<Locale, SoftReference<NumberFormat>> formatters = new ConcurrentHashMap<Locale, SoftReference<NumberFormat>>();
 
 	public static Number call(PageContext pc, String string) throws PageException {
-		return toDoubleValue(pc.getLocale(), string);
+		return toNumber(pc.getLocale(), string);
 	}
 
 	public static Number call(PageContext pc, String string, Locale locale) throws PageException {
-		return toDoubleValue(locale == null ? pc.getLocale() : locale, string);
+		return toNumber(locale == null ? pc.getLocale() : locale, string);
 	}
 
-	public static double toDoubleValue(Locale locale, String str) throws PageException {
+	public static Number toNumber(Locale locale, String str) throws PageException {
 		SoftReference<NumberFormat> tmp = formatters.remove(locale);
 		NumberFormat nf = tmp == null ? null : tmp.get();
 		if (nf == null) {
@@ -64,7 +64,7 @@ public final class LSParseNumber implements Function {
 				throw new ExpressionException("can't parse String [" + str + "] against locale [" + LocaleFactory.getDisplayName(locale) + "] to a number");
 			}
 			if (result == null) throw new ExpressionException("can't parse String [" + str + "] against locale [" + LocaleFactory.getDisplayName(locale) + "] to a number");
-			return result.doubleValue();
+			return result;
 		}
 		finally {
 			formatters.put(locale, new SoftReference<NumberFormat>(nf));

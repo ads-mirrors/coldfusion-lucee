@@ -35,19 +35,19 @@ public class ParseNumber {
 	}
 
 	public static Number call(PageContext pc, String strNumber, String strRadix) throws PageException {
-		return invoke(strNumber, strRadix);
+		return invoke(pc, strNumber, strRadix);
 	}
 
-	public static Number invoke(String strNumber, String strRadix, Number defaultValue) {
+	public static Number invoke(PageContext pc, String strNumber, String strRadix, Number defaultValue) {
 		try {
-			return invoke(strNumber, strRadix);
+			return invoke(pc, strNumber, strRadix);
 		}
 		catch (PageException e) {
 			return defaultValue;
 		}
 	}
 
-	public static Number invoke(String strNumber, String strRadix) throws PageException {
+	public static Number invoke(PageContext pc, String strNumber, String strRadix) throws PageException {
 		strNumber = strNumber.trim();
 		int radix = DEC;
 		if (strRadix == null) {
@@ -85,7 +85,7 @@ public class ParseNumber {
 		if (strNumber.indexOf('.') != -1 && radix != DEC) throw new ExpressionException("The radix con only be [dec] for floating point numbers");
 
 		if (radix == DEC) {
-			return Caster.toDoubleValue(strNumber);
+			return Caster.toNumber(pc, strNumber);
 		}
 		return Integer.parseInt(strNumber, radix);
 	}
