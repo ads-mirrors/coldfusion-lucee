@@ -23,7 +23,7 @@
 				application action="update" preciseMath=false;
 				expect( parseNumber( n ) ).toBe( 2305843009213693696 );
 				application action="update" preciseMath=true;
-				expect( parseNumber( n ) ).toBe( 2305843009213693951 );  // returns 2305843009213693951.77
+				expect( parseNumber( n ) ).toBe( 2305843009213693951.77 );  // returns 2305843009213693951.77
 			});
 
 			it( "Test Bin", function(){

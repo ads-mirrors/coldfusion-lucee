@@ -193,11 +193,11 @@ public class CacheUtil {
 	}
 
 	public static Struct getInfo(Cache c) {
-		return getInfo(new StructImpl(), c);
+		return getInfo(new StructImpl(StructImpl.TYPE_SYNC), c);
 	}
 
 	public static Struct getInfo(Struct info, Cache c) {
-		if (info == null) info = new StructImpl();
+		if (info == null) info = new StructImpl(StructImpl.TYPE_SYNC);
 		try {
 			long value = c.hitCount();
 			if (value >= 0) info.setEL("hit_count", Double.valueOf(value));
