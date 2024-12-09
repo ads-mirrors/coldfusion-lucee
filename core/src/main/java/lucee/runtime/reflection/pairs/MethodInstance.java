@@ -67,8 +67,10 @@ public final class MethodInstance {
 			return ((BiFunction<Object, Object, Object>) getResult().getValue()).apply(o, args);
 		}
 		catch (IncompatibleClassChangeError | ClassFormatError | ClassCastException e) { // java.lang.ClassCastException
+			print.e("-------------------------");
 			print.e(e);
-			if (!Clazz.allowReflection()) throw e;
+			print.e("-------------------------");
+			// if (!Clazz.allowReflection()) throw e;
 			LogUtil.log("dynamic", e);
 			DynamicInvoker di = DynamicInvoker.getExistingInstance();
 			lucee.transformer.dynamic.meta.Method method = Clazz.getMethodMatch(di.getClazz(clazz, true), methodName, args, true, true);
