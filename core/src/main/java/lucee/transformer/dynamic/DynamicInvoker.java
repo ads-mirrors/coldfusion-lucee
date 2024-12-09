@@ -15,6 +15,7 @@ import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -30,6 +31,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
 import lucee.aprint;
+import lucee.print;
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
@@ -253,6 +255,8 @@ public class DynamicInvoker {
 					mv.visitVarInsn(Opcodes.ALOAD, 1); // Load the first method argument (instance)
 					if (!fm.getDeclaringProviderClassWithSameAccess().equals(Object.class)) { // Only cast if clazz is not java.lang.Object
 						mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(fm.getDeclaringProviderClassWithSameAccess()));
+						print.e("-->" + fm.getDeclaringProviderClassNameWithSameAccess());
+						print.e("-->" + fm.getDeclaringProviderClassName());
 					}
 				}
 			}
@@ -285,6 +289,7 @@ public class DynamicInvoker {
 					if (argType.isPrimitive()) {
 						Type type = Type.getType(argType);
 						Class<?> wrapperType = Reflector.toReferenceClass(argType);
+
 						mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(wrapperType)); // Cast to wrapper type
 						mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL, Type.getInternalName(wrapperType), ASMUtil.getClassName(type) + "Value", "()" + ASMUtil.getDescriptor(type),
 								false); // Unbox
@@ -431,6 +436,12 @@ public class DynamicInvoker {
 		ResourceUtil.deleteContent(classes, null);
 		DynamicInvoker e = new DynamicInvoker(classes);
 
+		HashMap map = new HashMap<>();
+		map.put("aaa", "sss");
+		Iterator it = map.keySet().iterator();
+		// aprint.e(e.invokeInstanceMethod(it, "next", new Object[] {}, false));
+		aprint.e(e.invokeInstanceMethod(it, "hasNext", new Object[] {}, false));
+
 		if (false) {
 			FileInputStream fis = new java.io.FileInputStream("/Users/mic/Tmp3/test.prop");
 			InputStreamReader fir = new java.io.InputStreamReader(fis, "UTF-8");
@@ -466,7 +477,7 @@ public class DynamicInvoker {
 
 		}
 
-		if (true) return;
+		// if (true) return;
 
 		StringBuilder sb = new StringBuilder("Susi");
 		Test t = new Test();
@@ -508,7 +519,7 @@ public class DynamicInvoker {
 		// instance (double->int):String
 		{
 			Object reflection = t.test(134);
-			Object dynamic = e.invokeInstanceMethod(t, "test", new Object[] { 134D }, false);
+			Object dynamic = e.invokeInstanceMethod(t, "test", new Object[] { 134D }, true);
 			if (!reflection.equals(dynamic)) {
 				aprint.e("direct:");
 				aprint.e(reflection);
@@ -520,7 +531,7 @@ public class DynamicInvoker {
 		// instance (double->int):String
 		{
 			Object reflection = t.test(134);
-			Object dynamic = e.invokeInstanceMethod(t, "test", new Object[] { 134D }, false);
+			Object dynamic = e.invokeInstanceMethod(t, "test", new Object[] { 134D }, true);
 			if (!reflection.equals(dynamic)) {
 				aprint.e("direct:");
 				aprint.e(reflection);
@@ -530,23 +541,23 @@ public class DynamicInvoker {
 		}
 
 		aprint.e(t.complete("", 1, null));
-		aprint.e(e.invokeInstanceMethod(t, "complete", new Object[] { "", i, null }, false));
-		aprint.e(e.invokeInstanceMethod(t, "complete", new Object[] { "", bd, null }, false));
+		aprint.e(e.invokeInstanceMethod(t, "complete", new Object[] { "", i, null }, true));
+		aprint.e(e.invokeInstanceMethod(t, "complete", new Object[] { "", bd, null }, true));
 
 		aprint.e(t.testb(true, true));
-		aprint.e(e.invokeInstanceMethod(t, "testb", new Object[] { null, true }, false));
+		aprint.e(e.invokeInstanceMethod(t, "testb", new Object[] { null, true }, true));
 
 		aprint.e(t.testStr(1, "string", 1L));
-		aprint.e(e.invokeInstanceMethod(t, "testStr", new Object[] { "1", 1, Double.valueOf(1D) }, false));
+		aprint.e(e.invokeInstanceMethod(t, "testStr", new Object[] { "1", 1, Double.valueOf(1D) }, true));
 
-		aprint.e(e.invokeInstanceMethod(t, "test", new Object[] { "1" }, false));
-		aprint.e(e.invokeInstanceMethod(t, "test", new Object[] { 1D }, false));
+		aprint.e(e.invokeInstanceMethod(t, "test", new Object[] { "1" }, true));
+		aprint.e(e.invokeInstanceMethod(t, "test", new Object[] { 1D }, true));
 
-		aprint.e(e.invokeInstanceMethod(new SystemOut(), "setOut", new Object[] { null }, false));
+		aprint.e(e.invokeInstanceMethod(new SystemOut(), "setOut", new Object[] { null }, true));
 		System.setProperty("a.b.c", "- value -");
 		aprint.e(e.invokeInstanceMethod(sb, "toSTring", new Object[] {}, false));
-		aprint.e(e.invokeStaticMethod(SystemUtil.class, "getSystemPropOrEnvVar", new Object[] { "a.b.c", "default-value" }, false));
-		aprint.e(e.invokeStaticMethod(ListUtil.class, "arrayToList", new Object[] { new String[] { "a", "b" }, "," }, false));
+		aprint.e(e.invokeStaticMethod(SystemUtil.class, "getSystemPropOrEnvVar", new Object[] { "a.b.c", "default-value" }, true));
+		aprint.e(e.invokeStaticMethod(ListUtil.class, "arrayToList", new Object[] { new String[] { "a", "b" }, "," }, true));
 
 	}
 
