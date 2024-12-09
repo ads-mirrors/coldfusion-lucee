@@ -18,8 +18,12 @@
  **/
 package lucee.runtime.functions.string;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
+import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
@@ -87,7 +91,10 @@ public class ParseNumber {
 		if (radix == DEC) {
 			return Caster.toNumber(pc, strNumber);
 		}
+
+		if (ThreadLocalPageContext.preciseMath(pc)) {
+			return new BigDecimal(new BigInteger(strNumber, radix));
+		}
 		return Integer.parseInt(strNumber, radix);
 	}
-
 }
