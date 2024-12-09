@@ -3005,7 +3005,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 						try {
 							Class clazz = cd.getClazz();
 							Object obj;
-							ConstructorInstance constr = Reflector.getConstructorInstance(clazz, new Object[] { configServer });
+							ConstructorInstance constr = Reflector.getConstructorInstance(clazz, new Object[] { configServer }, false);
 							if (constr.getConstructor(null) != null) obj = constr.invoke();
 							else obj = ClassUtil.newInstance(clazz);
 							LogUtil.logGlobal(ThreadLocalPageContext.getConfig(configServer == null ? config : configServer), Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(),
