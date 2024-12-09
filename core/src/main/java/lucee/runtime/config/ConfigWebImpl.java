@@ -1660,11 +1660,6 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	}
 
 	@Override
-	public void resetBaseComponentPage() {
-		helper.resetBaseComponentPage();
-	}
-
-	@Override
 	public ActionMonitorCollector getActionMonitorCollector() {
 		return cs.getActionMonitorCollector();
 	}

@@ -314,10 +314,6 @@ public class ConfigWebHelper {
 		return base;
 	}
 
-	public void resetBaseComponentPage() {
-		baseComponentPageCFML = null;
-	}
-
 	public Mapping[] getApplicationMappings() {
 		List<Mapping> list = new ArrayList<>();
 		Iterator<SoftReference<Mapping>> it = applicationMappings.values().iterator();

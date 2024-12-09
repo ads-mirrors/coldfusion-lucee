@@ -68,8 +68,6 @@ public interface ConfigWebPro extends ConfigWeb, ConfigPro {
 
 	public CIPage getBaseComponentPage(PageContext pc) throws PageException;
 
-	public void resetBaseComponentPage();
-
 	public ActionMonitorCollector getActionMonitorCollector();
 
 	public KeyLock<String> getContextLock();
