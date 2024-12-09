@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.BiFunction;
 
+import lucee.print;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.Pair;
@@ -66,6 +67,7 @@ public final class MethodInstance {
 			return ((BiFunction<Object, Object, Object>) getResult().getValue()).apply(o, args);
 		}
 		catch (IncompatibleClassChangeError | ClassFormatError | ClassCastException e) { // java.lang.ClassCastException
+			print.e(e);
 			if (!Clazz.allowReflection()) throw e;
 			LogUtil.log("dynamic", e);
 			DynamicInvoker di = DynamicInvoker.getExistingInstance();
