@@ -453,6 +453,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 
 		controler = new Controler(cs, initContextes, 5 * 1000, controlerState);
 		controler.setDaemon(true);
+		controler.setName("Controller");
 		controler.setPriority(Thread.MIN_PRIORITY);
 
 		boolean disabled = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar(SystemUtil.SETTING_CONTROLLER_DISABLED, null), false);

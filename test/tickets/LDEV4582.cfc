@@ -3,7 +3,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 	function beforeAll(){
 		variables.uri = createURI("LDEV4582");
 		variables.logDir = getDirectoryFromPath(getCurrentTemplatepath()) & "LDEV4582#server.separator.file#logs";
-		systemOutput( "", true);
+		//systemOutput( "", true);
 		cleanup();
 	}
 

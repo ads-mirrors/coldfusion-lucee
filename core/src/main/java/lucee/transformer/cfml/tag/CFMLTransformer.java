@@ -343,27 +343,28 @@ public final class CFMLTransformer {
 	 * @throws TemplateException
 	 */
 	public void body(Data data, Body body) throws TemplateException {
-		boolean parseLiteral = true;
+		do {
+			boolean parseLiteral = true;
 
-		// Comment
-		comment(data.srcCode, false);
-		// Tag
-		// is Tag Beginning
-		if (data.srcCode.isCurrent('<')) {
-			// return if end tag and inside tag
-			if (data.srcCode.isNext('/')) {
-				// lucee.print.ln("early return");
-				return;
+			// Comment
+			comment(data.srcCode, false);
+			// Tag
+			// is Tag Beginning
+			if (data.srcCode.isCurrent('<')) {
+				// return if end tag and inside tag
+				if (data.srcCode.isNext('/')) {
+					// lucee.print.ln("early return");
+					return;
+				}
+				parseLiteral = !tag(data, body);
 			}
-			parseLiteral = !tag(data, body);
+			// no Tag
+			if (parseLiteral) {
+				literal(data, body);
+			}
+			// not at the end
 		}
-		// no Tag
-		if (parseLiteral) {
-			literal(data, body);
-		}
-		// not at the end
-
-		if (!done && data.srcCode.isValidIndex()) body(data, body);
+		while (!done && data.srcCode.isValidIndex());
 	}
 
 	/**

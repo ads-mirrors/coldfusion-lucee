@@ -18,45 +18,45 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
             });
 			it( title='Checking datasource session expiry, timezone UTC',skip=isMySqlNotSupported(),body=function( currentSpec ) {
 				var remainingSessions = testSessionTimezone( "UTC", "datasource" );
-				dumpResult( remainingSessions, "UTC" );
+				//dumpResult( remainingSessions, "UTC" );
 				expect( remainingSessions.recordcount ).toBe( 0 );
 			});
 
 			it( title='Checking datasource session expiry, timezone PDT -7',skip=isMySqlNotSupported(),body=function( currentSpec ) {
 				var remainingSessions = testSessionTimezone( "PDT", "datasource" );
-				dumpResult( remainingSessions, "PDT" );
+				//dumpResult( remainingSessions, "PDT" );
 				expect( remainingSessions.recordcount ).toBe( 0 );
 			});
 
 			it( title='Checking datasource session expiry, timezone AEST +10',skip=isMySqlNotSupported(),body=function( currentSpec ) {
 				var remainingSessions = testSessionTimezone( "AEST", "datasource" );
-				dumpResult( remainingSessions, "AEST" );
+				//dumpResult( remainingSessions, "AEST" );
 
 				expect( remainingSessions.recordcount ).toBe( 0 );
 			});
 
 			it( title='Checking memory session expiry, timezone UTC', body=function( currentSpec ) {
 				var remainingSessions = testSessionTimezone( "UTC", "memory" );
-				dumpResult( remainingSessions, "UTC" );
+				//dumpResult( remainingSessions, "UTC" );
 				expect( remainingSessions.recordcount ).toBe( 0 );
 			});
 
 			it( title='Checking memory session expiry, timezone PDT -7', body=function( currentSpec ) {
 				var remainingSessions = testSessionTimezone( "PDT", "memory" );
-				dumpResult( remainingSessions, "PDT" );
+				//dumpResult( remainingSessions, "PDT" );
 				expect( remainingSessions.recordcount ).toBe( 0 );
 			});
 
 			it( title='Checking memory session expiry, timezone Europe/Berlin +1', body=function( currentSpec ) {
 				var remainingSessions = testSessionTimezone( "Europe/Berlin", "memory" );
-				dumpResult( remainingSessions, "Europe/Berlin" );
+				//dumpResult( remainingSessions, "Europe/Berlin" );
 
 				expect( remainingSessions.recordcount ).toBe( 0 );
 			});
 
 			it( title='Checking memory session expiry, timezone AEST +10', body=function( currentSpec ) {
 				var remainingSessions = testSessionTimezone( "AEST", "memory" );
-				dumpResult( remainingSessions, "AEST" );
+				//dumpResult( remainingSessions, "AEST" );
 
 				expect( remainingSessions.recordcount ).toBe( 0 );
 			});
@@ -65,9 +65,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 	}
 
 	private query function testSessionTimezone( required string timezone, required string sessionStorageType ){
-		systemOutput( "  ", true );
+		//systemOutput( "  ", true );
 
-		systemOutput(">>>>> testSessionTimezone #arguments.timezone# / #arguments.sessionStorageType# ----- ", true);
+		//systemOutput(">>>>> testSessionTimezone #arguments.timezone# / #arguments.sessionStorageType# ----- ", true);
 		if ( arguments.sessionStorageType == "datasource" ) {
 			var result = testSession("first cleanout sessions table",{
 				action: "purge",
@@ -76,7 +76,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 				sessionStorageType: arguments.sessionStorageType
 			});
 		}
-		systemoutput("purgeExpiredSessions", true);
+		//systemoutput("purgeExpiredSessions", true);
 		admin
 			action="purgeExpiredSessions"
 			type="server"
@@ -123,7 +123,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 		// now let the session expire, session expiry is 1s
 		sleep( 1001 );
 
-		systemoutput("purgeExpiredSessions", true);
+		//systemoutput("purgeExpiredSessions", true);
 		admin
 			action="purgeExpiredSessions"
 			type="server"
@@ -166,7 +166,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 	}
 
 	private any function testSession ( required string name, required struct args, struct session={} ){
-		systemOutput( "----  #arguments.name# ----- ", true );
+		//systemOutput( "----  #arguments.name# ----- ", true );
 		var uri = createURI("LDEV4670");
 		var cookies = {};
 		if ( structCount( arguments.session ) ){
@@ -185,7 +185,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 		);
 
 		//systemOutput(result, true);
-		systemOutput( deserializeJson( result.filecontent ), true );
+		// systemOutput( deserializeJson( result.filecontent ), true );
 		//systemOutput(deserializeJson(result.filecontent, false), true);
 		return result;
 	}

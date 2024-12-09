@@ -1,0 +1,1 @@
+<cfoutput>#urlDecode(getPageContext().getRequest().getQueryString())#</cfoutput>

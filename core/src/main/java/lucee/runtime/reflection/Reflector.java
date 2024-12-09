@@ -46,7 +46,6 @@ import lucee.commons.lang.types.RefInteger;
 import lucee.runtime.Component;
 import lucee.runtime.JF;
 import lucee.runtime.PageContext;
-import lucee.runtime.config.Constants;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.ExpressionException;
@@ -54,10 +53,8 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.exp.SecurityException;
 import lucee.runtime.functions.conversion.DeserializeJSON;
-import lucee.runtime.java.JavaObject;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
-import lucee.runtime.op.Duplicator;
 import lucee.runtime.op.OpUtil;
 import lucee.runtime.reflection.pairs.ConstructorInstance;
 import lucee.runtime.reflection.pairs.MethodInstance;
@@ -91,7 +88,6 @@ import lucee.transformer.dynamic.meta.Method;
 public final class Reflector {
 
 	private static final Collection.Key SET_ACCESSIBLE = KeyConstants._setAccessible;
-	private static final Collection.Key EXIT = KeyConstants._exit;
 
 	private static WeakConstructorStorage cStorage = new WeakConstructorStorage();
 	private static WeakFieldStorage fStorage = new WeakFieldStorage();
@@ -621,20 +617,24 @@ public final class Reflector {
 		}
 	}
 
-	public static ConstructorInstance getConstructorInstance(Class clazz, Object[] args) {
-		return new ConstructorInstance(clazz, args);
+	public static ConstructorInstance getConstructorInstance(Class clazz, Object[] args, boolean exactMatchOnly) {
+		return new ConstructorInstance(clazz, args, !exactMatchOnly);
 	}
 
-	public static ConstructorInstance getConstructorInstance(Class clazz, Object[] args, boolean exactMatchOnly) {
-		// TODO exactMatchOnly
-		return new ConstructorInstance(clazz, args);
-	}
+	static int count = 0;
 
 	public static Object[] cleanArgs(Object[] args) {
 		if (args == null) {
 			return new Object[0];
 		}
+		return args;
 
+	}
+
+	public static Object[] cleanArgsOld(Object[] args) {
+		if (args == null) {
+			return new Object[0];
+		}
 		boolean digg = false;
 		for (int i = 0; i < args.length; i++) {
 			if (args[i] instanceof ObjectWrap) {
@@ -660,13 +660,9 @@ public final class Reflector {
 		done.add(obj);
 		try {
 			if (obj instanceof ObjectWrap) {
-
 				return ((ObjectWrap) obj).getEmbededObject(obj);
 			}
 			if (obj instanceof Collection) return _clean(done, (Collection) obj);
-			// if (obj instanceof Map) return _clean(done, (Map) obj);
-			// if (obj instanceof List) return _clean(done, (List) obj);
-			// if (obj instanceof Object[]) return _clean(done, (Object[]) obj);
 		}
 		finally {
 			done.remove(obj);
@@ -688,6 +684,7 @@ public final class Reflector {
 		if (!change) return coll;
 
 		coll = coll.duplicate(false);
+
 		Iterator<Entry<Key, Object>> eit = coll.entryIterator();
 		Entry<Key, Object> e;
 		while (eit.hasNext()) {
@@ -697,104 +694,8 @@ public final class Reflector {
 		return coll;
 	}
 
-	private static Object _clean(ObjectIdentityHashSet done, Map map) {
-		Iterator vit = map.values().iterator();
-		Object v;
-		boolean change = false;
-		while (vit.hasNext()) {
-			v = vit.next();
-			if (v != _clean(done, v)) {
-				change = true;
-				break;
-			}
-		}
-		if (!change) return map;
-
-		map = Duplicator.duplicateMap(map, false);
-		Iterator<Entry> eit = map.entrySet().iterator();
-		Entry e;
-		while (eit.hasNext()) {
-			e = eit.next();
-			map.put(e.getKey(), _clean(done, e.getValue()));
-		}
-
-		return map;
-	}
-
-	private static Object _clean(ObjectIdentityHashSet done, List list) {
-		Iterator it = list.iterator();
-		Object v;
-		boolean change = false;
-		while (it.hasNext()) {
-			v = it.next();
-			if (v != _clean(done, v)) {
-				change = true;
-				break;
-			}
-		}
-		if (!change) return list;
-
-		list = Duplicator.duplicateList(list, false);
-		it = list.iterator();
-		while (it.hasNext()) {
-			list.add(_clean(done, it.next()));
-		}
-
-		return list;
-	}
-
-	private static Object _clean(ObjectIdentityHashSet done, Object[] src) {
-		boolean change = false;
-		for (int i = 0; i < src.length; i++) {
-			if (src[i] != _clean(done, src[i])) {
-				change = true;
-				break;
-			}
-		}
-		if (!change) return src;
-
-		Object[] trg = new Object[src.length];
-		for (int i = 0; i < trg.length; i++) {
-			trg[i] = _clean(done, src[i]);
-		}
-
-		return trg;
-	}
-
-	public static MethodInstance getMethodInstance(Class clazz, final Collection.Key methodName, Object[] args) {
-		return new MethodInstance(clazz, methodName, args);
-	}
-
-	public static MethodInstance getMethodInstanceValidateX(Class clazz, Collection.Key methodName, Object[] args) throws NoSuchMethodException {
-		MethodInstance mi = getMethodInstance(clazz, methodName, args);
-		if (mi.hasMethod()) return mi;
-
-		Class[] classes = getClasses(args);
-		// StringBuilder sb=null;
-		JavaObject jo;
-		Class c;
-		lucee.transformer.dynamic.meta.Constructor cc;
-		for (int i = 0; i < classes.length; i++) {
-			if (args[i] instanceof JavaObject) {
-				jo = (JavaObject) args[i];
-				c = jo.getClazz();
-				cc = Reflector.getConstructorInstance(c, new Object[0], true).getConstructor(null);
-				if (cc == null) {
-
-					throw new NoSuchMethodException("The " + pos(i + 1) + " parameter of " + methodName + "(" + getDspMethods(classes) + ") ia an object created "
-							+ "by the createObject function (JavaObject/JavaProxy). This object has not been instantiated because it does not have a constructor "
-							+ "that takes zero arguments. " + Constants.NAME
-							+ " cannot instantiate it for you, please use the .init(...) method to instantiate it with the correct parameters first");
-
-				}
-			}
-		}
-		/*
-		 * the argument list contains objects created by createObject, that are no instantiated
-		 * (first,third,10th) and because this object have no constructor taking no arguments, Lucee cannot
-		 * instantiate them. you need first to instantiate this objects.
-		 */
-		throw new NoSuchMethodException("No matching Method for " + methodName + "(" + getDspMethods(classes) + ") found for " + Caster.toTypeName(clazz));
+	public static MethodInstance getMethodInstance(Class clazz, final Collection.Key methodName, Object[] args, boolean exactMatchOnly) {
+		return new MethodInstance(clazz, methodName, args, !exactMatchOnly);
 	}
 
 	public static String pos(int index) {
@@ -929,7 +830,7 @@ public final class Reflector {
 	 */
 	public static Object callConstructor(Class clazz, Object[] args) throws PageException {
 		try {
-			return getConstructorInstance(clazz, args).invoke();
+			return getConstructorInstance(clazz, args, false).invoke();
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);
@@ -938,7 +839,7 @@ public final class Reflector {
 
 	public static Object callConstructor(Class clazz, Object[] args, Object defaultValue) {
 		try {
-			ConstructorInstance ci = getConstructorInstance(clazz, args);
+			ConstructorInstance ci = getConstructorInstance(clazz, args, false);
 			if (ci.getConstructor(null) == null) return defaultValue;
 			return ci.invoke();
 		}
@@ -965,7 +866,7 @@ public final class Reflector {
 			throw new ExpressionException("can't call method [" + methodName + "] on object, object is null");
 		}
 
-		MethodInstance mi = getMethodInstance(obj.getClass(), methodName, args);
+		MethodInstance mi = getMethodInstance(obj.getClass(), methodName, args, false);
 		// if (!mi.hasMethod()) throw throwCall(obj, methodName.getString(), args);
 		try {
 			return mi.invoke(obj);
@@ -976,17 +877,17 @@ public final class Reflector {
 	}
 
 	public static boolean hasMethod(Class<?> clazz, String methodName, Object[] args) {
-		MethodInstance mi = getMethodInstance(clazz, KeyImpl.init(methodName), args);
+		MethodInstance mi = getMethodInstance(clazz, KeyImpl.init(methodName), args, false);
 		return mi.hasMethod();
 	}
 
 	public static boolean hasMethod(Class<?> clazz, Collection.Key methodName, Object[] args) {
-		MethodInstance mi = getMethodInstance(clazz, methodName, args);
+		MethodInstance mi = getMethodInstance(clazz, methodName, args, false);
 		return mi.hasMethod();
 	}
 
 	public static void checkAccessibility(Class clazz, Key methodName) {
-		if (methodName.equals(EXIT) && (clazz == System.class || clazz == Runtime.class)) { // TODO better implementation
+		if (methodName.equals(KeyConstants._exit) && (clazz == System.class || clazz == Runtime.class)) { // TODO better implementation
 			throw new PageRuntimeException(new SecurityException("Calling the exit method is not allowed"));
 		}
 	}
@@ -1006,7 +907,7 @@ public final class Reflector {
 		}
 		// checkAccesibility(obj,methodName);
 
-		MethodInstance mi = getMethodInstance(obj.getClass(), methodName, args);
+		MethodInstance mi = getMethodInstance(obj.getClass(), methodName, args, false);
 		if (!mi.hasMethod()) return defaultValue;
 		try {
 			return mi.invoke(obj);
@@ -1039,7 +940,7 @@ public final class Reflector {
 	 */
 	public static Object callStaticMethod(Class clazz, Collection.Key methodName, Object[] args) throws PageException {
 		try {
-			return getMethodInstance(clazz, methodName, args).invoke(null);
+			return getMethodInstance(clazz, methodName, args, false).invoke(null);
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);
@@ -1057,11 +958,11 @@ public final class Reflector {
 	 */
 	public static MethodInstance getGetter(Class clazz, String prop) throws PageException, NoSuchMethodException {
 		String getterName = "get" + StringUtil.ucFirst(prop);
-		MethodInstance mi = getMethodInstance(clazz, KeyImpl.init(getterName), ArrayUtil.OBJECT_EMPTY);
+		MethodInstance mi = getMethodInstance(clazz, KeyImpl.init(getterName), ArrayUtil.OBJECT_EMPTY, false);
 
 		if (!mi.hasMethod()) {
 			String isName = "is" + StringUtil.ucFirst(prop);
-			mi = getMethodInstance(clazz, KeyImpl.init(isName), ArrayUtil.OBJECT_EMPTY);
+			mi = getMethodInstance(clazz, KeyImpl.init(isName), ArrayUtil.OBJECT_EMPTY, false);
 			if (mi.hasMethod()) {
 				lucee.transformer.dynamic.meta.Method m = mi.getMethod();
 				Class rtn = m.getReturnClass();
@@ -1087,7 +988,7 @@ public final class Reflector {
 	 */
 	public static MethodInstance getGetterEL(Class clazz, String prop) {
 		prop = "get" + StringUtil.ucFirst(prop);
-		MethodInstance mi = getMethodInstance(clazz, KeyImpl.init(prop), ArrayUtil.OBJECT_EMPTY);
+		MethodInstance mi = getMethodInstance(clazz, KeyImpl.init(prop), ArrayUtil.OBJECT_EMPTY, false);
 		if (!mi.hasMethod()) return null;
 		try {
 			if (mi.getMethod().getReturnClass() == void.class) return null;
@@ -1130,7 +1031,7 @@ public final class Reflector {
 	 */
 	public static MethodInstance getSetter(Object obj, String prop, Object value) throws PageException {
 		prop = "set" + StringUtil.ucFirst(prop);
-		MethodInstance mi = getMethodInstance(obj.getClass(), KeyImpl.init(prop), new Object[] { value });
+		MethodInstance mi = getMethodInstance(obj.getClass(), KeyImpl.init(prop), new Object[] { value }, false);
 		lucee.transformer.dynamic.meta.Method m = mi.getMethod();
 
 		if (m.getReturnClass() != void.class)
@@ -1148,7 +1049,7 @@ public final class Reflector {
 	 */
 	public static MethodInstance getSetter(Object obj, String prop, Object value, MethodInstance defaultValue) {
 		prop = "set" + StringUtil.ucFirst(prop);
-		MethodInstance mi = getMethodInstance(obj.getClass(), KeyImpl.init(prop), new Object[] { value });
+		MethodInstance mi = getMethodInstance(obj.getClass(), KeyImpl.init(prop), new Object[] { value }, false);
 		lucee.transformer.dynamic.meta.Method m;
 		if ((m = mi.getMethod(null)) == null) return defaultValue;
 

@@ -77,7 +77,7 @@ public class ScopeUtil {
 		for (int x = 0; x < itemsArr.length; x++) {
 			items = itemsArr[x];
 			encoding = encodings[x];
-			if (ReqRspUtil.needEncoding(name, false)) encName = ReqRspUtil.encode(name, encoding);
+			if (ReqRspUtil.needEncoding(name)) encName = ReqRspUtil.encode(name, encoding);
 			else encName = null;
 			for (int i = 0; i < items.length; i++) {
 				n = items[i].getName();

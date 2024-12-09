@@ -145,7 +145,9 @@ public final class XMLUtil {
 	private static boolean disableXmlFeatureOverride = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.xmlfeatures.override.disable", "false"), false);
 
 	private static Class<DocumentBuilderFactory> dbf;
+	private static Class<TransformerFactory> tf;
 	private static boolean initDbf = false;
+	private static boolean initTf = false;
 
 	private static URL documentBuilderFactoryResource;
 
@@ -249,31 +251,59 @@ public final class XMLUtil {
 	}
 
 	private static TransformerFactory _newTransformerFactory() {
-
-		Thread.currentThread().setContextClassLoader(EnvClassLoader.getInstance((ConfigPro) ThreadLocalPageContext.getConfig()));
-		TransformerFactory factory = null;
-		Class clazz = null;
-		try {
-			clazz = ClassUtil.loadClass("com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
-		}
-		catch (Exception e) {
-			try {
-				clazz = ClassUtil.loadClass("org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
-			}
-			catch (Exception ee) {
-			}
-		}
+		Class<TransformerFactory> clazz = _newTransformerFactoryClass();
 		if (clazz != null) {
 			try {
-				factory = (TransformerFactory) ClassUtil.loadInstance(clazz);
+				return (TransformerFactory) ClassUtil.loadInstance(clazz);
 			}
-			catch (Exception e) {
+			catch (Throwable t) {
+				ExceptionUtil.rethrowIfNecessary(t);
+				LogUtil.log(Log.LEVEL_DEBUG, "application", "xml", ExceptionUtil.getStacktrace(t, true));
 			}
 		}
-		if (factory == null) return factory = TransformerFactory.newInstance();
-		LogUtil.log(Log.LEVEL_INFO, "application", "xml", factory.getClass().getName() + " is used as TransformerFactory");
+		return TransformerFactory.newInstance();
+	}
 
-		return factory;
+	private static Class<TransformerFactory> _newTransformerFactoryClass() {
+		if (!initTf) {
+			synchronized (SystemUtil.createToken("XMLUtil", "newDocumentBuilderFactoryClass")) {
+				if (!initTf) {
+
+					Thread.currentThread().setContextClassLoader(EnvClassLoader.getInstance((ConfigPro) ThreadLocalPageContext.getConfig()));
+					Class<TransformerFactory> clazz = null;
+
+					try {
+						Class c = ClassUtil.loadClass("com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
+						ClassUtil.loadInstance(clazz); // make sure we can also load it
+						clazz = c;
+					}
+					catch (Throwable t) {
+						ExceptionUtil.rethrowIfNecessary(t);
+						LogUtil.log(Log.LEVEL_DEBUG, "application", "xml", ExceptionUtil.getStacktrace(t, true));
+					}
+
+					if (clazz == null) {
+						try {
+							Class c = ClassUtil.loadClass("org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
+							ClassUtil.loadInstance(clazz); // make sure we can also load it
+							clazz = c;
+						}
+						catch (Throwable t) {
+							ExceptionUtil.rethrowIfNecessary(t);
+							LogUtil.log(Log.LEVEL_DEBUG, "application", "xml", ExceptionUtil.getStacktrace(t, true));
+						}
+					}
+
+					initTf = true; // we only try once to load it, because this comes from the main classloader that will not change
+									// his mind
+					if (clazz != null) {
+						tf = clazz;
+						LogUtil.log(Log.LEVEL_INFO, "application", "xml", clazz.getName() + " is used as DocumentBuilderFactory");
+					}
+				}
+			}
+		}
+		return tf;
 	}
 
 	public static final Document parse(InputSource xml, InputSource validator, boolean isHtml) throws SAXException, IOException {
@@ -437,12 +467,6 @@ public final class XMLUtil {
 		return value; // TODO better impl, still used?
 	}
 
-	public static String getDocumentBuilderFactoryName() {
-		Class<DocumentBuilderFactory> clazz = _newDocumentBuilderFactoryClass();
-		if (clazz != null) return clazz.getName();
-		return DocumentBuilderFactory.newInstance().getClass().getName();
-	}
-
 	public static URL getDocumentBuilderFactoryResource() throws IOException {
 		if (documentBuilderFactoryResource == null) {
 			String name = getDocumentBuilderFactoryName();
@@ -453,20 +477,25 @@ public final class XMLUtil {
 		return documentBuilderFactoryResource;
 	}
 
+	public static String getDocumentBuilderFactoryName() {
+		DocumentBuilderFactory factory = _newDocumentBuilderFactory();
+		if (factory != null) return factory.getClass().getName();
+		return DocumentBuilderFactory.newInstance().getClass().getName();
+	}
+
 	// used by xmlbuilder! do nt change
 	private static DocumentBuilderFactory _newDocumentBuilderFactory() {
 		Class<DocumentBuilderFactory> clazz = _newDocumentBuilderFactoryClass();
-		DocumentBuilderFactory factory = null;
 		if (clazz != null) {
 			try {
-				factory = (DocumentBuilderFactory) ClassUtil.loadInstance(clazz);
+				return (DocumentBuilderFactory) ClassUtil.loadInstance(clazz);
 			}
-			catch (Exception e) {
-				LogUtil.log(Log.LEVEL_DEBUG, "application", "xml", ExceptionUtil.getStacktrace(e, true));
+			catch (Throwable t) {
+				ExceptionUtil.rethrowIfNecessary(t);
+				LogUtil.log(Log.LEVEL_DEBUG, "application", "xml", ExceptionUtil.getStacktrace(t, true));
 			}
 		}
-		if (factory == null) factory = DocumentBuilderFactory.newInstance();
-		return factory;
+		return DocumentBuilderFactory.newInstance();
 	}
 
 	private static Class<DocumentBuilderFactory> _newDocumentBuilderFactoryClass() {
@@ -476,20 +505,29 @@ public final class XMLUtil {
 
 					Thread.currentThread().setContextClassLoader(EnvClassLoader.getInstance((ConfigPro) ThreadLocalPageContext.getConfig()));
 					Class<DocumentBuilderFactory> clazz = null;
+
 					try {
 						Class c = ClassUtil.loadClass("com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl");
-						// ClassUtil.loadInstance(clazz); // make sure we can also load it
+						ClassUtil.loadInstance(clazz); // make sure we can also load it
 						clazz = c;
 					}
-					catch (Exception e) {
+					catch (Throwable t) {
+						ExceptionUtil.rethrowIfNecessary(t);
+						LogUtil.log(Log.LEVEL_DEBUG, "application", "xml", ExceptionUtil.getStacktrace(t, true));
+					}
+
+					if (clazz == null) {
 						try {
 							Class c = ClassUtil.loadClass("org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl");
-							// ClassUtil.loadInstance(clazz); // make sure we can also load it
+							ClassUtil.loadInstance(clazz); // make sure we can also load it
 							clazz = c;
 						}
-						catch (Exception ee) {
+						catch (Throwable t) {
+							ExceptionUtil.rethrowIfNecessary(t);
+							LogUtil.log(Log.LEVEL_DEBUG, "application", "xml", ExceptionUtil.getStacktrace(t, true));
 						}
 					}
+
 					initDbf = true; // we only try once to load it, because this comes from the main classloader that will not change
 									// his mind
 					if (clazz != null) {
@@ -529,19 +567,25 @@ public final class XMLUtil {
 		try {
 			return XMLReaderFactory.createXMLReader("com.sun.org.apache.xerces.internal.parsers.SAXParser");
 		}
-		catch (Exception e) {
+		catch (Throwable t) {
+			ExceptionUtil.rethrowIfNecessary(t);
+			LogUtil.log(Log.LEVEL_DEBUG, "application", "xml", ExceptionUtil.getStacktrace(t, true));
 		}
 
 		try {
 			return XMLReaderFactory.createXMLReader("org.apache.xerces.internal.parsers.SAXParser");
 		}
-		catch (Exception ee) {
+		catch (Throwable t) {
+			ExceptionUtil.rethrowIfNecessary(t);
+			LogUtil.log(Log.LEVEL_DEBUG, "application", "xml", ExceptionUtil.getStacktrace(t, true));
 		}
 
 		try {
 			return XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
 		}
-		catch (Exception ee) {
+		catch (Throwable t) {
+			ExceptionUtil.rethrowIfNecessary(t);
+			LogUtil.log(Log.LEVEL_DEBUG, "application", "xml", ExceptionUtil.getStacktrace(t, true));
 		}
 
 		try {

@@ -58,7 +58,7 @@ public abstract class StorageScopeFile extends StorageScopeImpl {
 	 * @param sct
 	 */
 	protected StorageScopeFile(PageContext pc, Resource res, String strType, int type, Struct sct) {
-		super(sct == null ? (sct = new StructImpl()) : sct, doNowIfNull(pc, Caster.toDate(sct.get(TIMECREATED, null), false, pc.getTimeZone(), null)),
+		super(sct == null ? (sct = new StructImpl(Struct.TYPE_SYNC)) : sct, doNowIfNull(pc, Caster.toDate(sct.get(TIMECREATED, null), false, pc.getTimeZone(), null)),
 				doNowIfNull(pc, Caster.toDate(sct.get(LASTVISIT, null), false, pc.getTimeZone(), null)), -1,
 				type == SCOPE_CLIENT ? Caster.toIntValue(sct.get(HITCOUNT, "1"), 1) : 0, strType, type);
 

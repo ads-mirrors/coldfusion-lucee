@@ -22,10 +22,13 @@ package lucee.runtime.engine;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
+import lucee.aprint;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
@@ -134,10 +137,12 @@ public final class Controler extends ParentThreasRefThread {
 	public void run() {
 		// scheduleThread.start();
 		boolean firstRun = true;
+		boolean dump = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.dump.threads", null), false);
+		long count = 0;
 		List<ControlerThread> threads = new ArrayList<ControlerThread>();
 		CFMLFactoryImpl factories[] = null;
 		while (state.active()) {
-
+			if (dump) dumpThreads();
 			// sleep
 			SystemUtil.wait(this, interval);
 			if (!state.active()) break;
@@ -145,6 +150,7 @@ public final class Controler extends ParentThreasRefThread {
 			factories = toFactories(factories, contextes);
 			// start the thread that calls control
 			ControlerThread ct = new ControlerThread(this, factories, firstRun, configServer.getLog("application"));
+			ct.setName("ControllerThread:" + (++count));
 			ct.start();
 			threads.add(ct);
 
@@ -187,6 +193,17 @@ public final class Controler extends ParentThreasRefThread {
 			}
 			if (factories.length > 0) firstRun = false;
 		}
+	}
+
+	private static void dumpThreads() {
+		aprint.e("==================== THREAD DUMP " + new Date() + " ====================");
+		for (Entry<Thread, StackTraceElement[]> e: Thread.getAllStackTraces().entrySet()) {
+			aprint.e(e.getKey().getName() + ":" + e.getKey().getId() + " " + e.getKey().getState()); 
+			aprint.e(ExceptionUtil.getStacktrace(e.getValue()));
+			aprint.e("------------------------------------------------------------------");
+		}
+		aprint.e("==================================================================");
+
 	}
 
 	private void control(CFMLFactoryImpl[] factories, boolean firstRun, Log log) {

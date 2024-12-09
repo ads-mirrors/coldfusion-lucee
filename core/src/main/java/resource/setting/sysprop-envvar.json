@@ -368,5 +368,23 @@
         "sysprop": "lucee.template.charset",
         "envvar": "LUCEE_TEMPLATE_CHARSET",
         "desc": ""
+    },
+    {
+        "sysprop": "lucee.url.encodeAllowPlus",
+        "envvar": "LUCEE_URL_ENCODEALLOWPLUS",
+        "desc": "Lucee before 6.2 would attempt to re-encode a url param which contained a space. If the url param was already encoded, it would trigger re-encoding the param again, breaking it. This was avoidable previously by using cfhttp encodeurl=false, set to false to enable previous behaviour"
+    },
+    {
+        "sysprop": "lucee.dump.threads",
+        "envvar": "LUCEE_DUMP_THREADS",
+        "desc": "Used for debugging, when enabled, it will dump out running threads to the console via the background controller thread"
+        "sysprop": "lucee.scope.local.capacity",
+        "envvar": "LUCEE_SCOPE_LOCAL_CAPACITY",
+        "desc": "Sets the initial capacity (size) for the local scope hashmap"
+    },
+    {
+        "sysprop": "lucee.scope.arguments.capacity",
+        "envvar": "LUCEE_SCOPE_ARGUMENTS_CAPACITY",
+        "desc": "Sets the initial capacity (size) for the arguments scope hashmap"
     }
 ]

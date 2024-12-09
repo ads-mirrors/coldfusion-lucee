@@ -429,7 +429,7 @@ public final class Types {
 	 * @return
 	 */
 	public static boolean isPrimitiveType(Type type) {
-		String className = type.getClassName();
+		String className = ASMUtil.getClassName(type);
 		if (className.indexOf('.') != -1) return false;
 
 		if ("boolean".equals(className)) return true;
@@ -445,7 +445,7 @@ public final class Types {
 	}
 
 	public static Type toRefType(Type type) {
-		String className = type.getClassName();
+		String className = ASMUtil.getClassName(type);
 		if (className.indexOf('.') != -1) return type;
 
 		if ("boolean".equals(className)) return BOOLEAN;
@@ -484,7 +484,7 @@ public final class Types {
 		 * ); }
 		 */
 		if (Types.BYTE_VALUE_ARRAY.equals(type)) return byte[].class;
-		return ClassUtil.loadClass(type.getClassName());
+		return ClassUtil.loadClass(ASMUtil.getClassName(type));
 	}
 
 }

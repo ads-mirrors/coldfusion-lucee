@@ -20,6 +20,7 @@ package lucee.runtime.type.scope.storage;
 
 import lucee.commons.io.log.Log;
 import lucee.runtime.PageContext;
+import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.dt.DateTimeImpl;
 import lucee.runtime.type.scope.ScopeContext;
@@ -39,7 +40,7 @@ public abstract class StorageScopeMemory extends StorageScopeImpl implements Mem
 	 * @param name
 	 */
 	protected StorageScopeMemory(PageContext pc, String strType, int type, Log log) {
-		super(new StructImpl(), new DateTimeImpl(pc.getConfig()), null, -1, 1, strType, type);
+		super(new StructImpl(Struct.TYPE_SYNC), new DateTimeImpl(pc.getConfig()), null, -1, 1, strType, type);
 		ScopeContext.debug(log, "create new memory based " + strType + " scope for " + pc.getApplicationContext().getName() + "/" + pc.getCFID());
 
 	}

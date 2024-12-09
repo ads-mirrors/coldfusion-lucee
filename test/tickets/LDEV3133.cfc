@@ -6,7 +6,7 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" labels="struct" {
 	function run ( testResults , testbox ){
 		describe("This testcase for LDEV-3133",function(){
 			it(title = "Create struct with structNew",body = function( currentSpec ){
-				animals=StructNew();
+				animals=StructNew("sync");
 				animals.Aardwolf="Proteles cristata";
 				animals.aardvark="Orycteropus afer";
 				animals.Alligator="Mississippiensis";

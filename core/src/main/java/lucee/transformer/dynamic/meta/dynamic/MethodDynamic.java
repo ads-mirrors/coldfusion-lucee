@@ -19,7 +19,7 @@ class MethodDynamic extends FunctionMemberDynamic implements Method {
 	@Override
 	public Object invoke(Object obj, Object... args) throws IOException {
 		// TODO is there a better way to do this?
-		MethodInstance mi = Reflector.getMethodInstance(getDeclaringClass(), KeyImpl.init(getName()), args);
+		MethodInstance mi = Reflector.getMethodInstance(getDeclaringClass(), KeyImpl.init(getName()), args, false);
 		try {
 			return mi.invoke(obj);
 		}

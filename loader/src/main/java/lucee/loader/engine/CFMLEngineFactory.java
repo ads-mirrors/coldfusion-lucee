@@ -681,7 +681,6 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 		catch (final InvocationTargetException e) {
 			log(e.getTargetException());
 			ServletException se = new ServletException(e.getTargetException());
-			se.initCause(e.getTargetException());
 			throw se;
 		}
 		catch (final Exception e) {

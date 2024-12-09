@@ -18,17 +18,24 @@
  **/
 package lucee.runtime.type.scope;
 
+import lucee.commons.io.SystemUtil;
 import lucee.runtime.PageContext;
+import lucee.runtime.op.Caster;
 import lucee.runtime.type.Struct;
 
 public final class LocalImpl extends ScopeSupport implements Scope, Local {
 
 	private static final long serialVersionUID = -7155406303949924403L;
 	private boolean bind;
+	private static int localInitialCapacity;
+
+	static {
+		localInitialCapacity = Caster.toIntValue(SystemUtil.getSystemPropOrEnvVar("lucee.scope.local.capacity", "16"), 16);
+	}
 
 	public LocalImpl() {
 		// super("local", Scope.SCOPE_LOCAL, Struct.TYPE_SYNC, 4);
-		super("local", Scope.SCOPE_LOCAL, Struct.TYPE_REGULAR, 4);
+		super("local", Scope.SCOPE_LOCAL, Struct.TYPE_REGULAR, localInitialCapacity);
 	}
 
 	@Override

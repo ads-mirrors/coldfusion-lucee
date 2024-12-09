@@ -252,6 +252,9 @@
       <mkdir dir="${temp}/loader/extensions/"/>
     </target> 
 
+  <!--
+    MARK: Prepare Core
+  -->
   <target name="copyDeployFiles" depends="init,check" description="copy files from source/cfml to source/java/core/src/resource">
     <echots message="copying files from ${srcCFML} and ${srcCore}/resource to ${tmpContext}/cfml"/>
 
@@ -384,7 +387,9 @@
     <currentTime property="ct" />
     <echo file="${temp}/loader/lucee/version" message="${version}:${ct}" encoding="UTF-8"/>
   </target>
-
+  <!--
+    MARK: Compile Java 11
+  -->
   <!-- temporary disbled: depends="_loader,java17core,java21core" -->
   <target name="_core" depends="_loader" description="compile the source" >
     <echots message="compile core, java 11, (default)"/>
@@ -451,6 +456,9 @@
       <attribute name="Minor-Name-Explanation" value="${name.explanation}"/>-->
     </manifest>
   </target>
+  <!--
+    MARK: Compile Java 17
+  -->
 
   <target name="java17core" description="compile the source" if="hasJava17">
     <echots message="compile core, java 17"/>
@@ -474,7 +482,9 @@
     </javac>
 
   </target>
-
+  <!--
+    MARK: Compile Java 21
+  -->
   <target name="java21core" description="compile the source" if="hasJava21">
     <echots message="compile core, java 21"/>
     <!-- set the loader as classpath -->
@@ -518,7 +528,9 @@
 
 </target>
 
-
+<!--
+  MARK: Build Archives
+-->
 <target name="__build_archives" depends="buildJars,__extract_testbox">
     <!-- first we copy the jars in place otherwise, Lucee downloads them  -->
     <echots message="copy bundles in place"/>
@@ -580,7 +592,9 @@
     <unzip src="${temp}/testbox-${testboxVersion}.zip" dest="${temp}/testbox"/>
     <delete dir="${temp}/testbox-${testboxVersion}.zip"/>
 </target>
-
+<!--
+  MARK: Run Tests
+-->
 <target name="__build_testbox" if="testcases">
     <!-- optionally install test lucee extensions from a directory -->
     <deployTestExtensions
@@ -648,7 +662,9 @@
     </java>
     <outputTrimmedString str="${exc2}"/>
 </target>
-
+<!--
+  MARK: Upload to S3
+-->
 <target name="upload_to_s3">
     <jar 
       basedir="${outputDir}/" 
@@ -687,7 +703,9 @@
     <outputTrimmedString str="${exc3}"/>
 
 </target>
-
+<!--
+  MARK: Test Warm up
+-->
 <target name="test_warmup" if="testcases">
     <echots message="Testing LUCEE_ENABLE_WARMUP"/>
     <mkdir dir="${temp}/warmup"/>
@@ -709,6 +727,9 @@
     <echo level="info">${exc4}</echo>
 </target>
 
+<!-- MARK:
+  Stable Loader
+-->
 <target name="test_stable_loader">
     <!-- no we copy the extension in place otherwise, Lucee downloads them as well  -->
     <echots message="copy extensions in place"/>
@@ -759,7 +780,9 @@
     <copy file="${temp}/archive/lucee-admin.lar" tofile="${core}/resource/context/lucee-admin.lar"/> 
     <copy file="${temp}/archive/lucee-doc.lar" tofile="${core}/resource/context/lucee-doc.lar"/> 
   </target>
-
+  <!--
+  MARK: Felix
+  -->
   <target name="addFelix" if="buildLoaderJar">
     <echots message="copy the content of the felix jar to the classes folder"/>
     
@@ -808,7 +831,9 @@
   </target>
 
   <!-- temporary disabled: depends="createCore17,createCore21" -->
-
+  <!--
+    MARK: Create Core
+  -->
   <target name="createCore" >
     <echots message="build core .lco"/>
     <echots message="output dir ${outputDir}"/>

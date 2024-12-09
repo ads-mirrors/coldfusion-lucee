@@ -85,14 +85,14 @@ public class EnvClassLoader extends URLClassLoader {
 		if (trace == null) {
 			return (java.net.URL) load(name, URL, true, null, true);
 		}
-		double start = SystemUtil.millis();
-		try {
-			return (java.net.URL) load(name, URL, true, null, true);
-		}
-		finally {
-			trace.trace("EnvClassLoader", "EnvClassLoader.getResource(" + name + "):" + (SystemUtil.millis() - start));
-		}
-
+		// double start = SystemUtil.millis();
+		// try {
+		return (java.net.URL) load(name, URL, true, null, true);
+		// }
+		// finally {
+		// trace.trace("EnvClassLoader", "EnvClassLoader.getResource(" + name + "):" + (SystemUtil.millis()
+		// - start));
+		// }
 	}
 
 	@Override
@@ -100,13 +100,14 @@ public class EnvClassLoader extends URLClassLoader {
 		if (trace == null) {
 			return (InputStream) load(name, STREAM, true, null, true);
 		}
-		double start = SystemUtil.millis();
-		try {
-			return (InputStream) load(name, STREAM, true, null, true);
-		}
-		finally {
-			trace.trace("EnvClassLoader", "EnvClassLoader.getResourceAsStream(" + name + "):" + (SystemUtil.millis() - start));
-		}
+		// double start = SystemUtil.millis();
+		// try {
+		return (InputStream) load(name, STREAM, true, null, true);
+		// }
+		// finally {
+		// trace.trace("EnvClassLoader", "EnvClassLoader.getResourceAsStream(" + name + "):" +
+		// (SystemUtil.millis() - start));
+		// }
 	}
 
 	@Override
@@ -118,16 +119,17 @@ public class EnvClassLoader extends URLClassLoader {
 			if (url != null) list.add(url);
 			return new E<URL>(list.iterator());
 		}
-		double start = SystemUtil.millis();
-		try {
-			List<URL> list = new ArrayList<URL>();
-			URL url = (URL) load(name, URL, false, null, true);
-			if (url != null) list.add(url);
-			return new E<URL>(list.iterator());
-		}
-		finally {
-			trace.trace("EnvClassLoader", "EnvClassLoader.getResources(" + name + "):" + (SystemUtil.millis() - start));
-		}
+		// double start = SystemUtil.millis();
+		// try {
+		List<URL> list = new ArrayList<URL>();
+		URL url = (URL) load(name, URL, false, null, true);
+		if (url != null) list.add(url);
+		return new E<URL>(list.iterator());
+		// }
+		// finally {
+		// trace.trace("EnvClassLoader", "EnvClassLoader.getResources(" + name + "):" + (SystemUtil.millis()
+		// - start));
+		// }
 	}
 
 	@Override
@@ -139,17 +141,18 @@ public class EnvClassLoader extends URLClassLoader {
 			if (resolve) resolveClass(c);
 			return c;
 		}
-		double start = SystemUtil.millis();
-		try {
-			Class<?> c = findLoadedClass(name);
-			if (c == null) c = (Class<?>) load(name, CLASS, true, null, true);
-			if (c == null) c = findClass(name);
-			if (resolve) resolveClass(c);
-			return c;
-		}
-		finally {
-			trace.trace("EnvClassLoader", "EnvClassLoader.loadClass(" + name + "):" + (SystemUtil.millis() - start));
-		}
+		// double start = SystemUtil.millis();
+		// try {
+		Class<?> c = findLoadedClass(name);
+		if (c == null) c = (Class<?>) load(name, CLASS, true, null, true);
+		if (c == null) c = findClass(name);
+		if (resolve) resolveClass(c);
+		return c;
+		// }
+		// finally {
+		// trace.trace("EnvClassLoader", "EnvClassLoader.loadClass(" + name + "):" + (SystemUtil.millis() -
+		// start));
+		// }
 
 	}
 

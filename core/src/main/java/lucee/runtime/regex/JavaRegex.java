@@ -169,7 +169,7 @@ class JavaRegex implements Regex {
 	}
 
 	private Struct findEmpty() {
-		Struct sct = new StructImpl();
+		Struct sct = new StructImpl(StructImpl.TYPE_LINKED);
 		Array a = new ArrayImpl();
 		a.appendEL(ZERO);
 		sct.setEL(LEN, a);
@@ -183,7 +183,7 @@ class JavaRegex implements Regex {
 	}
 
 	private Struct toStruct(Matcher matcher, String input) {
-		Struct sct = new StructImpl();
+		Struct sct = new StructImpl(StructImpl.TYPE_LINKED);
 		Array lenArray = new ArrayImpl();
 		Array posArray = new ArrayImpl();
 		Array matchArray = new ArrayImpl();

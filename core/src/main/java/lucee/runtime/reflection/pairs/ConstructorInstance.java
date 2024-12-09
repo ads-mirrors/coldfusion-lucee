@@ -42,6 +42,7 @@ public final class ConstructorInstance {
 	private Class clazz;
 	private Object[] args;
 	private Pair<FunctionMember, Object> result;
+	private boolean convertComparsion;
 
 	/**
 	 * constructor of the class
@@ -49,9 +50,10 @@ public final class ConstructorInstance {
 	 * @param constructor
 	 * @param args
 	 */
-	public ConstructorInstance(Class clazz, Object[] args) {
+	public ConstructorInstance(Class clazz, Object[] args, boolean convertComparsion) {
 		this.clazz = clazz;
 		this.args = args;
+		this.convertComparsion = convertComparsion;
 	}
 
 	public Object invoke() throws PageException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException,
@@ -67,7 +69,7 @@ public final class ConstructorInstance {
 			boolean failed = false;
 			try {
 				DynamicInvoker di = DynamicInvoker.getExistingInstance();
-				lucee.transformer.dynamic.meta.Constructor constr = Clazz.getConstructorMatch(di.getClazz(clazz, true), args, true);
+				lucee.transformer.dynamic.meta.Constructor constr = Clazz.getConstructorMatch(di.getClazz(clazz, true), args, true, convertComparsion);
 				return ((LegacyConstuctor) constr).getConstructor().newInstance(args);
 			}
 			catch (IncompatibleClassChangeError | ClassFormatError | IllegalStateException ex) {
@@ -104,7 +106,7 @@ public final class ConstructorInstance {
 	private Pair<FunctionMember, Object> getResult() throws PageException {
 		if (result == null) {
 			try {
-				result = DynamicInvoker.getExistingInstance().createInstance(clazz, null, args);
+				result = DynamicInvoker.getExistingInstance().createInstance(clazz, null, args, convertComparsion);
 			}
 			catch (Exception e) {
 				throw Caster.toPageException(e);

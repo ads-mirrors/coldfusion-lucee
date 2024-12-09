@@ -368,7 +368,7 @@ public final class HTTPUtil {
 	}
 
 	public static String escapeQSValue(String str, boolean encodeOnlyWhenNecessary) {
-		if (encodeOnlyWhenNecessary && !ReqRspUtil.needEncoding(str, false)) return str;
+		if (encodeOnlyWhenNecessary && !ReqRspUtil.needEncoding(str)) return str;
 		PageContextImpl pc = (PageContextImpl) ThreadLocalPageContext.get();
 		if (pc != null) {
 			try {

@@ -343,7 +343,7 @@ public class InternalRequest implements Function {
 
 	private static String urlenc(String str, Charset charset) throws PageException {
 		try {
-			if (!ReqRspUtil.needEncoding(str, false)) return str;
+			if (!ReqRspUtil.needEncoding(str)) return str;
 			return URLEncoder.encode(str, charset);
 		}
 		catch (UnsupportedEncodingException uee) {

@@ -3,6 +3,7 @@ package lucee.runtime.ai;
 import java.util.ArrayList;
 import java.util.List;
 
+import lucee.runtime.exp.PageException;
 import lucee.runtime.functions.other.CreateUniqueId;
 
 public abstract class AISessionSupport implements AISession {
@@ -45,4 +46,8 @@ public abstract class AISessionSupport implements AISession {
 		return id;
 	}
 
+	@Override
+	public Response inquiry(String message) throws PageException {
+		return inquiry(message, null);
+	}
 }

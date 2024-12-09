@@ -19,9 +19,11 @@
 package lucee.runtime.engine;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.runtime.PageContext;
 import lucee.runtime.PageContextImpl;
@@ -342,6 +344,42 @@ public final class ThreadLocalPageContext {
 
 	public static TimeZone getTimeZone() {
 		return getTimeZone((PageContext) null);
+	}
+
+	public static ClassLoader getRPCClassLoader(PageContext pc, boolean reload) throws IOException {
+		// pc provided
+		if (pc != null) {
+			ClassLoader cl = ((PageContextImpl) pc).getRPCClassLoader(reload);
+			if (cl != null) return cl;
+			return SystemUtil.getCombinedClassLoader();
+		}
+		// pc from current thread
+		pc = pcThreadLocal.get();
+		if (pc != null) {
+			ClassLoader cl = ((PageContextImpl) pc).getRPCClassLoader();
+			if (cl != null) return cl;
+			return SystemUtil.getCombinedClassLoader();
+		}
+
+		// pc from parent thread
+		pc = pcThreadLocalInheritable.get();
+		if (pc != null) {
+			ClassLoader cl = ((PageContextImpl) pc).getRPCClassLoader();
+			if (cl != null) return cl;
+			return SystemUtil.getCombinedClassLoader();
+		}
+
+		// config
+		Config config = getConfig((Config) null);
+		if (config != null) {
+			ClassLoader cl = config.getRPCClassLoader(reload);
+			if (cl != null) return cl;
+		}
+		return SystemUtil.getCombinedClassLoader();
+	}
+
+	public static ClassLoader getRPCClassLoader(boolean reload) throws IOException {
+		return getRPCClassLoader((PageContext) null, reload);
 	}
 
 	public static int getId() {

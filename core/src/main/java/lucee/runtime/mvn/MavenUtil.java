@@ -26,13 +26,16 @@ import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
-import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.SerializableObject;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.net.HTTPUtil;
+import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.mvn.POMReader.Dependency;
+import lucee.runtime.op.Caster;
 import lucee.runtime.thread.ThreadUtil;
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 
 public class MavenUtil {
@@ -208,7 +211,7 @@ public class MavenUtil {
 		// dependencies.add(p);
 	}
 
-	static class GAVSO {
+	public static class GAVSO {
 		public final String g;
 		public final String a;
 		public final String v;
@@ -229,6 +232,30 @@ public class MavenUtil {
 			this.v = v;
 			this.s = s;
 			this.o = o;
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+
+			if (!StringUtil.isEmpty(g, true)) sb.append(g);
+			if (!StringUtil.isEmpty(a, true)) {
+				if (sb.length() > 0) sb.append(':');
+				sb.append(a);
+			}
+			if (!StringUtil.isEmpty(v, true)) {
+				if (sb.length() > 0) sb.append(':');
+				sb.append(v);
+			}
+			if (!StringUtil.isEmpty(s, true)) {
+				if (sb.length() > 0) sb.append(':');
+				sb.append(s);
+			}
+			if (!StringUtil.isEmpty(o, true)) {
+				if (sb.length() > 0) sb.append(':');
+				sb.append(o);
+			}
+			return sb.toString();
 		}
 	}
 
@@ -346,7 +373,7 @@ public class MavenUtil {
 						URL url = pom.getArtifact(type, repositories);
 						if (log != null) log.info("maven", "download [" + url + "]");
 						try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-							HttpGet request = new HttpGet(pom.getArtifact(type, repositories).toExternalForm());
+							HttpGet request = new HttpGet(url.toExternalForm());
 							HttpResponse response = httpClient.execute(request);
 							HttpEntity entity = response.getEntity();
 							int sc = response.getStatusLine().getStatusCode();
@@ -374,7 +401,7 @@ public class MavenUtil {
 						}
 					}
 					catch (IOException ioe) {
-						ResourceUtil.deleteEmptyFoldersInside(pom.getLocalDirectory());
+						// MUST add again ResourceUtil.deleteEmptyFoldersInside(pom.getLocalDirectory());
 						throw ioe;
 					}
 				}
@@ -443,4 +470,97 @@ public class MavenUtil {
 		}
 	}
 
+	public static GAVSO toGAVSO(Object obj, GAVSO defaultValue) {
+		Struct el = Caster.toStruct(obj, null);
+		if (el != null) {
+			String g = Caster.toString(el.get(KeyConstants._groupId, null), null);
+			if (StringUtil.isEmpty(g)) g = Caster.toString(el.get(KeyConstants._g, null), null);
+			String a = Caster.toString(el.get(KeyConstants._artifactId, null), null);
+			if (StringUtil.isEmpty(a)) a = Caster.toString(el.get(KeyConstants._a, null), null);
+
+			if (!StringUtil.isEmpty(g) && !StringUtil.isEmpty(a)) {
+				String v = Caster.toString(el.get(KeyConstants._version, null), null);
+				if (StringUtil.isEmpty(v)) v = Caster.toString(el.get(KeyConstants._v, null), null);
+				return new GAVSO(g, a,
+
+						v,
+
+						Caster.toString(el.get(KeyConstants._scope, null), null),
+
+						Caster.toString(el.get(KeyConstants._optional, null), null));
+			}
+			return defaultValue;
+		}
+		// gradle style?
+		String str = Caster.toString(obj, null);
+		if (!StringUtil.isEmpty(str)) {
+			String[] arr = ListUtil.listToStringArray(str, ':');
+			if (arr.length > 1 && arr.length < 6) {
+				return new GAVSO(
+
+						arr[0].trim(), // group
+
+						arr[1].trim(), // artifact
+
+						arr.length > 2 ? arr[2].trim() : null, // version
+
+						arr.length > 3 ? arr[3].trim() : null, // scope
+
+						arr.length > 4 ? arr[4].trim() : null // optional
+
+				);
+			}
+		}
+
+		return defaultValue;
+	}
+
+	public static GAVSO toGAVSO(Object obj) throws ApplicationException {
+		Struct el = Caster.toStruct(obj, null);
+		if (el != null) {
+			String g = Caster.toString(el.get(KeyConstants._groupId, null), null);
+			if (StringUtil.isEmpty(g)) g = Caster.toString(el.get(KeyConstants._g, null), null);
+			if (StringUtil.isEmpty(g)) throw new ApplicationException("Missing required field: groupId. Ensure that the 'groupId' key is present and not empty.");
+
+			String a = Caster.toString(el.get(KeyConstants._artifactId, null), null);
+			if (StringUtil.isEmpty(a)) a = Caster.toString(el.get(KeyConstants._a, null), null);
+			if (StringUtil.isEmpty(a)) throw new ApplicationException("Missing required field: artifactId. Ensure that the 'artifactId' key is present and not empty.");
+
+			String v = Caster.toString(el.get(KeyConstants._version, null), null);
+			if (StringUtil.isEmpty(v)) v = Caster.toString(el.get(KeyConstants._v, null), null);
+			if (StringUtil.isEmpty(v)) throw new ApplicationException("Missing required field: version. Ensure that the 'version' key is present and not empty.");
+
+			return new GAVSO(g, a, v,
+
+					Caster.toString(el.get(KeyConstants._scope, null), null),
+
+					Caster.toString(el.get(KeyConstants._optional, null), null));
+
+		}
+		// gradle style?
+		String str = Caster.toString(obj, null);
+		if (!StringUtil.isEmpty(str)) {
+			String[] arr = ListUtil.listToStringArray(str, ':');
+			if (arr.length > 1 && arr.length < 6) {
+				return new GAVSO(
+
+						arr[0].trim(), // group
+
+						arr[1].trim(), // artifact
+
+						arr.length > 2 ? arr[2].trim() : null, // version
+
+						arr.length > 3 ? arr[3].trim() : null, // scope
+
+						arr.length > 4 ? arr[4].trim() : null // optional
+
+				);
+			}
+			throw new ApplicationException("Invalid Maven data in string [" + str + "]. " + "Expected format: '<group>:<artifact>:<version>[:<scope>[:<optional>]]'.");
+		}
+		throw new ApplicationException("Unable to parse Maven data from the provided input of type [" + Caster.toTypeName(obj) + "]. " + "Supported formats are: "
+				+ "1) A Struct with keys 'groupId', 'artifactId', and 'version' (optionally 'scope' and 'optional'), or "
+				+ "2) A String in the format 'group:artifact:version[:scope[:optional]]'. " + "Ensure the input conforms to one of these formats.");
+
+	}
 }

@@ -68,6 +68,14 @@ public final class StructNew extends BIF {
 	}
 
 	public static int toType(String type) throws ApplicationException {
+		int res = toType(type, Struct.TYPE_UNDEFINED);
+		if (res == Struct.TYPE_UNDEFINED)
+			throw new ApplicationException("valid struct types are [normal, weak, linked, soft, synchronized,ordered-casesensitive,casesensitive,max:<number>]");
+		return res;
+	}
+
+	public static int toType(String type, int defaultValue) {
+		if (type == null) return defaultValue;
 		type = type.toLowerCase();
 		if (type.equals("linked")) return Struct.TYPE_LINKED;
 		else if (type.equals("ordered")) return Struct.TYPE_LINKED;
@@ -82,7 +90,7 @@ public final class StructNew extends BIF {
 		else if (type.equals("ordered-casesensitive")) return StructImpl.TYPE_LINKED_CASESENSITIVE;
 		else if (type.equals("casesensitive")) return StructImpl.TYPE_CASESENSITIVE;
 		else if (type.startsWith("max:")) return StructImpl.TYPE_MAX;
-		else throw new ApplicationException("valid struct types are [normal, weak, linked, soft, synchronized,ordered-casesensitive,casesensitive,max:<number>]");
+		else return defaultValue;
 
 	}
 

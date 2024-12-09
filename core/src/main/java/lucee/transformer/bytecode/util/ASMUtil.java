@@ -23,8 +23,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
@@ -1176,7 +1178,7 @@ public final class ASMUtil {
 		Method m = bc.getMethod();
 		Type[] types;
 		if (m != null && (types = m.getArgumentTypes()) != null && types.length > 0) {
-			firstIsPC = Reflector.isInstaneOf(types[0].getClassName(), PageContext.class);
+			firstIsPC = Reflector.isInstaneOf(ASMUtil.getClassName(types[0]), PageContext.class);
 		}
 		return firstIsPC;
 	}
@@ -1291,5 +1293,42 @@ public final class ASMUtil {
 
 	public static int getMaxVersion() {
 		return Opcodes.V24;
+	}
+
+	private static Map<Type, String> names = new HashMap<>();
+	private static Map<Type, String> descriptors = new HashMap<>();
+
+	public static String getClassName(Type type) {
+		String name = names.get(type);
+		if (name == null) {
+			names.put(type, name = type.getClassName());
+		}
+		return name;
+	}
+
+	public static String getDescriptor(Type type) {
+		String desc = descriptors.get(type);
+		if (desc == null) {
+			descriptors.put(type, desc = type.getDescriptor());
+		}
+		return desc;
+	}
+
+	/**
+	 * Validates the given byte array using the ASM library.
+	 *
+	 * @param className the name of the class being validated
+	 * @param bytecode the byte array representing the class
+	 */
+	public static boolean isValidBytecode(byte[] bytecode) {
+		try {
+			ClassReader classReader = new ClassReader(bytecode);
+			// Simply parse the bytecode; will throw if invalid
+			classReader.accept(null, 0);
+			return true;
+		}
+		catch (Exception e) {
+			return false;
+		}
 	}
 }

@@ -37,7 +37,7 @@ import lucee.runtime.dump.DumpTable;
 import lucee.runtime.dump.DumpUtil;
 import lucee.runtime.dump.SimpleDumpData;
 import lucee.runtime.ext.function.Function;
-import lucee.runtime.functions.string.Len;
+import lucee.runtime.functions.string.LenNumber;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
 import lucee.runtime.type.Collection;
@@ -178,7 +178,7 @@ public final class DumpStruct implements Function {
 
 	private static String getSize(Object o) {
 
-		return Caster.toInteger(Len.invoke(o, 0)).toString();
+		return Caster.toInteger(LenNumber.invoke(o, 0)).toString();
 	}
 
 	private static Struct toStruct(DumpData dd, Object object, RefBoolean hasReference) {

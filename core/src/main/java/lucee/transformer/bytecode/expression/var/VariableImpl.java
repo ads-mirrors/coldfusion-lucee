@@ -623,7 +623,7 @@ public class VariableImpl extends ExpressionBase implements Variable {
 						for (FunctionLibFunctionArg flfa: fargs) {
 							sb.append(", ").append(Types.toType(bc, flfa.getTypeAsString()).getClassName()).append(' ').append(flfa.getName());
 						}
-						sb.append("):").append(rtnType.getClassName());
+						sb.append("):").append(ASMUtil.getClassName(rtnType));
 						throw new TransformerException(bc, "no matching implementation for the BIF [" + sb + "] found", line);
 					}
 

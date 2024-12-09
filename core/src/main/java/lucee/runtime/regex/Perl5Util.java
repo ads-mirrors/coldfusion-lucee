@@ -153,7 +153,7 @@ final class Perl5Util {
 		lenArray.appendEL(Constants.INTEGER_0);
 		matchArray.appendEL("");
 
-		Struct struct = new StructImpl();
+		Struct struct = new StructImpl(StructImpl.TYPE_LINKED);
 		struct.setEL("pos", posArray);
 		struct.setEL("len", lenArray);
 		struct.setEL("match", matchArray);
@@ -188,7 +188,7 @@ final class Perl5Util {
 			matchArray.appendEL(input.substring(beginOff, endOff));
 		}
 
-		Struct struct = new StructImpl();
+		Struct struct = new StructImpl(StructImpl.TYPE_LINKED);
 		struct.setEL("pos", posArray);
 		struct.setEL("len", lenArray);
 		struct.setEL("match", matchArray);

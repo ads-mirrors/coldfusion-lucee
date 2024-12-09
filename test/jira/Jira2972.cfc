@@ -97,7 +97,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 
 	public void function testStructReduce() localMode="true" {
 		
-		sct={a:1,b:2,c:3};
+		sct=[a:1,b:2,c:3];
 		//arr[5]='e';
 		
 		// base test
@@ -105,7 +105,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
  							return result&";"&key&":"&value;
  
                         },"merge:");
-		assertEquals("merge:;B:2;A:1;C:3",res);
+		assertEquals("merge:;A:1;B:2;C:3",res);
 
 		// closure output
 		savecontent variable="c" {
@@ -122,7 +122,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
  							return result&";"&key&":"&value;
  
                         },"merge:");
-		assertEquals("merge:;B:2;A:1;C:3",res); 
+		assertEquals("merge:;A:1;B:2;C:3",res); 
 	}
 
 	public void function testQueryReduce() localMode="true" {

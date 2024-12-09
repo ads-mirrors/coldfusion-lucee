@@ -35,13 +35,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 			it( title = "Checking the createObject(..,javasettings:{maven:...}) with guava", body = function( currentSpec ) {
 				var ImmutableList=createObject("java","com.google.common.collect.ImmutableList",{
-					"maven":[
-						{
-							"groupId" : "com.google.guava",
-							"artifactId" : "guava",
-							"version" : "31.0.1-jre"
-						}
-					]
+					"maven":["com.google.guava:guava:31.0.1-jre"]
 				});
 				expect(ImmutableList.of("a", "b", "c").size()).toBe(3);
 			});

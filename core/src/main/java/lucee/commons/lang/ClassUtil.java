@@ -529,7 +529,7 @@ public final class ClassUtil {
 		if (args == null || args.length == 0) return loadInstance(clazz);
 
 		try {
-			return Reflector.getConstructorInstance(clazz, args).invoke();
+			return Reflector.getConstructorInstance(clazz, args, true).invoke();
 		}
 		catch (SecurityException e) {
 			ClassException ce = new ClassException("there is a security violation (thrown by security manager)");
@@ -592,7 +592,7 @@ public final class ClassUtil {
 	public static Object loadInstance(Class clazz, Object[] args, Object defaultValue) {
 		if (args == null || args.length == 0) return loadInstance(clazz, defaultValue);
 		try {
-			return Reflector.getConstructorInstance(clazz, args).invoke();
+			return Reflector.getConstructorInstance(clazz, args, true).invoke();
 
 		}
 		catch (Throwable t) {

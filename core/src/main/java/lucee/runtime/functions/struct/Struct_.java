@@ -37,7 +37,7 @@ public class Struct_ implements Function {
 	private static final long serialVersionUID = 8708684598035273346L;
 
 	public static Struct call(PageContext pc, Object[] objArr) throws PageException {
-		return _call(objArr, "invalid argument for function struct, only named arguments are allowed like struct(name:\"value\",name2:\"value2\")", StructImpl.TYPE_UNDEFINED);
+		return _call(objArr, "invalid argument for function struct, only named arguments are allowed like struct(name:\"value\",name2:\"value2\")", StructImpl.DEFAULT_TYPE);
 	}
 
 	protected static Struct _call(Object[] objArr, String expMessage, int type) throws PageException {

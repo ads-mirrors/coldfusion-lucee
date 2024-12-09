@@ -14,7 +14,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				var result = refind("{%\d%}", testString, 1 ,  true, "all");
 				expect(isArray(result)).toBe(true);
 				if(isArray(result)){
-					expect(structkeyList(result[1])).toBe("MATCH,LEN,POS");
+					expect(structkeyList(result[1])).toBe("pos,len,match");
 				}
 			});
 		});

@@ -199,7 +199,7 @@ public final class DynamicClassLoader extends ClassLoader implements ExtendableC
 		if (directory != null) {
 			synchronized (SystemUtil.createToken("DynamicClassLoader:file", className)) {
 				Resource classFile = directory.getRealResource(className.replace('.', '/') + ".class");
-				classFile.getParentResource().mkdirs();
+				classFile.getParentResource().createDirectory(true);
 				IOUtil.write(classFile, barr);
 			}
 		}

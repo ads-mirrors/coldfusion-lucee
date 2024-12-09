@@ -18,6 +18,7 @@
  */
 package lucee.commons.lang;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,6 +56,7 @@ import lucee.runtime.listener.SerializationSettings;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
+import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.bytecode.util.ClassRenamer;
 
 /**
@@ -75,8 +77,8 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 	private final ClassLoader addionalClassLoader;
 	private final Collection<Resource> resources;
 
-	private Map<String, String> loadedClasses = new ConcurrentHashMap<String, String>();
-	private Map<String, String> allLoadedClasses = new ConcurrentHashMap<String, String>(); // this includes all renames
+	private Map<String, byte[]> loadedClasses = new ConcurrentHashMap<String, byte[]>();
+	private Map<String, byte[]> allLoadedClasses = new ConcurrentHashMap<String, byte[]>(); // this includes all renames
 	private Map<String, String> unavaiClasses = new ConcurrentHashMap<String, String>();
 
 	private PageSourcePool pageSourcePool;
@@ -85,7 +87,7 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 
 	private String birthplace;
 
-	private static final AtomicLong counter = new AtomicLong(Long.MAX_VALUE - 1);
+	private static final AtomicLong counter = new AtomicLong(0);
 	private static long _start = 0L;
 	private static String start = Long.toString(_start, Character.MAX_RADIX);
 	private static Object countToken = new Object();
@@ -107,7 +109,6 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 	}
 
 	public static PhysicalClassLoader getPhysicalClassLoader(Config c, Resource directory, boolean reload) throws IOException {
-
 		String key = HashUtil.create64BitHashAsString(directory.getAbsolutePath());
 
 		PhysicalClassLoader rpccl = reload ? null : classLoaders.get(key);
@@ -243,7 +244,6 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 			catch (ClassNotFoundException cnf) {
 			}
 			if (clazz == null) return _loadClass(name, barr, false);
-
 			return rename(clazz, barr);
 		}
 	}
@@ -300,14 +300,21 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 	}
 
 	private Class<?> _loadClass(String name, byte[] barr, boolean rename) {
-		Class<?> clazz = defineClass(name, barr, 0, barr.length);
-		if (clazz != null) {
-			if (!rename) loadedClasses.put(name, "");
-			allLoadedClasses.put(name, "");
+		try {
+			Class<?> clazz = defineClass(name, barr, 0, barr.length);
 
-			resolveClass(clazz);
+			if (clazz != null) {
+				if (!rename) loadedClasses.put(name, barr);
+				allLoadedClasses.put(name, barr);
+
+				resolveClass(clazz);
+			}
+			return clazz;
 		}
-		return clazz;
+		catch (ClassFormatError cfe) {
+			if (!ASMUtil.isValidBytecode(barr)) throw new RuntimeException("given bytcode for [" + name + "] is not valid");
+			throw cfe;
+		}
 	}
 
 	public Resource[] getJarResources() {
@@ -335,6 +342,13 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 	public InputStream getResourceAsStream(String name) {
 		InputStream is = super.getResourceAsStream(name);
 		if (is != null) return is;
+
+		if (name.endsWith(".class")) {
+			// MUST store the barr in a less memory intensive way
+			String className = name.substring(0, name.length() - 6).replace('/', '.').replace('\\', '.');
+			byte[] barr = allLoadedClasses.get(className);
+			if (barr != null) return new ByteArrayInputStream(barr);
+		}
 
 		URL url = super.getResource(name);
 		if (url != null) {

@@ -8,18 +8,25 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.xml.sax.SAXException;
 
 import lucee.commons.digest.HashUtil;
+import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.ExceptionUtil;
+import lucee.commons.lang.Pair;
 import lucee.commons.lang.SerializableObject;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.tree.TreeNode;
 import lucee.runtime.mvn.POMReader.Dependency;
 import lucee.runtime.op.Caster;
+import lucee.runtime.thread.ThreadUtil;
 
 public class POM {
 
@@ -233,13 +240,18 @@ public class POM {
 	}
 
 	private void init() throws IOException {
-		if (isInit) return;
-		isInit = true;
-		if (log != null) log.debug("maven", "int for " + this);
-		initProperties();
-		initRepositories();
-		initDependencyManagement();
-		initDependencies();
+		if (!isInit) {
+			synchronized (SystemUtil.createToken("POM", groupId + ":" + artifactId + ":" + version)) {
+				if (!isInit) {
+					if (log != null) log.debug("maven", "int for " + this);
+					initProperties();
+					initRepositories();
+					initDependencyManagement();
+					initDependencies();
+					isInit = true;
+				}
+			}
+		}
 	}
 
 	public String getGroupId() {
@@ -400,17 +412,16 @@ public class POM {
 		if (repositories == null || repositories.isEmpty()) repositories = getRepositories();
 		for (Repository r: repositories) {
 			url = new URL(r.getUrl() + groupId.replace('.', '/') + "/" + artifactId + "/" + version + "/" + artifactId + "-" + version + "." + type);
-
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("HEAD");
 			int responseCode = connection.getResponseCode();
-
 			if (responseCode == 200) {
 				return url;
 			}
 			// TODO handle having more than one redirect
 			else if (responseCode == 301 || responseCode == 302) {
 				String newUrl = connection.getHeaderField("Location");
+
 				if (!StringUtil.isEmpty(newUrl, true)) {
 					url = new URL(newUrl);
 					connection = (HttpURLConnection) url.openConnection();
@@ -477,6 +488,74 @@ public class POM {
 			IOException e = new IOException("failed to load dependencies in [" + pom + "]");
 			ExceptionUtil.initCauseEL(e, cause);
 			throw e;
+		}
+	}
+
+	private static TreeNode<POM> getDependenciesAsync(POM pom, boolean recursive, int level, TreeNode<POM> node) throws IOException {
+		ExecutorService executor = null;
+		try {
+			List<POM> deps = pom.getDependencies();
+			if (deps != null && deps.size() > 0) {
+				executor = ThreadUtil.createExecutorService(deps.size(), false);
+				List<Future<Pair<IOException, POM>>> futures = new ArrayList<>();
+				for (POM p: deps) {
+					if (!node.addChild(p)) continue;
+
+					// Handle recursive processing in a separate thread
+					if (recursive) {
+						Future<Pair<IOException, POM>> future = executor.submit(() -> {
+							try {
+								getDependencies(p, recursive, level + 1, node);
+							}
+							catch (IOException ioe) {
+								return new Pair<IOException, POM>(ioe, p);
+							}
+							return new Pair<IOException, POM>(null, p);
+						});
+						futures.add(future);
+					}
+				}
+
+				// Wait for all tasks to complete
+				Pair<IOException, POM> pair;
+				for (Future<Pair<IOException, POM>> future: futures) {
+					try {
+						pair = future.get();
+						if (pair.getName() != null) {
+							node.removeChild(pair.getValue());
+							// if optional we let it go
+							if (!pair.getValue().isOptional()) throw pair.getName();
+						}
+					}
+					catch (ExecutionException e) {
+						throw ExceptionUtil.toIOException(e.getCause());
+
+					}
+					catch (InterruptedException e) {
+						throw ExceptionUtil.toIOException(e);
+					}
+				}
+			}
+			return node;
+		}
+		catch (IOException cause) {
+			IOException e = new IOException("Failed to load dependencies in [" + pom + "]");
+			ExceptionUtil.initCauseEL(e, cause);
+			throw e;
+		}
+		finally {
+			if (executor != null) {
+				executor.shutdown();
+				try {
+					if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+						executor.shutdownNow();
+					}
+				}
+				catch (InterruptedException ie) {
+					executor.shutdownNow();
+					Thread.currentThread().interrupt();
+				}
+			}
 		}
 	}
 

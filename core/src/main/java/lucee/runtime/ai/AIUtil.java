@@ -4,8 +4,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.http.StatusLine;
+import org.apache.http.client.methods.CloseableHttpResponse;
+
 import lucee.commons.io.res.ContentType;
 import lucee.commons.lang.StringUtil;
+import lucee.commons.net.http.HTTPResponse;
 import lucee.runtime.PageContext;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.ApplicationException;
@@ -23,9 +27,9 @@ public class AIUtil {
 	private static final Key CREATED_AT = KeyImpl.init("createdAt");
 	private static final Key STATUS_DETAILS = KeyImpl.init("statusDetails");
 
-	public static PageException toException(AIEngine engine, String msg, String type, String code) {
+	public static PageException toException(AIEngine engine, String msg, String type, String code, int statusCode) {
 		String appendix = "";
-		if ("model_not_found".equals(code) || msg.indexOf("models") != -1) {
+		if ("model_not_found".equals(code) || msg.equals("invalid_model") || msg.indexOf("models") != -1) {
 			try {
 				appendix = " Available model names are [" + AIUtil.getModelNamesAsStringList(engine) + "]";
 			}
@@ -33,13 +37,13 @@ public class AIUtil {
 			}
 		}
 
-		PageException ae = new ApplicationException(msg + appendix, "type:" + type + ";code:" + code);
+		PageException ae = new ApplicationException(msg + appendix + "; type:" + type + "; code:" + code + "; status-code:" + statusCode);
 		ae.setErrorCode(code);
 		return ae;
 	}
 
-	public static void valdate(AIEngine aie) throws PageException {
-		AISession session = aie.createSession("keep the answer short", aie.getTimeout());
+	public static void valdate(AIEngine aie, long timeout) throws PageException {
+		AISession session = aie.createSession("keep the answer short", timeout <= 0 ? aie.getTimeout() : timeout);
 		session.inquiry("ping");
 	}
 
@@ -53,9 +57,23 @@ public class AIUtil {
 		return names;
 	}
 
+	public static String findModelName(AIEngine aie, String name) throws PageException {
+		List<AIModel> models = aie.getModels();
+		for (AIModel m: models) {
+			if (m.getName().equalsIgnoreCase(name)) return m.getName();
+			if (m.getName().equalsIgnoreCase(name + ":latest")) return m.getName();
+			if (m.getLabel().equalsIgnoreCase(name)) return m.getName();
+		}
+		return null;
+	}
+
 	public static String getModelNamesAsStringList(AIEngine aie) throws PageException {
+		return getModelNamesAsStringList(getModelNames(aie));
+	}
+
+	public static String getModelNamesAsStringList(List<String> models) {
 		StringBuilder sb = new StringBuilder();
-		for (String name: getModelNames(aie)) {
+		for (String name: models) {
 			if (sb.length() > 0) sb.append(", ");
 			sb.append(name);
 		}
@@ -131,5 +149,22 @@ public class AIUtil {
 	public static String createJsonContentType(String charset) {
 		if (StringUtil.isEmpty(charset, true)) return "application/json";
 		return "application/json; charset=" + charset.trim();
+	}
+
+	public static int getStatusCode(HTTPResponse response) {
+		if (response != null) {
+			return response.getStatusCode();
+		}
+		return -1;
+	}
+
+	public static int getStatusCode(CloseableHttpResponse response) {
+		if (response != null) {
+			StatusLine sl = response.getStatusLine();
+			if (sl != null) {
+				return sl.getStatusCode();
+			}
+		}
+		return -1;
 	}
 }

@@ -1,6 +1,6 @@
 component extends="org.lucee.cfml.test.LuceeTestCase" labels="xml" {
 
-	variables.xml=xmlparse('<?xml version="1.0" encoding="UTF-8"?>
+	variables.xml='<?xml version="1.0" encoding="UTF-8"?>
 	<shiporder orderid="889923" 
 	xmlns="http://webservice.example.com/"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -23,7 +23,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="xml" {
 		<quantity>1</quantity>
 		<price>9.90</price>
 	</item>
-</shiporder>');
+</shiporder>';
 
 	variables.schema='<?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
@@ -57,7 +57,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="xml" {
 	</xs:complexType>
 </xs:schema>';
 
-
+	function beforeAll(){
+		variables.xml = xmlParse( variables.xml );
+	};
 
 	function run( testResults , testBox ) {
 		describe( "test case for LDEV-2113", function() {

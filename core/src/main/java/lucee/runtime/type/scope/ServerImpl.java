@@ -76,7 +76,6 @@ public final class ServerImpl extends ScopeSupport implements Server, SharedScop
 	private static final Key VERSION_NAME = KeyConstants._versionName;
 	private static final Key VERSION_NAME_EXPLANATION = KeyConstants._versionNameExplanation;
 	private static final Key HOST_NAME = KeyConstants._hostname;
-	private static final Key ENVIRONMENT = KeyConstants._environment;
 	private static final Key ADMIN_MODE = KeyConstants._singleContext;
 
 	private static String jep;
@@ -159,7 +158,7 @@ public final class ServerImpl extends ScopeSupport implements Server, SharedScop
 		lucee.setEL(RELEASE_DATE, new DateTimeImpl(info.getRealeaseTime(), false));
 		lucee.setEL(LOADER_VERSION, Caster.toDouble(SystemUtil.getLoaderVersion()));
 		lucee.setEL(LOADER_PATH, ClassUtil.getSourcePathForClass(pc, "lucee.loader.servlet.CFMLServlet", ""));
-		lucee.setEL(ENVIRONMENT, jsr223 != null && jsr223.booleanValue() ? "jsr223" : "servlet");
+		lucee.setEL(KeyConstants._environment, jsr223 != null && jsr223.booleanValue() ? "jsr223" : "servlet");
 
 		// singleContext admin Mode
 		lucee.setEL(ADMIN_MODE, Boolean.TRUE);

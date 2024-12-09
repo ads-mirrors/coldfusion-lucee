@@ -505,8 +505,8 @@ public class HTTPEngine4Impl {
 	}
 
 	public static void addCookie(CookieStore cookieStore, String domain, String name, String value, String path, String charset) {
-		if (ReqRspUtil.needEncoding(name, false)) name = ReqRspUtil.encode(name, charset);
-		if (ReqRspUtil.needEncoding(value, false)) value = ReqRspUtil.encode(value, charset);
+		if (ReqRspUtil.needEncoding(name)) name = ReqRspUtil.encode(name, charset);
+		if (ReqRspUtil.needEncoding(value)) value = ReqRspUtil.encode(value, charset);
 		BasicClientCookie cookie = new BasicClientCookie(name, value);
 		if (!StringUtil.isEmpty(domain, true)) cookie.setDomain(domain);
 		if (!StringUtil.isEmpty(path, true)) cookie.setPath(path);

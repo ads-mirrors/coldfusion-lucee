@@ -228,7 +228,7 @@ public class QueryLazy extends BIF {
 				isArray = true;
 			}
 			else if (returntype == RETURN_TYPE_STRUCT) {
-				sctRows = new StructImpl();
+				sctRows = new StructImpl(StructImpl.TYPE_LINKED);
 				isStruct = true;
 			}
 			else {
@@ -241,7 +241,7 @@ public class QueryLazy extends BIF {
 		while (res.next()) {
 			rownbr++;
 			// create row
-			row = new StructImpl();
+			row = new StructImpl(StructImpl.TYPE_LINKED);
 			for (Col col: columns) {
 				if (isQuery) col.set(qryRows, rownbr);
 				else col.set(row);
@@ -268,7 +268,7 @@ public class QueryLazy extends BIF {
 							aborted.setValue(true);
 							break;
 						}
-						sctRows = new StructImpl();
+						sctRows = new StructImpl(StructImpl.TYPE_LINKED);
 						rownbr = 0;
 					}
 				}

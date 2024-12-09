@@ -11,6 +11,7 @@ import lucee.commons.lang.ClassException;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.converter.JavaConverter.ObjectInputStreamImpl;
 import lucee.runtime.exp.PageRuntimeException;
+import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.dynamic.meta.Clazz;
 import lucee.transformer.dynamic.meta.FunctionMember;
 
@@ -38,9 +39,14 @@ abstract class FunctionMemberDynamic implements FunctionMember {
 	protected transient Class declaringProviderRtnClassWithSameAccess;
 
 	protected transient Type rtnType;
+	protected transient String rtnName;
+	protected transient Class rtnClass;
 	protected transient Type[] argTypes;
+	protected transient String[] argNames;
 	protected transient Class[] argClasses;
+
 	protected transient Type[] expTypes;
+	protected transient String[] expNames;
 
 	public FunctionMemberDynamic(String name) {
 		this.name = name;
@@ -59,28 +65,28 @@ abstract class FunctionMemberDynamic implements FunctionMember {
 		out.writeInt(classAccess);
 
 		// declaring class
-		out.writeObject(declaringType.getDescriptor());
+		out.writeObject(ASMUtil.getDescriptor(declaringType));
 		// declaring provider class
-		out.writeObject(declaringProviderType == null ? null : declaringProviderType.getDescriptor());
-		out.writeObject(declaringProviderRtnType == null ? null : declaringProviderRtnType.getDescriptor());
+		out.writeObject(declaringProviderType == null ? null : ASMUtil.getDescriptor(declaringProviderType));
+		out.writeObject(declaringProviderRtnType == null ? null : ASMUtil.getDescriptor(declaringProviderRtnType));
 
-		out.writeObject(declaringProviderTypeWithSameAccess == null ? null : declaringProviderTypeWithSameAccess.getDescriptor());
-		out.writeObject(declaringProviderRtnTypeWithSameAccess == null ? null : declaringProviderRtnTypeWithSameAccess.getDescriptor());
+		out.writeObject(declaringProviderTypeWithSameAccess == null ? null : ASMUtil.getDescriptor(declaringProviderTypeWithSameAccess));
+		out.writeObject(declaringProviderRtnTypeWithSameAccess == null ? null : ASMUtil.getDescriptor(declaringProviderRtnTypeWithSameAccess));
 
 		// return
-		out.writeObject(rtnType.getDescriptor());
+		out.writeObject(ASMUtil.getDescriptor(rtnType));
 
 		// arguments
 		String[] arr = new String[argTypes.length];
 		for (int i = 0; i < argTypes.length; i++) {
-			arr[i] = argTypes[i].getDescriptor();
+			arr[i] = ASMUtil.getDescriptor(argTypes[i]);
 		}
 		out.writeObject(arr);
 
 		// exception
 		arr = new String[expTypes.length];
 		for (int i = 0; i < expTypes.length; i++) {
-			arr[i] = expTypes[i].getDescriptor();
+			arr[i] = ASMUtil.getDescriptor(expTypes[i]);
 		}
 		out.writeObject(arr);
 
@@ -151,7 +157,7 @@ abstract class FunctionMemberDynamic implements FunctionMember {
 		return name;
 	}
 
-	public static FunctionMember createInstance(Class declaringClass, String name, int access, String descriptor, String[] exceptions, int classAccess) {
+	public static FunctionMemberDynamic createInstance(Class declaringClass, String name, int access, String descriptor, String[] exceptions, int classAccess) {
 		FunctionMemberDynamic fm;
 		if ("<init>".equals(name)) {
 			fm = new ConstructorDynamic();
@@ -193,7 +199,7 @@ abstract class FunctionMemberDynamic implements FunctionMember {
 
 	@Override
 	public String getDeclaringClassName() {
-		return declaringType.getClassName();
+		return ASMUtil.getClassName(declaringType);
 	}
 
 	@Override
@@ -331,16 +337,14 @@ abstract class FunctionMemberDynamic implements FunctionMember {
 	}
 
 	public int classAccess() {
-		/*
-		 * print.e("private:" + ((access & Opcodes.ACC_PRIVATE) != 0)); print.e("protected:" + ((access &
-		 * Opcodes.ACC_PROTECTED) != 0)); print.e("public:" + ((access & Opcodes.ACC_PUBLIC) != 0));
-		 * isInterface.setValue((access & Opcodes.ACC_INTERFACE) != 0);
-		 */
 		return classAccess;
 	}
 
 	public String getReturn() {
-		return rtnType.getClassName();
+		if (rtnName == null) {
+			rtnName = ASMUtil.getClassName(rtnType);
+		}
+		return rtnName;
 	}
 
 	public Type getReturnType() {
@@ -348,21 +352,35 @@ abstract class FunctionMemberDynamic implements FunctionMember {
 	}
 
 	public Class getReturnClass() {
-		try {
-			return Clazz.toClass(Clazz.getClassLoader(this.declaringClass), rtnType);
+		if (rtnClass == null) {
+			synchronized (this) {
+				if (rtnClass == null) {
+					try {
+						rtnClass = Clazz.toClass(Clazz.getClassLoader(this.declaringClass), rtnType);
+					}
+					catch (ClassException e) {
+						throw new PageRuntimeException(e);
+					}
+				}
+			}
 		}
-		catch (ClassException e) {
-			throw new PageRuntimeException(e);
-		}
+		return rtnClass;
 	}
 
 	@Override
 	public String[] getArguments() {
-		String[] arguments = new String[argTypes.length];
-		for (int i = 0; i < argTypes.length; i++) {
-			arguments[i] = argTypes[i].getClassName();
+		if (argNames == null) {
+			synchronized (this) {
+				if (argNames == null) {
+					String[] arguments = new String[argTypes.length];
+					for (int i = 0; i < argTypes.length; i++) {
+						arguments[i] = ASMUtil.getClassName(argTypes[i]);
+					}
+					argNames = arguments;
+				}
+			}
 		}
-		return arguments;
+		return argNames;
 	}
 
 	@Override
@@ -399,11 +417,18 @@ abstract class FunctionMemberDynamic implements FunctionMember {
 
 	@Override
 	public String[] getExceptions() {
-		String[] exceptions = new String[expTypes.length];
-		for (int i = 0; i < expTypes.length; i++) {
-			exceptions[i] = expTypes[i].getClassName();
+		if (expNames == null) {
+			synchronized (this) {
+				if (expNames == null) {
+					String[] exceptions = new String[expTypes.length];
+					for (int i = 0; i < expTypes.length; i++) {
+						exceptions[i] = ASMUtil.getClassName(expTypes[i]);
+					}
+					expNames = exceptions;
+				}
+			}
 		}
-		return exceptions;
+		return expNames;
 	}
 
 	public Type[] getExceptionTypes() {
@@ -430,7 +455,7 @@ abstract class FunctionMemberDynamic implements FunctionMember {
 		if (isStatic()) sb.append("static ");
 
 		// return type
-		sb.append(getReturnType().getClassName()).append(' ');
+		sb.append(ASMUtil.getClassName(getReturnType())).append(' ');
 
 		// declaring class
 		sb.append(getDeclaringClassName()).append('.');
@@ -444,7 +469,7 @@ abstract class FunctionMemberDynamic implements FunctionMember {
 		if (argTypes != null && argTypes.length > 0) {
 			String del = "";
 			for (Type t: argTypes) {
-				sb.append(del).append(t.getClassName());
+				sb.append(del).append(ASMUtil.getClassName(t));
 				del = ",";
 			}
 		}
@@ -456,7 +481,7 @@ abstract class FunctionMemberDynamic implements FunctionMember {
 			String del = "";
 			sb.append(" throws ");
 			for (Type t: expTypes) {
-				sb.append(del).append(t.getClassName());
+				sb.append(del).append(ASMUtil.getClassName(t));
 				del = ",";
 			}
 		}

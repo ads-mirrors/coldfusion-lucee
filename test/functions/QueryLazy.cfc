@@ -77,7 +77,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 			columnKey: "n"
 		} );
 		expect( ArrayLen( result ) ).toBe( 6 );
-		expect( result.toJson() ).toBe('[{"4":{"ID":2,"N":4},"2":{"ID":1,"N":2}},"-",{"6":{"ID":3,"N":6},"8":{"ID":4,"N":8}},"-",{"12":{"ID":6,"N":12},"10":{"ID":5,"N":10}},"-"]');
+		expect( result.toJson() ).toBe('[{"2":{"ID":1,"N":2},"4":{"ID":2,"N":4}},"-",{"6":{"ID":3,"N":6},"8":{"ID":4,"N":8}},"-",{"10":{"ID":5,"N":10},"12":{"ID":6,"N":12}},"-"]');
+	
+		// [{"4":{"ID":2,"N":4},"2":{"ID":1,"N":2}},"-",{"6":{"ID":3,"N":6},"8":{"ID":4,"N":8}},"-",{"12":{"ID":6,"N":12},"10":{"ID":5,"N":10}},"-"]
+		
+	
 	}
 
 	public void function testLazyStructById(){

@@ -48,6 +48,7 @@ import org.xml.sax.InputSource;
 
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.IOUtil;
+import lucee.commons.io.SystemUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.Pair;
 import lucee.commons.lang.StringUtil;
@@ -73,6 +74,12 @@ import lucee.runtime.type.UDF;
 import lucee.runtime.type.util.CollectionUtil;
 
 public final class ReqRspUtil {
+
+	private static boolean urlEncodeAllowPlus;
+
+	static {
+		urlEncodeAllowPlus = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.url.encodeAllowPlus", "false"), false);
+	}
 
 	private static Map<String, String> rootPathes = new ReferenceMap<String, String>(HARD, SOFT);
 
@@ -290,6 +297,10 @@ public final class ReqRspUtil {
 		catch (UnsupportedEncodingException e) {
 			return str;
 		}
+	}
+
+	public static boolean needEncoding(String str) {
+		return needEncoding(str, urlEncodeAllowPlus);
 	}
 
 	public static boolean needEncoding(String str, boolean allowPlus) {

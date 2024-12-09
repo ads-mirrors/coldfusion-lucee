@@ -61,6 +61,14 @@ public final class ExceptionUtil {
 		return getStacktrace(t, addMessage, true);
 	}
 
+	public static String getStacktrace(StackTraceElement[] trace) {
+		StringBuilder sb = new StringBuilder();
+		for (StackTraceElement traceElement: trace)
+			sb.append("\tat ").append(traceElement).append('\n');
+
+		return sb.toString();
+	}
+
 	public static String getStacktrace(Throwable t, boolean addMessage, boolean onlyLuceePart) {
 		StringWriter sw = new StringWriter();
 		PrintWriter pw = new PrintWriter(sw);

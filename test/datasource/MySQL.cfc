@@ -21,6 +21,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase"  labels="mysql" 	{
 	
 	processingdirective pageEncoding="UTF-8";
 
+	function beforeAll(){
+		variables.preciseMath = getApplicationSettings().preciseMath;	
+	};
+
 	public function beforeTests(){
 		// stash system timezone
 		variables.timezone = getApplicationSettings().timezone;
@@ -184,31 +188,53 @@ component extends="org.lucee.cfml.test.LuceeTestCase"  labels="mysql" 	{
 				assertEquals(UnsignedMaxBigInt,qry.UnsignedMaxBigInt);
 				assertEquals(UnsignedMaxBigInt,""&qry.UnsignedMaxBigInt);
 				
-				// ATM we only test the types, because there is an issue with float that need fixing first
+				// TODO we only test the types, because there is an issue with float that need fixing first
 				assertEquals("java.lang.Float",qry.MinFloat[1].getClass().getName());
-				//assertEquals(MinFloat,qry.MinFloat);
-				//assertEquals(MinFloat,""&qry.MinFloat);
+				/*
+				assertEquals(MinFloat,qry.MinFloat);
+				if ( variables.preciseMath )
+					assertEquals(MinFloat,""&qry.MinFloat);
+				else
+					assertEquals(toNumeric(MinFloat),""&qry.MinFloat);
+				*/
 				
-				// ATM we only test the types, because there is an issue with float that need fixing first
+				// TODO we only test the types, because there is an issue with float that need fixing first
 				assertEquals("java.lang.Float",qry.MaxFloat[1].getClass().getName());
-				//assertEquals(MaxFloat,qry.MaxFloat);
-				//assertEquals(MaxFloat,""&qry.MaxFloat);
+				/*
+				assertEquals(MaxFloat,qry.MaxFloat);
+				if ( variables.preciseMath )
+					assertEquals(MaxFloat,""&qry.MaxFloat);
+				else
+					assertEquals(toNumeric(MaxFloat),""&qry.MaxFloat);
+				*/
 				
 				assertEquals("java.lang.Double",qry.MinDouble[1].getClass().getName());
 				assertEquals(MinDouble,qry.MinDouble);
-				assertEquals(MinDouble,""&qry.MinDouble);
-				
+				if ( variables.preciseMath )
+					assertEquals(MinDouble,""&qry.MinDouble);
+				else
+					assertEquals(toNumeric(MinDouble),""&qry.MinDouble);
+
 				assertEquals("java.lang.Double",qry.MaxDouble[1].getClass().getName());
 				assertEquals(MaxDouble,qry.MaxDouble);
-				assertEquals(MaxDouble,""&qry.MaxDouble);
+				if ( variables.preciseMath )
+					assertEquals(MaxDouble,""&qry.MaxDouble);
+				else
+					assertEquals(toNumeric(MaxDouble),""&qry.MaxDouble);
 				
 				assertEquals("java.math.BigDecimal",qry.MinDecimal[1].getClass().getName());
 				assertEquals(MinDecimal,qry.MinDecimal);
-				assertEquals(MinDecimal,""&qry.MinDecimal);
+				if ( variables.preciseMath )
+					assertEquals(MinDecimal,""&qry.MinDecimal);
+				else
+					assertEquals(toNumeric(MinDecimal),""&qry.MinDecimal);
 				
 				assertEquals("java.math.BigDecimal",qry.MaxDecimal[1].getClass().getName());
 				assertEquals(MaxDecimal,qry.MaxDecimal);
-				assertEquals(MaxDecimal,""&qry.MaxDecimal);
+				if ( variables.preciseMath )
+					assertEquals(MaxDecimal,""&qry.MaxDecimal);
+				else
+					assertEquals(toNumeric(MaxDecimal),""&qry.MaxDecimal);
 			}
 			finally {
 				

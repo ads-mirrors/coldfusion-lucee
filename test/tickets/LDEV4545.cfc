@@ -1,4 +1,14 @@
 component extends="org.lucee.cfml.test.LuceeTestCase" skip=false {
+
+	function beforeAll(){
+		variables.preciseMath = getApplicationSettings().preciseMath;
+		application action="update" precisemath=true;
+	};
+
+	function afterAll(){
+		application action="update" precisemath=variables.preciseMath;
+	};
+
 	function run( testResults, textbox ) {
 		describe("Testcase for LDEV-4545", function() {
 			it(title="checking precisionEvaluate(String) function", body=function( currentSpec ) {

@@ -1,4 +1,8 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
+    function beforeAll(){
+        variables.preciseMath = getApplicationSettings().preciseMath;
+    };
+
 	function run( testResults , testBox ) {
 		describe( title="Test suite for BitSHLN()", body=function() {
 			it(title="Checking BitSHLN() function with small shifts", body = function(currentSpec) {
@@ -14,7 +18,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 
             it(title="Checking BitSHLN() function with large number shift", body = function(currentSpec) {
                 // Shift a large number that's already near the boundary of 32-bit integer range
-                assertEquals("4294967294", toString(BitSHLN(2147483647, 1)));  // 2147483647 << 1 = 0 (overflow)
+                if ( variables.preciseMath )
+                    assertEquals("4294967294", toString(BitSHLN(2147483647, 1)));  // 2147483647 << 1 = 0 (overflow)
+                else  
+                    assertEquals("4294967296", toString(BitSHLN(2147483647, 1)));  // 2147483647 << 1 = 0 (overflow)
             });
 
             it(title="Checking BitSHLN() function with negative shift", body = function(currentSpec) {
@@ -39,7 +46,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
             });
             it(title="Checking BitSHLN() function with extreme shifts 128", body = function(currentSpec) {
                 // Extreme shift cases where the shift count is very large
-                assertEquals("340282366920938463463374607431768211456",toString(BitSHLN(1, 128)));  // 1 << 64 = 0 (all bits shifted out in a 64-bit context)
+                if ( variables.preciseMath )
+                    assertEquals("340282366920938463463374607431768211456",toString(BitSHLN(1, 128)));  // 1 << 64 = 0 (all bits shifted out in a 64-bit context)
+                else 
+                    assertEquals("0", BitSHLN(1, 64));  // 1 << 64 = 0 (all bits shifted out in a 64-bit context)
             });
 		});
 	}

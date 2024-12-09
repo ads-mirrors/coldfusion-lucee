@@ -2,8 +2,8 @@ package lucee.runtime.ai.openai;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.SocketTimeoutException;
 import java.net.URI;
-import java.net.URL;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -16,6 +16,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import lucee.commons.io.CharsetUtil;
+import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.lang.mimetype.MimeType;
 import lucee.loader.util.Util;
@@ -48,11 +49,6 @@ public class OpenAISession extends AISessionSupport {
 		super(engine, timeout);
 		this.openaiEngine = engine;
 		this.systemMessage = systemMessage;
-	}
-
-	@Override
-	public Response inquiry(String message) throws PageException {
-		return inquiry(message, null);
 	}
 
 	@Override
@@ -91,7 +87,7 @@ public class OpenAISession extends AISessionSupport {
 			arr.append(msg);
 
 			Struct sct = new StructImpl(StructImpl.TYPE_LINKED);
-			sct.set(KeyConstants._model, openaiEngine.model);
+			sct.set(KeyConstants._model, openaiEngine.getModel());
 			sct.set(KeyConstants._messages, arr);
 			sct.set(KeyConstants._stream, listener != null);
 			if (openaiEngine.temperature != null) sct.set(KeyConstants._temperature, openaiEngine.temperature);
@@ -105,8 +101,6 @@ public class OpenAISession extends AISessionSupport {
 
 			JSONConverter json = new JSONConverter(true, CharsetUtil.UTF8, JSONDateFormat.PATTERN_CF, false);
 			String str = json.serialize(null, sct, SerializationSettings.SERIALIZE_AS_COLUMN, null);
-			URL url = new URL(openaiEngine.getBaseURL(), "chat/completions");
-
 			try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
 				URI uri = new URI(openaiEngine.getBaseURL() + "chat/completions");
 				// Create HttpPost request
@@ -136,13 +130,14 @@ public class OpenAISession extends AISessionSupport {
 						// String cs = ct.getCharset();
 						// getContent(rsp, cs);
 						if (Util.isEmpty(cs, true)) cs = openaiEngine.charset;
-
-						Struct raw = Caster.toStruct(new JSONExpressionInterpreter().interpret(null, EntityUtils.toString(responseEntity, openaiEngine.charset)));
+						String rawStr = EntityUtils.toString(responseEntity, openaiEngine.charset);
+						Struct raw = Caster.toStruct(new JSONExpressionInterpreter().interpret(null, rawStr));
 
 						Struct err = Caster.toStruct(raw.get(KeyConstants._error, null), null);
 						if (err != null) {
+
 							throw AIUtil.toException(this.getEngine(), Caster.toString(err.get(KeyConstants._message)), Caster.toString(err.get(KeyConstants._type, null), null),
-									Caster.toString(err.get(KeyConstants._code, null), null));
+									Caster.toString(err.get(KeyConstants._code, null), null), response.getStatusLine().getStatusCode());
 						}
 
 						OpenAIResponse r = new OpenAIResponse(raw, cs);
@@ -174,10 +169,17 @@ public class OpenAISession extends AISessionSupport {
 						return r;
 					}
 					else {
-						throw new ApplicationException("The AI did answer with the mime type [" + t + "] that is not supported, only [application/json] is supported");
+						throw new ApplicationException("The AI did answer (" + AIUtil.getStatusCode(response) + ") with the mime type [" + t
+								+ "] that is not supported, only [application/json] is supported");
 					}
 				}
 			}
+		}
+		catch (SocketTimeoutException ste) {
+			ApplicationException ae = new ApplicationException(
+					"A timeout occurred while querying the AI Engine [" + openaiEngine.getLabel() + "]. The configured timeout was " + getTimeout() + " ms.");
+			ExceptionUtil.initCauseEL(ae, ste);
+			throw ae;
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);

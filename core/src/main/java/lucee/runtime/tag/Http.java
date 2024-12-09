@@ -1627,7 +1627,7 @@ public final class Http extends BodyTagImpl {
 	}
 
 	private static String urlenc(String str, String charset, boolean checkIfNeeded) throws UnsupportedEncodingException {
-		if (checkIfNeeded && !ReqRspUtil.needEncoding(str, false)) return str;
+		if (checkIfNeeded && !ReqRspUtil.needEncoding(str)) return str;
 		return URLEncoder.encode(str, CharsetUtil.toCharset(charset));
 	}
 

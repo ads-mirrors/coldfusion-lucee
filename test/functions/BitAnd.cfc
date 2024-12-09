@@ -1,6 +1,24 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
+
+	function beforeAll(){
+		variables.preciseMath = getApplicationSettings().preciseMath;
+	};
+
+	function afterAll(){
+		application action="update" preciseMath=variables.preciseMath;
+	};
+
 	function run( testResults , testBox ) {
 		describe( title="Test suite for BitAnd()", body=function() {
+
+			beforeEach( function(){
+				application action="update" preciseMath=variables.preciseMath;
+			});
+
+			afterEach( function(){
+				application action="update" preciseMath=variables.preciseMath;
+			});
+
 			it(title="Checking BitAnd() function integers", body = function( currentSpec ) {
 				assertEquals("0",BitAnd(1, 0));
 				assertEquals("0",BitAnd(0, 0));
@@ -16,8 +34,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 
 			it(title="Checking BitAnd() function float edge case ", body = function( currentSpec ) {
 				// they can be converted because they are below the threshold
+				application action="update" preciseMath=true;
 				assertEquals("0",BitAnd(1, 0.00000000000001));
-				assertEquals("1",BitAnd(1, 0.999999999999999));
+                assertEquals("1",BitAnd(1, 0.999999999999999));
+
+				application action="update" preciseMath=false;
+				var Integer=createObject("java","java.lang.Integer");
+				assertEquals("1",BitAnd(1, Integer.MAX_VALUE));
 			});
 
 			it("should correctly perform bitwise AND between two positive numbers", function() {
@@ -45,10 +68,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
             });
 
 			it("should correctly perform bitwise AND between two large BigInteger values", function() {
+				application action="update" preciseMath=true;
                 expect( BitAnd(9223372036854775808, 9223372036854775807) ).toBe(0);
             });
 
             it("should correctly perform bitwise AND between a BigInteger and a smaller integer", function() {
+				application action="update" preciseMath=true;
                 // Expect zero because 255 does not overlap with high bits of largeNumber
 				expect( BitAnd(9223372036854775808, 255) ).toBe(0);
             });

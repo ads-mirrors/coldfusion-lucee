@@ -6,12 +6,13 @@ import java.util.Iterator;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
-import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.Function;
+import lucee.runtime.mvn.MavenUtil;
+import lucee.runtime.mvn.MavenUtil.GAVSO;
 import lucee.runtime.mvn.POM;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
@@ -20,7 +21,6 @@ import lucee.runtime.type.ArrayImpl;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
-import lucee.runtime.type.util.KeyConstants;
 
 public class MavenLoad implements Function {
 
@@ -42,35 +42,16 @@ public class MavenLoad implements Function {
 
 		Iterator<Object> it = array.valueIterator();
 		Struct sct;
-		String g, a, v;
 		Struct rtnData = new StructImpl();
 
 		Resource dir = ((ConfigPro) pc.getConfig()).getMavenDir();
 		Log log = LogUtil.getLog(pc.getConfig(), "mvn", "application");
 
 		while (it.hasNext()) {
-			sct = Caster.toStruct(it.next());
 
-			g = Caster.toString(sct.get(KeyConstants._groupId, null), null);
-			if (StringUtil.isEmpty(g)) g = Caster.toString(sct.get(KeyConstants._g, null), null);
-			if (StringUtil.isEmpty(g)) {
-				throw new FunctionException(pc, "MavenLoad", 1, "input", "Missing required field: groupId. Ensure that the 'groupId' key is present and not empty.");
-			}
-
-			a = Caster.toString(sct.get(KeyConstants._artifactId, null), null);
-			if (StringUtil.isEmpty(a)) a = Caster.toString(sct.get(KeyConstants._a, null), null);
-			if (StringUtil.isEmpty(a)) {
-				throw new FunctionException(pc, "MavenLoad", 1, "input", "Missing required field: artifactId. Ensure that the 'artifactId' key is present and not empty.");
-			}
-
-			v = Caster.toString(sct.get(KeyConstants._version, null), null);
-			if (StringUtil.isEmpty(v)) v = Caster.toString(sct.get(KeyConstants._v, null), null);
-			if (StringUtil.isEmpty(v)) {
-				throw new FunctionException(pc, "MavenLoad", 1, "input", "Missing required field: version. Ensure that the 'version' key is present and not empty.");
-			}
-
+			GAVSO gavso = MavenUtil.toGAVSO(it.next());
 			try {
-				for (Resource r: POM.getInstance(dir, g, a, v, POM.SCOPE_COMPILE, log).getJars()) {
+				for (Resource r: POM.getInstance(dir, gavso.g, gavso.a, gavso.v, MavenUtil.toScope(gavso.s, POM.SCOPE_COMPILE), log).getJars()) {
 					rtnData.set(r.getAbsolutePath(), "");
 				}
 			}

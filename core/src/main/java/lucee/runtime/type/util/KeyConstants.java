@@ -580,6 +580,7 @@ public class KeyConstants {
 	public static final Key _rst = KeyImpl._const("rst");
 	public static final Key _sad = KeyImpl._const("sad");
 	public static final Key _scope = KeyImpl._const("scope");
+	public static final Key _optional = KeyImpl._const("optional");
 	public static final Key _scopeKey = KeyImpl._const("scopeKey");
 	public static final Key _score = KeyImpl._const("score");
 	public static final Key _sct = KeyImpl._const("sct");

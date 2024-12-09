@@ -56,8 +56,6 @@ public final class Methods_Operator {
 					new Method("compare", Types.INT_VALUE, new Type[] { Types.PAGE_CONTEXT, Types.STRING, Types.STRING }) } };
 
 	public static int getType(Type type) {
-		String className = type.getClassName();
-
 		if (Types.BOOLEAN.equals(type)) return Types._BOOLEAN;
 		if (Types.DOUBLE.equals(type)) return Types._NUMBER;
 		if (Types.NUMBER.equals(type)) return Types._NUMBER;

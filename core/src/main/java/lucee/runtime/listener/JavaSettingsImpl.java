@@ -378,17 +378,12 @@ public class JavaSettingsImpl implements JavaSettings {
 					dir.mkdirs();
 					Log log = LogUtil.getLog(config, "mvn", "application");
 					while (it.hasNext()) {
-						Struct el = Caster.toStruct(it.next(), null);
-						if (el != null) {
-							g = Caster.toString(el.get(KeyConstants._groupId, null), null);
-							a = Caster.toString(el.get(KeyConstants._artifactId, null), null);
-							v = Caster.toString(el.get(KeyConstants._version, null), null);
-							s = Caster.toString(el.get(KeyConstants._scope, null), null);
-							if (!StringUtil.isEmpty(g) && !StringUtil.isEmpty(a)) {
-								POM tmp = POM.getInstance(dir, g, a, v, MavenUtil.toScopes(s, POM.SCOPE_COMPILE), log);
-								mapPoms.put("maven:" + tmp.getGroupId() + ":" + tmp.getArtifactId() + ":" + tmp.getVersion(), tmp);
-							}
+						MavenUtil.GAVSO gavso = MavenUtil.toGAVSO(it.next(), null);
+						if (gavso != null) {
+							POM tmp = POM.getInstance(dir, gavso.g, gavso.a, gavso.v, MavenUtil.toScopes(gavso.s, POM.SCOPE_COMPILE), log);
+							mapPoms.put("maven:" + tmp.getGroupId() + ":" + tmp.getArtifactId() + ":" + tmp.getVersion(), tmp);
 						}
+
 					}
 
 					for (String k: mapPoms.keySet()) {

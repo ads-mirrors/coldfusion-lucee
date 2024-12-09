@@ -8,6 +8,7 @@ import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.reflection.Reflector;
 import lucee.runtime.reflection.pairs.ConstructorInstance;
+import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.dynamic.meta.Clazz;
 import lucee.transformer.dynamic.meta.Constructor;
 
@@ -46,7 +47,7 @@ class ConstructorDynamic extends FunctionMemberDynamic implements Constructor {
 		if (argTypes != null && argTypes.length > 0) {
 			String del = "";
 			for (Type t: argTypes) {
-				sb.append(del).append(t.getClassName());
+				sb.append(del).append(ASMUtil.getClassName(t));
 				del = ",";
 			}
 		}
@@ -58,7 +59,7 @@ class ConstructorDynamic extends FunctionMemberDynamic implements Constructor {
 			String del = "";
 			sb.append(" throws ");
 			for (Type t: expTypes) {
-				sb.append(del).append(t.getClassName());
+				sb.append(del).append(ASMUtil.getClassName(t));
 				del = ",";
 			}
 		}
@@ -68,7 +69,7 @@ class ConstructorDynamic extends FunctionMemberDynamic implements Constructor {
 
 	@Override
 	public Object newInstance(Object... args) throws IOException {
-		ConstructorInstance ci = Reflector.getConstructorInstance(getDeclaringClass(), args);
+		ConstructorInstance ci = Reflector.getConstructorInstance(getDeclaringClass(), args, true);
 		try {
 			return ci.invoke();
 		}

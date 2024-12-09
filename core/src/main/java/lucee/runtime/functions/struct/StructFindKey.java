@@ -88,7 +88,7 @@ public final class StructFindKey extends BIF {
 
 			// matching value (this function search first for base)
 			if (key.getString().equalsIgnoreCase(value)) {
-				Struct sct = new StructImpl();
+				Struct sct = new StructImpl(StructImpl.TYPE_LINKED);
 
 				sct.setEL(KeyConstants._value, o);
 				sct.setEL(KeyConstants._path, createKey(coll, path, key));
