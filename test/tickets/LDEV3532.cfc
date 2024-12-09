@@ -13,10 +13,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
                 expect(res.match[1]).toBe(''); 
 
                 var res=reFind("(f)(oo)", "bar", 1, true,"all");   
-                systemOutput(res,1,1);
-                expect(res.len[1]).toBe(0);
-                expect(res.pos[1]).toBe(0);
-                expect(res.match[1]).toBe('');
+                expect(res[1].len[1]).toBe(0);
+                expect(res[1].pos[1]).toBe(0);
+                expect(res[1].match[1]).toBe('');
             });
             it( title="reFind() no matches with regex type perl", body=function( currentSpec ){
                 try{
@@ -37,9 +36,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
                 expect(res.pos[1]).toBe(0);
                 
                 var res=reFind("(f)(oo)", "bar", 1, true,"all");  
-                expect(res.match[1]).toBe('');
-                expect(res.len[1]).toBe(0);
-                expect(res.pos[1]).toBe(0);
+                expect(res[1].match[1]).toBe('');
+                expect(res[1].len[1]).toBe(0);
+                expect(res[1].pos[1]).toBe(0);
 
             });
         });
