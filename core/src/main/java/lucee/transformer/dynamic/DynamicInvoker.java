@@ -31,7 +31,6 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
 import lucee.aprint;
-import lucee.print;
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
@@ -255,8 +254,6 @@ public class DynamicInvoker {
 					mv.visitVarInsn(Opcodes.ALOAD, 1); // Load the first method argument (instance)
 					if (!fm.getDeclaringProviderClassWithSameAccess().equals(Object.class)) { // Only cast if clazz is not java.lang.Object
 						mv.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(fm.getDeclaringProviderClassWithSameAccess()));
-						print.e("-->" + fm.getDeclaringProviderClassNameWithSameAccess());
-						print.e("-->" + fm.getDeclaringProviderClassName());
 					}
 				}
 			}

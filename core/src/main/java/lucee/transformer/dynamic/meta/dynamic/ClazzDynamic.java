@@ -16,6 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.felix.framework.BundleWiringImpl.BundleClassLoader;
 import org.objectweb.asm.ClassReader;
@@ -186,7 +187,7 @@ public class ClazzDynamic extends Clazz {
 	private ClazzDynamic(Class clazz, String clid, Log log) throws IOException {
 		this.clazz = clazz;
 		this.clid = clid;
-		Map<String, FunctionMember> members = _getFunctionMembers(clazz, null, log);
+		Map<String, FunctionMember> members = _getFunctionMembers(this.clid, clazz, null, log);
 
 		LinkedList<FunctionMember> tmpMethods = new LinkedList<>();
 		LinkedList<FunctionMember> tmpDeclaredMethods = new LinkedList<>();
@@ -363,12 +364,12 @@ public class ClazzDynamic extends Clazz {
 		return list;
 	}
 
-	private static Map<String, FunctionMember> _getFunctionMembers(final Class clazz, Map<String, FunctionMember> membersInput, Log log) throws IOException {
-
+	private static Map<String, FunctionMember> _getFunctionMembers(String clid, final Class clazz, Map<String, FunctionMember> membersInput, Log log) throws IOException {
+		String key = clid + ":" + clazz.getName();
 		if (membersInput == null) membersInput = new LinkedHashMap<>();
 		final Map<String, FunctionMember> members = membersInput;
 
-		Map<String, FunctionMember> existing = membersCollection.get(clazz);
+		Map<String, FunctionMember> existing = membersCollection.get(key);
 		if (existing != null) {
 			for (Entry<String, FunctionMember> e: existing.entrySet()) {
 				members.put(e.getKey(), e.getValue());
@@ -403,7 +404,7 @@ public class ClazzDynamic extends Clazz {
 				if (interfaces != null && interfaces.length > 0) {
 					for (String interf: interfaces) {
 						try {
-							_getFunctionMembers(cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), members, log);
+							_getFunctionMembers(clid, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), members, log);
 						}
 						catch (Exception e) {
 							if (log != null) log.error("dynamic", e);
@@ -412,7 +413,7 @@ public class ClazzDynamic extends Clazz {
 				}
 				if (superName != null) {
 					try {
-						_getFunctionMembers(cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), members, log);
+						_getFunctionMembers(clid, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), members, log);
 					}
 					catch (IllegalArgumentException iae) {
 						String v = ASMUtil.getJavaVersionFromException(iae, null);
@@ -483,7 +484,7 @@ public class ClazzDynamic extends Clazz {
 		};
 		// Start visiting the class
 		classReader.accept(visitor, 0);
-		membersCollection.put(clazz, cloneIt(members));
+		membersCollection.put(key, cloneIt(members));
 		return members;
 	}
 
@@ -495,7 +496,7 @@ public class ClazzDynamic extends Clazz {
 		return cloned;
 	}
 
-	private static Map<Class, Map<String, FunctionMember>> membersCollection = new IdentityHashMap<>();
+	private static Map<String, Map<String, FunctionMember>> membersCollection = new ConcurrentHashMap<>();
 
 	public static void serialize(Serializable o, OutputStream os) throws IOException {
 		ObjectOutputStream oos = null;
