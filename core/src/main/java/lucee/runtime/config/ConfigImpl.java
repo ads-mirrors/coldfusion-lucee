@@ -6331,4 +6331,19 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			method.invoke(this);
 		}
 	}
+
+	/*
+	 * public static void main(String[] args) throws IOException { List<Method> methods; Resource res =
+	 * ResourcesImpl.getFileResourceProvider().getResource("/Users/mic/Tmp3/wwwwww");
+	 * ResourceUtil.deleteContent(res, null); DynamicInvoker.getInstance(res);
+	 * 
+	 * methods = Reflector.getMethods(lucee.runtime.config.ConfigWebImpl.class); methods =
+	 * Reflector.getMethods(lucee.runtime.config.ConfigServerImpl.class);
+	 * 
+	 * int max = 5; for (Method method: methods) { if (!method.getName().startsWith("reset") ||
+	 * method.getName().equals("reset") || method.getName().equals("resetAll") ||
+	 * method.getArgumentCount() != 0) continue; print.e("->" +
+	 * method.getDeclaringProviderClassNameWithSameAccess() + ":" +
+	 * method.getDeclaringProviderClassName() + ":" + method.getName()); // if (--max == 0) break; } }
+	 */
 }
