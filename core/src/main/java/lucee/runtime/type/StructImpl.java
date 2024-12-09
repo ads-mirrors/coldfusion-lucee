@@ -43,7 +43,7 @@ import lucee.runtime.dump.DumpData;
 import lucee.runtime.dump.DumpProperties;
 import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.PageException;
-import lucee.runtime.op.Caster;
+import lucee.runtime.functions.struct.StructNew;
 import lucee.runtime.op.Duplicator;
 import lucee.runtime.op.ThreadLocalDuplication;
 import lucee.runtime.type.it.StringIterator;
@@ -71,7 +71,7 @@ public class StructImpl extends StructSupport {
 	public static final int DEFAULT_TYPE;
 
 	static {
-		DEFAULT_TYPE = Caster.toIntValue(SystemUtil.getSystemPropOrEnvVar("lucee.struct.type", null), TYPE_REGULAR);
+		DEFAULT_TYPE = StructNew.toType(SystemUtil.getSystemPropOrEnvVar("lucee.struct.type", null), TYPE_REGULAR);
 	}
 
 	/**
