@@ -19,6 +19,8 @@
 package lucee.runtime.functions.international;
 
 import java.lang.ref.SoftReference;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
 import java.util.Locale;
@@ -26,6 +28,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import lucee.runtime.PageContext;
+import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.Function;
@@ -41,14 +44,16 @@ public final class LSParseNumber implements Function {
 	private static Map<Locale, SoftReference<NumberFormat>> formatters = new ConcurrentHashMap<Locale, SoftReference<NumberFormat>>();
 
 	public static Number call(PageContext pc, String string) throws PageException {
-		return toDoubleValue(pc.getLocale(), string);
+		if (ThreadLocalPageContext.preciseMath(pc)) return toBigDecimal(pc.getLocale(), string);
+		return toDouble(pc.getLocale(), string);
 	}
 
 	public static Number call(PageContext pc, String string, Locale locale) throws PageException {
-		return toDoubleValue(locale == null ? pc.getLocale() : locale, string);
+		if (ThreadLocalPageContext.preciseMath(pc)) return toBigDecimal(locale == null ? pc.getLocale() : locale, string);
+		return toDouble(locale == null ? pc.getLocale() : locale, string);
 	}
 
-	public static double toDoubleValue(Locale locale, String str) throws PageException {
+	public static Number toDouble(Locale locale, String str) throws PageException {
 		SoftReference<NumberFormat> tmp = formatters.remove(locale);
 		NumberFormat nf = tmp == null ? null : tmp.get();
 		if (nf == null) {
@@ -68,6 +73,30 @@ public final class LSParseNumber implements Function {
 		}
 		finally {
 			formatters.put(locale, new SoftReference<NumberFormat>(nf));
+		}
+	}
+
+	public static BigDecimal toBigDecimal(Locale locale, String str) throws PageException {
+		DecimalFormat df = (DecimalFormat) NumberFormat.getInstance(locale);
+		df.setParseBigDecimal(true);
+
+		try {
+			str = optimze(str.toCharArray());
+
+			ParsePosition pp = new ParsePosition(0);
+			BigDecimal result = (BigDecimal) df.parse(str, pp);
+
+			if (pp.getIndex() < str.length()) {
+				throw new ExpressionException("Can't parse String [" + str + "] against locale [" + LocaleFactory.getDisplayName(locale) + "] to a BigDecimal");
+			}
+			if (result == null) {
+				throw new ExpressionException("Can't parse String [" + str + "] against locale [" + LocaleFactory.getDisplayName(locale) + "] to a BigDecimal");
+			}
+
+			return result;
+		}
+		finally {
+			// No caching here, but you could implement caching if necessary
 		}
 	}
 

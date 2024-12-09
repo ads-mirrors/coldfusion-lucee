@@ -25,12 +25,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip=true  {
 		filewrite( base & 'n\o.txt', "" );
 		
 	
-		systemOutput("----testdata -----", true );
+		// systemOutput("----testdata -----", true );
 		var dirList = directorylist( base, true, 'path', '*.txt', 'directory ASC');
 		loop array=dirList item="local.dir" index="local.i" {
-			systemOutput( dir, true );
+		// 	systemOutput( dir, true );
 		}
-		systemOutput("---------", true );
+		// systemOutput("---------", true );
 	}
 
 	function run( testResults , testBox ) {
@@ -99,7 +99,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip=true  {
 			});
 
 			it(title = "recursive directorylist() sort='size'", body = function( currentSpec ) {
-				systemOutput("============================================================", true);
+				// systemOutput("============================================================", true);
 				var base = "#getDirectoryFromPath(getCurrentTemplatePath())#\files\";
 
 				if (directoryExists(base)) directoryDelete(base, true);
@@ -111,15 +111,15 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip=true  {
 				for ( local.i = 1; i lte a.len(); i++ ) {
 					fileWrite( "#base#/#a[i]#.txt", a[ i ] );
 				} 
-				systemOutput( 'directoryList(base, true, "query", "", "Size")', true );
-				systemOutput( directoryList(base, true, "query", "", "Size"), true );
-				systemOutput( 'directoryList(base, true, "path", "", "Size")', true );
-				systemOutput( directoryList(base, true, "path", "", "Size"), true );
-				systemOutput( 'directoryList(base, true, "name", "", "Size")', true );
-				systemOutput( directoryList(base, true, "name", "", "Size"), true );
+				// systemOutput( 'directoryList(base, true, "query", "", "Size")', true );
+				// systemOutput( directoryList(base, true, "query", "", "Size"), true );
+				// systemOutput( 'directoryList(base, true, "path", "", "Size")', true );
+				// systemOutput( directoryList(base, true, "path", "", "Size"), true );
+				// systemOutput( 'directoryList(base, true, "name", "", "Size")', true );
+				// systemOutput( directoryList(base, true, "name", "", "Size"), true );
 
 				if (directoryExists(base)) directoryDelete(base, true);
-				systemOutput("============================================================", true);
+				// systemOutput("============================================================", true);
 			});
 		});
 	}

@@ -12,13 +12,13 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" skip=true {
 				var f=getTempFile(getDirectoryFromPath(getCurrentTemplatePath()), "ldev2127-bytecode", "cfm");
 				try {
 					fileWrite( f, arrayToList(a, chr(10) ) );
-					systemOutput( f );
+					// systemOutput( f );
 					timer variable="local.compileExecutionTime" {
 						silent {
 							cfinclude( template=listlast(f,"\/") ); // errors see  https://luceeserver.atlassian.net/browse/LDEV-4602
 						}
 					}
-					systemOutput("compileExecutionTime: #compileExecutionTime#", true );
+					// systemOutput("compileExecutionTime: #compileExecutionTime#", true );
 				} finally {
 					if (FileExists( f ) )
 						FileDelete( f )

@@ -31,7 +31,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="mysql,orm" {
 					loop times=1000 {
 						Thread=createObject("java","java.lang.Thread");
 						it=Thread.getAllStackTraces().keySet().iterator();
-						systemOutput("-------------------------------------------"&NL,1,1);
+						// systemOutput("-------------------------------------------"&NL,1,1);
 						// loop threads
 						loop collection=it item="t" label="outer" {
 							st=t.getStackTrace();
@@ -50,8 +50,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="mysql,orm" {
 							if(isEmpty(str)) continue;
 				
 							
-							Systemoutput( ucase( t.name&" ("&state&")" )&NL ,1,1);
-							systemOutput(str&NL,1,1);
+							// Systemoutput( ucase( t.name&" ("&state&")" )&NL ,1,1);
+							// systemOutput(str&NL,1,1);
 						}
 				
 				

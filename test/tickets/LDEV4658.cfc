@@ -56,10 +56,10 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" labels="datetime" {
 	}
 	
 	private function debugDateTime( d ){
-		systemOutput( "", true );
-		systemOutput( d, true );
+		// systemOutput( "", true );
+		// systemOutput( d, true );
 		for (var c=1; c < d.len(); c++){
-			systemOutput( d[c] & " [" & asc(d[c]) & "]", true );
+			// systemOutput( d[c] & " [" & asc(d[c]) & "]", true );
 		}
 	}
 }

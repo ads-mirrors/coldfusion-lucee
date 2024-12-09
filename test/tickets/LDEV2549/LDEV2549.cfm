@@ -23,7 +23,7 @@
 		<cfoutput>#test2.maxDeviceID#</cfoutput>
 		<cfcatch>
 			<cfscript>
-				systemOutput(cfcatch, true);
+				// systemOutput(cfcatch, true);
 			</cfscript>
 			<cfrethrow>
 		</cfcatch>

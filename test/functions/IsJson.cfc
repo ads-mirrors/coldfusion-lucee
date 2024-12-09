@@ -116,8 +116,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 		var canJson5 = ( len( getFunctionData( "isJson" ).arguments ) == 2 );
 
 		expect( ArrayLen( json5Tests ) ).toBeGT( 0 );
-		systemOutput( "", true);
-		systemOutput( "running json5 testsuite with #ArrayLen( json5Tests )# tests", true);
+		// systemOutput( "", true);
+		// systemOutput( "running json5 testsuite with #ArrayLen( json5Tests )# tests", true);
 		
 		loop array=json5Tests item="local.test"{
 			var fileType = listLast( test, "." );
@@ -143,7 +143,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 			}
 			// due to false positives, this function is private / disabled LDEV-5017
 			if ( isJson( fileRead( test ) ) neq expectedResult ) {
-				systemOutput( "expected: " & expectedResult & " isJson:" & isJson( fileRead( test ) ) & " " & test, true);
+				// systemOutput( "expected: " & expectedResult & " isJson:" & isJson( fileRead( test ) ) & " " & test, true);
 			}
 			//TBD add second argument, version for json5 support
 			//expect( isJson( fileRead( test ) ) ).toBe( expectedResult, test );

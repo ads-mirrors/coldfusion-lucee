@@ -50,10 +50,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="thread,cookie,sess
 	}
 
 	private function dumpResult(r){
-		systemOutput("", true);
-		systemOutput("Cookies: " & serializeJson(r.cookies), true);
-		systemOutput("Headers: " & serializeJson(r.headers), true);
-		systemOutput("", true);
+		// systemOutput("", true);
+		// systemOutput("Cookies: " & serializeJson(r.cookies), true);
+		// systemOutput("Headers: " & serializeJson(r.headers), true);
+		// systemOutput("", true);
 	}
 	
 	private string function createURI(string calledName){

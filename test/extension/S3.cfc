@@ -14,7 +14,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="s3" {
 		describe( title="Test the S3 extension", body=function() {
 
 			it(title="create/delete a empty bucket", skip=isNotSupported(), body=function( currentSpec ){
-				SystemOutput(root,1,1);
+				// SystemOutput(root,1,1);
 				var bucketName = "#id#-bucket-1";
 				var bucketPath=root&bucketName;
 				try {
@@ -118,7 +118,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="s3" {
 			});
 
 			it(title="copy a empty bucket", skip=isNotSupported(), body=function( currentSpec ){
-				SystemOutput(root,1,1);
+				// SystemOutput(root,1,1);
 				var bucketName = "#id#-copy1";
 				var bucketPathSrc=root&bucketName;
 				var bucketPathTrg=bucketPathSrc&"copied";
@@ -150,7 +150,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="s3" {
 
 
 			it(title="copy a bucket with content", skip=isNotSupported(), body=function( currentSpec ){
-				SystemOutput(root,1,1);
+				// SystemOutput(root,1,1);
 				var bucketName = "#id#-copy2";
 				var bucketPathSrc=root&bucketName;
 				var folderPathSrc=bucketPathSrc&"/folder1";
@@ -231,7 +231,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="s3" {
 			});
 
 			xit(title="move a bucket with content", skip=isNotSupported(), body=function( currentSpec ){
-				SystemOutput(root,1,1);
+				// SystemOutput(root,1,1);
 				var bucketName = "#id#-copy-move";
 				var bucketPathSrc=root&bucketName;
 				var folderPathSrc=bucketPathSrc&"/folder1";

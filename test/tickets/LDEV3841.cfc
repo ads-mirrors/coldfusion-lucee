@@ -23,7 +23,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip="true" {
             return CGI.foo;
         }
         catch(any e) {
-            systemOutput(e.message, true);
+            // systemOutput(e.message, true);
             return "cgiReadOnly:#scene#";
         }
     }

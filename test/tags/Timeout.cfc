@@ -90,7 +90,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					}
 					catch(e) {}
 					sleep(100);
-					systemOutput(result&":start",1,1);
+					// systemOutput(result&":start",1,1);
 					expect(request.timeouttest?:"").toBe("start");
 				});
 
@@ -104,7 +104,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					}
 					catch(e) {}
 					sleep(100);
-					systemOutput(result&":end",1,1);
+					// systemOutput(result&":end",1,1);
 					expect(request.timeouttest?:"").toBe("end");
 				});*/
 				

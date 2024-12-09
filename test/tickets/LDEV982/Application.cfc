@@ -3,11 +3,11 @@ component {
 	this.applicationTimeout = createTimespan( 0, 0, 0, 1 );
 
 	function onApplicationStart(){
-		systemOutput("application started", true);
+		// systemOutput("application started", true);
 		application.configured = true;
 	}
 
 	function onApplicationEnd(){
-		systemOutput("application ended", true);
+		// systemOutput("application ended", true);
 	}
 }

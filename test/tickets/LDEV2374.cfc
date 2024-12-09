@@ -14,9 +14,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip=true {
 				);
 				var parsedUrl = deserializeJSON( result.filecontent ); 
 
-				systemOutput( "", true );
-				systemOutput( qs, true );
-				systemOutput( parsedUrl, true );
+				// systemOutput( "", true );
+				// systemOutput( qs, true );
+				// systemOutput( parsedUrl, true );
 
 				expect( structCount( parsedUrl ) ).toBe( 2 );
 				expect( parsedUrl ).toHaveKey( "ts" );
@@ -33,9 +33,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip=true {
 
 				var parsedUrl = deserializeJSON( result.filecontent ); 
 
-				systemOutput( "", true );
-				systemOutput( qs, true );
-				systemOutput( parsedUrl, true );
+				// systemOutput( "", true );
+				// systemOutput( qs, true );
+				// systemOutput( parsedUrl, true );
 
 				expect( structCount( parsedUrl ) ).toBe( 2 );
 				expect( parsedUrl ).toHaveKey( "mt" );

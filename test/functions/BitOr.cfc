@@ -52,12 +52,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			});
 			
 			it("should correctly perform bitwise OR between two large String values", function() {
-				systemOutput("------", true);
+				// systemOutput("------", true);
 				application action="update" preciseMath=true;
-				systemOutput(getApplicationSettings().preciseMath, true);
+				// systemOutput(getApplicationSettings().preciseMath, true);
 				expect( BitOr("9223372036854775808", "9223372036854775807") ).toBe("18446744073709551615");
 				application action="update" preciseMath=false;
-				systemOutput(getApplicationSettings().preciseMath, true);
+				// systemOutput(getApplicationSettings().preciseMath, true);
 				expect( BitOr("9223372036854775808", "9223372036854775807") ).toBe("9223372036854775807");
 			});
 			it("should correctly perform bitwise OR between two large Number values", function() {

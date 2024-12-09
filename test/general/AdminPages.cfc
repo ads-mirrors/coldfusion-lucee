@@ -73,7 +73,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
                 local.adminUrls = deserializeJson( _adminUrls.fileContent );
                 expect( adminUrls ).toBeArray();
                 // systemOutput( adminUrls, true );
-                systemOutput( "", true );
+                // systemOutput( "", true );
                 loop array="#adminUrls#" item="local.testUrl" {
                     checkUrl( adminRoot, local.testUrl, 200 );
                 }
@@ -142,8 +142,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
         // this expect() maybe isn't even needed as _internalRequest throws the stack trace anyway??
         // systemOutput( local.result.headers, true );
         //expect( local.result.status ).toBeBetween( 200, 399, adminRoot & page & " returned status code: " & local.result.status);
-        if ( local.result.status neq arguments.statusCode )
-            systemOutput( trim(local.result.filecontent), true );
+        // if ( local.result.status neq arguments.statusCode )
+        //     systemOutput( trim(local.result.filecontent), true );
         expect( local.result.status ).toBe( arguments.statusCode, 
             arguments.adminRoot & page & " returned status code: " & local.result.status );
     }

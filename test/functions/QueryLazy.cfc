@@ -129,11 +129,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 			}
 			,options: arguments.options
 		);
-		/*
-		systemOutput(arguments, true);
-		systemOutput(result, true);
-		systemOutput(result.toJson(), true);
-		*/
+		// systemOutput(arguments, true);
+		// systemOutput(result, true);
+		// systemOutput(result.toJson(), true);
 		return result;
 
 	};

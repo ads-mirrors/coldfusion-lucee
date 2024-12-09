@@ -24,7 +24,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip=true {
 					try {
 						evaluate( "#f#();" ); 
 					} catch (e) {
-						systemOutput( d, true);
+						// systemOutput( d, true);
 						result = e.message;
 					}
 					expect( result ).toBe("", 'evaluate( "#f#();" ) ');

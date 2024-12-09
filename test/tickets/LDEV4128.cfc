@@ -18,7 +18,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="logging" {
 					}
 				}
 
-				systemOutput("---- Async: #async# vs nonAsync #nonAsync# ---" , true) ;
+				// systemOutput("---- Async: #async# vs nonAsync #nonAsync# ---" , true) ;
 
 				expect( async ).toBeLT( nonAsync );
 			});
