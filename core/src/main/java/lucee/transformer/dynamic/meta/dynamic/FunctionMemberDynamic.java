@@ -157,7 +157,7 @@ abstract class FunctionMemberDynamic implements FunctionMember {
 		return name;
 	}
 
-	public static FunctionMember createInstance(Class declaringClass, String name, int access, String descriptor, String[] exceptions, int classAccess) {
+	public static FunctionMemberDynamic createInstance(Class declaringClass, String name, int access, String descriptor, String[] exceptions, int classAccess) {
 		FunctionMemberDynamic fm;
 		if ("<init>".equals(name)) {
 			fm = new ConstructorDynamic();

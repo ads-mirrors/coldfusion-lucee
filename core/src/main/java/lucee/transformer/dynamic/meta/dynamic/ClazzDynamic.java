@@ -437,7 +437,7 @@ public class ClazzDynamic extends Clazz {
 
 			@Override
 			public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
-				FunctionMember fmCurrent = FunctionMemberDynamic.createInstance(clazz, name, access, descriptor, exceptions, classAccess.toInt());
+				FunctionMemberDynamic fmCurrent = FunctionMemberDynamic.createInstance(clazz, name, access, descriptor, exceptions, classAccess.toInt());
 				String id = Clazz.id(fmCurrent);
 				FunctionMember parent = members.get(id);
 				if (parent instanceof FunctionMemberDynamic) {
