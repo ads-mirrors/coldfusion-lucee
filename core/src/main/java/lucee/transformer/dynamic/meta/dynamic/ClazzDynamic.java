@@ -188,7 +188,7 @@ public class ClazzDynamic extends Clazz {
 	private ClazzDynamic(Class clazz, String clid, Log log) throws IOException {
 		this.clazz = clazz;
 		this.clid = clid;
-		Map<String, FunctionMember> members = _getFunctionMembers(null, this.clid, clazz, log);
+		Map<String, FunctionMember> members = getFunctionMembers(this.clid, clazz, log);
 
 		LinkedList<FunctionMember> tmpMethods = new LinkedList<>();
 		LinkedList<FunctionMember> tmpDeclaredMethods = new LinkedList<>();
@@ -365,18 +365,31 @@ public class ClazzDynamic extends Clazz {
 		return list;
 	}
 
-	private static Map<String, FunctionMember> _getFunctionMembers(Map<String, FunctionMember> inputMembers, String clid, final Class clazz, Log log) throws IOException {
-		String key = clid + ":" + clazz.getName();
-		if (inputMembers == null) inputMembers = new LinkedHashMap<>();
-		final Map<String, FunctionMember> members = inputMembers;
-		Map<String, FunctionMember> existing = membersCollection.get(key);
+	private static Map<String, FunctionMember> getFunctionMembers(String clid, final Class clazz, Log log) throws IOException {
+		return _getFunctionMembers(clid, clazz, log);
+	}
+
+	private static Map<String, FunctionMember> _getFunctionMembers(String clid, final Class clazz, Log log) throws IOException {
+
+		final Map<String, FunctionMember> members = new LinkedHashMap<>();
+		Map<String, FunctionMember> existing = membersCollection.get(clazz);
 
 		if (existing != null) {
+			/*
+			 * if (true) { print.e("ex-->" + clazz.getName()); for (Entry<String, FunctionMember> e:
+			 * existing.entrySet()) { if (e.getValue().getDeclaringClass() != clazz &&
+			 * !Reflector.isInstaneOf(clazz, e.getValue().getDeclaringClass(), true) &&
+			 * e.getValue().getDeclaringClass() != Object.class) print.e("- " + e.getValue()); }
+			 * 
+			 * }
+			 */
+
 			for (Entry<String, FunctionMember> e: existing.entrySet()) {
 				members.put(e.getKey(), e.getValue());
 			}
 			return members;
 		}
+		// print.e("ne-->" + clazz.getName());
 
 		final String classPath = clazz.getName().replace('.', '/') + ".class";
 		final ClassLoader cl = getClassLoader(clazz);
@@ -401,23 +414,11 @@ public class ClazzDynamic extends Clazz {
 			@Override
 			public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
 				classAccess.setValue(access);
-				if (interfaces != null && interfaces.length > 0) {
-					for (String interf: interfaces) {
-						try {
-							// add(members, _getFunctionMembers(clid,
-							// cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), log));
-							_getFunctionMembers(members, clid, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), log);
-						}
-						catch (Exception e) {
-							if (log != null) log.error("dynamic", e);
-						}
-					}
-				}
 				if (superName != null) {
 					try {
 						// add(members, _getFunctionMembers(clid,
 						// cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), log));
-						_getFunctionMembers(members, clid, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), log);
+						add(members, _getFunctionMembers(clid, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), log));
 					}
 					catch (IllegalArgumentException iae) {
 						String v = ASMUtil.getJavaVersionFromException(iae, null);
@@ -434,6 +435,18 @@ public class ClazzDynamic extends Clazz {
 					}
 					catch (Exception e) {
 						if (log != null) log.error("dynamic", e);
+					}
+				}
+				if (interfaces != null && interfaces.length > 0) {
+					for (String interf: interfaces) {
+						try {
+							// add(members, _getFunctionMembers(clid,
+							// cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), log));
+							add(members, _getFunctionMembers(clid, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), log));
+						}
+						catch (Exception e) {
+							if (log != null) log.error("dynamic", e);
+						}
 					}
 				}
 				// print.e("-- " + name);
@@ -501,7 +514,154 @@ public class ClazzDynamic extends Clazz {
 		};
 		// Start visiting the class
 		classReader.accept(visitor, 0);
-		membersCollection.put(key, cloneIt(members));
+		membersCollection.put(clazz, cloneIt(members));
+		return members;
+	}
+
+	private static Map<String, FunctionMember> _getFunctionMembers(Map<String, FunctionMember> inputMembers, String clid, final Class clazz, Log log) throws IOException {
+		String key = clid + ":" + clazz.getName();
+
+		// print.e("-->" + clazz.getName());
+		// if (inputMembers != null) {
+		// if (inputMembers.size() < 20) print.e(inputMembers.keySet());
+		// else print.e(inputMembers.size());
+		// }
+
+		if (inputMembers == null) inputMembers = new LinkedHashMap<>();
+		final Map<String, FunctionMember> members = inputMembers;
+		Map<String, FunctionMember> existing = membersCollectionOld.get(key);
+
+		if (existing != null) {
+			for (Entry<String, FunctionMember> e: existing.entrySet()) {
+				members.put(e.getKey(), e.getValue());
+			}
+			return members;
+		}
+
+		final String classPath = clazz.getName().replace('.', '/') + ".class";
+		final ClassLoader cl = getClassLoader(clazz);
+		final RefInteger classAccess = new RefIntegerImpl();
+		ClassReader classReader;
+
+		try {
+			classReader = new ClassReader(cl.getResourceAsStream(classPath));
+		}
+		catch (IOException ioe) {
+			if ("Class not found".equals(ioe.getMessage())) {
+				IOException tmp = new IOException("unable to load class path [" + classPath + "]");
+				ExceptionUtil.initCauseEL(tmp, ioe);
+				ioe = tmp;
+			}
+			throw ioe;
+		}
+
+		// Create a ClassVisitor to visit the methods
+		ClassVisitor visitor = new ClassVisitor(Opcodes.ASM9) {
+
+			@Override
+			public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+				classAccess.setValue(access);
+				if (superName != null) {
+					try {
+						// add(members, _getFunctionMembers(clid,
+						// cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), log));
+						_getFunctionMembers(members, clid, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), log);
+					}
+					catch (IllegalArgumentException iae) {
+						String v = ASMUtil.getJavaVersionFromException(iae, null);
+						if (v != null) {
+							throw new RuntimeException("The class [" + superName + "] was compiled with Java version [" + v + "], "
+									+ "which is not supported by the current version of ASM. The highest supported version is ["
+									+ ASMUtil.toStringVersionFromBytceodeVersion(ASMUtil.getMaxVersion(), "unknown") + "]. ");
+
+						}
+						throw iae;
+					}
+					catch (RuntimeException re) {
+						throw re;
+					}
+					catch (Exception e) {
+						if (log != null) log.error("dynamic", e);
+					}
+				}
+				if (interfaces != null && interfaces.length > 0) {
+					for (String interf: interfaces) {
+						try {
+							// add(members, _getFunctionMembers(clid,
+							// cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), log));
+							_getFunctionMembers(members, clid, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), log);
+						}
+						catch (Exception e) {
+							if (log != null) log.error("dynamic", e);
+						}
+					}
+				}
+				// print.e("-- " + name);
+				// print.e(members);
+
+				super.visit(version, access, name, signature, superName, interfaces);
+			}
+
+			private void add(Map<String, FunctionMember> members, Map<String, FunctionMember> add) {
+				for (Entry<String, FunctionMember> e: add.entrySet()) {
+					members.put(e.getKey(), e.getValue());
+				}
+			}
+
+			@Override
+			public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+
+				FunctionMemberDynamic fmCurrent = FunctionMemberDynamic.createInstance(clazz, name, access, descriptor, exceptions, classAccess.toInt());
+				String id = Clazz.id(fmCurrent);
+				// if (name.toLowerCase().indexOf("next") != -1 && name.toLowerCase().indexOf("node") == -1) {
+				// print.e("======>" + clazz.getName() + ":" + name);
+				// print.e(members.keySet());
+				// }
+				FunctionMember parent = members.get(id);
+				if (parent instanceof FunctionMemberDynamic) {
+					FunctionMemberDynamic fmParent = (FunctionMemberDynamic) parent;
+					// java.lang.Appendable
+
+					Class tmpClass = fmParent.getDeclaringProviderClass(true);
+					if (tmpClass != null) {
+						Class rtnClass = null;
+						if (fmParent instanceof Method) {
+
+							Class tmpRtn = fmParent.getDeclaringProviderRtnClass(true);
+							rtnClass = tmpRtn;
+						}
+
+						/*
+						 * if (name.equals("toLocalDateTime")) { print.e("xxxxxxxxxxxxxxx"); print.e(clazz + ":" + name +
+						 * ":" + descriptor); // print.e(Clazz.getAccessModifier(fmCurrent)); //
+						 * print.e(Clazz.getAccessModifier(fmParent)); print.e("curr: " +
+						 * Clazz.getAccessModifierAsString(fmCurrent)); print.e("parr: " +
+						 * Clazz.getAccessModifierAsString(fmParent)); print.e("DeclaringClassName: " +
+						 * fmCurrent.getDeclaringClassName()); print.e("getDeclaringProviderClassName: " +
+						 * fmCurrent.getDeclaringProviderClassNameWithSameAccess()); // print.e("-----------------" +
+						 * Clazz.compareAccess(fmd, fm)); }
+						 */
+
+						Type tmpType = tmpClass != null ? Type.getType(tmpClass) : null;
+						Type rtnType = rtnClass != null ? Type.getType(rtnClass) : null;
+
+						if (Clazz.compareAccess(fmParent, fmCurrent) >= 0) fmCurrent.setDeclaringProviderClassWithSameAccess(tmpClass, tmpType, rtnClass, rtnType);
+						fmCurrent.setDeclaringProviderClass(tmpClass, tmpType, rtnClass, rtnType);
+
+						/*
+						 * if (name.equals("nextElement")) { print.e(fm.getDeclaringProviderClassName());
+						 * print.e(fm.getDeclaringProviderClassNameWithSameAccess()); }
+						 */
+					}
+				}
+				members.put(id, fmCurrent);
+
+				return super.visitMethod(access, name, descriptor, signature, exceptions);
+			}
+		};
+		// Start visiting the class
+		classReader.accept(visitor, 0);
+		membersCollectionOld.put(key, cloneIt(members));
 		return members;
 	}
 
@@ -513,7 +673,8 @@ public class ClazzDynamic extends Clazz {
 		return cloned;
 	}
 
-	private static Map<String, Map<String, FunctionMember>> membersCollection = new ConcurrentHashMap<>();
+	private static Map<String, Map<String, FunctionMember>> membersCollectionOld = new ConcurrentHashMap<>();
+	private static Map<Class, Map<String, FunctionMember>> membersCollection = new IdentityHashMap<>();
 
 	public static void serialize(Serializable o, OutputStream os) throws IOException {
 		ObjectOutputStream oos = null;
