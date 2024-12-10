@@ -435,28 +435,47 @@ public class DynamicInvoker {
 		DynamicInvoker e = new DynamicInvoker(classes);
 
 		{
+			List<Method> methods;
+
 			DynamicInvoker.getInstance(classes);
-			List<Method> methods = Reflector.getMethods(lucee.runtime.config.ConfigServerImpl.class);
-			methods = Reflector.getMethods(lucee.runtime.config.ConfigWebImpl.class);
+			// methods = Reflector.getMethods(lucee.runtime.config.ConfigWebImpl.class);
+			// methods = Reflector.getMethods(lucee.runtime.PageContextImpl.class);
+			List<Method> methodsw = Reflector.getMethods(lucee.runtime.config.ConfigWebImpl.class);
 
-			aprint.e("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-			for (Method method: methods) {
-				if (!method.getName().startsWith("reset") || method.getName().equals("reset") || method.getName().equals("resetAll") || method.getArgumentCount() != 0) continue;
-				aprint.e("->" + method.getDeclaringProviderClassNameWithSameAccess() + ":" + method.getDeclaringProviderClassName() + ":" + method.getName()); // if (--max == 0)
-																																								// break; } }
-			}
-
+			// methods = Reflector.getMethods(lucee.runtime.config.ConfigServerImpl.class);
 			methods = Reflector.getMethods(lucee.runtime.config.ConfigServerImpl.class);
+			// methods = Reflector.getMethods(lucee.runtime.config.ConfigImpl.class);
+			// methods = Reflector.getMethods(lucee.runtime.config.ConfigWebPro.class);
 
-			int max = 5;
-			aprint.e("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+			// methods = Reflector.getMethods(lucee.runtime.config.ConfigServerImpl.class);
+
+			// int max = 500;
+			aprint.e("xxxxxxxxxxxxxxxx ConfigServerImpl  xxxxxxxxxxxxxxxxx");
 			for (Method method: methods) {
-				if (!method.getName().startsWith("reset") || method.getName().equals("reset") || method.getName().equals("resetAll") || method.getArgumentCount() != 0) continue;
-				aprint.e("->" + method.getDeclaringProviderClassNameWithSameAccess() + ":" + method.getDeclaringProviderClassName() + ":" + method.getName()); // if (--max == 0)
-																																								// break; } }
+				// if (!method.getName().startsWith("reset") || method.getName().equals("reset") ||
+				// method.getName().equals("resetAll") || method.getArgumentCount() != 0) continue;
+				if (method.getDeclaringProviderClassNameWithSameAccess().indexOf("ConfigWeb") != -1) {
+					aprint.e("->" + method.getDeclaringProviderClassNameWithSameAccess() + ":"
+
+							+ method.getDeclaringProviderClassName() + ":" + method.getDeclaringClassName() + ":" + method.getName());
+					// throw new RuntimeException("ups!");
+					// if (--max == 0) break;
+				}
+			}
+			aprint.e("xxxxxxxxxxxxxxxx ConfigWebImpl  xxxxxxxxxxxxxxxxx");
+			for (Method method: methodsw) {
+				// if (!method.getName().startsWith("reset") || method.getName().equals("reset") ||
+				// method.getName().equals("resetAll") || method.getArgumentCount() != 0) continue;
+				if (method.getDeclaringProviderClassNameWithSameAccess().indexOf("ConfigServer") != -1) {
+					aprint.e("->" + method.getDeclaringProviderClassNameWithSameAccess() + ":"
+
+							+ method.getDeclaringProviderClassName() + ":" + method.getDeclaringClassName() + ":" + method.getName());
+					// throw new RuntimeException("ups!");
+					// if (--max == 0) break;
+				}
 			}
 		}
-
+		/// if (true) return;
 		HashMap map = new HashMap<>();
 		map.put("aaa", "sss");
 		Iterator it = map.keySet().iterator();
@@ -579,6 +598,7 @@ public class DynamicInvoker {
 		aprint.e(e.invokeInstanceMethod(sb, "toSTring", new Object[] {}, false));
 		aprint.e(e.invokeStaticMethod(SystemUtil.class, "getSystemPropOrEnvVar", new Object[] { "a.b.c", "default-value" }, true));
 		aprint.e(e.invokeStaticMethod(ListUtil.class, "arrayToList", new Object[] { new String[] { "a", "b" }, "," }, true));
+		aprint.e("done");
 
 	}
 
