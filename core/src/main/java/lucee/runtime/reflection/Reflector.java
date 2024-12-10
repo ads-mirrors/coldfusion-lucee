@@ -133,7 +133,6 @@ public final class Reflector {
 	}
 
 	public static boolean isInstaneOf(ClassLoader cl, Class src, String trgClassName) {
-		long start = System.currentTimeMillis();
 		Class clazz = ClassUtil.loadClass(cl, trgClassName, null);
 		if (clazz == null) return false;
 		return isInstaneOf(src, clazz, false);
