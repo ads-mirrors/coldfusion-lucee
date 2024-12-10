@@ -44,7 +44,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="java" {
 
 			});
 
-			it( title='test parseDateTime (preciseMath=false)', skip=true, body=function() {
+			it( title='test parseDateTime (preciseMath=false)',  body=function() {
 				application action="update" preciseMath=false;
 				var projects = [
 					{
@@ -73,5 +73,4 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="java" {
 			});
 		});
 	}
-
 }

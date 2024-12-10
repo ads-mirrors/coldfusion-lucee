@@ -54,6 +54,7 @@ import lucee.transformer.bytecode.util.Types;
 import lucee.transformer.dynamic.meta.Clazz;
 import lucee.transformer.dynamic.meta.FunctionMember;
 import lucee.transformer.dynamic.meta.LegacyMethod;
+import lucee.transformer.dynamic.meta.Method;
 
 public class DynamicInvoker {
 
@@ -432,6 +433,29 @@ public class DynamicInvoker {
 		Resource classes = ResourcesImpl.getFileResourceProvider().getResource("/Users/mic/tmp8/classes/");
 		ResourceUtil.deleteContent(classes, null);
 		DynamicInvoker e = new DynamicInvoker(classes);
+
+		{
+			DynamicInvoker.getInstance(classes);
+			List<Method> methods = Reflector.getMethods(lucee.runtime.config.ConfigServerImpl.class);
+			methods = Reflector.getMethods(lucee.runtime.config.ConfigWebImpl.class);
+
+			aprint.e("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+			for (Method method: methods) {
+				if (!method.getName().startsWith("reset") || method.getName().equals("reset") || method.getName().equals("resetAll") || method.getArgumentCount() != 0) continue;
+				aprint.e("->" + method.getDeclaringProviderClassNameWithSameAccess() + ":" + method.getDeclaringProviderClassName() + ":" + method.getName()); // if (--max == 0)
+																																								// break; } }
+			}
+
+			methods = Reflector.getMethods(lucee.runtime.config.ConfigServerImpl.class);
+
+			int max = 5;
+			aprint.e("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+			for (Method method: methods) {
+				if (!method.getName().startsWith("reset") || method.getName().equals("reset") || method.getName().equals("resetAll") || method.getArgumentCount() != 0) continue;
+				aprint.e("->" + method.getDeclaringProviderClassNameWithSameAccess() + ":" + method.getDeclaringProviderClassName() + ":" + method.getName()); // if (--max == 0)
+																																								// break; } }
+			}
+		}
 
 		HashMap map = new HashMap<>();
 		map.put("aaa", "sss");

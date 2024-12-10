@@ -188,7 +188,7 @@ public class ClazzDynamic extends Clazz {
 	private ClazzDynamic(Class clazz, String clid, Log log) throws IOException {
 		this.clazz = clazz;
 		this.clid = clid;
-		Map<String, FunctionMember> members = _getFunctionMembers(this.clid, clazz, log);
+		Map<String, FunctionMember> members = _getFunctionMembers(null, this.clid, clazz, log);
 
 		LinkedList<FunctionMember> tmpMethods = new LinkedList<>();
 		LinkedList<FunctionMember> tmpDeclaredMethods = new LinkedList<>();
@@ -365,11 +365,12 @@ public class ClazzDynamic extends Clazz {
 		return list;
 	}
 
-	private static Map<String, FunctionMember> _getFunctionMembers(String clid, final Class clazz, Log log) throws IOException {
+	private static Map<String, FunctionMember> _getFunctionMembers(Map<String, FunctionMember> inputMembers, String clid, final Class clazz, Log log) throws IOException {
 		String key = clid + ":" + clazz.getName();
-		final Map<String, FunctionMember> members = new LinkedHashMap<>();
-
+		if (inputMembers == null) inputMembers = new LinkedHashMap<>();
+		final Map<String, FunctionMember> members = inputMembers;
 		Map<String, FunctionMember> existing = membersCollection.get(key);
+
 		if (existing != null) {
 			for (Entry<String, FunctionMember> e: existing.entrySet()) {
 				members.put(e.getKey(), e.getValue());
@@ -403,7 +404,9 @@ public class ClazzDynamic extends Clazz {
 				if (interfaces != null && interfaces.length > 0) {
 					for (String interf: interfaces) {
 						try {
-							add(members, _getFunctionMembers(clid, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), log));
+							// add(members, _getFunctionMembers(clid,
+							// cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), log));
+							_getFunctionMembers(members, clid, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), log);
 						}
 						catch (Exception e) {
 							if (log != null) log.error("dynamic", e);
@@ -412,7 +415,9 @@ public class ClazzDynamic extends Clazz {
 				}
 				if (superName != null) {
 					try {
-						add(members, _getFunctionMembers(clid, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), log));
+						// add(members, _getFunctionMembers(clid,
+						// cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), log));
+						_getFunctionMembers(members, clid, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), log);
 					}
 					catch (IllegalArgumentException iae) {
 						String v = ASMUtil.getJavaVersionFromException(iae, null);
@@ -431,6 +436,8 @@ public class ClazzDynamic extends Clazz {
 						if (log != null) log.error("dynamic", e);
 					}
 				}
+				// print.e("-- " + name);
+				// print.e(members);
 
 				super.visit(version, access, name, signature, superName, interfaces);
 			}
@@ -443,8 +450,13 @@ public class ClazzDynamic extends Clazz {
 
 			@Override
 			public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
+
 				FunctionMemberDynamic fmCurrent = FunctionMemberDynamic.createInstance(clazz, name, access, descriptor, exceptions, classAccess.toInt());
 				String id = Clazz.id(fmCurrent);
+				// if (name.toLowerCase().indexOf("next") != -1 && name.toLowerCase().indexOf("node") == -1) {
+				// print.e("======>" + clazz.getName() + ":" + name);
+				// print.e(members.keySet());
+				// }
 				FunctionMember parent = members.get(id);
 				if (parent instanceof FunctionMemberDynamic) {
 					FunctionMemberDynamic fmParent = (FunctionMemberDynamic) parent;
