@@ -806,30 +806,6 @@ public final class Caster {
 		throw new CasterException(o, "number");
 	}
 
-	/**
-	 * cast an Object to an int value (primitive value type)
-	 * 
-	 * @param o Object to cast
-	 * @param defaultValue
-	 * @return casted int value
-	 */
-	public static int toIntValue(Object o, int defaultValue) {
-
-		if (o instanceof Number) return ((Number) o).intValue();
-		else if (o instanceof Boolean) return ((Boolean) o).booleanValue() ? 1 : 0;
-		else if (o instanceof CharSequence) return toIntValue(o.toString().trim(), defaultValue);
-		// else if(o instanceof Clob) return toIntValue(toString(o));
-		else if (o instanceof Character) return (((Character) o).charValue());
-		else if (o instanceof Castable) {
-			return (int) ((Castable) o).castToDoubleValue(defaultValue);
-
-		}
-		else if (o instanceof Date) return (int) new DateTimeImpl((Date) o).castToDoubleValue();
-		else if (o instanceof ObjectWrap) return toIntValue(((ObjectWrap) o).getEmbededObject(Integer.valueOf(defaultValue)), defaultValue);
-
-		return defaultValue;
-	}
-
 	public static int toIntValue(Integer i, int defaultValue) {
 		if (i == null) return defaultValue;
 		return i.intValue();
@@ -4843,6 +4819,12 @@ public final class Caster {
 		return Integer.valueOf(toIntValue(str));
 	}
 
+	public static Integer toInteger(String str, Integer defaultValue) {
+		Double d = toDouble(str, null);
+		if (d == null) return defaultValue;
+		return Integer.valueOf(d.intValue());
+	}
+
 	// used in bytecode genrator
 	public static Integer toInteger(int i) {
 		return Integer.valueOf(i);
@@ -4856,10 +4838,32 @@ public final class Caster {
 	 * @return Integer from Object
 	 */
 	public static Integer toInteger(Object o, Integer defaultValue) {
-		if (defaultValue != null) return Integer.valueOf(toIntValue(o, defaultValue.intValue()));
-		int res = toIntValue(o, Integer.MIN_VALUE);
-		if (res == Integer.MIN_VALUE) return defaultValue;
-		return Integer.valueOf(res);
+
+		if (o instanceof Number) return Integer.valueOf(((Number) o).intValue());
+		else if (o instanceof Boolean) return Integer.valueOf(((Boolean) o).booleanValue() ? 1 : 0);
+		else if (o instanceof CharSequence) return toInteger(o.toString().trim(), defaultValue);
+		// else if(o instanceof Clob) return toIntValue(toString(o));
+		else if (o instanceof Character) return Integer.valueOf(((Character) o).charValue());
+		else if (o instanceof Castable) {
+			return Integer.valueOf((int) ((Castable) o).castToDoubleValue(defaultValue));
+
+		}
+		else if (o instanceof Date) return Integer.valueOf((int) new DateTimeImpl((Date) o).castToDoubleValue());
+		else if (o instanceof ObjectWrap) return toInteger(((ObjectWrap) o).getEmbededObject(Integer.valueOf(defaultValue)), defaultValue);
+		return defaultValue;
+	}
+
+	/**
+	 * cast an Object to an int value (primitive value type)
+	 * 
+	 * @param o Object to cast
+	 * @param defaultValue
+	 * @return casted int value
+	 */
+	public static int toIntValue(Object o, int defaultValue) {
+		Integer i = toInteger(o, null);
+		if (i == null) return defaultValue;
+		return i.intValue();
 	}
 
 	/**
