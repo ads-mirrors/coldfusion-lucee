@@ -131,13 +131,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase"  labels="mysql" 	{
 			var MaxBigInt="9223372036854775807";
 			var MinUnsignedBigInt="0";
 			var UnsignedMaxBigInt="18446744073709551615";
-			var MinFloat="-3.402823466E+38";
-			var MaxFloat="3.402823466E+38";
+			var MinFloat="-3.4028235E38";
+			var MaxFloat="3.4028235E38";
 			var MinDouble="-1.7976931348623157E+308";
 			var MaxDouble="1.7976931348623157E+308";
 			var MinDecimal="-99999999999999.9999";
 			var MaxDecimal="99999999999999.9999";
-
 
 			try {
 
@@ -189,6 +188,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase"  labels="mysql" 	{
 				assertEquals(UnsignedMaxBigInt,""&qry.UnsignedMaxBigInt);
 				
 				assertEquals("java.lang.Float",qry.MinFloat[1].getClass().getName());
+				systemOutput(parseNumber(MinFloat),1,1);
+				systemOutput(parseNumber(qry.MinFloat),1,1);
+				systemOutput(toNumeric(qry.MinFloat),1,1);
 				assertEquals(MinFloat,qry.MinFloat);
 				if ( variables.preciseMath ) assertEquals(MinFloat,""&qry.MinFloat);
 				else assertEquals(toNumeric(MinFloat),""&qry.MinFloat);
