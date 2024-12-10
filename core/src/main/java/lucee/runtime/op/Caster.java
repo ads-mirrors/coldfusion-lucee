@@ -4845,8 +4845,12 @@ public final class Caster {
 		// else if(o instanceof Clob) return toIntValue(toString(o));
 		else if (o instanceof Character) return Integer.valueOf(((Character) o).charValue());
 		else if (o instanceof Castable) {
-			return Integer.valueOf((int) ((Castable) o).castToDoubleValue(defaultValue));
-
+			try {
+				return Integer.valueOf((int) ((Castable) o).castToDoubleValue());
+			}
+			catch (PageException e) {
+				return defaultValue;
+			}
 		}
 		else if (o instanceof Date) return Integer.valueOf((int) new DateTimeImpl((Date) o).castToDoubleValue());
 		else if (o instanceof ObjectWrap) return toInteger(((ObjectWrap) o).getEmbededObject(Integer.valueOf(defaultValue)), defaultValue);
