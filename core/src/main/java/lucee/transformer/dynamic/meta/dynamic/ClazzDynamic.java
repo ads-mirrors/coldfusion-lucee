@@ -57,7 +57,8 @@ public class ClazzDynamic extends Clazz {
 	private static Map<ClassLoader, String> clids = new IdentityHashMap<>();
 	private static String systemId;
 
-	private static Map<String, SoftReference<ClazzDynamic>> classes = new ConcurrentHashMap<>();
+	private static Map<Class, SoftReference<ClazzDynamic>> classes = new IdentityHashMap<>();
+	// private static Map<String, SoftReference<ClazzDynamic>> classes = new ConcurrentHashMap<>();
 
 	/*
 	 * private static double generateClassLoderId = 0; private static double path = 0; private static
@@ -77,13 +78,12 @@ public class ClazzDynamic extends Clazz {
 		 */
 
 		ClazzDynamic cd = null;
-		String id = generateClassLoderId(clazz);
-		String key = id + ":" + clazz.getName();
-		Reference<ClazzDynamic> sr = classes.get(key);
+		Reference<ClazzDynamic> sr = classes.get(clazz);
 		if (sr == null || (cd = sr.get()) == null) {
 			synchronized (clazz) {
-				sr = classes.get(key);
+				sr = classes.get(clazz);
 				if (sr == null || (cd = sr.get()) == null) {
+					String id = generateClassLoderId(clazz);
 					// generateClassLoderId += (SystemUtil.millis() - start);
 					// start = SystemUtil.millis();
 					StringBuilder sbClassPath = new StringBuilder();
@@ -102,7 +102,7 @@ public class ClazzDynamic extends Clazz {
 							// deserialize += (SystemUtil.millis() - start);
 							// start = SystemUtil.millis();
 							if (log != null) log.info("dynamic", "loaded metadata for [" + clazz.getName() + "] from serialized file:" + ser);
-							classes.put(key, new SoftReference<ClazzDynamic>(cd));
+							classes.put(clazz, new SoftReference<ClazzDynamic>(cd));
 							// put += (SystemUtil.millis() - start);
 							// start = SystemUtil.millis();
 						}
@@ -188,7 +188,7 @@ public class ClazzDynamic extends Clazz {
 	private ClazzDynamic(Class clazz, String clid, Log log) throws IOException {
 		this.clazz = clazz;
 		this.clid = clid;
-		Map<String, FunctionMember> members = _getFunctionMembers(this.clid, clazz, null, log);
+		Map<String, FunctionMember> members = _getFunctionMembers(this.clid, clazz, log);
 
 		LinkedList<FunctionMember> tmpMethods = new LinkedList<>();
 		LinkedList<FunctionMember> tmpDeclaredMethods = new LinkedList<>();
@@ -365,10 +365,9 @@ public class ClazzDynamic extends Clazz {
 		return list;
 	}
 
-	private static Map<String, FunctionMember> _getFunctionMembers(String clid, final Class clazz, Map<String, FunctionMember> membersInput, Log log) throws IOException {
+	private static Map<String, FunctionMember> _getFunctionMembers(String clid, final Class clazz, Log log) throws IOException {
 		String key = clid + ":" + clazz.getName();
-		if (membersInput == null) membersInput = new LinkedHashMap<>();
-		final Map<String, FunctionMember> members = membersInput;
+		final Map<String, FunctionMember> members = new LinkedHashMap<>();
 
 		Map<String, FunctionMember> existing = membersCollection.get(key);
 		if (existing != null) {
@@ -376,7 +375,6 @@ public class ClazzDynamic extends Clazz {
 				members.put(e.getKey(), e.getValue());
 			}
 			return members;
-
 		}
 
 		final String classPath = clazz.getName().replace('.', '/') + ".class";
@@ -405,7 +403,7 @@ public class ClazzDynamic extends Clazz {
 				if (interfaces != null && interfaces.length > 0) {
 					for (String interf: interfaces) {
 						try {
-							_getFunctionMembers(clid, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), members, log);
+							add(members, _getFunctionMembers(clid, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), log));
 						}
 						catch (Exception e) {
 							if (log != null) log.error("dynamic", e);
@@ -414,7 +412,7 @@ public class ClazzDynamic extends Clazz {
 				}
 				if (superName != null) {
 					try {
-						_getFunctionMembers(clid, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), members, log);
+						add(members, _getFunctionMembers(clid, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), log));
 					}
 					catch (IllegalArgumentException iae) {
 						String v = ASMUtil.getJavaVersionFromException(iae, null);
@@ -435,6 +433,12 @@ public class ClazzDynamic extends Clazz {
 				}
 
 				super.visit(version, access, name, signature, superName, interfaces);
+			}
+
+			private void add(Map<String, FunctionMember> members, Map<String, FunctionMember> add) {
+				for (Entry<String, FunctionMember> e: add.entrySet()) {
+					members.put(e.getKey(), e.getValue());
+				}
 			}
 
 			@Override
