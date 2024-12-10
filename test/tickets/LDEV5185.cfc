@@ -30,6 +30,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
                     expect(it.next()).toBe( "sorglos" );
                 }
             });
+            it(title = "checking overlap issue in cache", body = function( currentSpec ) {
+                getPageContext().getConfig().getConfigServerImpl().resetAll();
+            });
 
         });
     }
