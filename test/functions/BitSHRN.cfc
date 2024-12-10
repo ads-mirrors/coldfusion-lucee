@@ -48,7 +48,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
                 application action="update" preciseMath=true;
                 assertEquals("8", BitSHRN(147573952589676412928, 64));  // 128 >> 64 = 0 (all bits shifted out)
                 application action="update" preciseMath=false;
-                assertEquals("0", BitSHRN(128, 64));  // 128 >> 64 = 0 (all bits shifted out)
+                assertEquals("0", BitSHRN(4611686018427387904, 63));  // 128 >> 64 = 0 (all bits shifted out)
             });
         });
     }

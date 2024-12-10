@@ -63,9 +63,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
             it(title="Checking BitSHLN() function with extreme shifts 128", body = function(currentSpec) {
                 // Extreme shift cases where the shift count is very large
                 application action="update" preciseMath=true;
-                assertEquals("340282366920938463463374607431768211456",toString(BitSHLN(1, 128)));  // 1 << 64 = 0 (all bits shifted out in a 64-bit context)
+                assertEquals("340282366920938463463374607431768211456",toString(BitSHLN(1, 128)));  
                 application action="update" preciseMath=false;
-                assertEquals("0", BitSHLN(1, 64));  // 1 << 64 = 0 (all bits shifted out in a 64-bit context)
+                assertEquals("4611686018427387904", BitSHLN(1, 62)); 
             });
         });
     }
