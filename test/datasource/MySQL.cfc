@@ -188,25 +188,15 @@ component extends="org.lucee.cfml.test.LuceeTestCase"  labels="mysql" 	{
 				assertEquals(UnsignedMaxBigInt,qry.UnsignedMaxBigInt);
 				assertEquals(UnsignedMaxBigInt,""&qry.UnsignedMaxBigInt);
 				
-				// TODO we only test the types, because there is an issue with float that need fixing first
 				assertEquals("java.lang.Float",qry.MinFloat[1].getClass().getName());
-				/*
 				assertEquals(MinFloat,qry.MinFloat);
-				if ( variables.preciseMath )
-					assertEquals(MinFloat,""&qry.MinFloat);
-				else
-					assertEquals(toNumeric(MinFloat),""&qry.MinFloat);
-				*/
+				if ( variables.preciseMath ) assertEquals(MinFloat,""&qry.MinFloat);
+				else assertEquals(toNumeric(MinFloat),""&qry.MinFloat);
 				
-				// TODO we only test the types, because there is an issue with float that need fixing first
 				assertEquals("java.lang.Float",qry.MaxFloat[1].getClass().getName());
-				/*
 				assertEquals(MaxFloat,qry.MaxFloat);
-				if ( variables.preciseMath )
-					assertEquals(MaxFloat,""&qry.MaxFloat);
-				else
-					assertEquals(toNumeric(MaxFloat),""&qry.MaxFloat);
-				*/
+				if ( variables.preciseMath ) assertEquals(MaxFloat,""&qry.MaxFloat);
+				else assertEquals(toNumeric(MaxFloat),""&qry.MaxFloat);
 				
 				assertEquals("java.lang.Double",qry.MinDouble[1].getClass().getName());
 				assertEquals(MinDouble,qry.MinDouble);
