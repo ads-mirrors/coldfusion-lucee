@@ -224,7 +224,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 
 	private CFMLEngineImpl(CFMLEngineFactory factory, BundleCollection bc) {
 		String dumpPath = Caster.toString(SystemUtil.getSystemPropOrEnvVar("lucee.dump.threads", null), null);
-		if (dumpPath != null) {
+		if (!StringUtil.isEmpty(dumpPath, true)) {
 			int interval = Caster.toIntValue(SystemUtil.getSystemPropOrEnvVar("lucee.dump.threads.interval", null), 100);
 			long start = System.currentTimeMillis();
 			long max = Caster.toIntValue(SystemUtil.getSystemPropOrEnvVar("lucee.dump.threads.max", null), 10000);
@@ -1837,6 +1837,8 @@ public final class CFMLEngineImpl implements CFMLEngine {
 			String id = CreateUniqueId.invoke();
 			final String requestURI = (inWebRoot ? "" : ("/" + (isWeb ? "lucee" : "lucee-server"))) + "/" + context + "."
 					+ (lucee.runtime.config.Constants.getCFMLComponentExtension());
+			PageSource ps = config.getPageSourceExisting(null, null, requestURI, true, true, true, false);
+			if (ps == null) return;
 
 			// PageContext oldPC = ThreadLocalPageContext.get();
 			PageContext pc = null;

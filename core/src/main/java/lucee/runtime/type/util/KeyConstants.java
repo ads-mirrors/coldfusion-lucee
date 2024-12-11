@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import lucee.commons.io.SystemUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.KeyImpl;
@@ -3009,36 +3010,43 @@ public class KeyConstants {
 
 	private static Map<String, Key> _____keys;
 
-	static {
-		Field[] fields = KeyConstants.class.getFields();
-		_____keys = new ConcurrentHashMap<String, Key>();
-		for (int i = 0; i < fields.length; i++) {
-			if (fields[i].getType() != Key.class || !fields[i].getName().startsWith("_")) continue;
-			try {
-				_____keys.put(fields[i].getName().substring(1), (Key) fields[i].get(null));
-			}
-			catch (Throwable t) {
-				ExceptionUtil.rethrowIfNecessary(t);
+	public static Map<String, Key> getKeys() {
+		if (_____keys == null) {
+			synchronized (SystemUtil.createToken("KeyConstants", "getKeys")) {
+				if (_____keys == null) {
+					Field[] fields = KeyConstants.class.getFields();
+					_____keys = new ConcurrentHashMap<String, Key>();
+					for (int i = 0; i < fields.length; i++) {
+						if (fields[i].getType() != Key.class || !fields[i].getName().startsWith("_")) continue;
+						try {
+							_____keys.put(fields[i].getName().substring(1), (Key) fields[i].get(null));
+						}
+						catch (Throwable t) {
+							ExceptionUtil.rethrowIfNecessary(t);
+						}
+					}
+
+					copyTo(KeyImpl.getKeys());
+				}
 			}
 		}
-
-		copyTo(KeyImpl.getKeys());
-
+		return _____keys;
 	}
 
-	public static String getFieldName(String key) {
-		return _____keys.containsKey(key) ? "_" + key : null;
-	}
-
-	public static void copyTo(Map<String, Key> target) {
+	private static void copyTo(Map<String, Key> target) {
 		for (Entry<String, Key> e: _____keys.entrySet()) {
 			target.put(e.getKey(), e.getValue());
 		}
 	}
 
+	public static String getFieldName(String key) {
+		return getKeys().containsKey(key) ? "_" + key : null;
+	}
+
 	public static Key getKey(String key) {
-		Key k = _____keys.get(key);
+		Key k = getKeys().get(key);
 		if (k == null) return new KeyImpl(key);
 		return k;
 	}
+
 }
