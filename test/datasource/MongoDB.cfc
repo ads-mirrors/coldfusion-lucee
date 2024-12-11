@@ -117,9 +117,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase"  labels="mongodb"	{
 	public void function testMongoDBID() skip="isNotSupported" {
 		if(isNotSupported()) return;
 		var id = MongoDBID();
-		$assert.key(id,"date");
-		$assert.key(id,"timestamp");
-		$assert.key(id,"id");
+		assertEquals(structKeyExists(id,"date"),true);
+		assertEquals(structKeyExists(id,"timestamp"),true);
+		assertEquals(structKeyExists(id,"id"),true);
+		
 
 		var dateSeed = now().add("d",-1)
 		id = MongoDBID(dateSeed);

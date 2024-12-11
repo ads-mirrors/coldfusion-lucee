@@ -30,7 +30,6 @@ import lucee.runtime.PageContextImpl;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.ConfigWebPro;
-import lucee.runtime.listener.ApplicationContext;
 import lucee.runtime.listener.ApplicationContextSupport;
 import lucee.runtime.thread.ThreadUtil;
 
@@ -126,38 +125,15 @@ public final class ThreadLocalPageContext {
 
 	public static boolean preciseMath(PageContext pc) {
 		// pc provided
-		if (pc != null) {
-			ApplicationContext ac = pc.getApplicationContext();
-			if (ac instanceof ApplicationContextSupport) {
-				return ((ApplicationContextSupport) ac).getPreciseMath();
-			}
-			Config c = ThreadLocalConfig.get();
-			if (c instanceof ConfigPro) return ((ConfigPro) c).getPreciseMath();
-			return true;
-		}
+		if (pc != null) return ((ApplicationContextSupport) pc.getApplicationContext()).getPreciseMath();
+
 		// pc from current thread
 		pc = pcThreadLocal.get();
-		if (pc != null) {
-			ApplicationContext ac = pc.getApplicationContext();
-			if (ac instanceof ApplicationContextSupport) {
-				return ((ApplicationContextSupport) ac).getPreciseMath();
-			}
-			Config c = ThreadLocalConfig.get();
-			if (c instanceof ConfigPro) return ((ConfigPro) c).getPreciseMath();
-			return true;
-		}
+		if (pc != null) return ((ApplicationContextSupport) pc.getApplicationContext()).getPreciseMath();
 
 		// pc from parent thread
 		pc = pcThreadLocalInheritable.get();
-		if (pc != null) {
-			ApplicationContext ac = pc.getApplicationContext();
-			if (ac instanceof ApplicationContextSupport) {
-				return ((ApplicationContextSupport) ac).getPreciseMath();
-			}
-			Config c = ThreadLocalConfig.get();
-			if (c instanceof ConfigPro) return ((ConfigPro) c).getPreciseMath();
-			return true;
-		}
+		if (pc != null) return ((ApplicationContextSupport) pc.getApplicationContext()).getPreciseMath();
 
 		Config c = ThreadLocalConfig.get();
 		if (c instanceof ConfigPro) return ((ConfigPro) c).getPreciseMath();

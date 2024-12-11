@@ -25,6 +25,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -152,7 +155,6 @@ import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 import lucee.runtime.type.util.StructUtil;
 import lucee.runtime.type.util.UDFUtil;
-import lucee.transformer.dynamic.meta.Method;
 import lucee.transformer.library.ClassDefinitionImpl;
 import lucee.transformer.library.function.FunctionLibException;
 import lucee.transformer.library.tag.TagLibException;
@@ -3874,15 +3876,25 @@ public final class ConfigAdmin {
 	}
 
 	public void restart(ConfigServerImpl cs) throws PageException {
-		CFMLEngineFactory factory = cs.getEngine().getCFMLEngineFactory();
+		CFMLEngineFactory factory = cs.getCFMLEngine().getCFMLEngineFactory();
+
 		synchronized (factory) {
 			try {
-				Method m = Reflector.getDeclaredMethod(factory.getClass(), "_restart", new Class[0]);
-				if (m == null) throw new ApplicationException("Cannot restart Lucee.");
-				m.invoke(factory, new Object[0]);
+				// Get a lookup instance for accessing private methods
+				MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(factory.getClass(), MethodHandles.lookup());
+
+				// Define the method type (return type and parameter types)
+				MethodType methodType = MethodType.methodType(boolean.class);
+
+				// Find the private method handle
+				MethodHandle restartHandle = lookup.findVirtual(factory.getClass(), "_restart", methodType);
+
+				// Invoke the method handle
+				restartHandle.invoke(factory);
 			}
-			catch (Exception e) {
-				throw Caster.toPageException(e);
+			catch (Throwable t) {
+				ExceptionUtil.rethrowIfNecessary(t);
+				throw Caster.toPageException(t);
 			}
 		}
 	}

@@ -29,16 +29,19 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import lucee.aprint;
+import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
+import lucee.commons.io.res.ResourcesImpl;
 import lucee.commons.io.res.filter.ExtensionResourceFilter;
 import lucee.commons.io.res.filter.ResourceFilter;
 import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.ParentThreasRefThread;
+import lucee.commons.lang.StringUtil;
 import lucee.commons.net.http.httpclient.HTTPEngine4Impl;
 import lucee.runtime.CFMLFactoryImpl;
 import lucee.runtime.Mapping;
@@ -195,15 +198,49 @@ public final class Controler extends ParentThreasRefThread {
 		}
 	}
 
+	public static void dumpThreadPositions(String path) throws IOException {
+		Resource target = ResourcesImpl.getFileResourceProvider().getResource(path);
+
+		StackTraceElement[] stes;
+		String line;
+		List<StackTraceElement> elements;
+		for (Entry<Thread, StackTraceElement[]> e: Thread.getAllStackTraces().entrySet()) {
+			stes = e.getValue();
+			if (stes == null || stes.length == 0) continue;
+			elements = new ArrayList<>();
+			for (int i = 0; i < stes.length; i++) {
+				if (stes[i].getLineNumber() > 0) {
+					elements.add(stes[i]);
+				}
+			}
+			if (elements.size() == 0) continue;
+			// print.e(stes);
+			line = "{\"stack\":[";
+			String del = "";
+			for (StackTraceElement ste: elements) {
+				line += (del + "\"" + ste.getClassName() + "." + (StringUtil.isEmpty(ste.getMethodName()) ? "<init>" : ste.getMethodName()) + "():" + ste.getLineNumber() + "\"");
+				del = ",";
+			}
+
+			line += "],\"thread\":\"" + e.getKey().getName() + "\",\"id\":" + e.getKey().getId() + ",\"time\":" + System.currentTimeMillis() + "}\n";
+			IOUtil.write(target, line, CharsetUtil.UTF8, true);
+		}
+
+	}
+
 	private static void dumpThreads() {
 		aprint.e("==================== THREAD DUMP " + new Date() + " ====================");
 		for (Entry<Thread, StackTraceElement[]> e: Thread.getAllStackTraces().entrySet()) {
-			aprint.e(e.getKey().getName() + ":" + e.getKey().getId() + " " + e.getKey().getState()); 
+			aprint.e(e.getKey().getName() + ":" + e.getKey().getId() + " " + e.getKey().getState());
 			aprint.e(ExceptionUtil.getStacktrace(e.getValue()));
 			aprint.e("------------------------------------------------------------------");
 		}
 		aprint.e("==================================================================");
 
+	}
+
+	public static void main(String[] args) throws IOException {
+		dumpThreadPositions("/Users/mic/Tmp3/tmp/data.jsonl");
 	}
 
 	private void control(CFMLFactoryImpl[] factories, boolean firstRun, Log log) {
