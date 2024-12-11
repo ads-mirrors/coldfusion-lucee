@@ -541,6 +541,7 @@ public class RHExtension implements Serializable {
 		metadata.setCacheHandler(StringUtil.unwrap(attr.getValue("cache-handler")), logger);
 		metadata.setJDBC(StringUtil.unwrap(attr.getValue("jdbc")), logger);
 		metadata.setStartupHook(StringUtil.unwrap(attr.getValue("startup-hook")), logger);
+		metadata.setMaven(StringUtil.unwrap(attr.getValue("maven")), logger);
 		metadata.setMapping(StringUtil.unwrap(attr.getValue("mapping")), logger);
 		metadata.setEventGatewayInstances(StringUtil.unwrap(attr.getValue("event-gateway-instance")), logger);
 	}
@@ -579,6 +580,7 @@ public class RHExtension implements Serializable {
 		metadata.setCacheHandler(ConfigFactoryImpl.getAttr(data, "cacheHandler", "cache-handler"), logger);
 		metadata.setJDBC(ConfigFactoryImpl.getAttr(data, "jdbc"), logger);
 		metadata.setStartupHook(ConfigFactoryImpl.getAttr(data, "startup-hook"), logger);
+		metadata.setMaven(ConfigFactoryImpl.getAttr(data, "maven"), logger);
 		metadata.setMapping(ConfigFactoryImpl.getAttr(data, "mapping"), logger);
 		metadata.setEventGatewayInstances(ConfigFactoryImpl.getAttr(data, "eventGatewayInstance", "event-gateway-instance"), logger);
 	}
@@ -904,6 +906,10 @@ public class RHExtension implements Serializable {
 		// startup-hook
 		if (!StringUtil.isEmpty(metadata.getStartupHooksRaw())) el.setEL("startupHook", toStringForAttr(metadata.getStartupHooksRaw()));
 		else el.removeEL(KeyImpl.init("startupHook"));
+
+		// maven
+		if (!StringUtil.isEmpty(metadata.getMavenRaw())) el.setEL("maven", toStringForAttr(metadata.getMavenRaw()));
+		else el.removeEL(KeyImpl.init("maven"));
 
 		// mapping
 		if (!StringUtil.isEmpty(metadata.getMappingsRaw())) el.setEL("mapping", toStringForAttr(metadata.getMappingsRaw()));

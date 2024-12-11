@@ -115,6 +115,8 @@ import lucee.runtime.gateway.GatewayEntryImpl;
 import lucee.runtime.listener.AppListenerUtil;
 import lucee.runtime.listener.SerializationSettings;
 import lucee.runtime.monitor.Monitor;
+import lucee.runtime.mvn.MavenUtil;
+import lucee.runtime.mvn.MavenUtil.GAVSO;
 import lucee.runtime.net.proxy.ProxyData;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
@@ -699,6 +701,29 @@ public final class ConfigAdmin {
 			boolean toplevel, int listenerMode, int listenerType, boolean readOnly) throws ExpressionException, SecurityException {
 		checkWriteAccess();
 		_updateMapping(virtual, physical, archive, primary, inspect, inspectTemplateIntervalSlow, inspectTemplateIntervalFast, toplevel, listenerMode, listenerType, readOnly);
+	}
+
+	private void _updateMaven(MavenUtil.GAVSO gavso) {
+		Array maven = ConfigUtil.getAsArray("maven", ConfigUtil.getAsStruct("javasettings", root));
+
+		Iterator<?> it = maven.getIterator();
+		Struct el = null;
+		GAVSO existing;
+
+		while (it.hasNext()) {
+			el = Caster.toStruct(it.next(), null);
+			if (el == null) continue;
+			existing = MavenUtil.toGAVSO(el, null);
+			if (existing.equalIDAndVersion(gavso)) {
+				gavso.populate(el);
+				return;
+			}
+		}
+		maven.appendEL(gavso.populate(new StructImpl(Struct.TYPE_LINKED)));
+	}
+
+	private void _removeMaven(MavenUtil.GAVSO gavso) {
+		// MUST not sure if we really should remove them
 	}
 
 	private void _updateMapping(String virtual, String physical, String archive, String primary, short inspect, int inspectTemplateIntervalSlow, int inspectTemplateIntervalFast,
@@ -4986,6 +5011,16 @@ public final class ConfigAdmin {
 				}
 			}
 
+			// update maven
+			List<GAVSO> mavens = rhext.getMetadata().getMaven();
+			if (!ArrayUtil.isEmpty(mavens)) {
+				for (MavenUtil.GAVSO gavso: mavens) {
+					_updateMaven(gavso);
+					reloadNecessary = true;
+					logger.debug("extension", "Update Maven [" + gavso + "]");
+				}
+			}
+
 			// update mapping
 			List<Map<String, String>> mappings = rhext.getMetadata().getMappings();
 			if (!ArrayUtil.isEmpty(mappings)) {
@@ -5338,6 +5373,15 @@ public final class ConfigAdmin {
 						ConfigUtil.getConfigServerImpl(config).resetStartups();
 					}
 					logger.info("extension", "Remove Startup Hook [" + cd + "] from extension [" + rhe.getMetadata().getName() + ":" + rhe.getVersion() + "]");
+				}
+			}
+
+			// remove maven
+			List<GAVSO> mavens = rhe.getMetadata().getMaven();
+			if (!ArrayUtil.isEmpty(mavens)) {
+				for (GAVSO gavso: mavens) {
+					_removeMaven(gavso);
+					logger.info("extension", "remove Maven [" + gavso + "]");
 				}
 			}
 

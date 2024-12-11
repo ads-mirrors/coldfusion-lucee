@@ -257,6 +257,60 @@ public class MavenUtil {
 			}
 			return sb.toString();
 		}
+
+		/**
+		 * same group and artifact id, but version MAY differ
+		 * 
+		 * @param gavso
+		 * @return
+		 */
+		public boolean equalID(GAVSO other) {
+			if (!g.equalsIgnoreCase(other.g)) return false;
+			if (!a.equalsIgnoreCase(other.a)) return false;
+
+			return true;
+		}
+
+		public boolean equalIDAndVersion(GAVSO other) {
+			if (!v.equalsIgnoreCase(other.v)) return false;
+			return equalID(other);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (!(obj instanceof GAVSO)) return false;
+			GAVSO other = (GAVSO) obj;
+			if (!equalIDAndVersion(other)) return false;
+
+			if (s != null) {
+				if (other.s == null) return false;
+				if (!s.equalsIgnoreCase(other.s)) return false;
+			}
+			if (other.s != null) {
+				if (s == null) return false;
+				if (!other.s.equalsIgnoreCase(s)) return false;
+			}
+
+			if (o != null) {
+				if (other.o == null) return false;
+				if (!o.equalsIgnoreCase(other.o)) return false;
+			}
+			if (other.o != null) {
+				if (o == null) return false;
+				if (!other.o.equalsIgnoreCase(o)) return false;
+			}
+
+			return true;
+		}
+
+		public Struct populate(Struct sct) {
+			if (!StringUtil.isEmpty(g, true)) sct.setEL(KeyConstants._groupId, g);
+			if (!StringUtil.isEmpty(a, true)) sct.setEL(KeyConstants._artifactId, a);
+			if (!StringUtil.isEmpty(v, true)) sct.setEL(KeyConstants._version, v);
+			if (!StringUtil.isEmpty(s, true)) sct.setEL(KeyConstants._scope, s);
+			if (!StringUtil.isEmpty(o, true)) sct.setEL(KeyConstants._optional, o);
+			return sct;
+		}
 	}
 
 	public static boolean allowed(int allowedScopes, int scope) {
@@ -468,6 +522,16 @@ public class MavenUtil {
 		default:
 			return defaultValue;
 		}
+	}
+
+	public static List<GAVSO> toGAVSOs(String str) {
+		String[] arr = ListUtil.listToStringArray(str, ',');
+		List<GAVSO> list = new ArrayList<>();
+		for (String el: arr) {
+			GAVSO gavso = toGAVSO(el, null);
+			if (gavso != null) list.add(gavso);
+		}
+		return list;
 	}
 
 	public static GAVSO toGAVSO(Object obj, GAVSO defaultValue) {

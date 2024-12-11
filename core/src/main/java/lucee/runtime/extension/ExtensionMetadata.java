@@ -7,6 +7,8 @@ import java.util.Map;
 import lucee.Info;
 import lucee.commons.io.log.Log;
 import lucee.commons.lang.StringUtil;
+import lucee.runtime.mvn.MavenUtil;
+import lucee.runtime.mvn.MavenUtil.GAVSO;
 import lucee.runtime.osgi.BundleInfo;
 import lucee.runtime.osgi.VersionRange;
 import lucee.runtime.type.util.ListUtil;
@@ -76,6 +78,9 @@ public class ExtensionMetadata {
 	private List<Map<String, String>> mappings;
 	private String mappingsRaw;
 
+	private List<MavenUtil.GAVSO> maven;
+	private String mavenRaw;
+
 	private List<Map<String, Object>> eventGatewayInstances;
 	private String eventGatewayInstancesRaw;
 
@@ -109,6 +114,22 @@ public class ExtensionMetadata {
 			mappingsRaw = str;
 		}
 		if (mappings == null) mappings = new ArrayList<Map<String, String>>();
+	}
+
+	public List<MavenUtil.GAVSO> getMaven() {
+		return maven;
+	}
+
+	public String getMavenRaw() {
+		return mavenRaw;
+	}
+
+	public void setMaven(String str, Log logger) {
+		mavenRaw = str;
+		if (!StringUtil.isEmpty(str, true)) {
+			maven = MavenUtil.toGAVSOs(str);
+		}
+		if (maven == null) maven = new ArrayList<GAVSO>();
 	}
 
 	public List<Map<String, String>> getStartupHooks() {
