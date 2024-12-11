@@ -28,11 +28,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import lucee.aprint;
+import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
+import lucee.commons.io.res.ResourcesImpl;
 import lucee.commons.io.res.filter.ExtensionResourceFilter;
 import lucee.commons.io.res.filter.ResourceFilter;
 import lucee.commons.io.res.util.ResourceUtil;
@@ -194,15 +196,70 @@ public final class Controler extends ParentThreasRefThread {
 		}
 	}
 
+	public static void dumpThreadPositions(String path) throws IOException {
+		Resource target = ResourcesImpl.getFileResourceProvider().getResource(path);
+
+		StackTraceElement[] stes;
+		StackTraceElement ste, n1, n2, n3, n4, n5, n6;
+		String line;
+		for (Entry<Thread, StackTraceElement[]> e: Thread.getAllStackTraces().entrySet()) {
+			stes = e.getValue();
+			if (stes == null || stes.length == 0) continue;
+			ste = null;
+			n1 = null;
+			n2 = null;
+			n3 = null;
+			n4 = null;
+			n5 = null;
+			n6 = null;
+
+			for (int i = 0; i < stes.length; i++) {
+				if (stes[i].getLineNumber() > 0) {
+					ste = stes[i];
+					if (i + 1 < stes.length) n1 = stes[i + 1];
+					if (i + 2 < stes.length) n2 = stes[i + 2];
+					if (i + 3 < stes.length) n3 = stes[i + 3];
+					if (i + 4 < stes.length) n4 = stes[i + 4];
+					if (i + 5 < stes.length) n5 = stes[i + 5];
+					if (i + 6 < stes.length) n6 = stes[i + 6];
+					break;
+				}
+			}
+			if (ste == null) continue;
+			// print.e(stes);
+			line = "{\"stack\":[\"" + ste.getClassName() + ":" + ste.getLineNumber() + "." + ste.getMethodName() + "\"" +
+
+					(n1 == null ? "" : ",\"" + n1.getClassName() + ":" + n1.getLineNumber() + "." + n1.getMethodName() + "\"") +
+
+					(n2 == null ? "" : ",\"" + n2.getClassName() + ":" + n2.getLineNumber() + "." + n2.getMethodName() + "\"") +
+
+					(n3 == null ? "" : ",\"" + n3.getClassName() + ":" + n3.getLineNumber() + "." + n3.getMethodName() + "\"") +
+
+					(n4 == null ? "" : ",\"" + n4.getClassName() + ":" + n4.getLineNumber() + "." + n4.getMethodName() + "\"") +
+
+					(n5 == null ? "" : ",\"" + n5.getClassName() + ":" + n5.getLineNumber() + "." + n5.getMethodName() + "\"") +
+
+					(n6 == null ? "" : ",\"" + n6.getClassName() + ":" + n6.getLineNumber() + "." + n6.getMethodName() + "\"") +
+
+					"],\"thread\":\"" + e.getKey().getName() + "\",\"id\":" + e.getKey().getId() + ",\"time\":" + System.currentTimeMillis() + "}\n";
+			IOUtil.write(target, line, CharsetUtil.UTF8, true);
+		}
+
+	}
+
 	private static void dumpThreads() {
 		aprint.e("==================== THREAD DUMP " + new Date() + " ====================");
 		for (Entry<Thread, StackTraceElement[]> e: Thread.getAllStackTraces().entrySet()) {
-			aprint.e(e.getKey().getName() + ":" + e.getKey().getId() + " " + e.getKey().getState()); 
+			aprint.e(e.getKey().getName() + ":" + e.getKey().getId() + " " + e.getKey().getState());
 			aprint.e(ExceptionUtil.getStacktrace(e.getValue()));
 			aprint.e("------------------------------------------------------------------");
 		}
 		aprint.e("==================================================================");
 
+	}
+
+	public static void main(String[] args) throws IOException {
+		dumpThreadPositions("/Users/mic/Tmp3/tmp/data.jsonl");
 	}
 
 	private void control(CFMLFactoryImpl[] factories, boolean firstRun, Log log) {

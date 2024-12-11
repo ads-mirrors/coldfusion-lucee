@@ -223,6 +223,36 @@ public final class CFMLEngineImpl implements CFMLEngine {
 	}
 
 	private CFMLEngineImpl(CFMLEngineFactory factory, BundleCollection bc) {
+		String dumpPath = Caster.toString(SystemUtil.getSystemPropOrEnvVar("lucee.dump.threads", null), null);
+		if (dumpPath != null) {
+			int interval = Caster.toIntValue(SystemUtil.getSystemPropOrEnvVar("lucee.dump.threads.interval", null), 100);
+			long start = System.currentTimeMillis();
+			long max = Caster.toIntValue(SystemUtil.getSystemPropOrEnvVar("lucee.dump.threads.max", null), 10000);
+
+			// Create a new thread to run the task
+			Thread thread = new Thread(() -> {
+				while (true) {
+					try {
+						if ((start + max) < System.currentTimeMillis()) {
+							break;
+						}
+						// Call the dumpThreadPositions method
+						Controler.dumpThreadPositions(dumpPath);
+
+						// Pause for the specified interval
+						SystemUtil.sleep(interval);
+					}
+					catch (IOException e) {
+						e.printStackTrace();
+						SystemUtil.sleep(1000);
+					}
+				}
+			});
+
+			// Start the thread
+			thread.start();
+		}
+
 		FACTORY = this.factory = factory;
 		this.bundleCollection = bc;
 
