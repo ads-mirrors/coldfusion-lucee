@@ -3872,7 +3872,7 @@ public final class ConfigAdmin {
 				MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(factory.getClass(), MethodHandles.lookup());
 
 				// Define the method type (return type and parameter types)
-				MethodType methodType = MethodType.methodType(void.class);
+				MethodType methodType = MethodType.methodType(boolean.class);
 
 				// Find the private method handle
 				MethodHandle restartHandle = lookup.findVirtual(factory.getClass(), "_restart", methodType);
