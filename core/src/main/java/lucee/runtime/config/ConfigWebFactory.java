@@ -5630,7 +5630,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			config.setFullNullSupport(fns);
 
 			// precise math
-			boolean pm = hasCS ? configServer.getPreciseMath() : true;
+			boolean pm = hasCS ? configServer.getPreciseMath() : false;
 			if (mode == ConfigPro.MODE_STRICT) {
 				pm = true;
 			}
