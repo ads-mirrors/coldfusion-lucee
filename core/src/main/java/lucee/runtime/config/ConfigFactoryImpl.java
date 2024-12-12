@@ -3296,17 +3296,24 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 					// we force a new installation if we have switched from single to multi mode, because extension can
 					// act completely different if that is the case
 					rhe = RHExtension.installExtension(config, id, Caster.toString(child.get(KeyConstants._version, null), null), res, false);
-					startBundles(config, rhe, firstLoad);
-
+					// startBundles(config, rhe, firstLoad);
+					rhe.asyncInit();
 					extensions.add(rhe);
-					installedFiles.add(rhe.getExtensionFile());
-					installedIds.add(rhe.getId());
+					// installedFiles.add(rhe.getExtensionFile());
+					// installedIds.add(rhe.getId());
 				}
 				catch (Throwable t) {
 					ExceptionUtil.rethrowIfNecessary(t);
 					log(config, t);
 					continue;
 				}
+			}
+
+			// start bundles
+			for (RHExtension ext: extensions) {
+				installedFiles.add(ext.getExtensionFile());
+				installedIds.add(ext.getId());
+				startBundles(config, ext, firstLoad);
 			}
 
 			// uninstall extensions no longer used

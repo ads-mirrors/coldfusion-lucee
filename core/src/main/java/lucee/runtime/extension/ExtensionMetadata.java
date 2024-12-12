@@ -7,9 +7,11 @@ import java.util.Map;
 import lucee.Info;
 import lucee.commons.io.log.Log;
 import lucee.commons.lang.StringUtil;
+import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.mvn.MavenUtil;
 import lucee.runtime.mvn.MavenUtil.GAVSO;
 import lucee.runtime.op.Caster;
+import lucee.runtime.op.Decision;
 import lucee.runtime.osgi.BundleInfo;
 import lucee.runtime.osgi.VersionRange;
 import lucee.runtime.type.util.ListUtil;
@@ -299,7 +301,11 @@ public class ExtensionMetadata {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(String id, String label) throws ApplicationException {
+		id = StringUtil.unwrap(id);
+		if (!Decision.isUUId(id)) {
+			throw new ApplicationException("The Extension [" + label + "] has no valid id defined (" + id + "),id must be a valid UUID.");
+		}
 		this.id = id;
 	}
 
@@ -307,16 +313,24 @@ public class ExtensionMetadata {
 		return version;
 	}
 
-	public void setVersion(String version) {
+	public void setVersion(String version, String label) throws ApplicationException {
+		if (StringUtil.isEmpty(version)) {
+			throw new ApplicationException("cannot deploy extension [" + label + "], this Extension has no version information.");
+		}
 		this.version = version;
+
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setName(String name, String label) throws ApplicationException {
+		name = StringUtil.unwrap(name);
+		if (StringUtil.isEmpty(name)) {
+			throw new ApplicationException("The Extension [" + label + "] has no name defined, a name is necesary.");
+		}
+		this.name = name.trim();
 	}
 
 	public String getDescription() {

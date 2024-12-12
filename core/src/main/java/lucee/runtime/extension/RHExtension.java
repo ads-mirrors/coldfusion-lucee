@@ -44,6 +44,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
 import lucee.Info;
+import lucee.print;
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.IOUtil;
@@ -88,6 +89,7 @@ import lucee.runtime.osgi.BundleInfo;
 import lucee.runtime.osgi.OSGiUtil;
 import lucee.runtime.osgi.OSGiUtil.BundleDefinition;
 import lucee.runtime.osgi.VersionRange;
+import lucee.runtime.thread.ThreadUtil;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.KeyImpl;
@@ -125,9 +127,13 @@ public class RHExtension implements Serializable {
 	private static Set<String> metadataFilesChecked = new HashSet<>();
 	private static Map<String, RHExtension> instances = new ConcurrentHashMap<>();
 
-	private ExtensionMetadata metadata = new ExtensionMetadata();
+	private ExtensionMetadata metadata;
 	private Resource extensionFile;
-	public boolean softLoaded = false;
+
+	// may not exist, only used for init
+	private String _id;
+	private String _version;
+	private Config config;
 
 	public static RHExtension getInstance(Config config, Resource ext, RHExtension defaultValue) {
 		RHExtension instance = instances.get(ext.getAbsolutePath());
@@ -144,7 +150,7 @@ public class RHExtension implements Serializable {
 		return instance;
 	}
 
-	public static RHExtension getInstance(Config config, Resource ext) throws PageException, IOException, BundleException, ConverterException {
+	public static RHExtension getInstance(Config config, Resource ext) {
 		RHExtension instance = instances.get(ext.getAbsolutePath());
 		if (instance == null) {
 			instance = new RHExtension(config, ext);
@@ -154,13 +160,7 @@ public class RHExtension implements Serializable {
 		return instance;
 	}
 
-	private RHExtension(Config config, Resource ext) throws PageException, IOException, BundleException, ConverterException {
-		this.extensionFile = ext;
-
-		init(config);
-	}
-
-	public static RHExtension getInstance(Config config, String id, String version) throws PageException, IOException, BundleException, ConverterException {
+	public static RHExtension getInstance(Config config, String id, String version) throws PageException {
 		RHExtension instance = instances.get(id + ":" + version);
 		if (instance == null) {
 			instance = new RHExtension(config, id, version);
@@ -171,47 +171,85 @@ public class RHExtension implements Serializable {
 
 	}
 
-	public RHExtension(Config config, String id, String version) throws PageException, IOException, BundleException, ConverterException {
-
-		Struct data = getMetaData(config, id, version, (Struct) null);
-		this.extensionFile = getExtensionInstalledFile(config, id, version, false);
-		// do we have usefull meta data?
-		if (data != null && data.containsKey("startBundles")) {
-			try {
-				readManifestConfig(config, id, data, extensionFile.getAbsolutePath(), null);
-				softLoaded = true;
-				return;
-			}
-			catch (InvalidVersion iv) {
-				throw iv;
-			}
-			catch (ApplicationException ae) {
-			}
-		}
-
-		init(config);
-		softLoaded = false;
+	private RHExtension(Config config, Resource ext) {
+		this.config = config;
+		this.extensionFile = ext;
 	}
 
-	private void init(Config config) throws PageException, IOException, BundleException, ConverterException {
+	public RHExtension(Config config, String id, String version) throws PageException {
+		this.config = config;
+		this._id = id;
+		this._version = version;
+		this.extensionFile = getExtensionInstalledFile(config, id, version, false);
+		// softLoaded = false;
+	}
+
+	public void asyncInit() {
+		ThreadUtil.getThread(() -> {
+			try {
+				getMetadata();
+			}
+			catch (Exception e) {
+				print.e(e);
+				LogUtil.log("extension", e);
+			}
+		}, true).start();
+
+	}
+
+	public ExtensionMetadata getMetadata() {
+		if (metadata == null) {
+			synchronized (this) {
+				if (metadata == null) {
+					ExtensionMetadata tmp = new ExtensionMetadata();
+					if (_id != null && _version != null) {
+						// do we have usefull meta data?
+						Struct data = getMetaData(config, _id, _version, (Struct) null);
+						if (data != null && data.containsKey("startBundles")) {
+							try {
+								readManifestConfig(config, tmp, _id, data, extensionFile.getAbsolutePath(), null);
+
+								return metadata = tmp;
+							}
+							catch (InvalidVersion iv) {
+								throw new PageRuntimeException(iv);
+							}
+							catch (ApplicationException ae) {
+							}
+						}
+					}
+
+					// init from file
+					try {
+						init(config, tmp, extensionFile);
+					}
+					catch (Exception e) {
+						throw new PageRuntimeException(Caster.toPageException(e)); // MUST improve exception handling, no runtime
+					}
+					return metadata = tmp;
+				}
+			}
+		}
+		return this.metadata;
+	}
+
+	private static void init(Config config, ExtensionMetadata metadata, Resource extensionFile) throws PageException, IOException, BundleException, ConverterException {
 		// make sure the config is registerd with the thread
 		if (ThreadLocalPageContext.getConfig() == null) ThreadLocalConfig.register(config);
 		// is it a web or server context?
-		this.metadata.setType(config instanceof ConfigWeb ? "web" : "server");
 
-		load(config, this.extensionFile);
+		load(config, metadata, extensionFile);
 		// write metadata to XML
-		Resource mdf = getMetaDataFile(config, getId(), getVersion());
+		Resource mdf = getMetaDataFile(config, metadata.getId(), metadata.getVersion());
 		if (!metadataFilesChecked.contains(mdf.getAbsolutePath()) && !mdf.isFile()) {
 			Struct data = new StructImpl(Struct.TYPE_LINKED);
-			populate(data, true);
+			populate(metadata, data, true);
 			storeMetaData(mdf, data);
 			metadataFilesChecked.add(mdf.getAbsolutePath()); // that way we only have to check this once
 		}
 	}
 
-	public static RHExtension installExtension(ConfigPro config, String id, String version, String resource, boolean force)
-			throws PageException, IOException, BundleException, ConverterException {
+	public static RHExtension installExtension(ConfigPro config, String id, String version, String resource, boolean force) throws PageException, IOException {
 
 		// get installed res
 		Resource res = StringUtil.isEmpty(version) ? null : getExtensionInstalledFile(config, id, version, false);
@@ -318,7 +356,7 @@ public class RHExtension implements Serializable {
 	private void addToAvailable(Config config, Resource ext) {
 		if (getId() == null) {
 			try {
-				load(config, ext);
+				load(config, getMetadata(), ext);
 			}
 			catch (Exception e) {
 				LogUtil.log("deploy", "extension", e);
@@ -383,7 +421,10 @@ public class RHExtension implements Serializable {
 
 	}
 
-	private void load(Config config, Resource ext) throws IOException, BundleException, ApplicationException {
+	private static void load(Config config, ExtensionMetadata metadata, Resource ext) throws IOException, BundleException, ApplicationException {
+
+		metadata.setType(config instanceof ConfigWeb ? "web" : "server");
+
 		// no we read the content of the zip
 		ZipInputStream zis = new ZipInputStream(IOUtil.toBufferedInputStream(ext.getInputStream()));
 		ZipEntry entry;
@@ -482,27 +523,27 @@ public class RHExtension implements Serializable {
 
 		// read the manifest
 		if (manifest == null) throw new ApplicationException("The Extension [" + ext + "] is invalid,no Manifest file was found at [META-INF/MANIFEST.MF].");
-		readManifestConfig(config, manifest, ext.getAbsolutePath(), _img);
+		readManifestConfig(config, metadata, manifest, ext.getAbsolutePath(), _img);
 
-		this.metadata.setJars(jars.toArray(new String[jars.size()]));
-		this.metadata.setFlds(flds.toArray(new String[flds.size()]));
-		this.metadata.setTlds(tlds.toArray(new String[tlds.size()]));
-		this.metadata.setTags(tags.toArray(new String[tags.size()]));
-		this.metadata.setFunctions(functions.toArray(new String[functions.size()]));
-		this.metadata.setEventGateways(gateways.toArray(new String[gateways.size()]));
-		this.metadata.setFunctions(archives.toArray(new String[archives.size()]));
+		metadata.setJars(jars.toArray(new String[jars.size()]));
+		metadata.setFlds(flds.toArray(new String[flds.size()]));
+		metadata.setTlds(tlds.toArray(new String[tlds.size()]));
+		metadata.setTags(tags.toArray(new String[tags.size()]));
+		metadata.setFunctions(functions.toArray(new String[functions.size()]));
+		metadata.setEventGateways(gateways.toArray(new String[gateways.size()]));
+		metadata.setFunctions(archives.toArray(new String[archives.size()]));
 
-		this.metadata.setContexts(contexts.toArray(new String[contexts.size()]));
-		this.metadata.setConfigs(configs.toArray(new String[configs.size()]));
-		this.metadata.setWebContexts(webContexts.toArray(new String[webContexts.size()]));
-		this.metadata.setApplications(applications.toArray(new String[applications.size()]));
-		this.metadata.setComponents(components.toArray(new String[components.size()]));
-		this.metadata.setPlugins(plugins.toArray(new String[plugins.size()]));
-		this.metadata.setBundles(bundles.toArray(new BundleInfo[bundles.size()]));
+		metadata.setContexts(contexts.toArray(new String[contexts.size()]));
+		metadata.setConfigs(configs.toArray(new String[configs.size()]));
+		metadata.setWebContexts(webContexts.toArray(new String[webContexts.size()]));
+		metadata.setApplications(applications.toArray(new String[applications.size()]));
+		metadata.setComponents(components.toArray(new String[components.size()]));
+		metadata.setPlugins(plugins.toArray(new String[plugins.size()]));
+		metadata.setBundles(bundles.toArray(new BundleInfo[bundles.size()]));
 
 	}
 
-	private void readManifestConfig(Config config, Manifest manifest, String label, String _img) throws ApplicationException {
+	private static void readManifestConfig(Config config, ExtensionMetadata metadata, Manifest manifest, String label, String _img) throws ApplicationException {
 		boolean isWeb = config instanceof ConfigWeb;
 		metadata.setType(isWeb ? "web" : "server");
 		Log logger = ThreadLocalPageContext.getLog(config, "deploy");
@@ -511,11 +552,11 @@ public class RHExtension implements Serializable {
 		Attributes attr = manifest.getMainAttributes();
 
 		metadata.setSymbolicName(StringUtil.unwrap(attr.getValue("symbolic-name")));
-		readName(label, StringUtil.unwrap(attr.getValue("name")));
+		metadata.setName(StringUtil.unwrap(attr.getValue("name")), label);
 		label = metadata.getName();
-		readVersion(label, StringUtil.unwrap(attr.getValue("version")));
-		label += " : " + getVersion();
-		readId(label, StringUtil.unwrap(attr.getValue("id")));
+		metadata.setVersion(StringUtil.unwrap(attr.getValue("version")), label);
+		label += " : " + metadata.getVersion();
+		metadata.setId(StringUtil.unwrap(attr.getValue("id")), label);
 		metadata.setDescription(StringUtil.unwrap(attr.getValue("description")));
 		metadata.setTrial(Caster.toBooleanValue(StringUtil.unwrap(attr.getValue("trial")), false));
 		if (_img == null) _img = StringUtil.unwrap(attr.getValue("image"));
@@ -542,7 +583,7 @@ public class RHExtension implements Serializable {
 		metadata.setEventGatewayInstances(StringUtil.unwrap(attr.getValue("event-gateway-instance")), logger);
 	}
 
-	private void readManifestConfig(Config config, String id, Struct data, String label, String _img) throws ApplicationException {
+	private static void readManifestConfig(Config config, ExtensionMetadata metadata, String id, Struct data, String label, String _img) throws ApplicationException {
 		boolean isWeb = config instanceof ConfigWeb;
 		metadata.setType(isWeb ? "web" : "server");
 
@@ -550,11 +591,11 @@ public class RHExtension implements Serializable {
 		Info info = ConfigUtil.getEngine(config).getInfo();
 
 		metadata.setSymbolicName(ConfigFactoryImpl.getAttr(data, "symbolicName", "symbolic-name"));
-		readName(label, ConfigFactoryImpl.getAttr(data, "name"));
-		label = getMetadata().getName();
-		readVersion(label, ConfigFactoryImpl.getAttr(data, "version"));
-		label += " : " + getVersion();
-		readId(label, StringUtil.isEmpty(id) ? ConfigFactoryImpl.getAttr(data, "id") : id);
+		metadata.setName(ConfigFactoryImpl.getAttr(data, "name"), label);
+		label = metadata.getName();
+		metadata.setVersion(ConfigFactoryImpl.getAttr(data, "version"), label);
+		label += " : " + metadata.getVersion();
+		metadata.setId(StringUtil.isEmpty(id) ? ConfigFactoryImpl.getAttr(data, "id") : id, label);
 		metadata.setDescription(ConfigFactoryImpl.getAttr(data, "description"));
 		metadata.setTrial(Caster.toBooleanValue(ConfigFactoryImpl.getAttr(data, "trial"), false));
 		if (_img == null) _img = ConfigFactoryImpl.getAttr(data, "image");
@@ -586,49 +627,26 @@ public class RHExtension implements Serializable {
 	}
 
 	public void validate(Info info) throws ApplicationException {
-		VersionRange minCoreVersion = metadata.getMinCoreVersion();
+		VersionRange minCoreVersion = getMetadata().getMinCoreVersion();
 		if (minCoreVersion != null && !minCoreVersion.isWithin(info.getVersion())) {
-			throw new InvalidVersion("The Extension [" + metadata.getName() + "] cannot be loaded, " + Constants.NAME + " Version must be at least [" + minCoreVersion.toString()
-					+ "], version is [" + info.getVersion().toString() + "].");
+			throw new InvalidVersion("The Extension [" + getMetadata().getName() + "] cannot be loaded, " + Constants.NAME + " Version must be at least ["
+					+ minCoreVersion.toString() + "], version is [" + info.getVersion().toString() + "].");
 		}
-		if (metadata.getMinLoaderVersion() > SystemUtil.getLoaderVersion()) {
-			throw new InvalidVersion("The Extension [" + metadata.getName() + "] cannot be loaded, " + Constants.NAME + " Loader Version must be at least ["
-					+ metadata.getMinLoaderVersion() + "], update the Lucee.jar first.");
+		if (getMetadata().getMinLoaderVersion() > SystemUtil.getLoaderVersion()) {
+			throw new InvalidVersion("The Extension [" + getMetadata().getName() + "] cannot be loaded, " + Constants.NAME + " Loader Version must be at least ["
+					+ getMetadata().getMinLoaderVersion() + "], update the Lucee.jar first.");
 		}
 	}
 
 	public boolean isValidFor(Info info) {
-		VersionRange minCoreVersion = metadata.getMinCoreVersion();
+		VersionRange minCoreVersion = getMetadata().getMinCoreVersion();
 		if (minCoreVersion != null && !minCoreVersion.isWithin(info.getVersion())) {
 			return false;
 		}
-		if (metadata.getMinLoaderVersion() > SystemUtil.getLoaderVersion()) {
+		if (getMetadata().getMinLoaderVersion() > SystemUtil.getLoaderVersion()) {
 			return false;
 		}
 		return true;
-	}
-
-	private void readId(String label, String id) throws ApplicationException {
-		id = StringUtil.unwrap(id);
-		if (!Decision.isUUId(id)) {
-			throw new ApplicationException("The Extension [" + label + "] has no valid id defined (" + id + "),id must be a valid UUID.");
-		}
-		metadata.setId(id);
-	}
-
-	private void readVersion(String label, String version) throws ApplicationException {
-		if (StringUtil.isEmpty(version)) {
-			throw new ApplicationException("cannot deploy extension [" + label + "], this Extension has no version information.");
-		}
-		metadata.setVersion(version);
-	}
-
-	private void readName(String label, String str) throws ApplicationException {
-		str = StringUtil.unwrap(str);
-		if (StringUtil.isEmpty(str, true)) {
-			throw new ApplicationException("The Extension [" + label + "] has no name defined, a name is necesary.");
-		}
-		metadata.setName(str.trim());
 	}
 
 	public void deployBundles(Config config, boolean load) throws IOException, BundleException {
@@ -642,7 +660,7 @@ public class RHExtension implements Serializable {
 			while ((entry = zis.getNextEntry()) != null) {
 				path = entry.getName();
 				fileName = fileName(entry);
-				type = metadata.getType();
+				type = getMetadata().getType();
 				// jars
 				if (!entry.isDirectory() && (startsWith(path, type, "jars") || startsWith(path, type, "jar") || startsWith(path, type, "bundles")
 						|| startsWith(path, type, "bundle") || startsWith(path, type, "lib") || startsWith(path, type, "libs")) && (StringUtil.endsWithIgnoreCase(path, ".jar"))) {
@@ -675,9 +693,15 @@ public class RHExtension implements Serializable {
 		return res;
 	}
 
-	private Struct getMetaData(Config config, String id, String version, Struct defaultValue) throws PageException, IOException {
+	private static Struct getMetaData(Config config, String id, String version, Struct defaultValue) {
 		Resource file = getMetaDataFile(config, id, version);
-		if (file.isFile()) return Caster.toStruct(new JSONExpressionInterpreter().interpret(null, IOUtil.toString(file, CharsetUtil.UTF8)));
+		if (file.isFile()) {
+			try {
+				return Caster.toStruct(new JSONExpressionInterpreter().interpret(null, IOUtil.toString(file, CharsetUtil.UTF8)));
+			}
+			catch (Exception e) {
+			}
+		}
 		return defaultValue;
 	}
 
@@ -707,7 +731,7 @@ public class RHExtension implements Serializable {
 		return count.toInt();
 	}
 
-	public static void correctExtensions(Config config) throws PageException, IOException, BundleException, ConverterException {
+	public static void correctExtensions(Config config) throws PageException {
 		// reduce the amount of extension stored in available
 		{
 			int max = 2;
@@ -803,7 +827,12 @@ public class RHExtension implements Serializable {
 	}
 
 	public void populate(Struct el, boolean full) {
-		String id = getId();
+		populate(getMetadata(), el, full);
+	}
+
+	public static void populate(ExtensionMetadata metadata, Struct el, boolean full) {
+
+		String id = metadata.getId();
 		String name = metadata.getName();
 		if (StringUtil.isEmpty(name)) name = id;
 
@@ -811,16 +840,16 @@ public class RHExtension implements Serializable {
 
 		el.setEL("id", id);
 		el.setEL("name", name);
-		el.setEL("version", getVersion());
+		el.setEL("version", metadata.getVersion());
 
 		if (!full) return;
 
 		// newly added
 		// start bundles (IMPORTANT:this key is used to reconize a newer entry, so do not change)
-		el.setEL("startBundles", Caster.toString(getMetadata().isStartBundles()));
+		el.setEL("startBundles", Caster.toString(metadata.isStartBundles()));
 
 		// release type
-		el.setEL("releaseType", toReleaseType(getMetadata().getReleaseType(), "all"));
+		el.setEL("releaseType", toReleaseType(metadata.getReleaseType(), "all"));
 
 		// Description
 		if (StringUtil.isEmpty(metadata.getDescription())) el.setEL("description", toStringForAttr(metadata.getDescription()));
@@ -834,7 +863,7 @@ public class RHExtension implements Serializable {
 		else el.removeEL(KeyImpl.init("image"));
 
 		// Categories
-		String[] cats = getMetadata().getCategories();
+		String[] cats = metadata.getCategories();
 		if (!ArrayUtil.isEmpty(cats)) {
 			StringBuilder sb = new StringBuilder();
 			for (String cat: cats) {
@@ -907,7 +936,7 @@ public class RHExtension implements Serializable {
 		else el.removeEL(KeyImpl.init("eventGatewayInstances"));
 	}
 
-	private String toStringForAttr(String str) {
+	private static String toStringForAttr(String str) {
 		if (str == null) return "";
 		return str;
 	}
@@ -1043,11 +1072,11 @@ public class RHExtension implements Serializable {
 	}
 
 	public String getId() {
-		return metadata.getId();
+		return getMetadata().getId();
 	}
 
 	public String getVersion() {
-		return metadata.getVersion();
+		return getMetadata().getVersion();
 	}
 
 	private static Manifest toManifest(Config config, InputStream is, Manifest defaultValue) {
@@ -1142,10 +1171,6 @@ public class RHExtension implements Serializable {
 		int index = name.indexOf('/');
 		if (index == -1) return name;
 		return name.substring(index + 1);
-	}
-
-	public ExtensionMetadata getMetadata() {
-		return this.metadata;
 	}
 
 	public Resource getExtensionFile() {
@@ -1397,4 +1422,5 @@ public class RHExtension implements Serializable {
 			}
 		}
 	}
+
 }
