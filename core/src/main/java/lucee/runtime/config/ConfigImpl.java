@@ -6106,12 +6106,12 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (preciseMath == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getPreciseMath")) {
 				if (preciseMath == null) {
-					boolean pm = true;
+					boolean pm = false;
 					String str = ConfigFactoryImpl.getAttr(root, "preciseMath");
 					if (StringUtil.isEmpty(str, true)) str = SystemUtil.getSystemPropOrEnvVar("lucee.precise.math", null);
 
 					if (!StringUtil.isEmpty(str, true)) {
-						pm = Caster.toBooleanValue(str, true);
+						pm = Caster.toBooleanValue(str, false);
 					}
 					preciseMath = pm;
 				}
