@@ -130,8 +130,8 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 
 	private int permGenCleanUpThreshold = 60;
 
-	final TagLib coreTLDs;
-	final FunctionLib coreFLDs;
+	private TagLib coreTLDs;
+	private FunctionLib coreFLDs;
 
 	private final UpdateInfo updateInfo;
 
@@ -166,8 +166,6 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 	protected ConfigServerImpl(CFMLEngineImpl engine, Map<String, CFMLFactory> initContextes, Map<String, CFMLFactory> contextes, Resource configDir, Resource configFile,
 			UpdateInfo updateInfo, boolean essentialOnly, boolean newVersion) throws TagLibException, FunctionLibException {
 		super(configDir, configFile, newVersion);
-		this.coreTLDs = TagLibFactory.loadFromSystem(id);
-		this.coreFLDs = FunctionLibFactory.loadFromSystem(id);
 
 		this.engine = engine;
 		if (!essentialOnly) engine.setConfigServerImpl(this);
@@ -176,6 +174,28 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		this.rootDir = configDir;
 		// instance=this;
 		this.updateInfo = updateInfo;
+	}
+
+	FunctionLib getCoreFLDs() throws FunctionLibException {
+		if (coreFLDs == null) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "getCoreFLDs")) {
+				if (coreFLDs == null) {
+					this.coreFLDs = FunctionLibFactory.loadFromSystem(id);
+				}
+			}
+		}
+		return coreFLDs;
+	}
+
+	TagLib getCoreTLDs() throws TagLibException {
+		if (coreTLDs == null) {
+			synchronized (SystemUtil.createToken("ConfigServerImpl", "getCoreTLDs")) {
+				if (coreTLDs == null) {
+					this.coreTLDs = TagLibFactory.loadFromSystem(id);
+				}
+			}
+		}
+		return coreTLDs;
 	}
 
 	public void setRoot(Struct root) {

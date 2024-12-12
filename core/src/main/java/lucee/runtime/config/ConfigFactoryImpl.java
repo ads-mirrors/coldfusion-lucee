@@ -2146,7 +2146,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 
 			// init TLDS
 			{
-				config.setTLDs(ConfigUtil.duplicate(new TagLib[] { ConfigUtil.getConfigServerImpl(config).coreTLDs }, false));
+				config.setTLDs(ConfigUtil.duplicate(new TagLib[] { ConfigUtil.getConfigServerImpl(config).getCoreTLDs() }, false)); // MUST duplicate needed?
 			}
 
 			// TLD Dir
@@ -2222,7 +2222,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 
 			// Init flds
 			{
-				config.setFLDs(ConfigUtil.getConfigServerImpl(config).coreFLDs.duplicate(false));
+				config.setFLDs(ConfigUtil.getConfigServerImpl(config).getCoreFLDs().duplicate(false)); // MUST duplicate needed?
 
 			}
 
@@ -3296,24 +3296,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 					// we force a new installation if we have switched from single to multi mode, because extension can
 					// act completely different if that is the case
 					rhe = RHExtension.installExtension(config, id, Caster.toString(child.get(KeyConstants._version, null), null), res, false);
-					if (rhe.getMetadata().isStartBundles()) {
-						if (!firstLoad) {
-							rhe.deployBundles(config, true);
-						}
-						else {
-							try {
-								BundleInfo[] bundles = rhe.getMetadata().getBundles();
-								if (bundles != null) {
-									for (BundleInfo bi: bundles) {
-										OSGiUtil.loadBundleFromLocal(bi.getSymbolicName(), bi.getVersion(), null, false, null);
-									}
-								}
-							}
-							catch (Exception ex) {
-								rhe.deployBundles(config, true);
-							}
-						}
-					}
+					startBundles(config, rhe, firstLoad);
 
 					extensions.add(rhe);
 					installedFiles.add(rhe.getExtensionFile());
@@ -3356,6 +3339,28 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, t);
 		}
+	}
+
+	private static void startBundles(ConfigServerImpl config, RHExtension rhe, boolean firstLoad) throws IOException, BundleException {
+		if (rhe.getMetadata().isStartBundles()) {
+			if (!firstLoad) {
+				rhe.deployBundles(config, true);
+			}
+			else {
+				try {
+					BundleInfo[] bundles = rhe.getMetadata().getBundles();
+					if (bundles != null) {
+						for (BundleInfo bi: bundles) {
+							OSGiUtil.loadBundleFromLocal(bi.getSymbolicName(), bi.getVersion(), null, false, null);
+						}
+					}
+				}
+				catch (Exception ex) {
+					rhe.deployBundles(config, true);
+				}
+			}
+		}
+
 	}
 
 	public static List<ExtensionDefintion> loadExtensionDefinition(ConfigImpl config, Struct root) {
