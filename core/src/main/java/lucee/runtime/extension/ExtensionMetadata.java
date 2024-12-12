@@ -9,6 +9,7 @@ import lucee.commons.io.log.Log;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.mvn.MavenUtil;
 import lucee.runtime.mvn.MavenUtil.GAVSO;
+import lucee.runtime.op.Caster;
 import lucee.runtime.osgi.BundleInfo;
 import lucee.runtime.osgi.VersionRange;
 import lucee.runtime.type.util.ListUtil;
@@ -29,6 +30,7 @@ public class ExtensionMetadata {
 	private boolean startBundles;
 	private BundleInfo[] bundles;
 	private VersionRange minCoreVersion;
+	private double minLoaderVersion;
 
 	private String[] jars;
 	private String[] flds;
@@ -364,6 +366,14 @@ public class ExtensionMetadata {
 
 	public void setMinCoreVersion(String str, Info info) {
 		this.minCoreVersion = StringUtil.isEmpty(str, true) ? null : new VersionRange(str);
+	}
+
+	public double getMinLoaderVersion() {
+		return minLoaderVersion;
+	}
+
+	public void setMinLoaderVersion(String str, Info info) {
+		minLoaderVersion = Caster.toDoubleValue(str, 0);
 	}
 
 	public String getImage() {

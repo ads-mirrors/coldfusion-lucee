@@ -123,16 +123,11 @@ public class RHExtension implements Serializable {
 	private static final ExtensionResourceFilter LEX_FILTER = new ExtensionResourceFilter("lex");
 
 	private static Set<String> metadataFilesChecked = new HashSet<>();
+	private static Map<String, RHExtension> instances = new ConcurrentHashMap<>();
 
 	private ExtensionMetadata metadata = new ExtensionMetadata();
-
 	private Resource extensionFile;
-
-	private double minLoaderVersion;
-
 	public boolean softLoaded = false;
-
-	private static Map<String, RHExtension> instances = new ConcurrentHashMap<>();
 
 	public static RHExtension getInstance(Config config, Resource ext, RHExtension defaultValue) {
 		RHExtension instance = instances.get(ext.getAbsolutePath());
@@ -160,7 +155,9 @@ public class RHExtension implements Serializable {
 	}
 
 	private RHExtension(Config config, Resource ext) throws PageException, IOException, BundleException, ConverterException {
-		init(config, ext);
+		this.extensionFile = ext;
+
+		init(config);
 	}
 
 	public static RHExtension getInstance(Config config, String id, String version) throws PageException, IOException, BundleException, ConverterException {
@@ -192,18 +189,17 @@ public class RHExtension implements Serializable {
 			}
 		}
 
-		init(config, this.extensionFile);
+		init(config);
 		softLoaded = false;
 	}
 
-	private void init(Config config, Resource ext) throws PageException, IOException, BundleException, ConverterException {
+	private void init(Config config) throws PageException, IOException, BundleException, ConverterException {
 		// make sure the config is registerd with the thread
 		if (ThreadLocalPageContext.getConfig() == null) ThreadLocalConfig.register(config);
 		// is it a web or server context?
 		this.metadata.setType(config instanceof ConfigWeb ? "web" : "server");
-		this.extensionFile = ext;
 
-		load(config, ext);
+		load(config, this.extensionFile);
 		// write metadata to XML
 		Resource mdf = getMetaDataFile(config, getId(), getVersion());
 		if (!metadataFilesChecked.contains(mdf.getAbsolutePath()) && !mdf.isFile()) {
@@ -528,7 +524,7 @@ public class RHExtension implements Serializable {
 		if (StringUtil.isEmpty(cat, true)) cat = StringUtil.unwrap(attr.getValue("categories"));
 		metadata.setCategories(cat);
 		metadata.setMinCoreVersion(StringUtil.unwrap(attr.getValue("lucee-core-version")), info);
-		readLoaderVersion(label, StringUtil.unwrap(attr.getValue("lucee-loader-version")));
+		metadata.setMinLoaderVersion(StringUtil.unwrap(attr.getValue("lucee-loader-version")), info);
 		metadata.setStartBundles(Caster.toBooleanValue(StringUtil.unwrap(attr.getValue("start-bundles")), true));
 
 		metadata.setAMF(StringUtil.unwrap(attr.getValue("amf")), logger);
@@ -567,7 +563,7 @@ public class RHExtension implements Serializable {
 		if (StringUtil.isEmpty(cat, true)) cat = ConfigFactoryImpl.getAttr(data, "categories");
 		metadata.setCategories(cat);
 		metadata.setMinCoreVersion(ConfigFactoryImpl.getAttr(data, "luceeCoreVersion", "lucee-core-version"), info);
-		readLoaderVersion(label, ConfigFactoryImpl.getAttr(data, "luceeLoaderVersion", "lucee-loader-version"));
+		metadata.setMinLoaderVersion(ConfigFactoryImpl.getAttr(data, "luceeCoreVersion", "lucee-loader-version"), info);
 		metadata.setStartBundles(Caster.toBooleanValue(ConfigFactoryImpl.getAttr(data, "startBundles", "start-bundles"), true));
 
 		metadata.setAMF(ConfigFactoryImpl.getAttr(data, "amf"), logger);
@@ -585,15 +581,6 @@ public class RHExtension implements Serializable {
 		metadata.setEventGatewayInstances(ConfigFactoryImpl.getAttr(data, "eventGatewayInstance", "event-gateway-instance"), logger);
 	}
 
-	private void readLoaderVersion(String label, String str) {
-		minLoaderVersion = Caster.toDoubleValue(str, 0);
-		/*
-		 * if (minLoaderVersion > SystemUtil.getLoaderVersion()) { throw new InvalidVersion(
-		 * "The Extension [" + label + "] cannot be loaded, " + Constants.NAME +
-		 * " Loader Version must be at least [" + str + "], update the Lucee.jar first."); }
-		 */
-	}
-
 	public void validate(Config config) throws ApplicationException {
 		validate(ConfigUtil.getEngine(config).getInfo());
 	}
@@ -604,9 +591,9 @@ public class RHExtension implements Serializable {
 			throw new InvalidVersion("The Extension [" + metadata.getName() + "] cannot be loaded, " + Constants.NAME + " Version must be at least [" + minCoreVersion.toString()
 					+ "], version is [" + info.getVersion().toString() + "].");
 		}
-		if (minLoaderVersion > SystemUtil.getLoaderVersion()) {
-			throw new InvalidVersion("The Extension [" + metadata.getName() + "] cannot be loaded, " + Constants.NAME + " Loader Version must be at least [" + minLoaderVersion
-					+ "], update the Lucee.jar first.");
+		if (metadata.getMinLoaderVersion() > SystemUtil.getLoaderVersion()) {
+			throw new InvalidVersion("The Extension [" + metadata.getName() + "] cannot be loaded, " + Constants.NAME + " Loader Version must be at least ["
+					+ metadata.getMinLoaderVersion() + "], update the Lucee.jar first.");
 		}
 	}
 
@@ -615,7 +602,7 @@ public class RHExtension implements Serializable {
 		if (minCoreVersion != null && !minCoreVersion.isWithin(info.getVersion())) {
 			return false;
 		}
-		if (minLoaderVersion > SystemUtil.getLoaderVersion()) {
+		if (metadata.getMinLoaderVersion() > SystemUtil.getLoaderVersion()) {
 			return false;
 		}
 		return true;
@@ -864,7 +851,7 @@ public class RHExtension implements Serializable {
 		else el.removeEL(KeyImpl.init("luceeCoreVersion"));
 
 		// loader version
-		if (minLoaderVersion > 0) el.setEL("loaderVersion", Caster.toString(minLoaderVersion));
+		if (metadata.getMinLoaderVersion() > 0) el.setEL("loaderVersion", Caster.toString(metadata.getMinLoaderVersion()));
 		else el.removeEL(KeyImpl.init("loaderVersion"));
 
 		// amf
