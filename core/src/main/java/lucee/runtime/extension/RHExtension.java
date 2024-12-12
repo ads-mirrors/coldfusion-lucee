@@ -136,39 +136,41 @@ public class RHExtension implements Serializable {
 	private Config config;
 
 	public static RHExtension getInstance(Config config, Resource ext, RHExtension defaultValue) {
-		RHExtension instance = instances.get(ext.getAbsolutePath());
-		if (instance == null) {
-			try {
-				instance = new RHExtension(config, ext);
-			}
-			catch (Exception e) {
-				return defaultValue;
-			}
-			instances.put(instance.getId() + ":" + instance.getVersion(), instance);
-			instances.put(ext.getAbsolutePath(), instance);
+		try {
+			return getInstance(config, ext);
 		}
-		return instance;
+		catch (Exception e) {
+			return defaultValue;
+		}
+	}
+
+	public static RHExtension getInstance(Config config, ExtensionDefintion ext) throws PageException {
+		Resource src = ext.getSource(null);
+		if (src != null) {
+			RHExtension instance = instances.get(src.getAbsolutePath());
+			if (instance == null) {
+				if (ext.getId() != null) {
+					instance = new RHExtension(config, src, ext.getId(), ext.getVersion()).asyncInit();
+				}
+				else instance = new RHExtension(config, src).asyncInit();
+				instances.put(src.getAbsolutePath(), instance);
+			}
+			return instance;
+		}
+		return getInstance(config, ext.getId(), ext.getVersion());
 	}
 
 	public static RHExtension getInstance(Config config, Resource ext) {
 		RHExtension instance = instances.get(ext.getAbsolutePath());
 		if (instance == null) {
-			instance = new RHExtension(config, ext);
-			instances.put(instance.getId() + ":" + instance.getVersion(), instance);
+			instance = new RHExtension(config, ext).asyncInit();
 			instances.put(ext.getAbsolutePath(), instance);
 		}
 		return instance;
 	}
 
 	public static RHExtension getInstance(Config config, String id, String version) throws PageException {
-		RHExtension instance = instances.get(id + ":" + version);
-		if (instance == null) {
-			instance = new RHExtension(config, id, version);
-			instances.put(instance.getId() + ":" + instance.getVersion(), instance);
-			instances.put(instance.extensionFile.getAbsolutePath(), instance);
-		}
-		return instance;
-
+		return getInstance(config, new ExtensionDefintion(id, version).setSource(config, getExtensionInstalledFile(config, id, version, false)));
 	}
 
 	private RHExtension(Config config, Resource ext) {
@@ -176,7 +178,7 @@ public class RHExtension implements Serializable {
 		this.extensionFile = ext;
 	}
 
-	public RHExtension(Config config, String id, String version) throws PageException {
+	private RHExtension(Config config, String id, String version) throws PageException {
 		this.config = config;
 		this._id = id;
 		this._version = version;
@@ -184,23 +186,33 @@ public class RHExtension implements Serializable {
 		// softLoaded = false;
 	}
 
-	public void asyncInit() {
+	private RHExtension(Config config, Resource ext, String id, String version) {
+		this.config = config;
+		this.extensionFile = ext;
+		this._id = id;
+		this._version = version;
+	}
+
+	private RHExtension asyncInit() {
 		ThreadUtil.getThread(() -> {
 			try {
 				getMetadata();
+				// if (addTo != null) addTo.put(md.getId() + ":" + md.getVersion(), this);
+
 			}
 			catch (Exception e) {
 				print.e(e);
 				LogUtil.log("extension", e);
 			}
 		}, true).start();
-
+		return this;
 	}
 
 	public ExtensionMetadata getMetadata() {
 		if (metadata == null) {
 			synchronized (this) {
 				if (metadata == null) {
+					print.e("> " + extensionFile + " " + Thread.currentThread().getId());
 					ExtensionMetadata tmp = new ExtensionMetadata();
 					if (_id != null && _version != null) {
 						// do we have usefull meta data?
@@ -226,6 +238,8 @@ public class RHExtension implements Serializable {
 					catch (Exception e) {
 						throw new PageRuntimeException(Caster.toPageException(e)); // MUST improve exception handling, no runtime
 					}
+					print.e("< " + extensionFile + " " + Thread.currentThread().getId());
+					if (Thread.currentThread().getId() == 1L) print.ds();
 					return metadata = tmp;
 				}
 			}
@@ -240,7 +254,7 @@ public class RHExtension implements Serializable {
 
 		load(config, metadata, extensionFile);
 		// write metadata to XML
-		Resource mdf = getMetaDataFile(config, metadata.getId(), metadata.getVersion());
+		Resource mdf = getMetaDataFile(config, metadata._getId(), metadata._getVersion());
 		if (!metadataFilesChecked.contains(mdf.getAbsolutePath()) && !mdf.isFile()) {
 			Struct data = new StructImpl(Struct.TYPE_LINKED);
 			populate(metadata, data, true);
@@ -257,10 +271,10 @@ public class RHExtension implements Serializable {
 
 		if (!installed) {
 			if (!StringUtil.isEmpty(resource) && (res = ResourceUtil.toResourceExisting(config, resource, null)) != null) {
-				return DeployHandler.deployExtension(config, res, false, true, RHExtension.ACTION_COPY);
+				return DeployHandler.deployExtension(config, new ExtensionDefintion(id, version).setSource(config, res), null, false, true, true, new RefBooleanImpl());
 			}
 			else if (!StringUtil.isEmpty(id)) {
-				return DeployHandler.deployExtension(config, new ExtensionDefintion(id, version), null, false, true, true, new RefBooleanImpl());
+				return DeployHandler.deployExtension(config, new ExtensionDefintion(id, version), null, false, true, true, new RefBooleanImpl()); // MUSTT
 			}
 			else {
 				throw new IOException("cannot install extension based on the given data [id:" + id + ";version:" + version + ";resource:" + resource + "]");
@@ -270,7 +284,7 @@ public class RHExtension implements Serializable {
 		else if (force) {
 			return DeployHandler.deployExtension(config, res, false, true, RHExtension.ACTION_NONE);
 		}
-		return new RHExtension(config, res);
+		return getInstance(config, new ExtensionDefintion(id, version).setSource(config, res));
 	}
 
 	public static boolean isInstalled(Config config, String id, String version) throws PageException {
@@ -354,14 +368,6 @@ public class RHExtension implements Serializable {
 	}
 
 	private void addToAvailable(Config config, Resource ext) {
-		if (getId() == null) {
-			try {
-				load(config, getMetadata(), ext);
-			}
-			catch (Exception e) {
-				LogUtil.log("deploy", "extension", e);
-			}
-		}
 		if (ext == null || ext.length() == 0 || getId() == null) return;
 		Log logger = ThreadLocalPageContext.getLog(config, "deploy");
 		Resource res;
@@ -422,6 +428,13 @@ public class RHExtension implements Serializable {
 	}
 
 	private static void load(Config config, ExtensionMetadata metadata, Resource ext) throws IOException, BundleException, ApplicationException {
+
+		// print.e("-------" + ext);
+		// long start = System.currentTimeMillis();
+		// JarFile jf = new JarFile(ResourceUtil.toFile(ext));
+		// jf.getManifest();
+		// print.e("jarfile:" + (System.currentTimeMillis() - start));
+		// start = System.currentTimeMillis();
 
 		metadata.setType(config instanceof ConfigWeb ? "web" : "server");
 
@@ -520,7 +533,8 @@ public class RHExtension implements Serializable {
 		finally {
 			IOUtil.close(zis);
 		}
-
+		// print.e("zip:" + (System.currentTimeMillis() - start));
+		// start = System.currentTimeMillis();
 		// read the manifest
 		if (manifest == null) throw new ApplicationException("The Extension [" + ext + "] is invalid,no Manifest file was found at [META-INF/MANIFEST.MF].");
 		readManifestConfig(config, metadata, manifest, ext.getAbsolutePath(), _img);
@@ -555,7 +569,7 @@ public class RHExtension implements Serializable {
 		metadata.setName(StringUtil.unwrap(attr.getValue("name")), label);
 		label = metadata.getName();
 		metadata.setVersion(StringUtil.unwrap(attr.getValue("version")), label);
-		label += " : " + metadata.getVersion();
+		label += " : " + metadata._getVersion();
 		metadata.setId(StringUtil.unwrap(attr.getValue("id")), label);
 		metadata.setDescription(StringUtil.unwrap(attr.getValue("description")));
 		metadata.setTrial(Caster.toBooleanValue(StringUtil.unwrap(attr.getValue("trial")), false));
@@ -594,7 +608,7 @@ public class RHExtension implements Serializable {
 		metadata.setName(ConfigFactoryImpl.getAttr(data, "name"), label);
 		label = metadata.getName();
 		metadata.setVersion(ConfigFactoryImpl.getAttr(data, "version"), label);
-		label += " : " + metadata.getVersion();
+		label += " : " + metadata._getVersion();
 		metadata.setId(StringUtil.isEmpty(id) ? ConfigFactoryImpl.getAttr(data, "id") : id, label);
 		metadata.setDescription(ConfigFactoryImpl.getAttr(data, "description"));
 		metadata.setTrial(Caster.toBooleanValue(ConfigFactoryImpl.getAttr(data, "trial"), false));
@@ -743,7 +757,7 @@ public class RHExtension implements Serializable {
 			List<Pair<RHExtension, Resource>> versions;
 			if (resources != null) {
 				for (Resource r: resources) {
-					ext = new RHExtension(config, r);
+					ext = getInstance(config, r);
 					versions = map.get(ext.getId());
 					if (versions == null) map.put(ext.getId(), versions = new ArrayList<>());
 					versions.add(new Pair<RHExtension, Resource>(ext, r));
@@ -793,7 +807,7 @@ public class RHExtension implements Serializable {
 		int rt;
 		RHExtension xmlExt;
 		for (int i = 0; i < resources.length; i++) {
-			ext = new RHExtension(config, resources[i]);
+			ext = getInstance(config, resources[i]);
 			xmlExt = xmlExtensions.get(ext.getId());
 			if (xmlExt != null && (xmlExt.getVersion() + "").equals(ext.getVersion() + "")) continue;
 			rt = ext.getMetadata().getReleaseType();
@@ -832,7 +846,7 @@ public class RHExtension implements Serializable {
 
 	public static void populate(ExtensionMetadata metadata, Struct el, boolean full) {
 
-		String id = metadata.getId();
+		String id = metadata._getId();
 		String name = metadata.getName();
 		if (StringUtil.isEmpty(name)) name = id;
 
@@ -840,7 +854,7 @@ public class RHExtension implements Serializable {
 
 		el.setEL("id", id);
 		el.setEL("name", name);
-		el.setEL("version", metadata.getVersion());
+		el.setEL("version", metadata._getVersion());
 
 		if (!full) return;
 
@@ -991,13 +1005,13 @@ public class RHExtension implements Serializable {
 	private void populate(Query qry) throws PageException {
 		int row = qry.addRow();
 		ExtensionMetadata md = getMetadata();
-		qry.setAt(KeyConstants._id, row, md.getId());
+		qry.setAt(KeyConstants._id, row, md._getId());
 		qry.setAt(KeyConstants._name, row, md.getName());
 		qry.setAt(KeyConstants._symbolicName, row, md.getSymbolicName());
 		qry.setAt(KeyConstants._image, row, md.getImage());
 		qry.setAt(KeyConstants._type, row, md.getType());
 		qry.setAt(KeyConstants._description, row, md.getDescription());
-		qry.setAt(KeyConstants._version, row, md.getVersion() == null ? null : md.getVersion().toString());
+		qry.setAt(KeyConstants._version, row, md._getVersion() == null ? null : md._getVersion().toString());
 		qry.setAt(KeyConstants._trial, row, md.isTrial());
 		qry.setAt(KeyConstants._releaseType, row, toReleaseType(md.getReleaseType(), "all"));
 		// qry.setAt(JARS, row,Caster.toArray(getJars()));
@@ -1030,12 +1044,12 @@ public class RHExtension implements Serializable {
 	public Struct toStruct() throws PageException {
 		ExtensionMetadata md = getMetadata();
 		Struct sct = new StructImpl();
-		sct.set(KeyConstants._id, md.getId());
+		sct.set(KeyConstants._id, md._getId());
 		sct.set(KeyConstants._symbolicName, md.getSymbolicName());
 		sct.set(KeyConstants._name, md.getName());
 		sct.set(KeyConstants._image, md.getImage());
 		sct.set(KeyConstants._description, md.getDescription());
-		sct.set(KeyConstants._version, md.getVersion() == null ? null : md.getVersion().toString());
+		sct.set(KeyConstants._version, md._getVersion() == null ? null : md._getVersion().toString());
 		sct.set(KeyConstants._trial, md.isTrial());
 		sct.set(KeyConstants._releaseType, toReleaseType(md.getReleaseType(), "all"));
 		// sct.set(JARS, row,Caster.toArray(getJars()));
@@ -1072,11 +1086,13 @@ public class RHExtension implements Serializable {
 	}
 
 	public String getId() {
-		return getMetadata().getId();
+		if (metadata == null && _id != null) return _id;
+		return getMetadata()._getId();
 	}
 
 	public String getVersion() {
-		return getMetadata().getVersion();
+		if (metadata == null && _version != null) return _version;
+		return getMetadata()._getVersion();
 	}
 
 	private static Manifest toManifest(Config config, InputStream is, Manifest defaultValue) {
@@ -1285,7 +1301,7 @@ public class RHExtension implements Serializable {
 				if (!trg.isFile()) continue;
 
 				try {
-					return new RHExtension(c, trg).toExtensionDefinition();
+					return getInstance(c, trg).toExtensionDefinition();
 				}
 				catch (Exception e) {
 					e.printStackTrace();
@@ -1330,7 +1346,7 @@ public class RHExtension implements Serializable {
 					if (!trg.isFile()) continue;
 
 					try {
-						return new RHExtension(config, trg).toExtensionDefinition();
+						return getInstance(config, trg).toExtensionDefinition();
 					}
 					catch (Exception e) {
 						e.printStackTrace();
@@ -1372,7 +1388,7 @@ public class RHExtension implements Serializable {
 
 	public ExtensionDefintion toExtensionDefinition() {
 		ExtensionMetadata md = getMetadata();
-		ExtensionDefintion ed = new ExtensionDefintion(this, md.getId(), md.getVersion());
+		ExtensionDefintion ed = new ExtensionDefintion(this, getId(), getVersion());
 		ed.setParam("symbolic-name", md.getSymbolicName());
 		ed.setParam("description", md.getDescription());
 		if (extensionFile != null) ed.setSource(null, extensionFile);
@@ -1382,7 +1398,7 @@ public class RHExtension implements Serializable {
 	@Override
 	public String toString() {
 		ExtensionMetadata md = getMetadata();
-		ExtensionDefintion ed = new ExtensionDefintion(this, md.getId(), md.getVersion());
+		ExtensionDefintion ed = new ExtensionDefintion(this, getId(), getVersion());
 		ed.setParam("symbolic-name", md.getSymbolicName());
 		ed.setParam("description", md.getDescription());
 		return ed.toString();

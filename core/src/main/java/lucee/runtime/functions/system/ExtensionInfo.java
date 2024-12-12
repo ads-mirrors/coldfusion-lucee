@@ -51,9 +51,9 @@ public class ExtensionInfo extends BIF implements Function {
 			if (ext.getId().equalsIgnoreCase(id) || ext.getMetadata().getSymbolicName().equalsIgnoreCase(id)) {
 
 				ExtensionMetadata md = ext.getMetadata();
-				String ver = md.getVersion().toString();
+				String ver = ext.getVersion().toString();
 				String sName = md.getSymbolicName();
-				sct.set(KeyConstants._id, md.getId());
+				sct.set(KeyConstants._id, ext.getId());
 				sct.set(SYMBOLIC_NAME, sName);
 				sct.set(KeyConstants._name, md.getName());
 				sct.set(KeyConstants._image, md.getImage());

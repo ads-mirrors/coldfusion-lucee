@@ -1,18 +1,15 @@
 package lucee.runtime.extension;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.config.Config;
-import lucee.runtime.converter.ConverterException;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.osgi.OSGiUtil;
@@ -113,9 +110,10 @@ public class ExtensionDefintion {
 		if (rhe.getExtensionFile() != null) this.source = rhe.getExtensionFile();
 	}
 
-	public void setSource(Config config, Resource source) {
+	public ExtensionDefintion setSource(Config config, Resource source) {
 		this.config = config;
 		this.source = source;
+		return this;
 	}
 
 	public RHExtension toRHExtension(RHExtension defaultValue) {
@@ -128,7 +126,7 @@ public class ExtensionDefintion {
 		return rhe;
 	}
 
-	public RHExtension toRHExtension() throws PageException, IOException, BundleException, ConverterException {
+	public RHExtension toRHExtension() throws PageException {
 		if (rhe != null) return rhe;
 
 		if (source == null) {
@@ -143,5 +141,11 @@ public class ExtensionDefintion {
 		if (source != null) return source;
 		if (rhe != null) return rhe.getExtensionFile();
 		throw new ApplicationException("ExtensionDefinition does not contain a source.");
+	}
+
+	public Resource getSource(Resource defaultValue) {
+		if (source != null) return source;
+		if (rhe != null) return rhe.getExtensionFile();
+		return defaultValue;
 	}
 }

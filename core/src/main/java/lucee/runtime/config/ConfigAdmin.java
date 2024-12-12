@@ -4625,6 +4625,32 @@ public final class ConfigAdmin {
 		}
 	}
 
+	public static RHExtension _updateRHExtension(ConfigPro config, ExtensionDefintion ext, boolean reload, boolean force, short action) throws PageException {
+		try {
+			ConfigAdmin admin = new ConfigAdmin(config, null, true);
+			return admin.updateRHExtension(config, ext, reload, force, action);
+		}
+		catch (Exception e) {
+			throw Caster.toPageException(e);
+		}
+	}
+
+	public RHExtension updateRHExtension(Config config, ExtensionDefintion ext, boolean reload, boolean force, short action) throws PageException {
+		RHExtension rhext;
+		try {
+			rhext = RHExtension.getInstance(config, ext);
+			if (RHExtension.ACTION_COPY == action) rhext.copyToInstalled(config);
+			else if (RHExtension.ACTION_MOVE == action) rhext.moveToInstalled(config);
+			rhext.validate(config);
+		}
+		catch (Throwable t) {
+			ExceptionUtil.rethrowIfNecessary(t);
+			throw Caster.toPageException(t);
+		}
+		updateRHExtension(config, rhext, reload, force);
+		return rhext;
+	}
+
 	public static RHExtension _updateRHExtension(ConfigPro config, Resource ext, boolean reload, boolean force, short action) throws PageException {
 		try {
 			ConfigAdmin admin = new ConfigAdmin(config, null, true);

@@ -297,7 +297,7 @@ public class ExtensionMetadata {
 		if (caches == null) caches = new ArrayList<Map<String, String>>();
 	}
 
-	public String getId() {
+	public String _getId() {
 		return id;
 	}
 
@@ -309,7 +309,7 @@ public class ExtensionMetadata {
 		this.id = id;
 	}
 
-	public String getVersion() {
+	public String _getVersion() {
 		return version;
 	}
 
@@ -342,7 +342,7 @@ public class ExtensionMetadata {
 	}
 
 	public String getSymbolicName() {
-		return StringUtil.isEmpty(symbolicName) ? getId() : symbolicName;
+		return StringUtil.isEmpty(symbolicName) ? _getId() : symbolicName;
 	}
 
 	public void setSymbolicName(String str) {

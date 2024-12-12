@@ -3297,7 +3297,6 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 					// act completely different if that is the case
 					rhe = RHExtension.installExtension(config, id, Caster.toString(child.get(KeyConstants._version, null), null), res, false);
 					// startBundles(config, rhe, firstLoad);
-					rhe.asyncInit();
 					extensions.add(rhe);
 					// installedFiles.add(rhe.getExtensionFile());
 					// installedIds.add(rhe.getId());
@@ -3609,7 +3608,6 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 
 	public static boolean loadError(ConfigImpl config, Struct root, boolean defaultValue) {
 		try {
-			// Struct error = ConfigWebUtil.getAsStruct("error", root);
 			boolean hasAccess = ConfigUtil.hasAccess(config, SecurityManager.TYPE_DEBUGGING);
 
 			// status code

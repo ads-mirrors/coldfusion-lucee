@@ -200,7 +200,7 @@ public class DeployHandler {
 					continue;
 				}
 				try {
-					deployExtension(config, ed, log, i + 1 == eds.length, force, throwOnError, sucess);
+					deployExtension((ConfigPro) config, ed, log, i + 1 == eds.length, force, throwOnError, sucess);
 					if (!throwOnError) results.put(ed, Boolean.TRUE);
 				}
 				catch (PageException e) {
@@ -229,7 +229,7 @@ public class DeployHandler {
 				ed = it.next();
 				if (StringUtil.isEmpty(ed.getId(), true)) continue;
 				try {
-					deployExtension(config, ed, log, count == eds.size(), force, throwOnError, sucess);
+					deployExtension((ConfigPro) config, ed, log, count == eds.size(), force, throwOnError, sucess);
 				}
 				catch (PageException e) {
 					if (throwOnError) throw e;
@@ -255,12 +255,12 @@ public class DeployHandler {
 	 * @throws IOException
 	 * @throws PageException
 	 */
-	public static RHExtension deployExtension(Config config, ExtensionDefintion ed, Log log, boolean reload, boolean force, boolean throwOnError, RefBoolean installDone)
+	public static RHExtension deployExtension(ConfigPro config, ExtensionDefintion ed, Log log, boolean reload, boolean force, boolean throwOnError, RefBoolean installDone)
 			throws PageException {
-		ConfigPro ci = (ConfigPro) config;
+
 		// is the extension already installed
 		try {
-			RHExtension installed = ConfigAdmin.hasRHExtensionInstalled(ci, ed);
+			RHExtension installed = ConfigAdmin.hasRHExtensionInstalled(config, ed);
 			if (installed != null) {
 				installDone.setValue(false);
 				return installed;
@@ -270,6 +270,13 @@ public class DeployHandler {
 			if (throwOnError) throw Caster.toPageException(e);
 			if (log != null) log.error("extension", e);
 			else LogUtil.log("extension", e);
+		}
+
+		// does the extension defintion come with a source?
+		if (ed.getSource(null) != null) {
+			installDone.setValue(true);
+			deployExtension(config, RHExtension.getInstance(config, ed), reload, force);
+
 		}
 
 		// check if a local extension is matching our id
@@ -291,10 +298,14 @@ public class DeployHandler {
 				Resource res = null;
 				try {
 					if (log != null) log.info("extension", "Installing extension [" + ed + "] from local provider");
-					res = SystemUtil.getTempDirectory().getRealResource(ed.getId() + "-" + ed.getVersion() + ".lex");
-					ResourceUtil.touch(res);
-					IOUtil.copy(ext.getSource(), res);
-					RHExtension _ext = ConfigAdmin._updateRHExtension((ConfigPro) config, res, reload, force, RHExtension.ACTION_MOVE);
+
+					res = ext.getSource();
+					// res = SystemUtil.getTempDirectory().getRealResource(ed.getId() + "-" + ed.getVersion() + ".lex");
+					// ResourceUtil.touch(res);
+					// IOUtil.copy(ext.getSource(), res);
+					// print.e(ext.getSource() + " -> " + res);
+
+					RHExtension _ext = ConfigAdmin._updateRHExtension(config, ext, reload, force, RHExtension.ACTION_COPY);
 					installDone.setValue(true);
 					return _ext;
 				}
@@ -320,7 +331,7 @@ public class DeployHandler {
 		while (true);
 		Identification id = config.getIdentification();
 		String apiKey = id == null ? null : id.getApiKey();
-		RHExtensionProvider[] providers = ci.getRHExtensionProviders();
+		RHExtensionProvider[] providers = config.getRHExtensionProviders();
 		URL url;
 		// if we have a local version, we look if there is a newer remote version
 		if (ext != null) {
@@ -353,7 +364,7 @@ public class DeployHandler {
 						ResourceUtil.touch(res);
 
 						IOUtil.copy(ext.getSource(), res);
-						RHExtension _ext = ConfigAdmin._updateRHExtension((ConfigPro) config, res, reload, force, RHExtension.ACTION_MOVE);
+						RHExtension _ext = ConfigAdmin._updateRHExtension(config, res, reload, force, RHExtension.ACTION_MOVE);
 						installDone.setValue(true);
 						return _ext;
 					}
@@ -376,7 +387,7 @@ public class DeployHandler {
 				ResourceUtil.touch(res);
 
 				IOUtil.copy(ext.getSource(), res);
-				RHExtension _ext = ConfigAdmin._updateRHExtension((ConfigPro) config, res, reload, force, RHExtension.ACTION_MOVE);
+				RHExtension _ext = ConfigAdmin._updateRHExtension(config, res, reload, force, RHExtension.ACTION_MOVE);
 				installDone.setValue(true);
 				return _ext;
 			}
@@ -387,10 +398,10 @@ public class DeployHandler {
 
 		// if not we try to download it
 		if (log != null) log.info("extension", "Installing extension [" + ed + "] from remote extension provider");
-		Resource res = downloadExtension(ci, ed, log, throwOnError);
+		Resource res = downloadExtension(config, ed, log, throwOnError);
 		if (res != null) {
 			try {
-				RHExtension _ext = ConfigAdmin._updateRHExtension((ConfigPro) config, res, reload, force, RHExtension.ACTION_MOVE);
+				RHExtension _ext = ConfigAdmin._updateRHExtension(config, res, reload, force, RHExtension.ACTION_MOVE);
 				installDone.setValue(true);
 				return _ext;
 			}
