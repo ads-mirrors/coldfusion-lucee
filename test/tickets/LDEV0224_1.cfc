@@ -12,7 +12,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq"{
 	}
 
 	function run( testResults , testBox ) {
-		describe( title='selecting 2 rows from QoQ' , body=function() {
+		//describe( title='selecting 2 rows from QoQ' , body=function() {
 			describe( title='is possible using a hard coded list' , body=function() {
 				it( title='of numerics' , body=function( currentSpec ) {
 					var actual = QueryExecute(
@@ -28,6 +28,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq"{
 						"
 					);
 					expect( actual.RecordCount ).toBe( ListLen( interestingNumbersAsAList , ',' )  );
+					expect( queryColumnData( actual, "id" ).toList() ).toBe( interestingNumbersAsAList );
 				});
 
 				it( title='of strings' , body=function( currentSpec ) {
@@ -44,11 +45,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq"{
 						"
 					);
 					expect( actual.RecordCount ).toBe( ListLen( interestingStringsAsAQuotedList , ',' ) );
+					expect( queryColumnData( actual, "value" ).toList() ).toBe( interestingStringsAsAList );
 				});
 			});
 
-			describe( title='using param list=true' , body=function() {
-				describe( title='with new Query()' , body=function() {
+			//describe( title='using param list=true' , body=function() {
+				describe( title='using param list=true, with new Query()' , body=function() {
 					beforeEach( function( currentSpec ) {
 						q = new Query(
 							dbtype = 'query',
@@ -64,9 +66,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq"{
 								value
 							FROM queryWithDataIn
 							WHERE id IN ( :needle )
+							ORDER BY ID
 						" ).getResult();
 
 						expect( actual.RecordCount ).toBe( ListLen( interestingNumbersAsAList , ',' ) );
+						expect( queryColumnData( actual, "id" ).toList() ).toBe( interestingNumbersAsAList );
 					});
 
 					it( title='when using numeric params and a custom separator' , body=function( currentSpec ) {
@@ -77,9 +81,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq"{
 								value
 							FROM queryWithDataIn
 							WHERE id IN ( :needle )
+							ORDER BY ID
 						" ).getResult();
 
 						expect( actual.RecordCount ).toBe( ListLen( interestingNumbersAsAList , ',' ) );
+						expect( queryColumnData( actual, "id" ).toList() ).toBe( interestingNumbersAsAList );
 					});
 
 					it( title='when using string params' , body=function( currentSpec ) {
@@ -90,12 +96,14 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq"{
 								value
 							FROM queryWithDataIn
 							WHERE value IN ( :needle )
+							ORDER BY ID
 						" ).getResult();
 						expect( actual.RecordCount ).toBe( ListLen( interestingStringsAsAList , ',' ) );
+						expect( queryColumnData( actual, "value" ).toList() ).toBe( interestingStringsAsAList );
 					});
 				});
 
-				describe( title='with query{} ( cfquery )' , body=function() {
+				describe( title='using param list=true, with query{} ( cfquery )' , body=function() {
 					it( title='when using numeric params' , body=function( currentSpec ) {
 						query
 							name = 'actual'
@@ -111,9 +119,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq"{
 								value = interestingNumbersAsAList
 								sqltype = 'integer'
 								list = true;
-							WriteOutput( " )" );
+							WriteOutput( " )
+								ORDER BY ID
+							" );
 						}
 						expect( actual.RecordCount ).toBe( ListLen( interestingNumbersAsAList , ',' ) );
+						expect( queryColumnData( actual, "id" ).toList() ).toBe( interestingNumbersAsAList );
 					});
 
 					it( title='when using numeric params and a custom separator' , body=function( currentSpec ) {
@@ -132,9 +143,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq"{
 								sqltype = 'integer'
 								list = true
 								separator = '|';
-							WriteOutput( " )" );
+							WriteOutput( " )
+								ORDER BY ID
+							" );
 						}
 						expect( actual.RecordCount ).toBe( ListLen( interestingNumbersAsAList , ',' ) );
+						expect( queryColumnData( actual, "id" ).toList() ).toBe( interestingNumbersAsAList );
 					});
 
 					it( title='when using string params' , body=function( currentSpec ) {
@@ -152,14 +166,17 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq"{
 								value = interestingStringsAsAList
 								sqltype = 'varchar'
 								list = true;
-							WriteOutput( " )" );
+							WriteOutput( " )
+								ORDER BY ID
+							" );
 						}
 						expect( actual.RecordCount ).toBe( ListLen( interestingStringsAsAList , ',' ) );
+						expect( queryColumnData( actual, "value" ).toList() ).toBe( interestingStringsAsAList );
 					});
 
 				});
 
-				describe( title='with QueryExecute' , body=function() {
+				describe( title='using param list=true, with QueryExecute' , body=function() {
 					it( title='when using an array of numeric params' , body=function( currentSpec ) {
 						var actual = QueryExecute(
 							params = [
@@ -174,9 +191,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq"{
 									value
 								FROM queryWithDataIn
 								WHERE id IN ( :needle )
+								ORDER BY ID
 							"
 						);
 						expect( actual.RecordCount ).toBe( ListLen( interestingNumbersAsAList , ',' ) );
+						expect( queryColumnData( actual, "id" ).toList() ).toBe( interestingNumbersAsAList );
 					});
 
 					it( title='when using a struct of numeric params' , body=function( currentSpec ) {
@@ -193,9 +212,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq"{
 									value
 								FROM queryWithDataIn
 								WHERE id IN ( :needle )
+								ORDER BY ID
 							"
 						);
 						expect( actual.RecordCount ).toBe( ListLen( interestingNumbersAsAList , ',' ) );
+						expect( queryColumnData( actual, "id" ).toList() ).toBe( interestingNumbersAsAList );
 					});
 
 					it( title='when using an array of string params' , body=function( currentSpec ) {
@@ -212,9 +233,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq"{
 									value
 								FROM queryWithDataIn
 								WHERE value IN ( :needle )
+								ORDER BY ID
 							"
 						);
 						expect( actual.RecordCount ).toBe( ListLen( interestingStringsAsAList , ',' ) );
+						expect( queryColumnData( actual, "value" ).toList() ).toBe( interestingStringsAsAList );
 					});
 
 					it( title='when using a struct of string params' , body=function( currentSpec ) {
@@ -231,9 +254,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq"{
 									value
 								FROM queryWithDataIn
 								WHERE value IN ( :needle )
+								ORDER BY ID
 							"
 						);
 						expect( actual.RecordCount ).toBe( ListLen( interestingStringsAsAList , ',' ) );
+						expect( queryColumnData( actual, "value" ).toList() ).toBe( interestingStringsAsAList );
 					});
 
 					it( title='when using numeric params and a custom separator' , body=function( currentSpec ) {
@@ -250,12 +275,14 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq"{
 									value
 								FROM queryWithDataIn
 								WHERE id IN ( :needle )
+								ORDER BY ID
 							"
 						);
 						expect( actual.RecordCount ).toBe( ListLen( interestingNumbersAsAList , ',' ) );
+						expect( queryColumnData( actual, "id" ).toList() ).toBe( interestingNumbersAsAList );
 					});
 				});
-			});
-		});
+//			});
+		//});
 	}
 }
