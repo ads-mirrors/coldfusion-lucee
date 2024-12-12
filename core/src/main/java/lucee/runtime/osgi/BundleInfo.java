@@ -41,6 +41,8 @@ import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.type.file.FileResource;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
+import lucee.runtime.config.Config;
+import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.op.Caster;
 import lucee.runtime.osgi.OSGiUtil.BundleDefinition;
 import lucee.runtime.osgi.OSGiUtil.PackageDefinition;
@@ -72,12 +74,27 @@ public class BundleInfo implements Serializable {
 	private Map<String, PackageDefinition> exportPackageAsMap;
 	private static Map<String, BundleInfo> bundles = new HashMap<String, BundleInfo>();
 
-	public static BundleInfo getInstance(String id, InputStream is, boolean closeStream) throws IOException, BundleException {
+	public static BundleInfo getInstance(Config config, String id, InputStream is, boolean closeStream) throws IOException, BundleException {
+
+		// cached ?
 		BundleInfo bi = bundles.get(id);
-		if (bi != null) return bi;
+		if (bi != null) {
+			return bi;
+		}
 
+		// load file from bundles dir
+		try {
+			File bundleFile = new File(ConfigUtil.getCFMLEngine(config).getCFMLEngineFactory().getBundleDirectory(), id);
+			if (bundleFile.isFile()) {
+				bundles.put(id, bi = new BundleInfo(bundleFile));
+				return bi;
+			}
+		}
+		catch (Exception e) {
+		}
+
+		// create a temp file to read data from it (using the stream direclty did not work properly)
 		File tmp = File.createTempFile("temp-extension", "lex");
-
 		try {
 			FileOutputStream os = new FileOutputStream(tmp);
 			IOUtil.copy(is, os, closeStream, true);
@@ -306,5 +323,12 @@ public class BundleInfo implements Serializable {
 	protected static File toFileResource(Resource file) throws IOException {
 		if (file instanceof FileResource) return (File) file;
 		throw new IOException("only file resources (local file system) are supported");
+	}
+
+	@Override
+	public String toString() {
+		return "name:" + name + ";version:" + version + ";symbolicName:" + symbolicName + ";exportPackage:" + exportPackage + ";importPackage:" + importPackage + ";activator:"
+				+ activator + ";manifestVersion:" + manifestVersion + ";description:" + description + ";dynamicImportPackage:" + dynamicImportPackage + ";classPath:" + classPath
+				+ ";requireBundle:" + requireBundle + ";fragmentHost:" + fragementHost;
 	}
 }

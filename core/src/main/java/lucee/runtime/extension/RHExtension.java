@@ -429,7 +429,7 @@ public class RHExtension implements Serializable {
 						|| startsWith(path, type, "bundle") || startsWith(path, type, "lib") || startsWith(path, type, "libs")) && (StringUtil.endsWithIgnoreCase(path, ".jar"))) {
 
 							jars.add(fileName);
-							BundleInfo bi = BundleInfo.getInstance(fileName, zis, false);
+							BundleInfo bi = BundleInfo.getInstance(config, fileName, zis, false);
 							if (bi.isBundle()) bundles.add(bi);
 						}
 
