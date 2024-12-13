@@ -5487,12 +5487,24 @@ public final class ConfigWebFactory extends ConfigFactory {
 			boolean hasAccess = ConfigWebUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
 			Struct proxy = ConfigWebUtil.getAsStruct("proxy", root);
 
-			// proxy server
-			boolean enabled = Caster.toBooleanValue(getAttr(proxy, "enabled"), true);
-			String server = getAttr(proxy, "server");
-			String username = getAttr(proxy, "username");
-			String password = getAttr(proxy, "password");
-			int port = Caster.toIntValue(getAttr(proxy, "port"), -1);
+			boolean enabled = false;
+			String server = null, username = null, password = null;
+			int port = -1;
+			if (proxy != null && proxy.size() > 0) {
+				enabled = Caster.toBooleanValue(getAttr(proxy, "enabled"), true);
+				server = getAttr(proxy, "server");
+				username = getAttr(proxy, "username");
+				password = getAttr(proxy, "password");
+				port = Caster.toIntValue(getAttr(proxy, "port"), -1);
+			}
+			if (StringUtil.isEmpty(server, true)) {
+				server = getAttr(root, "updateProxyHost");
+				username = getAttr(root, "updateProxyUsername");
+				password = getAttr(root, "updateProxyPassword");
+				port = Caster.toIntValue(getAttr(root, "updateProxyPort"), -1);
+				enabled = !StringUtil.isEmpty(server, true);
+
+			}
 
 			// includes/excludes
 			Set<String> includes = proxy != null ? ProxyDataImpl.toStringSet(getAttr(proxy, "includes")) : null;
