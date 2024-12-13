@@ -2993,6 +2993,7 @@ public class KeyConstants {
 	public static final Key _metric = KeyImpl._const("metric");
 	public static final Key _monitoring = KeyImpl._const("monitoring");
 	public static final Key _expression = KeyImpl._const("expression");
+	public static final Key _physical = KeyImpl._const("physical");
 	private static Map<String, Key> _____keys;
 
 	static {

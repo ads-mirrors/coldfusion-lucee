@@ -2924,8 +2924,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 				}
 			}
 
-			// Struct customTag = ConfigWebUtil.getAsStruct("customTag", root);
-			Array ctMappings = ConfigWebUtil.getAsArray("customTagMappings", root);
+			Array ctMappings = ConfigWebUtil.getAsArray(root, true, KeyConstants._virtual, KeyConstants._physical, true, "customTagMappings", "customTagPaths");
 
 			// Web Mapping
 			boolean hasSet = false;
@@ -5267,7 +5266,8 @@ public final class ConfigWebFactory extends ConfigFactory {
 			// sct.setEL("physical", "{lucee-config}/components/");
 
 			// Web Mapping
-			Array compMappings = ConfigWebUtil.getAsArray("componentMappings", root);
+
+			Array compMappings = ConfigWebUtil.getAsArray(root, true, KeyConstants._virtual, KeyConstants._physical, false, "componentMappings", "componentPaths");
 			hasSet = false;
 			Mapping[] mappings = null;
 			if (hasAccess) {
