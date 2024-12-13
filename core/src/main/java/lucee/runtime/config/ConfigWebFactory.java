@@ -2368,6 +2368,8 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 			// PSQ
 			String strPSQ = getAttr(root, "preserveSingleQuote");
+			if (StringUtil.isEmpty(strPSQ)) strPSQ = getAttr(root, "datasourcePreserveSingleQuotes");
+
 			if (access != SecurityManager.VALUE_NO && !StringUtil.isEmpty(strPSQ)) {
 				config.setPSQL(toBoolean(strPSQ, true));
 			}
@@ -2922,6 +2924,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 			// do patch cache
 			String strDoPathcache = getAttr(root, "customTagUseCachePath");
+			if (StringUtil.isEmpty(strDoPathcache, true)) strDoPathcache = getAttr(root, "customTagCachePaths");
 			if (hasAccess && !StringUtil.isEmpty(strDoPathcache, true)) {
 				config.setUseCTPathCache(Caster.toBooleanValue(strDoPathcache.trim(), true));
 			}
@@ -2935,6 +2938,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			}
 			else {
 				String strDoCTLocalSearch = getAttr(root, "customTagLocalSearch");
+				if (StringUtil.isEmpty(strDoCTLocalSearch, true)) strDoCTLocalSearch = getAttr(root, "customTagSearchLocal");
 				if (hasAccess && !StringUtil.isEmpty(strDoCTLocalSearch)) {
 					config.setDoLocalCustomTag(Caster.toBooleanValue(strDoCTLocalSearch.trim(), true));
 				}
@@ -2949,6 +2953,8 @@ public final class ConfigWebFactory extends ConfigFactory {
 			}
 			else {
 				String strDoCTDeepSearch = getAttr(root, "customTagDeepSearch");
+				if (StringUtil.isEmpty(strDoCTDeepSearch, true)) strDoCTDeepSearch = getAttr(root, "customTagSearchSubdirectories");
+
 				if (hasAccess && !StringUtil.isEmpty(strDoCTDeepSearch)) {
 					config.setDoCustomTagDeepSearch(Caster.toBooleanValue(strDoCTDeepSearch.trim(), false));
 				}
