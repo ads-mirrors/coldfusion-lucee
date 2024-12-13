@@ -943,6 +943,82 @@ public final class ConfigWebUtil {
 		return tmp;
 	}
 
+	/**
+	 * get an array that matches oe of the given key or creates the array in place
+	 * 
+	 * @param input struct to look for the names
+	 * @param convertStructToArray if true and the value is a struct, convert it to an array
+	 * @param convertKey if the value is a struct the key of that strcut will be copied to the array
+	 *            with that name
+	 * @param stringKey in case the array contains string values and this key is set, create a struct
+	 *            containing a key with the string as value
+	 * @param names
+	 * @return
+	 * @throws PageException
+	 */
+	public static Array getAsArray(Struct input, boolean convertStructToArray, Key convertKey, Key stringKey, boolean replacePlaceHolder, String... names) {
+		Array arr = null;
+		if (input == null) return arr;
+
+		Object obj;
+		for (String name: names) {
+			obj = input.get(KeyImpl.init(name), null);
+			if (obj instanceof Array && (arr = (Array) obj).size() > 0) {
+				if (name != names[0]) {
+					input.setEL(KeyImpl.init(names[0]), arr);
+					input.removeEL(KeyImpl.init(name));
+				}
+				break;
+			}
+			if (arr == null && convertStructToArray && obj instanceof Struct) {
+				Struct sct = (Struct) obj;
+				arr = new ArrayImpl();
+				input.setEL(KeyImpl.init(name), arr);
+				if (name != names[0]) {
+					input.setEL(KeyImpl.init(names[0]), arr);
+					input.removeEL(KeyImpl.init(name));
+				}
+				Iterator<Entry<Key, Object>> it = sct.entryIterator();
+				Entry<Key, Object> e;
+				Struct s;
+				Object v;
+				while (it.hasNext()) {
+					e = it.next();
+					v = e.getValue();
+					if (convertKey != null && v instanceof Struct) {
+						s = (Struct) v;
+						if (!s.containsKey(convertKey)) s.setEL(convertKey, e.getKey().getString());
+					}
+					arr.appendEL(v);
+				}
+				break;
+			}
+		}
+
+		// validate the array values
+		if (arr != null && stringKey != null) {
+			Key[] keys = arr.keys();
+			Object val;
+			for (Key k: keys) {
+				val = arr.get(k, null);
+				if (val instanceof CharSequence) {
+					Struct sct = new StructImpl();
+					sct.setEL(stringKey, val);
+					arr.setEL(k, sct);
+				}
+			}
+		}
+		else if (arr == null) {
+			arr = new ArrayImpl();
+			input.setEL(KeyImpl.init(names[0]), arr);
+			return arr;
+		}
+
+		if (replacePlaceHolder) return (Array) replaceConfigPlaceHolders(arr);
+
+		return arr;
+	}
+
 	public static String getAsString(String name, Struct sct, String defaultValue) {
 		if (sct == null) return defaultValue;
 		Object obj = sct.get(KeyImpl.init(name), null);

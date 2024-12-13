@@ -961,7 +961,7 @@ public final class ConfigAdmin {
 	public void removeCustomTag(String virtual) throws SecurityException {
 		checkWriteAccess();
 
-		Array mappings = ConfigWebUtil.getAsArray("customTagMappings", root);
+		Array mappings = ConfigWebUtil.getAsArray(root, true, KeyConstants._virtual, KeyConstants._physical, false, "customTagMappings", "customTagPaths");
 		Key[] keys = mappings.keys();
 		Struct data;
 		String v;
@@ -1000,7 +1000,7 @@ public final class ConfigAdmin {
 	public void removeComponentMapping(String virtual) throws SecurityException {
 		checkWriteAccess();
 
-		Array mappings = ConfigWebUtil.getAsArray("componentMappings", root);
+		Array mappings = ConfigWebUtil.getAsArray(root, true, KeyConstants._virtual, KeyConstants._physical, false, "componentMappings", "componentPaths");
 		Key[] keys = mappings.keys();
 		Struct data;
 		String v;
@@ -1051,7 +1051,7 @@ public final class ConfigAdmin {
 			throw new ExpressionException("physical must have a value when primary has value physical");
 		}
 
-		Array mappings = ConfigWebUtil.getAsArray("customTagMappings", root);
+		Array mappings = ConfigWebUtil.getAsArray(root, true, KeyConstants._virtual, KeyConstants._physical, false, "customTagMappings", "customTagPaths");
 		Key[] keys = mappings.keys();
 		// Update
 		String v;
@@ -1150,7 +1150,7 @@ public final class ConfigAdmin {
 			throw new ExpressionException("physical must have a value when primary has value physical");
 		}
 
-		Array componentMappings = ConfigWebUtil.getAsArray("componentMappings", root);
+		Array componentMappings = ConfigWebUtil.getAsArray(root, true, KeyConstants._virtual, KeyConstants._physical, false, "componentMappings", "componentPaths");
 		Key[] keys = componentMappings.keys();
 		Struct el;
 
