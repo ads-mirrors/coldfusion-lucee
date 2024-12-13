@@ -3610,6 +3610,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 				cs.setUpdateType(getAttr(root, "updateType"));
 
 				String location = getAttr(root, "updateLocation");
+				if (StringUtil.isEmpty(location, true)) location = getAttr(root, "updateSiteURL");
 				if (!StringUtil.isEmpty(location, true)) {
 					location = location.trim();
 					if ("http://update.lucee.org".equals(location)) location = DEFAULT_LOCATION;
