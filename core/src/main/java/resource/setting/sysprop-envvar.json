@@ -386,5 +386,10 @@
         "sysprop": "lucee.scope.arguments.capacity",
         "envvar": "LUCEE_SCOPE_ARGUMENTS_CAPACITY",
         "desc": "Sets the initial capacity (size) for the arguments scope hashmap"
+    },
+    {
+        "sysprop": "lucee.cache.variableKeys",
+        "envvar": "LUCEE_CACHE_VARIABLEKEYS",
+        "desc": "Sets the max number of variable names (keys) to cache"
     }
 ]
