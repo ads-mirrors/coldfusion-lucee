@@ -2872,6 +2872,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 			// do patch cache
 			String strDoPathcache = getAttr(root, "customTagUseCachePath");
+			if (StringUtil.isEmpty(strDoPathcache, true)) strDoPathcache = getAttr(root, "customTagCachePaths");
 			if (hasAccess && !StringUtil.isEmpty(strDoPathcache, true)) {
 				config.setUseCTPathCache(Caster.toBooleanValue(strDoPathcache.trim(), true));
 			}
