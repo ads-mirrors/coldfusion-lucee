@@ -568,8 +568,10 @@ public class VariableImpl extends ExpressionBase implements Variable {
 				}
 				ArrayList<FunctionLibFunctionArg> list = bif.getFlf().getArg();
 				lucee.transformer.dynamic.meta.Method method = getMethod(clazzz, list, rtnType, bc, line);
-				if (method == null) throw new TransformerException(bc, "not matching method founf for function [" + bif.getName() + "]", line);
-
+				if (method == null) {
+					throw new TransformerException(bc, "not matching method found for function [" + bif.getName() + "] in class [" + clazzz.getDeclaringClass().getName()
+							+ "] with return type [" + rtnType.getClassName() + "], when developing clear dynclasses folder", line);
+				}
 				Iterator<FunctionLibFunctionArg> it = list.iterator();
 
 				argTypes = method.getArgumentTypes();

@@ -234,7 +234,8 @@ public final class CFMLEngineImpl implements CFMLEngine {
 							break;
 						}
 						// Call the dumpThreadPositions method
-						Controler.dumpThreadPositions(dumpPath);
+						Resource target = ResourcesImpl.getFileResourceProvider().getResource(dumpPath);
+						Controler.dumpThreadPositions(target);
 
 						// Pause for the specified interval
 						SystemUtil.sleep(interval);
