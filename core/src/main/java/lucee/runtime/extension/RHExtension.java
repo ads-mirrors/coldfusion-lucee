@@ -38,13 +38,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
 import lucee.Info;
-import lucee.print;
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.IOUtil;
@@ -201,7 +201,6 @@ public class RHExtension implements Serializable {
 
 			}
 			catch (Exception e) {
-				print.e(e);
 				LogUtil.log("extension", e);
 			}
 		}, true).start();
@@ -212,7 +211,6 @@ public class RHExtension implements Serializable {
 		if (metadata == null) {
 			synchronized (this) {
 				if (metadata == null) {
-					print.e("> " + extensionFile + " " + Thread.currentThread().getId());
 					ExtensionMetadata tmp = new ExtensionMetadata();
 					if (_id != null && _version != null) {
 						// do we have usefull meta data?
@@ -238,8 +236,6 @@ public class RHExtension implements Serializable {
 					catch (Exception e) {
 						throw new PageRuntimeException(Caster.toPageException(e)); // MUST improve exception handling, no runtime
 					}
-					print.e("< " + extensionFile + " " + Thread.currentThread().getId());
-					if (Thread.currentThread().getId() == 1L) print.ds();
 					return metadata = tmp;
 				}
 			}
@@ -247,7 +243,7 @@ public class RHExtension implements Serializable {
 		return this.metadata;
 	}
 
-	private static void init(Config config, ExtensionMetadata metadata, Resource extensionFile) throws PageException, IOException, BundleException, ConverterException {
+	private static void init(Config config, ExtensionMetadata metadata, Resource extensionFile) throws PageException, IOException, ConverterException {
 		// make sure the config is registerd with the thread
 		if (ThreadLocalPageContext.getConfig() == null) ThreadLocalConfig.register(config);
 		// is it a web or server context?
@@ -414,7 +410,7 @@ public class RHExtension implements Serializable {
 		try {
 			while ((entry = zis.getNextEntry()) != null) {
 				if (!entry.isDirectory() && entry.getName().equalsIgnoreCase("META-INF/MANIFEST.MF")) {
-					manifest = toManifest(config, zis, null);
+					manifest = toManifest(config, zis, false, null);
 				}
 				zis.closeEntry();
 				if (manifest != null) return manifest;
@@ -427,7 +423,172 @@ public class RHExtension implements Serializable {
 
 	}
 
-	private static void load(Config config, ExtensionMetadata metadata, Resource ext) throws IOException, BundleException, ApplicationException {
+	private static void processEntry(ZipFile zip, ZipEntry entry) {
+		try (InputStream is = zip.getInputStream(entry)) {
+
+			// Process the entry (e.g., read content, extract, etc.)
+			if (!entry.isDirectory()) {
+				// print.e("> " + entry.getName() + ":" + Thread.currentThread().getId());
+				byte[] data = is.readAllBytes();
+				// print.e("< " + entry.getName() + ":" + data.length);
+				// Perform your logic here with `data`
+			}
+		}
+		catch (IOException e) {
+			System.err.println("Error processing entry: " + entry.getName());
+			e.printStackTrace();
+		}
+	}
+
+	private static class Data {
+		public String image;
+		public Manifest manifest;
+
+	}
+
+	private static void load(Config config, ExtensionMetadata metadata, Resource ext) throws PageException {
+
+		// print.e("-------" + ext);
+		// long start = System.currentTimeMillis();
+		// JarFile jf = new JarFile(ResourceUtil.toFile(ext));
+		// jf.getManifest();
+		// print.e("jarfile:" + (System.currentTimeMillis() - start));
+		// start = System.currentTimeMillis();
+
+		metadata.setType(config instanceof ConfigWeb ? "web" : "server");
+
+		final Data data = new Data();
+		final List<BundleInfo> bundles = new ArrayList<BundleInfo>();
+		final List<String> jars = new ArrayList<String>();
+		final List<String> flds = new ArrayList<String>();
+		final List<String> tlds = new ArrayList<String>();
+		final List<String> tags = new ArrayList<String>();
+		final List<String> functions = new ArrayList<String>();
+		final List<String> contexts = new ArrayList<String>();
+		final List<String> configs = new ArrayList<String>();
+		final List<String> webContexts = new ArrayList<String>();
+		final List<String> applications = new ArrayList<String>();
+		final List<String> components = new ArrayList<String>();
+		final List<String> plugins = new ArrayList<String>();
+		final List<String> gateways = new ArrayList<String>();
+		final List<String> archives = new ArrayList<String>();
+
+		try (ZipFile zip = new ZipFile(ResourceUtil.toFile(ext))) {
+			zip.stream().parallel().forEach(entry -> {
+				try {
+					String path = entry.getName();
+					String fileName = fileName(entry);
+
+					String sub = subFolder(entry);
+					String type = metadata.getType();
+					if (!entry.isDirectory() && path.equalsIgnoreCase("META-INF/MANIFEST.MF")) {
+						data.manifest = toManifest(config, zip.getInputStream(entry), true, null);
+					}
+					else if (!entry.isDirectory() && path.equalsIgnoreCase("META-INF/logo.png")) {
+						data.image = toBase64(zip.getInputStream(entry), true, null);
+					}
+
+					// jars
+					else if (!entry.isDirectory() && (startsWith(path, type, "jars") || startsWith(path, type, "jar") || startsWith(path, type, "bundles")
+							|| startsWith(path, type, "bundle") || startsWith(path, type, "lib") || startsWith(path, type, "libs"))
+							&& (StringUtil.endsWithIgnoreCase(path, ".jar"))) {
+
+								jars.add(fileName);
+								BundleInfo bi = BundleInfo.getInstance(config, fileName, zip.getInputStream(entry), true);
+								if (bi.isBundle()) bundles.add(bi);
+							}
+
+					// flds
+					else if (!entry.isDirectory() && startsWith(path, type, "flds")
+							&& (StringUtil.endsWithIgnoreCase(path, ".fld") || StringUtil.endsWithIgnoreCase(path, ".fldx")))
+						flds.add(fileName);
+
+					// tlds
+					else if (!entry.isDirectory() && startsWith(path, type, "tlds")
+							&& (StringUtil.endsWithIgnoreCase(path, ".tld") || StringUtil.endsWithIgnoreCase(path, ".tldx")))
+						tlds.add(fileName);
+
+					// archives
+					else if (!entry.isDirectory() && (startsWith(path, type, "archives") || startsWith(path, type, "mappings")) && StringUtil.endsWithIgnoreCase(path, ".lar"))
+						archives.add(fileName);
+
+					// event-gateway
+					else if (!entry.isDirectory() && (startsWith(path, type, "event-gateways") || startsWith(path, type, "eventGateways"))
+							&& (StringUtil.endsWithIgnoreCase(path, "." + Constants.getCFMLComponentExtension())))
+						gateways.add(sub);
+
+					// tags
+					else if (!entry.isDirectory() && startsWith(path, type, "tags")) tags.add(sub);
+
+					// functions
+					else if (!entry.isDirectory() && startsWith(path, type, "functions")) functions.add(sub);
+
+					// context
+					else if (!entry.isDirectory() && startsWith(path, type, "context") && !StringUtil.startsWith(fileName(entry), '.')) contexts.add(sub);
+
+					// web contextS
+					else if (!entry.isDirectory() && (startsWith(path, type, "webcontexts") || startsWith(path, type, "web.contexts"))
+							&& !StringUtil.startsWith(fileName(entry), '.'))
+						webContexts.add(sub);
+
+					// config
+					else if (!entry.isDirectory() && startsWith(path, type, "config") && !StringUtil.startsWith(fileName(entry), '.')) configs.add(sub);
+
+					// applications
+					else if (!entry.isDirectory() && (startsWith(path, type, "web.applications") || startsWith(path, type, "applications") || startsWith(path, type, "web"))
+							&& !StringUtil.startsWith(fileName(entry), '.'))
+						applications.add(sub);
+
+					// components
+					else if (!entry.isDirectory() && (startsWith(path, type, "components")) && !StringUtil.startsWith(fileName(entry), '.')) components.add(sub);
+
+					// plugins
+					else if (!entry.isDirectory() && (startsWith(path, type, "plugins")) && !StringUtil.startsWith(fileName(entry), '.')) plugins.add(sub);
+				}
+				catch (Exception e) {
+					throw Caster.toPageRuntimeException(e);
+				}
+				/*
+				 * try (BufferedReader reader = new BufferedReader(new
+				 * InputStreamReader(zip.getInputStream(entry)))) { String line; while ((line = reader.readLine())
+				 * != null) { // Process each line of the entry here System.out.println("Processing line: " + line);
+				 * } } catch (IOException e) { // Handle I/O exceptions specific to this entry e.printStackTrace();
+				 * }
+				 */
+
+			});
+		}
+		catch (IOException e) {
+			throw Caster.toPageException(e);
+		}
+
+		// no we read the content of the zip
+
+		// print.e("zip:" + (System.currentTimeMillis() - start));
+		// start = System.currentTimeMillis();
+		// read the manifest
+		if (data.manifest == null) throw new ApplicationException("The Extension [" + ext + "] is invalid,no Manifest file was found at [META-INF/MANIFEST.MF].");
+		readManifestConfig(config, metadata, data.manifest, ext.getAbsolutePath(), data.image);
+
+		metadata.setJars(jars.toArray(new String[jars.size()]));
+		metadata.setFlds(flds.toArray(new String[flds.size()]));
+		metadata.setTlds(tlds.toArray(new String[tlds.size()]));
+		metadata.setTags(tags.toArray(new String[tags.size()]));
+		metadata.setFunctions(functions.toArray(new String[functions.size()]));
+		metadata.setEventGateways(gateways.toArray(new String[gateways.size()]));
+		metadata.setFunctions(archives.toArray(new String[archives.size()]));
+
+		metadata.setContexts(contexts.toArray(new String[contexts.size()]));
+		metadata.setConfigs(configs.toArray(new String[configs.size()]));
+		metadata.setWebContexts(webContexts.toArray(new String[webContexts.size()]));
+		metadata.setApplications(applications.toArray(new String[applications.size()]));
+		metadata.setComponents(components.toArray(new String[components.size()]));
+		metadata.setPlugins(plugins.toArray(new String[plugins.size()]));
+		metadata.setBundles(bundles.toArray(new BundleInfo[bundles.size()]));
+
+	}
+
+	private static void loadOld(Config config, ExtensionMetadata metadata, Resource ext) throws IOException, BundleException, ApplicationException {
 
 		// print.e("-------" + ext);
 		// long start = System.currentTimeMillis();
@@ -468,10 +629,10 @@ public class RHExtension implements Serializable {
 				sub = subFolder(entry);
 				type = metadata.getType();
 				if (!entry.isDirectory() && path.equalsIgnoreCase("META-INF/MANIFEST.MF")) {
-					manifest = toManifest(config, zis, null);
+					manifest = toManifest(config, zis, false, null);
 				}
 				else if (!entry.isDirectory() && path.equalsIgnoreCase("META-INF/logo.png")) {
-					_img = toBase64(zis, null);
+					_img = toBase64(zis, false, null);
 				}
 
 				// jars
@@ -852,29 +1013,29 @@ public class RHExtension implements Serializable {
 
 		if (!full) el.clear();
 
-		el.setEL("id", id);
-		el.setEL("name", name);
-		el.setEL("version", metadata._getVersion());
+		el.setEL(KeyConstants._id, id);
+		el.setEL(KeyConstants._name, name);
+		el.setEL(KeyConstants._version, metadata._getVersion());
 
 		if (!full) return;
 
 		// newly added
 		// start bundles (IMPORTANT:this key is used to reconize a newer entry, so do not change)
-		el.setEL("startBundles", Caster.toString(metadata.isStartBundles()));
+		el.setEL(KeyConstants._startBundles, Caster.toString(metadata.isStartBundles()));
 
 		// release type
-		el.setEL("releaseType", toReleaseType(metadata.getReleaseType(), "all"));
+		el.setEL(KeyConstants._releaseType, toReleaseType(metadata.getReleaseType(), "all"));
 
 		// Description
-		if (StringUtil.isEmpty(metadata.getDescription())) el.setEL("description", toStringForAttr(metadata.getDescription()));
-		else el.removeEL(KeyImpl.init("description"));
+		if (StringUtil.isEmpty(metadata.getDescription())) el.setEL(KeyConstants._description, toStringForAttr(metadata.getDescription()));
+		else el.removeEL(KeyConstants._description);
 
 		// Trial
-		el.setEL("trial", Caster.toString(metadata.isTrial()));
+		el.setEL(KeyConstants._trial, Caster.toString(metadata.isTrial()));
 
 		// Image
-		if (StringUtil.isEmpty(metadata.getImage())) el.setEL("image", toStringForAttr(metadata.getImage()));
-		else el.removeEL(KeyImpl.init("image"));
+		if (StringUtil.isEmpty(metadata.getImage())) el.setEL(KeyConstants._image, toStringForAttr(metadata.getImage()));
+		else el.removeEL(KeyConstants._image);
 
 		// Categories
 		String[] cats = metadata.getCategories();
@@ -884,9 +1045,9 @@ public class RHExtension implements Serializable {
 				if (sb.length() > 0) sb.append(',');
 				sb.append(toStringForAttr(cat).replace(',', ' '));
 			}
-			el.setEL("categories", sb.toString());
+			el.setEL(KeyConstants._categories, sb.toString());
 		}
-		else el.removeEL(KeyImpl.init("categories"));
+		else el.removeEL(KeyConstants._categories);
 
 		// core version
 		VersionRange minCoreVersion = metadata.getMinCoreVersion();
@@ -902,28 +1063,28 @@ public class RHExtension implements Serializable {
 		else el.removeEL(KeyImpl.init("amf"));
 
 		// resource
-		if (!StringUtil.isEmpty(metadata.getResourcesRaw())) el.setEL("resource", toStringForAttr(metadata.getResourcesRaw()));
-		else el.removeEL(KeyImpl.init("resource"));
+		if (!StringUtil.isEmpty(metadata.getResourcesRaw())) el.setEL(KeyConstants._resource, toStringForAttr(metadata.getResourcesRaw()));
+		else el.removeEL(KeyConstants._resource);
 
 		// search
-		if (!StringUtil.isEmpty(metadata.getSearchsRaw())) el.setEL("search", toStringForAttr(metadata.getSearchsRaw()));
-		else el.removeEL(KeyImpl.init("search"));
+		if (!StringUtil.isEmpty(metadata.getSearchsRaw())) el.setEL(KeyConstants._search, toStringForAttr(metadata.getSearchsRaw()));
+		else el.removeEL(KeyConstants._search);
 
 		// orm
 		if (!StringUtil.isEmpty(metadata.getOrmsRaw())) el.setEL("orm", toStringForAttr(metadata.getOrmsRaw()));
 		else el.removeEL(KeyImpl.init("orm"));
 
 		// webservice
-		if (!StringUtil.isEmpty(metadata.getWebservicesRaw())) el.setEL("webservice", toStringForAttr(metadata.getWebservicesRaw()));
-		else el.removeEL(KeyImpl.init("webservice"));
+		if (!StringUtil.isEmpty(metadata.getWebservicesRaw())) el.setEL(KeyConstants._webservice, toStringForAttr(metadata.getWebservicesRaw()));
+		else el.removeEL(KeyConstants._webservice);
 
 		// monitor
 		if (!StringUtil.isEmpty(metadata.getMonitorsRaw())) el.setEL("monitor", toStringForAttr(metadata.getMonitorsRaw()));
 		else el.removeEL(KeyImpl.init("monitor"));
 
 		// cache
-		if (!StringUtil.isEmpty(metadata.getCachesRaw())) el.setEL("cache", toStringForAttr(metadata.getCachesRaw()));
-		else el.removeEL(KeyImpl.init("cache"));
+		if (!StringUtil.isEmpty(metadata.getCachesRaw())) el.setEL(KeyConstants._cache, toStringForAttr(metadata.getCachesRaw()));
+		else el.removeEL(KeyConstants._cache);
 
 		// cache-handler
 		if (!StringUtil.isEmpty(metadata.getCacheHandlersRaw())) el.setEL("cacheHandler", toStringForAttr(metadata.getCacheHandlersRaw()));
@@ -938,12 +1099,12 @@ public class RHExtension implements Serializable {
 		else el.removeEL(KeyImpl.init("startupHook"));
 
 		// maven
-		if (!StringUtil.isEmpty(metadata.getMavenRaw())) el.setEL("maven", toStringForAttr(metadata.getMavenRaw()));
-		else el.removeEL(KeyImpl.init("maven"));
+		if (!StringUtil.isEmpty(metadata.getMavenRaw())) el.setEL(KeyConstants._maven, toStringForAttr(metadata.getMavenRaw()));
+		else el.removeEL(KeyConstants._maven);
 
 		// mapping
-		if (!StringUtil.isEmpty(metadata.getMappingsRaw())) el.setEL("mapping", toStringForAttr(metadata.getMappingsRaw()));
-		else el.removeEL(KeyImpl.init("mapping"));
+		if (!StringUtil.isEmpty(metadata.getMappingsRaw())) el.setEL(KeyConstants._mapping, toStringForAttr(metadata.getMappingsRaw()));
+		else el.removeEL(KeyConstants._mapping);
 
 		// event-gateway-instances
 		if (!StringUtil.isEmpty(metadata.getEventGatewayInstancesRaw())) el.setEL("eventGatewayInstances", toStringForAttr(metadata.getEventGatewayInstancesRaw()));
@@ -1095,7 +1256,7 @@ public class RHExtension implements Serializable {
 		return getMetadata()._getVersion();
 	}
 
-	private static Manifest toManifest(Config config, InputStream is, Manifest defaultValue) {
+	private static Manifest toManifest(Config config, InputStream is, boolean closeStream, Manifest defaultValue) {
 		try {
 			Charset cs = config.getResourceCharset();
 			String str = IOUtil.toString(is, cs);
@@ -1107,11 +1268,14 @@ public class RHExtension implements Serializable {
 			ExceptionUtil.rethrowIfNecessary(t);
 			return defaultValue;
 		}
+		finally {
+			if (closeStream) IOUtil.closeEL(is);
+		}
 	}
 
-	private static String toBase64(InputStream is, String defaultValue) {
+	private static String toBase64(InputStream is, boolean closeStream, String defaultValue) {
 		try {
-			byte[] bytes = IOUtil.toBytes(is);
+			byte[] bytes = IOUtil.toBytes(is, closeStream);
 			if (ArrayUtil.isEmpty(bytes)) return defaultValue;
 			return Caster.toB64(bytes, defaultValue);
 		}
