@@ -2885,6 +2885,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			}
 			else {
 				String strDoCTLocalSearch = getAttr(root, "customTagLocalSearch");
+				if (StringUtil.isEmpty(strDoCTLocalSearch, true)) strDoCTLocalSearch = getAttr(root, "customTagSearchLocal");
 				if (hasAccess && !StringUtil.isEmpty(strDoCTLocalSearch)) {
 					config.setDoLocalCustomTag(Caster.toBooleanValue(strDoCTLocalSearch.trim(), true));
 				}
