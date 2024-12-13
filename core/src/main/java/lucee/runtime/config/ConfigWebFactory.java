@@ -3664,10 +3664,15 @@ public final class ConfigWebFactory extends ConfigFactory {
 			str = SystemUtil.getSystemPropOrEnvVar("lucee.cfml.writer", null);
 			if (StringUtil.isEmpty(str)) {
 				str = getAttr(root, "cfmlWriter");
+
+				// CB compatibility
+				if (StringUtil.isEmpty(str, true)) str = getAttr(root, "whitespaceManagement");
 			}
 			if (!StringUtil.isEmpty(str) && hasAccess) {
 				if ("white-space".equalsIgnoreCase(str)) config.setCFMLWriterType(ConfigPro.CFML_WRITER_WS);
+				else if ("simple".equalsIgnoreCase(str)) config.setCFMLWriterType(ConfigPro.CFML_WRITER_WS);
 				else if ("white-space-pref".equalsIgnoreCase(str)) config.setCFMLWriterType(ConfigPro.CFML_WRITER_WS_PREF);
+				else if ("smart".equalsIgnoreCase(str)) config.setCFMLWriterType(ConfigPro.CFML_WRITER_WS_PREF);
 				else if ("regular".equalsIgnoreCase(str)) config.setCFMLWriterType(ConfigPro.CFML_WRITER_REFULAR);
 				// FUTURE add support for classes implementing CFMLWriter interface
 			}
