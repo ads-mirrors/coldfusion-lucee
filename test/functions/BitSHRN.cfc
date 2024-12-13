@@ -35,7 +35,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
                 application action="update" preciseMath=true;
                 assertEquals("2147483647", BitSHRN(4294967295, 1));  // Large number shifted right
                 application action="update" preciseMath=false;
-                assertEquals("2147483648", BitSHRN(4294967295, 1));  // Large number shifted right
+                assertEquals("2147483647", BitSHRN(4294967295, 1));  // Large number shifted right
             });
 
             it(title="Checking BitSHRN() function with negative numbers", body = function(currentSpec) {
