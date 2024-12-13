@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import lucee.commons.digest.WangJenkins;
+import lucee.commons.io.SystemUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.CasterException;
@@ -46,7 +47,7 @@ public class KeyImpl implements Collection.Key, Castable, Comparable, Externaliz
 	private static final long HSTART = 0xBB40E64DA205B064L;
 	private static final long HMULT = 7664345821815920749L;
 
-	private static final int MAX = 5000;
+	private static final int MAX = Caster.toInteger(SystemUtil.getSystemPropOrEnvVar("lucee.cache.variableKeys", null),5000);
 
 	// private boolean intern;
 	private String key;
