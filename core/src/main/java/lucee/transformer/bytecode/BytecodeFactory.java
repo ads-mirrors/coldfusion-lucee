@@ -159,7 +159,7 @@ public class BytecodeFactory extends FactoryBase {
 
 	@Override
 	public LitNumber createLitNumber(Number n, Position start, Position end) {
-		return new LitNumberImpl(this, n instanceof BigDecimal ? (BigDecimal) n : BigDecimal.valueOf(n.doubleValue()), start, end);
+		return new LitNumberImpl(this, n, start, end);
 	}
 
 	@Override

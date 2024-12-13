@@ -46,18 +46,17 @@ public class LitNumberImpl extends ExpressionBase implements LitNumber, ExprNumb
 	}
 
 	private String number;
-	private BigDecimal bd;
+	private Number nbr;
 
 	public LitNumberImpl(Factory f, String number, Position start, Position end) {
 		super(f, start, end);
 		this.number = number;
 	}
 
-	public LitNumberImpl(Factory f, BigDecimal bd, Position start, Position end) {
+	public LitNumberImpl(Factory f, Number nbr, Position start, Position end) {
 		super(f, start, end);
-		this.bd = bd;
-		this.number = Caster.toString(bd);
-
+		this.nbr = nbr;
+		this.number = Caster.toString(nbr);
 	}
 
 	@Override
@@ -96,14 +95,13 @@ public class LitNumberImpl extends ExpressionBase implements LitNumber, ExprNumb
 	}
 
 	public BigDecimal getBigDecimal() throws CasterException {
-		if (bd == null) bd = Caster.toBigDecimal(number);
-		return bd;
+		if (nbr == null) return Caster.toBigDecimal(number);
+		return Caster.toBigDecimal(nbr);
 	}
 
 	@Override
 	public Type _writeOut(BytecodeContext bc, int mode) throws TransformerException {
 		GeneratorAdapter adapter = bc.getAdapter();
-
 		// are we within a method not providing PageContext as first argument?
 		boolean firstIsPC = ASMUtil.isFirstArgumentPageContext(bc);
 
@@ -116,7 +114,8 @@ public class LitNumberImpl extends ExpressionBase implements LitNumber, ExprNumb
 			}
 			return Types.DOUBLE_VALUE;
 		}
-		Long l = justNumberDigits(number) ? Caster.toLong(number, null) : null;
+		// we only take length 18 to avoid edge cases
+		Long l = number.length() < 18 && justNumberDigits(number) ? Caster.toLong(number, null) : null;
 
 		if (l != null && Caster.toString(l).equals(number)) {
 			if (firstIsPC) adapter.loadArg(0);

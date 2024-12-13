@@ -25,7 +25,6 @@ import lucee.commons.io.CharsetUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.config.ConfigPro;
-import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.op.Caster;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
@@ -140,9 +139,7 @@ public class LitStringImpl extends ExpressionBase implements LitString, ExprStri
 
 	@Override
 	public Number getNumber(Number defaultValue) {
-		Number res;
-		if (ThreadLocalPageContext.preciseMath(null)) res = Caster.toBigDecimal(str, null);
-		else res = Caster.toDouble(getString(), null);
+		Number res = Caster.toBigDecimal(str, null);
 		if (res != null) return res;
 		return defaultValue;
 	}
