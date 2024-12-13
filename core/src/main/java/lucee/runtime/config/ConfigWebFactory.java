@@ -2316,6 +2316,8 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 			// PSQ
 			String strPSQ = getAttr(root, "preserveSingleQuote");
+			if (StringUtil.isEmpty(strPSQ)) strPSQ = getAttr(root, "datasourcePreserveSingleQuotes");
+
 			if (access != SecurityManager.VALUE_NO && !StringUtil.isEmpty(strPSQ)) {
 				config.setPSQL(toBoolean(strPSQ, true));
 			}
