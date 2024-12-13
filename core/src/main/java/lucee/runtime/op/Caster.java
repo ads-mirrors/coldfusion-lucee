@@ -751,6 +751,14 @@ public final class Caster {
 		return n.doubleValue();
 	}
 
+	public static double toDoubleValue(long l) {
+		return l;
+	}
+
+	public static double toDoubleValue(Long l) {
+		return l.doubleValue();
+	}
+
 	public static double toDoubleValue(float f) {
 		return f;
 	}
