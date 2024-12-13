@@ -1095,6 +1095,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 				if (psq == null) {
 					// PSQ
 					String strPSQ = ConfigFactoryImpl.getAttr(root, "preserveSingleQuote");
+					if (StringUtil.isEmpty(strPSQ)) strPSQ = ConfigFactoryImpl.getAttr(root, "datasourcePreserveSingleQuotes");
 					if (!StringUtil.isEmpty(strPSQ)) {
 						psq = Caster.toBoolean(strPSQ, Boolean.FALSE);
 					}
@@ -3449,6 +3450,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 				if (useCTPathCache == null) {
 					if (ConfigUtil.hasAccess(this, SecurityManager.TYPE_CUSTOM_TAG)) {
 						String strDoPathcache = ConfigFactoryImpl.getAttr(root, "customTagUseCachePath");
+						if (StringUtil.isEmpty(strDoPathcache, true)) strDoPathcache = ConfigFactoryImpl.getAttr(root, "customTagCachePaths");
 						if (!StringUtil.isEmpty(strDoPathcache, true)) {
 							useCTPathCache = Caster.toBooleanValue(strDoPathcache.trim(), true);
 						}
@@ -3604,6 +3606,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 					else {
 						if (ConfigUtil.hasAccess(this, SecurityManager.TYPE_CUSTOM_TAG)) {
 							String strDoCTLocalSearch = ConfigFactoryImpl.getAttr(root, "customTagLocalSearch");
+							if (StringUtil.isEmpty(strDoCTLocalSearch, true)) strDoCTLocalSearch = ConfigFactoryImpl.getAttr(root, "customTagSearchLocal");
 							if (!StringUtil.isEmpty(strDoCTLocalSearch)) {
 								doLocalCustomTag = Caster.toBooleanValue(strDoCTLocalSearch.trim(), true);
 							}
@@ -3708,6 +3711,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 					else {
 						if (ConfigUtil.hasAccess(this, SecurityManager.TYPE_CUSTOM_TAG)) {
 							String strDoCTDeepSearch = ConfigFactoryImpl.getAttr(root, "customTagDeepSearch");
+							if (StringUtil.isEmpty(strDoCTDeepSearch, true)) strDoCTDeepSearch = ConfigFactoryImpl.getAttr(root, "customTagSearchSubdirectories");
 							if (!StringUtil.isEmpty(strDoCTDeepSearch)) {
 								doCustomTagDeepSearch = Caster.toBooleanValue(strDoCTDeepSearch.trim(), false);
 							}
