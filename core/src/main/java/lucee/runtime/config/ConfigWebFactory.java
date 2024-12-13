@@ -2899,6 +2899,8 @@ public final class ConfigWebFactory extends ConfigFactory {
 			}
 			else {
 				String strDoCTDeepSearch = getAttr(root, "customTagDeepSearch");
+				if (StringUtil.isEmpty(strDoCTDeepSearch, true)) strDoCTDeepSearch = getAttr(root, "customTagSearchSubdirectories");
+
 				if (hasAccess && !StringUtil.isEmpty(strDoCTDeepSearch)) {
 					config.setDoCustomTagDeepSearch(Caster.toBooleanValue(strDoCTDeepSearch.trim(), false));
 				}
