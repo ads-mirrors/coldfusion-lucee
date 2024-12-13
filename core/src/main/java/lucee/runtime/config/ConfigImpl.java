@@ -5288,10 +5288,18 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 					if (StringUtil.isEmpty(str)) {
 						str = ConfigFactoryImpl.getAttr(root, "cfmlWriter");
 					}
+
+					// CB compatibility
+					if (StringUtil.isEmpty(str, true)) {
+						str = ConfigFactoryImpl.getAttr(root, "whitespaceManagement");
+					}
+
 					if (!StringUtil.isEmpty(str, true)) {
 						str = str.trim();
 						if ("white-space".equalsIgnoreCase(str)) writerType = ConfigPro.CFML_WRITER_WS;
+						else if ("simple".equalsIgnoreCase(str)) writerType = ConfigPro.CFML_WRITER_WS;
 						else if ("white-space-pref".equalsIgnoreCase(str)) writerType = ConfigPro.CFML_WRITER_WS_PREF;
+						else if ("snart".equalsIgnoreCase(str)) writerType = ConfigPro.CFML_WRITER_WS_PREF;
 						else if ("regular".equalsIgnoreCase(str)) writerType = ConfigPro.CFML_WRITER_REFULAR;
 						else writerType = ConfigPro.CFML_WRITER_REFULAR;
 					}
