@@ -2048,7 +2048,8 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 	public static Mapping[] loadCustomTagsMappings(ConfigImpl config, Struct root) {
 		Mapping[] mappings = null;
 		try {
-			Array ctMappings = ConfigUtil.getAsArray("customTagMappings", root);
+			Array ctMappings = ConfigUtil.getAsArray(root, true, KeyConstants._virtual, KeyConstants._physical, true, "customTagMappings", "customTagPaths");
+
 			boolean hasDefault = false;
 
 			// Web Mapping
@@ -3509,7 +3510,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 			boolean hasSet = false;
 
 			// Web Mapping
-			Array compMappings = ConfigUtil.getAsArray("componentMappings", root);
+			Array compMappings = ConfigUtil.getAsArray(root, true, KeyConstants._virtual, KeyConstants._physical, false, "componentMappings", "componentPaths");
 			hasSet = false;
 			boolean hasDefault = false;
 			if (compMappings.size() > 0) {

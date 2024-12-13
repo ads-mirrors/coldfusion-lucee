@@ -27,7 +27,7 @@ component output="false" extends="HelperBase" accessors="true"{
 
 		if(structKeyExists(arguments,"sql") && len(arguments.sql)){
 			 this.setSql(arguments.sql);
-			 trace type="warning" var="arguments.sql";
+			// trace type="warning" var="arguments.sql";
 		}
 
 		//parse the sql into an array and save it

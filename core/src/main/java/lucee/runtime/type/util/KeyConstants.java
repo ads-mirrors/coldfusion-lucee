@@ -3007,6 +3007,7 @@ public class KeyConstants {
 	public static final Key _stream = KeyImpl._const("stream");
 	public static final Key _temperature = KeyImpl._const("temperature");
 	public static final Key _purpose = KeyImpl._const("purpose");
+	public static final Key _physical = KeyImpl._const("physical");
 
 	private static Map<String, Key> _____keys;
 
