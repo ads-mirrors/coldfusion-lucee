@@ -190,6 +190,7 @@ public class KeyImpl implements Collection.Key, Castable, Comparable, Externaliz
 	 * used to inside the rest of the source created, can be dynamic values, so a lot
 	 */
 	public static Collection.Key source(String key) {
+		if (MAX == 0) return new KeyImpl(key);
 		Key k = keys.get(key);
 		if (k == null) {
 			if (keys.size() > MAX) return new KeyImpl(key);
