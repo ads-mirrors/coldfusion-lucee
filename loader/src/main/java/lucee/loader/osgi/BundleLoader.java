@@ -339,7 +339,7 @@ public class BundleLoader {
 			removeBundle(bundle);
 	}
 
-	public static void removeBundles(final BundleCollection bc) throws BundleException {
+	public static void removeBundles(final BundleCollection bc, boolean uninstall) throws BundleException {
 		BundleContext bcc = bc.getBundleContext();
 		final Bundle[] bundles = bcc == null ? new Bundle[0] : bcc.getBundles();
 
@@ -350,9 +350,11 @@ public class BundleLoader {
 			}
 		}
 		// uninstall
-		for (final Bundle bundle: bundles) {
-			if (!BundleUtil.isSystemBundle(bundle)) {
-				uninstallBundle(bundle);
+		if (uninstall) {
+			for (final Bundle bundle: bundles) {
+				if (!BundleUtil.isSystemBundle(bundle)) {
+					uninstallBundle(bundle);
+				}
 			}
 		}
 	}

@@ -83,6 +83,7 @@ import lucee.loader.osgi.LoggerImpl;
 import lucee.loader.util.ExtensionFilter;
 import lucee.loader.util.Util;
 import lucee.loader.util.ZipUtil;
+import lucee.loader.util.log.Logging;
 import lucee.runtime.config.ConfigServer;
 import lucee.runtime.config.Identification;
 import lucee.runtime.config.Password;
@@ -133,6 +134,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 	private boolean embedded;
 
 	protected CFMLEngineFactory(final ServletConfig config) {
+		Logging.startupLog();
 		System.setProperty("org.apache.commons.logging.LogFactory.HashtableImpl", ConcurrentHashMapAsHashtable.class.getName());
 		File logFile = null;
 		this.config = config;
@@ -289,16 +291,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 		BundleCollection bc = singelton.getBundleCollection();
 		if (bc == null || bc.felix == null) return;
 
-		// stop
-		BundleLoader.removeBundles(bc);
-
-		// we give it some time
-		try {
-			Thread.sleep(5000);
-		}
-		catch (InterruptedException e) {
-		}
-
+		// BundleLoader.removeBundles(bc, false);
 		BundleUtil.stop(felix, false);
 	}
 
@@ -751,12 +744,12 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 		// Enables or disables bundle cache locking, which is used to prevent concurrent access to the
 		// bundle cache.
 
-		extend(config, "felix.cache.locking", null, false);
+		extend(config, "felix.cache.locking", "false", false);
 		extend(config, "org.osgi.framework.executionenvironment", null, false);
 		extend(config, "org.osgi.framework.storage", null, false);
-		extend(config, "org.osgi.framework.storage.clean", Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT, false);
+		extend(config, "org.osgi.framework.storage.clean", "none", false);
 		extend(config, Constants.FRAMEWORK_BUNDLE_PARENT, Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK, false);
-
+		// felix.cache.bufsize
 		boolean isNew = false;
 		// felix.cache.rootdir
 		if (Util.isEmpty((String) config.get("felix.cache.rootdir"))) {
@@ -771,7 +764,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 		extend(config, Constants.FRAMEWORK_SYSTEMPACKAGES, null, true);
 		extend(config, Constants.FRAMEWORK_SYSTEMPACKAGES_EXTRA, null, true);
 		extend(config, "felix.cache.filelimit", null, false);
-		extend(config, "felix.cache.bufsize", null, false);
+		extend(config, "felix.cache.bufsize", "65536", false); // 64kb default is 8kb
 		extend(config, "felix.bootdelegation.implicit", null, false);
 		extend(config, "felix.systembundle.activators", null, false);
 		extend(config, "org.osgi.framework.startlevel.beginning", null, false);
@@ -803,7 +796,6 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 			e = it.next();
 			sb.append("\n- ").append(e.getKey()).append(':').append(e.getValue());
 		}
-		// log(Logger.LOG_INFO, sb.toString());
 
 		felix = new Felix(config);
 		try {

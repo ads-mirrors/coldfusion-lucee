@@ -176,6 +176,10 @@ import lucee.runtime.video.VideoUtil;
 import lucee.runtime.video.VideoUtilImpl;
 import lucee.servlet.http.HTTPServletImpl;
 import lucee.transformer.dynamic.DynamicInvoker;
+import lucee.transformer.library.function.FunctionLibException;
+import lucee.transformer.library.function.FunctionLibFactory;
+import lucee.transformer.library.tag.TagLibException;
+import lucee.transformer.library.tag.TagLibFactory;
 
 /**
  * The CFMl Engine
@@ -220,36 +224,49 @@ public final class CFMLEngineImpl implements CFMLEngine {
 	}
 
 	private CFMLEngineImpl(CFMLEngineFactory factory, BundleCollection bc) {
-		String dumpPath = Caster.toString(SystemUtil.getSystemPropOrEnvVar("lucee.dump.threads", null), null);
-		if (!StringUtil.isEmpty(dumpPath, true)) {
-			int interval = Caster.toIntValue(SystemUtil.getSystemPropOrEnvVar("lucee.dump.threads.interval", null), 100);
-			long start = System.currentTimeMillis();
-			long max = Caster.toIntValue(SystemUtil.getSystemPropOrEnvVar("lucee.dump.threads.max", null), 10000);
 
-			// Create a new thread to run the task
-			Thread thread = new Thread(() -> {
-				while (true) {
-					try {
-						if ((start + max) < System.currentTimeMillis()) {
-							break;
-						}
-						// Call the dumpThreadPositions method
-						Resource target = ResourcesImpl.getFileResourceProvider().getResource(dumpPath);
-						Controler.dumpThreadPositions(target);
+		// Kick some stuff to get it started in parallel because it takes forever to load
+		ThreadUtil.getThread(() -> {
+			try {
+				Class.forName("lucee.runtime.type.util.KeyConstants");
+			}
+			catch (ClassNotFoundException e) {
+			}
+		}, true).start();
 
-						// Pause for the specified interval
-						SystemUtil.sleep(interval);
-					}
-					catch (IOException e) {
-						e.printStackTrace();
-						SystemUtil.sleep(1000);
-					}
-				}
-			});
+		ThreadUtil.getThread(() -> {
+			try {
+				FunctionLibFactory.loadFromSystem(null);
+			}
+			catch (FunctionLibException e) {
+			}
+		}, true).start();
 
-			// Start the thread
-			thread.start();
-		}
+		ThreadUtil.getThread(() -> {
+			try {
+				TagLibFactory.loadFromSystem(null);
+			}
+			catch (TagLibException e) {
+			}
+		}, true).start();
+
+		/*
+		 * String dumpPath = Caster.toString(SystemUtil.getSystemPropOrEnvVar("lucee.dump.threads", null),
+		 * null); if (!StringUtil.isEmpty(dumpPath, true)) { int interval =
+		 * Caster.toIntValue(SystemUtil.getSystemPropOrEnvVar("lucee.dump.threads.interval", null), 100);
+		 * long start = System.currentTimeMillis(); long max =
+		 * Caster.toIntValue(SystemUtil.getSystemPropOrEnvVar("lucee.dump.threads.max", null), 10000);
+		 * 
+		 * // Create a new thread to run the task Thread thread = new Thread(() -> { while (true) { try { if
+		 * ((start + max) < System.currentTimeMillis()) { break; } // Call the dumpThreadPositions method
+		 * Resource target = ResourcesImpl.getFileResourceProvider().getResource(dumpPath);
+		 * Controler.dumpThreadPositions(target);
+		 * 
+		 * // Pause for the specified interval SystemUtil.sleep(interval); } catch (IOException e) {
+		 * e.printStackTrace(); SystemUtil.sleep(1000); } } });
+		 * 
+		 * // Start the thread thread.start(); }
+		 */
 
 		FACTORY = this.factory = factory;
 		this.bundleCollection = bc;
