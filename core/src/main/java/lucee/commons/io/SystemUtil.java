@@ -24,6 +24,8 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryPoolMXBean;
 import java.lang.management.MemoryType;
@@ -84,6 +86,7 @@ import lucee.commons.lang.StringUtil;
 import lucee.commons.lang.types.RefInteger;
 import lucee.commons.lang.types.RefIntegerImpl;
 import lucee.loader.TP;
+import lucee.loader.Version;
 import lucee.loader.engine.CFMLEngineFactory;
 import lucee.loader.util.Util;
 import lucee.runtime.PageContext;
@@ -1205,21 +1208,32 @@ public final class SystemUtil {
 	}
 
 	public static double getLoaderVersion() {
-		// this is done via reflection to make it work in older version, where the class
-		// lucee.loader.Version does not exist
 		if (loaderVersion == 0D) {
-			loaderVersion = 4D;
-			Class<?> cVersion = ClassUtil.loadClass(getLoaderClassLoader(), "lucee.loader.Version", null);
-			if (cVersion != null) {
+			try {
+				loaderVersion = Version.VERSION;
+			}
+			catch (Throwable t) {
+				ExceptionUtil.rethrowIfNecessary(t);
 				try {
-					Field f = cVersion.getField("VERSION");
-					loaderVersion = f.getDouble(null);
+					// Get a lookup object
+					MethodHandles.Lookup lookup = MethodHandles.lookup();
+
+					// Find the class
+					Class<?> cVersion = ClassUtil.loadClass(getLoaderClassLoader(), "lucee.loader.Version", null);
+					if (cVersion != null) {
+						// Get a handle to the VERSION field
+						VarHandle fieldHandle = lookup.findStaticVarHandle(cVersion, "VERSION", double.class);
+						// Get the value
+						loaderVersion = (double) fieldHandle.get();
+					}
 				}
-				catch (Throwable t) {
-					ExceptionUtil.rethrowIfNecessary(t);
+				catch (Throwable tt) {
+					loaderVersion = 4d;
+					ExceptionUtil.rethrowIfNecessary(tt);
 				}
 			}
 		}
+
 		return loaderVersion;
 	}
 

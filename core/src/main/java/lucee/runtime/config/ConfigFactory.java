@@ -86,13 +86,12 @@ public abstract class ConfigFactory {
 		String strOldVersion;
 		final Resource resOldVersion = contextDir.getRealResource("version");
 
-		String strNewVersion = info.getVersion() + "-" + info.getRealeaseTime();
-
 		// if the config got deleted, we need to make sure the required extension get installed again
 		boolean deleted = false;
 		if (readOnly && !ConfigFactoryImpl.getConfigFile(contextDir, true).exists()) {
 			deleted = resOldVersion.delete();
 		}
+		String strNewVersion = info.getVersion() + "-" + info.getRealeaseTime();
 
 		// new version
 		if (deleted || !resOldVersion.exists()) {

@@ -510,15 +510,6 @@ public final class CFMLEngineImpl implements CFMLEngine {
 			LogUtil.log(cs, Log.LEVEL_INFO, "startup", "Start CFML Controller");
 			controler.start();
 		}
-
-		// remove old log4j bundles FUTURE remove
-		try {
-			OSGiUtil.removeLocalBundle("log4j", OSGiUtil.toVersion("1.2.16"), null, true, true);
-			OSGiUtil.removeLocalBundle("log4j", OSGiUtil.toVersion("1.2.17"), null, true, true);
-		}
-		catch (Exception e) {
-			LogUtil.log(cs, "startup", e);
-		}
 	}
 
 	private static void checkInvalidExtensions(CFMLEngineImpl eng, ConfigPro config, Set<ExtensionDefintion> extensionsToInstall, Set<String> extensionsToRemove) {

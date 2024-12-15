@@ -19,11 +19,16 @@ package lucee.runtime.engine;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
-import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 import org.osgi.framework.Bundle;
@@ -35,12 +40,9 @@ import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageSourceImpl;
 import lucee.runtime.config.Constants;
-import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.extension.ExtensionDefintion;
 import lucee.runtime.extension.RHExtension;
 import lucee.runtime.op.Caster;
-import lucee.runtime.op.date.DateCaster;
-import lucee.runtime.osgi.OSGiUtil;
 import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.dt.DateTime;
 import lucee.runtime.type.util.ListUtil;
@@ -56,50 +58,137 @@ public final class InfoImpl implements Info {
 	public static final int STATE_FINAL = 0;
 
 	// Mod this
+
+	private Version version;
+
+	private long releaseTime;
 	private DateTime releaseDate;
 	private String versionName;
 	private String versionNameExplanation;
-	private final long releaseTime;
-	private Version version;
 	private String level;
 	private List<ExtensionDefintion> requiredExtensions;
-
-	// private int state;
-	// private final String strState;
-
-	public InfoImpl() {
-		this(null);
-	}
+	public String requiredExtensionsRaw;
 
 	public InfoImpl(Bundle bundle) {
 
-		try {
-			Manifest manifest = getManifest(bundle);
-			if (manifest == null) throw new IllegalArgumentException("Failed to get manifest from bundle");
-			Attributes mf = manifest.getMainAttributes();
+		Dictionary<String, String> headers = bundle.getHeaders();
 
-			versionName = mf.getValue("Minor-Name");
-			if (versionName == null) throw new RuntimeException("missing Minor-Name");
+		// version
+		this.version = bundle.getVersion();
+		this.versionName = headers.get("Minor-Name");
+		if (this.versionName == null) throw new RuntimeException("missing Minor-Name");
+		this.versionNameExplanation = headers.get("Minor-Name-Explanation");
 
-			versionNameExplanation = mf.getValue("Minor-Name-Explanation");
-			releaseDate = DateCaster.toDateAdvanced(mf.getValue("Built-Date"), null);
-			// state=toIntState(mf.getValue("State"));
-			level = "os";
-			version = OSGiUtil.toVersion(mf.getValue("Bundle-Version"));
+		// release date
+		this.releaseTime = parseDateTime(headers.get("Built-Date"));
+		this.level = "os";
 
-			String str = mf.getValue("Require-Extension");
-			if (StringUtil.isEmpty(str, true)) requiredExtensions = new ArrayList<ExtensionDefintion>();
-			else requiredExtensions = RHExtension.toExtensionDefinitions(str);
-
-			// ListUtil.trimItems(ListUtil.listToStringArray(str, ','));
+		// required extension
+		String str = headers.get("Require-Extension");
+		if (StringUtil.isEmpty(str, true)) {
+			this.requiredExtensions = new ArrayList<ExtensionDefintion>();
 		}
-		catch (Throwable t) {
-			ExceptionUtil.rethrowIfNecessary(t);
-			throw new PageRuntimeException(Caster.toPageException(t));
+		else {
+			this.requiredExtensionsRaw = str;
 		}
+	}
 
-		releaseTime = releaseDate.getTime();
-		// strState=toStringState(state);
+	public static long parseDateTime(String dateStr) {
+
+		int index1 = dateStr.indexOf('/');
+		int index2 = dateStr.indexOf('/', index1 + 1);
+		int index3 = dateStr.indexOf(' ', index2 + 1);
+		int index4 = dateStr.indexOf(':', index3 + 1);
+		int index5 = dateStr.indexOf(':', index4 + 1);
+		int index6 = dateStr.indexOf(' ', index5 + 1);
+
+		if (index6 != -1) {
+			LocalDateTime ldt = LocalDateTime.of(Integer.parseInt(dateStr.substring(0, index1)), // year
+					Integer.parseInt(dateStr.substring(index1 + 1, index2)), // month
+					Integer.parseInt(dateStr.substring(index2 + 1, index3)), // day
+					Integer.parseInt(dateStr.substring(index3 + 1, index4)), // hour
+					Integer.parseInt(dateStr.substring(index4 + 1, index5)), // minute
+					Integer.parseInt(dateStr.substring(index5 + 1, index6)) // second
+			);
+			return ldt.atZone(ZoneId.of(dateStr.substring(index6 + 1))).toInstant().toEpochMilli();
+		}
+		// fallback (slower, but more forgiving)
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss z", Locale.ENGLISH);
+		ZonedDateTime zdt = ZonedDateTime.parse(dateStr, formatter);
+		return zdt.toInstant().toEpochMilli();
+	}
+
+	@Override
+	public String getLevel() {
+		return level;
+	}
+
+	@Override
+	public long getRealeaseTime() {
+		return releaseTime;
+	}
+
+	@Override
+	public Version getVersion() {
+		return version;
+	}
+
+	public List<ExtensionDefintion> getRequiredExtension() {
+		if (requiredExtensions == null) {
+			this.requiredExtensions = RHExtension.toExtensionDefinitions(requiredExtensionsRaw);
+		}
+		return requiredExtensions;
+	}
+
+	@Override
+	public String getVersionName() {
+		return versionName;
+	}
+
+	@Override
+	public String getVersionNameExplanation() {
+		return versionNameExplanation;
+	}
+
+	@Override
+	public long getFullVersionInfo() {
+		return KeyImpl.createHash64(getVersion().toString());// +state;
+	}
+
+	@Override
+	public String[] getCFMLTemplateExtensions() {
+		return Constants.getCFMLTemplateExtensions();
+	}
+
+	@Override
+	public String[] getLuceeTemplateExtensions() {
+		return null;
+	}
+
+	@Override
+	public String[] getCFMLComponentExtensions() {
+		return new String[] { getCFMLComponentExtension() };
+	}
+
+	@Override
+	public String[] getLuceeComponentExtensions() {
+		return new String[] { getLuceeComponentExtension() };
+	}
+
+	@Override
+	public String getCFMLComponentExtension() {
+		return Constants.getCFMLComponentExtension();
+	}
+
+	@Override
+	public String getLuceeComponentExtension() {
+		return null;
+	}
+
+	@Override
+	public String toString() {
+		return "releaseDate:" + releaseDate + ";versionName:" + versionName + ";versionNameExplanation:" + versionNameExplanation + ";level" + level + ";requiredExtensions:"
+				+ requiredExtensionsRaw;
 	}
 
 	public static Properties getDefaultProperties(Bundle bundle) {
@@ -256,14 +345,6 @@ public final class InfoImpl implements Info {
 		return null;
 	}
 
-	/**
-	 * @return the level
-	 */
-	@Override
-	public String getLevel() {
-		return level;
-	}
-
 	public static int toIntVersion(String version, int defaultValue) {
 		try {
 			String[] aVersion = ListUtil.toStringArray(ListUtil.listToArrayRemoveEmpty(version, '.'));
@@ -279,105 +360,4 @@ public final class InfoImpl implements Info {
 		}
 	}
 
-	// Version <version>.<major>.<minor>.<patches>
-
-	/**
-	 * @return Returns the releaseDate.
-	 */
-	public DateTime getRealeaseDate() {
-		return releaseDate;
-	}
-
-	/**
-	 * @return Returns the releaseTime.
-	 */
-	@Override
-	public long getRealeaseTime() {
-		return releaseTime;
-	}
-
-	@Override
-	public Version getVersion() {
-		return version;
-	}
-
-	public List<ExtensionDefintion> getRequiredExtension() {
-		return requiredExtensions;
-	}
-
-	/**
-	 * @return returns the state
-	 * 
-	 * @Override public int getStateAsInt() { return state; }
-	 */
-
-	/**
-	 * @return returns the state
-	 * 
-	 * @Override public String getStateAsString() { return strState; }
-	 */
-
-	/*
-	 * *
-	 * 
-	 * @return returns the state
-	 * 
-	 * public static String toStringState(int state) { if(state==STATE_FINAL) return "final"; else
-	 * if(state==STATE_BETA) return "beta"; else if(state==STATE_RC) return "rc"; else return "alpha"; }
-	 */
-
-	/*
-	 * *
-	 * 
-	 * @return returns the state
-	 * 
-	 * public int toIntState(String state) { state=state.trim().toLowerCase(); if("final".equals(state))
-	 * return STATE_FINAL; else if("beta".equals(state)) return STATE_BETA; else if("rc".equals(state))
-	 * return STATE_RC; else return STATE_ALPHA; }
-	 */
-
-	@Override
-	public String getVersionName() {
-		return versionName;
-	}
-
-	@Override
-	public String getVersionNameExplanation() {
-		return versionNameExplanation;
-	}
-
-	@Override
-	public long getFullVersionInfo() {
-		return KeyImpl.createHash64(getVersion().toString());// +state;
-	}
-
-	@Override
-	public String[] getCFMLTemplateExtensions() {
-		return Constants.getCFMLTemplateExtensions();
-	}
-
-	@Override
-	public String[] getLuceeTemplateExtensions() {
-		return null;
-	}
-
-	@Override
-	public String[] getCFMLComponentExtensions() {
-		return new String[] { getCFMLComponentExtension() };
-	}
-
-	@Override
-	public String[] getLuceeComponentExtensions() {
-		return new String[] { getLuceeComponentExtension() };
-	}
-
-	@Override
-	public String getCFMLComponentExtension() {
-		return Constants.getCFMLComponentExtension();
-	}
-
-	@Override
-	public String getLuceeComponentExtension() {
-		return null;
-	}
 }
