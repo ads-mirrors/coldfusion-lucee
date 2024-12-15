@@ -9572,7 +9572,7 @@ The following things are considered to be empty:
         <name>interval</name>
         <type>number</type>
         <required>false</required>
-        <default>10</default>
+        <default>0</default>
         <description>
             The time interval (in milliseconds) between stack trace captures. Lower values provide
             more detailed analysis but generate larger log files and may impact performance.

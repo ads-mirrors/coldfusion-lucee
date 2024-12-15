@@ -18,7 +18,7 @@ public final class LogAllThreads implements Function {
 	private static final long serialVersionUID = -1922482127354478506L;
 
 	public static String call(PageContext pc, String path) throws PageException {
-		return call(pc, path, 10, 10000);
+		return call(pc, path, 0, 10000);
 	}
 
 	public static String call(PageContext pc, String path, Number interval) throws PageException {
@@ -31,7 +31,7 @@ public final class LogAllThreads implements Function {
 			throw new FunctionException(pc, "LogAllThreads", 1, "path", "the directory [" + res.getParent() + "] for your log file [" + path + "] does not exist.");
 
 		int tmp = Caster.toIntValue(interval);
-		if (tmp < 1) tmp = 10;
+		if (tmp < 0) tmp = 10;
 		final long interv = tmp;
 
 		long ltmp = Caster.toLongValue(duration);
@@ -50,7 +50,7 @@ public final class LogAllThreads implements Function {
 					Controler.dumpThreadPositions(res);
 
 					// Pause for the specified interval
-					SystemUtil.sleep(interv);
+					if (interv > 0) SystemUtil.sleep(interv);
 				}
 				catch (IOException e) {
 					SystemUtil.sleep(1000);
