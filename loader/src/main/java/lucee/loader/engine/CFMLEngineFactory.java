@@ -288,17 +288,6 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 
 		BundleCollection bc = singelton.getBundleCollection();
 		if (bc == null || bc.felix == null) return;
-
-		// stop
-		BundleLoader.removeBundles(bc);
-
-		// we give it some time
-		try {
-			Thread.sleep(5000);
-		}
-		catch (InterruptedException e) {
-		}
-
 		BundleUtil.stop(felix, false);
 	}
 
