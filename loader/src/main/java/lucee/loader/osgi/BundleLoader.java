@@ -31,10 +31,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -53,7 +53,7 @@ public class BundleLoader {
 
 	public static BundleCollection loadBundles(final CFMLEngineFactory engFac, final File cacheRootDir, final File jarDirectory, final File rc, final BundleCollection old)
 			throws IOException, BundleException {
-		// if (rc.getName().toLowerCase().toLowerCase().indexOf("ehcache") != -1)
+
 		final JarFile jf = new JarFile(rc);// TODO this should work in any case, but we should still improve this code
 		try {
 			// Manifest
@@ -62,7 +62,6 @@ public class BundleLoader {
 			final Attributes attrs = mani.getMainAttributes();
 			// default properties
 			final Properties defProp = loadDefaultProperties(jf);
-
 			// read the config from default.properties
 			final Map<String, Object> config = new HashMap<>();
 			{
@@ -99,8 +98,10 @@ public class BundleLoader {
 
 			// load Required/Available Bundles
 			final Map<String, String> requiredBundles = readRequireBundle(rb); // Require-Bundle
+
 			final Map<String, String> requiredBundleFragments = readRequireBundle(rbf); // Require-Bundle-Fragment
-			final Map<String, File> availableBundles = loadAvailableBundles(jarDirectory);
+
+			final Map<String, File> availableBundles = loadAvailableBundles(jarDirectory, requiredBundles, requiredBundleFragments);
 
 			// deploys bundled bundles to bundle directory
 			// deployBundledBundles(jarDirectory, availableBundles);
@@ -134,39 +135,32 @@ public class BundleLoader {
 
 	public static List<Bundle> addRequiredBundles(Map<String, String> requiredBundles, Map<String, File> availableBundles, boolean always, CFMLEngineFactory engFac,
 			BundleContext bc) {
-		List<Bundle> bundles = new ArrayList<>();
+		final List<Bundle> bundles = new ArrayList<>();
 		Iterator<Entry<String, String>> it = requiredBundles.entrySet().iterator();
-
 		// Use regular threads
-		ExecutorService executor = createExecutorService(requiredBundles.size());
-		List<Future<Bundle>> futures = new ArrayList<>();
-
+		List<CompletableFuture<?>> futures = new ArrayList<>();
 		while (it.hasNext()) {
 			Entry<String, String> e = it.next();
-			futures.add(executor.submit(() -> {
-				String id = e.getKey() + "|" + e.getValue();
-				File f = always ? null : availableBundles.get(id);
-				if (f == null) {
-					f = engFac.downloadBundle(e.getKey(), e.getValue(), null);
+			futures.add(CompletableFuture.runAsync(() -> {
+				try {
+					String id = e.getKey() + "|" + e.getValue();
+					File f = always ? null : availableBundles.get(id);
+					if (f == null) {
+						f = engFac.downloadBundle(e.getKey(), e.getValue(), null);
+					}
+					bundles.add(BundleUtil.addBundle(engFac, bc, f, null));
 				}
-				return BundleUtil.addBundle(engFac, bc, f, null);
+				catch (Exception ex) {
+					ex.printStackTrace();
+				}
 			}));
 		}
 
-		for (Future<Bundle> future: futures) {
-			try {
-				bundles.add(future.get());
-			}
-			catch (Exception ex) {
-				ex.printStackTrace();
-			}
-		}
-
-		executor.shutdown();
+		CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
 		return bundles;
 	}
 
-	private static Map<String, File> loadAvailableBundles(final File jarDirectory) {
+	private static Map<String, File> loadAvailableBundles(final File jarDirectory, final Map<String, String> requiredBundles, final Map<String, String> requiredBundleFragments) {
 		final Map<String, File> rtn = new ConcurrentHashMap<>();
 		final File[] jars = jarDirectory.listFiles();
 
@@ -174,38 +168,79 @@ public class BundleLoader {
 			// Create a thread pool with a fixed number of threads
 			// ExecutorService executor = Executors.newFixedThreadPool(Math.min(jars.length,
 			// Runtime.getRuntime().availableProcessors()));
-			ExecutorService executor = createExecutorService(jars.length);
-			try {
-				List<Future<?>> futures = new ArrayList<>();
-				for (File jar: jars) {
-					if (!jar.isFile() || !jar.getName().endsWith(".jar")) continue;
 
-					// Submit tasks for processing each jar file
-					futures.add(executor.submit(() -> {
+			// we first try to make a match based on the required bundles and bundle fragments
+			List<File> remainings = null;
+			boolean has;
+			for (File jar: jars) {
+				if (!jar.isFile() || !jar.getName().endsWith(".jar")) continue;
+				String fullname = null;
+				has = false;
+				try {
+					fullname = jar.getName();
+					fullname = jar.getName().substring(0, fullname.length() - 4);
+					int lastDot = fullname.lastIndexOf('.');
+					if (lastDot != -1) {
+						int lastSlash = fullname.substring(0, lastDot).lastIndexOf('-');
+						if (lastSlash != -1) {
+							String name = fullname.substring(0, lastSlash);
+							String version = fullname.substring(lastSlash + 1);
+							String val;
+							if ((val = requiredBundles.get(name)) != null && val.equals(version)) {
+								rtn.put(name + "|" + version, jar);
+								has = true;
+							}
+							else if ((val = requiredBundleFragments.get(name)) != null && val.equals(version)) {
+								rtn.put(name + "|" + version, jar);
+								has = true;
+							}
+						}
+					}
+
+					if (!has) {
+						if (remainings == null) remainings = new ArrayList<>();
+						remainings.add(jar);
+					}
+				}
+				catch (Throwable t) {
+					Util.rethrowIfNecessary(t);
+				}
+			}
+			if (remainings != null) {
+
+				if (remainings.size() > 1) {
+					List<CompletableFuture<?>> futures = new ArrayList<>();
+					for (File jar: remainings) {
+						// Submit tasks for processing each jar file
+						futures.add(CompletableFuture.runAsync(() -> {
+							long start = System.currentTimeMillis();
+							try {
+								rtn.put(loadBundleInfo(jar), jar);
+							}
+							catch (IOException ioe) { // Log the exception
+								new Exception("Error loading bundle info for [" + jar.toString() + "]", ioe).printStackTrace();
+							}
+						}));
+					}
+					// Wait for all tasks to complete
+					CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+				}
+				else {
+					for (File jar: remainings) {
 						try {
 							rtn.put(loadBundleInfo(jar), jar);
+
 						}
 						catch (IOException ioe) {
 							// Log the exception
 							new Exception("Error loading bundle info for [" + jar.toString() + "]", ioe).printStackTrace();
 						}
-					}));
-				}
-				// Wait for all tasks to complete
-				for (Future<?> future: futures) {
-					try {
-						future.get();
-					}
-					catch (Exception e) {
-						throw new RuntimeException(e);
 					}
 				}
-			}
-			finally {
-				executor.shutdown(); // Ensure the executor is properly shut down
 			}
 		}
 		return rtn;
+
 	}
 
 	private static Map<String, File> loadAvailableBundlesSerial(final File jarDirectory) {
@@ -241,7 +276,8 @@ public class BundleLoader {
 				if (e instanceof ThreadDeath) throw (ThreadDeath) e;
 			}
 		}
-		return Executors.newFixedThreadPool(maxThreads);
+
+		return Executors.newFixedThreadPool(Math.min(Runtime.getRuntime().availableProcessors(), maxThreads));
 	}
 
 	private static int parseJavaVersion(String version) {

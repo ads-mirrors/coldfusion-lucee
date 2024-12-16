@@ -1213,6 +1213,7 @@ public final class SystemUtil {
 				loaderVersion = Version.VERSION;
 			}
 			catch (Throwable t) {
+				t.printStackTrace();
 				ExceptionUtil.rethrowIfNecessary(t);
 				try {
 					// Get a lookup object

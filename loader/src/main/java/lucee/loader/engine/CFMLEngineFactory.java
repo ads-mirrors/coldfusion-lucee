@@ -789,13 +789,12 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 			}
 		}
 
-		final StringBuilder sb = new StringBuilder("Loading felix with config:");
-		final Iterator<Entry<String, Object>> it = config.entrySet().iterator();
-		Entry<String, Object> e;
-		while (it.hasNext()) {
-			e = it.next();
-			sb.append("\n- ").append(e.getKey()).append(':').append(e.getValue());
-		}
+		/*
+		 * final StringBuilder sb = new StringBuilder("Loading felix with config:"); final
+		 * Iterator<Entry<String, Object>> it = config.entrySet().iterator(); Entry<String, Object> e; while
+		 * (it.hasNext()) { e = it.next();
+		 * sb.append("\n- ").append(e.getKey()).append(':').append(e.getValue()); } System.err.println(sb);
+		 */
 
 		felix = new Felix(config);
 		try {
@@ -805,9 +804,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 			// this could be cause by an invalid felix cache, so we simply delete it and try again
 			if (!isNew && "Error creating bundle cache.".equals(be.getMessage())) {
 				Util.deleteContent(cacheRootDir, null);
-
 			}
-
 		}
 
 		return felix;
