@@ -391,5 +391,10 @@
         "sysprop": "lucee.cache.variableKeys",
         "envvar": "LUCEE_CACHE_VARIABLEKEYS",
         "desc": "Sets the max number of variable names (keys) to cache"
+    },
+    {
+        "sysprop": "lucee.threads.maxDefault",
+        "envvar": "LUCEE_THREADS_MAXDEFAULT",
+        "desc": "Sets the default max number of parallel threads, default 20"
     }
 ]

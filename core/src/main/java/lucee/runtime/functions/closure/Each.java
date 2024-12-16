@@ -53,7 +53,8 @@ import lucee.runtime.type.util.StringListData;
 
 public final class Each extends BIF implements ClosureFunc {
 
-	public static final int DEFAULT_MAX_THREAD = 20;
+	public static final int DEFAULT_MAX_THREAD = Caster.toIntValue(SystemUtil.getSystemPropOrEnvVar("lucee.threads.maxDefault", null), 20);
+	
 	private static final long serialVersionUID = 1955185705863596525L;
 
 	public static String call(PageContext pc, Object obj, UDF udf) throws PageException {
