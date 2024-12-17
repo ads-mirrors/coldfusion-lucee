@@ -83,6 +83,7 @@ import lucee.loader.osgi.LoggerImpl;
 import lucee.loader.util.ExtensionFilter;
 import lucee.loader.util.Util;
 import lucee.loader.util.ZipUtil;
+import lucee.loader.util.log.Logging;
 import lucee.runtime.config.ConfigServer;
 import lucee.runtime.config.Identification;
 import lucee.runtime.config.Password;
@@ -133,6 +134,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 	private boolean embedded;
 
 	protected CFMLEngineFactory(final ServletConfig config) {
+		Logging.startupLog();
 		System.setProperty("org.apache.commons.logging.LogFactory.HashtableImpl", ConcurrentHashMapAsHashtable.class.getName());
 		File logFile = null;
 		this.config = config;

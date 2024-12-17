@@ -29,6 +29,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -50,6 +51,10 @@ public class Util {
 
 	private static File tempFile;
 	// private static File homeFile;
+	public static final Charset UTF8;
+	static {
+		UTF8 = Charset.forName("UTF-8");
+	}
 
 	private static final int QUALIFIER_APPENDIX_SNAPSHOT = 1;
 	private static final int QUALIFIER_APPENDIX_BETA = 2;
@@ -579,5 +584,13 @@ public class Util {
 		Throwable cause = t.getCause();
 		if (cause != null && cause != t) return unwrap(cause);
 		return t;
+	}
+
+	public static void sleep(int time) {
+		try {
+			Thread.sleep(time);
+		}
+		catch (InterruptedException e) {
+		}
 	}
 }
