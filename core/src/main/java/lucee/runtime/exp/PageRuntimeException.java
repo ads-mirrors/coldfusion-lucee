@@ -18,6 +18,7 @@
  **/
 package lucee.runtime.exp;
 
+import lucee.commons.lang.ExceptionUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.PageSource;
 import lucee.runtime.config.Config;
@@ -41,17 +42,7 @@ public class PageRuntimeException extends RuntimeException implements IPageExcep
 	public PageRuntimeException(Throwable t) {
 		super(t.getMessage(), t);
 		this.pe = Caster.toPageException(t);
-	}
-
-	/**
-	 * constructor of the class
-	 * 
-	 * @param pe page exception to hold
-	 */
-	public PageRuntimeException(PageException pe) {
-		super(pe.getMessage(), pe);
-		setStackTrace(pe.getStackTrace());
-		this.pe = pe;
+		ExceptionUtil.initCauseEL(this, t);
 	}
 
 	/**
