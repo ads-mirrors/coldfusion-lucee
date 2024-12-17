@@ -318,9 +318,12 @@ public final class ExceptionUtil {
 			if (--count <= 0) break; // in case cause point to a child
 			tmp = e.getCause();
 			if (tmp == null) break;
+			if (tmp == cause) return;
 			e = tmp;
 		}
 		while (true);
+
+		if (e == cause) return;
 		// attach to root cause
 		try {
 			e.initCause(cause);
