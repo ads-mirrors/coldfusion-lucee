@@ -139,12 +139,10 @@ public final class Controler extends ParentThreasRefThread {
 	public void run() {
 		// scheduleThread.start();
 		boolean firstRun = true;
-		boolean dump = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.dump.threads", null), false);
 		long count = 0;
 		List<ControlerThread> threads = new ArrayList<ControlerThread>();
 		CFMLFactoryImpl factories[] = null;
 		while (state.active()) {
-			if (dump) dumpThreads();
 			// sleep
 			SystemUtil.wait(this, interval);
 			if (!state.active()) break;
