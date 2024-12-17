@@ -255,13 +255,13 @@ public final class Reflector {
 	public static Class toReferenceClass(Class c) {
 		if (c != null && c.isPrimitive()) {
 			if (c == boolean.class) return Boolean.class;
+			if (c == int.class) return Integer.class;
+			if (c == long.class) return Long.class;
+			if (c == double.class) return Double.class;
 			if (c == byte.class) return Byte.class;
 			if (c == short.class) return Short.class;
 			if (c == char.class) return Character.class;
-			if (c == int.class) return Integer.class;
-			if (c == long.class) return Long.class;
 			if (c == float.class) return Float.class;
-			if (c == double.class) return Double.class;
 		}
 		return c;
 	}
@@ -623,14 +623,6 @@ public final class Reflector {
 
 	static int count = 0;
 
-	public static Object[] cleanArgs(Object[] args) {
-		if (args == null) {
-			return new Object[0];
-		}
-		return args;
-
-	}
-
 	public static Object[] cleanArgsOld(Object[] args) {
 		if (args == null) {
 			return new Object[0];
@@ -889,6 +881,15 @@ public final class Reflector {
 	public static void checkAccessibility(Class clazz, Key methodName) {
 		if (methodName.equals(KeyConstants._exit) && (clazz == System.class || clazz == Runtime.class)) { // TODO better implementation
 			throw new PageRuntimeException(new SecurityException("Calling the exit method is not allowed"));
+		}
+	}
+
+	public static void checkAccessibility(Clazz clazz, Key methodName) {
+		if (methodName.equals(KeyConstants._exit)) { // TODO better implementation
+			Class cl = clazz.getDeclaringClass();
+			if ((cl == System.class || cl == Runtime.class)) { // TODO better implementation
+				throw new PageRuntimeException(new SecurityException("Calling the exit method is not allowed"));
+			}
 		}
 	}
 

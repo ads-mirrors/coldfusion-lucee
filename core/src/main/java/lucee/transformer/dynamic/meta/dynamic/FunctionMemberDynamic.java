@@ -48,6 +48,9 @@ abstract class FunctionMemberDynamic implements FunctionMember {
 	protected transient Type[] expTypes;
 	protected transient String[] expNames;
 
+	private String classPath;
+	private String className;
+
 	public FunctionMemberDynamic(String name) {
 		this.name = name;
 	}
@@ -487,6 +490,30 @@ abstract class FunctionMemberDynamic implements FunctionMember {
 		}
 
 		return sb.toString();
+	}
+
+	@Override
+	public String getClassPath() {
+		if (classPath == null) {
+			synchronized (this) {
+				if (classPath == null) {
+					classPath = FunctionMember.createClassPath(this);
+				}
+			}
+		}
+		return classPath;
+	}
+
+	@Override
+	public String getClassName() {
+		if (className == null) {
+			synchronized (this) {
+				if (className == null) {
+					className = getClassPath().replace('/', '.');
+				}
+			}
+		}
+		return className;
 	}
 
 }

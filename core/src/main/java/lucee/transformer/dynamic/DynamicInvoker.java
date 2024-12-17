@@ -4,6 +4,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.instrument.UnmodifiableClassException;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
@@ -31,7 +34,6 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
 import lucee.aprint;
-import lucee.commons.digest.HashUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.res.Resource;
@@ -42,6 +44,7 @@ import lucee.commons.lang.SerializableObject;
 import lucee.commons.lang.SystemOut;
 import lucee.loader.engine.CFMLEngineFactory;
 import lucee.runtime.exp.PageException;
+import lucee.runtime.op.Caster;
 import lucee.runtime.reflection.Reflector;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.KeyImpl;
@@ -55,6 +58,7 @@ import lucee.transformer.dynamic.meta.Clazz;
 import lucee.transformer.dynamic.meta.FunctionMember;
 import lucee.transformer.dynamic.meta.LegacyMethod;
 import lucee.transformer.dynamic.meta.Method;
+import lucee.transformer.dynamic.meta.dynamic.ClazzDynamic;
 
 public class DynamicInvoker {
 
@@ -143,28 +147,24 @@ public class DynamicInvoker {
 		return Clazz.getClazz(clazz, root, log, useReflection);
 	}
 
-	/*
-	 * private static double getClass = 0; private static double match = 0; private static double types
-	 * = 0; private static double getDeclaringClass = 0; private static double lclassPath = 0; private
-	 * static double pathName = 0; private static double clsLoader = 0; private static double
-	 * loadInstance = 0; private static int count = 0;
-	 */
+	private static double getClass = 0;
+	private static double match = 0;
+	private static double getDeclaringClass = 0;
+	private static double pathName = 0;
+	private static double clsLoader = 0;
+	private static double loadInstance = 0;
+
 	public Pair<FunctionMember, Object> createInstance(Class<?> clazz, Key methodName, Object[] arguments, boolean convertComparsion) throws NoSuchMethodException, IOException,
 			UnmodifiableClassException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, SecurityException, PageException {
 
-		/*
-		 * count++; if ((count % 500) == 0) { print.e("-------------------"); print.e("getClass:" +
-		 * getClass); print.e("match:" + match); print.e("types:" + types); print.e("getDeclaringClass:" +
-		 * getDeclaringClass); print.e("lclassPath:" + lclassPath); print.e("pathName:" + pathName);
-		 * print.e("clsLoader:" + clsLoader); print.e("loadInstance:" + loadInstance); }
-		 */
-
 		// double start = SystemUtil.millis();
 		boolean isConstr = methodName == null;
-		Clazz clazzz = getClazz(clazz);
-
-		// getClass += (SystemUtil.millis() - start);
+		// Clazz clazzz = getClazz(clazz);
+		Clazz clazzz = ClazzDynamic.getInstance(clazz, root, log);
+		// Clazz clazzz = new ClazzReflection(clazz);
+		// getClass -= start;
 		// start = SystemUtil.millis();
+		// getClass += start;
 
 		lucee.transformer.dynamic.meta.FunctionMember fm = null;
 		lucee.transformer.dynamic.meta.Method method = null;
@@ -176,36 +176,28 @@ public class DynamicInvoker {
 			// Clazz clazz, final Collection.Key methodName, final Object[] args, boolean convertArgument
 			fm = method = Clazz.getMethodMatch(clazzz, methodName, arguments, true, convertComparsion);
 		}
-		// match += (SystemUtil.millis() - start);
+		// match -= start;
 		// start = SystemUtil.millis();
+		// match += start;
 
-		// types += (SystemUtil.millis() - start);
-		// start = SystemUtil.millis();
 		clazz = fm.getDeclaringClass(); // we wanna go as low as possible, to be as open as possible also this avoid not allow to access
 
-		// getDeclaringClass += (SystemUtil.millis() - start);
+		// getDeclaringClass -= start;
 		// start = SystemUtil.millis();
+		// getDeclaringClass += start;
 
-		StringBuilder sbClassPath = new StringBuilder();
-		sbClassPath.append(clazz.getName().replace('.', '/')).append('/').append(isConstr ? "____init____" : fm.getName());
-		if (fm.getArgumentCount() > 0) {
-			StringBuilder sbArgs = new StringBuilder();
-			for (String arg: fm.getArguments()) {
-				sbArgs.append(':').append(arg);
-			}
-			sbClassPath.append('_').append(HashUtil.create64BitHashAsString(sbArgs, Character.MAX_RADIX));
-		}
-		// lclassPath += (SystemUtil.millis() - start);
+		String className = fm.getClassName();
+
+		// pathName -= start;
 		// start = SystemUtil.millis();
+		// pathName += start;
 
-		String classPath = Clazz.getPackagePrefix() + sbClassPath.toString();// StringUtil.replace(sbClassPath.toString(), "javae/lang/", "java_lang/", false);
-		String className = classPath.replace('/', '.');
-
-		// pathName += (SystemUtil.millis() - start);
-		// start = SystemUtil.millis();
 		DynamicClassLoader loader = getCL(clazz);
-		// clsLoader += (SystemUtil.millis() - start);
+
+		// clsLoader -= start;
 		// start = SystemUtil.millis();
+		// clsLoader += start;
+
 		if (loader.hasClass(className)) {
 			try {
 				return new Pair<FunctionMember, Object>(fm, loader.loadInstance(className));
@@ -215,9 +207,9 @@ public class DynamicInvoker {
 				// simply ignore when fail
 			}
 			// finally {
-			// loadInstance += (SystemUtil.millis() - start);
+			// loadInstance -= start;
 			// start = SystemUtil.millis();
-
+			// loadInstance += start;
 			// }
 		}
 		synchronized (SystemUtil.createToken("dyninvocer", className)) {
@@ -226,7 +218,7 @@ public class DynamicInvoker {
 			ClassWriter cw = ASMUtil.getClassWriter();
 			MethodVisitor mv;
 			String abstractClassPath = "java/lang/Object";
-			cw.visit(ASMUtil.getJavaVersionForBytecodeGeneration(), Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, classPath,
+			cw.visit(ASMUtil.getJavaVersionForBytecodeGeneration(), Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, fm.getClassPath(),
 					"Ljava/lang/Object;Ljava/util/function/BiFunction<Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;>;", "java/lang/Object",
 					new String[] { "java/util/function/BiFunction" });
 			// Constructor
@@ -428,11 +420,108 @@ public class DynamicInvoker {
 		return Type.getArgumentTypes(descriptor.toString());
 	}
 
-	public static void main(String[] args) throws Exception {
+	public static class TestMule {
+		public void test(int x) {
+
+		}
+	}
+
+	public Pair<FunctionMember, Object> createInstance2(Class<?> clazz, Key methodName, Object[] arguments, boolean convertComparsion) {
+
+		return null;
+	}
+
+	public static void main(String[] args) throws Throwable {
 		System.setProperty("lucee.allow.reflection", "false");
 		Resource classes = ResourcesImpl.getFileResourceProvider().getResource("/Users/mic/tmp8/classes/");
 		ResourceUtil.deleteContent(classes, null);
 		DynamicInvoker e = new DynamicInvoker(classes);
+
+		DynamicInvoker.getInstance(classes);
+		{
+			int rounds = 6;
+			int max = 500000;
+			long dynamicInvoker = Long.MAX_VALUE;
+			long dynamicInvoker2 = Long.MAX_VALUE;
+			long reflection = Long.MAX_VALUE;
+			long direct = Long.MAX_VALUE;
+			long methodHandle = Long.MAX_VALUE;
+			long tmp;
+			TestMule tm = new TestMule();
+			Class<? extends TestMule> clazz = tm.getClass();
+			Class[] cargs = new Class[] { int.class };
+			// reflection
+			for (int i = 0; i < rounds; i++) {
+				long start = System.currentTimeMillis();
+				for (int y = 0; y < max; y++) {
+					clazz.getMethod("test", cargs).invoke(tm, new Object[] { 1 });
+				}
+				tmp = System.currentTimeMillis() - start;
+				if (tmp < reflection) reflection = tmp;
+			}
+
+			// invokeInstanceMethod
+			for (int i = 0; i < rounds; i++) {
+				long start = System.currentTimeMillis();
+				for (int y = 0; y < max; y++) {
+					e.invokeInstanceMethod(tm, "test", new Object[] { 1 }, false);
+				}
+				tmp = System.currentTimeMillis() - start;
+				if (tmp < dynamicInvoker) dynamicInvoker = tmp;
+			}
+
+			// invokeInstanceMethod
+			for (int i = 0; i < rounds; i++) {
+				long start = System.currentTimeMillis();
+				for (int y = 0; y < max; y++) {
+					Reflector.getMethod(clazz, "test", cargs).invoke(tm, new Object[] { 1 });
+				}
+				tmp = System.currentTimeMillis() - start;
+				if (tmp < dynamicInvoker2) dynamicInvoker2 = tmp;
+			}
+
+			// MethodHandles
+			MethodHandles.Lookup lookup = MethodHandles.lookup();
+			for (int i = 0; i < rounds; i++) {
+				long start = System.currentTimeMillis();
+				for (int y = 0; y < max; y++) {
+					MethodType methodType = MethodType.methodType(void.class, int.class);
+					MethodHandle testHandle = lookup.findVirtual(clazz, "test", methodType);
+					testHandle.invoke(tm, 1);
+
+				}
+				tmp = System.currentTimeMillis() - start;
+				if (tmp < methodHandle) methodHandle = tmp;
+			}
+
+			// direct
+			for (int i = 0; i < rounds; i++) {
+				long start = System.currentTimeMillis();
+				for (int y = 0; y < max; y++) {
+					tm.test(1);
+				}
+				tmp = System.currentTimeMillis() - start;
+				if (tmp < direct) direct = tmp;
+			}
+
+			aprint.e("dynamicInvoker2:" + dynamicInvoker2);
+			aprint.e("dynamicInvoker:" + dynamicInvoker);
+			aprint.e("reflection:" + reflection);
+			aprint.e("methodHandle:" + reflection);
+			aprint.e("direct:" + direct);
+
+			aprint.e("-------------------");
+			double total = getClass + match + getDeclaringClass + pathName + clsLoader + loadInstance;
+
+			aprint.e(((int) getClass) + ":" + Caster.toIntValue(100d / total * getClass) + "% :getClass");
+			aprint.e(((int) match) + ":" + Caster.toIntValue(100d / total * match) + "% :match");
+			aprint.e(((int) getDeclaringClass) + ":" + Caster.toIntValue(100d / total * getDeclaringClass) + "% :getDeclaringClass");
+			aprint.e(((int) pathName) + ":" + Caster.toIntValue(100d / total * pathName) + "% :pathName");
+			aprint.e(((int) clsLoader) + ":" + Caster.toIntValue(100d / total * clsLoader) + "% :clsLoader");
+			aprint.e(((int) loadInstance) + ":" + Caster.toIntValue(100d / total * loadInstance) + "% :loadInstance");
+
+			if (true) return;
+		}
 
 		{
 			List<Method> methods;

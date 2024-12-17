@@ -54,6 +54,7 @@ public class ClazzDynamic extends Clazz {
 	private final FunctionMember[] declaredConstructors;
 
 	private String clid;
+	private String id;
 	private static Map<ClassLoader, String> clids = new IdentityHashMap<>();
 	private static String systemId;
 
@@ -68,17 +69,9 @@ public class ClazzDynamic extends Clazz {
 	 */
 
 	public static ClazzDynamic getInstance(Class clazz, Resource dir, Log log) throws IOException {
-
-		/*
-		 * count++; if ((count % 500) == 0) { print.e("-------------------");
-		 * print.e("generateClassLoderId:" + generateClassLoderId); print.e("path:" + path);
-		 * print.e("isFile:" + isFile); print.e("deserialize:" + deserialize); print.e("put:" + put);
-		 * print.e("neww:" + neww); print.e("serialize:" + serialize); print.e("done:" + done); } double
-		 * start = SystemUtil.millis();
-		 */
-
 		ClazzDynamic cd = null;
 		Reference<ClazzDynamic> sr = classes.get(clazz);
+
 		if (sr == null || (cd = sr.get()) == null) {
 			synchronized (clazz) {
 				sr = classes.get(clazz);
@@ -223,11 +216,13 @@ public class ClazzDynamic extends Clazz {
 
 	@Override
 	public String id() {
-		if (clid == null) {
-			clid = generateClassLoderId(clazz);
+		if (id == null) {
+			if (clid == null) {
+				clid = generateClassLoderId(clazz);
+			}
+			id = clid + ":" + clazz.getName();
 		}
-
-		return clid + ":" + clazz.getName();
+		return id;
 	}
 
 	@Override
@@ -304,7 +299,7 @@ public class ClazzDynamic extends Clazz {
 		for (FunctionMember fm: methods) {
 			if (/* fm.isPublic() && */
 
-			(argumentLength < 0 || argumentLength == fm.getArgumentCount()) &&
+			(argumentLength == fm.getArgumentCount() || argumentLength < 0) &&
 
 					(methodName == null || (nameCaseSensitive ? methodName.equals(fm.getName()) : methodName.equalsIgnoreCase(fm.getName())))
 

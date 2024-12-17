@@ -57,7 +57,7 @@ public abstract class Clazz implements Serializable {
 
 	public abstract Type getDeclaringType();
 
-	protected abstract String id();
+	public abstract String id();
 
 	public static boolean allowReflection() {
 		if (allowReflection == null) {
@@ -86,7 +86,6 @@ public abstract class Clazz implements Serializable {
 		}
 	}
 
-	private static Map<String, SoftReference<Pair<Method, Boolean>>> cachedMethods = new ConcurrentHashMap<>();
 	private static RefInteger nirvana = new RefIntegerImpl();
 
 	/*
@@ -96,61 +95,20 @@ public abstract class Clazz implements Serializable {
 	 * private static double lclasses2 = 0; private static int count = 0;
 	 */
 
+	private static Map<String, SoftReference<Pair<Method, Boolean>>> cachedMethods = new ConcurrentHashMap<>();
+
 	public static Method getMethodMatch(Clazz clazz, final Collection.Key methodName, Object[] args, boolean convertArgument, boolean convertComparsion)
 			throws NoSuchMethodException, IOException, PageException {
 
-		/*
-		 * count++; if ((count % 500) == 0) { print.e("-------------------"); print.e("cleanArgs:" +
-		 * cleanArgs); print.e("checkAccessibility:" + checkAccessibility); print.e("lmethods:" + lmethods);
-		 * print.e("cache:" + cache); print.e("exact:" + exact); print.e("like:" + like); print.e("convert:"
-		 * + convert); print.e("lclasses:" + lclasses); print.e("lclasses2:" + lclasses2); } double start =
-		 * SystemUtil.millis();
-		 */
-
-		args = Reflector.cleanArgs(args);
-
-		// cleanArgs += (SystemUtil.millis() - start);
-		// start = SystemUtil.millis();
 		List<Method> methods = clazz.getMethods(methodName.getString(), false, args.length);
-
-		// lmethods += (SystemUtil.millis() - start);
-		// start = SystemUtil.millis();
-
 		if (methods != null && methods.size() > 0) {
+			if (args.length == 0) {
+				return methods.get(0);
+			}
+
 			Class[] clazzArgs = Reflector.getClasses(args);
 
-			// cache
-			StringBuilder sb = new StringBuilder(clazz.id()).append(methodName).append(';');
-			for (Class cls: clazzArgs) {
-				sb.append(cls.getName()).append(';');
-			}
-
-			String key = sb.toString();
-
-			// get match from cache
-			SoftReference<Pair<Method, Boolean>> sr = cachedMethods.get(key);
-			if (sr != null) {
-				Pair<Method, Boolean> p = sr.get();
-				if (p != null) {
-					// print.e("used cached match(" + p.getValue() + "):" + key + ":" + cachedMethods.size());
-					// convert arguments
-					if (p.getValue()) {
-						// print.e("------- " + clazz.getDeclaringClass().getName() + ":" + methodName + " -----");
-						Class[] trgArgs = p.getName().getArgumentClasses();
-						for (int x = 0; x < trgArgs.length; x++) {
-							if (args[x] != null) args[x] = Reflector.convert(args[x], Reflector.toReferenceClass(trgArgs[x]), nirvana);
-						}
-					}
-					return p.getName();
-				}
-			}
-			// cache += (SystemUtil.millis() - start);
-			// start = SystemUtil.millis();
-
-			Reflector.checkAccessibility(clazz.getDeclaringClass(), methodName);
-
-			// checkAccessibility += (SystemUtil.millis() - start);
-			// start = SystemUtil.millis();
+			Reflector.checkAccessibility(clazz, methodName);
 
 			// exact comparsion
 			outer: for (Method m: methods) {
@@ -159,8 +117,6 @@ public abstract class Clazz implements Serializable {
 					for (int y = 0; y < parameterTypes.length; y++) {
 						if (Reflector.toReferenceClass(parameterTypes[y]) != clazzArgs[y]) continue outer;
 					}
-					// print.e("exact match:" + key + ":");
-					cachedMethods.put(key, new SoftReference<Pair<Method, Boolean>>(new Pair<Method, Boolean>(m, Boolean.FALSE)));
 					return m;
 				}
 			}
@@ -174,13 +130,35 @@ public abstract class Clazz implements Serializable {
 					for (int y = 0; y < parameterTypes.length; y++) {
 						if (!Reflector.like(clazzArgs[y], Reflector.toReferenceClass(parameterTypes[y]))) continue outer;
 					}
-					// print.e("like match:" + key + ":");
-					cachedMethods.put(key, new SoftReference<Pair<Method, Boolean>>(new Pair<Method, Boolean>(m, Boolean.FALSE)));
 					return m;
 				}
 			}
 			// like += (SystemUtil.millis() - start);
 			// start = SystemUtil.millis();
+
+			// cache
+			StringBuilder sb = new StringBuilder(100).append(clazz.id()).append(methodName).append(';');
+			for (Class cls: clazzArgs) {
+				sb.append(cls.getName()).append(';');
+			}
+			String key = sb.toString();
+
+			// get match from cache
+			SoftReference<Pair<Method, Boolean>> sr = cachedMethods.get(key);
+			if (sr != null) {
+				Pair<Method, Boolean> p = sr.get();
+				if (p != null) {
+					// print.e("used cached match(" + p.getValue() + "):" + key + ":" + cachedMethods.size());
+					// convert arguments
+					if (p.getValue()) {
+						Class[] trgArgs = p.getName().getArgumentClasses();
+						for (int x = 0; x < trgArgs.length; x++) {
+							if (args[x] != null) args[x] = Reflector.convert(args[x], Reflector.toReferenceClass(trgArgs[x]), nirvana);
+						}
+					}
+					return p.getName();
+				}
+			}
 
 			// convert comparsion
 			Pair<Method, Object[]> result = null;
@@ -309,7 +287,6 @@ public abstract class Clazz implements Serializable {
 	}
 
 	public static Constructor getConstructorMatch(Clazz clazz, Object[] args, boolean convertArgument, boolean convertComparsion) throws NoSuchMethodException, IOException {
-		args = Reflector.cleanArgs(args);
 		List<Constructor> constructors = clazz.getConstructors(args.length);
 		if (constructors != null && constructors.size() > 0) {
 			Class[] clazzArgs = Reflector.getClasses(args);
@@ -488,4 +465,5 @@ public abstract class Clazz implements Serializable {
 	public static String getPackagePrefix() {
 		return "lucee/invoc/wrap/v" + VERSION + "/";
 	}
+
 }
