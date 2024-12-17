@@ -184,20 +184,22 @@ public final class Reflector {
 	 * 
 	 */
 	public static boolean isInstaneOf(Class src, Class trg, boolean exatctMatch) {
+		if (exatctMatch) return trg.isAssignableFrom(src);
+
 		if (src.isArray() && trg.isArray()) {
-			return isInstaneOf(src.getComponentType(), trg.getComponentType(), exatctMatch);
+			return isInstaneOf(src.getComponentType(), trg.getComponentType(), false);
 		}
 
-		if (src == trg || (!exatctMatch && src.getName().equals(trg.getName()))) return true;
+		if (src == trg || (src.getName().equals(trg.getName()))) return true;
 
 		// Interface
 		if (trg.isInterface()) {
-			return _checkInterfaces(src, trg, exatctMatch);
+			return _checkInterfaces(src, trg, false);
 		}
 		// Extends
 
 		while (src != null) {
-			if (src == trg || (!exatctMatch && src.getName().equals(trg.getName()))) return true;
+			if (src == trg || (src.getName().equals(trg.getName()))) return true;
 			src = src.getSuperclass();
 		}
 		return trg == Object.class;

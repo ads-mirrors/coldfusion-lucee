@@ -110,31 +110,16 @@ public abstract class Clazz implements Serializable {
 
 			Reflector.checkAccessibility(clazz, methodName);
 
-			// exact comparsion
-			outer: for (Method m: methods) {
-				if (m != null) {
-					Class[] parameterTypes = m.getArgumentClasses();
-					for (int y = 0; y < parameterTypes.length; y++) {
-						if (Reflector.toReferenceClass(parameterTypes[y]) != clazzArgs[y]) continue outer;
-					}
-					return m;
-				}
-			}
-			// exact += (SystemUtil.millis() - start);
-			// start = SystemUtil.millis();
-
 			// like comparsion
 			outer: for (Method m: methods) {
 				if (m != null) {
 					Class[] parameterTypes = m.getArgumentClasses();
 					for (int y = 0; y < parameterTypes.length; y++) {
-						if (!Reflector.like(clazzArgs[y], Reflector.toReferenceClass(parameterTypes[y]))) continue outer;
+						if (!Reflector.toReferenceClass(parameterTypes[y]).isAssignableFrom(clazzArgs[y])) continue outer;
 					}
 					return m;
 				}
 			}
-			// like += (SystemUtil.millis() - start);
-			// start = SystemUtil.millis();
 
 			// cache
 			StringBuilder sb = new StringBuilder(100).append(clazz.id()).append(methodName).append(';');
@@ -290,27 +275,18 @@ public abstract class Clazz implements Serializable {
 		List<Constructor> constructors = clazz.getConstructors(args.length);
 		if (constructors != null && constructors.size() > 0) {
 			Class[] clazzArgs = Reflector.getClasses(args);
-			// exact comparsion
+			// like comparsion
 			outer: for (Constructor c: constructors) {
 				if (c != null) {
 
 					Class[] parameterTypes = c.getArgumentClasses();
 					for (int y = 0; y < parameterTypes.length; y++) {
-						if (Reflector.toReferenceClass(parameterTypes[y]) != clazzArgs[y]) continue outer;
+						if (!Reflector.toReferenceClass(parameterTypes[y]).isAssignableFrom(clazzArgs[y])) continue outer;
 					}
 					return c;
 				}
 			}
-			// like comparsion
-			outer: for (Constructor c: constructors) {
-				if (c != null) {
-					Class[] parameterTypes = c.getArgumentClasses();
-					for (int y = 0; y < parameterTypes.length; y++) {
-						if (!Reflector.like(clazzArgs[y], Reflector.toReferenceClass(parameterTypes[y]))) continue outer;
-					}
-					return c;
-				}
-			}
+
 			// convert comparsion
 			Pair<Constructor, Object[]> result = null;
 			int _rating = 0;
