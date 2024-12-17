@@ -23,6 +23,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.net.HTTPUtil;
 import lucee.transformer.util.SourceCode;
 
@@ -91,6 +92,7 @@ public final class HTMLUtil {
 						urls.add(new URL(url, value.toString()));
 					}
 					catch (MalformedURLException e) {
+						LogUtil.warn("html-util", e);
 					}
 					cfml.next();
 				}
@@ -141,6 +143,7 @@ public final class HTMLUtil {
 			}
 		}
 		catch (MalformedURLException mue) {
+			LogUtil.warn("html-util", mue);
 		}
 		// print.err(list.get(list.size()-1));
 	}

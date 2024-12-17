@@ -978,6 +978,7 @@ public final class ResourceUtil {
 							src.remove(false);
 						}
 						catch (IOException e) {
+							LogUtil.warn("resource", e);
 						}
 					}
 				}
@@ -1158,6 +1159,7 @@ public final class ResourceUtil {
 				return ((HTTPResource) resource).getContentType();
 			}
 			catch (Exception e) {
+				LogUtil.warn("resource", e);
 			}
 		}
 		InputStream is = null;
@@ -1179,6 +1181,7 @@ public final class ResourceUtil {
 				return ((HTTPResource) resource).getContentType();
 			}
 			catch (Exception e) {
+				LogUtil.warn("resource", e);
 			}
 		}
 		InputStream is = null;

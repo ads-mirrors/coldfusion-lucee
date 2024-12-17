@@ -24,6 +24,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import lucee.commons.cli.Command;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.runtime.type.util.ListUtil;
 
@@ -37,6 +38,7 @@ public final class ZipUtil {
 					Command.execute("unzip", new String[] { "-o", zip.getAbsolutePath(), "-d", dir.getAbsolutePath() });
 				}
 				catch (InterruptedException e) {
+					LogUtil.warn("zip", e);
 				}
 				return;
 			}

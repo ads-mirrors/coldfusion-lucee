@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
+import lucee.commons.io.log.LogUtil;
+
 /**
  * class to handle characters, similar to StringBuffer, but dont copy big blocks of char arrays.
  */
@@ -183,6 +185,7 @@ public class ByteBuffer {
 			writeOut(baos);
 		}
 		catch (IOException e) {
+			LogUtil.warn("byte-buffer", e);
 		}
 		return baos.toByteArray();
 	}

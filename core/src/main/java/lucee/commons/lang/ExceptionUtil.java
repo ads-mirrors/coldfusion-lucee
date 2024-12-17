@@ -27,7 +27,6 @@ import java.nio.file.NoSuchFileException;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import lucee.print;
 import lucee.commons.io.SystemUtil.TemplateLine;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.util.ResourceUtil;
@@ -329,8 +328,6 @@ public final class ExceptionUtil {
 			e.initCause(cause);
 		}
 		catch (Exception ex) {
-			print.e("xxxxxxxxxxxx");
-			print.e(ex);
 		}
 	}
 

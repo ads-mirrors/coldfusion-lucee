@@ -78,6 +78,7 @@ public class CacheEngine {
 			return Caster.toArray(keys);
 		}
 		catch (Exception e) {
+			LogUtil.warn("cache-engine", e);
 		}
 		return new ArrayImpl();
 	}

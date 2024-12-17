@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.cache.Cache;
 import lucee.commons.io.cache.CacheEntry;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.KeyGenerator;
 import lucee.runtime.PageContext;
@@ -343,6 +344,7 @@ public class CacheHandlerCollectionImpl implements CacheHandlerCollection {
 			}
 		}
 		catch (IOException e) {
+			LogUtil.warn("cache-handle-collection", e);
 		}
 	}
 }

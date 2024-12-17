@@ -26,6 +26,7 @@ import java.util.List;
 import lucee.commons.io.cache.Cache;
 import lucee.commons.io.cache.CacheEntry;
 import lucee.commons.io.cache.CachePro;
+import lucee.commons.io.log.LogUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.cache.CacheUtil;
 import lucee.runtime.cache.ram.RamCache;
@@ -72,6 +73,7 @@ public class TimespanCacheHandler implements CacheHandlerPro {
 			return getCache(pc).remove(id);
 		}
 		catch (IOException e) {
+			LogUtil.warn("timespan-cache", e);
 		}
 		return false;
 	}
@@ -107,6 +109,7 @@ public class TimespanCacheHandler implements CacheHandlerPro {
 			}
 		}
 		catch (IOException ioe) {
+			LogUtil.warn("timespan-cache", ioe);
 		}
 	}
 
@@ -116,6 +119,7 @@ public class TimespanCacheHandler implements CacheHandlerPro {
 			getCache(pc).remove(CacheKeyFilterAll.getInstance());
 		}
 		catch (IOException e) {
+			LogUtil.warn("timespan-cache", e);
 		}
 	}
 

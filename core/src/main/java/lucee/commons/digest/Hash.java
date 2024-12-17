@@ -28,6 +28,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.IOUtil;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 
 public class Hash {
@@ -174,6 +175,7 @@ public class Hash {
 			return str;
 		}
 		catch (CloneNotSupportedException e) {
+			LogUtil.warn("hash", e);
 		}
 
 		// if not possible to clone the MessageDigest create always a new instance

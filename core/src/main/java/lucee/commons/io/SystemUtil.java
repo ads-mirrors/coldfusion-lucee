@@ -68,6 +68,7 @@ import com.jezhumble.javasysmon.MemoryStats;
 import lucee.commons.collection.AccessOrderLimitedSizeMap;
 import lucee.commons.digest.MD5;
 import lucee.commons.io.log.Log;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.ResourceProvider;
 import lucee.commons.io.res.ResourcesImpl;
@@ -511,6 +512,7 @@ public final class SystemUtil {
 			return frp.getResource(".").getCanonicalResource();
 		}
 		catch (IOException e) {
+			LogUtil.warn("system", e);
 		}
 		URL url = InfoImpl.class.getClassLoader().getResource(".");
 		try {
@@ -651,6 +653,7 @@ public final class SystemUtil {
 				return StringUtil.replace(file.getCanonicalPath(), dir.getCanonicalPath(), placeholder, true);
 			}
 			catch (IOException e) {
+				LogUtil.warn("system", e);
 			}
 		}
 		return null;
@@ -723,6 +726,7 @@ public final class SystemUtil {
 			id = MD5.getDigestAsString(ReqRspUtil.getRootPath(sc));
 		}
 		catch (IOException e) {
+			LogUtil.warn("system", e);
 		}
 		return id;
 	}
@@ -1093,6 +1097,7 @@ public final class SystemUtil {
 				if (pc != null) template = ExpandPath.call(pc, template);
 			}
 			catch (PageException e) {
+				LogUtil.warn("system", e);
 			} // optional step, so in case it fails we are still fine
 
 			return new TemplateLine(template, line);
@@ -1777,6 +1782,7 @@ public final class SystemUtil {
 				return Caster.toBoolean(Reflector.callStaticMethod(clazz, "isBooted", EMPTY_OBJ)).booleanValue();
 			}
 			catch (Exception e) {
+				LogUtil.warn("system", e);
 			}
 		}
 		return true;
@@ -1809,6 +1815,7 @@ public final class SystemUtil {
 				joisa = Reflector.callStaticMethod(clazz, "getJavaObjectInputStreamAccess", EMPTY_OBJ);
 			}
 			catch (Exception e) {
+				LogUtil.warn("system", e);
 			}
 		}
 
@@ -1819,6 +1826,7 @@ public final class SystemUtil {
 				return true;
 			}
 			catch (Exception e) {
+				LogUtil.warn("system", e);
 			}
 		}
 		return false;

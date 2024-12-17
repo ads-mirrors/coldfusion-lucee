@@ -42,6 +42,7 @@ import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.FileUtil;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.runtime.PageContext;
 import lucee.runtime.PageContextImpl;
@@ -634,6 +635,7 @@ public final class ClassUtil {
 					pathes.put(file.getCanonicalPath(), "");
 				}
 				catch (IOException e) {
+					LogUtil.warn("class-util", e);
 				}
 			}
 		}
@@ -668,6 +670,7 @@ public final class ClassUtil {
 				pathes.put(file.getCanonicalPath(), "");
 			}
 			catch (IOException e) {
+				LogUtil.warn("class-util", e);
 			}
 		}
 	}
@@ -852,6 +855,7 @@ public final class ClassUtil {
 			return IOUtil.toBytes(is);
 		}
 		catch (Exception e) {
+			LogUtil.warn("class-util", e);
 		}
 
 		is = null;
@@ -877,6 +881,7 @@ public final class ClassUtil {
 			}
 		}
 		catch (Exception e) {
+			LogUtil.warn("class-util", e);
 		}
 		finally {
 			IOUtil.closeEL(is);

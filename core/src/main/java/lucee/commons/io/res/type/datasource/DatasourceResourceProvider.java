@@ -33,6 +33,7 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import lucee.commons.db.DBUtil;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.ResourceProvider;
 import lucee.commons.io.res.ResourceProviderPro;
@@ -557,6 +558,7 @@ public final class DatasourceResourceProvider implements ResourceProviderPro {
 				DBUtil.setTransactionIsolationEL(dc.getConnection(), ((DatasourceConnectionPro) dc).getDefaultTransactionIsolation());
 			}
 			catch (SQLException e) {
+				LogUtil.warn("datasource-resource-provider", e);
 			}
 			getManager().releaseConnection(ThreadLocalPageContext.get(), dc);
 		}

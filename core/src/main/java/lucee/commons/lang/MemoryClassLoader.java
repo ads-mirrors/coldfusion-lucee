@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.lang.instrument.UnmodifiableClassException;
 
 import lucee.commons.io.SystemUtil;
+import lucee.commons.io.log.LogUtil;
 import lucee.runtime.config.Config;
 import lucee.transformer.bytecode.util.ClassRenamer;
 
@@ -90,6 +91,7 @@ public final class MemoryClassLoader extends ClassLoader implements ExtendableCl
 				clazz = loadClass(name);
 			}
 			catch (ClassNotFoundException cnf) {
+				LogUtil.warn("memory-classloader", cnf);
 			}
 
 			// if class already exists
