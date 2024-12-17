@@ -59,7 +59,8 @@ public interface FunctionMember extends Serializable {
 		// sbClassPath.append(getDeclaringClassName().replace('.', '/')).append('/').append(isConstr ?
 		// "____init____" : fm.getName());
 		sbClassPath.append(fm.getDeclaringClassName().replace('.', '/')).append('/');
-		if (fm.getName() == null) sbClassPath.append("____init____");
+
+		if (fm instanceof Constructor) sbClassPath.append("____init____");
 		else sbClassPath.append(fm.getName());
 
 		if (fm.getArgumentCount() > 0) {
