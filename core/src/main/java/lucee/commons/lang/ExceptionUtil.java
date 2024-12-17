@@ -309,7 +309,7 @@ public final class ExceptionUtil {
 	}
 
 	public static void initCauseEL(Throwable e, Throwable cause) {
-		if (cause == null) return;
+		if (cause == null || e == cause) return;
 
 		// get current root cause
 		Throwable tmp;
