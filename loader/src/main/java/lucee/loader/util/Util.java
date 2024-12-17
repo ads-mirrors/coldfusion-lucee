@@ -21,12 +21,15 @@ package lucee.loader.util;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
@@ -383,6 +386,40 @@ public class Util {
 			throw ioe;
 		}
 		copy(is, os);
+	}
+
+	@Deprecated
+	public static void write(File file, String string, Charset charset, boolean append) throws IOException {
+		if (charset == null) {
+			charset = UTF8;
+		}
+		Writer writer = null;
+		try {
+			writer = getWriter(file, charset, append);
+			writer.write(string);
+		}
+		finally {
+			closeEL(writer);
+		}
+	}
+
+	@Deprecated
+	public static Writer getWriter(File file, Charset charset, boolean append) throws IOException {
+		OutputStream os = null;
+		try {
+			os = new FileOutputStream(file, append);
+		}
+		catch (IOException ioe) {
+			closeEL(os);
+			throw ioe;
+		}
+		return getWriter(os, charset);
+	}
+
+	@Deprecated
+	public static Writer getWriter(OutputStream os, Charset charset) throws IOException {
+		if (charset == null) charset = UTF8;
+		return new BufferedWriter(new OutputStreamWriter(os, charset));
 	}
 
 	/**
