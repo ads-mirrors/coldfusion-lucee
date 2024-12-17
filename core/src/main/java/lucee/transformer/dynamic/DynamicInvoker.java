@@ -464,7 +464,7 @@ public class DynamicInvoker {
 		return null;
 	}
 
-	public static void main(String[] args) throws Throwable {
+	public static void main(String[] argsw) throws Throwable {
 		System.setProperty("lucee.allow.reflection", "false");
 		Resource classes = ResourcesImpl.getFileResourceProvider().getResource("/Users/mic/tmp8/classes/");
 		ResourceUtil.deleteContent(classes, null);
@@ -485,6 +485,7 @@ public class DynamicInvoker {
 			TestMule tm = new TestMule();
 			Class<? extends TestMule> clazz = tm.getClass();
 			Class[] cargs = new Class[] { int.class };
+			Object[] args = new Object[] { 1 };
 			Key methodName = new KeyImpl("Test");
 			e.invokeConstructor(clazz, new Object[] { 1 }, false);
 			e.invokeConstructor(String.class, new Object[] { "" }, false);
@@ -493,7 +494,7 @@ public class DynamicInvoker {
 			for (int i = 0; i < rounds; i++) {
 				long start = System.currentTimeMillis();
 				for (int y = 0; y < max; y++) {
-					clazz.getMethod("test", cargs).invoke(tm, new Object[] { 1 });
+					clazz.getMethod("test", cargs).invoke(tm, args);
 				}
 				tmp = System.currentTimeMillis() - start;
 				if (tmp < reflection) reflection = tmp;
@@ -503,7 +504,7 @@ public class DynamicInvoker {
 			for (int i = 0; i < rounds; i++) {
 				long start = System.currentTimeMillis();
 				for (int y = 0; y < max; y++) {
-					e.invokeInstanceMethod(tm, "test", new Object[] { 1 }, false, false);
+					e.invokeInstanceMethod(tm, methodName, args, false, false);
 				}
 				tmp = System.currentTimeMillis() - start;
 				if (tmp < dynamicInvoker) dynamicInvoker = tmp;
@@ -514,7 +515,7 @@ public class DynamicInvoker {
 				long start = System.currentTimeMillis();
 				for (int y = 0; y < max; y++) {
 					// Reflector.getMethodInstance(clazz, methodName, new Object[] { 1 }, false, false).invoke(tm);
-					Reflector.getMethod(clazz, "test", cargs, true).invoke(tm, new Object[] { 1 });
+					Reflector.getMethod(clazz, "test", cargs, true).invoke(tm, args);
 				}
 				tmp = System.currentTimeMillis() - start;
 				if (tmp < dynamicInvoker2) dynamicInvoker2 = tmp;
@@ -524,7 +525,7 @@ public class DynamicInvoker {
 			for (int i = 0; i < rounds; i++) {
 				long start = System.currentTimeMillis();
 				for (int y = 0; y < max; y++) {
-					Reflector.callMethod(tm, methodName, new Object[] { 1 }, false);
+					Reflector.callMethod(tm, methodName, args, false);
 				}
 				tmp = System.currentTimeMillis() - start;
 				if (tmp < dynamicInvoker3) dynamicInvoker3 = tmp;

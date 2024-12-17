@@ -40,6 +40,7 @@ import lucee.runtime.functions.international.GetTimeZoneInfo;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
 import lucee.runtime.reflection.Reflector;
+import lucee.runtime.reflection.pairs.MethodInstance;
 import lucee.runtime.security.SecurityManager;
 import lucee.runtime.text.xml.XMLUtil;
 import lucee.runtime.text.xml.struct.XMLStructFactory;
@@ -838,8 +839,9 @@ public final class VariableUtilImpl implements VariableUtil {
 		if (pc.getConfig().getSecurityManager().getAccess(SecurityManager.TYPE_DIRECT_JAVA_ACCESS) == SecurityManager.VALUE_YES) {
 			if (doLogReflectionCalls()) LogUtil.log(pc, Log.LEVEL_INFO, "reflection", "call-method:" + key + " from class " + Caster.toTypeName(coll));
 			if (!(coll instanceof Undefined)) {
-				return Reflector.getMethodInstance(coll.getClass(), key, args, false, false).invoke(coll);
-				// return Reflector.callMethod(coll, key, args);
+				// return Reflector.getMethodInstance(coll.getClass(), key, args, false, false).invoke(coll);
+				return MethodInstance.invoke(coll, key, args, false, true);
+				// return Reflector.callMethod(coll, key, args, false);
 			}
 		}
 		throw new ExpressionException("No matching Method/Function for " + key + "(" + Reflector.getDspMethods(Reflector.getClasses(args)) + ")");

@@ -865,7 +865,7 @@ public final class Reflector {
 	}
 
 	public static Object callMethod(final Object obj, Collection.Key methodName, Object[] args, boolean nameCaseSensitive) throws PageException {
-		return getMethodInstance(obj.getClass(), methodName, args, nameCaseSensitive, false).invoke(obj);
+		return MethodInstance.invoke(obj, methodName, args, nameCaseSensitive, true);
 	}
 
 	public static boolean hasMethod(Class<?> clazz, String methodName, Object[] args, boolean nameCaseSensitive) {

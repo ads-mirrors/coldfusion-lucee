@@ -87,6 +87,35 @@ public final class MethodInstance {
 		}
 	}
 
+	public static Object invoke(Object obj, Key methodName, Object[] args, boolean nameCaseSensitive, boolean convertComparsion) throws PageException {
+		// if (Clazz.allowReflection()) print.e(Clazz.allowReflection());
+		try {
+			return ((BiFunction<Object, Object, Object>) DynamicInvoker.getExistingInstance().getInstance(obj.getClass(), methodName, args, nameCaseSensitive, convertComparsion)
+					.getValue()).apply(obj, args);
+		}
+		catch (IncompatibleClassChangeError | ClassFormatError | ClassCastException e) { // java.lang.ClassCastException
+			if (!Clazz.allowReflection()) throw e;
+			LogUtil.log("dynamic", e);
+			DynamicInvoker di = DynamicInvoker.getExistingInstance();
+			try {
+				lucee.transformer.dynamic.meta.Method method = Clazz.getMethodMatch(di.getClazz(obj.getClass(), true), methodName, args, nameCaseSensitive, true, true);
+				return ((LegacyMethod) method).getMethod().invoke(obj, args);
+			}
+			catch (Exception e1) {
+				if (e1 instanceof InvocationTargetException) {
+					Throwable t = ((InvocationTargetException) e1).getTargetException();
+					ExceptionUtil.initCauseEL(e, t);
+					throw e;
+				}
+				ExceptionUtil.initCauseEL(e, e1);
+				throw e;
+			}
+		}
+		catch (Exception e) {
+			throw Caster.toPageException(e);
+		}
+	}
+
 	/**
 	 * @return Returns the args.
 	 */
