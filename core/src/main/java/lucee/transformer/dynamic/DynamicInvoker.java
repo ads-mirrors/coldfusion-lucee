@@ -421,6 +421,15 @@ public class DynamicInvoker {
 	}
 
 	public static class TestMule {
+
+		public TestMule() {
+
+		}
+
+		public TestMule(int x) {
+
+		}
+
 		public void test(int x) {
 
 		}
@@ -439,6 +448,7 @@ public class DynamicInvoker {
 
 		DynamicInvoker.getInstance(classes);
 		{
+
 			int rounds = 6;
 			int max = 500000;
 			long dynamicInvoker = Long.MAX_VALUE;
@@ -450,6 +460,10 @@ public class DynamicInvoker {
 			TestMule tm = new TestMule();
 			Class<? extends TestMule> clazz = tm.getClass();
 			Class[] cargs = new Class[] { int.class };
+
+			e.invokeConstructor(clazz, new Object[] { 1 }, false);
+			e.invokeConstructor(String.class, new Object[] { "" }, false);
+
 			// reflection
 			for (int i = 0; i < rounds; i++) {
 				long start = System.currentTimeMillis();
@@ -520,7 +534,7 @@ public class DynamicInvoker {
 			aprint.e(((int) clsLoader) + ":" + Caster.toIntValue(100d / total * clsLoader) + "% :clsLoader");
 			aprint.e(((int) loadInstance) + ":" + Caster.toIntValue(100d / total * loadInstance) + "% :loadInstance");
 
-			if (true) return;
+			// if (true) return;
 		}
 
 		{
