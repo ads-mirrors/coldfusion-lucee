@@ -34,7 +34,6 @@ import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
-import lucee.commons.io.res.ResourcesImpl;
 import lucee.commons.io.res.filter.ExtensionResourceFilter;
 import lucee.commons.io.res.filter.ResourceFilter;
 import lucee.commons.io.res.util.ResourceUtil;
@@ -197,8 +196,7 @@ public final class Controler extends ParentThreasRefThread {
 		}
 	}
 
-	public static void dumpThreadPositions(String path) throws IOException {
-		Resource target = ResourcesImpl.getFileResourceProvider().getResource(path);
+	public static void dumpThreadPositions(Resource target) throws IOException {
 
 		StackTraceElement[] stes;
 		String line;
@@ -236,10 +234,6 @@ public final class Controler extends ParentThreasRefThread {
 		}
 		aprint.e("==================================================================");
 
-	}
-
-	public static void main(String[] args) throws IOException {
-		dumpThreadPositions("/Users/mic/Tmp3/tmp/data.jsonl");
 	}
 
 	private void control(CFMLFactoryImpl[] factories, boolean firstRun, Log log) {
