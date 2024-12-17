@@ -48,13 +48,14 @@ public class ClazzDynamic extends Clazz {
 
 	private transient Class clazz;
 	// private static Map<String, SoftReference<ClazzDynamic>> classes = new ConcurrentHashMap<>();
-	private final FunctionMember[] methods;
-	private final FunctionMember[] declaredMethods;
-	private final FunctionMember[] constructors;
-	private final FunctionMember[] declaredConstructors;
+	private final Method[] methods;
+	private final Method[] declaredMethods;
+	private final Constructor[] constructors;
+	private final Constructor[] declaredConstructors;
 
 	private String clid;
 	private String id;
+
 	private static Map<ClassLoader, String> clids = new IdentityHashMap<>();
 	private static String systemId;
 
@@ -183,24 +184,24 @@ public class ClazzDynamic extends Clazz {
 		this.clid = clid;
 		Map<String, FunctionMember> members = getFunctionMembers(this.clid, clazz, log);
 
-		LinkedList<FunctionMember> tmpMethods = new LinkedList<>();
-		LinkedList<FunctionMember> tmpDeclaredMethods = new LinkedList<>();
-		LinkedList<FunctionMember> tmpConstructors = new LinkedList<>();
-		LinkedList<FunctionMember> tmpDeclaredConstructors = new LinkedList<>();
+		LinkedList<Method> tmpMethods = new LinkedList<>();
+		LinkedList<Method> tmpDeclaredMethods = new LinkedList<>();
+		LinkedList<Constructor> tmpConstructors = new LinkedList<>();
+		LinkedList<Constructor> tmpDeclaredConstructors = new LinkedList<>();
 		for (FunctionMember fm: members.values()) {
 			if (fm instanceof Method) {
-				if (clazz.getName().equals(fm.getDeclaringClassName())) tmpDeclaredMethods.add(fm);
-				if (fm.isPublic()) tmpMethods.add(fm);
+				if (clazz.getName().equals(fm.getDeclaringClassName())) tmpDeclaredMethods.add((Method) fm);
+				if (fm.isPublic()) tmpMethods.add((Method) fm);
 			}
 			else if (fm instanceof Constructor) {
-				if (clazz.getName().equals(fm.getDeclaringClassName())) tmpDeclaredConstructors.add(fm);
-				if (fm.isPublic()) tmpConstructors.add(fm);
+				if (clazz.getName().equals(fm.getDeclaringClassName())) tmpDeclaredConstructors.add((Constructor) fm);
+				if (fm.isPublic()) tmpConstructors.add((Constructor) fm);
 			}
 		}
-		methods = tmpMethods.toArray(new FunctionMember[tmpMethods.size()]);
-		declaredMethods = tmpDeclaredMethods.toArray(new FunctionMember[tmpDeclaredMethods.size()]);
-		constructors = tmpConstructors.toArray(new FunctionMember[tmpConstructors.size()]);
-		declaredConstructors = tmpDeclaredConstructors.toArray(new FunctionMember[tmpDeclaredConstructors.size()]);
+		methods = tmpMethods.toArray(new Method[tmpMethods.size()]);
+		declaredMethods = tmpDeclaredMethods.toArray(new Method[tmpDeclaredMethods.size()]);
+		constructors = tmpConstructors.toArray(new Constructor[tmpConstructors.size()]);
+		declaredConstructors = tmpDeclaredConstructors.toArray(new Constructor[tmpDeclaredConstructors.size()]);
 
 	}
 
@@ -296,7 +297,7 @@ public class ClazzDynamic extends Clazz {
 	@Override
 	public List<Method> getMethods(String methodName, boolean nameCaseSensitive, int argumentLength) {
 		List<Method> list = new LinkedList<>();
-		for (FunctionMember fm: methods) {
+		for (Method fm: methods) {
 			if (/* fm.isPublic() && */
 
 			(argumentLength == fm.getArgumentCount() || argumentLength < 0) &&
@@ -304,7 +305,7 @@ public class ClazzDynamic extends Clazz {
 					(methodName == null || (nameCaseSensitive ? methodName.equals(fm.getName()) : methodName.equalsIgnoreCase(fm.getName())))
 
 			) {
-				list.add((Method) fm);
+				list.add(fm);
 			}
 		}
 		return list;
@@ -313,7 +314,7 @@ public class ClazzDynamic extends Clazz {
 	@Override
 	public List<Method> getDeclaredMethods(String methodName, boolean nameCaseSensitive, int argumentLength) throws IOException {
 		List<Method> list = new LinkedList<>();
-		for (FunctionMember fm: declaredMethods) {
+		for (Method fm: declaredMethods) {
 			if ((argumentLength < 0 || argumentLength == fm.getArgumentCount()) &&
 
 					(methodName == null || (nameCaseSensitive ? methodName.equals(fm.getName()) : methodName.equalsIgnoreCase(fm.getName())))
@@ -321,7 +322,7 @@ public class ClazzDynamic extends Clazz {
 			/* &&clazz.getName().equals(fm.getDeclaringClassName()) */
 
 			) {
-				list.add((Method) fm);
+				list.add(fm);
 			}
 		}
 		return list;
@@ -331,7 +332,7 @@ public class ClazzDynamic extends Clazz {
 	public List<Constructor> getConstructors(int argumentLength) throws IOException {
 		List<Constructor> list = new LinkedList<>();
 
-		for (FunctionMember fm: constructors) {
+		for (Constructor fm: constructors) {
 			if (/* fm.isPublic() && */
 
 			(argumentLength < 0 || argumentLength == fm.getArgumentCount()) &&
@@ -339,7 +340,7 @@ public class ClazzDynamic extends Clazz {
 					clazz.getName().equals(fm.getDeclaringClassName())
 
 			) {
-				list.add((Constructor) fm);
+				list.add(fm);
 			}
 		}
 		return list;
@@ -348,13 +349,13 @@ public class ClazzDynamic extends Clazz {
 	@Override
 	public List<Constructor> getDeclaredConstructors(int argumentLength) throws IOException {
 		List<Constructor> list = new LinkedList<>();
-		for (FunctionMember fm: declaredConstructors) {
+		for (Constructor fm: declaredConstructors) {
 			if ((argumentLength < 0 || argumentLength == fm.getArgumentCount())
 
 			/* && clazz.getName().equals(fm.getDeclaringClassName()) */
 
 			) {
-				list.add((Constructor) fm);
+				list.add(fm);
 			}
 		}
 		return list;

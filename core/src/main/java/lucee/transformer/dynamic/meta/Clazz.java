@@ -27,6 +27,8 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.reflection.Reflector;
 import lucee.runtime.type.Collection;
 import lucee.transformer.bytecode.util.ASMUtil;
+import lucee.transformer.dynamic.DynamicClassLoader;
+import lucee.transformer.dynamic.DynamicInvoker;
 import lucee.transformer.dynamic.meta.dynamic.ClazzDynamic;
 import lucee.transformer.dynamic.meta.reflection.ClazzReflection;
 
@@ -36,6 +38,8 @@ public abstract class Clazz implements Serializable {
 
 	private static final long serialVersionUID = 4236939474343760825L;
 	private static Boolean allowReflection = null;
+
+	private DynamicClassLoader dcl;
 
 	public abstract List<Method> getMethods(String methodName, boolean nameCaseSensitive, int argumentLength) throws IOException;
 
@@ -97,7 +101,7 @@ public abstract class Clazz implements Serializable {
 
 	private static Map<String, SoftReference<Pair<Method, Boolean>>> cachedMethods = new ConcurrentHashMap<>();
 
-	public static Method getMethodMatch(Clazz clazz, final Collection.Key methodName, Object[] args, boolean convertArgument, boolean convertComparsion)
+	public static Method getMethodMatch(Clazz clazz, final Collection.Key methodName, Object[] args, boolean nameCaseSensitive, boolean convertArgument, boolean convertComparsion)
 			throws NoSuchMethodException, IOException, PageException {
 
 		List<Method> methods = clazz.getMethods(methodName.getString(), false, args.length);
@@ -369,6 +373,13 @@ public abstract class Clazz implements Serializable {
 		ClassLoader tmp = clazz.getClassLoader();
 		if (tmp == null) tmp = ClassLoader.getSystemClassLoader();
 		return tmp;
+	}
+
+	public DynamicClassLoader getDynamicClassLoader(DynamicInvoker dynamicInvoker) {
+		if (dcl == null) {
+			dcl = dynamicInvoker.getCL(getDeclaringClass());
+		}
+		return dcl;
 	}
 
 	public static Type[] toTypes(Class[] classes) {

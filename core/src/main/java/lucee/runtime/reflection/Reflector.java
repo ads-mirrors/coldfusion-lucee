@@ -80,6 +80,7 @@ import lucee.transformer.bytecode.util.JavaProxyFactory;
 import lucee.transformer.dynamic.DynamicInvoker;
 import lucee.transformer.dynamic.meta.Clazz;
 import lucee.transformer.dynamic.meta.Constructor;
+import lucee.transformer.dynamic.meta.FunctionMember;
 import lucee.transformer.dynamic.meta.Method;
 
 /**
@@ -688,8 +689,12 @@ public final class Reflector {
 		return coll;
 	}
 
-	public static MethodInstance getMethodInstance(Class clazz, final Collection.Key methodName, Object[] args, boolean exactMatchOnly) {
-		return new MethodInstance(clazz, methodName, args, !exactMatchOnly);
+	public static MethodInstance getMethodInstance(Class clazz, final FunctionMember fm, Object[] args, boolean nameCaseSensitive, boolean exactMatchOnly) {
+		return new MethodInstance(clazz, fm, args, nameCaseSensitive, !exactMatchOnly);
+	}
+
+	public static MethodInstance getMethodInstance(Class clazz, final Collection.Key methodName, Object[] args, boolean nameCaseSensitive, boolean exactMatchOnly) {
+		return new MethodInstance(clazz, methodName, args, nameCaseSensitive, !exactMatchOnly);
 	}
 
 	public static String pos(int index) {
@@ -852,31 +857,24 @@ public final class Reflector {
 	 * @throws PageException
 	 */
 	public static Object callMethod(Object obj, String methodName, Object[] args) throws PageException {
-		return callMethod(obj, KeyImpl.init(methodName), args);
+		return callMethod(obj, KeyImpl.init(methodName), args, false);
 	}
 
-	public static Object callMethod(final Object obj, Collection.Key methodName, Object[] args) throws PageException {
-		if (obj == null) {
-			throw new ExpressionException("can't call method [" + methodName + "] on object, object is null");
-		}
-
-		MethodInstance mi = getMethodInstance(obj.getClass(), methodName, args, false);
-		// if (!mi.hasMethod()) throw throwCall(obj, methodName.getString(), args);
-		try {
-			return mi.invoke(obj);
-		}
-		catch (Exception e) {
-			throw Caster.toPageException(e);
-		}
+	public static Object callMethod(Object obj, String methodName, Object[] args, boolean nameCaseSensitive) throws PageException {
+		return callMethod(obj, KeyImpl.init(methodName), args, nameCaseSensitive);
 	}
 
-	public static boolean hasMethod(Class<?> clazz, String methodName, Object[] args) {
-		MethodInstance mi = getMethodInstance(clazz, KeyImpl.init(methodName), args, false);
+	public static Object callMethod(final Object obj, Collection.Key methodName, Object[] args, boolean nameCaseSensitive) throws PageException {
+		return getMethodInstance(obj.getClass(), methodName, args, nameCaseSensitive, false).invoke(obj);
+	}
+
+	public static boolean hasMethod(Class<?> clazz, String methodName, Object[] args, boolean nameCaseSensitive) {
+		MethodInstance mi = getMethodInstance(clazz, KeyImpl.init(methodName), args, nameCaseSensitive, false);
 		return mi.hasMethod();
 	}
 
-	public static boolean hasMethod(Class<?> clazz, Collection.Key methodName, Object[] args) {
-		MethodInstance mi = getMethodInstance(clazz, methodName, args, false);
+	public static boolean hasMethod(Class<?> clazz, Collection.Key methodName, Object[] args, boolean nameCaseSensitive) {
+		MethodInstance mi = getMethodInstance(clazz, methodName, args, nameCaseSensitive, false);
 		return mi.hasMethod();
 	}
 
@@ -904,13 +902,13 @@ public final class Reflector {
 	 * )); } } }
 	 */
 
-	public static Object callMethod(Object obj, Collection.Key methodName, Object[] args, Object defaultValue) {
+	public static Object callMethod(Object obj, Collection.Key methodName, Object[] args, boolean nameCaseSensitive, Object defaultValue) {
 		if (obj == null) {
 			return defaultValue;
 		}
 		// checkAccesibility(obj,methodName);
 
-		MethodInstance mi = getMethodInstance(obj.getClass(), methodName, args, false);
+		MethodInstance mi = getMethodInstance(obj.getClass(), methodName, args, nameCaseSensitive, false);
 		if (!mi.hasMethod()) return defaultValue;
 		try {
 			return mi.invoke(obj);
@@ -929,7 +927,11 @@ public final class Reflector {
 	}
 
 	public static Object callStaticMethod(Class clazz, String methodName, Object[] args) throws PageException {
-		return callStaticMethod(clazz, KeyImpl.init(methodName), args);
+		return callStaticMethod(clazz, KeyImpl.init(methodName), args, false);
+	}
+
+	public static Object callStaticMethod(Class clazz, String methodName, Object[] args, boolean nameCaseSensitive) throws PageException {
+		return callStaticMethod(clazz, KeyImpl.init(methodName), args, nameCaseSensitive);
 	}
 
 	/**
@@ -941,9 +943,19 @@ public final class Reflector {
 	 * @return return return value of the called Method
 	 * @throws PageException
 	 */
+
 	public static Object callStaticMethod(Class clazz, Collection.Key methodName, Object[] args) throws PageException {
 		try {
-			return getMethodInstance(clazz, methodName, args, false).invoke(null);
+			return getMethodInstance(clazz, methodName, args, false, false).invoke(null);
+		}
+		catch (Exception e) {
+			throw Caster.toPageException(e);
+		}
+	}
+
+	public static Object callStaticMethod(Class clazz, Collection.Key methodName, Object[] args, boolean nameCaseSensitive) throws PageException {
+		try {
+			return getMethodInstance(clazz, methodName, args, nameCaseSensitive, false).invoke(null);
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);
@@ -959,13 +971,14 @@ public final class Reflector {
 	 * @throws NoSuchMethodException
 	 * @throws PageException
 	 */
-	public static MethodInstance getGetter(Class clazz, String prop) throws PageException, NoSuchMethodException {
+
+	public static MethodInstance getGetter(Class clazz, String prop, boolean nameCaseSensitive) throws PageException, NoSuchMethodException {
 		String getterName = "get" + StringUtil.ucFirst(prop);
-		MethodInstance mi = getMethodInstance(clazz, KeyImpl.init(getterName), ArrayUtil.OBJECT_EMPTY, false);
+		MethodInstance mi = getMethodInstance(clazz, KeyImpl.init(getterName), ArrayUtil.OBJECT_EMPTY, nameCaseSensitive, false);
 
 		if (!mi.hasMethod()) {
 			String isName = "is" + StringUtil.ucFirst(prop);
-			mi = getMethodInstance(clazz, KeyImpl.init(isName), ArrayUtil.OBJECT_EMPTY, false);
+			mi = getMethodInstance(clazz, KeyImpl.init(isName), ArrayUtil.OBJECT_EMPTY, nameCaseSensitive, false);
 			if (mi.hasMethod()) {
 				lucee.transformer.dynamic.meta.Method m = mi.getMethod();
 				Class rtn = m.getReturnClass();
@@ -989,9 +1002,9 @@ public final class Reflector {
 	 * @param prop Name of the Method without get
 	 * @return return Value of the getter Method
 	 */
-	public static MethodInstance getGetterEL(Class clazz, String prop) {
+	public static MethodInstance getGetterEL(Class clazz, String prop, boolean nameCaseSensitive) {
 		prop = "get" + StringUtil.ucFirst(prop);
-		MethodInstance mi = getMethodInstance(clazz, KeyImpl.init(prop), ArrayUtil.OBJECT_EMPTY, false);
+		MethodInstance mi = getMethodInstance(clazz, KeyImpl.init(prop), ArrayUtil.OBJECT_EMPTY, nameCaseSensitive, false);
 		if (!mi.hasMethod()) return null;
 		try {
 			if (mi.getMethod().getReturnClass() == void.class) return null;
@@ -1010,9 +1023,9 @@ public final class Reflector {
 	 * @return return Value of the getter Method
 	 * @throws PageException
 	 */
-	public static Object callGetter(Object obj, String prop) throws PageException {
+	public static Object callGetter(Object obj, String prop, boolean nameCaseSensitive) throws PageException {
 		try {
-			return getGetter(obj.getClass(), prop).invoke(obj);
+			return getGetter(obj.getClass(), prop, nameCaseSensitive).invoke(obj);
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);
@@ -1032,9 +1045,9 @@ public final class Reflector {
 	 * @throws IOException
 	 * @throws ClassNotFoundException
 	 */
-	public static MethodInstance getSetter(Object obj, String prop, Object value) throws PageException {
+	public static MethodInstance getSetter(Object obj, String prop, Object value, boolean nameCaseSensitive) throws PageException {
 		prop = "set" + StringUtil.ucFirst(prop);
-		MethodInstance mi = getMethodInstance(obj.getClass(), KeyImpl.init(prop), new Object[] { value }, false);
+		MethodInstance mi = getMethodInstance(obj.getClass(), KeyImpl.init(prop), new Object[] { value }, nameCaseSensitive, false);
 		lucee.transformer.dynamic.meta.Method m = mi.getMethod();
 
 		if (m.getReturnClass() != void.class)
@@ -1051,8 +1064,12 @@ public final class Reflector {
 	 * @return MethodInstance
 	 */
 	public static MethodInstance getSetter(Object obj, String prop, Object value, MethodInstance defaultValue) {
+		return getSetter(obj, prop, value, false, defaultValue);
+	}
+
+	public static MethodInstance getSetter(Object obj, String prop, Object value, boolean nameCaseSensitive, MethodInstance defaultValue) {
 		prop = "set" + StringUtil.ucFirst(prop);
-		MethodInstance mi = getMethodInstance(obj.getClass(), KeyImpl.init(prop), new Object[] { value }, false);
+		MethodInstance mi = getMethodInstance(obj.getClass(), KeyImpl.init(prop), new Object[] { value }, nameCaseSensitive, false);
 		lucee.transformer.dynamic.meta.Method m;
 		if ((m = mi.getMethod(null)) == null) return defaultValue;
 
@@ -1070,7 +1087,16 @@ public final class Reflector {
 	 */
 	public static void callSetter(Object obj, String prop, Object value) throws PageException {
 		try {
-			getSetter(obj, prop, value).invoke(obj);
+			getSetter(obj, prop, value, false).invoke(obj);
+		}
+		catch (Exception e) {
+			throw Caster.toPageException(e);
+		}
+	}
+
+	public static void callSetter(Object obj, String prop, Object value, boolean nameCaseSensitive) throws PageException {
+		try {
+			getSetter(obj, prop, value, nameCaseSensitive).invoke(obj);
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);
@@ -1085,9 +1111,9 @@ public final class Reflector {
 	 * @param value
 	 * @throws PageException
 	 */
-	public static void callSetterEL(Object obj, String prop, Object value) throws PageException {
+	public static void callSetterEL(Object obj, String prop, Object value, boolean nameCaseSensitive) throws PageException {
 		try {
-			MethodInstance setter = getSetter(obj, prop, value, null);
+			MethodInstance setter = getSetter(obj, prop, value, nameCaseSensitive, null);
 			if (setter != null) setter.invoke(obj);
 		}
 		catch (Exception e) {
@@ -1182,20 +1208,15 @@ public final class Reflector {
 	 * @return property value
 	 * @throws PageException
 	 */
-	public static Object getProperty(Object obj, String prop) throws PageException {
+	public static Object getProperty(Object obj, String prop, boolean nameCaseSensitive) throws PageException {
 		Object rtn = getField(obj, prop, CollectionUtil.NULL);// NULL is used because the field can contain null as well
 		if (rtn != CollectionUtil.NULL) return rtn;
 
 		char first = prop.charAt(0);
-		MethodInstance getter = (first >= '0' && first <= '9') ? null : getGetterEL(obj.getClass(), prop);
+		MethodInstance getter = (first >= '0' && first <= '9') ? null : getGetterEL(obj.getClass(), prop, nameCaseSensitive);
 		if (getter == null) throw new ApplicationException("there is no property with name [" + prop + "]  found in [" + Caster.toTypeName(obj) + "]");
 
-		try {
-			return getter.invoke(obj);
-		}
-		catch (IOException | NoSuchMethodException e) {
-			throw Caster.toPageException(e);
-		}
+		return getter.invoke(obj);
 	}
 
 	/**
@@ -1205,7 +1226,12 @@ public final class Reflector {
 	 * @param prop property to call
 	 * @return property value
 	 */
+
 	public static Object getProperty(Object obj, String prop, Object defaultValue) {
+		return getProperty(obj, prop, false, defaultValue);
+	}
+
+	public static Object getProperty(Object obj, String prop, boolean nameCaseSensitive, Object defaultValue) {
 
 		// first try field
 		Field[] fields = getFieldsIgnoreCase(obj.getClass(), prop, null);
@@ -1222,7 +1248,7 @@ public final class Reflector {
 		try {
 			char first = prop.charAt(0);
 			if (first >= '0' && first <= '9') return defaultValue;
-			return getGetter(obj.getClass(), prop).invoke(obj);
+			return getGetter(obj.getClass(), prop, nameCaseSensitive).invoke(obj);
 		}
 		catch (Throwable e1) {
 			ExceptionUtil.rethrowIfNecessary(e1);
@@ -1238,7 +1264,12 @@ public final class Reflector {
 	 * @param value Value to assign
 	 * @throws PageException
 	 */
+
 	public static void setProperty(Object obj, String prop, Object value) throws PageException {
+		setProperty(obj, prop, value, false);
+	}
+
+	public static void setProperty(Object obj, String prop, Object value, boolean nameCaseSensitive) throws PageException {
 		boolean done = false;
 		try {
 			if (setField(obj, prop, value)) done = true;
@@ -1246,7 +1277,7 @@ public final class Reflector {
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 		}
-		if (!done) callSetter(obj, prop, value);
+		if (!done) callSetter(obj, prop, value, nameCaseSensitive);
 	}
 
 	/**
@@ -1256,7 +1287,7 @@ public final class Reflector {
 	 * @param prop name of property
 	 * @param value Value to assign
 	 */
-	public static void setPropertyEL(Object obj, String prop, Object value) {
+	public static void setPropertyEL(Object obj, String prop, Object value, boolean nameCaseSensitive) {
 
 		// first check for field
 		Field[] fields = getFieldsIgnoreCase(obj.getClass(), prop, null);
@@ -1272,7 +1303,7 @@ public final class Reflector {
 
 		// then check for setter
 		try {
-			getSetter(obj, prop, value).invoke(obj);
+			getSetter(obj, prop, value, nameCaseSensitive).invoke(obj);
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
@@ -1570,28 +1601,16 @@ public final class Reflector {
 		}
 	}
 
-	public static Method getMethod(Class<?> clazz, String methodName, Class<?>[] args) throws NoSuchMethodException, IOException {
-		DynamicInvoker di = DynamicInvoker.getExistingInstance();
-		try {
-			return di.getClazz(clazz, false).getMethod(methodName, args, true);
-		}
-		catch (IOException e) {
-			return di.getClazz(clazz, false).getMethod(methodName, args, false);
-		}
+	public static Method getMethod(Class<?> clazz, String methodName, Class<?>[] args, boolean nameCaseSensitive) throws NoSuchMethodException, IOException {
+		return DynamicInvoker.getExistingInstance().getClazz(clazz, false).getMethod(methodName, args, nameCaseSensitive);
 	}
 
-	public static Method getMethod(Class<?> clazz, String methodName, Class<?>[] args, Method defaultValue) {
-		DynamicInvoker di = DynamicInvoker.getExistingInstance();
+	public static Method getMethod(Class<?> clazz, String methodName, Class<?>[] args, boolean nameCaseSensitive, Method defaultValue) {
 		try {
-			return di.getClazz(clazz, false).getMethod(methodName, args, true);
+			return DynamicInvoker.getExistingInstance().getClazz(clazz, false).getMethod(methodName, args, nameCaseSensitive);
 		}
 		catch (IOException e) {
-			try {
-				return di.getClazz(clazz, false).getMethod(methodName, args, false);
-			}
-			catch (Exception e1) {
-				return defaultValue;
-			}
+			return defaultValue;
 		}
 		catch (NoSuchMethodException e) {
 			return defaultValue;

@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.SerializableObject;
@@ -197,6 +198,7 @@ public final class TemporaryStream extends OutputStream {
 			tempFile = getCanonicalResourceEL(tempFile);
 		}
 		catch (IOException ioe) {
+			LogUtil.warn("temporary-stream", ioe);
 		}
 		finally {
 			if (tmp != null) tmp.delete();

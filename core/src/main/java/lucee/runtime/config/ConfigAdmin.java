@@ -1689,7 +1689,7 @@ public final class ConfigAdmin {
 		if (startup.cd.equals(cd) && !force) return;
 
 		try {
-			lucee.transformer.dynamic.meta.Method fin = Reflector.getMethod(startup.instance.getClass(), "finalize", new Class[0], null);
+			lucee.transformer.dynamic.meta.Method fin = Reflector.getMethod(startup.instance.getClass(), "finalize", new Class[0], true, null);
 			if (fin != null) {
 				fin.invoke(startup.instance, new Object[0]);
 			}

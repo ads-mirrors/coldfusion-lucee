@@ -187,12 +187,12 @@ public class DataDogLayout extends AbstractStringLayout {
 
 			// CorrelationIdentifier.getTraceId()
 			if (getTraceId == null) {
-				getTraceId = Reflector.getMethod(correlationIdentifierClass, "getTraceId", EMPTY_CLASS);
+				getTraceId = Reflector.getMethod(correlationIdentifierClass, "getTraceId", EMPTY_CLASS, true);
 			}
 
 			// CorrelationIdentifier.getSpanId()
 			if (getSpanId == null) {
-				getSpanId = Reflector.getMethod(correlationIdentifierClass, "getSpanId", EMPTY_CLASS);
+				getSpanId = Reflector.getMethod(correlationIdentifierClass, "getSpanId", EMPTY_CLASS, true);
 			}
 			Object[] tmp = new Object[] { getTraceId.invoke(null, EMPTY_OBJ), getSpanId.invoke(null, EMPTY_OBJ) };
 

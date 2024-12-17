@@ -46,19 +46,19 @@ public class OracleBlob {
 
 			// BLOB blob = BLOB.createTemporary(conn, false, BLOB.DURATION_SESSION);
 			if (createTemporary == null || createTemporary.getDeclaringClass() != clazz) {
-				createTemporary = Reflector.getMethod(clazz, "createTemporary", new Class[] { Connection.class, boolean.class, int.class });
+				createTemporary = Reflector.getMethod(clazz, "createTemporary", new Class[] { Connection.class, boolean.class, int.class }, true);
 			}
 			Object blob = createTemporary.invoke(null, new Object[] { conn, Boolean.FALSE, duration });
 
 			// blob.open(BLOB.MODE_READWRITE);
 			if (open == null || open.getDeclaringClass() != clazz) {
-				open = Reflector.getMethod(clazz, "open", new Class[] { int.class });
+				open = Reflector.getMethod(clazz, "open", new Class[] { int.class }, true);
 			}
 			open.invoke(blob, new Object[] { mode });
 
 			// blob.setBytes(1,barr);
 			if (setBytes == null || setBytes.getDeclaringClass() != clazz) {
-				setBytes = Reflector.getMethod(clazz, "setBytes", new Class[] { long.class, byte[].class });
+				setBytes = Reflector.getMethod(clazz, "setBytes", new Class[] { long.class, byte[].class }, true);
 			}
 			setBytes.invoke(blob, new Object[] { Long.valueOf(1), barr });
 

@@ -978,7 +978,7 @@ public final class ResourceUtil {
 							src.remove(false);
 						}
 						catch (IOException e) {
-							LogUtil.warn("resource", e);
+							// LogUtil.warn("resource", e);
 						}
 					}
 				}

@@ -54,6 +54,12 @@ public interface FunctionMember extends Serializable {
 
 	public abstract String getClassName();
 
+	public abstract String getReturn();
+
+	public abstract Type getReturnType();
+
+	public abstract Class getReturnClass();
+
 	public static String createClassPath(FunctionMember fm) {
 		StringBuilder sbClassPath = new StringBuilder();
 		// sbClassPath.append(getDeclaringClassName().replace('.', '/')).append('/').append(isConstr ?

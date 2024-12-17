@@ -18,7 +18,6 @@
  **/
 package lucee.runtime.reflection.pairs;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.BiFunction;
 
@@ -44,24 +43,27 @@ public final class MethodInstance {
 	private Object[] args;
 	private Pair<FunctionMember, Object> result;
 	private boolean convertComparsion;
+	private boolean nameCaseSensitive;
+	private FunctionMember fm;
 
-	public MethodInstance(Class clazz, Key methodName, Object[] args, boolean convertComparsion) {
+	public MethodInstance(Class clazz, FunctionMember fm, Object[] args, boolean nameCaseSensitive, boolean convertComparsion) {
+		this.clazz = clazz;
+		this.fm = fm;
+		this.args = args;
+		this.convertComparsion = convertComparsion;
+		this.nameCaseSensitive = nameCaseSensitive;
+	}
+
+	public MethodInstance(Class clazz, Key methodName, Object[] args, boolean nameCaseSensitive, boolean convertComparsion) {
 		this.clazz = clazz;
 		this.methodName = methodName;
 		this.args = args;
 		this.convertComparsion = convertComparsion;
+		this.nameCaseSensitive = nameCaseSensitive;
 	}
 
-	public Object invoke(Object o) throws PageException, NoSuchMethodException, IOException {
-
-		if (o != null) {
-			if (args.length == 0 && "toString".equals(methodName.getString())) {
-				return o.toString();
-			}
-			else if (args.length == 1 && "equals".equals(methodName.getString())) {
-				return o.equals(args[0]);
-			}
-		}
+	public Object invoke(Object o) throws PageException {
+		// if (Clazz.allowReflection()) print.e(Clazz.allowReflection());
 		try {
 			return ((BiFunction<Object, Object, Object>) getResult().getValue()).apply(o, args);
 		}
@@ -69,8 +71,8 @@ public final class MethodInstance {
 			if (!Clazz.allowReflection()) throw e;
 			LogUtil.log("dynamic", e);
 			DynamicInvoker di = DynamicInvoker.getExistingInstance();
-			lucee.transformer.dynamic.meta.Method method = Clazz.getMethodMatch(di.getClazz(clazz, true), methodName, args, true, true);
 			try {
+				lucee.transformer.dynamic.meta.Method method = Clazz.getMethodMatch(di.getClazz(clazz, true), methodName, args, nameCaseSensitive, true, true);
 				return ((LegacyMethod) method).getMethod().invoke(o, args);
 			}
 			catch (Exception e1) {
@@ -125,7 +127,11 @@ public final class MethodInstance {
 	private Pair<FunctionMember, Object> getResult() throws PageException {
 		if (result == null) {
 			try {
-				result = DynamicInvoker.getExistingInstance().createInstance(clazz, methodName, args, convertComparsion);
+				result = fm != null ?
+
+						DynamicInvoker.getExistingInstance().getInstance(clazz, fm, args, nameCaseSensitive, convertComparsion) :
+
+						DynamicInvoker.getExistingInstance().getInstance(clazz, methodName, args, nameCaseSensitive, convertComparsion);
 			}
 			catch (Throwable t) {
 				ExceptionUtil.rethrowIfNecessary(t);

@@ -2,14 +2,7 @@ package lucee.transformer.dynamic.meta;
 
 import java.io.IOException;
 
-import org.objectweb.asm.Type;
-
 public interface Method extends FunctionMember {
-	public String getReturn();
-
-	public Type getReturnType();
-
-	public Class getReturnClass();
 
 	public String getDeclaringProviderRtnClassName();
 

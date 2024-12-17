@@ -191,7 +191,7 @@ public class MemberUtil {
 	}
 
 	private static Object callMethod(Object obj, Collection.Key methodName, Object[] args) throws PageException {
-		MethodInstance mi = Reflector.getMethodInstance(obj.getClass(), methodName, args, false);
+		MethodInstance mi = Reflector.getMethodInstance(obj.getClass(), methodName, args, false, false);
 		if (!mi.hasMethod()) return DEFAULT;
 		try {
 			return mi.invoke(obj);

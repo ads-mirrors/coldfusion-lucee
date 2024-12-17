@@ -28,6 +28,7 @@ import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.Pair;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
+import lucee.runtime.type.Collection.Key;
 import lucee.transformer.dynamic.DynamicInvoker;
 import lucee.transformer.dynamic.meta.Clazz;
 import lucee.transformer.dynamic.meta.Constructor;
@@ -106,7 +107,7 @@ public final class ConstructorInstance {
 	private Pair<FunctionMember, Object> getResult() throws PageException {
 		if (result == null) {
 			try {
-				result = DynamicInvoker.getExistingInstance().createInstance(clazz, null, args, convertComparsion);
+				result = DynamicInvoker.getExistingInstance().getInstance(clazz, (Key) null, args, true, convertComparsion);
 			}
 			catch (Exception e) {
 				throw Caster.toPageException(e);

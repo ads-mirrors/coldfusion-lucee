@@ -176,7 +176,7 @@ public class TagUtil {
 
 	public static void setAttribute(PageContext pc, boolean doDynamic, boolean silently, Tag tag, String name, Object value) throws PageException {
 
-		MethodInstance setter = silently || doDynamic ? Reflector.getSetter(tag, name.toLowerCase(), value, null) : Reflector.getSetter(tag, name.toLowerCase(), value);
+		MethodInstance setter = silently || doDynamic ? Reflector.getSetter(tag, name.toLowerCase(), value, null) : Reflector.getSetter(tag, name.toLowerCase(), value, false);
 
 		if (setter != null) {
 			if (value == null) {

@@ -188,12 +188,12 @@ public class ClassUtilImpl implements ClassUtil {
 
 	@Override
 	public Object callMethod(Object obj, Key methodName, Object[] args) throws PageException {
-		return Reflector.callMethod(obj, methodName, args);
+		return Reflector.callMethod(obj, methodName, args, false);
 	}
 
 	@Override
 	public Object callMethod(Object obj, Key methodName, Object[] args, Object defaultValue) {
-		return Reflector.callMethod(obj, methodName, args, defaultValue);
+		return Reflector.callMethod(obj, methodName, args, false, defaultValue);
 	}
 
 	@Override
@@ -218,7 +218,7 @@ public class ClassUtilImpl implements ClassUtil {
 
 	@Override
 	public Object getProperty(Object obj, String prop) throws PageException {
-		return Reflector.getProperty(obj, prop);
+		return Reflector.getProperty(obj, prop, false);
 	}
 
 	@Override
@@ -233,7 +233,7 @@ public class ClassUtilImpl implements ClassUtil {
 
 	@Override
 	public void setPropertyEL(Object obj, String prop, Object value) {
-		Reflector.setPropertyEL(obj, prop, value);
+		Reflector.setPropertyEL(obj, prop, value, false);
 	}
 
 	@Override
