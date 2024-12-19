@@ -2037,6 +2037,16 @@ public final class PageContextImpl extends PageContext {
 
 	@Override
 	public Object getFunction(Object coll, Key key, Object[] args) throws PageException {
+		if (config.hasDebugOptions(ConfigPro.DEBUG_TEMPLATE) && !gatewayContext) {
+			DebugEntryTemplate debugEntry = debugger.getEntry(this, getCurrentTemplatePageSource(), key.toString());
+			long currTime = getExecutionTime();
+			long time = System.nanoTime();
+			Object result = variableUtil.callFunctionWithoutNamedValues(this, coll, key, args);
+			long diff = ((System.nanoTime() - time) - (getExecutionTime() - currTime));
+			setExecutionTime(getExecutionTime() + diff);
+			debugEntry.updateExeTime(diff);
+			return result;
+		}
 		return variableUtil.callFunctionWithoutNamedValues(this, coll, key, args);
 	}
 
