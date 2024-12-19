@@ -16,16 +16,9 @@ import lucee.commons.io.res.Resource;
 import lucee.commons.lang.ClassException;
 import lucee.commons.lang.ClassUtil;
 import lucee.commons.lang.Pair;
-import lucee.commons.lang.PhysicalClassLoader;
 import lucee.commons.lang.types.RefInteger;
 import lucee.commons.lang.types.RefIntegerImpl;
-import lucee.runtime.config.Constants;
-import lucee.runtime.exp.FunctionException;
-import lucee.runtime.exp.PageException;
-import lucee.runtime.java.JavaObject;
 import lucee.runtime.op.Caster;
-import lucee.runtime.reflection.Reflector;
-import lucee.runtime.type.Collection;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.dynamic.DynamicClassLoader;
 import lucee.transformer.dynamic.DynamicInvoker;
@@ -33,7 +26,7 @@ import lucee.transformer.dynamic.meta.dynamic.ClazzDynamic;
 import lucee.transformer.dynamic.meta.reflection.ClazzReflection;
 
 public abstract class Clazz implements Serializable {
-
+	private static final boolean debug = false;
 	public static final int VERSION = 4;
 
 	private static final long serialVersionUID = 4236939474343760825L;
@@ -53,7 +46,15 @@ public abstract class Clazz implements Serializable {
 
 	public abstract Method getMethod(String methodName, Class[] arguments, boolean nameCaseSensitive) throws IOException, NoSuchMethodException;
 
+	public abstract Method getMethod(String methodName, Object[] args, boolean nameCaseSensitive, boolean convertArgument, boolean convertComparsion) throws NoSuchMethodException;
+
+	public abstract Method getMethod(String methodName, Object[] args, boolean nameCaseSensitive, boolean convertArgument, boolean convertComparsion, Method defaultValue);
+
 	public abstract Constructor getConstructor(Class[] arguments) throws IOException, NoSuchMethodException;
+
+	public abstract Constructor getConstructor(Object[] args, boolean convertArgument, boolean convertComparsion) throws NoSuchMethodException;
+
+	public abstract Constructor getConstructor(Object[] args, boolean convertArgument, boolean convertComparsion, Constructor defaultValue);
 
 	public abstract Constructor getDeclaredConstructor(Class[] arguments) throws IOException, NoSuchMethodException;
 
@@ -100,244 +101,6 @@ public abstract class Clazz implements Serializable {
 	 */
 
 	private static Map<String, SoftReference<Pair<Method, Boolean>>> cachedMethods = new ConcurrentHashMap<>();
-
-	public static Method getMethodMatch(Clazz clazz, final Collection.Key methodName, Object[] args, boolean nameCaseSensitive, boolean convertArgument, boolean convertComparsion)
-			throws NoSuchMethodException, IOException, PageException {
-
-		List<Method> methods = clazz.getMethods(methodName.getString(), false, args.length);
-		if (methods != null && methods.size() > 0) {
-			if (args.length == 0) {
-				return methods.get(0);
-			}
-
-			Class[] clazzArgs = Reflector.getClasses(args);
-
-			Reflector.checkAccessibility(clazz, methodName);
-
-			// like comparsion
-			outer: for (Method m: methods) {
-				if (m != null) {
-					Class[] parameterTypes = m.getArgumentClasses();
-					for (int y = 0; y < parameterTypes.length; y++) {
-						if (!Reflector.toReferenceClass(parameterTypes[y]).isAssignableFrom(clazzArgs[y])) continue outer;
-					}
-					return m;
-				}
-			}
-
-			// cache
-			StringBuilder sb = new StringBuilder(100).append(clazz.id()).append(methodName).append(';');
-			for (Class cls: clazzArgs) {
-				sb.append(cls.getName()).append(';');
-			}
-			String key = sb.toString();
-
-			// get match from cache
-			SoftReference<Pair<Method, Boolean>> sr = cachedMethods.get(key);
-			if (sr != null) {
-				Pair<Method, Boolean> p = sr.get();
-				if (p != null) {
-					// print.e("used cached match(" + p.getValue() + "):" + key + ":" + cachedMethods.size());
-					// convert arguments
-					if (p.getValue()) {
-						Class[] trgArgs = p.getName().getArgumentClasses();
-						for (int x = 0; x < trgArgs.length; x++) {
-							if (args[x] != null) args[x] = Reflector.convert(args[x], Reflector.toReferenceClass(trgArgs[x]), nirvana);
-						}
-					}
-					return p.getName();
-				}
-			}
-
-			// convert comparsion
-			Pair<Method, Object[]> result = null;
-			int _rating = 0;
-			if (convertComparsion) {
-				outer: for (Method m: methods) {
-					if (m != null) {
-						RefInteger rating = (methods.size() > 1) ? new RefIntegerImpl(0) : null;
-						Class[] parameterTypes = m.getArgumentClasses();
-						Object[] newArgs = new Object[args.length];
-
-						for (int y = 0; y < parameterTypes.length; y++) {
-							try {
-								newArgs[y] = Reflector.convert(args[y], Reflector.toReferenceClass(parameterTypes[y]), rating);
-							}
-							catch (PageException e) {
-								continue outer;
-							}
-						}
-						if (result == null || rating.toInt() > _rating) {
-							if (rating != null) _rating = rating.toInt();
-							result = new Pair<Method, Object[]>(m, newArgs);
-						}
-					}
-				}
-			}
-			// convert += (SystemUtil.millis() - start);
-			// start = SystemUtil.millis();
-			if (result != null) {
-				if (convertArgument) {
-					Object[] newArgs = result.getValue();
-					for (int x = 0; x < args.length; x++) {
-						args[x] = newArgs[x];
-					}
-				}
-				// print.e("conv match:" + key + ":");
-				cachedMethods.put(key, new SoftReference<Pair<Method, Boolean>>(new Pair<Method, Boolean>(result.getName(), Boolean.TRUE)));
-				return result.getName();
-			}
-		}
-		Class[] classes = Reflector.getClasses(args);
-		// StringBuilder sb=null;
-		JavaObject jo;
-		Class c;
-		Constructor cc;
-		for (int i = 0; i < classes.length; i++) {
-			if (args[i] instanceof JavaObject) {
-				jo = (JavaObject) args[i];
-				c = jo.getClazz();
-				cc = Reflector.getConstructorInstance(c, new Object[0], true).getConstructor(null);
-				if (cc == null) {
-
-					throw new NoSuchMethodException(
-							"The " + Reflector.pos(i + 1) + " parameter of " + methodName + "(" + Reflector.getDspMethods(classes) + ") ia an object created "
-									+ "by the createObject function (JavaObject/JavaProxy). This object has not been instantiated because it does not have a constructor "
-									+ "that takes zero arguments. " + Constants.NAME
-									+ " cannot instantiate it for you, please use the .init(...) method to instantiate it with the correct parameters first");
-
-				}
-			}
-		}
-
-		// lclasses += (SystemUtil.millis() - start);
-		// start = SystemUtil.millis();
-		/*
-		 * the argument list contains objects created by createObject, that are no instantiated
-		 * (first,third,10th) and because this object have no constructor taking no arguments, Lucee cannot
-		 * instantiate them. you need first to instantiate this objects.
-		 */
-
-		Class[] trgArgs = Reflector.getClasses(args);
-		String strTrgArgs = Reflector.getDspMethods(trgArgs);
-		StringBuilder msg = new StringBuilder();
-		msg.append("No matching method for ").append(lucee.runtime.type.util.Type.getName(clazz.getDeclaringClass())).append(".").append(methodName).append("(").append(strTrgArgs)
-				.append(") found. ");
-		if (methods.size() > 0) {
-			msg.append("there are similar methods with the same name, but diferent arguments:\n ");
-			Class[] srcArgs;
-			String strSrcArgs;
-			for (Method m: methods) {
-				srcArgs = m.getArgumentClasses();
-				strSrcArgs = Reflector.getDspMethods(srcArgs);
-				if (strSrcArgs.equals(strTrgArgs)) {
-					ClassLoader srcClassLoader = null;
-					ClassLoader trgClassLoader = null;
-					int index = -1;
-					for (int i = 0; i < srcArgs.length; i++) {
-						if (srcArgs[i].getClassLoader() == trgArgs[i].getClassLoader()) continue;
-						index = i;
-						srcClassLoader = srcArgs[i].getClassLoader();
-						trgClassLoader = trgArgs[i].getClassLoader();
-						break;
-					}
-					String srcClassLoaderName = "Bootstrap ClassLoader";
-					if (srcClassLoader instanceof PhysicalClassLoader) {
-						srcClassLoaderName = "PhysicalClassLoader loaded at " + ((PhysicalClassLoader) srcClassLoader).getBirthplace();
-					}
-					else if (srcClassLoader != null) {
-						srcClassLoaderName = srcClassLoader.toString();
-					}
-					String trgClassLoaderName = "Bootstrap ClassLoader";
-					if (trgClassLoader instanceof PhysicalClassLoader) {
-						trgClassLoaderName = "PhysicalClassLoader loaded at " + ((PhysicalClassLoader) trgClassLoader).getBirthplace();
-					}
-					else if (trgClassLoader != null) {
-						trgClassLoaderName = srcClassLoader.toString();
-					}
-
-					if (index != -1) throw new NoSuchMethodException("Found a matching method for [" + lucee.runtime.type.util.Type.getName(clazz.getDeclaringClass()) + "("
-							+ strSrcArgs + ")], but the classes were loaded by different class loaders. \n" + "The " + FunctionException.toStringBadArgumentPosition(index + 1)
-							+ " argument [" + lucee.runtime.type.util.Type.getName(srcArgs[index]) + "] was loaded by the class loader [" + trgClassLoaderName
-							+ "], but the provided argument is from the class loader [" + srcClassLoaderName + "]."
-							+ " Ensure that both classes are loaded by the same class loader to avoid conflicts.");
-
-				}
-				msg.append(methodName).append('(').append(strSrcArgs).append(");\n");
-			}
-
-		}
-		else {
-			msg.append("there are no methods with this name.");
-		}
-		// lclasses2 += (SystemUtil.millis() - start);
-		// start = SystemUtil.millis();
-		throw new NoSuchMethodException(msg.toString());
-	}
-
-	public static Constructor getConstructorMatch(Clazz clazz, Object[] args, boolean convertArgument, boolean convertComparsion) throws NoSuchMethodException, IOException {
-		List<Constructor> constructors = clazz.getConstructors(args.length);
-		if (constructors != null && constructors.size() > 0) {
-			Class[] clazzArgs = Reflector.getClasses(args);
-			// like comparsion
-			outer: for (Constructor c: constructors) {
-				if (c != null) {
-
-					Class[] parameterTypes = c.getArgumentClasses();
-					for (int y = 0; y < parameterTypes.length; y++) {
-						if (!Reflector.toReferenceClass(parameterTypes[y]).isAssignableFrom(clazzArgs[y])) continue outer;
-					}
-					return c;
-				}
-			}
-
-			// convert comparsion
-			Pair<Constructor, Object[]> result = null;
-			int _rating = 0;
-			if (convertComparsion) {
-				outer: for (Constructor c: constructors) {
-					if (c != null) {
-						RefInteger rating = (constructors.size() > 1) ? new RefIntegerImpl(0) : null;
-						Class[] parameterTypes = c.getArgumentClasses();
-						Object[] newArgs = new Object[args.length];
-						for (int y = 0; y < parameterTypes.length; y++) {
-							try {
-								newArgs[y] = Reflector.convert(args[y], Reflector.toReferenceClass(parameterTypes[y]), rating);
-							}
-							catch (PageException e) {
-								continue outer;
-							}
-						}
-						if (result == null || rating.toInt() > _rating) {
-							if (rating != null) _rating = rating.toInt();
-							result = new Pair<Constructor, Object[]>(c, newArgs);
-						}
-						// return new ConstructorInstance(constructors[i],newArgs);
-					}
-				}
-			}
-			if (result != null) {
-				if (convertArgument) {
-					Object[] newArgs = result.getValue();
-					for (int x = 0; x < args.length; x++) {
-						args[x] = newArgs[x];
-					}
-				}
-				return result.getName();
-			}
-
-			// Exception
-			StringBuilder msg = new StringBuilder("No matching Constructor for ").append(clazz.getDeclaringClass().getName()).append("(")
-					.append(Reflector.getDspMethods(Reflector.getClasses(args))).append(") found.\n").append("We have the following constructors:\n");
-			for (Constructor c: constructors) {
-				msg.append("- <init>(").append(Reflector.getDspMethods(c.getArgumentClasses())).append(")\n");
-			}
-			throw new NoSuchMethodException(msg.toString());
-		}
-
-		throw new NoSuchMethodException(
-				"No matching Constructor for " + clazz.getDeclaringClass().getName() + "(" + Reflector.getDspMethods(Reflector.getClasses(args)) + ") found.");
-	}
 
 	public static String id(FunctionMember fm) {
 		// public java.lang.String java.lang.String.toString()

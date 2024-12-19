@@ -43,7 +43,6 @@ import lucee.commons.lang.Pair;
 import lucee.commons.lang.SerializableObject;
 import lucee.commons.lang.SystemOut;
 import lucee.loader.engine.CFMLEngineFactory;
-import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.reflection.Reflector;
 import lucee.runtime.type.Collection.Key;
@@ -135,7 +134,7 @@ public class DynamicInvoker {
 		catch (IncompatibleClassChangeError | IllegalStateException e) {
 			if (log != null) log.error("dynamic", e);
 			if (!Clazz.allowReflection()) throw e;
-			lucee.transformer.dynamic.meta.Method method = Clazz.getMethodMatch(getClazz(objClass, true), methodName, arguments, nameCaseSensitive, true, convertComparsion);
+			lucee.transformer.dynamic.meta.Method method = getClazz(objClass, true).getMethod(methodName.getString(), arguments, nameCaseSensitive, true, convertComparsion);
 			return ((LegacyMethod) method).getMethod().invoke(objClass, arguments);
 		}
 	}
@@ -157,7 +156,7 @@ public class DynamicInvoker {
 
 	public Pair<FunctionMember, Object> getInstance(Class<?> clazz, Key methodName, Object[] arguments, boolean nameCaseSensitive, boolean convertComparsion)
 			throws NoSuchMethodException, IOException, UnmodifiableClassException, InstantiationException, IllegalAccessException, IllegalArgumentException,
-			InvocationTargetException, SecurityException, PageException {
+			InvocationTargetException, SecurityException {
 
 		// double start = SystemUtil.millis();
 		boolean isConstr = methodName == null;
@@ -167,8 +166,9 @@ public class DynamicInvoker {
 		// getClass -= start;
 		// start = SystemUtil.millis();
 		// getClass += start;
-		lucee.transformer.dynamic.meta.FunctionMember fm = isConstr ? Clazz.getConstructorMatch(clazzz, arguments, true, convertComparsion)
-				: Clazz.getMethodMatch(clazzz, methodName, arguments, nameCaseSensitive, true, convertComparsion);
+
+		lucee.transformer.dynamic.meta.FunctionMember fm = isConstr ? clazzz.getConstructor(arguments, true, convertComparsion)
+				: clazzz.getMethod(methodName.getString(), arguments, nameCaseSensitive, true, convertComparsion);
 
 		// match -= start;
 		// start = SystemUtil.millis();
@@ -736,7 +736,7 @@ public class DynamicInvoker {
 
 		aprint.e(e.invokeInstanceMethod(new SystemOut(), "setOut", new Object[] { null }, true, true));
 		System.setProperty("a.b.c", "- value -");
-		aprint.e(e.invokeInstanceMethod(sb, "toSTring", new Object[] {}, true, false));
+		aprint.e(e.invokeInstanceMethod(sb, "toSTring", new Object[] {}, false, false));
 		aprint.e(e.invokeStaticMethod(SystemUtil.class, "getSystemPropOrEnvVar", new Object[] { "a.b.c", "default-value" }, true, true));
 		aprint.e(e.invokeStaticMethod(ListUtil.class, "arrayToList", new Object[] { new String[] { "a", "b" }, "," }, true, true));
 		aprint.e("done");

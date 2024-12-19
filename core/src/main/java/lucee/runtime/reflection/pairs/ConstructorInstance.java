@@ -18,7 +18,6 @@
  **/
 package lucee.runtime.reflection.pairs;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.BiFunction;
 
@@ -57,8 +56,8 @@ public final class ConstructorInstance {
 		this.convertComparsion = convertComparsion;
 	}
 
-	public Object invoke() throws PageException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException,
-			SecurityException, IOException {
+	public Object invoke()
+			throws PageException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 
 		try {
 			return ((BiFunction<Object, Object, Object>) getResult().getValue()).apply(null, args);
@@ -70,7 +69,7 @@ public final class ConstructorInstance {
 			boolean failed = false;
 			try {
 				DynamicInvoker di = DynamicInvoker.getExistingInstance();
-				lucee.transformer.dynamic.meta.Constructor constr = Clazz.getConstructorMatch(di.getClazz(clazz, true), args, true, convertComparsion);
+				lucee.transformer.dynamic.meta.Constructor constr = di.getClazz(clazz, true).getConstructor(args, true, convertComparsion);
 				return ((LegacyConstuctor) constr).getConstructor().newInstance(args);
 			}
 			catch (IncompatibleClassChangeError | ClassFormatError | IllegalStateException ex) {

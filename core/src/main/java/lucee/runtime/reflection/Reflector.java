@@ -296,6 +296,15 @@ public final class Reflector {
 		return isInstaneOf(src, trg, true);
 	}
 
+	public static Object convert(Object src, Class trgClass, RefInteger rating, Object defaultValue) {
+		try {
+			return convert(src, trgClass, rating);
+		}
+		catch (PageException e) {// MUST handle this better
+			return defaultValue;
+		}
+	}
+
 	/**
 	 * convert Object from src to trg Type, if possible
 	 * 

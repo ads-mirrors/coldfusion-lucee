@@ -1032,8 +1032,8 @@ public final class ClassUtil {
 		return new lucee.commons.lang.ClassLoaderHelper().getClass().getClassLoader();
 	}
 
-	public static Object newInstance(Class clazz) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException,
-			SecurityException, PageException, IOException {
+	public static Object newInstance(Class clazz)
+			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, PageException {
 		return Reflector.getConstructorInstance(clazz, EMPTY_OBJ, true).invoke();
 	}
 }

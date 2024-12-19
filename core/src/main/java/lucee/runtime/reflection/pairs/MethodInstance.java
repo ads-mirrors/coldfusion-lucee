@@ -72,7 +72,7 @@ public final class MethodInstance {
 			LogUtil.log("dynamic", e);
 			DynamicInvoker di = DynamicInvoker.getExistingInstance();
 			try {
-				lucee.transformer.dynamic.meta.Method method = Clazz.getMethodMatch(di.getClazz(clazz, true), methodName, args, nameCaseSensitive, true, true);
+				lucee.transformer.dynamic.meta.Method method = di.getClazz(clazz, true).getMethod(methodName.getString(), args, nameCaseSensitive, true, true);
 				return ((LegacyMethod) method).getMethod().invoke(o, args);
 			}
 			catch (Exception e1) {
@@ -98,7 +98,7 @@ public final class MethodInstance {
 			LogUtil.log("dynamic", e);
 			DynamicInvoker di = DynamicInvoker.getExistingInstance();
 			try {
-				lucee.transformer.dynamic.meta.Method method = Clazz.getMethodMatch(di.getClazz(obj.getClass(), true), methodName, args, nameCaseSensitive, true, true);
+				lucee.transformer.dynamic.meta.Method method = di.getClazz(obj.getClass(), true).getMethod(methodName.getString(), args, nameCaseSensitive, true, true);
 				return ((LegacyMethod) method).getMethod().invoke(obj, args);
 			}
 			catch (Exception e1) {
