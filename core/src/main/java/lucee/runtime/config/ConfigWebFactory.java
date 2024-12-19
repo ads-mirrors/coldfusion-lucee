@@ -140,6 +140,7 @@ import lucee.runtime.listener.ApplicationListener;
 import lucee.runtime.listener.MixedAppListener;
 import lucee.runtime.listener.ModernAppListener;
 import lucee.runtime.listener.SerializationSettings;
+import lucee.runtime.lsp.LSPEndpointFactory;
 import lucee.runtime.monitor.ActionMonitor;
 import lucee.runtime.monitor.ActionMonitorCollector;
 import lucee.runtime.monitor.ActionMonitorFatory;
@@ -689,6 +690,8 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 			_loadStartupHook(cs, config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(cs == null ? config : cs), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded startup hook");
+
+			if (config instanceof ConfigServer) LSPEndpointFactory.init(config, false);
 		}
 
 		config.setLoadTime(System.currentTimeMillis());
