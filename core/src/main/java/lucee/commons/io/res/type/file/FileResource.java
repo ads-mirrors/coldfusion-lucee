@@ -138,7 +138,7 @@ public final class FileResource extends File implements Resource {
 	@Override
 	public Resource getCanonicalResource() throws IOException {
 		// java 12 performance regression LDEV-5218
-		if (SystemUtil.JAVA_VERSION >= SystemUtil.JAVA_VERSION_11 )
+		if (SystemUtil.JAVA_VERSION > SystemUtil.JAVA_VERSION_11 )
 			return new FileResource(provider, Path.of(getPath()).toAbsolutePath().normalize().toString());
 		return new FileResource(provider, getCanonicalPath());
 	}
