@@ -1,7 +1,7 @@
 package lucee.runtime.lsp;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -10,9 +10,10 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.servlet.http.Cookie;
+import javax.servlet.ServletException;
 
 import lucee.print;
+import lucee.commons.io.DevNullOutputStream;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.loader.engine.CFMLEngine;
@@ -21,10 +22,8 @@ import lucee.loader.util.Util;
 import lucee.runtime.Component;
 import lucee.runtime.PageContext;
 import lucee.runtime.config.Config;
-import lucee.runtime.config.ConfigServer;
-import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.op.Caster;
-import lucee.runtime.thread.ThreadUtil;
+import lucee.runtime.thread.SerializableCookie;
 
 public class LSPEndpointFactory {
 	private static final int DEFAULT_LSP_PORT = 2089; // Common LSP port
@@ -48,11 +47,11 @@ public class LSPEndpointFactory {
 		cfcPath = engine.getCastUtil().toString(SystemUtil.getSystemPropOrEnvVar("lucee.lsp.component", null), DEFAULT_COMPONENT);
 		if (Util.isEmpty(cfcPath, true)) cfcPath = DEFAULT_COMPONENT;
 
-		log.debug("lsp", "LSP server port: " + port);
-		log.debug("lsp", "LSP server component endpoint: " + cfcPath);
+		log.info("lsp", "LSP server port: " + port);
+		log.info("lsp", "LSP server component endpoint: " + cfcPath);
 	}
 
-	public static LSPEndpointFactory init(Config config, boolean forceRestart) throws IOException {
+	public static LSPEndpointFactory getInstance(Config config, boolean forceRestart) throws IOException {
 		if (Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.lsp.enabled", null), false)) {
 			print.e("---- LSPEndpointFactory ----");
 			synchronized (SystemUtil.createToken("LSPEndpointFactory", "init")) {
@@ -75,8 +74,12 @@ public class LSPEndpointFactory {
 		return instance;
 	}
 
+	public static LSPEndpointFactory getExistingInstance() {
+		return instance;
+	}
+
 	private LSPEndpointFactory start() throws IOException {
-		log.debug("lsp", "starting LSP server");
+		log.info("lsp", "starting LSP server");
 		try {
 			serverSocket = new ServerSocket(port);
 		}
@@ -104,7 +107,7 @@ public class LSPEndpointFactory {
 		listenerThread.setDaemon(true);
 		listenerThread.start();
 
-		log.debug("lsp", "LSP server started");
+		log.info("lsp", "LSP server started");
 		return this;
 	}
 
@@ -118,13 +121,9 @@ public class LSPEndpointFactory {
 		}
 	}
 
-	public static LSPEndpointFactory getInstance(Config config) {
-		return instance;
-	}
-
 	private void handleClient(Socket clientSocket) {
 
-		log.debug("lsp", "LSP server handle client");
+		log.info("lsp", "LSP server handle client");
 		try {
 			// Get input/output streams
 			BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -188,10 +187,10 @@ public class LSPEndpointFactory {
 		}
 	}
 
-	private String processMessage(String jsonMessage) {
+	public String processMessage(String jsonMessage) {
 		try {
 			log.info("lsp", "Received message: " + jsonMessage);
-			PageContext pc = createPageContext((ConfigWeb) engine.getThreadConfig());
+			PageContext pc = createPageContext();
 			Component cfc = engine.getCreationUtil().createComponentFromName(pc, cfcPath);
 
 			String response = engine.getCastUtil().toString(cfc.call(pc, "execute", new Object[] { jsonMessage }));
@@ -214,12 +213,7 @@ public class LSPEndpointFactory {
 
 	public static Log getLog(Config config) {
 		if (config == null) config = CFMLEngineFactory.getInstance().getThreadConfig();
-		if (config instanceof ConfigServer) {
-			// we only log to config Server if there is no web context
-			Config cw = CFMLEngineFactory.getInstance().getThreadConfig();
-			if (cw != null) config = cw;
-		}
-		if (config == null) return null;
+
 		try {
 			Log log = config.getLog("lsp");
 			if (log == null) log = config.getLog(DEFAULT_LOG);
@@ -233,8 +227,9 @@ public class LSPEndpointFactory {
 		return null;
 	}
 
-	public static PageContext createPageContext(final ConfigWeb cw) {
-		return ThreadUtil.createPageContext(cw, new ByteArrayOutputStream(), "", "/", "", new Cookie[0], null, null, null, null, true, TIMEOUT);
+	public static PageContext createPageContext() throws ServletException {
+		return CFMLEngineFactory.getInstance().createPageContext(new File("."), "localhost", "/", "", SerializableCookie.COOKIES0, null, null, null,
+				DevNullOutputStream.DEV_NULL_OUTPUT_STREAM, -1, false);
 	}
 
 	public static void releasePageContext(PageContext pc) {
