@@ -378,6 +378,8 @@
         "sysprop": "lucee.dump.threads",
         "envvar": "LUCEE_DUMP_THREADS",
         "desc": "Used for debugging, when enabled, it will dump out running threads to the console via the background controller thread"
+    },
+    {
         "sysprop": "lucee.scope.local.capacity",
         "envvar": "LUCEE_SCOPE_LOCAL_CAPACITY",
         "desc": "Sets the initial capacity (size) for the local scope hashmap"
