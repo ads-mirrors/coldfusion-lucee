@@ -38,6 +38,7 @@ import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.lang.types.RefBoolean;
 import lucee.commons.lang.types.RefBooleanImpl;
+import lucee.commons.net.HTTPUtil;
 import lucee.commons.net.http.HTTPEngine;
 import lucee.commons.net.http.HTTPResponse;
 import lucee.commons.net.http.Header;
@@ -428,6 +429,9 @@ public class DeployHandler {
 					Resource res = SystemUtil.getTempDirectory().getRealResource(ed.getId() + "-" + ed.getVersion() + ".lex");
 					ResourceUtil.touch(res);
 					IOUtil.copy(rsp.getContentAsStream(), res, true);
+
+					HTTPUtil.validateDownload(url, rsp, res, true, null);
+
 					if (log != null) log.info("main", "Downloaded extension [" + ed + "] to [" + res + "]");
 					return res;
 

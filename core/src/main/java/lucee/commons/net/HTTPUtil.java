@@ -21,12 +21,15 @@ package lucee.commons.net;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -38,6 +41,7 @@ import javax.servlet.ServletResponse;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
+import org.apache.http.message.BasicHeader;
 
 import lucee.commons.digest.Hash;
 import lucee.commons.io.IOUtil;
@@ -694,10 +698,77 @@ public final class HTTPUtil {
 		return StringUtil.indexOfIgnoreCase(url.getProtocol(), "https") != -1;
 	}
 
-	public static void validateDownload(URL url, HttpResponse response, Resource res, boolean deleteFileWhenInvalid, Exception cause) throws IOException {
+	public static interface HeadersCollection {
+		public Header[] getHeaders(String name);
+	}
+
+	public static class HeadersHttpURLConnection implements HeadersCollection {
+
+		private HttpURLConnection conn;
+
+		public HeadersHttpURLConnection(HttpURLConnection conn) {
+			this.conn = conn;
+		}
+
+		@Override
+		public Header[] getHeaders(String name) {
+			String val = conn.getHeaderField(name);
+			if (!StringUtil.isEmpty(val, true)) {
+				return new Header[] { new BasicHeader(name, val) };
+			}
+			return null;
+		}
+	}
+
+	public static class HeadersHTTPResponse implements HeadersCollection {
+
+		private HTTPResponse response;
+
+		public HeadersHTTPResponse(HTTPResponse response) {
+			this.response = response;
+		}
+
+		@Override
+		public Header[] getHeaders(String name) {
+			List<Header> list = new ArrayList<>();
+			for (lucee.commons.net.http.Header header: response.getAllHeaders()) {
+				if (name.equals(header.getName())) {
+					list.add(new BasicHeader(header.getName(), header.getValue()));
+				}
+			}
+			return list.toArray(new Header[list.size()]);
+		}
+	}
+
+	public static class HeadersHttpResponse implements HeadersCollection {
+
+		private HttpResponse response;
+
+		public HeadersHttpResponse(HttpResponse response) {
+			this.response = response;
+		}
+
+		@Override
+		public Header[] getHeaders(String name) {
+			return response.getHeaders(name);
+		}
+	}
+
+	public static void validateDownload(URL url, HttpURLConnection conn, Resource res, boolean deleteFileWhenInvalid, Exception cause) throws IOException {
+		_validateDownload(url, new HeadersHttpURLConnection(conn), res, deleteFileWhenInvalid, cause);
+	}
+
+	public static void validateDownload(URL url, HTTPResponse rsp, Resource res, boolean deleteFileWhenInvalid, Exception cause) throws IOException {
+		_validateDownload(url, new HeadersHTTPResponse(rsp), res, deleteFileWhenInvalid, cause);
+	}
+
+	public static void validateDownload(URL url, HttpResponse rsp, Resource res, boolean deleteFileWhenInvalid, Exception cause) throws IOException {
+		_validateDownload(url, new HeadersHttpResponse(rsp), res, deleteFileWhenInvalid, cause);
+	}
+
+	private static void _validateDownload(URL url, HeadersCollection headersCollection, Resource res, boolean deleteFileWhenInvalid, Exception cause) throws IOException {
 		// in case of an exception, the file may was not created
 		if (cause != null && !res.exists()) return;
-
 		Header[] headers;
 		Header h;
 		String label, name;
@@ -706,7 +777,7 @@ public final class HTTPUtil {
 			name = e.getKey();
 			label = name.toUpperCase();
 			for (String hn: e.getValue()) {
-				headers = response.getHeaders(hn);
+				headers = headersCollection.getHeaders(hn);
 				if (headers != null && headers.length > 0) {
 					h = headers[0];
 					if (!StringUtil.isEmpty(h.getValue(), true)) {
@@ -717,7 +788,6 @@ public final class HTTPUtil {
 						else if ("sha256".equalsIgnoreCase(name)) fileHash = Hash.sha256(res);
 						else if ("sha512".equalsIgnoreCase(name)) fileHash = Hash.sha512(res);
 						else continue;
-
 						if (!fileHash.equalsIgnoreCase(h.getValue())) {
 							if (deleteFileWhenInvalid) {
 								res.remove(true);
@@ -739,7 +809,7 @@ public final class HTTPUtil {
 
 		// Digest validation
 		for (String hn: VALIDATION_HEADERS) {
-			headers = response.getHeaders(hn);
+			headers = headersCollection.getHeaders(hn);
 			if (headers != null && headers.length > 0) {
 				h = headers[0];
 				String raw = h.getValue();
