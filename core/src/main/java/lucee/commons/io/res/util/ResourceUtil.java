@@ -770,6 +770,8 @@ public final class ResourceUtil {
 	public static File getCanonicalFileEL(File file) {
 		if (file == null) return file;
 		try {
+			if (SystemUtil.JAVA_VERSION > SystemUtil.JAVA_VERSION_11 )
+				return file.getAbsoluteFile();
 			return file.getCanonicalFile();
 		}
 		catch (IOException e) {

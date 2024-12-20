@@ -140,6 +140,21 @@ public final class FileResource extends File implements Resource {
 		return new FileResource(provider, getCanonicalPath());
 	}
 
+	public String getCanonicalPath() {
+		try {
+			// java 12 performance regression LDEV-5218
+			if (SystemUtil.JAVA_VERSION > SystemUtil.JAVA_VERSION_11 )
+				return Path.of(getPath()).toAbsolutePath().normalize().toString();
+			return super.getCanonicalPath();
+		}
+		catch (IOException e) {
+			return getAbsolutePath();
+		}
+		catch (java.nio.file.InvalidPathException ipe) {
+			return getPath();
+		}
+	}
+
 	@Override
 	public Resource getParentResource() {
 		String p = getParent();
