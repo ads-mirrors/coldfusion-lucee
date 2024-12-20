@@ -212,6 +212,7 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 						c = super.loadClass(name, resolve);
 					}
 					catch (Exception e) {
+						LogUtil.warn("physical-classloader", e);
 					}
 
 					if (addionalClassLoader != null) {
@@ -219,6 +220,7 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 							c = addionalClassLoader.loadClass(name);
 						}
 						catch (Exception e) {
+							LogUtil.warn("physical-classloader", e);
 						}
 					}
 
@@ -242,6 +244,7 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 				clazz = loadClass(name, false, false); // we do not load existing class from disk
 			}
 			catch (ClassNotFoundException cnf) {
+				LogUtil.warn("physical-classloader", cnf);
 			}
 			if (clazz == null) return _loadClass(name, barr, false);
 			return rename(clazz, barr);
@@ -263,6 +266,7 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 				return addionalClassLoader.loadClass(name);
 			}
 			catch (ClassNotFoundException e) {
+				LogUtil.warn("physical-classloader", e);
 			}
 		}
 
@@ -356,6 +360,7 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 				return IOUtil.toBufferedInputStream(url.openStream());
 			}
 			catch (IOException e) {
+				LogUtil.warn("physical-classloader", e);
 			}
 		}
 
@@ -365,6 +370,7 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 				return IOUtil.toBufferedInputStream(f.getInputStream());
 			}
 			catch (IOException e) {
+				LogUtil.warn("physical-classloader", e);
 			}
 		}
 		return null;

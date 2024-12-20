@@ -28,6 +28,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import lucee.commons.io.IOUtil;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.ExceptionUtil;
 
@@ -190,6 +191,7 @@ public final class RCL extends ClassLoader implements Closeable {
 			return data;
 		}
 		catch (IOException ioe) {
+			LogUtil.warn("ftp", ioe);
 		}
 		finally {
 			IOUtil.closeEL(is);

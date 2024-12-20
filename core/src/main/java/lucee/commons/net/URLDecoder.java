@@ -25,6 +25,7 @@ import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.net.URLCodec;
 
 import lucee.commons.io.SystemUtil;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.net.http.ReqRspUtil;
 
@@ -88,6 +89,7 @@ public class URLDecoder {
 
 		}
 		catch (UnsupportedEncodingException | EncoderException uee) {
+			LogUtil.warn("physical-classloader", uee);
 		}
 		return result == null ? input : result.toString();
 	}

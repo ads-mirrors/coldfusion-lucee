@@ -150,6 +150,7 @@ public final class Compress {
 							ffile.createFile(false);
 						}
 						catch (IOException e) {
+							LogUtil.warn("compress", e);
 						}
 					}
 					// remove all the old extracts
@@ -200,6 +201,7 @@ public final class Compress {
 			// ramProvider=null;
 		}
 		catch (IOException e) {
+			LogUtil.warn("compress", e);
 		}
 	}
 
@@ -229,7 +231,7 @@ public final class Compress {
 				gos = new GZIPOutputStream(res.getOutputStream());
 				// wait for sync
 				while (true) {
-					sleepEL();
+					SystemUtil.sleep(interval);
 					if (zip.syn + interval <= System.currentTimeMillis()) break;
 				}
 				// sync
@@ -238,6 +240,7 @@ public final class Compress {
 				CompressUtil.compressGZip(tmpis, gos);
 			}
 			catch (IOException e) {
+				LogUtil.warn("compress", e);
 			}
 			finally {
 				IOUtil.closeEL(gos);
@@ -254,13 +257,14 @@ public final class Compress {
 				tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
 				// wait for sync
 				while (true) {
-					sleepEL();
+					SystemUtil.sleep(interval);
 					if (zip.syn + interval <= System.currentTimeMillis()) break;
 				}
 				// sync
 				CompressUtil.compressTar(root.listResources(), tos, -1);
 			}
 			catch (IOException e) {
+				LogUtil.warn("compress", e);
 			}
 			finally {
 				IOUtil.closeEL(tos);
@@ -274,25 +278,18 @@ public final class Compress {
 				zos = new ZipOutputStream(res.getOutputStream());
 				// wait for sync
 				while (true) {
-					sleepEL();
+					SystemUtil.sleep(interval);
 					if (zip.syn + interval <= System.currentTimeMillis()) break;
 				}
 				// sync
 				CompressUtil.compressZip(root.listResources(), zos, null);
 			}
 			catch (IOException e) {
+				LogUtil.warn("compress", e);
 			}
 			finally {
 				IOUtil.closeEL(zos);
 				running = false;
-			}
-		}
-
-		private void sleepEL() {
-			try {
-				sleep(interval);
-			}
-			catch (InterruptedException e) {
 			}
 		}
 

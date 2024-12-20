@@ -53,7 +53,7 @@ public class CPPCustomTag implements CustomTag {
 
 			}
 			try {
-				processRequest = Reflector.getMethod(clazz, "processRequest", new Class[] { String.class, String.class, Request.class, Response.class, boolean.class });
+				processRequest = Reflector.getMethod(clazz, "processRequest", new Class[] { String.class, String.class, Request.class, Response.class, boolean.class }, true);
 			}
 			catch (Exception e) {
 				throw new CFXTagException(e);

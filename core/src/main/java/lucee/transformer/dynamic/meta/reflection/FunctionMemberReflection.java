@@ -11,6 +11,8 @@ import lucee.transformer.dynamic.meta.FunctionMember;
 abstract class FunctionMemberReflection implements FunctionMember {
 	private static final long serialVersionUID = 6812458458981023205L;
 	private Executable executable;
+	private String classPath;
+	private String className;
 
 	public FunctionMemberReflection(Executable method) {
 		this.executable = method;
@@ -147,4 +149,29 @@ abstract class FunctionMemberReflection implements FunctionMember {
 	public String toString() {
 		return executable.toString();
 	}
+
+	@Override
+	public String getClassPath() {
+		if (classPath == null) {
+			synchronized (this) {
+				if (classPath == null) {
+					classPath = FunctionMember.createClassPath(this);
+				}
+			}
+		}
+		return classPath;
+	}
+
+	@Override
+	public String getClassName() {
+		if (className == null) {
+			synchronized (this) {
+				if (className == null) {
+					className = getClassPath().replace('/', '.');
+				}
+			}
+		}
+		return className;
+	}
+
 }

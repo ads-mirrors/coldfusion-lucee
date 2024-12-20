@@ -317,12 +317,20 @@ public final class Caster {
 	 * @throws PageException
 	 */
 	public static Double toDouble(float f) {
-		return Double.valueOf(f);
+		return (double) f;
 
 	}
 
 	public static Double toDouble(Float f) {
-		return Double.valueOf(f.doubleValue());
+		return f.doubleValue();
+	}
+
+	public static Double toDouble(long l) {
+		return (double) l;
+	}
+
+	public static Double toDouble(Long l) {
+		return l.doubleValue();
 	}
 
 	/**
@@ -749,6 +757,14 @@ public final class Caster {
 
 	public static double toDoubleValue(Number n) {
 		return n.doubleValue();
+	}
+
+	public static double toDoubleValue(long l) {
+		return l;
+	}
+
+	public static double toDoubleValue(Long l) {
+		return l.doubleValue();
 	}
 
 	public static double toDoubleValue(float f) {
@@ -2363,8 +2379,8 @@ public final class Caster {
 	public static String toString(Number n) {
 		if (n instanceof BigDecimal) return pf.format(n);
 		if (n instanceof Double) return Caster.toString(n.doubleValue());
-		if (n instanceof Float) return Caster.toString(n.floatValue());
 		if (n instanceof Long) return Caster.toString(n.longValue());
+		if (n instanceof Float) return Caster.toString(n.floatValue());
 		return n.toString();
 	}
 

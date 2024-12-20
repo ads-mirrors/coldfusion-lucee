@@ -106,4 +106,24 @@ public class ClazzReflection extends Clazz {
 		return new ConstructorReflection(clazz.getDeclaredConstructor(arguments));
 
 	}
+
+	@Override
+	public Method getMethod(String methodName, Object[] args, boolean nameCaseSensitive, boolean convertArgument, boolean convertComparsion) {
+		throw new RuntimeException("not supported yet!");
+	}
+
+	@Override
+	public Method getMethod(String methodName, Object[] args, boolean nameCaseSensitive, boolean convertArgument, boolean convertComparsion, Method defaultValue) {
+		throw new RuntimeException("not supported yet!");
+	}
+
+	@Override
+	public Constructor getConstructor(Object[] args, boolean convertArgument, boolean convertComparsion) throws NoSuchMethodException {
+		throw new RuntimeException("not supported yet!");
+	}
+
+	@Override
+	public Constructor getConstructor(Object[] args, boolean convertArgument, boolean convertComparsion, Constructor defaultValue) {
+		throw new RuntimeException("not supported yet!");
+	}
 }

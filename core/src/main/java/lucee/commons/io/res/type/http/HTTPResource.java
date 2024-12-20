@@ -24,6 +24,7 @@ import java.net.URL;
 import java.security.GeneralSecurityException;
 
 import lucee.commons.io.IOUtil;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.ContentType;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.ResourceProvider;
@@ -204,6 +205,7 @@ public class HTTPResource extends ReadOnlyResourceSupport {
 			if (cl != null && exists()) last = Caster.toIntValue(cl.getValue(), 0);
 		}
 		catch (Exception e) {
+			LogUtil.warn("ftp", e);
 		}
 		finally {
 			HTTPEngine.closeEL(rsp);

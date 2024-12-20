@@ -21,6 +21,7 @@ package lucee.commons.io.res.util;
 import java.io.IOException;
 import java.io.InputStream;
 
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 
 /**
@@ -70,6 +71,7 @@ public class ResourceSnippet implements java.io.Serializable {
 			is.close();
 		}
 		catch (IOException ex) {
+			LogUtil.warn("ftp", ex);
 		}
 
 		return result;

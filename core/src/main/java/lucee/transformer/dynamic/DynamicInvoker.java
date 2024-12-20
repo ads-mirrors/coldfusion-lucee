@@ -4,6 +4,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.instrument.UnmodifiableClassException;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
@@ -31,7 +34,6 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
 import lucee.aprint;
-import lucee.commons.digest.HashUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.res.Resource;
@@ -41,7 +43,7 @@ import lucee.commons.lang.Pair;
 import lucee.commons.lang.SerializableObject;
 import lucee.commons.lang.SystemOut;
 import lucee.loader.engine.CFMLEngineFactory;
-import lucee.runtime.exp.PageException;
+import lucee.runtime.op.Caster;
 import lucee.runtime.reflection.Reflector;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.KeyImpl;
@@ -55,6 +57,7 @@ import lucee.transformer.dynamic.meta.Clazz;
 import lucee.transformer.dynamic.meta.FunctionMember;
 import lucee.transformer.dynamic.meta.LegacyMethod;
 import lucee.transformer.dynamic.meta.Method;
+import lucee.transformer.dynamic.meta.dynamic.ClazzDynamic;
 
 public class DynamicInvoker {
 
@@ -98,24 +101,24 @@ public class DynamicInvoker {
 		return engine;
 	}
 
-	public Object invokeStaticMethod(Class<?> clazz, Key methodName, Object[] arguments, boolean convertComparsion) throws Exception {
-		return invoke(null, clazz, methodName, arguments, convertComparsion);
+	public Object invokeStaticMethod(Class<?> clazz, Key methodName, Object[] arguments, boolean nameCaseSensitive, boolean convertComparsion) throws Exception {
+		return invoke(null, clazz, methodName, arguments, nameCaseSensitive, convertComparsion);
 	}
 
-	public Object invokeStaticMethod(Class<?> clazz, String methodName, Object[] arguments, boolean convertComparsion) throws Exception {
-		return invoke(null, clazz, KeyImpl.init(methodName), arguments, convertComparsion);
+	public Object invokeStaticMethod(Class<?> clazz, String methodName, Object[] arguments, boolean nameCaseSensitive, boolean convertComparsion) throws Exception {
+		return invoke(null, clazz, KeyImpl.init(methodName), arguments, nameCaseSensitive, convertComparsion);
 	}
 
-	public Object invokeInstanceMethod(Object obj, Key methodName, Object[] arguments, boolean convertComparsion) throws Exception {
-		return invoke(obj, obj.getClass(), methodName, arguments, convertComparsion);
+	public Object invokeInstanceMethod(Object obj, Key methodName, Object[] arguments, boolean nameCaseSensitive, boolean convertComparsion) throws Exception {
+		return invoke(obj, obj.getClass(), methodName, arguments, nameCaseSensitive, convertComparsion);
 	}
 
-	public Object invokeInstanceMethod(Object obj, String methodName, Object[] arguments, boolean convertComparsion) throws Exception {
-		return invoke(obj, obj.getClass(), KeyImpl.init(methodName), arguments, convertComparsion);
+	public Object invokeInstanceMethod(Object obj, String methodName, Object[] arguments, boolean nameCaseSensitive, boolean convertComparsion) throws Exception {
+		return invoke(obj, obj.getClass(), KeyImpl.init(methodName), arguments, nameCaseSensitive, convertComparsion);
 	}
 
 	public Object invokeConstructor(Class<?> clazz, Object[] arguments, boolean convertComparsion) throws Exception {
-		return invoke(null, clazz, null, arguments, convertComparsion);
+		return invoke(null, clazz, null, arguments, true, convertComparsion);
 	}
 
 	// TODO handles isStatic better with proper exceptions
@@ -123,14 +126,17 @@ public class DynamicInvoker {
 	 * executes a instance method of the given object
 	 * 
 	 */
-	private Object invoke(Object objMaybeNull, Class<?> objClass, Key methodName, Object[] arguments, boolean convertComparsion) throws Exception {
+	private Object invoke(Object objMaybeNull, Class<?> objClass, Key methodName, Object[] arguments, boolean nameCaseSensitive, boolean convertComparsion) throws Exception {
 		try {
-			return ((BiFunction<Object, Object[], Object>) createInstance(objClass, methodName, arguments, convertComparsion).getValue()).apply(objMaybeNull, arguments);
+			ClazzDynamic clazzz = toClazzDynamic(objClass);
+
+			return ((BiFunction<Object, Object[], Object>) getInstance(clazzz, getFunctionMember(clazzz, methodName, arguments, nameCaseSensitive, convertComparsion), arguments))
+					.apply(objMaybeNull, arguments);
 		}
 		catch (IncompatibleClassChangeError | IllegalStateException e) {
 			if (log != null) log.error("dynamic", e);
 			if (!Clazz.allowReflection()) throw e;
-			lucee.transformer.dynamic.meta.Method method = Clazz.getMethodMatch(getClazz(objClass, true), methodName, arguments, true, convertComparsion);
+			lucee.transformer.dynamic.meta.Method method = getClazz(objClass, true).getMethod(methodName.getString(), arguments, nameCaseSensitive, true, convertComparsion);
 			return ((LegacyMethod) method).getMethod().invoke(objClass, arguments);
 		}
 	}
@@ -143,90 +149,53 @@ public class DynamicInvoker {
 		return Clazz.getClazz(clazz, root, log, useReflection);
 	}
 
-	/*
-	 * private static double getClass = 0; private static double match = 0; private static double types
-	 * = 0; private static double getDeclaringClass = 0; private static double lclassPath = 0; private
-	 * static double pathName = 0; private static double clsLoader = 0; private static double
-	 * loadInstance = 0; private static int count = 0;
-	 */
-	public Pair<FunctionMember, Object> createInstance(Class<?> clazz, Key methodName, Object[] arguments, boolean convertComparsion) throws NoSuchMethodException, IOException,
-			UnmodifiableClassException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, SecurityException, PageException {
+	private static double getClass = 0;
+	private static double match = 0;
+	private static double getDeclaringClass = 0;
+	private static double pathName = 0;
+	private static double clsLoader = 0;
+	private static double loadInstance = 0;
 
-		/*
-		 * count++; if ((count % 500) == 0) { print.e("-------------------"); print.e("getClass:" +
-		 * getClass); print.e("match:" + match); print.e("types:" + types); print.e("getDeclaringClass:" +
-		 * getDeclaringClass); print.e("lclassPath:" + lclassPath); print.e("pathName:" + pathName);
-		 * print.e("clsLoader:" + clsLoader); print.e("loadInstance:" + loadInstance); }
-		 */
+	public ClazzDynamic toClazzDynamic(Class<?> clazz) throws IOException {
+		return ClazzDynamic.getInstance(clazz, root, log);
+	}
 
-		// double start = SystemUtil.millis();
-		boolean isConstr = methodName == null;
-		Clazz clazzz = getClazz(clazz);
+	private lucee.transformer.dynamic.meta.FunctionMember getFunctionMember(ClazzDynamic clazzz, Key methodName, Object[] arguments, boolean nameCaseSensitive,
+			boolean convertComparsion) throws NoSuchMethodException {
+		return (methodName == null) ? clazzz.getConstructor(arguments, true, convertComparsion)
+				: clazzz.getMethod(methodName.getString(), arguments, nameCaseSensitive, true, convertComparsion);
+	}
 
-		// getClass += (SystemUtil.millis() - start);
-		// start = SystemUtil.millis();
+	public Object getInstance(ClazzDynamic clazzz, final lucee.transformer.dynamic.meta.FunctionMember fm, Object[] arguments) throws InstantiationException,
+			IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, UnmodifiableClassException, IOException {
 
-		lucee.transformer.dynamic.meta.FunctionMember fm = null;
-		lucee.transformer.dynamic.meta.Method method = null;
-		// <init>
-		if (isConstr) {
-			fm = Clazz.getConstructorMatch(clazzz, arguments, true, convertComparsion);
-		}
-		else {
-			// Clazz clazz, final Collection.Key methodName, final Object[] args, boolean convertArgument
-			fm = method = Clazz.getMethodMatch(clazzz, methodName, arguments, true, convertComparsion);
-		}
-		// match += (SystemUtil.millis() - start);
-		// start = SystemUtil.millis();
+		// ClazzDynamic clazzz = ClazzDynamic.getInstance(clazz, root, log);
+		String className = fm.getClassName();
+		DynamicClassLoader loader = clazzz.getDynamicClassLoader(this);
 
-		// types += (SystemUtil.millis() - start);
-		// start = SystemUtil.millis();
-		clazz = fm.getDeclaringClass(); // we wanna go as low as possible, to be as open as possible also this avoid not allow to access
-
-		// getDeclaringClass += (SystemUtil.millis() - start);
-		// start = SystemUtil.millis();
-
-		StringBuilder sbClassPath = new StringBuilder();
-		sbClassPath.append(clazz.getName().replace('.', '/')).append('/').append(isConstr ? "____init____" : fm.getName());
-		if (fm.getArgumentCount() > 0) {
-			StringBuilder sbArgs = new StringBuilder();
-			for (String arg: fm.getArguments()) {
-				sbArgs.append(':').append(arg);
-			}
-			sbClassPath.append('_').append(HashUtil.create64BitHashAsString(sbArgs, Character.MAX_RADIX));
-		}
-		// lclassPath += (SystemUtil.millis() - start);
-		// start = SystemUtil.millis();
-
-		String classPath = Clazz.getPackagePrefix() + sbClassPath.toString();// StringUtil.replace(sbClassPath.toString(), "javae/lang/", "java_lang/", false);
-		String className = classPath.replace('/', '.');
-
-		// pathName += (SystemUtil.millis() - start);
-		// start = SystemUtil.millis();
-		DynamicClassLoader loader = getCL(clazz);
-		// clsLoader += (SystemUtil.millis() - start);
-		// start = SystemUtil.millis();
 		if (loader.hasClass(className)) {
 			try {
-				return new Pair<FunctionMember, Object>(fm, loader.loadInstance(className));
+				return loader.loadInstance(className);
 
 			}
 			catch (Exception e) {
 				// simply ignore when fail
 			}
-			// finally {
-			// loadInstance += (SystemUtil.millis() - start);
-			// start = SystemUtil.millis();
-
-			// }
 		}
+		return createInstance(clazzz, fm, fm instanceof lucee.transformer.dynamic.meta.Constructor, className, loader);
+	}
+
+	private Object createInstance(ClazzDynamic clazzz, lucee.transformer.dynamic.meta.FunctionMember fm, boolean isConstr, String className, DynamicClassLoader loader)
+			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException,
+			UnmodifiableClassException, IOException {
+
 		synchronized (SystemUtil.createToken("dyninvocer", className)) {
 			Class[] parameterClasses = fm.getArgumentClasses();
 
 			ClassWriter cw = ASMUtil.getClassWriter();
 			MethodVisitor mv;
 			String abstractClassPath = "java/lang/Object";
-			cw.visit(ASMUtil.getJavaVersionForBytecodeGeneration(), Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, classPath,
+			cw.visit(ASMUtil.getJavaVersionForBytecodeGeneration(), Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, fm.getClassPath(),
 					"Ljava/lang/Object;Ljava/util/function/BiFunction<Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;>;", "java/lang/Object",
 					new String[] { "java/util/function/BiFunction" });
 			// Constructor
@@ -244,7 +213,7 @@ public class DynamicInvoker {
 			mv.visitCode();
 			boolean isStatic = true;
 			if (isConstr) {
-				mv.visitTypeInsn(Opcodes.NEW, Type.getType(clazz).getInternalName());
+				mv.visitTypeInsn(Opcodes.NEW, Type.getType(clazzz.getDeclaringClass()).getInternalName());
 				mv.visitInsn(Opcodes.DUP); // Duplicate the top operand stack value
 
 			}
@@ -302,12 +271,12 @@ public class DynamicInvoker {
 			}
 			Type rt;
 			if (isConstr) {
-				rt = Type.getType(clazz);
+				rt = Type.getType(clazzz.getDeclaringClass());
 			}
 			else {
-				Class tmp = method.getDeclaringProviderRtnClassWithSameAccess();
+				Class tmp = ((lucee.transformer.dynamic.meta.Method) fm).getDeclaringProviderRtnClassWithSameAccess();
 				if (tmp != null) rt = Type.getType(tmp);
-				else rt = method.getReturnType();
+				else rt = fm.getReturnType();
 			}
 
 			methodDesc.append(')').append(isConstr ? Types.VOID : rt.getDescriptor());
@@ -317,7 +286,7 @@ public class DynamicInvoker {
 			}
 			else {
 				mv.visitMethodInsn(isStatic ? Opcodes.INVOKESTATIC : (fm.getDeclaringProviderClassWithSameAccess().isInterface() ? Opcodes.INVOKEINTERFACE : Opcodes.INVOKEVIRTUAL),
-						Type.getInternalName(fm.getDeclaringProviderClassWithSameAccess()), method.getName(), methodDesc.toString(),
+						Type.getInternalName(fm.getDeclaringProviderClassWithSameAccess()), fm.getName(), methodDesc.toString(),
 						fm.getDeclaringProviderClassWithSameAccess().isInterface());
 
 			}
@@ -332,8 +301,7 @@ public class DynamicInvoker {
 
 			cw.visitEnd();
 			byte[] barr = cw.toByteArray();
-			Object result = loader.loadInstance(className, barr);
-			return new Pair<FunctionMember, Object>(fm, result);
+			return loader.loadInstance(className, barr);
 		}
 	}
 
@@ -390,7 +358,7 @@ public class DynamicInvoker {
 		}
 	}
 
-	private DynamicClassLoader getCL(Class<?> clazz) {
+	public DynamicClassLoader getCL(Class<?> clazz) {
 		ClassLoader parent = clazz.getClassLoader();
 		if (parent == null) parent = SystemUtil.getCombinedClassLoader();
 		DynamicClassLoader cl = loaders.get(parent.hashCode());
@@ -428,11 +396,136 @@ public class DynamicInvoker {
 		return Type.getArgumentTypes(descriptor.toString());
 	}
 
-	public static void main(String[] args) throws Exception {
+	public static class TestMule {
+
+		public TestMule() {
+
+		}
+
+		public TestMule(int x) {
+
+		}
+
+		public void test(int x) {
+
+		}
+	}
+
+	public Pair<FunctionMember, Object> createInstance2(Class<?> clazz, Key methodName, Object[] arguments, boolean convertComparsion) {
+
+		return null;
+	}
+
+	public static void main(String[] argsw) throws Throwable {
 		System.setProperty("lucee.allow.reflection", "false");
 		Resource classes = ResourcesImpl.getFileResourceProvider().getResource("/Users/mic/tmp8/classes/");
 		ResourceUtil.deleteContent(classes, null);
 		DynamicInvoker e = new DynamicInvoker(classes);
+
+		DynamicInvoker.getInstance(classes);
+		{
+
+			int rounds = 6;
+			int max = 500000;
+			long dynamicInvoker = Long.MAX_VALUE;
+			long dynamicInvoker2 = Long.MAX_VALUE;
+			long dynamicInvoker3 = Long.MAX_VALUE;
+			long reflection = Long.MAX_VALUE;
+			long direct = Long.MAX_VALUE;
+			long methodHandle = Long.MAX_VALUE;
+			long tmp;
+			TestMule tm = new TestMule();
+			Class<? extends TestMule> clazz = tm.getClass();
+			Class[] cargs = new Class[] { int.class };
+			Object[] args = new Object[] { 1 };
+			Key methodName = new KeyImpl("Test");
+			e.invokeConstructor(clazz, new Object[] { 1 }, false);
+			e.invokeConstructor(String.class, new Object[] { "" }, false);
+
+			// reflection
+			for (int i = 0; i < rounds; i++) {
+				long start = System.currentTimeMillis();
+				for (int y = 0; y < max; y++) {
+					clazz.getMethod("test", cargs).invoke(tm, args);
+				}
+				tmp = System.currentTimeMillis() - start;
+				if (tmp < reflection) reflection = tmp;
+			}
+
+			// invokeInstanceMethod
+			for (int i = 0; i < rounds; i++) {
+				long start = System.currentTimeMillis();
+				for (int y = 0; y < max; y++) {
+					e.invokeInstanceMethod(tm, methodName, args, false, false);
+				}
+				tmp = System.currentTimeMillis() - start;
+				if (tmp < dynamicInvoker) dynamicInvoker = tmp;
+			}
+
+			// invokeInstanceMethod
+			for (int i = 0; i < rounds; i++) {
+				long start = System.currentTimeMillis();
+				for (int y = 0; y < max; y++) {
+					// Reflector.getMethodInstance(clazz, methodName, new Object[] { 1 }, false, false).invoke(tm);
+					Reflector.getMethod(clazz, "test", cargs, true).invoke(tm, args);
+				}
+				tmp = System.currentTimeMillis() - start;
+				if (tmp < dynamicInvoker2) dynamicInvoker2 = tmp;
+			}
+
+			// invokeInstanceMethod
+			for (int i = 0; i < rounds; i++) {
+				long start = System.currentTimeMillis();
+				for (int y = 0; y < max; y++) {
+					Reflector.callMethod(tm, methodName, args, false);
+				}
+				tmp = System.currentTimeMillis() - start;
+				if (tmp < dynamicInvoker3) dynamicInvoker3 = tmp;
+			}
+
+			// MethodHandles
+			MethodHandles.Lookup lookup = MethodHandles.lookup();
+			for (int i = 0; i < rounds; i++) {
+				long start = System.currentTimeMillis();
+				for (int y = 0; y < max; y++) {
+					MethodType methodType = MethodType.methodType(void.class, int.class);
+					MethodHandle testHandle = lookup.findVirtual(clazz, "test", methodType);
+					testHandle.invoke(tm, 1);
+
+				}
+				tmp = System.currentTimeMillis() - start;
+				if (tmp < methodHandle) methodHandle = tmp;
+			}
+
+			// direct
+			for (int i = 0; i < rounds; i++) {
+				long start = System.currentTimeMillis();
+				for (int y = 0; y < max; y++) {
+					tm.test(1);
+				}
+				tmp = System.currentTimeMillis() - start;
+				if (tmp < direct) direct = tmp;
+			}
+
+			aprint.e("invokeInstanceMethod:" + dynamicInvoker);
+			aprint.e("Reflector.getMethod:" + dynamicInvoker2);
+			aprint.e("Reflector.callMethod:" + dynamicInvoker3);
+			aprint.e("reflection:" + reflection);
+			aprint.e("methodHandle:" + reflection);
+			aprint.e("direct:" + direct);
+
+			aprint.e("-------------------");
+			double total = getClass + match + getDeclaringClass + pathName + clsLoader + loadInstance;
+
+			aprint.e(((int) getClass) + ":" + Caster.toIntValue(100d / total * getClass) + "% :getClass");
+			aprint.e(((int) match) + ":" + Caster.toIntValue(100d / total * match) + "% :match");
+			aprint.e(((int) getDeclaringClass) + ":" + Caster.toIntValue(100d / total * getDeclaringClass) + "% :getDeclaringClass");
+			aprint.e(((int) pathName) + ":" + Caster.toIntValue(100d / total * pathName) + "% :pathName");
+			aprint.e(((int) clsLoader) + ":" + Caster.toIntValue(100d / total * clsLoader) + "% :clsLoader");
+			aprint.e(((int) loadInstance) + ":" + Caster.toIntValue(100d / total * loadInstance) + "% :loadInstance");
+
+			// if (true) return;
+		}
 
 		{
 			List<Method> methods;
@@ -480,7 +573,7 @@ public class DynamicInvoker {
 		map.put("aaa", "sss");
 		Iterator it = map.keySet().iterator();
 		// aprint.e(e.invokeInstanceMethod(it, "next", new Object[] {}, false));
-		aprint.e(e.invokeInstanceMethod(it, "hasNext", new Object[] {}, false));
+		aprint.e(e.invokeInstanceMethod(it, "hasNext", new Object[] {}, true, false));
 
 		if (false) {
 			FileInputStream fis = new java.io.FileInputStream("/Users/mic/Tmp3/test.prop");
@@ -488,12 +581,12 @@ public class DynamicInvoker {
 			PropertyResourceBundle prb = new java.util.PropertyResourceBundle(fir);
 			Enumeration<String> keys = prb.getKeys();
 			String key;
-			aprint.e(e.invokeInstanceMethod(keys, "hasMoreElements", new Object[] {}, false));
+			aprint.e(e.invokeInstanceMethod(keys, "hasMoreElements", new Object[] {}, true, false));
 			while (keys.hasMoreElements()) {
-				key = (String) e.invokeInstanceMethod(keys, "nextElement", new Object[] {}, false);
+				key = (String) e.invokeInstanceMethod(keys, "nextElement", new Object[] {}, true, false);
 				aprint.e(key);
 				aprint.e(prb.handleGetObject(key));
-				aprint.e(e.invokeInstanceMethod(prb, "handleGetObject", new Object[] { key }, false));
+				aprint.e(e.invokeInstanceMethod(prb, "handleGetObject", new Object[] { key }, true, false));
 			}
 			fis.close();
 			System.exit(0);
@@ -507,12 +600,12 @@ public class DynamicInvoker {
 			// dump( now().toInstant().atZone( zoneId.of( "US/Central" ) ).toLocalDateTime()
 			// .with( ChronoField.DAY_OF_WEEK, javacast( "long", 1 ) ))
 
-			ZoneId zoneId = (ZoneId) e.invokeStaticMethod(java.time.ZoneId.class, "of", new Object[] { "US/Central" }, false);
-			Instant instant = (Instant) e.invokeInstanceMethod(new DateTimeImpl(), "toInstant", new Object[] {}, false);
+			ZoneId zoneId = (ZoneId) e.invokeStaticMethod(java.time.ZoneId.class, "of", new Object[] { "US/Central" }, true, false);
+			Instant instant = (Instant) e.invokeInstanceMethod(new DateTimeImpl(), "toInstant", new Object[] {}, true, false);
 
-			ZonedDateTime zdt = (ZonedDateTime) e.invokeInstanceMethod(instant, "atZone", new Object[] { zoneId }, false);
-			LocalDateTime ldt = (LocalDateTime) e.invokeInstanceMethod(zdt, "toLocalDateTime", new Object[] {}, false);
-			Object r = e.invokeInstanceMethod(ldt, "with", new Object[] { ChronoField.DAY_OF_WEEK, 1L }, false);
+			ZonedDateTime zdt = (ZonedDateTime) e.invokeInstanceMethod(instant, "atZone", new Object[] { zoneId }, true, false);
+			LocalDateTime ldt = (LocalDateTime) e.invokeInstanceMethod(zdt, "toLocalDateTime", new Object[] {}, true, false);
+			Object r = e.invokeInstanceMethod(ldt, "with", new Object[] { ChronoField.DAY_OF_WEEK, 1L }, true, false);
 			aprint.e(r);
 
 		}
@@ -527,12 +620,12 @@ public class DynamicInvoker {
 		TimeZone tz = java.util.TimeZone.getDefault();
 		ArrayList arr = new ArrayList<>();
 
-		Object sadas1 = e.invokeInstanceMethod(sb, "append", new Object[] { "sss" }, false);
+		Object sadas1 = e.invokeInstanceMethod(sb, "append", new Object[] { "sss" }, true, false);
 		aprint.e(sadas1);
 
 		// java.util.HashMap.EntrySet
 		Thread.getAllStackTraces().entrySet().iterator();
-		Object sadasd = e.invokeInstanceMethod(Thread.getAllStackTraces().entrySet(), "iterator", new Object[] {}, false);
+		Object sadasd = e.invokeInstanceMethod(Thread.getAllStackTraces().entrySet(), "iterator", new Object[] {}, true, false);
 		// System.exit(0);
 		String str = new String("Susi exclusive");
 		aprint.e(str);
@@ -540,14 +633,14 @@ public class DynamicInvoker {
 
 		// System.exit(0);
 
-		Object eee = e.invokeInstanceMethod(t, "setSource", new Object[] { "" }, false);
+		Object eee = e.invokeInstanceMethod(t, "setSource", new Object[] { "" }, true, false);
 		// System.exit(0);
 
 		// source
 		// instance ():String
 		{
 			Object reflection = tz.getID();
-			Object dynamic = e.invokeInstanceMethod(tz, "getID", new Object[] {}, false);
+			Object dynamic = e.invokeInstanceMethod(tz, "getID", new Object[] {}, true, false);
 			if (!reflection.equals(dynamic)) {
 				aprint.e("direct:");
 				aprint.e(reflection);
@@ -559,7 +652,7 @@ public class DynamicInvoker {
 		// instance (double->int):String
 		{
 			Object reflection = t.test(134);
-			Object dynamic = e.invokeInstanceMethod(t, "test", new Object[] { 134D }, true);
+			Object dynamic = e.invokeInstanceMethod(t, "test", new Object[] { 134D }, true, true);
 			if (!reflection.equals(dynamic)) {
 				aprint.e("direct:");
 				aprint.e(reflection);
@@ -571,7 +664,7 @@ public class DynamicInvoker {
 		// instance (double->int):String
 		{
 			Object reflection = t.test(134);
-			Object dynamic = e.invokeInstanceMethod(t, "test", new Object[] { 134D }, true);
+			Object dynamic = e.invokeInstanceMethod(t, "test", new Object[] { 134D }, true, true);
 			if (!reflection.equals(dynamic)) {
 				aprint.e("direct:");
 				aprint.e(reflection);
@@ -581,23 +674,23 @@ public class DynamicInvoker {
 		}
 
 		aprint.e(t.complete("", 1, null));
-		aprint.e(e.invokeInstanceMethod(t, "complete", new Object[] { "", i, null }, true));
-		aprint.e(e.invokeInstanceMethod(t, "complete", new Object[] { "", bd, null }, true));
+		aprint.e(e.invokeInstanceMethod(t, "complete", new Object[] { "", i, null }, true, true));
+		aprint.e(e.invokeInstanceMethod(t, "complete", new Object[] { "", bd, null }, true, true));
 
 		aprint.e(t.testb(true, true));
-		aprint.e(e.invokeInstanceMethod(t, "testb", new Object[] { null, true }, true));
+		aprint.e(e.invokeInstanceMethod(t, "testb", new Object[] { null, true }, true, true));
 
 		aprint.e(t.testStr(1, "string", 1L));
-		aprint.e(e.invokeInstanceMethod(t, "testStr", new Object[] { "1", 1, Double.valueOf(1D) }, true));
+		aprint.e(e.invokeInstanceMethod(t, "testStr", new Object[] { "1", 1, Double.valueOf(1D) }, true, true));
 
-		aprint.e(e.invokeInstanceMethod(t, "test", new Object[] { "1" }, true));
-		aprint.e(e.invokeInstanceMethod(t, "test", new Object[] { 1D }, true));
+		aprint.e(e.invokeInstanceMethod(t, "test", new Object[] { "1" }, true, true));
+		aprint.e(e.invokeInstanceMethod(t, "test", new Object[] { 1D }, true, true));
 
-		aprint.e(e.invokeInstanceMethod(new SystemOut(), "setOut", new Object[] { null }, true));
+		aprint.e(e.invokeInstanceMethod(new SystemOut(), "setOut", new Object[] { null }, true, true));
 		System.setProperty("a.b.c", "- value -");
-		aprint.e(e.invokeInstanceMethod(sb, "toSTring", new Object[] {}, false));
-		aprint.e(e.invokeStaticMethod(SystemUtil.class, "getSystemPropOrEnvVar", new Object[] { "a.b.c", "default-value" }, true));
-		aprint.e(e.invokeStaticMethod(ListUtil.class, "arrayToList", new Object[] { new String[] { "a", "b" }, "," }, true));
+		aprint.e(e.invokeInstanceMethod(sb, "toSTring", new Object[] {}, false, false));
+		aprint.e(e.invokeStaticMethod(SystemUtil.class, "getSystemPropOrEnvVar", new Object[] { "a.b.c", "default-value" }, true, true));
+		aprint.e(e.invokeStaticMethod(ListUtil.class, "arrayToList", new Object[] { new String[] { "a", "b" }, "," }, true, true));
 		aprint.e("done");
 
 	}

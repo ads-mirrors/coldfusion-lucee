@@ -31,10 +31,13 @@ import lucee.commons.io.IOUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.ExceptionUtil;
+import lucee.commons.lang.Pair;
 import lucee.commons.lang.PhysicalClassLoader;
 import lucee.commons.lang.types.RefInteger;
 import lucee.commons.lang.types.RefIntegerImpl;
 import lucee.runtime.converter.JavaConverter.ObjectInputStreamImpl;
+import lucee.runtime.exp.PageException;
+import lucee.runtime.reflection.Reflector;
 import lucee.runtime.thread.ThreadUtil;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.dynamic.meta.Clazz;
@@ -48,12 +51,14 @@ public class ClazzDynamic extends Clazz {
 
 	private transient Class clazz;
 	// private static Map<String, SoftReference<ClazzDynamic>> classes = new ConcurrentHashMap<>();
-	private final FunctionMember[] methods;
-	private final FunctionMember[] declaredMethods;
-	private final FunctionMember[] constructors;
-	private final FunctionMember[] declaredConstructors;
+	private final Method[] methods;
+	private final Method[] declaredMethods;
+	private final Constructor[] constructors;
+	private final Constructor[] declaredConstructors;
 
 	private String clid;
+	private String id;
+
 	private static Map<ClassLoader, String> clids = new IdentityHashMap<>();
 	private static String systemId;
 
@@ -68,17 +73,9 @@ public class ClazzDynamic extends Clazz {
 	 */
 
 	public static ClazzDynamic getInstance(Class clazz, Resource dir, Log log) throws IOException {
-
-		/*
-		 * count++; if ((count % 500) == 0) { print.e("-------------------");
-		 * print.e("generateClassLoderId:" + generateClassLoderId); print.e("path:" + path);
-		 * print.e("isFile:" + isFile); print.e("deserialize:" + deserialize); print.e("put:" + put);
-		 * print.e("neww:" + neww); print.e("serialize:" + serialize); print.e("done:" + done); } double
-		 * start = SystemUtil.millis();
-		 */
-
 		ClazzDynamic cd = null;
 		Reference<ClazzDynamic> sr = classes.get(clazz);
+
 		if (sr == null || (cd = sr.get()) == null) {
 			synchronized (clazz) {
 				sr = classes.get(clazz);
@@ -190,24 +187,24 @@ public class ClazzDynamic extends Clazz {
 		this.clid = clid;
 		Map<String, FunctionMember> members = getFunctionMembers(this.clid, clazz, log);
 
-		LinkedList<FunctionMember> tmpMethods = new LinkedList<>();
-		LinkedList<FunctionMember> tmpDeclaredMethods = new LinkedList<>();
-		LinkedList<FunctionMember> tmpConstructors = new LinkedList<>();
-		LinkedList<FunctionMember> tmpDeclaredConstructors = new LinkedList<>();
+		LinkedList<Method> tmpMethods = new LinkedList<>();
+		LinkedList<Method> tmpDeclaredMethods = new LinkedList<>();
+		LinkedList<Constructor> tmpConstructors = new LinkedList<>();
+		LinkedList<Constructor> tmpDeclaredConstructors = new LinkedList<>();
 		for (FunctionMember fm: members.values()) {
 			if (fm instanceof Method) {
-				if (clazz.getName().equals(fm.getDeclaringClassName())) tmpDeclaredMethods.add(fm);
-				if (fm.isPublic()) tmpMethods.add(fm);
+				if (clazz.getName().equals(fm.getDeclaringClassName())) tmpDeclaredMethods.add((Method) fm);
+				if (fm.isPublic()) tmpMethods.add((Method) fm);
 			}
 			else if (fm instanceof Constructor) {
-				if (clazz.getName().equals(fm.getDeclaringClassName())) tmpDeclaredConstructors.add(fm);
-				if (fm.isPublic()) tmpConstructors.add(fm);
+				if (clazz.getName().equals(fm.getDeclaringClassName())) tmpDeclaredConstructors.add((Constructor) fm);
+				if (fm.isPublic()) tmpConstructors.add((Constructor) fm);
 			}
 		}
-		methods = tmpMethods.toArray(new FunctionMember[tmpMethods.size()]);
-		declaredMethods = tmpDeclaredMethods.toArray(new FunctionMember[tmpDeclaredMethods.size()]);
-		constructors = tmpConstructors.toArray(new FunctionMember[tmpConstructors.size()]);
-		declaredConstructors = tmpDeclaredConstructors.toArray(new FunctionMember[tmpDeclaredConstructors.size()]);
+		methods = tmpMethods.toArray(new Method[tmpMethods.size()]);
+		declaredMethods = tmpDeclaredMethods.toArray(new Method[tmpDeclaredMethods.size()]);
+		constructors = tmpConstructors.toArray(new Constructor[tmpConstructors.size()]);
+		declaredConstructors = tmpDeclaredConstructors.toArray(new Constructor[tmpDeclaredConstructors.size()]);
 
 	}
 
@@ -223,11 +220,13 @@ public class ClazzDynamic extends Clazz {
 
 	@Override
 	public String id() {
-		if (clid == null) {
-			clid = generateClassLoderId(clazz);
+		if (id == null) {
+			if (clid == null) {
+				clid = generateClassLoderId(clazz);
+			}
+			id = clid + ":" + clazz.getName();
 		}
-
-		return clid + ":" + clazz.getName();
+		return id;
 	}
 
 	@Override
@@ -301,24 +300,122 @@ public class ClazzDynamic extends Clazz {
 	@Override
 	public List<Method> getMethods(String methodName, boolean nameCaseSensitive, int argumentLength) {
 		List<Method> list = new LinkedList<>();
-		for (FunctionMember fm: methods) {
+		for (Method fm: methods) {
 			if (/* fm.isPublic() && */
 
-			(argumentLength < 0 || argumentLength == fm.getArgumentCount()) &&
+			(argumentLength == fm.getArgumentCount() || argumentLength < 0) &&
 
 					(methodName == null || (nameCaseSensitive ? methodName.equals(fm.getName()) : methodName.equalsIgnoreCase(fm.getName())))
 
 			) {
-				list.add((Method) fm);
+				list.add(fm);
 			}
 		}
 		return list;
 	}
 
+	private static RefInteger nirvana = new RefIntegerImpl();
+	private Map<String, SoftReference<Pair<Method, Boolean>>> cachedMethods;
+
+	@Override
+	public Method getMethod(String methodName, Object[] args, boolean nameCaseSensitive, boolean convertArgument, boolean convertComparsion) throws NoSuchMethodException {
+		Method method = getMethod(methodName, args, nameCaseSensitive, convertArgument, convertComparsion, null);
+		if (method != null) return method;
+
+		throw new NoSuchMethodException(
+				"No matching method for " + clazz.getDeclaringClass().getName() + "." + methodName + "(" + Reflector.getDspMethods(Reflector.getClasses(args)) + ") found.");
+	}
+
+	@Override
+	public Method getMethod(String methodName, Object[] args, boolean nameCaseSensitive, boolean convertArgument, boolean convertComparsion, Method defaultValue) {
+		// like
+		Class[] parameterTypes;
+		outer: for (Method fm: methods) {
+			if ((args.length == fm.getArgumentCount()) && (nameCaseSensitive ? methodName.equals(fm.getName()) : methodName.equalsIgnoreCase(fm.getName()))) {
+				parameterTypes = fm.getArgumentClasses();
+				for (int y = 0; y < parameterTypes.length; y++) {
+					if (!Reflector.toReferenceClass(parameterTypes[y]).isAssignableFrom(args[y] == null ? Object.class : args[y].getClass())) continue outer;
+				}
+				return fm;
+			}
+		}
+
+		// in case there are no arguments the code below will not find any match, nothing to convert
+		if (args.length == 0) return defaultValue;
+
+		// cache
+		StringBuilder sb = new StringBuilder(100).append(methodName).append(';'); // append(id()).
+		for (Object arg: args) {
+			sb.append((arg == null ? Object.class : arg.getClass()).getName()).append(';');
+		}
+		String key = sb.toString();
+
+		// get match from cache
+		if (cachedMethods != null) {
+			SoftReference<Pair<Method, Boolean>> sr = cachedMethods.get(key);
+			if (sr != null) {
+				Pair<Method, Boolean> p = sr.get();
+				if (p != null) {
+					// print.e("used cached match(" + p.getValue() + "):" + key + ":" + cachedMethods.size());
+					// convert arguments
+					if (p.getValue()) {
+						Class[] trgArgs = p.getName().getArgumentClasses();
+						for (int x = 0; x < trgArgs.length; x++) {
+							if (args[x] != null) {
+								// we can ignore a fail here, because this was done before, otherwisse it would not be in the cache
+								args[x] = Reflector.convert(args[x], Reflector.toReferenceClass(trgArgs[x]), nirvana, null);
+							}
+						}
+					}
+					return p.getName();
+				}
+			}
+		}
+
+		// convert comparsion
+		Pair<Method, Object[]> result = null;
+		int _rating = 0;
+		if (convertComparsion) {
+			outer: for (Method fm: methods) {
+				if ((args.length == fm.getArgumentCount()) && ((nameCaseSensitive ? methodName.equals(fm.getName()) : methodName.equalsIgnoreCase(fm.getName())))) {
+					RefInteger rating = (methods.length > 1) ? new RefIntegerImpl(0) : null;
+					parameterTypes = fm.getArgumentClasses();
+					Object[] newArgs = new Object[args.length];
+
+					for (int y = 0; y < parameterTypes.length; y++) {
+						try {
+							newArgs[y] = Reflector.convert(args[y], Reflector.toReferenceClass(parameterTypes[y]), rating);
+						}
+						catch (PageException e) {
+							continue outer;
+						}
+					}
+					if (result == null || rating.toInt() > _rating) {
+						if (rating != null) _rating = rating.toInt();
+						result = new Pair<Method, Object[]>(fm, newArgs);
+					}
+				}
+			}
+		}
+
+		if (result != null) {
+			if (convertArgument) {
+				Object[] newArgs = result.getValue();
+				for (int x = 0; x < args.length; x++) {
+					args[x] = newArgs[x];
+				}
+			}
+			if (cachedMethods == null) cachedMethods = new ConcurrentHashMap<>();
+			cachedMethods.put(key, new SoftReference<Pair<Method, Boolean>>(new Pair<Method, Boolean>(result.getName(), Boolean.TRUE)));
+			return result.getName();
+		}
+		return defaultValue;
+	}
+
 	@Override
 	public List<Method> getDeclaredMethods(String methodName, boolean nameCaseSensitive, int argumentLength) throws IOException {
 		List<Method> list = new LinkedList<>();
-		for (FunctionMember fm: declaredMethods) {
+		for (Method fm: declaredMethods) {
 			if ((argumentLength < 0 || argumentLength == fm.getArgumentCount()) &&
 
 					(methodName == null || (nameCaseSensitive ? methodName.equals(fm.getName()) : methodName.equalsIgnoreCase(fm.getName())))
@@ -326,7 +423,7 @@ public class ClazzDynamic extends Clazz {
 			/* &&clazz.getName().equals(fm.getDeclaringClassName()) */
 
 			) {
-				list.add((Method) fm);
+				list.add(fm);
 			}
 		}
 		return list;
@@ -336,7 +433,7 @@ public class ClazzDynamic extends Clazz {
 	public List<Constructor> getConstructors(int argumentLength) throws IOException {
 		List<Constructor> list = new LinkedList<>();
 
-		for (FunctionMember fm: constructors) {
+		for (Constructor fm: constructors) {
 			if (/* fm.isPublic() && */
 
 			(argumentLength < 0 || argumentLength == fm.getArgumentCount()) &&
@@ -344,22 +441,87 @@ public class ClazzDynamic extends Clazz {
 					clazz.getName().equals(fm.getDeclaringClassName())
 
 			) {
-				list.add((Constructor) fm);
+				list.add(fm);
 			}
 		}
 		return list;
 	}
 
 	@Override
+	public Constructor getConstructor(Object[] args, boolean convertArgument, boolean convertComparsion) throws NoSuchMethodException {
+		Constructor constructor = getConstructor(args, convertArgument, convertComparsion, null);
+		if (constructor != null) return constructor;
+
+		throw new NoSuchMethodException(
+				"No matching Constructor for " + clazz.getDeclaringClass().getName() + "(" + Reflector.getDspMethods(Reflector.getClasses(args)) + ") found.");
+	}
+
+	@Override
+	public Constructor getConstructor(Object[] args, boolean convertArgument, boolean convertComparsion, Constructor defaultValue) {
+
+		// like
+		Class[] parameterTypes;
+		outer: for (Constructor fm: constructors) {
+			if ((args.length == fm.getArgumentCount()) && clazz.getName().equals(fm.getDeclaringClassName())) {
+				parameterTypes = fm.getArgumentClasses();
+				for (int y = 0; y < parameterTypes.length; y++) {
+					if (!Reflector.toReferenceClass(parameterTypes[y]).isAssignableFrom(args[y] == null ? Object.class : args[y].getClass())) continue outer;
+				}
+				return fm;
+			}
+		}
+
+		// in case there are no arguments the code below will not find any match, nothing to convert
+		if (args.length == 0) return defaultValue;
+
+		// convert comparsion
+		Pair<Constructor, Object[]> result = null;
+		int _rating = 0;
+		if (convertComparsion) {
+			outer: for (Constructor fm: constructors) {
+				if ((args.length == fm.getArgumentCount()) && clazz.getName().equals(fm.getDeclaringClassName())) {
+					RefInteger rating = (constructors.length > 1) ? new RefIntegerImpl(0) : null;
+					parameterTypes = fm.getArgumentClasses();
+					Object[] newArgs = new Object[args.length];
+					for (int y = 0; y < parameterTypes.length; y++) {
+						try {
+							newArgs[y] = Reflector.convert(args[y], Reflector.toReferenceClass(parameterTypes[y]), rating);
+						}
+						catch (PageException e) {
+							continue outer;
+						}
+					}
+					if (result == null || rating.toInt() > _rating) {
+						if (rating != null) _rating = rating.toInt();
+						result = new Pair<Constructor, Object[]>(fm, newArgs);
+					}
+					// return new ConstructorInstance(constructors[i],newArgs);
+				}
+			}
+		}
+
+		if (result != null) {
+			if (convertArgument) {
+				Object[] newArgs = result.getValue();
+				for (int x = 0; x < args.length; x++) {
+					args[x] = newArgs[x];
+				}
+			}
+			return result.getName();
+		}
+		return defaultValue;
+	}
+
+	@Override
 	public List<Constructor> getDeclaredConstructors(int argumentLength) throws IOException {
 		List<Constructor> list = new LinkedList<>();
-		for (FunctionMember fm: declaredConstructors) {
+		for (Constructor fm: declaredConstructors) {
 			if ((argumentLength < 0 || argumentLength == fm.getArgumentCount())
 
 			/* && clazz.getName().equals(fm.getDeclaringClassName()) */
 
 			) {
-				list.add((Constructor) fm);
+				list.add(fm);
 			}
 		}
 		return list;

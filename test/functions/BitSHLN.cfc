@@ -35,7 +35,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
                 application action="update" preciseMath=true;
                 assertEquals("4294967294", toString(BitSHLN(2147483647, 1)));  // 2147483647 << 1 = 0 (overflow)
                 application action="update" preciseMath=false;
-                assertEquals("4294967296", toString(BitSHLN(2147483647, 1)));  // 2147483647 << 1 = 0 (overflow)
+                assertEquals("4294967294", toString(BitSHLN(2147483647, 1)));  // 2147483647 << 1 = 0 (overflow)
             });
 
             it(title="Checking BitSHLN() function with negative shift", body = function(currentSpec) {

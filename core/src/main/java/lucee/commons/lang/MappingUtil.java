@@ -175,6 +175,7 @@ public class MappingUtil {
 				if (si != null && trace.getFileName() != null && trace.getFileName().equals(si.absolutePath(pc))) return si;
 			}
 			catch (IOException e) {
+				LogUtil.warn("mapping-util", e);
 			}
 
 		}

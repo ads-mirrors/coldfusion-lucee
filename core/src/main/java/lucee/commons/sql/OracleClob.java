@@ -46,19 +46,19 @@ public class OracleClob {
 
 			// CLOB c = CLOB.createTemporary(conn, false, CLOB.DURATION_SESSION);
 			if (createTemporary == null || createTemporary.getDeclaringClass() != clazz) {
-				createTemporary = Reflector.getMethod(clazz, "createTemporary", new Class[] { Connection.class, boolean.class, int.class });
+				createTemporary = Reflector.getMethod(clazz, "createTemporary", new Class[] { Connection.class, boolean.class, int.class }, true);
 			}
 			Object clob = createTemporary.invoke(null, new Object[] { conn, Boolean.FALSE, duration });
 
 			// c.open(CLOB.MODE_READWRITE);
 			if (open == null || open.getDeclaringClass() != clazz) {
-				open = Reflector.getMethod(clazz, "open", new Class[] { int.class });
+				open = Reflector.getMethod(clazz, "open", new Class[] { int.class }, true);
 			}
 			open.invoke(clob, new Object[] { mode });
 
 			// c.setString(1,value);
 			if (setString == null || setString.getDeclaringClass() != clazz) {
-				setString = Reflector.getMethod(clazz, "setString", new Class[] { long.class, String.class });
+				setString = Reflector.getMethod(clazz, "setString", new Class[] { long.class, String.class }, true);
 			}
 			setString.invoke(clob, new Object[] { Long.valueOf(1), value });
 

@@ -23,6 +23,7 @@ import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
 
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.ResourceProvider;
 import lucee.commons.io.res.ResourceProviderPro;
@@ -191,6 +192,7 @@ public final class FTPResourceProvider implements ResourceProviderPro {
 						client.disconnect();
 					}
 					catch (IOException e) {
+						LogUtil.warn("ftp", e);
 					}
 				}
 				clients.remove(client.getFtpConnectionData().toString());
@@ -222,6 +224,7 @@ public final class FTPResourceProvider implements ResourceProviderPro {
 				sleep(provider.clientTimeout);
 			}
 			catch (InterruptedException e) {
+				LogUtil.warn("ftp", e);
 			}
 		}
 	}

@@ -42,6 +42,7 @@ import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.FileUtil;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.runtime.PageContext;
 import lucee.runtime.PageContextImpl;
@@ -72,16 +73,17 @@ public final class ClassUtil {
 	}
 
 	private static Class checkPrimaryTypesBytecodeDef(String className, Class defaultValue) {
-		if (className.charAt(0) == '[') {
-			if (className.equals("[V")) return void.class;
-			if (className.equals("[Z")) return boolean.class;
-			if (className.equals("[B")) return byte.class;
-			if (className.equals("[I")) return int.class;
-			if (className.equals("[J")) return long.class;
-			if (className.equals("[F")) return float.class;
-			if (className.equals("[D")) return double.class;
-			if (className.equals("[C")) return char.class;
-			if (className.equals("[S")) return short.class;
+		if (className.length() == 2 && className.charAt(0) == '[') {
+			char pt = className.charAt(1);
+			if (pt == 'V') return void.class;
+			if (pt == 'Z') return boolean.class;
+			if (pt == 'B') return byte.class;
+			if (pt == 'I') return int.class;
+			if (pt == 'J') return long.class;
+			if (pt == 'F') return float.class;
+			if (pt == 'D') return double.class;
+			if (pt == 'C') return char.class;
+			if (pt == 'S') return short.class;
 		}
 		return defaultValue;
 	}
@@ -96,6 +98,8 @@ public final class ClassUtil {
 			lcClassName = lcClassName.substring(10);
 			isRef = true;
 		}
+
+		if (lcClassName.length() > 9) return defaultValue; // short circuit longest below match is "character"
 
 		if (lcClassName.equals("void")) {
 			return void.class;
@@ -634,6 +638,7 @@ public final class ClassUtil {
 					pathes.put(file.getCanonicalPath(), "");
 				}
 				catch (IOException e) {
+					LogUtil.warn("class-util", e);
 				}
 			}
 		}
@@ -668,6 +673,7 @@ public final class ClassUtil {
 				pathes.put(file.getCanonicalPath(), "");
 			}
 			catch (IOException e) {
+				LogUtil.warn("class-util", e);
 			}
 		}
 	}
@@ -852,6 +858,7 @@ public final class ClassUtil {
 			return IOUtil.toBytes(is);
 		}
 		catch (Exception e) {
+			LogUtil.warn("class-util", e);
 		}
 
 		is = null;
@@ -877,6 +884,7 @@ public final class ClassUtil {
 			}
 		}
 		catch (Exception e) {
+			LogUtil.warn("class-util", e);
 		}
 		finally {
 			IOUtil.closeEL(is);
@@ -1027,8 +1035,8 @@ public final class ClassUtil {
 		return new lucee.commons.lang.ClassLoaderHelper().getClass().getClassLoader();
 	}
 
-	public static Object newInstance(Class clazz) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException,
-			SecurityException, PageException, IOException {
+	public static Object newInstance(Class clazz)
+			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, PageException {
 		return Reflector.getConstructorInstance(clazz, EMPTY_OBJ, true).invoke();
 	}
 }

@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import org.objectweb.asm.Type;
 
+import lucee.commons.digest.HashUtil;
+
 public interface FunctionMember extends Serializable {
 
 	public abstract String getName();
@@ -48,4 +50,32 @@ public interface FunctionMember extends Serializable {
 
 	public abstract boolean inInterface();
 
+	public abstract String getClassPath();
+
+	public abstract String getClassName();
+
+	public abstract String getReturn();
+
+	public abstract Type getReturnType();
+
+	public abstract Class getReturnClass();
+
+	public static String createClassPath(FunctionMember fm) {
+		StringBuilder sbClassPath = new StringBuilder();
+		// sbClassPath.append(getDeclaringClassName().replace('.', '/')).append('/').append(isConstr ?
+		// "____init____" : fm.getName());
+		sbClassPath.append(fm.getDeclaringClassName().replace('.', '/')).append('/');
+
+		if (fm instanceof Constructor) sbClassPath.append("____init____");
+		else sbClassPath.append(fm.getName());
+
+		if (fm.getArgumentCount() > 0) {
+			StringBuilder sbArgs = new StringBuilder();
+			for (String arg: fm.getArguments()) {
+				sbArgs.append(':').append(arg);
+			}
+			sbClassPath.append('_').append(HashUtil.create64BitHashAsString(sbArgs, Character.MAX_RADIX));
+		}
+		return Clazz.getPackagePrefix() + sbClassPath.toString();
+	}
 }

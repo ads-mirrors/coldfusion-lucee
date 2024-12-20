@@ -58,6 +58,7 @@ public class Util {
 	static {
 		UTF8 = Charset.forName("UTF-8");
 	}
+
 	private static final int QUALIFIER_APPENDIX_SNAPSHOT = 1;
 	private static final int QUALIFIER_APPENDIX_BETA = 2;
 	private static final int QUALIFIER_APPENDIX_RC = 3;
@@ -392,7 +393,6 @@ public class Util {
 		if (charset == null) {
 			charset = UTF8;
 		}
-
 		Writer writer = null;
 		try {
 			writer = getWriter(file, charset, append);
@@ -621,27 +621,6 @@ public class Util {
 		Throwable cause = t.getCause();
 		if (cause != null && cause != t) return unwrap(cause);
 		return t;
-	}
-
-	public static String getSystemPropOrEnvVar(String name, String defaultValue) {
-		// env
-		String value = System.getenv(name);
-		if (!isEmpty(value)) return value;
-
-		// prop
-		value = System.getProperty(name);
-		if (!isEmpty(value)) return value;
-
-		// env 2
-		name = convertSystemPropToEnvVar(name);
-		value = System.getenv(name);
-		if (!isEmpty(value)) return value;
-
-		return defaultValue;
-	}
-
-	private static String convertSystemPropToEnvVar(String name) {
-		return name.replace('.', '_').toUpperCase();
 	}
 
 	public static void sleep(int time) {

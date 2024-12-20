@@ -95,7 +95,7 @@ public class JavaObject implements Objects, ObjectWrap {
 			}
 		}
 		// Getter
-		MethodInstance mi = Reflector.getGetterEL(clazz, propertyName);
+		MethodInstance mi = Reflector.getGetterEL(clazz, propertyName, false);
 		if (mi != null) {
 			if (mi.getMethod().isStatic()) {
 				try {
@@ -136,7 +136,7 @@ public class JavaObject implements Objects, ObjectWrap {
 			}
 		}
 		// Getter
-		MethodInstance mi = Reflector.getGetterEL(clazz, propertyName);
+		MethodInstance mi = Reflector.getGetterEL(clazz, propertyName, false);
 		if (mi != null) {
 			try {
 				if (mi.getMethod().isStatic()) {
@@ -250,13 +250,13 @@ public class JavaObject implements Objects, ObjectWrap {
 			return clazz;
 		}
 		else if (isInit) {
-			return Reflector.callMethod(object, methodName, arguments);
+			return Reflector.callMethod(object, methodName, arguments, false);
 		}
 
 		try {
 			// get method
 			// if ("toHexString".equals(methodName)) print.ds();
-			MethodInstance mi = Reflector.getMethodInstance(clazz, KeyImpl.init(methodName), arguments, false);
+			MethodInstance mi = Reflector.getMethodInstance(clazz, KeyImpl.init(methodName), arguments, false, false);
 			// call static method if exist
 			if (mi.getMethod().isStatic()) {
 				return mi.invoke(null);

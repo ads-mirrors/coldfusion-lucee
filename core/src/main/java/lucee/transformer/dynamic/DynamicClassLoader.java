@@ -184,7 +184,6 @@ public final class DynamicClassLoader extends ClassLoader implements ExtendableC
 	}
 
 	private Class<?> _loadClass(String name, byte[] barr) {
-		// print.e(">>>>" + name);
 		Class<?> clazz = defineClass(name, barr, 0, barr.length);
 		if (clazz != null) {
 			loadedClasses.put(name, "");
@@ -273,6 +272,7 @@ public final class DynamicClassLoader extends ClassLoader implements ExtendableC
 	}
 
 	public boolean isClassLoaded(String className) {
+		if (loadedClasses.containsKey(className)) return true;
 		return findLoadedClass(className) != null;
 	}
 

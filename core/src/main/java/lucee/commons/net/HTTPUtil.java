@@ -41,6 +41,7 @@ import org.apache.http.HttpResponse;
 
 import lucee.commons.digest.Hash;
 import lucee.commons.io.IOUtil;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringList;
@@ -375,6 +376,7 @@ public final class HTTPUtil {
 				return URLEncoder.encode(str, pc.getWebCharset());
 			}
 			catch (UnsupportedEncodingException e) {
+				LogUtil.warn("http-util", e);
 			}
 		}
 		return URLEncoder.encode(str);

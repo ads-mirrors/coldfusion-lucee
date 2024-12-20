@@ -33,8 +33,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import lucee.aprint;
+import lucee.print;
 import lucee.commons.io.DevNullOutputStream;
 import lucee.commons.io.SystemUtil;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.Pair;
@@ -54,8 +56,17 @@ import lucee.runtime.type.Struct;
 public class ThreadUtil {
 
 	private static final boolean ALLOW_FUTURE_THREADS = false;
-	private static final Class<?> THREAD_CLASS = Thread.class;
+	// private static final Class<?> THREAD_CLASS = Thread.class;
 	private static final Class<?> RUNNABLE_CLASS = Runnable.class;
+	private static Class<?> threadBuilderClass;
+	private static boolean virtualDisabled = false;
+
+	public static Class<?> getThreadBuilderClass() throws ClassNotFoundException {
+		if (threadBuilderClass == null) {
+			threadBuilderClass = Class.forName("java.lang.Thread$Builder$OfVirtual");
+		}
+		return threadBuilderClass;
+	}
 
 	// do not change, used in Redis extension
 	public static PageContextImpl clonePageContext(PageContext pc, OutputStream os, boolean stateless, boolean register2Thread, boolean register2RunningThreads) {
@@ -205,20 +216,20 @@ public class ThreadUtil {
 
 	public static Thread getThread(Runnable task, boolean allowVirtual) {
 		if (allowVirtual && SystemUtil.JAVA_VERSION >= SystemUtil.JAVA_VERSION_19) {
+
 			try {
-				// return Thread.ofVirtual().unstarted(task);
+				// Get Thread.ofVirtual()
 				MethodHandles.Lookup lookup = MethodHandles.lookup();
-				MethodHandle ofVirtualHandle = lookup.findStatic(THREAD_CLASS, "ofVirtual", MethodType.methodType(THREAD_CLASS.getDeclaredClasses()[0]));
-				Object builder = ofVirtualHandle.invoke();
-				MethodHandle unstartedHandle = lookup.findVirtual(builder.getClass(), "unstarted", MethodType.methodType(THREAD_CLASS, RUNNABLE_CLASS));
-				return (Thread) unstartedHandle.invoke(builder, task);
+				MethodHandle ofVirtualHandle = lookup.findStatic(Thread.class, "ofVirtual", MethodType.methodType(getThreadBuilderClass()));
+				MethodHandle unstartedHandle = lookup.findVirtual(Class.forName("java.lang.Thread$Builder"), "unstarted", MethodType.methodType(Thread.class, Runnable.class));
+				return (Thread) unstartedHandle.bindTo(ofVirtualHandle.invoke()).invoke(task);
 			}
 			catch (Throwable e) {
 				ExceptionUtil.rethrowIfNecessary(e);
+				LogUtil.log("threading", e);
 			}
 		}
 		return new Thread(task);
-
 	}
 
 	public static ExecutorService createExecutorService(int maxThreads) {
@@ -226,19 +237,28 @@ public class ThreadUtil {
 	}
 
 	public static ExecutorService createExecutorService(int maxThreads, boolean allowVirtual) {
-		if (allowVirtual && SystemUtil.JAVA_VERSION >= SystemUtil.JAVA_VERSION_19) {
-			// FUTURE use newVirtualThreadPerTaskExecutor natively
-			try {
-				MethodHandles.Lookup lookup = MethodHandles.lookup();
-				MethodType methodType = MethodType.methodType(ExecutorService.class);
-				MethodHandle methodHandle = lookup.findStatic(Executors.class, "newVirtualThreadPerTaskExecutor", methodType);
-				return (ExecutorService) methodHandle.invoke();
-			}
-			catch (Throwable e) {
-				ExceptionUtil.rethrowIfNecessary(e);
+		if (!virtualDisabled) {
+			if (allowVirtual && SystemUtil.JAVA_VERSION >= SystemUtil.JAVA_VERSION_19) {
+				// FUTURE use newVirtualThreadPerTaskExecutor natively
+				try {
+					MethodHandles.Lookup lookup = MethodHandles.lookup();
+					MethodType methodType = MethodType.methodType(ExecutorService.class);
+					MethodHandle methodHandle = lookup.findStatic(Executors.class, "newVirtualThreadPerTaskExecutor", methodType);
+					return (ExecutorService) methodHandle.invoke();
+				}
+				catch (Throwable e) {
+					virtualDisabled = true;
+					ExceptionUtil.rethrowIfNecessary(e);
+					LogUtil.log("threading", e);
+				}
 			}
 		}
 		return Executors.newFixedThreadPool(maxThreads);
+	}
+
+	public static void main(String[] args) {
+		ExecutorService t = createExecutorService();
+		print.e(t);
 	}
 
 	public static ExecutorService createExecutorService() {
@@ -251,7 +271,9 @@ public class ThreadUtil {
 				return (ExecutorService) methodHandle.invoke();
 			}
 			catch (Throwable e) {
+				print.e(e);
 				ExceptionUtil.rethrowIfNecessary(e);
+				LogUtil.log("threading", e);
 			}
 		}
 		return Executors.newSingleThreadExecutor();

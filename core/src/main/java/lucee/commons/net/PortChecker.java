@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import lucee.commons.io.IOUtil;
+import lucee.commons.io.log.LogUtil;
 
 public class PortChecker {
 
@@ -39,6 +40,7 @@ public class PortChecker {
 			return true;
 		}
 		catch (IOException e) {
+			LogUtil.warn("port-checker", e);
 		}
 		finally {
 			IOUtil.closeEL(s);

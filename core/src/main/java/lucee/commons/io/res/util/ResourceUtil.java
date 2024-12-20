@@ -770,6 +770,8 @@ public final class ResourceUtil {
 	public static File getCanonicalFileEL(File file) {
 		if (file == null) return file;
 		try {
+			if (SystemUtil.JAVA_VERSION > SystemUtil.JAVA_VERSION_11 )
+				return file.getAbsoluteFile();
 			return file.getCanonicalFile();
 		}
 		catch (IOException e) {
@@ -978,6 +980,7 @@ public final class ResourceUtil {
 							src.remove(false);
 						}
 						catch (IOException e) {
+							// LogUtil.warn("resource", e);
 						}
 					}
 				}
@@ -1158,6 +1161,7 @@ public final class ResourceUtil {
 				return ((HTTPResource) resource).getContentType();
 			}
 			catch (Exception e) {
+				LogUtil.warn("resource", e);
 			}
 		}
 		InputStream is = null;
@@ -1179,6 +1183,7 @@ public final class ResourceUtil {
 				return ((HTTPResource) resource).getContentType();
 			}
 			catch (Exception e) {
+				LogUtil.warn("resource", e);
 			}
 		}
 		InputStream is = null;

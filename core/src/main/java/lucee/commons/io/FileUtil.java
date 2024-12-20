@@ -31,6 +31,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.util.ResourceUtil;
 import lucee.loader.util.Util;
@@ -171,6 +172,7 @@ public final class FileUtil {
 			return true;
 		}
 		catch (Exception e) {
+			LogUtil.warn("file", e);
 		}
 
 		return false;

@@ -428,7 +428,7 @@ public final class FunctionLibFunction {
 			}
 			catch (Throwable t) {
 				ExceptionUtil.rethrowIfNecessary(t);
-				throw new RuntimeException(t);
+				throw new PageRuntimeException(t);
 			}
 		}
 		else {

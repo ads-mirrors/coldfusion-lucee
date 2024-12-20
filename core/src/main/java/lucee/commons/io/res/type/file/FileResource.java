@@ -40,6 +40,7 @@ import lucee.commons.cli.Command;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.ModeUtil;
 import lucee.commons.io.SystemUtil;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.ContentType;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.ResourceProvider;
@@ -88,7 +89,8 @@ public final class FileResource extends File implements Resource {
 				Files.copy(((File) res).toPath(), this.toPath(), COPY_OPTIONS);
 				return;
 			}
-			catch (Exception exception) {
+			catch (Exception e) {
+				LogUtil.warn("file-resource-provider", e);
 			}
 		}
 
@@ -112,7 +114,8 @@ public final class FileResource extends File implements Resource {
 				Files.copy(this.toPath(), ((File) res).toPath(), COPY_OPTIONS);
 				return;
 			}
-			catch (Exception exception) {
+			catch (Exception e) {
+				LogUtil.warn("file-resource-provider", e);
 			}
 		}
 
@@ -135,6 +138,21 @@ public final class FileResource extends File implements Resource {
 	@Override
 	public Resource getCanonicalResource() throws IOException {
 		return new FileResource(provider, getCanonicalPath());
+	}
+
+	public String getCanonicalPath() {
+		try {
+			// java 12 performance regression LDEV-5218
+			if (SystemUtil.JAVA_VERSION > SystemUtil.JAVA_VERSION_11 )
+				return Path.of(getPath()).toAbsolutePath().normalize().toString();
+			return super.getCanonicalPath();
+		}
+		catch (IOException e) {
+			return getAbsolutePath();
+		}
+		catch (java.nio.file.InvalidPathException ipe) {
+			return getPath();
+		}
 	}
 
 	@Override
@@ -270,6 +288,7 @@ public final class FileResource extends File implements Resource {
 				}
 				// ignore this
 				catch (FileAlreadyExistsException faee) {
+					LogUtil.warn("file-resource-provider", faee);
 				}
 				catch (IOException ioe) {
 					Resource p = getParentResource();
@@ -420,6 +439,7 @@ public final class FileResource extends File implements Resource {
 
 			}
 			catch (Exception e) {
+				LogUtil.warn("file-resource-provider", e);
 			}
 
 		}
@@ -443,6 +463,7 @@ public final class FileResource extends File implements Resource {
 
 			}
 			catch (Exception e) {
+				LogUtil.warn("file-resource-provider", e);
 			}
 
 		}

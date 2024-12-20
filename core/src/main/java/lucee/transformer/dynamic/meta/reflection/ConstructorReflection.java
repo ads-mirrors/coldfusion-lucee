@@ -2,6 +2,8 @@ package lucee.transformer.dynamic.meta.reflection;
 
 import java.io.IOException;
 
+import org.objectweb.asm.Type;
+
 import lucee.commons.lang.ExceptionUtil;
 import lucee.transformer.dynamic.meta.Constructor;
 import lucee.transformer.dynamic.meta.LegacyConstuctor;
@@ -28,5 +30,20 @@ class ConstructorReflection extends FunctionMemberReflection implements Construc
 		catch (Exception e) {
 			throw ExceptionUtil.toIOException(e);
 		}
+	}
+
+	@Override
+	public String getReturn() {
+		return getReturnClass().getName();
+	}
+
+	@Override
+	public Type getReturnType() {
+		return Type.getType(getDeclaringClass());
+	}
+
+	@Override
+	public Class getReturnClass() {
+		return getDeclaringClass();
 	}
 }

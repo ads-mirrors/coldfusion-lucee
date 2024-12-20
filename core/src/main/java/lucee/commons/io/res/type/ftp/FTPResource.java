@@ -32,6 +32,7 @@ import org.apache.commons.net.ftp.FTPFile;
 import lucee.commons.date.JREDateTimeUtil;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.ModeUtil;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.ResourceProvider;
 import lucee.commons.io.res.util.ResourceSupport;
@@ -387,6 +388,7 @@ public final class FTPResource extends ResourceSupport {
 			return true;
 		}
 		catch (IOException e) {
+			LogUtil.warn("ftp", e);
 		}
 		finally {
 			provider.returnClient(client);
@@ -580,6 +582,7 @@ public final class FTPResource extends ResourceSupport {
 
 		}
 		catch (IOException e) {
+			LogUtil.warn("ftp", e);
 		}
 		finally {
 			provider.returnClient(client);
@@ -618,6 +621,7 @@ public final class FTPResource extends ResourceSupport {
 			}
 		}
 		catch (IOException e) {
+			LogUtil.warn("ftp", e);
 		}
 		finally {
 			provider.returnClient(client);

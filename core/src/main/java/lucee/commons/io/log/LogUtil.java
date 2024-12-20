@@ -94,6 +94,10 @@ public final class LogUtil {
 		log(config, level, "application", type, msg);
 	}
 
+	public static void warn(String type, Throwable t) {
+		log((Config) null, type, t, Log.LEVEL_WARN, "application");
+	}
+
 	//////////
 	public static void log(String type, Throwable t) {
 		log((Config) null, type, t, Log.LEVEL_ERROR, "application");

@@ -33,6 +33,7 @@ import org.apache.http.protocol.ExecutionContext;
 import org.apache.http.protocol.HttpContext;
 
 import lucee.commons.io.IOUtil;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.net.http.HTTPResponse;
 import lucee.commons.net.http.HTTPResponseSupport;
@@ -104,6 +105,7 @@ public class HTTPResponse4Impl extends HTTPResponseSupport implements HTTPRespon
 			}
 		}
 		catch (Exception e) {
+			LogUtil.warn("http-response", e);
 		}
 		return null;
 	}

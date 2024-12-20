@@ -44,7 +44,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				application action="update" preciseMath=true;
 				expect( BitOr(2147483647, 1) ).toBe(2147483647);
 				application action="update" preciseMath=false;
-				expect( BitOr(2147483647, 1) ).toBe(2147483648);
+				expect( BitOr(2147483647, 1) ).toBe(2147483647);
 			});
 			
 			it("should return the non-zero value when one number is zero", function() {
