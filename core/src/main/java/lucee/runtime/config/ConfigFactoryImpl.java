@@ -2798,7 +2798,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 					if (existing != null) {
 						if (existing.cd.equals(cd)) continue;
 						try {
-							Method fin = Reflector.getMethod(existing.instance.getClass(), "finalize", new Class[0], null);
+							Method fin = Reflector.getMethod(existing.instance.getClass(), "finalize", new Class[0], true, null);
 							if (fin != null) {
 								fin.invoke(existing.instance, new Object[0]);
 							}
