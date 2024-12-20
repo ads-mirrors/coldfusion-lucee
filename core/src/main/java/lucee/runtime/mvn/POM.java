@@ -144,7 +144,21 @@ public class POM {
 		this.dependencyScope = dependencyScope;
 		this.log = log;
 
+		initXMLAsync();
 		cache.put(id(), this);
+
+	}
+
+	public void initXMLAsync() {
+		ThreadUtil.getThread(() -> {
+			synchronized (token) {
+				try {
+					initXML();
+				}
+				catch (IOException e) {
+				}
+			}
+		}, true).start();
 	}
 
 	void initXML() throws IOException {
