@@ -322,8 +322,7 @@ public class ClazzDynamic extends Clazz {
 		Method method = getMethod(methodName, args, nameCaseSensitive, convertArgument, convertComparsion, null);
 		if (method != null) return method;
 
-		throw new NoSuchMethodException(
-				"No matching method for " + clazz.getDeclaringClass().getName() + "." + methodName + "(" + Reflector.getDspMethods(Reflector.getClasses(args)) + ") found.");
+		throw new NoSuchMethodException("No matching method for " + clazz.getName() + "." + methodName + "(" + Reflector.getDspMethods(Reflector.getClasses(args)) + ") found.");
 	}
 
 	@Override
@@ -452,8 +451,7 @@ public class ClazzDynamic extends Clazz {
 		Constructor constructor = getConstructor(args, convertArgument, convertComparsion, null);
 		if (constructor != null) return constructor;
 
-		throw new NoSuchMethodException(
-				"No matching Constructor for " + clazz.getDeclaringClass().getName() + "(" + Reflector.getDspMethods(Reflector.getClasses(args)) + ") found.");
+		throw new NoSuchMethodException("No matching Constructor for " + clazz.getName() + "(" + Reflector.getDspMethods(Reflector.getClasses(args)) + ") found.");
 	}
 
 	@Override
