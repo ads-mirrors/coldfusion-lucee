@@ -128,8 +128,10 @@ public class DynamicInvoker {
 	 */
 	private Object invoke(Object objMaybeNull, Class<?> objClass, Key methodName, Object[] arguments, boolean nameCaseSensitive, boolean convertComparsion) throws Exception {
 		try {
-			return ((BiFunction<Object, Object[], Object>) getInstance(objClass, methodName, arguments, nameCaseSensitive, convertComparsion).getValue()).apply(objMaybeNull,
-					arguments);
+			ClazzDynamic clazzz = toClazzDynamic(objClass);
+
+			return ((BiFunction<Object, Object[], Object>) getInstance(clazzz, getFunctionMember(clazzz, methodName, arguments, nameCaseSensitive, convertComparsion), arguments))
+					.apply(objMaybeNull, arguments);
 		}
 		catch (IncompatibleClassChangeError | IllegalStateException e) {
 			if (log != null) log.error("dynamic", e);
@@ -154,87 +156,38 @@ public class DynamicInvoker {
 	private static double clsLoader = 0;
 	private static double loadInstance = 0;
 
-	public Pair<FunctionMember, Object> getInstance(Class<?> clazz, Key methodName, Object[] arguments, boolean nameCaseSensitive, boolean convertComparsion)
-			throws NoSuchMethodException, IOException, UnmodifiableClassException, InstantiationException, IllegalAccessException, IllegalArgumentException,
-			InvocationTargetException, SecurityException {
+	public ClazzDynamic toClazzDynamic(Class<?> clazz) throws IOException {
+		return ClazzDynamic.getInstance(clazz, root, log);
+	}
 
-		// double start = SystemUtil.millis();
-		boolean isConstr = methodName == null;
-		// Clazz clazzz = getClazz(clazz);
-		ClazzDynamic clazzz = ClazzDynamic.getInstance(clazz, root, log);
-		// Clazz clazzz = new ClazzReflection(clazz);
-		// getClass -= start;
-		// start = SystemUtil.millis();
-		// getClass += start;
-
-		lucee.transformer.dynamic.meta.FunctionMember fm = isConstr ? clazzz.getConstructor(arguments, true, convertComparsion)
+	private lucee.transformer.dynamic.meta.FunctionMember getFunctionMember(ClazzDynamic clazzz, Key methodName, Object[] arguments, boolean nameCaseSensitive,
+			boolean convertComparsion) throws NoSuchMethodException {
+		return (methodName == null) ? clazzz.getConstructor(arguments, true, convertComparsion)
 				: clazzz.getMethod(methodName.getString(), arguments, nameCaseSensitive, true, convertComparsion);
-
-		// match -= start;
-		// start = SystemUtil.millis();
-		// match += start;
-		// clazz = fm.getDeclaringClass(); // we wanna go as low as possible, to be as open as possible also
-		// this avoid not allow to access
-
-		// getDeclaringClass -= start;
-		// start = SystemUtil.millis();
-		// getDeclaringClass += start;
-
-		String className = fm.getClassName();
-
-		// pathName -= start;
-		// start = SystemUtil.millis();
-		// pathName += start;
-
-		DynamicClassLoader loader = clazzz.getDynamicClassLoader(this);
-
-		// clsLoader -= start;
-		// start = SystemUtil.millis();
-		// clsLoader += start;
-
-		if (loader.hasClass(className)) {
-			try {
-				return new Pair<FunctionMember, Object>(fm, loader.loadInstance(className));
-
-			}
-			catch (Exception e) {
-				// simply ignore when fail
-			}
-			// finally {
-			// loadInstance -= start;
-			// start = SystemUtil.millis();
-			// loadInstance += start;
-			// }
-		}
-
-		return createInstance(clazzz, fm, isConstr, className, loader);
-
 	}
 
-	public Pair<FunctionMember, Object> getInstance(Class<?> clazz, final lucee.transformer.dynamic.meta.FunctionMember fm, Object[] arguments, boolean nameCaseSensitive,
-			boolean convertComparsion) throws NoSuchMethodException, IOException, UnmodifiableClassException, InstantiationException, IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException, SecurityException {
+	public Object getInstance(ClazzDynamic clazzz, final lucee.transformer.dynamic.meta.FunctionMember fm, Object[] arguments) throws InstantiationException,
+			IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, UnmodifiableClassException, IOException {
 
-		boolean isConstr = fm instanceof lucee.transformer.dynamic.meta.Constructor;
-		ClazzDynamic clazzz = ClazzDynamic.getInstance(clazz, root, log);
+		// ClazzDynamic clazzz = ClazzDynamic.getInstance(clazz, root, log);
 		String className = fm.getClassName();
 		DynamicClassLoader loader = clazzz.getDynamicClassLoader(this);
 
 		if (loader.hasClass(className)) {
 			try {
-				return new Pair<FunctionMember, Object>(fm, loader.loadInstance(className));
+				return loader.loadInstance(className);
 
 			}
 			catch (Exception e) {
 				// simply ignore when fail
 			}
 		}
-		return createInstance(clazzz, fm, isConstr, className, loader);
+		return createInstance(clazzz, fm, fm instanceof lucee.transformer.dynamic.meta.Constructor, className, loader);
 	}
 
-	private Pair<FunctionMember, Object> createInstance(ClazzDynamic clazzz, lucee.transformer.dynamic.meta.FunctionMember fm, boolean isConstr, String className,
-			DynamicClassLoader loader) throws NoSuchMethodException, IOException, UnmodifiableClassException, InstantiationException, IllegalAccessException,
-			IllegalArgumentException, InvocationTargetException, SecurityException {
+	private Object createInstance(ClazzDynamic clazzz, lucee.transformer.dynamic.meta.FunctionMember fm, boolean isConstr, String className, DynamicClassLoader loader)
+			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException,
+			UnmodifiableClassException, IOException {
 
 		synchronized (SystemUtil.createToken("dyninvocer", className)) {
 			Class[] parameterClasses = fm.getArgumentClasses();
@@ -348,8 +301,7 @@ public class DynamicInvoker {
 
 			cw.visitEnd();
 			byte[] barr = cw.toByteArray();
-			Object result = loader.loadInstance(className, barr);
-			return new Pair<FunctionMember, Object>(fm, result);
+			return loader.loadInstance(className, barr);
 		}
 	}
 

@@ -340,6 +340,9 @@ public class ClazzDynamic extends Clazz {
 			}
 		}
 
+		// in case there are no arguments the code below will not find any match, nothing to convert
+		if (args.length == 0) return defaultValue;
+
 		// cache
 		StringBuilder sb = new StringBuilder(100).append(methodName).append(';'); // append(id()).
 		for (Object arg: args) {
@@ -467,6 +470,9 @@ public class ClazzDynamic extends Clazz {
 				return fm;
 			}
 		}
+
+		// in case there are no arguments the code below will not find any match, nothing to convert
+		if (args.length == 0) return defaultValue;
 
 		// convert comparsion
 		Pair<Constructor, Object[]> result = null;

@@ -23,15 +23,14 @@ import java.util.function.BiFunction;
 
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.ExceptionUtil;
-import lucee.commons.lang.Pair;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.Collection.Key;
 import lucee.transformer.dynamic.DynamicInvoker;
 import lucee.transformer.dynamic.meta.Clazz;
-import lucee.transformer.dynamic.meta.FunctionMember;
 import lucee.transformer.dynamic.meta.LegacyMethod;
 import lucee.transformer.dynamic.meta.Method;
+import lucee.transformer.dynamic.meta.dynamic.ClazzDynamic;
 
 /**
  * class holds a Method and the parameter to call it
@@ -41,14 +40,14 @@ public final class MethodInstance {
 	private Class clazz;
 	private Key methodName;
 	private Object[] args;
-	private Pair<FunctionMember, Object> result;
 	private boolean convertComparsion;
 	private boolean nameCaseSensitive;
-	private FunctionMember fm;
+	private Method method;
+	private Object instance;
 
-	public MethodInstance(Class clazz, FunctionMember fm, Object[] args, boolean nameCaseSensitive, boolean convertComparsion) {
+	public MethodInstance(Class clazz, Method method, Object[] args, boolean nameCaseSensitive, boolean convertComparsion) {
 		this.clazz = clazz;
-		this.fm = fm;
+		this.method = method;
 		this.args = args;
 		this.convertComparsion = convertComparsion;
 		this.nameCaseSensitive = nameCaseSensitive;
@@ -65,7 +64,7 @@ public final class MethodInstance {
 	public Object invoke(Object o) throws PageException {
 		// if (Clazz.allowReflection()) print.e(Clazz.allowReflection());
 		try {
-			return ((BiFunction<Object, Object, Object>) getResult().getValue()).apply(o, args);
+			return ((BiFunction<Object, Object, Object>) getInstance()).apply(o, args);
 		}
 		catch (IncompatibleClassChangeError | ClassFormatError | ClassCastException e) { // java.lang.ClassCastException
 			if (!Clazz.allowReflection()) throw e;
@@ -90,8 +89,10 @@ public final class MethodInstance {
 	public static Object invoke(Object obj, Key methodName, Object[] args, boolean nameCaseSensitive, boolean convertComparsion) throws PageException {
 		// if (Clazz.allowReflection()) print.e(Clazz.allowReflection());
 		try {
-			return ((BiFunction<Object, Object, Object>) DynamicInvoker.getExistingInstance().getInstance(obj.getClass(), methodName, args, nameCaseSensitive, convertComparsion)
-					.getValue()).apply(obj, args);
+			DynamicInvoker di = DynamicInvoker.getExistingInstance();
+			ClazzDynamic clazzz = di.toClazzDynamic(obj.getClass());
+			return ((BiFunction<Object, Object, Object>) di.getInstance(clazzz, clazzz.getMethod(methodName.getString(), args, nameCaseSensitive, true, convertComparsion), args))
+					.apply(obj, args);
 		}
 		catch (IncompatibleClassChangeError | ClassFormatError | ClassCastException e) { // java.lang.ClassCastException
 			if (!Clazz.allowReflection()) throw e;
@@ -123,13 +124,9 @@ public final class MethodInstance {
 		return args;
 	}
 
-	public Method getMethod() throws PageException {
-		return (Method) getResult().getName();
-	}
-
 	public Method getMethod(Method defaultValue) {
 		try {
-			return (Method) getResult().getName();
+			return getMethod();
 		}
 		catch (PageException e) {
 			return defaultValue;
@@ -145,28 +142,38 @@ public final class MethodInstance {
 		}
 
 		try {
-			FunctionMember fm = getResult().getName();
-			return fm != null;
+			return getMethod() != null;
 		}
 		catch (PageException e) {
 			return false;
 		}
 	}
 
-	private Pair<FunctionMember, Object> getResult() throws PageException {
-		if (result == null) {
+	public Method getMethod() throws PageException {
+		getInstance();
+		return method;
+	}
+
+	private Object getInstance() throws PageException {
+		if (instance == null) {
 			try {
-				result = fm != null ?
-
-						DynamicInvoker.getExistingInstance().getInstance(clazz, fm, args, nameCaseSensitive, convertComparsion) :
-
-						DynamicInvoker.getExistingInstance().getInstance(clazz, methodName, args, nameCaseSensitive, convertComparsion);
+				DynamicInvoker di = DynamicInvoker.getExistingInstance();
+				ClazzDynamic clazzz = di.toClazzDynamic(clazz);
+				if (method == null) {
+					method = clazzz.getMethod(methodName.getString(), args, nameCaseSensitive, true, convertComparsion);
+				}
+				instance = di.getInstance(clazzz, method, args);
 			}
 			catch (Throwable t) {
 				ExceptionUtil.rethrowIfNecessary(t);
 				throw Caster.toPageException(t);
 			}
 		}
-		return result;
+		return instance;
+	}
+
+	public lucee.transformer.dynamic.meta.FunctionMember getMethod(ClazzDynamic clazzz, Key methodName, Object[] arguments, boolean nameCaseSensitive, boolean convertComparsion)
+			throws NoSuchMethodException {
+		return clazzz.getMethod(methodName.getString(), arguments, nameCaseSensitive, true, convertComparsion);
 	}
 }

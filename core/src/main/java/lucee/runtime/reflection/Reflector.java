@@ -699,7 +699,7 @@ public final class Reflector {
 	}
 
 	public static MethodInstance getMethodInstance(Class clazz, final FunctionMember fm, Object[] args, boolean nameCaseSensitive, boolean exactMatchOnly) {
-		return new MethodInstance(clazz, fm, args, nameCaseSensitive, !exactMatchOnly);
+		return new MethodInstance(clazz, (Method) fm, args, nameCaseSensitive, !exactMatchOnly);
 	}
 
 	public static MethodInstance getMethodInstance(Class clazz, final Collection.Key methodName, Object[] args, boolean nameCaseSensitive, boolean exactMatchOnly) {
