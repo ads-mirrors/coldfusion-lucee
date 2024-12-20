@@ -130,29 +130,29 @@ public final class FileResource extends File implements Resource {
 
 	}
 
+	public Resource getNormalizedResource() {
+		return new FileResource(provider, getNormalizedPath());
+	}
+
+	public String getNormalizedPath() {
+		return toPath().normalize().toString();
+	}
+
 	@Override
 	public Resource getAbsoluteResource() {
 		return new FileResource(provider, getAbsolutePath());
 	}
 
+	@Deprecated // use getNormalizedResource instead
 	@Override
 	public Resource getCanonicalResource() throws IOException {
-		return new FileResource(provider, getCanonicalPath());
+		return new FileResource(provider, getNormalizedPath());
 	}
 
+	@Deprecated // use getNormalizedPath instead
+	@Override
 	public String getCanonicalPath() {
-		try {
-			// java 12 performance regression LDEV-5218
-			if (SystemUtil.JAVA_VERSION > SystemUtil.JAVA_VERSION_11 )
-				return Path.of(getPath()).toAbsolutePath().normalize().toString();
-			return super.getCanonicalPath();
-		}
-		catch (IOException e) {
-			return getAbsolutePath();
-		}
-		catch (java.nio.file.InvalidPathException ipe) {
-			return getPath();
-		}
+		return toPath().normalize().toString();
 	}
 
 	@Override

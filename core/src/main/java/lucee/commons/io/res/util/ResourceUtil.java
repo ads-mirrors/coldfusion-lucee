@@ -737,7 +737,9 @@ public final class ResourceUtil {
 	 *         pathname
 	 *
 	 * @throws SecurityException If a required system property value cannot be accessed.
+	 * @deprecated use instead getNormalizedPathEL
 	 */
+	@Deprecated
 	public static String getCanonicalPathEL(Resource res) {
 		try {
 			return res.getCanonicalPath();
@@ -756,7 +758,9 @@ public final class ResourceUtil {
 	 *         pathname
 	 *
 	 * @throws SecurityException If a required system property value cannot be accessed.
+	 * @deprecated use instead getNormalizedPathEL
 	 */
+	@Deprecated
 	public static Resource getCanonicalResourceEL(Resource res) {
 		if (res == null) return res;
 		try {
@@ -767,16 +771,29 @@ public final class ResourceUtil {
 		}
 	}
 
-	public static File getCanonicalFileEL(File file) {
-		if (file == null) return file;
+	public static String getNormalizedPathEL(Resource res) {
 		try {
-			if (SystemUtil.JAVA_VERSION > SystemUtil.JAVA_VERSION_11 )
-				return file.getAbsoluteFile();
-			return file.getCanonicalFile();
+			if (res instanceof FileResource) return ((FileResource) res).getNormalizedPath();
+			return res.getCanonicalPath();
 		}
 		catch (IOException e) {
-			return file.getAbsoluteFile();
+			return res.toString();
 		}
+	}
+
+	public static Resource getNormalizedResourceEL(Resource res) {
+		try {
+			if (res instanceof FileResource) return ((FileResource) res).getNormalizedResource();
+			return res.getCanonicalResource();
+		}
+		catch (IOException e) {
+			return res.getAbsoluteResource();
+		}
+	}
+
+	public static File getCanonicalFileEL(File file) {
+		if (file == null) return file;
+		return file.toPath().normalize().toFile();
 	}
 
 	/**

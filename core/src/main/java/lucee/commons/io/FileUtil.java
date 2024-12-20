@@ -234,4 +234,12 @@ public final class FileUtil {
 		}
 	}
 
+	public static String getNormalizedPath(File file) {
+		return file.toPath().normalize().toString();
+	}
+
+	public static File getNormalizedFile(File file) {
+		return file.toPath().normalize().toFile();
+	}
+
 }
