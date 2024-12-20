@@ -22,6 +22,7 @@ import lucee.loader.util.Util;
 import lucee.runtime.Component;
 import lucee.runtime.PageContext;
 import lucee.runtime.config.Config;
+import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.thread.SerializableCookie;
@@ -85,7 +86,7 @@ public class LSPEndpointFactory {
 	public Component getComponent() throws PageException, ServletException {
 		// if component was not yet created, create it
 		if (cfc == null && !stateless) {
-			cfc = engine.getCreationUtil().createComponentFromName(createPageContext(), cfcPath);
+			cfc = engine.getCreationUtil().createComponentFromName(createPageContext(false), cfcPath);
 		}
 		return cfc;
 	}
@@ -200,9 +201,12 @@ public class LSPEndpointFactory {
 	}
 
 	public String processMessage(String jsonMessage) {
+		PageContext previousPC = null, pc = null;
 		try {
 			log.info("lsp", "Received message: " + jsonMessage);
-			PageContext pc = createPageContext();
+			// just in case there is a previous Pagcontext, safe it
+			previousPC = ThreadLocalPageContext.get();
+			pc = createPageContext(true);
 			if (cfc == null || stateless) {
 				cfc = engine.getCreationUtil().createComponentFromName(pc, cfcPath);
 			}
@@ -214,6 +218,9 @@ public class LSPEndpointFactory {
 		catch (Exception e) {
 			error("lsp", e);
 			return null;
+		}
+		finally {
+			releasePageContext(pc, previousPC);
 		}
 	}
 
@@ -240,13 +247,21 @@ public class LSPEndpointFactory {
 		return null;
 	}
 
-	public static PageContext createPageContext() throws ServletException {
+	public static PageContext createPageContext(boolean register) throws ServletException {
 		return CFMLEngineFactory.getInstance().createPageContext(new File("."), "localhost", "/", "", SerializableCookie.COOKIES0, null, null, null,
-				DevNullOutputStream.DEV_NULL_OUTPUT_STREAM, -1, false);
+				DevNullOutputStream.DEV_NULL_OUTPUT_STREAM, -1, register);
 	}
 
-	public static void releasePageContext(PageContext pc) {
-		CFMLEngineFactory.getInstance().releasePageContext(pc, true);
+	/**
+	 * unregister temporary PageContext and register again any PageContext that was already there (just
+	 * in case)
+	 * 
+	 * @param pc
+	 * @param previousPC
+	 */
+	public static void releasePageContext(PageContext pc, PageContext previousPC) {
+		if (pc != null) CFMLEngineFactory.getInstance().releasePageContext(pc, true);
+		if (previousPC != null) CFMLEngineFactory.getInstance().registerThreadPageContext(previousPC);
 	}
 
 }
