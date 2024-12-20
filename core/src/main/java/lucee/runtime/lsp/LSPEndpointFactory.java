@@ -22,6 +22,7 @@ import lucee.loader.util.Util;
 import lucee.runtime.Component;
 import lucee.runtime.PageContext;
 import lucee.runtime.config.Config;
+import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.thread.SerializableCookie;
 
@@ -79,6 +80,14 @@ public class LSPEndpointFactory {
 
 	public static LSPEndpointFactory getExistingInstance() {
 		return instance;
+	}
+
+	public Component getComponent() throws PageException, ServletException {
+		// if component was not yet created, create it
+		if (cfc == null && !stateless) {
+			cfc = engine.getCreationUtil().createComponentFromName(createPageContext(), cfcPath);
+		}
+		return cfc;
 	}
 
 	private LSPEndpointFactory start() throws IOException {
