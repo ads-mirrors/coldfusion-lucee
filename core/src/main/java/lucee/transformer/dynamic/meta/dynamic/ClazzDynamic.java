@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.felix.framework.BundleWiringImpl.BundleClassLoader;
 import org.objectweb.asm.ClassReader;
@@ -80,66 +83,39 @@ public class ClazzDynamic extends Clazz {
 			synchronized (clazz) {
 				sr = classes.get(clazz);
 				if (sr == null || (cd = sr.get()) == null) {
-					String id = generateClassLoderId(clazz);
+					// String id = generateClassLoderId(clazz);
 					// generateClassLoderId += (SystemUtil.millis() - start);
 					// start = SystemUtil.millis();
-					StringBuilder sbClassPath = new StringBuilder();
-					sbClassPath.append(clazz.getName().replace('.', '/')).append('-').append(id).append(".ser");
-					Resource ser = dir.getRealResource(getPackagePrefix() + sbClassPath.toString());
+					// StringBuilder sbClassPath = new StringBuilder();
+					// sbClassPath.append(clazz.getName().replace('.', '/')).append('-').append(id).append(".ser");
+					// Resource ser = dir.getRealResource(getPackagePrefix() + sbClassPath.toString());
 
-					// path += (SystemUtil.millis() - start);
-					// start = SystemUtil.millis();
-					if (id != null && ser.isFile()) {
-						// isFile += (SystemUtil.millis() - start);
-						// start = SystemUtil.millis();
-						if (log != null) log.info("dynamic", "found metadata for [" + clazz.getName() + "]in from serialized file:" + ser);
-						try {
-							cd = (ClazzDynamic) deserialize(getClassLoader(clazz), ser.getInputStream());
-							cd.clazz = clazz;
-							// deserialize += (SystemUtil.millis() - start);
-							// start = SystemUtil.millis();
-							if (log != null) log.info("dynamic", "loaded metadata for [" + clazz.getName() + "] from serialized file:" + ser);
-							classes.put(clazz, new SoftReference<ClazzDynamic>(cd));
-							// put += (SystemUtil.millis() - start);
-							// start = SystemUtil.millis();
-						}
-						catch (Exception e) {
-							if (log != null) log.error("dynamic", e);
-						}
-					}
-					if (cd == null) {
-						try {
-							if (log != null) log.info("dynamic", "extract metadata from [" + clazz.getName() + "]");
-							cd = new ClazzDynamic(clazz, id, log);
-							// neww += (SystemUtil.millis() - start);
-							// start = SystemUtil.millis();
-							if (id != null) {
-								final ClazzDynamic _cd = cd;
-								ThreadUtil.getThread(() -> {
-									// Thread.ofVirtual().start(() -> {
-									try {
-										ser.getParentResource().mkdirs();
-										serialize(_cd, ser.getOutputStream());
-										if (log != null) {
-											log.info("dynamic", "stored metadata for [" + clazz.getName() + "] to serialized file:" + ser);
-										}
-									}
-									catch (IOException e) {
-										if (log != null) {
-											log.error("dynamic", "Failed to serialize metadata for [" + clazz.getName() + "] to file: " + ser, e);
-										}
-									}
-								}, true).start();
+					/*
+					 * if (id != null && ser.isFile()) { if (log != null) log.info("dynamic", "found metadata for [" +
+					 * clazz.getName() + "]in from serialized file:" + ser); try { cd = (ClazzDynamic)
+					 * deserialize(getClassLoader(clazz), ser.getInputStream(), id + "->" + clazz.getName() + ":" +
+					 * ser); cd.clazz = clazz; if (log != null) log.info("dynamic", "loaded metadata for [" +
+					 * clazz.getName() + "] from serialized file:" + ser); classes.put(clazz, new
+					 * SoftReference<ClazzDynamic>(cd)); } catch (Exception e) { if (log != null) log.error("dynamic",
+					 * e); } }
+					 */
+					// if (cd == null) {
+					if (log != null) log.info("dynamic", "extract metadata from [" + clazz.getName() + "]");
+					cd = new ClazzDynamic(clazz, log);
 
-								// serialize += (SystemUtil.millis() - start);
-								// start = SystemUtil.millis();
-							}
-						}
-						catch (IOException ioe) {
-							// print.e(ioe);
-							throw ioe;
-						}
-					}
+					// if (id != null) {
+					// final ClazzDynamic _cd = cd;
+					/*
+					 * ThreadUtil.getThread(() -> { try { ser.getParentResource().mkdirs(); print.e("=>" +
+					 * _cd.getClass().getName()); serialize(_cd, ser.getOutputStream()); if (log != null) {
+					 * log.info("dynamic", "stored metadata for [" + clazz.getName() + "] to serialized file:" + ser); }
+					 * } catch (IOException e) { if (log != null) { log.error("dynamic",
+					 * "Failed to serialize metadata for [" + clazz.getName() + "] to file: " + ser, e); } } },
+					 * true).start();
+					 */
+					// }
+
+					// }
 				}
 			}
 		}
@@ -182,10 +158,9 @@ public class ClazzDynamic extends Clazz {
 		return null;
 	}
 
-	private ClazzDynamic(Class clazz, String clid, Log log) throws IOException {
+	private ClazzDynamic(Class clazz, Log log) throws IOException {
 		this.clazz = clazz;
-		this.clid = clid;
-		Map<String, FunctionMember> members = getFunctionMembers(this.clid, clazz, log);
+		Map<String, FunctionMember> members = getFunctionMembers(clazz, log);
 
 		LinkedList<Method> tmpMethods = new LinkedList<>();
 		LinkedList<Method> tmpDeclaredMethods = new LinkedList<>();
@@ -525,11 +500,11 @@ public class ClazzDynamic extends Clazz {
 		return list;
 	}
 
-	private static Map<String, FunctionMember> getFunctionMembers(String clid, final Class clazz, Log log) throws IOException {
-		return _getFunctionMembers(clid, clazz, log);
+	private static Map<String, FunctionMember> getFunctionMembers(final Class clazz, Log log) throws IOException {
+		return _getFunctionMembers(clazz, log);
 	}
 
-	private static Map<String, FunctionMember> _getFunctionMembers(String clid, final Class clazz, Log log) throws IOException {
+	private static Map<String, FunctionMember> _getFunctionMembers(final Class clazz, Log log) throws IOException {
 
 		final Map<String, FunctionMember> members = new LinkedHashMap<>();
 		Map<String, FunctionMember> existing = membersCollection.get(clazz);
@@ -578,7 +553,7 @@ public class ClazzDynamic extends Clazz {
 					try {
 						// add(members, _getFunctionMembers(clid,
 						// cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), log));
-						add(members, _getFunctionMembers(clid, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), log));
+						add(members, _getFunctionMembers(cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), log));
 					}
 					catch (IllegalArgumentException iae) {
 						String v = ASMUtil.getJavaVersionFromException(iae, null);
@@ -602,7 +577,7 @@ public class ClazzDynamic extends Clazz {
 						try {
 							// add(members, _getFunctionMembers(clid,
 							// cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), log));
-							add(members, _getFunctionMembers(clid, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), log));
+							add(members, _getFunctionMembers(cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), log));
 						}
 						catch (Exception e) {
 							if (log != null) log.error("dynamic", e);
@@ -847,7 +822,23 @@ public class ClazzDynamic extends Clazz {
 		}
 	}
 
-	public static Object deserialize(ClassLoader cl, InputStream is) throws IOException, ClassNotFoundException {
+	private static Object deserializeAsync(ClassLoader cl, InputStream is, String path) throws TimeoutException, InterruptedException, ExecutionException {
+		return ThreadUtil.createExecutorService().submit(() -> {
+			ObjectInputStream ois = null;
+			Object o;
+			try {
+				ois = new ObjectInputStreamImpl(cl, is);
+				o = ois.readObject();
+			}
+			finally {
+				IOUtil.close(ois);
+			}
+			return o;
+		}).get(10, TimeUnit.MILLISECONDS);
+	}
+
+	private static Object deserialize(ClassLoader cl, InputStream is) throws IOException, ClassNotFoundException {
+
 		ObjectInputStream ois = null;
 		Object o = null;
 		try {
