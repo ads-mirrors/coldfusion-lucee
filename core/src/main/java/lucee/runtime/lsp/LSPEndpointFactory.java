@@ -37,6 +37,8 @@ public class LSPEndpointFactory {
 	private int port;
 	private String cfcPath;
 	private Log log;
+	private boolean stateless;
+	private Component cfc;
 	private static LSPEndpointFactory instance;
 
 	private LSPEndpointFactory(Config config) {
@@ -45,6 +47,7 @@ public class LSPEndpointFactory {
 		log = getLog(config);
 		port = engine.getCastUtil().toIntValue(SystemUtil.getSystemPropOrEnvVar("lucee.lsp.port", null), DEFAULT_LSP_PORT);
 		cfcPath = engine.getCastUtil().toString(SystemUtil.getSystemPropOrEnvVar("lucee.lsp.component", null), DEFAULT_COMPONENT);
+		stateless = engine.getCastUtil().toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.lsp.stateless", null), false);
 		if (Util.isEmpty(cfcPath, true)) cfcPath = DEFAULT_COMPONENT;
 
 		log.info("lsp", "LSP server port: " + port);
@@ -160,7 +163,7 @@ public class LSPEndpointFactory {
 						if (buffer.length() < contentStart + contentLength) break;
 
 						// Extract the JSON message
-						String jsonMessage = content.substring(contentStart, contentStart + contentLength);
+						String jsonMessage = content.substring(contentStart, contentStart + contentLength).trim();
 
 						// Here you would call your component to handle the message
 						String response = processMessage(jsonMessage);
@@ -191,8 +194,9 @@ public class LSPEndpointFactory {
 		try {
 			log.info("lsp", "Received message: " + jsonMessage);
 			PageContext pc = createPageContext();
-			Component cfc = engine.getCreationUtil().createComponentFromName(pc, cfcPath);
-
+			if (cfc == null || stateless) {
+				cfc = engine.getCreationUtil().createComponentFromName(pc, cfcPath);
+			}
 			String response = engine.getCastUtil().toString(cfc.call(pc, "execute", new Object[] { jsonMessage }));
 			log.info("lsp", "response from component [" + cfcPath + "]: " + response);
 
