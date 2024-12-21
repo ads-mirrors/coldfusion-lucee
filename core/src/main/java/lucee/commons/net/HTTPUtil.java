@@ -27,9 +27,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,7 +39,6 @@ import javax.servlet.ServletResponse;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
-import org.apache.http.message.BasicHeader;
 
 import lucee.commons.digest.Hash;
 import lucee.commons.io.IOUtil;
@@ -52,6 +49,10 @@ import lucee.commons.lang.StringList;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.lang.mimetype.ContentType;
 import lucee.commons.lang.mimetype.MimeType;
+import lucee.commons.net.header.HeadersCollection;
+import lucee.commons.net.header.HeadersHTTPResponse;
+import lucee.commons.net.header.HeadersHttpResponseApache;
+import lucee.commons.net.header.HeadersHttpURLConnection;
 import lucee.commons.net.http.HTTPEngine;
 import lucee.commons.net.http.HTTPResponse;
 import lucee.commons.net.http.httpclient.HTTPEngine4Impl;
@@ -698,62 +699,6 @@ public final class HTTPUtil {
 		return StringUtil.indexOfIgnoreCase(url.getProtocol(), "https") != -1;
 	}
 
-	public static interface HeadersCollection {
-		public Header[] getHeaders(String name);
-	}
-
-	public static class HeadersHttpURLConnection implements HeadersCollection {
-
-		private HttpURLConnection conn;
-
-		public HeadersHttpURLConnection(HttpURLConnection conn) {
-			this.conn = conn;
-		}
-
-		@Override
-		public Header[] getHeaders(String name) {
-			String val = conn.getHeaderField(name);
-			if (!StringUtil.isEmpty(val, true)) {
-				return new Header[] { new BasicHeader(name, val) };
-			}
-			return null;
-		}
-	}
-
-	public static class HeadersHTTPResponse implements HeadersCollection {
-
-		private HTTPResponse response;
-
-		public HeadersHTTPResponse(HTTPResponse response) {
-			this.response = response;
-		}
-
-		@Override
-		public Header[] getHeaders(String name) {
-			List<Header> list = new ArrayList<>();
-			for (lucee.commons.net.http.Header header: response.getAllHeaders()) {
-				if (name.equals(header.getName())) {
-					list.add(new BasicHeader(header.getName(), header.getValue()));
-				}
-			}
-			return list.toArray(new Header[list.size()]);
-		}
-	}
-
-	public static class HeadersHttpResponse implements HeadersCollection {
-
-		private HttpResponse response;
-
-		public HeadersHttpResponse(HttpResponse response) {
-			this.response = response;
-		}
-
-		@Override
-		public Header[] getHeaders(String name) {
-			return response.getHeaders(name);
-		}
-	}
-
 	public static void validateDownload(URL url, HttpURLConnection conn, Resource res, boolean deleteFileWhenInvalid, Exception cause) throws IOException {
 		_validateDownload(url, new HeadersHttpURLConnection(conn), res, deleteFileWhenInvalid, cause);
 	}
@@ -763,7 +708,7 @@ public final class HTTPUtil {
 	}
 
 	public static void validateDownload(URL url, HttpResponse rsp, Resource res, boolean deleteFileWhenInvalid, Exception cause) throws IOException {
-		_validateDownload(url, new HeadersHttpResponse(rsp), res, deleteFileWhenInvalid, cause);
+		_validateDownload(url, new HeadersHttpResponseApache(rsp), res, deleteFileWhenInvalid, cause);
 	}
 
 	private static void _validateDownload(URL url, HeadersCollection headersCollection, Resource res, boolean deleteFileWhenInvalid, Exception cause) throws IOException {
