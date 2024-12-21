@@ -1683,7 +1683,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 			return pc.getConfig();
 		}
 		finally {
-			pc.getConfig().getFactory().releaseLuceePageContext(pc, false);
+			if (pc != null) pc.getConfig().getFactory().releaseLuceePageContext(pc, false);
 		}
 
 	}
