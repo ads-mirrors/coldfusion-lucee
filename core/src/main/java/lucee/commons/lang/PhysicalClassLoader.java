@@ -237,15 +237,10 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 
 	@Override
 	public Class<?> loadClass(String name, byte[] barr) throws UnmodifiableClassException {
-		Class<?> clazz = null;
+		// Class<?> clazz = null;
+		Class<?> clazz = findLoadedClass(name);
 
 		synchronized (SystemUtil.createToken("PhysicalClassLoader:load", name)) {
-			try {
-				clazz = loadClass(name, false, false); // we do not load existing class from disk
-			}
-			catch (ClassNotFoundException cnf) {
-				LogUtil.warn("physical-classloader", cnf);
-			}
 			if (clazz == null) return _loadClass(name, barr, false);
 			return rename(clazz, barr);
 		}
@@ -253,12 +248,13 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 
 	@Override
 	protected Class<?> findClass(String name) throws ClassNotFoundException {
-		ClassNotFoundException cnfe = null;
-		try {
+		/*
+		 * ClassNotFoundException cnfe = null; try { return super.findClass(name); } catch
+		 * (ClassNotFoundException e) { cnfe = e; }
+		 */
+
+		if (super.findResource(name.replace('.', '/').concat(".class")) != null) {
 			return super.findClass(name);
-		}
-		catch (ClassNotFoundException e) {
-			cnfe = e;
 		}
 
 		if (addionalClassLoader != null) {
@@ -273,7 +269,7 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 		synchronized (SystemUtil.createToken("PhysicalClassLoader:load", name)) {
 			Resource res = directory.getRealResource(name.replace('.', '/').concat(".class"));
 			if (!res.isFile()) {
-				if (cnfe != null) throw cnfe;
+				// if (cnfe != null) throw cnfe;
 				throw new ClassNotFoundException("Class [" + name + "] is invalid or doesn't exist");
 			}
 
