@@ -40,6 +40,7 @@ import lucee.runtime.config.Identification;
 import lucee.runtime.db.ClassDefinition;
 import lucee.runtime.op.Caster;
 import lucee.runtime.osgi.OSGiUtil;
+import lucee.runtime.reflection.Reflector;
 import lucee.runtime.type.util.ArrayUtil;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
@@ -656,14 +657,9 @@ public final class TagLibTag {
 		Class clazz = getTagClassDefinition().getClazz(null);
 		if (clazz == null) return false;
 
-		try {
-			java.lang.reflect.Method method = clazz.getMethod("hasBody", new Class[] { boolean.class });
-			if (method == null) return false;
-			return method.getReturnType() == void.class;
-		}
-		catch (Exception e) {
-		}
-		return false;
+		Method method = Reflector.getMethod(clazz, "hasBody", new Class[] { boolean.class }, true, null);
+		if (method == null) return false;
+		return method.getReturnClass() == void.class;
 	}
 
 	/**
