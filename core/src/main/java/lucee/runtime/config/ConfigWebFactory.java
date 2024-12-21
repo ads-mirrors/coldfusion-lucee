@@ -1738,7 +1738,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 				try {
 					// first we delete the physical classes
-					config.getClassDirectory().remove(true);
+					if (config.getClassDirectory().exists()) config.getClassDirectory().remove(true);
 
 					// now we force the pagepools to flush
 					flushPageSourcePool(config.getMappings());
