@@ -1135,7 +1135,7 @@ public final class CFMLTransformer {
 					if (StringUtil.isEmpty(names)) throw createTemplateException(cfml, "Attribute [" + id + "] is not allowed for tag [" + tag.getFullName() + "]", tag);
 
 					try {
-						names = ListUtil.sort(names, "textnocase", null, null);
+						names = ListUtil.sort(names, "textnocase", "asc", ",");
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);

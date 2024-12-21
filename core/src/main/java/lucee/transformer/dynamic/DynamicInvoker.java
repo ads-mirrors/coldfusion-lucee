@@ -64,30 +64,37 @@ public class DynamicInvoker {
 	private static DynamicInvoker engine;
 	private Map<Integer, DynamicClassLoader> loaders = new HashMap<>();
 	private Resource root;
-	private Log log;
+	private Log _log;
 	private static final Object token = new SerializableObject();
 
 	private static Map<String, AtomicInteger> observer = new ConcurrentHashMap<>();
 
 	public DynamicInvoker(Resource configDir) {
-		try {
-			this.log = CFMLEngineFactory.getInstance().getThreadConfig().getLog("application");
-		}
-		catch (Exception e) {
 
-		}
 		try {
 			this.root = configDir.getRealResource("dynclasses");
 			// loader = new DirectClassLoader(configDir.getRealResource("reflection"));
 		}
 		catch (Exception e) {
-			if (log != null) log.error("dynamic", e);
+			if (getLog() != null) getLog().error("dynamic", e);
 			this.root = SystemUtil.getTempDirectory();
 			// loader = new DirectClassLoader(SystemUtil.getTempDirectory());
 
 			// e.printStackTrace();
 		}
 
+	}
+
+	public Log getLog() {
+		if (_log == null) {
+			try {
+				_log = CFMLEngineFactory.getInstance().getThreadConfig().getLog("application");
+			}
+			catch (Exception e) {
+
+			}
+		}
+		return _log;
 	}
 
 	public static DynamicInvoker getInstance(Resource configDir) {
@@ -134,7 +141,7 @@ public class DynamicInvoker {
 					.apply(objMaybeNull, arguments);
 		}
 		catch (IncompatibleClassChangeError | IllegalStateException e) {
-			if (log != null) log.error("dynamic", e);
+			if (getLog() != null) getLog().error("dynamic", e);
 			if (!Clazz.allowReflection()) throw e;
 			lucee.transformer.dynamic.meta.Method method = getClazz(objClass, true).getMethod(methodName.getString(), arguments, nameCaseSensitive, true, convertComparsion);
 			return ((LegacyMethod) method).getMethod().invoke(objClass, arguments);
@@ -142,11 +149,11 @@ public class DynamicInvoker {
 	}
 
 	public Clazz getClazz(Class<?> clazz) {
-		return Clazz.getClazz(clazz, root, log);
+		return Clazz.getClazz(clazz, root, getLog());
 	}
 
 	public Clazz getClazz(Class<?> clazz, boolean useReflection) {
-		return Clazz.getClazz(clazz, root, log, useReflection);
+		return Clazz.getClazz(clazz, root, getLog(), useReflection);
 	}
 
 	private static double getClass = 0;
@@ -157,7 +164,7 @@ public class DynamicInvoker {
 	private static double loadInstance = 0;
 
 	public ClazzDynamic toClazzDynamic(Class<?> clazz) throws IOException {
-		return ClazzDynamic.getInstance(clazz, root, log);
+		return ClazzDynamic.getInstance(clazz, root, getLog());
 	}
 
 	private lucee.transformer.dynamic.meta.FunctionMember getFunctionMember(ClazzDynamic clazzz, Key methodName, Object[] arguments, boolean nameCaseSensitive,
@@ -366,7 +373,7 @@ public class DynamicInvoker {
 			synchronized (token) {
 				cl = loaders.get(parent.hashCode());
 				if (cl == null) {
-					loaders.put(parent.hashCode(), cl = new DynamicClassLoader(parent, root, log));
+					loaders.put(parent.hashCode(), cl = new DynamicClassLoader(parent, root, getLog()));
 				}
 			}
 		}
