@@ -31,10 +31,12 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import lucee.commons.io.res.Resource;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.math.MathUtil;
 import lucee.runtime.PageContext;
+import lucee.runtime.PageSource;
 import lucee.runtime.config.NullSupportHelper;
 import lucee.runtime.dump.DumpData;
 import lucee.runtime.dump.DumpProperties;
@@ -293,7 +295,13 @@ public final class CGIImplReadOnly extends ReadOnlyStruct implements CGI, Script
 	private Object getPathTranslated() {
 		try {
 			PageContext pc = ThreadLocalPageContext.get();
-			return pc.getBasePageSource().getResourceTranslated(pc).toString();
+			PageSource bps = pc.getBasePageSource();
+			if (bps != null) {
+				Resource rt = bps.getResourceTranslated(pc);
+				if (rt != null) {
+					return rt.toString();
+				}
+			}
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
