@@ -16,12 +16,13 @@ import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.util.ResourceUtil;
+import lucee.commons.lang.ClassLoaderDefault;
 import lucee.commons.lang.ExtendableClassLoader;
 
 /**
  * Directory ClassLoader
  */
-public final class DynamicClassLoader extends ClassLoader implements ExtendableClassLoader {
+public final class DynamicClassLoader extends ClassLoader implements ExtendableClassLoader, ClassLoaderDefault {
 
 	static {
 		boolean res = registerAsParallelCapable();
@@ -152,26 +153,51 @@ public final class DynamicClassLoader extends ClassLoader implements ExtendableC
 		return clazz;
 	}
 
-	private Class<?> loadClass(String name, boolean resolve, boolean loadFromFS) throws ClassNotFoundException {
+	@Override
+	public Class<?> loadClass(String name, boolean resolve, Class<?> defaultValue) {
+		return loadClass(name, resolve, true, defaultValue);
+	}
+
+	private Class<?> loadClass(String name, boolean resolve, boolean loadFromFS, Class<?> defaultValue) {
 		// First, check if the class has already been loaded
 		Class<?> c = findLoadedClass(name);
 		if (c == null) {
 			synchronized (SystemUtil.createToken("DynamicClassLoader:load", name)) {
 				c = findLoadedClass(name);
 				if (c == null) {
-					try {
-						c = getParent().loadClass(name);
+					ClassLoader pcl = getParent();
+					if (pcl instanceof ClassLoaderDefault) {
+						c = ((ClassLoaderDefault) pcl).loadClass(name, resolve, null);
 					}
-					catch (Exception e) {
+					else {
+						try {
+							c = pcl.loadClass(name);
+						}
+						catch (Exception e) {
+						}
 					}
+
 					if (c == null) {
-						if (loadFromFS) c = findClass(name);
-						else throw new ClassNotFoundException(name);
+						if (loadFromFS) {
+							try {
+								c = findClass(name);
+							}
+							catch (ClassNotFoundException e) {
+								return defaultValue;
+							}
+						}
+						else return defaultValue;
 					}
 				}
 			}
 		}
 		if (resolve) resolveClass(c);
+		return c;
+	}
+
+	private Class<?> loadClass(String name, boolean resolve, boolean loadFromFS) throws ClassNotFoundException {
+		Class<?> c = loadClass(name, resolve, loadFromFS, null);
+		if (c == null) throw new ClassNotFoundException(name);
 		return c;
 	}
 

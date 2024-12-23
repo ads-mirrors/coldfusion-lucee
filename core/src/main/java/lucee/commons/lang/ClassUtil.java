@@ -1029,4 +1029,9 @@ public final class ClassUtil {
 			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, PageException {
 		return Reflector.getConstructorInstance(clazz, EMPTY_OBJ, true).invoke();
 	}
+
+	public static boolean isClassAvailable(ClassLoader loader, String className) {
+		String resourcePath = className.replace('.', '/').concat(".class");
+		return loader.getResource(resourcePath) != null;
+	}
 }

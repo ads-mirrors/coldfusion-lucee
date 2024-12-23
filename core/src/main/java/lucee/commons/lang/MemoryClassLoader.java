@@ -28,7 +28,7 @@ import lucee.transformer.bytecode.util.ClassRenamer;
 /**
  * ClassLoader that loads classes in memory that are not stored somewhere physically
  */
-public final class MemoryClassLoader extends ClassLoader implements ExtendableClassLoader {
+public final class MemoryClassLoader extends ClassLoader implements ExtendableClassLoader, ClassLoaderDefault {
 	static {
 		boolean res = registerAsParallelCapable();
 	}
@@ -78,6 +78,36 @@ public final class MemoryClassLoader extends ClassLoader implements ExtendableCl
 	}
 
 	@Override
+	public Class<?> loadClass(String name, boolean resolve, Class<?> defaultValue) {
+		Class<?> c = findLoadedClass(name);
+		if (c == null) {
+			synchronized (SystemUtil.createToken("MemoryClassLoader", name)) {
+				c = findLoadedClass(name);
+				if (c == null) {
+					if (pcl instanceof ClassLoaderDefault) {
+						c = ((ClassLoaderDefault) pcl).loadClass(name, resolve, null);
+						if (c == null) return defaultValue;
+						resolve = false;
+					}
+					else {
+						try {
+							c = pcl.loadClass(name);// if(name.indexOf("sub")!=-1)print.ds(name);
+						}
+						catch (Throwable t) {
+							ExceptionUtil.rethrowIfNecessary(t);
+							return defaultValue;
+						}
+					}
+					if (resolve && c != null) {
+						resolveClass(c);
+					}
+				}
+			}
+		}
+		return c;
+	}
+
+	@Override
 	protected Class<?> findClass(String name) throws ClassNotFoundException {
 		throw new ClassNotFoundException("class " + name + " is invalid or doesn't exist");
 	}
@@ -88,7 +118,7 @@ public final class MemoryClassLoader extends ClassLoader implements ExtendableCl
 
 			Class<?> clazz = null;
 			try {
-				clazz = loadClass(name);
+				clazz = loadClass(name, false);
 			}
 			catch (ClassNotFoundException cnf) {
 				LogUtil.warn("memory-classloader", cnf);

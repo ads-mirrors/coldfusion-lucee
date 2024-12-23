@@ -35,6 +35,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.felix.framework.BundleWiringImpl.BundleClassLoader;
 
+import lucee.print;
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.IOUtil;
@@ -62,7 +63,7 @@ import lucee.transformer.bytecode.util.ClassRenamer;
 /**
  * Directory ClassLoader
  */
-public final class PhysicalClassLoader extends URLClassLoader implements ExtendableClassLoader {
+public final class PhysicalClassLoader extends URLClassLoader implements ExtendableClassLoader, ClassLoaderDefault {
 
 	static {
 		boolean res = registerAsParallelCapable();
@@ -201,37 +202,70 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 		return loadClass(name, resolve, true);
 	}
 
-	private Class<?> loadClass(String name, boolean resolve, boolean loadFromFS) throws ClassNotFoundException {
+	public boolean isClassAvailable(ClassLoader loader, String className) {
+		if (allLoadedClasses.containsKey(className)) return true;
+		if (unavaiClasses.containsKey(className)) return false;
+
+		String resourcePath = className.replace('.', '/').concat(".class");
+		return loader.getResource(resourcePath) != null;
+	}
+
+	@Override
+	public Class<?> loadClass(String name, boolean resolve, Class<?> defaultValue) {
+		return loadClass(name, resolve, true, defaultValue);
+	}
+
+	private Class<?> loadClass(String name, boolean resolve, boolean loadFromFS, Class<?> defaultValue) {
 		// First, check if the class has already been loaded
 		Class<?> c = findLoadedClass(name);
+
 		if (c == null) {
 			synchronized (SystemUtil.createToken("PhysicalClassLoader:load", name)) {
 				c = findLoadedClass(name);
 				if (c == null) {
-					try {
-						c = super.loadClass(name, resolve);
+					ClassLoader pcl = getParent();
+					if (pcl instanceof ClassLoaderDefault) {
+						print.e("-" + pcl + ">" + name);
+						c = ((ClassLoaderDefault) pcl).loadClass(name, resolve, null);
 					}
-					catch (Exception e) {
-						LogUtil.warn("physical-classloader", e);
+					else {
+						print.e("=" + pcl + ">" + name);
+						try {
+							c = super.loadClass(name, resolve);
+						}
+						catch (Exception e) {
+						}
 					}
 
-					if (addionalClassLoader != null) {
+					if (c == null && addionalClassLoader != null) {
 						try {
 							c = addionalClassLoader.loadClass(name);
 						}
 						catch (Exception e) {
-							LogUtil.warn("physical-classloader", e);
 						}
 					}
 
 					if (c == null) {
-						if (loadFromFS) c = findClass(name);
-						else throw new ClassNotFoundException(name);
+						if (loadFromFS) {
+							try {
+								c = findClass(name);
+							}
+							catch (ClassNotFoundException e) {
+								return defaultValue;
+							}
+						}
+						else return defaultValue;
 					}
 				}
 			}
 		}
 		if (resolve) resolveClass(c);
+		return c;
+	}
+
+	private Class<?> loadClass(String name, boolean resolve, boolean loadFromFS) throws ClassNotFoundException {
+		Class<?> c = loadClass(name, resolve, loadFromFS, null);
+		if (c == null) throw new ClassNotFoundException(name);
 		return c;
 	}
 
@@ -273,8 +307,7 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 				throw new ClassNotFoundException("Class [" + name + "] is invalid or doesn't exist");
 			}
 
-			byte[] barr = read(name);
-			return _loadClass(name, barr, false);
+			return _loadClass(name, read(name), false);
 		}
 	}
 
@@ -287,6 +320,22 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 		catch (IOException e) {
 			this.unavaiClasses.put(name, "");
 			throw new ClassNotFoundException("Class [" + name + "] is invalid or doesn't exist", e);
+		}
+		finally {
+			IOUtil.closeEL(baos);
+		}
+		return baos.toByteArray();
+	}
+
+	private byte[] read(String name, byte[] defaultValue) {
+		Resource res = directory.getRealResource(name.replace('.', '/').concat(".class"));
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try {
+			IOUtil.copy(res, baos, false);
+		}
+		catch (IOException e) {
+			this.unavaiClasses.put(name, "");
+			return defaultValue;
 		}
 		finally {
 			IOUtil.closeEL(baos);
