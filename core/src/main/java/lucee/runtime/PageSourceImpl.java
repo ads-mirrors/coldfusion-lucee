@@ -966,7 +966,7 @@ public final class PageSourceImpl implements PageSource {
 		else realPath = realPath.replace('\\', '/');
 		RefBoolean _isOutSide = new RefBooleanImpl(isOutSide);
 
-		if (realPath.indexOf('/') == 0) {
+		if (realPath.indexOf('/') == 0 || ResourceUtil.isWindowsPath(realPath)) {
 			_isOutSide.setValue(false);
 		}
 		else if (realPath.startsWith("./")) {
@@ -983,7 +983,7 @@ public final class PageSourceImpl implements PageSource {
 		else realPath = realPath.replace('\\', '/');
 		RefBoolean _isOutSide = new RefBooleanImpl(isOutSide);
 
-		if (realPath.indexOf('/') == 0) {
+		if (realPath.indexOf('/') == 0 || ResourceUtil.isWindowsPath(realPath)) {
 			_isOutSide.setValue(false);
 		}
 		else if (realPath.startsWith("./")) {
