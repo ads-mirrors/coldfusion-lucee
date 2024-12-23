@@ -769,6 +769,9 @@ public final class ResourceUtil {
 		catch (IOException e) {
 			return res.getAbsoluteResource();
 		}
+		catch (java.nio.file.InvalidPathException ipe) {
+			return res.getAbsoluteResource();
+		}
 	}
 
 	public static String getNormalizedPathEL(Resource res) {
@@ -779,6 +782,9 @@ public final class ResourceUtil {
 		catch (IOException e) {
 			return res.toString();
 		}
+		catch (java.nio.file.InvalidPathException ipe) {
+			return res.toString();
+		}
 	}
 
 	public static Resource getNormalizedResourceEL(Resource res) {
@@ -787,6 +793,9 @@ public final class ResourceUtil {
 			return res.getCanonicalResource();
 		}
 		catch (IOException e) {
+			return res.getAbsoluteResource();
+		}
+		catch (java.nio.file.InvalidPathException ipe) {
 			return res.getAbsoluteResource();
 		}
 	}
