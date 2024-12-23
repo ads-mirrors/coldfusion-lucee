@@ -4,87 +4,50 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 public class FormatterWrapper {
-	public final DateTimeFormatter formatter;
-	public int successCount;
-	public final String pattern;
-	public final boolean custom;
-	public final short type;
-	public final ZoneId zone;
+    public final DateTimeFormatter formatter;
+    public int successCount;
+    public final String pattern;
+    public final boolean custom;
+    public final short type;
+    public final ZoneId zone;
 
-	private final boolean hasComma;
-	private final boolean hasSlash;
-	private final boolean hasColon;
-	private final boolean hasSpace;
-	private final boolean hasHyphen;
+    private final int characterFlags;
 
-	FormatterWrapper(DateTimeFormatter formatter, String pattern, short type, ZoneId zone) {
-		this.formatter = formatter;
-		this.successCount = 0;
-		this.pattern = pattern;
-		this.type = type;
-		this.zone = zone;
-		this.custom = false;
+    private static final int COMMA_FLAG = 1;
+    private static final int SLASH_FLAG = 1 << 1;
+    private static final int HYPHEN_FLAG = 1 << 2;
+    private static final int COLON_FLAG = 1 << 3;
+    private static final int SPACE_FLAG = 1 << 4;
 
-		this.hasComma = pattern.indexOf(',') != -1;
-		this.hasSlash = pattern.indexOf('/') != -1;
-		this.hasHyphen = pattern.indexOf('-') != -1;
-		this.hasColon = pattern.indexOf(':') != -1;
-		this.hasSpace = pattern.indexOf(' ') != -1;
-	}
+    FormatterWrapper(DateTimeFormatter formatter, String pattern, short type, ZoneId zone) {
+        this(formatter, pattern, type, zone, false);
+    }
 
-	FormatterWrapper(DateTimeFormatter formatter, String pattern, short type, ZoneId zone, boolean custom) {
-		this.formatter = formatter;
-		this.successCount = 0;
-		this.pattern = pattern;
-		this.type = type;
-		this.zone = zone;
-		this.custom = custom;
+    FormatterWrapper(DateTimeFormatter formatter, String pattern, short type, ZoneId zone, boolean custom) {
+        this.formatter = formatter;
+        this.successCount = 0;
+        this.pattern = pattern;
+        this.type = type;
+        this.zone = zone;
+        this.custom = custom;
 
-		this.hasComma = pattern.indexOf(',') != -1;
-		this.hasSlash = pattern.indexOf('/') != -1;
-		this.hasHyphen = pattern.indexOf('-') != -1;
-		this.hasColon = pattern.indexOf(':') != -1;
-		this.hasSpace = pattern.indexOf(' ') != -1;
-	}
+        this.characterFlags = calculateCharacterFlags(pattern);
+    }
 
-	public boolean valid(String str) {
-		if (pattern.length() > str.length()) return false;
+    private static int calculateCharacterFlags(String pattern) {
+        int flags = 0;
+        if (pattern.contains(",")) flags |= COMMA_FLAG;
+        if (pattern.contains("/")) flags |= SLASH_FLAG;
+        if (pattern.contains("-")) flags |= HYPHEN_FLAG;
+        if (pattern.contains(":")) flags |= COLON_FLAG;
+        if (pattern.contains(" ")) flags |= SPACE_FLAG;
+        return flags;
+    }
 
-		if (hasComma) {
-			if (str.indexOf(',') == -1) return false;
-		}
-		else {
-			if (str.indexOf(',') != -1) return false;
-		}
+    public boolean valid(String str) {
+        if (pattern.length() > str.length()) return false;
 
-		if (hasHyphen) {
-			if (str.indexOf('-') == -1) return false;
-		}
-		else {
-			if (str.indexOf('-') != -1) return false;
-		}
-
-		if (hasSlash) {
-			if (str.indexOf('/') == -1) return false;
-		}
-		else {
-			if (str.indexOf('/') != -1) return false;
-		}
-
-		if (hasColon) {
-			if (str.indexOf(':') == -1) return false;
-		}
-		else {
-			if (str.indexOf(':') != -1) return false;
-		}
-
-		if (hasSpace) {
-			if (str.indexOf(' ') == -1) return false;
-		}
-		else {
-			if (str.indexOf(' ') != -1) return false;
-		}
-		return true;
-	}
-
+        int strFlags = calculateCharacterFlags(str);
+        return characterFlags == strFlags;
+    }
 }
