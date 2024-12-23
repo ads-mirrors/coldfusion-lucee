@@ -42,7 +42,7 @@ import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.Pair;
 import lucee.commons.lang.SerializableObject;
 import lucee.commons.lang.SystemOut;
-import lucee.loader.engine.CFMLEngineFactory;
+import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.op.Caster;
 import lucee.runtime.reflection.Reflector;
 import lucee.runtime.type.Collection.Key;
@@ -87,12 +87,7 @@ public class DynamicInvoker {
 
 	public Log getLog() {
 		if (_log == null) {
-			try {
-				_log = CFMLEngineFactory.getInstance().getThreadConfig().getLog("application");
-			}
-			catch (Exception e) {
-
-			}
+			_log = ThreadLocalPageContext.getLog("application");
 		}
 		return _log;
 	}

@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import lucee.print;
 import lucee.commons.date.DateTimeUtil;
 import lucee.commons.date.JREDateTimeUtil;
 import lucee.commons.date.TimeZoneConstants;
@@ -306,28 +307,25 @@ public final class DateCaster {
 		return (dt == null) ? defaultValue : dt;
 	}
 
+	public static void main(String[] args) {
+		print.e(toDateTimeNew(Locale.ENGLISH, "2024/12/23 12:07:11 CET", TimeZoneConstants.CET, null, true));
+	}
+
 	public static DateTime toDateTimeNew(Locale locale, String str, TimeZone tz, DateTime defaultValue, boolean useCommomDateParserAsWell) {
 		countCheck++;
 		str = str.trim();
 		tz = ThreadLocalPageContext.getTimeZone(tz);
 
 		List<FormatterWrapper> all = FormatUtil.getAllFormats(locale, tz, true);
-
+		Long time;
 		try {
 			for (FormatterWrapper fw: all) {
-
-				// if (fw.custom && fw.pattern.length() != str.length()) continue;
-				try {
-					DateTimeImpl res = new DateTimeImpl(FormatUtil.parse(fw, str, fw.zone));
+				if (!fw.valid(str)) continue;
+				time = FormatUtil.parse(fw, str, fw.zone, null);
+				if (time != null) {
+					DateTimeImpl res = new DateTimeImpl(time.longValue());
 					fw.successCount++;
-					// print.e("++++ " + fw.successCount + "|" + str + "|" + FormatUtil.format(fw.formatter, new Date(),
-					// tz) + "|" + fw.pattern + " -----");
 					return res;
-				}
-				catch (Exception e) {// TODO can we avoid the exception?
-					// print.e("X--- " + fw.successCount + "|" + str + "|" + FormatUtil.format(fw.formatter, new Date(),
-					// tz) + "|" + fw.pattern + " -----");
-					// print.e(e);
 				}
 			}
 		}

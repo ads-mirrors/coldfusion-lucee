@@ -35,7 +35,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.felix.framework.BundleWiringImpl.BundleClassLoader;
 
-import lucee.print;
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.IOUtil;
@@ -225,11 +224,9 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 				if (c == null) {
 					ClassLoader pcl = getParent();
 					if (pcl instanceof ClassLoaderDefault) {
-						print.e("-" + pcl + ">" + name);
 						c = ((ClassLoaderDefault) pcl).loadClass(name, resolve, null);
 					}
 					else {
-						print.e("=" + pcl + ">" + name);
 						try {
 							c = super.loadClass(name, resolve);
 						}
