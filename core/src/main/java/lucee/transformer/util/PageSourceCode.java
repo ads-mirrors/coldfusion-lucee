@@ -44,6 +44,13 @@ public class PageSourceCode extends SourceCode {
 		this.ps = ps;
 	}
 
+	public PageSourceCode(PageSource ps, String text, Charset charset, boolean writeLog, int sourceOffset) {
+		super(null, text, writeLog);
+		this.charset = charset;
+		this.ps = ps;
+		ps.setSourceOffset(sourceOffset);
+	}
+
 	public static String toString(PageSource ps, Charset charset) throws IOException {
 		String content;
 		InputStream is = null;
