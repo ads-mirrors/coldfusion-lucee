@@ -181,5 +181,4 @@ public interface PageSource extends Serializable {
 	 * @return is the page source can be executed
 	 */
 	public boolean executable();
-
 }

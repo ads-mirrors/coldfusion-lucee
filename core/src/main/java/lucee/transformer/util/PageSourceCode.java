@@ -25,6 +25,7 @@ import lucee.commons.digest.HashUtil;
 import lucee.commons.io.IOUtil;
 import lucee.commons.lang.ClassUtil;
 import lucee.runtime.PageSource;
+import lucee.runtime.PageSourceImpl;
 
 public class PageSourceCode extends SourceCode {
 
@@ -48,7 +49,7 @@ public class PageSourceCode extends SourceCode {
 		super(null, text, writeLog);
 		this.charset = charset;
 		this.ps = ps;
-		ps.setSourceOffset(sourceOffset);
+		if (ps instanceof PageSourceImpl) ((PageSourceImpl) ps).setSourceOffset(sourceOffset);
 	}
 
 	public static String toString(PageSource ps, Charset charset) throws IOException {

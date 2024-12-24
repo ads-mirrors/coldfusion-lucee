@@ -18,7 +18,6 @@
  **/
 package lucee.runtime.engine;
 
-import java.io.PrintWriter;
 import java.util.Map;
 
 import lucee.commons.io.log.Log;
@@ -27,8 +26,8 @@ import lucee.commons.io.res.util.ResourceSnippet;
 import lucee.commons.io.res.util.ResourceSnippetsMap;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
-import lucee.runtime.PageSource;
 import lucee.runtime.PageContextImpl;
+import lucee.runtime.PageSource;
 import lucee.runtime.op.Caster;
 
 public class LogExecutionLog extends ExecutionLogSupport {
@@ -57,7 +56,8 @@ public class LogExecutionLog extends ExecutionLogSupport {
 		if (snippet) {
 			ResourceSnippet snippet = snippetsMap.getSnippet(ps, startPos, endPos, ((PageContextImpl) pc).getResourceCharset().name());
 			log += positions(snippet.getEndLine(), snippet.getEndLine()) + " > " + timeLongToString(diff) + " [" + snippet.getContent() + "]";
-		} else {
+		}
+		else {
 			log += positions(startPos, endPos) + " > " + timeLongToString(diff);
 		}
 		LogUtil.log(pc, logLevel, Controler.class.getName(), log);
