@@ -182,8 +182,4 @@ public interface PageSource extends Serializable {
 	 */
 	public boolean executable();
 
-	public abstract void setSourceOffset(int sourceOffset);
-
-	public abstract int getSourceOffset();
-
 }
