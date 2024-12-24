@@ -14,7 +14,7 @@ public class FormatterWrapper {
 	private final boolean hasComma;
 	private final boolean hasSlash;
 	private final boolean hasColon;
-	private final boolean hasSpace;
+	private final boolean hasWhitespace;
 	private final boolean hasHyphen;
 
 	FormatterWrapper(DateTimeFormatter formatter, String pattern, short type, ZoneId zone) {
@@ -29,7 +29,7 @@ public class FormatterWrapper {
 		this.hasSlash = pattern.indexOf('/') != -1;
 		this.hasHyphen = pattern.indexOf('-') != -1;
 		this.hasColon = pattern.indexOf(':') != -1;
-		this.hasSpace = pattern.indexOf(' ') != -1;
+		this.hasWhitespace = pattern.chars().anyMatch(Character::isWhitespace);
 	}
 
 	FormatterWrapper(DateTimeFormatter formatter, String pattern, short type, ZoneId zone, boolean custom) {
@@ -44,7 +44,7 @@ public class FormatterWrapper {
 		this.hasSlash = pattern.indexOf('/') != -1;
 		this.hasHyphen = pattern.indexOf('-') != -1;
 		this.hasColon = pattern.indexOf(':') != -1;
-		this.hasSpace = pattern.indexOf(' ') != -1;
+		this.hasWhitespace = pattern.chars().anyMatch(Character::isWhitespace);
 	}
 
 	public boolean valid(String str) {
@@ -78,12 +78,59 @@ public class FormatterWrapper {
 			if (str.indexOf(':') != -1) return false;
 		}
 
-		if (hasSpace) {
-			if (str.indexOf(' ') == -1) return false;
+		if (hasWhitespace) {
+			if (!str.chars().anyMatch(Character::isWhitespace)) return false;
 		}
 		else {
-			if (str.indexOf(' ') != -1) return false;
+			if (str.chars().anyMatch(Character::isWhitespace)) return false;
 		}
+		return true;
+	}
+
+	public boolean validx(String str) {
+		if (pattern.length() > str.length()) return false;
+
+		boolean foundComma = false;
+		boolean foundHyphen = false;
+		boolean foundSlash = false;
+		boolean foundColon = false;
+		boolean foundWhitespace = false;
+
+		// Single pass through the string
+		for (int i = 0; i < str.length(); i++) {
+			char c = str.charAt(i);
+			switch (c) {
+			case ',':
+				if (!hasComma) return false;
+				foundComma = true;
+				break;
+			case '-':
+				if (!hasHyphen) return false;
+				foundHyphen = true;
+				break;
+			case '/':
+				if (!hasSlash) return false;
+				foundSlash = true;
+				break;
+			case ':':
+				if (!hasColon) return false;
+				foundColon = true;
+				break;
+			default:
+				if (Character.isWhitespace(c)) {
+					if (!hasWhitespace) return false;
+					foundWhitespace = true;
+				}
+			}
+		}
+
+		// Only check for required characters we haven't found
+		if (hasComma && !foundComma) return false;
+		if (hasHyphen && !foundHyphen) return false;
+		if (hasSlash && !foundSlash) return false;
+		if (hasColon && !foundColon) return false;
+		if (hasWhitespace && !foundWhitespace) return false;
+
 		return true;
 	}
 
