@@ -1153,13 +1153,14 @@ public class QueryImpl implements Query, Objects, QueryResult {
 	}
 
 	@Override
-	public synchronized int removeRow(int row) throws PageException {
+	public int removeRow(int row) throws PageException {
 		// disconnectCache();
-
-		for (int i = 0; i < columns.length; i++) {
-			columns[i].removeRow(row);
+		synchronized (this){
+			for (int i = 0; i < columns.length; i++) {
+				columns[i].removeRow(row);
+			}
+			return recordcount.decrementAndGet();
 		}
-		return recordcount.decrementAndGet();
 	}
 
 	@Override
@@ -1200,30 +1201,31 @@ public class QueryImpl implements Query, Objects, QueryResult {
 	}
 
 	@Override
-	public synchronized QueryColumn removeColumnEL(Collection.Key key) {
+	public QueryColumn removeColumnEL(Collection.Key key) {
 		// TODO should in that case not all method accessing columnNames,columns been locked down?
-
-		int index = getIndexFromKey(key);
-		if (index != -1) {
-			int current = 0;
-			QueryColumn removed = null;
-			Collection.Key[] newColumnNames = new Collection.Key[columnNames.length - 1];
-			QueryColumnImpl[] newColumns = new QueryColumnImpl[columns.length - 1];
-			for (int i = 0; i < columns.length; i++) {
-				if (i == index) {
-					removed = columns[i];
+		synchronized (this){
+			int index = getIndexFromKey(key);
+			if (index != -1) {
+				int current = 0;
+				QueryColumn removed = null;
+				Collection.Key[] newColumnNames = new Collection.Key[columnNames.length - 1];
+				QueryColumnImpl[] newColumns = new QueryColumnImpl[columns.length - 1];
+				for (int i = 0; i < columns.length; i++) {
+					if (i == index) {
+						removed = columns[i];
+					}
+					else {
+						newColumnNames[current] = columnNames[i];
+						newColumns[current++] = columns[i];
+					}
 				}
-				else {
-					newColumnNames[current] = columnNames[i];
-					newColumns[current++] = columns[i];
-				}
+				columnNames = newColumnNames;
+				columns = newColumns;
+				columncount--;
+				return removed;
 			}
-			columnNames = newColumnNames;
-			columns = newColumns;
-			columncount--;
-			return removed;
+			return null;
 		}
-		return null;
 	}
 
 	@Override
@@ -1395,15 +1397,19 @@ public class QueryImpl implements Query, Objects, QueryResult {
 	 * @throws PageException
 	 */
 	@Override
-	public synchronized void sort(String strColumn, int order) throws PageException {
+	public void sort(String strColumn, int order) throws PageException {
 		// disconnectCache();
-		sort(getColumn(strColumn), order);
+		synchronized (this) {
+			sort(getColumn(strColumn), order);
+		}
 	}
 
 	@Override
-	public synchronized void sort(Collection.Key keyColumn, int order) throws PageException {
+	public void sort(Collection.Key keyColumn, int order) throws PageException {
 		// disconnectCache();
-		sort(getColumn(keyColumn), order);
+		synchronized (this) {
+			sort(getColumn(keyColumn), order);
+		}
 	}
 
 	public void sort(int[] rows) throws PageException {
@@ -1464,8 +1470,10 @@ public class QueryImpl implements Query, Objects, QueryResult {
 	}
 
 	@Override
-	public synchronized boolean addColumn(String columnName, Array content, int type) throws DatabaseException {
-		return addColumn(KeyImpl.init(columnName.trim()), content, type);
+	public boolean addColumn(String columnName, Array content, int type) throws DatabaseException {
+		synchronized (this) {
+			return addColumn(KeyImpl.init(columnName.trim()), content, type);
+		}
 	}
 
 	@Override
@@ -1520,22 +1528,25 @@ public class QueryImpl implements Query, Objects, QueryResult {
 	}
 
 	@Override
-	public synchronized int[] getTypes() {
-		int[] types = new int[columns.length];
-		for (int i = 0; i < columns.length; i++) {
-			types[i] = columns[i].getType();
+	public int[] getTypes() {
+		synchronized (this){
+			int[] types = new int[columns.length];
+			for (int i = 0; i < columns.length; i++) {
+				types[i] = columns[i].getType();
+			}
+			return types;
 		}
-		return types;
 	}
 
 	@Override
-	public synchronized Map<Collection.Key, String> getTypesAsMap() {
-
-		Map<Collection.Key, String> map = new HashMap<Collection.Key, String>();
-		for (int i = 0; i < columns.length; i++) {
-			map.put(columnNames[i], columns[i].getTypeAsString());
+	public Map<Collection.Key, String> getTypesAsMap() {
+		synchronized (this){
+			Map<Collection.Key, String> map = new HashMap<Collection.Key, String>();
+			for (int i = 0; i < columns.length; i++) {
+				map.put(columnNames[i], columns[i].getTypeAsString());
+			}
+			return map;
 		}
-		return map;
 	}
 
 	@Override
@@ -1565,13 +1576,15 @@ public class QueryImpl implements Query, Objects, QueryResult {
 	}
 
 	@Override
-	public synchronized void rename(Collection.Key columnName, Collection.Key newColumnName) throws ExpressionException {
-		int index = getIndexFromKey(columnName);
-		if (index == -1) {
-			throw new ExpressionException("Cannot rename Column [" + columnName.getString() + "] to [" + newColumnName.getString() + "], original column doesn't exist");
+	public void rename(Collection.Key columnName, Collection.Key newColumnName) throws ExpressionException {
+		synchronized (this){
+			int index = getIndexFromKey(columnName);
+			if (index == -1) {
+				throw new ExpressionException("Cannot rename Column [" + columnName.getString() + "] to [" + newColumnName.getString() + "], original column doesn't exist");
+			}
+			columnNames[index] = newColumnName;
+			columns[index].setKey(newColumnName);
 		}
-		columnNames[index] = newColumnName;
-		columns[index].setKey(newColumnName);
 	}
 
 	@Override
@@ -1751,18 +1764,19 @@ public class QueryImpl implements Query, Objects, QueryResult {
 	 * @param maxrows
 	 * @return has cutted or not
 	 */
-	public synchronized boolean cutRowsTo(int maxrows) {
+	public boolean cutRowsTo(int maxrows) {
 		// disconnectCache();
-
-		if (maxrows > -1 && maxrows < getRecordcount()) {
-			for (int i = 0; i < columns.length; i++) {
-				QueryColumn column = columns[i];
-				column.cutRowsTo(maxrows);
+		synchronized (this){
+			if (maxrows > -1 && maxrows < getRecordcount()) {
+				for (int i = 0; i < columns.length; i++) {
+					QueryColumn column = columns[i];
+					column.cutRowsTo(maxrows);
+				}
+				recordcount.set(maxrows);
+				return true;
 			}
-			recordcount.set(maxrows);
-			return true;
+			return false;
 		}
-		return false;
 	}
 
 	@Override
@@ -1973,17 +1987,19 @@ public class QueryImpl implements Query, Objects, QueryResult {
 	}
 
 	@Override
-	public synchronized Array getMetaDataSimple() {
-		Array cols = new ArrayImpl();
-		Struct column;
-		for (int i = 0; i < columns.length; i++) {
-			column = new StructImpl();
-			column.setEL(KeyConstants._name, columnNames[i].getString());
-			column.setEL("isCaseSensitive", Boolean.FALSE);
-			column.setEL("typeName", columns[i].getTypeAsString());
-			cols.appendEL(column);
+	public Array getMetaDataSimple() {
+		synchronized (this){
+			Array cols = new ArrayImpl();
+			Struct column;
+			for (int i = 0; i < columns.length; i++) {
+				column = new StructImpl();
+				column.setEL(KeyConstants._name, columnNames[i].getString());
+				column.setEL("isCaseSensitive", Boolean.FALSE);
+				column.setEL("typeName", columns[i].getTypeAsString());
+				cols.appendEL(column);
+			}
+			return cols;
 		}
-		return cols;
 	}
 
 	/**
@@ -3329,9 +3345,11 @@ public class QueryImpl implements Query, Objects, QueryResult {
 	}
 
 	@Override
-	public synchronized void enableShowQueryUsage() {
-		if (columns != null) for (int i = 0; i < columns.length; i++) {
-			columns[i] = columns[i]._toDebugColumn();
+	public void enableShowQueryUsage() {
+		synchronized (this){
+			if (columns != null) for (int i = 0; i < columns.length; i++) {
+				columns[i] = columns[i]._toDebugColumn();
+			}
 		}
 	}
 
