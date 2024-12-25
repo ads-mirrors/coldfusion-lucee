@@ -33,7 +33,7 @@ import lucee.runtime.op.Caster;
 public class LogExecutionLog extends ExecutionLogSupport {
 
 	private PageContext pc;
-	private ResourceSnippetsMap snippetsMap = new ResourceSnippetsMap(1024, 128);
+	private ResourceSnippetsMap snippetsMap = new ResourceSnippetsMap(767, 191);
 	private boolean snippet = false;
 	private int logLevel;
 	private String logName;

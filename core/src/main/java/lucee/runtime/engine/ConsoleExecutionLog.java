@@ -32,7 +32,7 @@ public class ConsoleExecutionLog extends ExecutionLogSupport {
 
 	private PrintWriter pw;
 	private PageContext pc;
-	private ResourceSnippetsMap snippetsMap = new ResourceSnippetsMap(1024, 128);
+	private ResourceSnippetsMap snippetsMap = new ResourceSnippetsMap(767, 191);
 	private boolean snippet = false;
 
 	@Override

@@ -112,7 +112,7 @@ public final class DebuggerImpl implements Debugger {
 
 	private final Map<String, DebugEntryTemplateImpl> entries = new HashMap<String, DebugEntryTemplateImpl>();
 	private Map<String, DebugEntryTemplatePartImpl> partEntries;
-	private ResourceSnippetsMap snippetsMap = new ResourceSnippetsMap(1024, 128);
+	private ResourceSnippetsMap snippetsMap = new ResourceSnippetsMap(767, 191);
 
 	private final List<QueryEntry> queries = new ArrayList<QueryEntry>();
 	private final List<DebugTimerImpl> timers = new ArrayList<DebugTimerImpl>();
