@@ -240,7 +240,15 @@ Latest version: #latest.v#</cfif>"><cfif hasUpdates>
 
 		// OSGi compatible version
 		if(arr.len()==4 && isNumeric(arr[1]) && isNumeric(arr[2]) && isNumeric(arr[3])) {
-			try{ return toOSGiVersion(version).sortable; }catch(local.e){};
+			try{ 
+				osgiVersion = variables.toOSGiVersion(version);
+				if (structCount(osgiVersion)) {
+					return variables.toOSGiVersion(version).sortable;
+				}
+			}
+			catch(local.e){
+				//systemOutput(version & " " & e.message, true);
+			};
 		}
 
 		rtn="";
