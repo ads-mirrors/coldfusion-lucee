@@ -11,6 +11,7 @@ import lucee.commons.lang.StringUtil;
 import lucee.runtime.db.DataSource;
 import lucee.runtime.db.DatasourceConnection;
 import lucee.runtime.db.DatasourceConnectionFactory;
+import lucee.runtime.db.ApplicationDataSource;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.Struct;
@@ -87,7 +88,9 @@ public class DatasourceConnPool extends GenericObjectPool<DatasourceConnection> 
 				ExceptionUtil.rethrowIfNecessary(t);
 			}
 			try {
-				sct.setEL(KeyConstants._database, ds.getDatabase());
+				if (!(ds instanceof ApplicationDataSource)) {
+					sct.setEL(KeyConstants._database, ds.getDatabase());
+				}
 			}
 			catch (Throwable t) {
 				ExceptionUtil.rethrowIfNecessary(t);
