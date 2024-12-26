@@ -94,18 +94,20 @@ public class HTTPResponse4Impl extends HTTPResponseSupport implements HTTPRespon
 	}
 
 	public Array getLocations() {
-		try {
-			List<URI> locations = ((HttpClientContext) context).getRedirectLocations();
-			if (locations != null) {
-				Array arr = new ArrayImpl();
-				for (URI loc: locations) {
-					arr.appendEL(loc.toString());
+		if (context instanceof HttpClientContext){ // on error it's BasicHttpContext
+			try {
+				List<URI> locations = ((HttpClientContext) context).getRedirectLocations();
+				if (locations != null) {
+					Array arr = new ArrayImpl();
+					for (URI loc: locations) {
+						arr.appendEL(loc.toString());
+					}
+					return arr;
 				}
-				return arr;
 			}
-		}
-		catch (Exception e) {
-			LogUtil.warn("http-response", e);
+			catch (Exception e) {
+				LogUtil.warn("http-response", e);
+			}
 		}
 		return null;
 	}
