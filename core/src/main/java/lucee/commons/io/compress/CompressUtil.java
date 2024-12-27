@@ -203,11 +203,12 @@ public final class CompressUtil {
 			return;
 		}
 
-		// read the zip file and build a query from its contents
+		// read the tar file and extract its contents
 		TarArchiveInputStream tis = null;
 		try {
 			tis = new TarArchiveInputStream(IOUtil.toBufferedInputStream(tarFile.getInputStream()));
 			TarArchiveEntry entry;
+			int mode;
 			while ((entry = tis.getNextTarEntry()) != null) {
 				// print.ln(entry);
 				Resource target = targetDir.getRealResource(entry.getName());
@@ -220,6 +221,10 @@ public final class CompressUtil {
 					IOUtil.copy(tis, target, false);
 				}
 				target.setLastModified(entry.getModTime().getTime());
+				mode = entry.getMode();
+				if (mode > 0) {
+					target.setMode(ModeUtil.extractPermissions(mode, false));
+				}
 			}
 		}
 		finally {
@@ -544,29 +549,32 @@ public final class CompressUtil {
 	}
 
 	private static void compressTar(String parent, Resource source, TarArchiveOutputStream tos, int mode) throws IOException {
-		if (source.isFile()) {
-			// TarEntry entry = (source instanceof FileResource)?new TarEntry((FileResource)source):new
-			// TarEntry(parent);
-			TarArchiveEntry entry = new TarArchiveEntry(parent);
+		String _parent = parent;
+		if (!source.isFile() && parent.charAt(parent.length() - 1) != '/')
+			_parent += "/"; // indicates this is a directory
 
-			entry.setName(parent);
+		TarArchiveEntry entry = new TarArchiveEntry(_parent);
 
-			// mode
-			if (mode > 0) entry.setMode(ModeUtil.extractPermissions(mode, false));
-			else if ((mode = source.getMode()) > 0) entry.setMode(ModeUtil.extractPermissions(mode, false));
+		entry.setName(parent);
+		// mode
+		if (mode > 0) entry.setMode(ModeUtil.extractPermissions(mode, false));
+		else if (source.getMode() > 0) entry.setMode(ModeUtil.extractPermissions(source.getMode(), false));
 
+		if (source.isFile())
 			entry.setSize(source.length());
-			entry.setModTime(source.lastModified());
-			tos.putArchiveEntry(entry);
-			try {
+		entry.setModTime(source.lastModified());
+		tos.putArchiveEntry(entry);
+		try {
+			if (source.isFile())
 				IOUtil.copy(source, tos, false);
-			}
-			finally {
-				tos.closeArchiveEntry();
-			}
 		}
-		else if (source.isDirectory()) {
-			compressTar(parent, source.listResources(), tos, mode);
+		finally {
+			tos.closeArchiveEntry();
+		}
+
+		if (source.isDirectory()) {
+			Resource[] sources = source.listResources();
+			compressTar(parent, sources, tos, mode);
 		}
 	}
 
