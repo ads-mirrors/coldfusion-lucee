@@ -217,29 +217,35 @@ public final class HTTPServletRequestWrap implements HttpServletRequest, Seriali
 	}
 
 	@Override
-	public synchronized void removeAttribute(String name) {
-		if (disconnected) disconnectData.attributes.remove(name);
-		else req.removeAttribute(name);
-	}
-
-	@Override
-	public synchronized void setAttribute(String name, Object value) {
-		if (disconnected) disconnectData.attributes.put(name, value);
-		else req.setAttribute(name, value);
-	}
-
-	@Override
-	public synchronized Object getAttribute(String name) {
-		if (disconnected) return disconnectData.attributes.get(name);
-		return req.getAttribute(name);
-	}
-
-	@Override
-	public synchronized Enumeration getAttributeNames() {
-		if (disconnected) {
-			return new EnumerationWrapper(disconnectData.attributes.keySet().toArray());
+	public void removeAttribute(String name) {
+		synchronized (this) {
+			if (disconnected) disconnectData.attributes.remove(name);
+			else req.removeAttribute(name);
 		}
-		return req.getAttributeNames();
+	}
+
+	@Override
+	public void setAttribute(String name, Object value) {
+		synchronized (this) {
+			if (disconnected) disconnectData.attributes.put(name, value);
+			else req.setAttribute(name, value);
+		}
+	}
+
+	@Override
+	public Object getAttribute(String name) {
+		synchronized (this) {
+			if (disconnected) return disconnectData.attributes.get(name);
+			return req.getAttribute(name);
+		}
+	}
+
+	@Override
+	public Enumeration getAttributeNames() {
+		synchronized (this) {
+			if (disconnected) return new EnumerationWrapper(disconnectData.attributes.keySet().toArray());
+			return req.getAttributeNames();
+		}
 	}
 
 	@Override
@@ -379,79 +385,81 @@ public final class HTTPServletRequestWrap implements HttpServletRequest, Seriali
 		return req;
 	}
 
-	public synchronized void disconnect(PageContextImpl pc) {
-		if (disconnected) return;
-		disconnectData = new DisconnectData();
+	public void disconnect(PageContextImpl pc) {
+		synchronized (this){
+			if (disconnected) return;
+			disconnectData = new DisconnectData();
 
-		// attributes
-		{
-			Iterator<String> it = ListUtil.toIterator(req.getAttributeNames());
-			disconnectData.attributes = MapFactory.getConcurrentMap();
-			String k;
-			while (it.hasNext()) {
-				k = it.next();
-				if (!StringUtil.isEmpty(k)) disconnectData.attributes.put(k, req.getAttribute(k));
-			}
-		}
-
-		// headers
-		{
-			Enumeration<String> headerNames = req.getHeaderNames();
-			disconnectData.headers = MapFactory.getConcurrentMap();// new ConcurrentHashMap<Collection.Key, LinkedList<String>>();
-
-			String k;
-			Enumeration<String> e;
-			while (headerNames.hasMoreElements()) {
-				k = headerNames.nextElement().toString();
-				e = req.getHeaders(k);
-				LinkedList<String> list = new LinkedList<String>();
-				while (e.hasMoreElements()) {
-					list.add(e.nextElement().toString());
+			// attributes
+			{
+				Iterator<String> it = ListUtil.toIterator(req.getAttributeNames());
+				disconnectData.attributes = MapFactory.getConcurrentMap();
+				String k;
+				while (it.hasNext()) {
+					k = it.next();
+					if (!StringUtil.isEmpty(k)) disconnectData.attributes.put(k, req.getAttribute(k));
 				}
-				if (!StringUtil.isEmpty(k)) disconnectData.headers.put(KeyImpl.init(k), list);
 			}
-		}
 
-		// cookies
-		{
-			Cookie[] _cookies = req.getCookies();
-			if (!ArrayUtil.isEmpty(_cookies)) {
-				disconnectData.cookies = new Cookie[_cookies.length];
-				for (int i = 0; i < _cookies.length; i++)
-					disconnectData.cookies[i] = _cookies[i];
+			// headers
+			{
+				Enumeration<String> headerNames = req.getHeaderNames();
+				disconnectData.headers = MapFactory.getConcurrentMap();// new ConcurrentHashMap<Collection.Key, LinkedList<String>>();
+
+				String k;
+				Enumeration<String> e;
+				while (headerNames.hasMoreElements()) {
+					k = headerNames.nextElement().toString();
+					e = req.getHeaders(k);
+					LinkedList<String> list = new LinkedList<String>();
+					while (e.hasMoreElements()) {
+						list.add(e.nextElement().toString());
+					}
+					if (!StringUtil.isEmpty(k)) disconnectData.headers.put(KeyImpl.init(k), list);
+				}
 			}
-			else disconnectData.cookies = SerializableCookie.COOKIES0;
+
+			// cookies
+			{
+				Cookie[] _cookies = req.getCookies();
+				if (!ArrayUtil.isEmpty(_cookies)) {
+					disconnectData.cookies = new Cookie[_cookies.length];
+					for (int i = 0; i < _cookies.length; i++)
+						disconnectData.cookies[i] = _cookies[i];
+				}
+				else disconnectData.cookies = SerializableCookie.COOKIES0;
+			}
+
+			disconnectData.authType = req.getAuthType();
+			disconnectData.method = req.getMethod();
+			disconnectData.pathTranslated = req.getPathTranslated();
+			disconnectData.remoteUser = req.getRemoteUser();
+			disconnectData.requestedSessionId = req.getRequestedSessionId();
+			disconnectData.requestedSessionIdFromCookie = req.isRequestedSessionIdFromCookie();
+			disconnectData.requestedSessionIdFromURL = req.isRequestedSessionIdFromURL();
+			disconnectData.secure = req.isSecure();
+			disconnectData.requestedSessionIdValid = req.isRequestedSessionIdValid();
+			disconnectData.characterEncoding = req.getCharacterEncoding();
+			disconnectData.contentLength = req.getContentLength();
+			disconnectData.contentType = req.getContentType();
+			disconnectData.serverPort = req.getServerPort();
+			disconnectData.serverName = req.getServerName();
+			disconnectData.scheme = req.getScheme();
+			disconnectData.remoteHost = req.getRemoteHost();
+			disconnectData.remoteAddr = req.getRemoteAddr();
+			disconnectData.protocol = req.getProtocol();
+			disconnectData.locale = req.getLocale();
+			// only store it when j2ee sessions are enabled
+			if (pc.getSessionType() == Config.SESSION_TYPE_JEE) disconnectData.session = req.getSession(true); // create if necessary
+
+			disconnectData.userPrincipal = req.getUserPrincipal();
+
+			if (bytes == null || file == null) {
+				storeEL();
+			}
+			disconnected = true;
+			// req=null;
 		}
-
-		disconnectData.authType = req.getAuthType();
-		disconnectData.method = req.getMethod();
-		disconnectData.pathTranslated = req.getPathTranslated();
-		disconnectData.remoteUser = req.getRemoteUser();
-		disconnectData.requestedSessionId = req.getRequestedSessionId();
-		disconnectData.requestedSessionIdFromCookie = req.isRequestedSessionIdFromCookie();
-		disconnectData.requestedSessionIdFromURL = req.isRequestedSessionIdFromURL();
-		disconnectData.secure = req.isSecure();
-		disconnectData.requestedSessionIdValid = req.isRequestedSessionIdValid();
-		disconnectData.characterEncoding = req.getCharacterEncoding();
-		disconnectData.contentLength = req.getContentLength();
-		disconnectData.contentType = req.getContentType();
-		disconnectData.serverPort = req.getServerPort();
-		disconnectData.serverName = req.getServerName();
-		disconnectData.scheme = req.getScheme();
-		disconnectData.remoteHost = req.getRemoteHost();
-		disconnectData.remoteAddr = req.getRemoteAddr();
-		disconnectData.protocol = req.getProtocol();
-		disconnectData.locale = req.getLocale();
-		// only store it when j2ee sessions are enabled
-		if (pc.getSessionType() == Config.SESSION_TYPE_JEE) disconnectData.session = req.getSession(true); // create if necessary
-
-		disconnectData.userPrincipal = req.getUserPrincipal();
-
-		if (bytes == null || file == null) {
-			storeEL();
-		}
-		disconnected = true;
-		// req=null;
 	}
 
 	static class ArrayEnum<E> implements Enumeration<E> {
