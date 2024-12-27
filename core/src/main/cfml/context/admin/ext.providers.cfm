@@ -43,10 +43,23 @@
 			</cfloop>
 		</cfcase>
 		<cfcase value="#stText.Buttons.save#">
+			<cfadmin 
+				action="getRHExtensionProviders"
+				type="#request.adminType#"
+				password="#session["password"&request.adminType]#"
+				returnVariable="providers">
+				
+			<cfset providerUrls = QueryColumnData( query=providers, columnName="url" ) />
 			<cfset data.urls=toArrayFromForm("url")>
 			<cfset data.rows=toArrayFromForm("row")>
 			<cfloop from="1" to="#arrayLen(data.urls)#" index="idx">
-				<cfif !isNull(data.rows[idx])>
+				<cfset uniqUrl = true />
+				<cfloop from="1" to="#arrayLen(providerUrls)#" index="index">
+					<cfif providerUrls[index] EQ data.urls[idx]>
+						<cfset uniqUrl = false />
+					</cfif>
+				</cfloop>
+				<cfif !isNull(data.rows[idx]) && uniqUrl>
 					<cfadmin 
 						action="updateRHExtensionProvider"
 						type="#request.adminType#"
