@@ -1,12 +1,16 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function beforeAll(){
-		variables.name=ListFirst(ListLast(getCurrentTemplatePath(),"\/"),".");
-		variables.parent=getDirectoryFromPath(getCurrentTemplatePath())&name&"/";
-		
+		variables.SEP = Server.separator.file;
+		variables.parent = getTempDirectory() & "directoryRename" & sep;
+		if (directoryExists(parent))
+			directoryDelete(parent,true);
+		directoryCreate(parent);
 	}
+
 	function afterAll(){
 		directorydelete(parent,true);
 	}
+
 	function run( testResults , testBox ) {
 		describe( "test case for directoryRename", function() {
 			it(title = "Checking with directoryRename", body = function( currentSpec ) {

@@ -1,7 +1,10 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function beforeAll(){
-		variables.name=ListFirst(ListLast(getCurrentTemplatePath(),"\/"),".");
-		variables.dir=getDirectoryFromPath(getCurrentTemplatePath())&name&"/";	
+		variables.SEP = Server.separator.file;
+		variables.dir = getTempDirectory() & "directoryCreate" & sep;
+		if (directoryExists(dir))
+			directoryDelete(dir,true);
+		directoryCreate(dir);
 	}
 	function afterAll(){
 		directorydelete(dir,true);
