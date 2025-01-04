@@ -63,6 +63,7 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 	private static final URL DEFAULT_URL_OPENAI;
 	private static final URL DEFAULT_URL_OLLAMA;
 	private static final URL DEFAULT_URL_PERPLEXITY;
+	private static final URL DEFAULT_URL_DEEPSEEK;
 	private static final int DEFAULT_CONVERSATION_SIZE_LIMIT = 100;
 
 	// TODO
@@ -105,6 +106,16 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 			log(e);
 		}
 		DEFAULT_URL_PERPLEXITY = tmp;
+
+		// deep seek
+		tmp = null;
+		try {
+			tmp = new URL("https://api.deepseek.com/");
+		}
+		catch (MalformedURLException e) {
+			log(e);
+		}
+		DEFAULT_URL_DEEPSEEK = tmp;
 	}
 
 	Struct properties;
@@ -143,8 +154,13 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 				label = "Perplexity";
 				baseURL = DEFAULT_URL_PERPLEXITY;
 			}
+			else if ("deepseek".equals(str.trim())) {
+				label = "DeepSeek";
+				baseURL = DEFAULT_URL_DEEPSEEK;
+			}
+
 			else throw new ApplicationException(
-					"ATM only 3 types are supported [openai, ollama, perplexity], for any other endpoint simply define the attribute `url` that looks like this [https://api.lucee.com/v1/].");
+					"ATM only 4 types are supported [deepseek, openai, ollama, perplexity], for any other endpoint simply define the attribute `url` that looks like this [https://api.lucee.com/v1/].");
 		}
 		else {
 			str = Caster.toString(properties.get(KeyConstants._URL, null), null);
