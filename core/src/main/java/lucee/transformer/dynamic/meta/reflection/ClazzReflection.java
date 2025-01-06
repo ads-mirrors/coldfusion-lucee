@@ -93,7 +93,19 @@ public class ClazzReflection extends Clazz {
 			throw new IOException("not supported yet!"); // TODO
 		}
 		return new MethodReflection(clazz.getMethod(methodName, arguments));
+	}
 
+	@Override
+	public Method getMethod(String methodName, Class[] arguments, boolean nameCaseSensitive, Method defaultValue) {
+		if (!nameCaseSensitive) {
+			throw new RuntimeException("not supported yet!"); // TODO
+		}
+		try {
+			return new MethodReflection(clazz.getMethod(methodName, arguments));
+		}
+		catch (NoSuchMethodException e) {
+			return defaultValue;
+		}
 	}
 
 	@Override

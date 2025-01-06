@@ -46,6 +46,8 @@ public abstract class Clazz implements Serializable {
 
 	public abstract Method getMethod(String methodName, Class[] arguments, boolean nameCaseSensitive) throws IOException, NoSuchMethodException;
 
+	public abstract Method getMethod(String methodName, Class[] arguments, boolean nameCaseSensitive, Method defaultValue);
+
 	public abstract Method getMethod(String methodName, Object[] args, boolean nameCaseSensitive, boolean convertArgument, boolean convertComparsion) throws NoSuchMethodException;
 
 	public abstract Method getMethod(String methodName, Object[] args, boolean nameCaseSensitive, boolean convertArgument, boolean convertComparsion, Method defaultValue);

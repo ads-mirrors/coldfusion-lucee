@@ -223,6 +223,13 @@ public class ClazzDynamic extends Clazz {
 
 	@Override
 	public Method getMethod(String methodName, Class[] arguments, boolean nameCaseSensitive) throws IOException, NoSuchMethodException {
+		Method m = getMethod(methodName, arguments, nameCaseSensitive, null);
+		if (m == null) throw new NoSuchMethodException("no matching method for " + methodName + "(" + Clazz.toTypeNames(arguments) + ") found");
+		return m;
+	}
+
+	@Override
+	public Method getMethod(String methodName, Class[] arguments, boolean nameCaseSensitive, Method defaultValue) {
 		Type[] types = toTypes(arguments);
 		outer: for (FunctionMember fm: methods) {
 			if (/* fm.isPublic() && */ (nameCaseSensitive ? methodName.equals(fm.getName()) : methodName.equalsIgnoreCase(fm.getName()))) {
@@ -235,7 +242,7 @@ public class ClazzDynamic extends Clazz {
 				}
 			}
 		}
-		throw new NoSuchMethodException("no matching method for " + methodName + "(" + Clazz.toTypeNames(arguments) + ") found");
+		return defaultValue;
 	}
 
 	@Override

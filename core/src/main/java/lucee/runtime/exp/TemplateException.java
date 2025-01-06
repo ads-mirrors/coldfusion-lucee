@@ -57,7 +57,7 @@ public class TemplateException extends PageExceptionImpl {
 	 * @param message
 	 */
 	public TemplateException(PageSource ps, int line, int column, String message) {
-		super(message, "template");
+		super(addContext(message, ps, line, column), "template");
 		// print.err(line+"+"+column);
 		addContext(ps, line, column, null);
 		this.line = line;
@@ -106,6 +106,13 @@ public class TemplateException extends PageExceptionImpl {
 	 */
 	public TemplateException(SourceCode sc, Throwable t) {
 		this(getPageSource(sc), sc.getLine(), sc.getColumn(), t);
+	}
+
+	private static String addContext(String msg, PageSource ps, int line, int column) {
+		if (ps != null) {
+			msg += "; Failed in " + ps.getDisplayPath() + ":" + line + ":" + column;
+		}
+		return msg;
 	}
 
 	/**
