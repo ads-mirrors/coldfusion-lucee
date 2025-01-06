@@ -23,7 +23,6 @@ package lucee.runtime.functions.international;
 
 import java.lang.ref.SoftReference;
 import java.text.NumberFormat;
-import java.text.ParseException;
 import java.text.ParsePosition;
 import java.util.Currency;
 import java.util.Locale;
@@ -55,35 +54,37 @@ public final class LSParseCurrency implements Function {
 	}
 
 	public static double toDoubleValue(Locale locale, String str, boolean strict) throws PageException {
-
 		str = str.trim();
-		NumberFormat nf = null;
 		NumberFormat cnf = getCurrencyInstance(locale);
 		Currency currency = cnf.getCurrency();
 
-		if (currency.getCurrencyCode().equals("XXX")) throw new ExpressionException("Unknown currency [" + locale.toString() + "]");
+		if (currency.getCurrencyCode().equals("XXX")) {
+			throw new ExpressionException("Unknown currency [" + locale.toString() + "]");
+		}
 
 		cnf.setParseIntegerOnly(false);
-		try {
-			return cnf.parse(str).doubleValue();
-		}
-		catch (ParseException e) {
 
-			String stripped = str.replace(currency.getSymbol(locale), "").replace(currency.getCurrencyCode(), "");
+		// Use ParsePosition instead of try-catch
+		ParsePosition pp = new ParsePosition(0);
+		Number n = cnf.parse(str, pp);
 
-			nf = getInstance(locale);
-			ParsePosition pp = new ParsePosition(0);
-			Number n = nf.parse(stripped, pp);
-
-			if (n == null || pp.getIndex() == 0 || (strict && stripped.length() != pp.getIndex()))
-				throw new ExpressionException(String.format("Unparseable value [%s] for currency %s", str, locale.toString()));
-
+		if (n != null && pp.getIndex() > 0 && (!strict || str.length() == pp.getIndex())) {
+			if (cnf != null) currFormatter.put(locale, new SoftReference<NumberFormat>(cnf));
 			return n.doubleValue();
 		}
-		finally {
-			if (cnf != null) currFormatter.put(locale, new SoftReference<NumberFormat>(cnf));
-			if (nf != null) numbFormatter.put(locale, new SoftReference<NumberFormat>(nf));
+
+		// If currency parsing failed, try without currency symbols
+		String stripped = str.replace(currency.getSymbol(locale), "").replace(currency.getCurrencyCode(), "");
+		NumberFormat nf = getInstance(locale);
+		pp = new ParsePosition(0);
+		n = nf.parse(stripped, pp);
+
+		if (n == null || pp.getIndex() == 0 || (strict && stripped.length() != pp.getIndex())) {
+			throw new ExpressionException(String.format("Unparseable value [%s] for currency %s", str, locale.toString()));
 		}
+
+		if (nf != null) numbFormatter.put(locale, new SoftReference<NumberFormat>(nf));
+		return n.doubleValue();
 	}
 
 	private static NumberFormat getInstance(Locale locale) {

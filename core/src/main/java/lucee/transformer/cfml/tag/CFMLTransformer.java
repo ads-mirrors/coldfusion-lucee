@@ -150,12 +150,13 @@ public final class CFMLTransformer {
 
 		Charset charset = config.getTemplateCharset();
 		boolean dotUpper = ((MappingImpl) ps.getMapping()).getDotNotationUpperCase();
-
+		boolean isCFMLCompExt = Constants.isCFMLComponentExtension(ResourceUtil.getExtension(ps.getResource(), ""));
+		boolean wrapped = false;
 		// parse regular
 		while (true) {
 			try {
-				sc = new PageSourceCode(ps, charset, writeLog);
-
+				PageSourceCode psc = new PageSourceCode(ps, charset, writeLog);
+				sc = psc;
 				// script files (cfs)
 				if (Constants.isCFMLScriptExtension(ListUtil.last(ps.getRealpath(), '.'))) {
 					TagLibTag scriptTag = CFMLTransformer.getTLT(sc, Constants.CFML_SCRIPT_TAG_NAME, config.getIdentification());
@@ -168,7 +169,23 @@ public final class CFMLTransformer {
 					int sourceOffset = ("<" + scriptTag.getFullName() + ">").length();
 					sc = new PageSourceCode(ps, text, charset, writeLog, sourceOffset);
 				}
+				else if (isCFMLCompExt) {
+					TagLib tl = CFMLTransformer.getTagLib(sc, config.getIdentification());
+					String text = sc.getText();
+					if (StringUtil.indexOfIgnoreCase(text, "<" + tl.getNameSpaceAndSeparator()) == -1
+							&& StringUtil.indexOfIgnoreCase(text, "</" + tl.getNameSpaceAndSeparator()) == -1) {
 
+						TagLibTag scriptTag = CFMLTransformer.getTLT(sc, Constants.CFML_SCRIPT_TAG_NAME, config.getIdentification());
+						sc.setPos(0);
+						// try inside a cfscript
+						text = "<" + scriptTag.getFullName() + ">" + text + "\n</" + scriptTag.getFullName() + ">";
+						int sourceOffset = ("<" + scriptTag.getFullName() + ">").length();
+						sc = new PageSourceCode(ps, text, charset, writeLog, sourceOffset);
+						wrapped = true;
+
+					}
+
+				}
 				p = transform(factory, config, sc, tlibs, flibs, ps.getResource().lastModified(), dotUpper, returnValue, ignoreScopes);
 				break;
 			}
@@ -180,12 +197,11 @@ public final class CFMLTransformer {
 		}
 
 		// could it be a component?
-		boolean isCFMLCompExt = Constants.isCFMLComponentExtension(ResourceUtil.getExtension(ps.getResource(), ""));
 
 		boolean possibleUndetectedComponent = false;
 
 		// we don't have a component or interface
-		if (p.isPage()) {
+		if (!wrapped && p.isPage()) {
 			possibleUndetectedComponent = isCFMLCompExt;
 		}
 
@@ -243,6 +259,15 @@ public final class CFMLTransformer {
 			// this is already loaded, oherwise we where not here
 			tl = TagLibFactory.loadFromSystem(id);
 			return tl.getTag(name);
+		}
+		catch (TagLibException e) {
+			throw new TemplateException(cfml, e);
+		}
+	}
+
+	public static TagLib getTagLib(SourceCode cfml, Identification id) throws TemplateException {
+		try {
+			return TagLibFactory.loadFromSystem(id);
 		}
 		catch (TagLibException e) {
 			throw new TemplateException(cfml, e);
