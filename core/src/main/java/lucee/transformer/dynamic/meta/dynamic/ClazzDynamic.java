@@ -511,8 +511,8 @@ public class ClazzDynamic extends Clazz {
 		return _getFunctionMembers(clazz, log);
 	}
 
-	private static Map<String, FunctionMember> _getFunctionMembers(final Class clazz, Log log) throws IOException {
-
+	private static Map<String, FunctionMember> _getFunctionMembers(Class clazz_, Log log) throws IOException {
+		final Class clazz = clazz_.isArray() ? Object.class : clazz_;
 		final Map<String, FunctionMember> members = new LinkedHashMap<>();
 		Map<String, FunctionMember> existing = membersCollection.get(clazz);
 

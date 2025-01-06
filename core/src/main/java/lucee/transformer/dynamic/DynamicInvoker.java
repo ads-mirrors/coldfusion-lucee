@@ -130,8 +130,8 @@ public class DynamicInvoker {
 	 */
 	private Object invoke(Object objMaybeNull, Class<?> objClass, Key methodName, Object[] arguments, boolean nameCaseSensitive, boolean convertComparsion) throws Exception {
 		try {
+			if (objClass.isArray()) objClass = Object.class;
 			ClazzDynamic clazzz = toClazzDynamic(objClass);
-
 			return ((BiFunction<Object, Object[], Object>) getInstance(clazzz, getFunctionMember(clazzz, methodName, arguments, nameCaseSensitive, convertComparsion), arguments))
 					.apply(objMaybeNull, arguments);
 		}
@@ -425,7 +425,7 @@ public class DynamicInvoker {
 		DynamicInvoker e = new DynamicInvoker(classes);
 
 		DynamicInvoker.getInstance(classes);
-		{
+		if (true) {
 
 			int rounds = 6;
 			int max = 500000;
@@ -469,6 +469,7 @@ public class DynamicInvoker {
 				long start = System.currentTimeMillis();
 				for (int y = 0; y < max; y++) {
 					// Reflector.getMethodInstance(clazz, methodName, new Object[] { 1 }, false, false).invoke(tm);
+					// Reflector.getMethod(clazz, "test", cargs, true);
 					Reflector.getMethod(clazz, "test", cargs, true).invoke(tm, args);
 				}
 				tmp = System.currentTimeMillis() - start;
@@ -513,7 +514,7 @@ public class DynamicInvoker {
 			aprint.e("Reflector.getMethod:" + dynamicInvoker2);
 			aprint.e("Reflector.callMethod:" + dynamicInvoker3);
 			aprint.e("reflection:" + reflection);
-			aprint.e("methodHandle:" + reflection);
+			aprint.e("methodHandle:" + methodHandle);
 			aprint.e("direct:" + direct);
 
 			aprint.e("-------------------");
@@ -592,6 +593,13 @@ public class DynamicInvoker {
 			}
 			fis.close();
 			System.exit(0);
+		}
+
+		{
+
+			int[] arr = new int[] { 1, 2 };
+
+			aprint.e(e.invokeInstanceMethod(arr, "toString", new Object[] {}, true, false));
 		}
 
 		{
