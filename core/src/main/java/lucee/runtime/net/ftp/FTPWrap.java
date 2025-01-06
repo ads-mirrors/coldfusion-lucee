@@ -126,7 +126,7 @@ public final class FTPWrap {
 		if (client == null) return;
 
 		// timeout
-		client.setTimeout(conn.getTimeout() * 1000);
+		client.setDefaultTimeout(conn.getTimeout() * 1000);
 
 		// passive/active Mode
 		int mode = client.getDataConnectionMode();

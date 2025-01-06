@@ -90,6 +90,7 @@ public final class PageSourceImpl implements PageSource {
 	private long lastAccess;
 	private RefIntegerSync accessCount = new RefIntegerSync();
 	private boolean flush = false;
+	private int sourceOffset; // used to track when wrapping in cfscript tag
 
 	private static class PageAndClassName {
 		private Page page;
@@ -1156,4 +1157,14 @@ public final class PageSourceImpl implements PageSource {
 		Page p = pcn.page;
 		if (p != null) p.setLoadType((byte) 0);
 	}
+
+	public void setSourceOffset(int sourceOffset) {
+		this.sourceOffset = sourceOffset;
+	}
+
+	public int getSourceOffset() {
+		// lucee.aprint.o("sourceOffset:"+ sourceOffset);
+		return sourceOffset;
+	}
+
 }

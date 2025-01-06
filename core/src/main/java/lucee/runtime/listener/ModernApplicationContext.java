@@ -1315,8 +1315,11 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	public void initAntiSamyPolicyResource(PageContext pc) {
 		Struct sct = Caster.toStruct(get(component, KeyConstants._security, null), null);
 		if (sct != null) {
-			Resource tmp = ResourceUtil.toResourceExisting(pc, Caster.toString(sct.get("antisamypolicy", null), null), true, null);
-			if (tmp != null) antiSamyPolicyResource = tmp;
+			String policy = Caster.toString(sct.get("antisamypolicy", null), null);
+			if (!StringUtil.isEmpty(policy)) {
+				Resource tmp = ResourceUtil.toResourceExisting(pc, policy, true, null);
+				if (tmp != null) antiSamyPolicyResource = tmp;
+			}
 		}
 	}
 

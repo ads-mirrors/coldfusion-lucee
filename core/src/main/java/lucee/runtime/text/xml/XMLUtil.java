@@ -274,7 +274,7 @@ public final class XMLUtil {
 
 					try {
 						Class c = ClassUtil.loadClass("com.sun.org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
-						ClassUtil.loadInstance(clazz); // make sure we can also load it
+						ClassUtil.loadInstance(c); // make sure we can also load it
 						clazz = c;
 					}
 					catch (Throwable t) {
@@ -285,7 +285,7 @@ public final class XMLUtil {
 					if (clazz == null) {
 						try {
 							Class c = ClassUtil.loadClass("org.apache.xalan.internal.xsltc.trax.TransformerFactoryImpl");
-							ClassUtil.loadInstance(clazz); // make sure we can also load it
+							ClassUtil.loadInstance(c); // make sure we can also load it
 							clazz = c;
 						}
 						catch (Throwable t) {
@@ -508,7 +508,7 @@ public final class XMLUtil {
 
 					try {
 						Class c = ClassUtil.loadClass("com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl");
-						ClassUtil.loadInstance(clazz); // make sure we can also load it
+						ClassUtil.loadInstance(c); // make sure we can also load it
 						clazz = c;
 					}
 					catch (Throwable t) {
@@ -519,7 +519,7 @@ public final class XMLUtil {
 					if (clazz == null) {
 						try {
 							Class c = ClassUtil.loadClass("org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl");
-							ClassUtil.loadInstance(clazz); // make sure we can also load it
+							ClassUtil.loadInstance(c); // make sure we can also load it
 							clazz = c;
 						}
 						catch (Throwable t) {

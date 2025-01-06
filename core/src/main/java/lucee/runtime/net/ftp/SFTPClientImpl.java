@@ -402,6 +402,11 @@ public class SFTPClientImpl extends AFTPClient {
 	}
 
 	@Override
+	public void setDefaultTimeout(int timeout) {
+		setTimeout(timeout);
+	}
+
+	@Override
 	public void setTimeout(int timeout) {
 		this.timeout = timeout;
 		if (session != null) {

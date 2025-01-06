@@ -100,7 +100,7 @@
 							<td>
 								<input type="hidden" name="virtual_#bundles.currentrow#" value="#bundles.title#">
 								#bundles.title#<cfif bundles.symbolicName != bundles.title> (#bundles.symbolicName#)</cfif>
-								<cfif len(bundles.description)><br><span class="comment">#bundles.description.trim()#</span></cfif>
+								<cfif len(bundles.description)><br><span class="comment">#trim(bundles.description)#</span></cfif>
 							</td>
 							
 							<!--- version --->

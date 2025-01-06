@@ -289,6 +289,13 @@ public abstract class AFTPClient {
 	 * 
 	 * @param timeout
 	 */
+	public abstract void setDefaultTimeout(int timeout);
+
+	/**
+	 * timeout in milli seconds, only useful after connect()
+	 * 
+	 * @param timeout
+	 */
 	public abstract void setTimeout(int timeout);
 
 	/**

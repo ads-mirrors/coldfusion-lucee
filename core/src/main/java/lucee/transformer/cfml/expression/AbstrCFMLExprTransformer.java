@@ -1841,7 +1841,7 @@ public abstract class AbstrCFMLExprTransformer {
 					// Dynamic
 					if (isDynamic) {
 						if (max != -1 && max < fm.getArguments().length) throw new TemplateException(data.srcCode,
-								"Too many arguments (" + max + ":" + fm.getArguments().length + ") in function [ " + ASMUtil.display(name) + " ]");
+								"Too many arguments (" + max + ":" + fm.getArguments().length + ") in function call [ " + ASMUtil.display(name) + " ]");
 					}
 					// Fix
 					else {
@@ -1857,7 +1857,7 @@ public abstract class AbstrCFMLExprTransformer {
 
 				// check min attributes
 				if (flf.getArgMin() > count) {
-					TemplateException te = new TemplateException(data.srcCode, "Too few arguments in function [" + ASMUtil.display(name) + "]");
+					TemplateException te = new TemplateException(data.srcCode, "Too few arguments in function call [" + ASMUtil.display(name) + "]");
 					if (flf.getArgType() == FunctionLibFunction.ARG_FIX) UDFUtil.addFunctionDoc(te, flf);
 					throw te;
 				}
@@ -1948,9 +1948,9 @@ public abstract class AbstrCFMLExprTransformer {
 
 		if (!data.srcCode.forwardIfCurrent(')')) {
 			if (name != null) {
-				throw new TemplateException(data.srcCode, "Invalid Syntax Closing [)] for function [" + (flf != null ? flf.getName() : ASMUtil.display(name)) + "] not found");
+				throw new TemplateException(data.srcCode, "Invalid Syntax Closing [)] for function call [" + (flf != null ? flf.getName() : ASMUtil.display(name)) + "] not found");
 			}
-			throw new TemplateException(data.srcCode, "Invalid Syntax Closing [)] not found");
+			throw new TemplateException(data.srcCode, "Invalid Syntax Closing [)] for function call not found");
 		}
 		return count;
 	}
@@ -2051,7 +2051,7 @@ public abstract class AbstrCFMLExprTransformer {
 		}
 		if (!cfml.forwardIfCurrent("*/")) {
 			cfml.setPos(pos);
-			throw new TemplateException(cfml, "comment is not closed");
+			throw new TemplateException(cfml, "block comment is not closed");
 		}
 		if (isDocComment) {
 			String comment = cfml.substring(pos - 2, cfml.getPos() - pos);

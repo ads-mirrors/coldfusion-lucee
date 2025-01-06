@@ -647,7 +647,15 @@
 
 		// OSGi compatible version
 		if(arr.len()==4 && isNumeric(arr[1]) && isNumeric(arr[2]) && isNumeric(arr[3])) {
-			try{return variables.toOSGiVersion(version).sortable}catch(local.e){};
+			try{
+				osgiVersion = variables.toOSGiVersion(version);
+				if (structCount(osgiVersion)) {
+					return variables.toOSGiVersion(version).sortable;
+				}
+			}
+			catch(local.e){
+				//systemOutput(version & " " & e.message, true);
+			};
 		}
 
 
@@ -666,7 +674,8 @@
 
 		if(arr.len()!=4 || !isNumeric(arr[1]) || !isNumeric(arr[2]) || !isNumeric(arr[3])) {
 			if(ignoreInvalidVersion) return {};
-			throw "version number ["&arguments.version&"] is invalid";
+			return {};
+			//throw "version number ["&arguments.version&"] is invalid";
 		}
 		local.sct={major:arr[1]+0,minor:arr[2]+0,micro:arr[3]+0,qualifier_appendix:"",qualifier_appendix_nbr:100};
 
@@ -686,7 +695,7 @@
 			if(sct.qualifier_appendix1 =="ALPHA" || sct.qualifier_appendix2 == 'SNAPSHOT' )sct.qualifier_appendix_nbr=25;
 			else sct.qualifier_appendix_nbr=75; // every other appendix is better than SNAPSHOT
 		}
-		else throw "version number ["&arguments.version&"] is invalid";
+		else return {}; // throw "version number ["&arguments.version&"] is invalid";
 		sct.pure=
 					sct.major
 					&"."&sct.minor
@@ -695,14 +704,12 @@
 		sct.display=
 					sct.pure
 					&(sct.qualifier_appendix==""?"":"-"&sct.qualifier_appendix);
-
 		sct.sortable=repeatString("0",2-len(sct.major))&sct.major
 					&"."&repeatString("0",3-len(sct.minor))&sct.minor
-					&"."&repeatString("0",3-len(sct.micro))&sct.micro
+					&"."&repeatString("0",4-len(sct.micro))&sct.micro
 					&"."&repeatString("0",4-len(sct.qualifier))&sct.qualifier
 					& #sct.keyExists("qualifier_appendix1") && isNumeric(sct.qualifier_appendix1)? "."&repeatString("0",4-len(sct.qualifier_appendix1))&sct.qualifier_appendix1  : ""#
 					&"."&repeatString("0",3-len(sct.qualifier_appendix_nbr))&sct.qualifier_appendix_nbr;
-
 		return sct;
 	}
 

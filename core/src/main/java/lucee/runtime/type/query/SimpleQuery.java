@@ -437,33 +437,41 @@ public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 	}
 
 	@Override
-	public synchronized boolean next() {
-		try {
-			return next(getPid());
-		}
-		catch (DatabaseException e) {
-			throw new PageRuntimeException(e);
+	public boolean next() {
+		synchronized (this){
+			try {
+				return next(getPid());
+			}
+			catch (DatabaseException e) {
+				throw new PageRuntimeException(e);
+			}
 		}
 	}
 
 	@Override
-	public synchronized boolean next(int pid) throws DatabaseException {
-		throwIfClosed();
-		if (recordcount >= (arrCurrentRow.set(pid, arrCurrentRow.get(pid, 0) + 1))) {
-			return true;
+	public boolean next(int pid) throws DatabaseException {
+		synchronized (this){
+			throwIfClosed();
+			if (recordcount >= (arrCurrentRow.set(pid, arrCurrentRow.get(pid, 0) + 1))) {
+				return true;
+			}
+			arrCurrentRow.set(pid, 0);
+			return false;
 		}
-		arrCurrentRow.set(pid, 0);
-		return false;
 	}
 
 	@Override
-	public synchronized void reset() {
-		reset(getPid());
+	public void reset() {
+		synchronized (this){
+			reset(getPid());
+		}
 	}
 
 	@Override
-	public synchronized void reset(int pid) {
-		arrCurrentRow.set(pid, 0);
+	public void reset(int pid) {
+		synchronized (this){
+			arrCurrentRow.set(pid, 0);
+		}
 	}
 
 	@Override
@@ -483,8 +491,10 @@ public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 
 	@Override
 
-	public synchronized int getCurrentrow(int pid) {
-		return arrCurrentRow.get(pid, 1);
+	public int getCurrentrow(int pid) {
+		synchronized (this){
+			return arrCurrentRow.get(pid, 1);
+		}
 	}
 
 	public String getColumnlist(boolean upperCase) {
@@ -600,29 +610,33 @@ public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 
 	@Override
 
-	public synchronized int[] getTypes() {
-		if (_types == null) {
-			_types = new int[columns.size()];
-			int i = 0;
-			Iterator<Entry<String, SimpleQueryColumn>> it = columns.entrySet().iterator();
-			while (it.hasNext()) {
-				_types[i++] = it.next().getValue().getType();
+	public int[] getTypes() {
+		synchronized (this){
+			if (_types == null) {
+				_types = new int[columns.size()];
+				int i = 0;
+				Iterator<Entry<String, SimpleQueryColumn>> it = columns.entrySet().iterator();
+				while (it.hasNext()) {
+					_types[i++] = it.next().getValue().getType();
+				}
 			}
+			return _types;
 		}
-		return _types;
 	}
 
 	@Override
 
-	public synchronized Map<Collection.Key, String> getTypesAsMap() {
-		Map<Collection.Key, String> map = new HashMap<Collection.Key, String>();
-		Iterator<SimpleQueryColumn> it = columns.values().iterator();
-		SimpleQueryColumn c;
-		while (it.hasNext()) {
-			c = it.next();
-			map.put(c.getKey(), c.getTypeAsString());
+	public Map<Collection.Key, String> getTypesAsMap() {
+		synchronized (this){
+			Map<Collection.Key, String> map = new HashMap<Collection.Key, String>();
+			Iterator<SimpleQueryColumn> it = columns.values().iterator();
+			SimpleQueryColumn c;
+			while (it.hasNext()) {
+				c = it.next();
+				map.put(c.getKey(), c.getTypeAsString());
+			}
+			return map;
 		}
-		return map;
 	}
 
 	@Override
@@ -752,24 +766,26 @@ public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 
 	@Override
 
-	public synchronized String getData(int row, int col) throws IndexOutOfBoundsException {
-		try {
-			int rowBefore = res.getRow();
+	public String getData(int row, int col) throws IndexOutOfBoundsException {
+		synchronized (this){
 			try {
-				res.absolute(row);
-				if (col < 1 || col > columnNames.length) {
-					new IndexOutOfBoundsException("invalid column index to retrieve Data from query, valid index goes from 1 to " + columnNames.length);
-				}
-				return Caster.toString(get(columnNames[col]));
+				int rowBefore = res.getRow();
+				try {
+					res.absolute(row);
+					if (col < 1 || col > columnNames.length) {
+						new IndexOutOfBoundsException("invalid column index to retrieve Data from query, valid index goes from 1 to " + columnNames.length);
+					}
+					return Caster.toString(get(columnNames[col]));
 
+				}
+				finally {
+					res.absolute(rowBefore);
+				}
 			}
-			finally {
-				res.absolute(rowBefore);
+			catch (Throwable t) {
+				ExceptionUtil.rethrowIfNecessary(t);
+				throw toRuntimeExc(t);
 			}
-		}
-		catch (Throwable t) {
-			ExceptionUtil.rethrowIfNecessary(t);
-			throw toRuntimeExc(t);
 		}
 	}
 
@@ -876,20 +892,22 @@ public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 	}
 
 	@Override
-	public synchronized lucee.runtime.type.Array getMetaDataSimple() {
-		lucee.runtime.type.Array cols = new ArrayImpl();
-		SimpleQueryColumn sqc;
-		Struct column;
-		Iterator<SimpleQueryColumn> it = columns.values().iterator();
-		while (it.hasNext()) {
-			sqc = it.next();
-			column = new StructImpl();
-			column.setEL(KeyConstants._name, sqc.getKey());
-			column.setEL("isCaseSensitive", Boolean.FALSE);
-			column.setEL("typeName", sqc.getTypeAsString());
-			cols.appendEL(column);
+	public lucee.runtime.type.Array getMetaDataSimple() {
+		synchronized (this){
+			lucee.runtime.type.Array cols = new ArrayImpl();
+			SimpleQueryColumn sqc;
+			Struct column;
+			Iterator<SimpleQueryColumn> it = columns.values().iterator();
+			while (it.hasNext()) {
+				sqc = it.next();
+				column = new StructImpl();
+				column.setEL(KeyConstants._name, sqc.getKey());
+				column.setEL("isCaseSensitive", Boolean.FALSE);
+				column.setEL("typeName", sqc.getTypeAsString());
+				cols.appendEL(column);
+			}
+			return cols;
 		}
-		return cols;
 	}
 
 	@Override
@@ -977,49 +995,63 @@ public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 
 	@Override
 
-	public synchronized boolean absolute(int row) throws SQLException {
-		return res.absolute(row);
-	}
-
-	@Override
-
-	public synchronized void afterLast() throws SQLException {
-		res.afterLast();
-	}
-
-	@Override
-
-	public synchronized void beforeFirst() throws SQLException {
-		res.beforeFirst();
-	}
-
-	@Override
-
-	public synchronized void cancelRowUpdates() throws SQLException {
-		res.cancelRowUpdates();
-	}
-
-	@Override
-
-	public synchronized void clearWarnings() throws SQLException {
-		res.clearWarnings();
-	}
-
-	@Override
-
-	public synchronized void close() throws SQLException {
-		if (res != null && !res.isClosed()) {
-			res.close();
-		}
-		if (stat != null && !stat.isClosed()) {
-			stat.close();
+	public boolean absolute(int row) throws SQLException {
+		synchronized (this){
+			return res.absolute(row);
 		}
 	}
 
 	@Override
 
-	public synchronized void deleteRow() throws SQLException {
-		res.deleteRow();
+	public void afterLast() throws SQLException {
+		synchronized (this){
+			res.afterLast();
+		}
+	}
+
+	@Override
+
+	public void beforeFirst() throws SQLException {
+		synchronized (this){
+			res.beforeFirst();
+		}
+	}
+
+	@Override
+
+	public void cancelRowUpdates() throws SQLException {
+		synchronized (this){
+			res.cancelRowUpdates();
+		}
+	}
+
+	@Override
+
+	public void clearWarnings() throws SQLException {
+		synchronized (this){
+			res.clearWarnings();
+		}
+	}
+
+	@Override
+
+	public void close() throws SQLException {
+		synchronized (this){
+			if (res != null && !res.isClosed()) {
+				res.close();
+			}
+			if (stat != null && !stat.isClosed()) {
+				stat.close();
+			}
+		}
+	}
+
+	@Override
+
+	public void deleteRow() throws SQLException {
+		synchronized (this){
+			res.deleteRow();
+		}
 	}
 
 	@Override
@@ -1030,8 +1062,10 @@ public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 
 	@Override
 
-	public synchronized boolean first() throws SQLException {
-		return res.first();
+	public boolean first() throws SQLException {
+		synchronized (this){
+			return res.first();
+		}
 	}
 
 	@Override

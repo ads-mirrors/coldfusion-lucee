@@ -147,7 +147,7 @@ public class InternalRequest implements Function {
 			_pc.flush();
 			// cookie = _pc.cookieScope().duplicate(false);
 			request = _pc.requestScope().duplicate(false);
-			session = sessionEnabled(_pc) ? _pc.sessionScope().duplicate(false) : null;
+			session = _pc.hasCFSession() ? _pc.sessionScope().duplicate(false) : null;
 			exeTime = System.currentTimeMillis() - pc.getStartTime();
 			// debugging=_pc.getDebugger().getDebuggingData(_pc).duplicate(false);
 
@@ -242,12 +242,6 @@ public class InternalRequest implements Function {
 			else data.setEL(n, v);
 		}
 		return data;
-	}
-
-	private static boolean sessionEnabled(PageContextImpl pc) {
-		ApplicationContext ac = pc.getApplicationContext();
-		if (ac == null) return false;// this test properly is not necessary
-		return ac.hasName() && ac.isSetSessionManagement();
 	}
 
 	private static void fillForm(PageContextImpl _pc, Struct src, Charset charset) throws PageException {
