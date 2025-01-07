@@ -638,7 +638,7 @@ public final class SMTPClient implements Serializable {
 		Entry<String, String> e;
 		while (it.hasNext()) {
 			e = it.next();
-			if (e.getKey().equals(MESSAGE_ID)) return e.getValue();
+			if (e.getKey().equalsIgnoreCase(MESSAGE_ID)) return e.getValue();
 		}
 		return null;
 	}

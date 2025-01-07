@@ -13,6 +13,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="mail" {
 		if(isNull(application.testSMTP)) {
 			var ServerSetup=createObject("java","com.icegreen.greenmail.util.ServerSetup","org.lucee.greenmail","1.6.15");
 			var GreenMail=createObject("java","com.icegreen.greenmail.util.GreenMail","org.lucee.greenmail","1.6.15");
+			variables.utils = createObject("java","com.icegreen.greenmail.util.GreenMailUtil","org.lucee.greenmail","1.6.15");
 			application.testSMTP = GreenMail.init(ServerSetup.init(variables.port, nullValue(), ServerSetup.PROTOCOL_SMTP));
 			application.testSMTP.start();
 		}
@@ -166,7 +167,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="mail" {
 					application.testSMTP.purgeEmailFromAllMailboxes();
 				}
 				
-			});	
+			});
 
 			it(title="send muti part (html and text) mail", body = function( currentSpec ) {
 				
@@ -276,15 +277,46 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="mail" {
 				
 			});	
 
+			it(title="send mail with message-id, case shouldn't matter LDEV-2473", body = function( currentSpec ) {
+				
+				lock name="test:mail" {
+					application.testSMTP.purgeEmailFromAllMailboxes();
+					var messageId = "test-#createUniqueID()#";
+					var headerNames = [ "Message-ID", "Message-Id", "message-id", "MESSAGE-ID" ];
+					arrayEach( headerNames, function( el, idx ) {
+						mail to=variables.to from=variables.from subject="mail #idx# with #el#" 
+								spoolEnable=false server="localhost" port=variables.port {
+							mailparam name="#el#" value="<#messageId#-#el#>";
+							mailpart type="html" {
+								echo("This is a html email!");
+							}
+						}
+					});
 
+					var mail=application.testSMTP;
+					var messages = mail.getReceivedMessages();
+					expect( len(messages) ).toBe( len( headerNames ) );
 
-			
+					arrayEach( headerNames, function( el, idx ) {
+						expect( messages[ idx ].getSubject() ).toBe( "mail #idx# with #el#");
+						var msgHeaders = getMessageHeaders( messages[ idx ] );
+						expect( msgHeaders).toHaveKey( "Message-Id" );
+						expect( msgHeaders["Message-Id"] ).toBeWithCase( "<" & messageId & "-" & el & ">" );
+					});
+
+					application.testSMTP.purgeEmailFromAllMailboxes();
+				}
+			});
 		});
+	}
 
-
-
-
-
-
+	private function getMessageHeaders( msg ){
+		var str = utils.getHeaders( arguments.msg );
+		var tmp = listToArray( str, chr( 10 ) );
+		var headers = structNew( "ordered" );
+		arrayEach( tmp, function( v ){
+			headers[ listFirst( v, ":" ) ] = trim(listRest( v, ":" ));
+		});
+		return headers;
 	}
 }
