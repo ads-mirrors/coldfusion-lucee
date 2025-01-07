@@ -78,50 +78,16 @@ public class ClazzDynamic extends Clazz {
 	public static ClazzDynamic getInstance(Class clazz, Resource dir, Log log) throws IOException {
 		ClazzDynamic cd = null;
 		Reference<ClazzDynamic> sr = classes.get(clazz);
-
 		if (sr == null || (cd = sr.get()) == null) {
 			synchronized (clazz) {
 				sr = classes.get(clazz);
 				if (sr == null || (cd = sr.get()) == null) {
-					// String id = generateClassLoderId(clazz);
-					// generateClassLoderId += (SystemUtil.millis() - start);
-					// start = SystemUtil.millis();
-					// StringBuilder sbClassPath = new StringBuilder();
-					// sbClassPath.append(clazz.getName().replace('.', '/')).append('-').append(id).append(".ser");
-					// Resource ser = dir.getRealResource(getPackagePrefix() + sbClassPath.toString());
-
-					/*
-					 * if (id != null && ser.isFile()) { if (log != null) log.info("dynamic", "found metadata for [" +
-					 * clazz.getName() + "]in from serialized file:" + ser); try { cd = (ClazzDynamic)
-					 * deserialize(getClassLoader(clazz), ser.getInputStream(), id + "->" + clazz.getName() + ":" +
-					 * ser); cd.clazz = clazz; if (log != null) log.info("dynamic", "loaded metadata for [" +
-					 * clazz.getName() + "] from serialized file:" + ser); classes.put(clazz, new
-					 * SoftReference<ClazzDynamic>(cd)); } catch (Exception e) { if (log != null) log.error("dynamic",
-					 * e); } }
-					 */
-					// if (cd == null) {
 					if (log != null) log.info("dynamic", "extract metadata from [" + clazz.getName() + "]");
 					cd = new ClazzDynamic(clazz, log);
-
-					// if (id != null) {
-					// final ClazzDynamic _cd = cd;
-					/*
-					 * ThreadUtil.getThread(() -> { try { ser.getParentResource().mkdirs(); print.e("=>" +
-					 * _cd.getClass().getName()); serialize(_cd, ser.getOutputStream()); if (log != null) {
-					 * log.info("dynamic", "stored metadata for [" + clazz.getName() + "] to serialized file:" + ser); }
-					 * } catch (IOException e) { if (log != null) { log.error("dynamic",
-					 * "Failed to serialize metadata for [" + clazz.getName() + "] to file: " + ser, e); } } },
-					 * true).start();
-					 */
-					// }
-
-					// }
+					classes.put(clazz, new SoftReference<ClazzDynamic>(cd));
 				}
 			}
 		}
-		// done += (SystemUtil.millis() - start);
-		// start = SystemUtil.millis();
-
 		return cd;
 	}
 
