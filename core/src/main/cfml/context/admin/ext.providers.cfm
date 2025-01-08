@@ -43,13 +43,7 @@
 			</cfloop>
 		</cfcase>
 		<cfcase value="#stText.Buttons.save#">
-			<cfadmin 
-				action="getRHExtensionProviders"
-				type="#request.adminType#"
-				password="#session["password"&request.adminType]#"
-				returnVariable="providers">
-				
-			<cfset providerUrls = QueryColumnData( query=providers, columnName="url" ) />
+			<cfset providerUrls = QueryColumnData( query=getProvider(), columnName="url" ) />
 			<cfset data.urls=toArrayFromForm("url")>
 			<cfset data.rows=toArrayFromForm("row")>
 			<cfloop from="1" to="#arrayLen(data.urls)#" index="idx">
@@ -105,22 +99,27 @@
 
 <!--- Error Output --->
 <cfset printError(error)>
-
-<cfadmin 
-	action="getRHExtensionProviders"
-	type="#request.adminType#"
-	password="#session["password"&request.adminType]#"
-	returnVariable="providers">
-
-
+<cffunction access="public" name="getProvider" returntype="query">
+	<cfadmin 
+		action="getRHExtensionProviders"
+		type="#request.adminType#"
+		password="#session["password"&request.adminType]#"
+		returnVariable="providers">
+		<cfreturn providers/>
+</cffunction>
+<cfset providers = getProvider()/>
 <cfscript>
 	hasAccess=true;
-	thread name="provider:data" {
-		thread.datas=getProvidersInfo(providers:queryColumnData(providers,'url'));
-	}
-	thread action="join" name="provider:data" timeout=100;
-	datas=isNull(cfthread["provider:data"].datas)?{}:cfthread["provider:data"].datas;
+	// thread name="provider:data" {
+	// 	thread.datas=getProvidersInfo(providers:queryColumnData(providers,'url'));
+	// }
+	// thread action="join" name="provider:data" timeout=100;
+	// datas=isNull(cfthread["provider:data"].datas)?{}:cfthread["provider:data"].datas;
 	
+	datas = getProvidersInfo(queryColumnData(providers, 'url'));
+	if (isNull(datas)) {
+		datas = {};
+	}
 </cfscript>
 
 
