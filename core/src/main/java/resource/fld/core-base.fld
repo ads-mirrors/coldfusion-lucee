@@ -12678,6 +12678,18 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<type>void</type>
 		</return>
 	</function>
+
+	<!-- SessionExists -->
+	<function>
+		<name>SessionExists</name>
+		<class>lucee.runtime.functions.system.SessionExists</class>
+		<description>
+		Returns a boolean indicating if a session has been already created / exists.
+		</description>
+		<return>
+			<type>boolean</type>
+		</return>
+	</function>
 	
 	<!-- setEncoding -->
 	<function>
