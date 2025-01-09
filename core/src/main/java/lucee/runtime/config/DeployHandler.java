@@ -201,8 +201,8 @@ public class DeployHandler {
 					continue;
 				}
 				try {
-					deployExtension(config, ed, log, i + 1 == eds.length, force, throwOnError, sucess);
-					if (!throwOnError) results.put(ed, Boolean.TRUE);
+					RHExtension ext = deployExtension(config, ed, log, i + 1 == eds.length, force, throwOnError, sucess);
+					if (!throwOnError) results.put(ed, ext != null ? Boolean.TRUE : Boolean.FALSE);
 				}
 				catch (PageException e) {
 					if (throwOnError) throw e;
