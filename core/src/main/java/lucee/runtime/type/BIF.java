@@ -172,14 +172,18 @@ public class BIF extends MemberSupport implements UDFPlus {
 	@Override
 	public Object call(PageContext pageContext, Object[] args, boolean doIncludePath) throws PageException {
 		ArrayList<FunctionLibFunctionArg> flfas = flf.getArg();
-		FunctionLibFunctionArg flfa;
-		List<Ref> refs = new ArrayList<Ref>();
+		Ref[] refs = new Ref[args.length];
+
 		for (int i = 0; i < args.length; i++) {
 			if (i >= flfas.size()) throw new ApplicationException("Too many Attributes in function call [" + flf.getName() + "]");
-			flfa = flfas.get(i);
-			refs.add(new Casting(flfa.getTypeAsString(), flfa.getType(), args[i]));
+			if (flf.getArgType() == FunctionLibFunction.ARG_DYNAMIC) {
+				refs[i] = new Casting("any", CFTypes.TYPE_ANY, args[i]);
+			}
+			else {
+				refs[i] = new Casting(flfas.get(i), args[i]);
+			}
 		}
-		BIFCall call = new BIFCall(flf, refs.toArray(new Ref[refs.size()]));
+		BIFCall call = new BIFCall(flf, refs);
 		return call.getValue(pageContext);
 	}
 

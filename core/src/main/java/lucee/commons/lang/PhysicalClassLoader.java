@@ -288,7 +288,7 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 			return super.findClass(name);
 		}
 
-		if (addionalClassLoader != null) {
+		if (addionalClassLoader != null && isClassAvailable(addionalClassLoader, name)) {
 			try {
 				return addionalClassLoader.loadClass(name);
 			}
