@@ -1,19 +1,21 @@
 package lucee.runtime.lsp;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.ServletException;
 
 import lucee.print;
-import lucee.commons.io.DevNullOutputStream;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.loader.engine.CFMLEngine;
@@ -24,14 +26,22 @@ import lucee.runtime.PageContext;
 import lucee.runtime.config.Config;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.PageException;
+import lucee.runtime.functions.conversion.DeserializeJSON;
+import lucee.runtime.functions.conversion.SerializeJSON;
 import lucee.runtime.op.Caster;
-import lucee.runtime.thread.SerializableCookie;
+import lucee.runtime.type.Collection.Key;
+import lucee.runtime.type.KeyImpl;
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 
 public class LSPEndpointFactory {
-	private static final int DEFAULT_LSP_PORT = 2089; // Common LSP port
-	private static final String DEFAULT_COMPONENT = "org.lucee.cfml.lsp.LSPEndpoint";
-	private static final long TIMEOUT = 3000;
-	private static final String DEFAULT_LOG = "debug";
+	public static final int DEFAULT_LSP_PORT = 2089;
+	public static final String DEFAULT_COMPONENT = "org.lucee.cfml.lsp.LSPEndpoint";
+	public static final long TIMEOUT = 3000;
+	public static final String DEFAULT_LOG = "debug";
+	public static final Key JSONRPC;
+
 	private ServerSocket serverSocket;
 	private ExecutorService executor;
 	private volatile boolean running = true;
@@ -43,10 +53,18 @@ public class LSPEndpointFactory {
 	private Component cfc;
 	private static LSPEndpointFactory instance;
 
+	private ConcurrentHashMap<String, OutputStream> clientOutputStreams = new ConcurrentHashMap<>();
+	private AtomicInteger clientCounter = new AtomicInteger(0);
+	private final AtomicInteger requestId = new AtomicInteger(0);
+
+	static {
+		JSONRPC = KeyImpl.init("jsonrpc");
+	}
+
 	private LSPEndpointFactory(Config config) {
 		// setup config and utils
 		engine = CFMLEngineFactory.getInstance();
-		log = getLog(config);
+		log = LSPUtil.getLog(config);
 		port = engine.getCastUtil().toIntValue(SystemUtil.getSystemPropOrEnvVar("lucee.lsp.port", null), DEFAULT_LSP_PORT);
 		cfcPath = engine.getCastUtil().toString(SystemUtil.getSystemPropOrEnvVar("lucee.lsp.component", null), DEFAULT_COMPONENT);
 		stateless = engine.getCastUtil().toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.lsp.stateless", null), false);
@@ -86,7 +104,7 @@ public class LSPEndpointFactory {
 	public Component getComponent() throws PageException, ServletException {
 		// if component was not yet created, create it
 		if (cfc == null && !stateless) {
-			cfc = engine.getCreationUtil().createComponentFromName(createPageContext(false), cfcPath);
+			cfc = engine.getCreationUtil().createComponentFromName(LSPUtil.createPageContext(false), cfcPath);
 		}
 		return cfc;
 	}
@@ -132,15 +150,20 @@ public class LSPEndpointFactory {
 		if (serverSocket != null && !serverSocket.isClosed()) {
 			serverSocket.close();
 		}
+		// Clean up client connections
+		clientOutputStreams.clear();
 	}
 
 	private void handleClient(Socket clientSocket) {
+		String clientId = "client-" + clientCounter.incrementAndGet();
+		log.info("lsp", "LSP server handle client: " + clientId);
 
-		log.info("lsp", "LSP server handle client");
 		try {
-			// Get input/output streams
-			BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+			// Store output stream for this client
 			OutputStream out = clientSocket.getOutputStream();
+			clientOutputStreams.put(clientId, out);
+
+			BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			StringBuilder buffer = new StringBuilder();
 
 			while (!clientSocket.isClosed()) {
@@ -178,15 +201,12 @@ public class LSPEndpointFactory {
 						// Here you would call your component to handle the message
 						String response = processMessage(jsonMessage);
 
-						// Send response using LSP format
 						if (response != null) {
-							String header = "Content-Length: " + response.length() + "\r\n\r\n";
-							out.write(header.getBytes());
-							out.write(response.getBytes());
+							String formattedResponse = LSPUtil.formatLSPMessage(response);
+							out.write(formattedResponse.getBytes());
 							out.flush();
 						}
 
-						// Remove processed message from buffer
 						buffer.delete(0, contentStart + contentLength);
 					}
 				}
@@ -196,6 +216,7 @@ public class LSPEndpointFactory {
 			error("lsp", e);
 		}
 		finally {
+			clientOutputStreams.remove(clientId);
 			engine.getIOUtil().closeSilent(clientSocket);
 		}
 	}
@@ -204,13 +225,23 @@ public class LSPEndpointFactory {
 		PageContext previousPC = null, pc = null;
 		try {
 			log.info("lsp", "Received message: " + jsonMessage);
-			// just in case there is a previous Pagcontext, safe it
 			previousPC = ThreadLocalPageContext.get();
-			pc = createPageContext(true);
+			pc = LSPUtil.createPageContext(true);
 			if (cfc == null || stateless) {
 				cfc = engine.getCreationUtil().createComponentFromName(pc, cfcPath);
 			}
-			String response = engine.getCastUtil().toString(cfc.call(pc, "execute", new Object[] { jsonMessage }));
+
+			String response;
+			Object rsp = cfc.call(pc, "execute", new Object[] { DeserializeJSON.call(pc, jsonMessage), this });
+
+			// serialize if needed
+			if (rsp instanceof String) {
+				response = (String) rsp;
+			}
+			else {
+				response = SerializeJSON.call(pc, rsp);
+			}
+
 			log.info("lsp", "response from component [" + cfcPath + "]: " + response);
 
 			return response;
@@ -220,48 +251,63 @@ public class LSPEndpointFactory {
 			return null;
 		}
 		finally {
-			releasePageContext(pc, previousPC);
+			LSPUtil.releasePageContext(pc, previousPC);
+		}
+	}
+
+	public void sendMessageToClient(Struct message) throws IOException, PageException, ServletException {
+		if (clientOutputStreams.isEmpty()) {
+			log.error("lsp", "No connected clients to send message to");
+			return;
+		}
+
+		Struct data = new StructImpl(StructImpl.TYPE_LINKED);
+		// JSONRPC
+		data.set(JSONRPC, Caster.toString(message.remove(JSONRPC, null), "2.0"));
+		// ID
+		Integer id = Caster.toInteger(message.remove(KeyConstants._id, null), null);
+		if (id == null) id = requestId.incrementAndGet();
+		data.set(KeyConstants._id, id);
+
+		// all other entries
+		Iterator<Entry<Key, Object>> it = message.entryIterator();
+		Entry<Key, Object> entry;
+		while (it.hasNext()) {
+			entry = it.next();
+			data.set(entry.getKey(), entry.getValue());
+		}
+
+		boolean releasePC = false;
+		PageContext pc = ThreadLocalPageContext.get();
+		try {
+			// if there is no pc for the thread (unlikely), create one
+			if (pc == null) {
+				pc = LSPUtil.createPageContext(true);
+				releasePC = true;
+			}
+
+			String formattedMessage = LSPUtil.formatLSPMessage(SerializeJSON.call(pc, data));
+			byte[] formattedMessageBytes = formattedMessage.getBytes();
+			for (OutputStream out: clientOutputStreams.values()) {
+				try {
+					out.write(formattedMessageBytes);
+					out.flush();
+					log.info("lsp", "Sent server-initiated message: " + message);
+				}
+				catch (IOException e) {
+					log.error("lsp", "Failed to send message to client", e);
+					throw e;
+				}
+			}
+		}
+		finally {
+			if (releasePC) LSPUtil.releasePageContext(pc, null);
 		}
 	}
 
 	private void error(String type, Exception e) {
-		// TODO remove the print out
 		System.err.println(type);
 		e.printStackTrace();
 		log.error(type, e);
 	}
-
-	public static Log getLog(Config config) {
-		if (config == null) config = CFMLEngineFactory.getInstance().getThreadConfig();
-
-		try {
-			Log log = config.getLog("lsp");
-			if (log == null) log = config.getLog(DEFAULT_LOG);
-			if (log != null) return log;
-		}
-		catch (Exception e) {
-			Log log = config.getLog(DEFAULT_LOG);
-			log.error("lsp", e);
-			return log;
-		}
-		return null;
-	}
-
-	public static PageContext createPageContext(boolean register) throws ServletException {
-		return CFMLEngineFactory.getInstance().createPageContext(new File("."), "localhost", "/", "", SerializableCookie.COOKIES0, null, null, null,
-				DevNullOutputStream.DEV_NULL_OUTPUT_STREAM, -1, register);
-	}
-
-	/**
-	 * unregister temporary PageContext and register again any PageContext that was already there (just
-	 * in case)
-	 * 
-	 * @param pc
-	 * @param previousPC
-	 */
-	public static void releasePageContext(PageContext pc, PageContext previousPC) {
-		if (pc != null) CFMLEngineFactory.getInstance().releasePageContext(pc, true);
-		if (previousPC != null) CFMLEngineFactory.getInstance().registerThreadPageContext(previousPC);
-	}
-
 }
