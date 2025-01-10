@@ -41,6 +41,7 @@ import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.dt.DateTime;
 import lucee.runtime.type.dt.DateTimeImpl;
 import lucee.runtime.type.scope.CSRFTokenSupport;
+import lucee.runtime.type.scope.ScopeContext;
 import lucee.runtime.type.scope.util.ScopeUtil;
 import lucee.runtime.type.util.CollectionUtil;
 import lucee.runtime.type.util.KeyConstants;
@@ -224,10 +225,7 @@ public abstract class StorageScopeImpl extends StructSupport implements StorageS
 	 *         scope (cfid,cftoken,urltoken)
 	 */
 	public boolean hasContent() {
-		if (sct.size() == (type == SCOPE_CLIENT ? 6 : 5) && sct.containsKey(URLTOKEN) && sct.containsKey(KeyConstants._cftoken) && sct.containsKey(KeyConstants._cfid)) {
-			return false;
-		}
-		return true;
+		return ScopeContext.hasContent(this);
 	}
 
 	@Override

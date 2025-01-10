@@ -71,6 +71,7 @@ import lucee.runtime.type.scope.storage.StorageScopeEngine;
 import lucee.runtime.type.scope.storage.StorageScopeImpl;
 import lucee.runtime.type.scope.storage.clean.DatasourceStorageScopeCleaner;
 import lucee.runtime.type.scope.storage.clean.FileStorageScopeCleaner;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.wrap.MapAsStruct;
 import lucee.runtime.util.PageContextUtil;
 
@@ -80,8 +81,8 @@ import lucee.runtime.util.PageContextUtil;
 public final class ScopeContext {
 
 	private static final int MINUTE = 60 * 1000;
-	private static final long CLIENT_MEMORY_TIMESPAN = 5 * MINUTE;
-	private static final long SESSION_MEMORY_TIMESPAN = 5 * MINUTE;
+	private static final long CLIENT_MEMORY_TIMESPAN = 1 * MINUTE;
+	private static final long SESSION_MEMORY_TIMESPAN = 1 * MINUTE;
 
 	private Map<String, Map<String, Scope>> cfSessionContexts = MapFactory.<String, Map<String, Scope>>getConcurrentMap();
 	private Map<String, Map<String, Scope>> cfClientContexts = MapFactory.<String, Map<String, Scope>>getConcurrentMap();
@@ -815,17 +816,33 @@ public final class ScopeContext {
 					o = fhm.get(cfid);
 					if (!(o instanceof StorageScope)) continue;
 					StorageScope scope = (StorageScope) o;
-					if (scope.lastVisit() + timespan < now && !(scope instanceof MemoryScope)) {
-						getLog().log(Log.LEVEL_INFO, "scope-context",
-								"remove from memory [" + strType + "] scope for [" + applicationName + "/" + cfid + "] from storage [" + scope.getStorage() + "]");
-
-						fhm.remove(arrClients[y]);
-						count--;
+					if (scope.lastVisit() + timespan < now) {
+						if (!(scope instanceof MemoryScope)) {
+							getLog().log(Log.LEVEL_INFO, "scope-context",
+									"remove " + strType + " scope [" + applicationName + "/" + cfid + "] from memory, it remain in storage [" + scope.getStorage() + "]");
+							fhm.remove(arrClients[y]);
+							count--;
+						}
+						else if (!((MemoryScope) scope).hasContent()) {
+							getLog().log(Log.LEVEL_INFO, "scope-context", "remove " + strType + " scope [" + applicationName + "/" + cfid + "] from memory, because it is empty.");
+							fhm.remove(arrClients[y]);
+							count--;
+						}
 					}
 				}
 				if (count == 0) contexts.remove(arrContexts[i]);
 			}
 		}
+	}
+
+	public static boolean hasContent(Scope scope) {
+		int size = scope.size();
+		if (size == 0) return false;
+		if (size > 7) return true;
+		if (size == 7 && !scope.containsKey(KeyConstants._csrf_token)) return true;
+		return !(scope.containsKey(KeyConstants._cfid) && scope.containsKey(KeyConstants._cftoken) && scope.containsKey(KeyConstants._urltoken)
+				&& scope.containsKey(KeyConstants._timecreated) && scope.containsKey(KeyConstants._lastvisit)
+				&& (scope.getType() == Scope.SCOPE_CLIENT ? scope.containsKey(KeyConstants._hitcount) : scope.containsKey(KeyConstants._sessionid)));
 	}
 
 	/**

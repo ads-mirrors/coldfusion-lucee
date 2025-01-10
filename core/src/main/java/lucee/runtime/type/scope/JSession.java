@@ -190,4 +190,9 @@ public final class JSession extends ScopeSupport implements Session, HttpSession
 	public Component getComponent() {
 		return component;
 	}
+
+	@Override
+	public boolean hasContent() {
+		return size() > 0;
+	}
 }
