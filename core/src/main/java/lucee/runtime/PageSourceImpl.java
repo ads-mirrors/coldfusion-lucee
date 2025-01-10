@@ -90,6 +90,7 @@ public final class PageSourceImpl implements PageSource {
 	private long lastAccess;
 	private RefIntegerSync accessCount = new RefIntegerSync();
 	private boolean flush = false;
+	private int sourceOffset; // used to track when wrapping in cfscript tag
 
 	private static class PageAndClassName {
 		private Page page;
@@ -966,7 +967,7 @@ public final class PageSourceImpl implements PageSource {
 		else realPath = realPath.replace('\\', '/');
 		RefBoolean _isOutSide = new RefBooleanImpl(isOutSide);
 
-		if (realPath.indexOf('/') == 0) {
+		if (realPath.indexOf('/') == 0 || ResourceUtil.isWindowsPath(realPath)) {
 			_isOutSide.setValue(false);
 		}
 		else if (realPath.startsWith("./")) {
@@ -983,7 +984,7 @@ public final class PageSourceImpl implements PageSource {
 		else realPath = realPath.replace('\\', '/');
 		RefBoolean _isOutSide = new RefBooleanImpl(isOutSide);
 
-		if (realPath.indexOf('/') == 0) {
+		if (realPath.indexOf('/') == 0 || ResourceUtil.isWindowsPath(realPath)) {
 			_isOutSide.setValue(false);
 		}
 		else if (realPath.startsWith("./")) {
@@ -1156,4 +1157,14 @@ public final class PageSourceImpl implements PageSource {
 		Page p = pcn.page;
 		if (p != null) p.setLoadType((byte) 0);
 	}
+
+	public void setSourceOffset(int sourceOffset) {
+		this.sourceOffset = sourceOffset;
+	}
+
+	public int getSourceOffset() {
+		// lucee.aprint.o("sourceOffset:"+ sourceOffset);
+		return sourceOffset;
+	}
+
 }

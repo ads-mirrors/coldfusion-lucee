@@ -435,16 +435,18 @@ public class MavenUtil {
 								if (entity != null) {
 									Exception ex = null;
 									InputStream is = null;
+									Resource tmp = SystemUtil.getTempFile(type, false);
 									try {
 										is = entity.getContent();
-										IOUtil.copy(is, res, false);
+										IOUtil.copy(is, tmp, false);
 									}
 									catch (IOException e) {
 										ex = e;
 									}
 									finally {
 										IOUtil.closeEL(is);
-										HTTPUtil.validateDownload(url, response, res, true, ex);
+										HTTPUtil.validateDownload(url, response, tmp, true, ex);
+										tmp.moveTo(res);
 									}
 								}
 							}

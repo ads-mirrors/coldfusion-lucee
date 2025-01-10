@@ -1,10 +1,9 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function beforeAll(){
-		variables.name=ListFirst(ListLast(getCurrentTemplatePath(),"\/"),".");
-		variables.dir=getDirectoryFromPath(getCurrentTemplatePath())&name&"/";
-		if(directoryExists(dir)){
-			afterAll();
-		}
+		variables.SEP = Server.separator.file;
+		variables.dir = getTempDirectory() & "fileCopy" & sep;
+		if (directoryExists(dir))
+			directoryDelete(dir,true);
 		cfdirectory(directory="#dir#" action="create" mode="777");
 	}
 

@@ -1614,15 +1614,7 @@ public final class Reflector {
 	}
 
 	public static Method getMethod(Class<?> clazz, String methodName, Class<?>[] args, boolean nameCaseSensitive, Method defaultValue) {
-		try {
-			return DynamicInvoker.getExistingInstance().getClazz(clazz, false).getMethod(methodName, args, nameCaseSensitive);
-		}
-		catch (IOException e) {
-			return defaultValue;
-		}
-		catch (NoSuchMethodException e) {
-			return defaultValue;
-		}
+		return DynamicInvoker.getExistingInstance().getClazz(clazz, false).getMethod(methodName, args, nameCaseSensitive, defaultValue);
 	}
 
 	public static Constructor getConstructor(Class clazz, Class[] args, Constructor defaultValue) {

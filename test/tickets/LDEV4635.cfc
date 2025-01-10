@@ -32,8 +32,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="s3" {
 			fileWrite(srcDir & "region.txt", storelocation );
 
 			if ( arguments.invalid ) {
+				var args=arguments;
 				expect( function(){
-					directory action="copy" directory="#srcDir#" destination="#arguments.bucket#" storelocation="#arguments.storelocation#";
+					directory action="copy" directory="#srcDir#" destination="#args.bucket#" storelocation="#args.storelocation#";
 				}).toThrow();
 			} else {
 				// try coping local dir to a new s3 bucket with a region

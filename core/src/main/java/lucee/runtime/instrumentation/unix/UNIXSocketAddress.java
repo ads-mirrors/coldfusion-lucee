@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
+import lucee.commons.io.FileUtil;
+
 /**
  * Describes an {@link InetSocketAddress} that actually uses AF_UNIX sockets instead of AF_INET.
  * 
@@ -37,7 +39,7 @@ public class UNIXSocketAddress extends InetSocketAddress {
 		if (port != 0) {
 			NativeUnixSocket.setPort1(this, port);
 		}
-		this.socketFile = socketFile.getCanonicalPath();
+		this.socketFile = FileUtil.getNormalizedPath(socketFile);
 	}
 
 	/**

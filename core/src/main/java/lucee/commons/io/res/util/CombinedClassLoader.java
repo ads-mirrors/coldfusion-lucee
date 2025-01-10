@@ -8,7 +8,10 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CombinedClassLoader extends ClassLoader {
+import lucee.commons.lang.ClassLoaderDefault;
+import lucee.commons.lang.ClassUtil;
+
+public class CombinedClassLoader extends ClassLoader implements ClassLoaderDefault {
 
 	private final ClassLoader loader;
 	private final ClassLoader core;
@@ -29,6 +32,53 @@ public class CombinedClassLoader extends ClassLoader {
 			// If not found, delegate to the secondary (main) class loader
 			return loader.loadClass(name);
 		}
+	}
+
+	@Override
+	public Class<?> loadClass(String name) throws ClassNotFoundException {
+		try {
+			// Try loading with the primary (OSGi) class loader first
+			return core.loadClass(name);
+		}
+		catch (ClassNotFoundException e) {
+			// If not found, delegate to the secondary (main) class loader
+			return loader.loadClass(name);
+		}
+	}
+
+	@Override
+	public Class<?> loadClass(String name, boolean resolve, Class<?> defaultValue) {
+		Class<?> c;
+		if (core instanceof ClassLoaderDefault) {
+			c = ((ClassLoaderDefault) core).loadClass(name, resolve, defaultValue);
+			if (c != null) return c;
+		}
+		else {
+			if (ClassUtil.isClassAvailable(core, name)) {
+				try {
+					return core.loadClass(name);
+				}
+				catch (ClassNotFoundException e) {
+
+				}
+			}
+		}
+
+		if (loader instanceof ClassLoaderDefault) {
+			c = ((ClassLoaderDefault) loader).loadClass(name, resolve, defaultValue);
+			if (c != null) return c;
+		}
+		else {
+			if (ClassUtil.isClassAvailable(loader, name)) {
+				try {
+					return loader.loadClass(name);
+				}
+				catch (ClassNotFoundException e) {
+
+				}
+			}
+		}
+		return defaultValue;
 	}
 
 	@Override

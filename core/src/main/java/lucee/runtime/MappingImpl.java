@@ -38,6 +38,7 @@ import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
+import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.ClassUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.MappingUtil;
@@ -448,7 +449,7 @@ public final class MappingImpl implements Mapping {
 			else if (realPath.startsWith("./")) {
 				realPath = realPath.substring(1);
 			}
-			else {
+			else if (!ResourceUtil.isWindowsPath(realPath)){
 				realPath = "/" + realPath;
 			}
 		}
@@ -466,7 +467,7 @@ public final class MappingImpl implements Mapping {
 			else if (realPath.startsWith("./")) {
 				realPath = realPath.substring(1);
 			}
-			else {
+			else if (!ResourceUtil.isWindowsPath(realPath)){
 				realPath = "/" + realPath;
 			}
 		}

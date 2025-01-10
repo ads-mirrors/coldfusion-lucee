@@ -79,6 +79,7 @@ public class Constants {
 	public static final String CFML_SET_TAG_NAME = "set";
 
 	public static final String CFML_COMPONENT_TAG_NAME = "component";
+	public static final String CFML_INTERFACE_TAG_NAME = "interface";
 
 	public static final String CFML_CLASS_SUFFIX = "$cf";
 	public static final String SUB_COMPONENT_APPENDIX = "inline";

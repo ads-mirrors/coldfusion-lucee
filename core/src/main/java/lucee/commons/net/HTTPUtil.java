@@ -21,6 +21,7 @@ package lucee.commons.net;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -48,6 +49,10 @@ import lucee.commons.lang.StringList;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.lang.mimetype.ContentType;
 import lucee.commons.lang.mimetype.MimeType;
+import lucee.commons.net.header.HeadersCollection;
+import lucee.commons.net.header.HeadersHTTPResponse;
+import lucee.commons.net.header.HeadersHttpResponseApache;
+import lucee.commons.net.header.HeadersHttpURLConnection;
 import lucee.commons.net.http.HTTPEngine;
 import lucee.commons.net.http.HTTPResponse;
 import lucee.commons.net.http.httpclient.HTTPEngine4Impl;
@@ -694,10 +699,21 @@ public final class HTTPUtil {
 		return StringUtil.indexOfIgnoreCase(url.getProtocol(), "https") != -1;
 	}
 
-	public static void validateDownload(URL url, HttpResponse response, Resource res, boolean deleteFileWhenInvalid, Exception cause) throws IOException {
+	public static void validateDownload(URL url, HttpURLConnection conn, Resource res, boolean deleteFileWhenInvalid, Exception cause) throws IOException {
+		_validateDownload(url, new HeadersHttpURLConnection(conn), res, deleteFileWhenInvalid, cause);
+	}
+
+	public static void validateDownload(URL url, HTTPResponse rsp, Resource res, boolean deleteFileWhenInvalid, Exception cause) throws IOException {
+		_validateDownload(url, new HeadersHTTPResponse(rsp), res, deleteFileWhenInvalid, cause);
+	}
+
+	public static void validateDownload(URL url, HttpResponse rsp, Resource res, boolean deleteFileWhenInvalid, Exception cause) throws IOException {
+		_validateDownload(url, new HeadersHttpResponseApache(rsp), res, deleteFileWhenInvalid, cause);
+	}
+
+	private static void _validateDownload(URL url, HeadersCollection headersCollection, Resource res, boolean deleteFileWhenInvalid, Exception cause) throws IOException {
 		// in case of an exception, the file may was not created
 		if (cause != null && !res.exists()) return;
-
 		Header[] headers;
 		Header h;
 		String label, name;
@@ -706,7 +722,7 @@ public final class HTTPUtil {
 			name = e.getKey();
 			label = name.toUpperCase();
 			for (String hn: e.getValue()) {
-				headers = response.getHeaders(hn);
+				headers = headersCollection.getHeaders(hn);
 				if (headers != null && headers.length > 0) {
 					h = headers[0];
 					if (!StringUtil.isEmpty(h.getValue(), true)) {
@@ -717,7 +733,6 @@ public final class HTTPUtil {
 						else if ("sha256".equalsIgnoreCase(name)) fileHash = Hash.sha256(res);
 						else if ("sha512".equalsIgnoreCase(name)) fileHash = Hash.sha512(res);
 						else continue;
-
 						if (!fileHash.equalsIgnoreCase(h.getValue())) {
 							if (deleteFileWhenInvalid) {
 								res.remove(true);
@@ -739,7 +754,7 @@ public final class HTTPUtil {
 
 		// Digest validation
 		for (String hn: VALIDATION_HEADERS) {
-			headers = response.getHeaders(hn);
+			headers = headersCollection.getHeaders(hn);
 			if (headers != null && headers.length > 0) {
 				h = headers[0];
 				String raw = h.getValue();

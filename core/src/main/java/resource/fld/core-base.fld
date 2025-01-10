@@ -2638,7 +2638,7 @@ sort direction:
 			<required>no</required>
 			<default>777</default>
 			<description>
-			Mode of the values
+			Mode to store the files, pass 0 preserve the source file modes
 			</description>
 		</argument>
 		<return>
@@ -8752,7 +8752,7 @@ The following things are considered to be empty:
 	<!-- listFindNoCase -->
 	<function>
 		<name>listFindNoCase</name>
-		<class>lucee.runtime.functions.list.ListFindNoCase</class>
+		<class>lucee.runtime.functions.list.ListFindNoCaseNumber</class>
 		<keywords>list,string,find</keywords>
 		<member-name>listFindNoCase</member-name>
 		<description>Determines the index of the first list element in which a
@@ -14882,7 +14882,7 @@ _- asc (default): ascending (a to z) sort order
 	<!-- val -->
 	<function>
 		<name>val</name>
-		<class>lucee.runtime.functions.string.Val</class>
+		<class>lucee.runtime.functions.string.ValNumber</class>
 		<description>Converts numeric characters that occur at the beginning of a
         string to a number. If conversion fails, returns zero.</description>
 		<argument>

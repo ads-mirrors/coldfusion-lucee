@@ -29,7 +29,6 @@ import lucee.runtime.PageContext;
 import lucee.runtime.PageContextImpl;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
-import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.listener.ApplicationContextSupport;
 import lucee.runtime.thread.ThreadUtil;
 
@@ -197,7 +196,7 @@ public final class ThreadLocalPageContext {
 		Config config = getConfig(pc);
 		if (config != null) {
 			try {
-				return ((ConfigWebPro) config).getLog(logName, createIfNecessary);
+				return ((ConfigPro) config).getLog(logName, createIfNecessary);
 			}
 			catch (Exception e) {
 				return config.getLog(logName);

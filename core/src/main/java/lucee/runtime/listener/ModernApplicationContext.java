@@ -1315,10 +1315,6 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 		antiSamyPolicyResource = res;
 	}
 
-	public void initAntiSamyPolicyResource(PageContext pc) {
-
-	}
-
 	@Override
 	public Charset getWebCharset() {
 		return CharsetUtil.toCharset(getWebCharSet());

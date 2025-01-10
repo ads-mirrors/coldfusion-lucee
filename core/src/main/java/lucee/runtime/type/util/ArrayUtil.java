@@ -872,7 +872,7 @@ public final class ArrayUtil {
 
 		// check order
 		boolean isAsc = true;
-		if (sortOrder.equalsIgnoreCase("asc")) isAsc = true;
+		if (sortOrder == null || sortOrder.equalsIgnoreCase("asc")) isAsc = true;
 		else if (sortOrder.equalsIgnoreCase("desc")) isAsc = false;
 		else throw new ExpressionException("invalid sort order type [" + sortOrder + "], sort order types are [asc and desc]");
 

@@ -33,7 +33,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import lucee.aprint;
-import lucee.print;
 import lucee.commons.io.DevNullOutputStream;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.LogUtil;
@@ -256,11 +255,6 @@ public class ThreadUtil {
 		return Executors.newFixedThreadPool(maxThreads);
 	}
 
-	public static void main(String[] args) {
-		ExecutorService t = createExecutorService();
-		print.e(t);
-	}
-
 	public static ExecutorService createExecutorService() {
 		if (SystemUtil.JAVA_VERSION >= SystemUtil.JAVA_VERSION_19) {
 			// FUTURE use newVirtualThreadPerTaskExecutor natively
@@ -271,7 +265,6 @@ public class ThreadUtil {
 				return (ExecutorService) methodHandle.invoke();
 			}
 			catch (Throwable e) {
-				print.e(e);
 				ExceptionUtil.rethrowIfNecessary(e);
 				LogUtil.log("threading", e);
 			}

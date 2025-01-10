@@ -49,9 +49,12 @@ import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
+import lucee.commons.io.res.Resource;
+import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.Pair;
 import lucee.commons.lang.StringUtil;
+import lucee.commons.net.HTTPUtil;
 import lucee.commons.net.http.HTTPResponse;
 import lucee.commons.net.http.httpclient.HTTPEngine4Impl;
 import lucee.loader.engine.CFMLEngine;
@@ -358,8 +361,10 @@ public final class BundleProvider extends DefaultHandler {
 			}
 
 		}
-
-		IOUtil.copy((InputStream) conn.getContent(), new FileOutputStream(jar), true, true);
+		Resource tmp = SystemUtil.getTempFile("jar", false);
+		IOUtil.copy((InputStream) conn.getContent(), tmp.getOutputStream(), true, true);
+		HTTPUtil.validateDownload(updateUrl, conn, tmp, true, null);
+		ResourceUtil.toFile(tmp).renameTo(jar);
 		conn.disconnect();
 		return jar;
 		/*

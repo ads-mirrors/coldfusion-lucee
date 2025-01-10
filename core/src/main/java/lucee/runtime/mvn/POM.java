@@ -144,7 +144,21 @@ public class POM {
 		this.dependencyScope = dependencyScope;
 		this.log = log;
 
+		initXMLAsync();
 		cache.put(id(), this);
+
+	}
+
+	public void initXMLAsync() {
+		ThreadUtil.getThread(() -> {
+			synchronized (token) {
+				try {
+					initXML();
+				}
+				catch (IOException e) {
+				}
+			}
+		}, true).start();
 	}
 
 	void initXML() throws IOException {
@@ -466,7 +480,7 @@ public class POM {
 		return list;
 	}
 
-	private static TreeNode<POM> getDependencies(POM pom, boolean recursive, int level, TreeNode<POM> node) throws IOException {
+	private static TreeNode<POM> getDependenciesSerial(POM pom, boolean recursive, int level, TreeNode<POM> node) throws IOException {
 		try {
 			List<POM> deps = pom.getDependencies();
 			if (deps != null) {
@@ -491,7 +505,7 @@ public class POM {
 		}
 	}
 
-	private static TreeNode<POM> getDependenciesAsync(POM pom, boolean recursive, int level, TreeNode<POM> node) throws IOException {
+	private static TreeNode<POM> getDependencies(POM pom, boolean recursive, int level, TreeNode<POM> node) throws IOException {
 		ExecutorService executor = null;
 		try {
 			List<POM> deps = pom.getDependencies();

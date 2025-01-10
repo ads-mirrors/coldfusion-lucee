@@ -31,4 +31,6 @@ public interface MemoryScope extends Scope {
 	 */
 	public abstract void touch();
 
+	public boolean hasContent();
+
 }

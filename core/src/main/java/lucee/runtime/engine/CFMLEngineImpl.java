@@ -826,7 +826,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 					scl = tmp;
 					return;
 				}
-				catch (Exception e) {
+				catch (Exception | NoSuchMethodError e) {
 					// because this is optional and not all servlet engine do support this, we keep the log level on
 					// info
 					LogUtil.log(configServer, "add-event-listener", e, Log.LEVEL_INFO, "application");
@@ -843,7 +843,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 				scl = tmp;
 				return;
 			}
-			catch (Exception e) {
+			catch (Exception | NoSuchMethodError e) {
 				// because this is optional and not all servlet engine do support this, we keep the log level on
 				// info
 				LogUtil.log(configServer, "add-event-listener", e, Log.LEVEL_INFO, "application");
@@ -1705,7 +1705,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 			return pc.getConfig();
 		}
 		finally {
-			pc.getConfig().getFactory().releaseLuceePageContext(pc, false);
+			if (pc != null) pc.getConfig().getFactory().releaseLuceePageContext(pc, false);
 		}
 
 	}

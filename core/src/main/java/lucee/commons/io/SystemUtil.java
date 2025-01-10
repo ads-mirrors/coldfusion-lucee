@@ -1489,9 +1489,13 @@ public final class SystemUtil {
 		}
 		if (bundle != null) {
 			try {
-				is = bundle.getEntry(path).openStream();
+				URL entry = bundle.getEntry(path);
+				is = entry != null ? entry.openStream() : null;
 				if (is != null) return is;
-				if (path.startsWith("/")) is = bundle.getEntry(path.substring(1)).openStream();
+				if (path.startsWith("/")) {
+					URL e = bundle.getEntry(path.substring(1));
+					is = e == null ? null : e.openStream();
+				}
 				if (is != null) return is;
 
 			}

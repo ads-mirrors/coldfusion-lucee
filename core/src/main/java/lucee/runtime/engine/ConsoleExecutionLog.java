@@ -21,41 +21,55 @@ package lucee.runtime.engine;
 import java.io.PrintWriter;
 import java.util.Map;
 
-import lucee.commons.io.log.Log;
-import lucee.commons.io.log.LogUtil;
+import lucee.commons.io.res.util.ResourceSnippet;
+import lucee.commons.io.res.util.ResourceSnippetsMap;
 import lucee.runtime.PageContext;
+import lucee.runtime.PageSource;
+import lucee.runtime.PageContextImpl;
+import lucee.runtime.op.Caster;
 
 public class ConsoleExecutionLog extends ExecutionLogSupport {
 
 	private PrintWriter pw;
 	private PageContext pc;
+	private ResourceSnippetsMap snippetsMap = new ResourceSnippetsMap(767, 191);
+	private boolean snippet = false;
 
 	@Override
 	protected void _init(PageContext pc, Map<String, String> arguments) {
 		this.pc = pc;
-
+		if (Caster.toBooleanValue(arguments.get("snippet"), false)) snippet = true;
 		if (pw == null) {
 			// stream type
 			String type = arguments.get("stream-type");
-			if (type != null && type.trim().equalsIgnoreCase("error")) pw = new PrintWriter(System.err);
+			if (type.trim().equalsIgnoreCase("error")) pw = new PrintWriter(System.err);
 			else pw = new PrintWriter(System.out);
-
 		}
 	}
 
 	@Override
 	protected void _log(int startPos, int endPos, long startTime, long endTime) {
-
+		PageSource ps = pc.getCurrentPageSource(null);
+		if (ps == null) return;
 		long diff = endTime - startTime;
-		LogUtil.log(pc, Log.LEVEL_TRACE, Controler.class.getName(),
-				pc.getId() + ":" + pc.getCurrentPageSource().getDisplayPath() + ":" + positons(startPos, endPos) + " > " + timeLongToString(diff));
+		String log = pc.getId() + ":" + ps.getDisplayPath() + ":";
+		if (snippet) {
+			ResourceSnippet snippet = snippetsMap.getSnippet(ps, startPos, endPos, ((PageContextImpl) pc).getResourceCharset().name());
+			log += positions(snippet.getEndLine(), snippet.getEndLine()) + " > " + timeLongToString(diff) + " [" + snippet.getContent() + "]";
+		} else {
+			log += positions(startPos, endPos) + " > " + timeLongToString(diff);
+		}
+		pw.print(log + "\n");
+		pw.flush();
 	}
 
 	@Override
 	protected void _release() {
+		//if (pw != null) pw.close();
+		snippetsMap = null;
 	}
 
-	private static String positons(int startPos, int endPos) {
+	private static String positions(int startPos, int endPos) {
 		if (startPos == endPos) return startPos + "";
 		return startPos + ":" + endPos;
 	}

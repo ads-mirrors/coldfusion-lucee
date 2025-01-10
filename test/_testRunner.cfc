@@ -1,6 +1,9 @@
 component {
 	// track which request variables exist before running tests, used for cleanup between tests
-	variables.requestKeys = ArrayToStruct( StructKeyArray( request ), true );
+	variables.requestKeys = {};
+	structEach(request, function(key, value) {
+		requestKeys[key] = true;
+	});
 
 	public function init (){
 		return this;

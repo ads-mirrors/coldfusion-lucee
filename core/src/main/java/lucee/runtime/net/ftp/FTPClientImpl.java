@@ -169,8 +169,12 @@ public class FTPClientImpl extends AFTPClient {
 	}
 
 	@Override
+	public void setDefaultTimeout(int timeout) {
+		client.setDefaultTimeout(timeout);
+	}
+
+	@Override
 	public void setTimeout(int timeout) {
-		client.setDataTimeout(timeout);
 		try {
 			client.setSoTimeout(timeout);
 		}

@@ -634,12 +634,7 @@ public final class ClassUtil {
 			int len = arr.size();
 			for (int i = 1; i <= len; i++) {
 				File file = FileUtil.toFile(Caster.toString(arr.get(i, ""), "").trim());
-				if (file.exists()) try {
-					pathes.put(file.getCanonicalPath(), "");
-				}
-				catch (IOException e) {
-					LogUtil.warn("class-util", e);
-				}
+				pathes.put(FileUtil.getNormalizedPath(file), "");
 			}
 		}
 
@@ -669,12 +664,7 @@ public final class ClassUtil {
 
 		for (int i = 0; i < urls.length; i++) {
 			File file = FileUtil.toFile(urls[i].getPath());
-			if (file.exists()) try {
-				pathes.put(file.getCanonicalPath(), "");
-			}
-			catch (IOException e) {
-				LogUtil.warn("class-util", e);
-			}
+			if (file.exists()) pathes.put(FileUtil.getNormalizedPath(file), "");
 		}
 	}
 
@@ -1038,5 +1028,10 @@ public final class ClassUtil {
 	public static Object newInstance(Class clazz)
 			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, PageException {
 		return Reflector.getConstructorInstance(clazz, EMPTY_OBJ, true).invoke();
+	}
+
+	public static boolean isClassAvailable(ClassLoader loader, String className) {
+		String resourcePath = className.replace('.', '/').concat(".class");
+		return loader.getResource(resourcePath) != null;
 	}
 }

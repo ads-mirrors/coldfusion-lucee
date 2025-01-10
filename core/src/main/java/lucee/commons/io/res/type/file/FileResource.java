@@ -30,11 +30,16 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.DosFileAttributes;
+import java.nio.file.attribute.PosixFileAttributes;
+import java.nio.file.attribute.PosixFilePermission;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import lucee.commons.cli.Command;
 import lucee.commons.io.IOUtil;
@@ -130,29 +135,29 @@ public final class FileResource extends File implements Resource {
 
 	}
 
+	public Resource getNormalizedResource() {
+		return new FileResource(provider, getNormalizedPath());
+	}
+
+	public String getNormalizedPath() {
+		return toPath().normalize().toString();
+	}
+
 	@Override
 	public Resource getAbsoluteResource() {
 		return new FileResource(provider, getAbsolutePath());
 	}
 
+	@Deprecated // use getNormalizedResource instead
 	@Override
 	public Resource getCanonicalResource() throws IOException {
-		return new FileResource(provider, getCanonicalPath());
+		return new FileResource(provider, getNormalizedPath());
 	}
 
+	@Deprecated // use getNormalizedPath instead
+	@Override
 	public String getCanonicalPath() {
-		try {
-			// java 12 performance regression LDEV-5218
-			if (SystemUtil.JAVA_VERSION > SystemUtil.JAVA_VERSION_11 )
-				return Path.of(getPath()).toAbsolutePath().normalize().toString();
-			return super.getCanonicalPath();
-		}
-		catch (IOException e) {
-			return getAbsolutePath();
-		}
-		catch (java.nio.file.InvalidPathException ipe) {
-			return getPath();
-		}
+		return toPath().normalize().toString();
 	}
 
 	@Override
@@ -429,14 +434,9 @@ public final class FileResource extends File implements Resource {
 		if (!exists()) return 0;
 		if (SystemUtil.isUnix()) {
 			try {
-				// TODO geht nur fuer file
-				String line = Command.execute("ls -ld " + getPath(), false).getOutput();
-
-				line = line.trim();
-				line = line.substring(0, line.indexOf(' '));
-				// print.ln(getPath());
-				return ModeUtil.toOctalMode(line);
-
+				PosixFileAttributes attrs = Files.readAttributes(Paths.get(getPath()), PosixFileAttributes.class);
+				Set<PosixFilePermission> permissions = attrs.permissions();
+				return ModeUtil.toOctalMode(PosixFilePermissions.toString(permissions));
 			}
 			catch (Exception e) {
 				LogUtil.warn("file-resource-provider", e);
@@ -453,14 +453,9 @@ public final class FileResource extends File implements Resource {
 		if (!Files.exists(path)) return 0;
 		if (SystemUtil.isUnix()) {
 			try {
-				// TODO geht nur fuer file
-				String line = Command.execute("ls -ld " + path.toAbsolutePath().toString(), false).getOutput();
-
-				line = line.trim();
-				line = line.substring(0, line.indexOf(' '));
-				// print.ln(getPath());
-				return ModeUtil.toOctalMode(line);
-
+				PosixFileAttributes attrs = Files.readAttributes( path, PosixFileAttributes.class);
+				Set<PosixFilePermission> permissions = attrs.permissions();
+				return ModeUtil.toOctalMode(PosixFilePermissions.toString(permissions));
 			}
 			catch (Exception e) {
 				LogUtil.warn("file-resource-provider", e);
@@ -478,14 +473,12 @@ public final class FileResource extends File implements Resource {
 		// TODO for windows do it with help of NIO functions
 		if (!SystemUtil.isUnix()) return;
 		mode = ModeUtil.extractPermissions(mode, true); // we only need the permission part
-		provider.lock(this);
 		try {
+			provider.lock(this);
 			// print.ln(ModeUtil.toStringMode(mode));
-			if (Runtime.getRuntime().exec(new String[] { "chmod", ModeUtil.toStringMode(mode), getPath() }).waitFor() != 0)
-				throw new IOException("chmod  [" + ModeUtil.toStringMode(mode) + "] [" + toString() + "] failed");
-		}
-		catch (InterruptedException e) {
-			throw new IOException("Interrupted waiting for chmod [" + toString() + "]");
+			Files.setPosixFilePermissions(Paths.get(getPath()), PosixFilePermissions.fromString(ModeUtil.fromOctalMode(mode)));
+		} catch (IOException e) {
+			throw new IOException("Interrupted setPosixFilePermissions [" + toString() + "]");
 		}
 		finally {
 			provider.unlock(this);

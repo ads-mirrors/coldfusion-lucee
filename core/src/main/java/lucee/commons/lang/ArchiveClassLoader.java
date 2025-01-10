@@ -33,7 +33,7 @@ import lucee.commons.io.res.util.FileWrapper;
 
 // TODO umbauen auf ZipInputStream oder ein wrapper schreiben fuer resorces der das file interface einhaelt
 
-public final class ArchiveClassLoader extends ClassLoader implements Closeable {
+public final class ArchiveClassLoader extends ClassLoader implements Closeable, ClassLoaderDefault {
 
 	private final ZipFile zip;
 	private final ClassLoader pcl;
@@ -108,6 +108,33 @@ public final class ArchiveClassLoader extends ClassLoader implements Closeable {
 			c = findClassEL(name);
 			if (c == null) {
 				c = pcl.loadClass(name);
+			}
+		}
+		if (resolve) {
+			resolveClass(c);
+		}
+		return c;
+	}
+
+	@Override
+	public Class<?> loadClass(String name, boolean resolve, Class<?> defaultValue) {
+		// First, check if the class has already been loaded
+		Class c = findLoadedClass(name);
+		if (c == null) {
+			c = findClassEL(name);
+			if (c == null) {
+				if (pcl instanceof ClassLoaderDefault) {
+					c = ((ClassLoaderDefault) pcl).loadClass(name, false, null);
+					if (c == null) return defaultValue;
+				}
+				else {
+					try {
+						c = pcl.loadClass(name);
+					}
+					catch (ClassNotFoundException e) {
+						return defaultValue;
+					}
+				}
 			}
 		}
 		if (resolve) {

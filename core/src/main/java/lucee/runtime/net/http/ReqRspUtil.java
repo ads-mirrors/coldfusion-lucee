@@ -47,6 +47,7 @@ import org.apache.commons.collections4.map.ReferenceMap;
 import org.xml.sax.InputSource;
 
 import lucee.commons.io.CharsetUtil;
+import lucee.commons.io.FileUtil;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.lang.ExceptionUtil;
@@ -552,11 +553,7 @@ public final class ReqRspUtil {
 		if (root == null) throw new RuntimeException("cannot determinate webcontext root, the ServletContext from class [" + sc.getClass().getName()
 				+ "] is returning null for the method call sc.getRealPath(\"/\"), possibly due to configuration problem.");
 
-		try {
-			root = new File(root).getCanonicalPath();
-		}
-		catch (IOException e) {
-		}
+		root = FileUtil.getNormalizedPath(new File(root));
 		rootPathes.put(id, root);
 		return root;
 	}

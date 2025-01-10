@@ -49,6 +49,7 @@ import lucee.runtime.type.it.EntryIterator;
 import lucee.runtime.type.it.ValueIterator;
 import lucee.runtime.type.scope.CSRFTokenSupport;
 import lucee.runtime.type.scope.Scope;
+import lucee.runtime.type.scope.ScopeContext;
 import lucee.runtime.type.scope.Session;
 import lucee.runtime.type.scope.client.IKStorageScopeClient;
 import lucee.runtime.type.scope.session.IKStorageScopeSession;
@@ -295,13 +296,7 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 	 *         scope (cfid,cftoken,urltoken)
 	 */
 	public boolean hasContent() {
-		int size = size();
-		if (size == 0) return false;
-		if (size > 7) return true;
-		if (size == 7 && !containsKey(KeyConstants._csrf_token)) return true;
-
-		return !(containsKey(KeyConstants._cfid) && containsKey(KeyConstants._cftoken) && containsKey(KeyConstants._urltoken) && containsKey(KeyConstants._timecreated)
-				&& containsKey(KeyConstants._lastvisit) && (type == SCOPE_CLIENT ? containsKey(KeyConstants._hitcount) : containsKey(KeyConstants._sessionid)));
+		return ScopeContext.hasContent(this);
 	}
 
 	@Override

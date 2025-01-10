@@ -24,6 +24,7 @@ import lucee.runtime.interpreter.ref.Ref;
 import lucee.runtime.interpreter.ref.RefSupport;
 import lucee.runtime.interpreter.ref.var.Variable;
 import lucee.runtime.op.Caster;
+import lucee.transformer.library.function.FunctionLibFunctionArg;
 
 /**
  * cast
@@ -52,6 +53,12 @@ public final class Casting extends RefSupport implements Ref {
 	public Casting(String strType, short type, Object val) {
 		this.type = type;
 		this.strType = strType;
+		this.val = val;
+	}
+
+	public Casting(FunctionLibFunctionArg flfa, Object val) {
+		this.type = flfa.getType();
+		this.strType = flfa.getTypeAsString();
 		this.val = val;
 	}
 

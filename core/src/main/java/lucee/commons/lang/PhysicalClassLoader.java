@@ -62,7 +62,7 @@ import lucee.transformer.bytecode.util.ClassRenamer;
 /**
  * Directory ClassLoader
  */
-public final class PhysicalClassLoader extends URLClassLoader implements ExtendableClassLoader {
+public final class PhysicalClassLoader extends URLClassLoader implements ExtendableClassLoader, ClassLoaderDefault {
 
 	static {
 		boolean res = registerAsParallelCapable();
@@ -201,32 +201,57 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 		return loadClass(name, resolve, true);
 	}
 
-	private Class<?> loadClass(String name, boolean resolve, boolean loadFromFS) throws ClassNotFoundException {
+	public boolean isClassAvailable(ClassLoader loader, String className) {
+		if (allLoadedClasses.containsKey(className)) return true;
+		if (unavaiClasses.containsKey(className)) return false;
+
+		String resourcePath = className.replace('.', '/').concat(".class");
+		return loader.getResource(resourcePath) != null;
+	}
+
+	@Override
+	public Class<?> loadClass(String name, boolean resolve, Class<?> defaultValue) {
+		return loadClass(name, resolve, true, defaultValue);
+	}
+
+	private Class<?> loadClass(String name, boolean resolve, boolean loadFromFS, Class<?> defaultValue) {
 		// First, check if the class has already been loaded
 		Class<?> c = findLoadedClass(name);
+
 		if (c == null) {
 			synchronized (SystemUtil.createToken("PhysicalClassLoader:load", name)) {
 				c = findLoadedClass(name);
 				if (c == null) {
-					try {
-						c = super.loadClass(name, resolve);
+					ClassLoader pcl = getParent();
+					if (pcl instanceof ClassLoaderDefault) {
+						c = ((ClassLoaderDefault) pcl).loadClass(name, resolve, null);
 					}
-					catch (Exception e) {
-						LogUtil.warn("physical-classloader", e);
+					else {
+						try {
+							c = super.loadClass(name, resolve);
+						}
+						catch (Exception e) {
+						}
 					}
 
-					if (addionalClassLoader != null) {
+					if (c == null && addionalClassLoader != null) {
 						try {
 							c = addionalClassLoader.loadClass(name);
 						}
 						catch (Exception e) {
-							LogUtil.warn("physical-classloader", e);
 						}
 					}
 
 					if (c == null) {
-						if (loadFromFS) c = findClass(name);
-						else throw new ClassNotFoundException(name);
+						if (loadFromFS) {
+							try {
+								c = findClass(name);
+							}
+							catch (ClassNotFoundException e) {
+								return defaultValue;
+							}
+						}
+						else return defaultValue;
 					}
 				}
 			}
@@ -235,17 +260,18 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 		return c;
 	}
 
+	private Class<?> loadClass(String name, boolean resolve, boolean loadFromFS) throws ClassNotFoundException {
+		Class<?> c = loadClass(name, resolve, loadFromFS, null);
+		if (c == null) throw new ClassNotFoundException(name);
+		return c;
+	}
+
 	@Override
 	public Class<?> loadClass(String name, byte[] barr) throws UnmodifiableClassException {
-		Class<?> clazz = null;
+		// Class<?> clazz = null;
+		Class<?> clazz = findLoadedClass(name);
 
 		synchronized (SystemUtil.createToken("PhysicalClassLoader:load", name)) {
-			try {
-				clazz = loadClass(name, false, false); // we do not load existing class from disk
-			}
-			catch (ClassNotFoundException cnf) {
-				LogUtil.warn("physical-classloader", cnf);
-			}
 			if (clazz == null) return _loadClass(name, barr, false);
 			return rename(clazz, barr);
 		}
@@ -253,15 +279,16 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 
 	@Override
 	protected Class<?> findClass(String name) throws ClassNotFoundException {
-		ClassNotFoundException cnfe = null;
-		try {
+		/*
+		 * ClassNotFoundException cnfe = null; try { return super.findClass(name); } catch
+		 * (ClassNotFoundException e) { cnfe = e; }
+		 */
+
+		if (super.findResource(name.replace('.', '/').concat(".class")) != null) {
 			return super.findClass(name);
 		}
-		catch (ClassNotFoundException e) {
-			cnfe = e;
-		}
 
-		if (addionalClassLoader != null) {
+		if (addionalClassLoader != null && isClassAvailable(addionalClassLoader, name)) {
 			try {
 				return addionalClassLoader.loadClass(name);
 			}
@@ -273,12 +300,11 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 		synchronized (SystemUtil.createToken("PhysicalClassLoader:load", name)) {
 			Resource res = directory.getRealResource(name.replace('.', '/').concat(".class"));
 			if (!res.isFile()) {
-				if (cnfe != null) throw cnfe;
+				// if (cnfe != null) throw cnfe;
 				throw new ClassNotFoundException("Class [" + name + "] is invalid or doesn't exist");
 			}
 
-			byte[] barr = read(name);
-			return _loadClass(name, barr, false);
+			return _loadClass(name, read(name), false);
 		}
 	}
 
@@ -291,6 +317,22 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 		catch (IOException e) {
 			this.unavaiClasses.put(name, "");
 			throw new ClassNotFoundException("Class [" + name + "] is invalid or doesn't exist", e);
+		}
+		finally {
+			IOUtil.closeEL(baos);
+		}
+		return baos.toByteArray();
+	}
+
+	private byte[] read(String name, byte[] defaultValue) {
+		Resource res = directory.getRealResource(name.replace('.', '/').concat(".class"));
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		try {
+			IOUtil.copy(res, baos, false);
+		}
+		catch (IOException e) {
+			this.unavaiClasses.put(name, "");
+			return defaultValue;
 		}
 		finally {
 			IOUtil.closeEL(baos);

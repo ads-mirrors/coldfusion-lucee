@@ -696,7 +696,7 @@ public class FormatUtil {
 		return zonedDateTime.withZoneSameInstant(timeZone != null ? timeZone.toZoneId() : ZoneId.systemDefault()).toInstant().toEpochMilli();
 	}
 
-	public static long parse(FormatterWrapper fw, String date, ZoneId zone) {
+	public static long parse(FormatterWrapper fw, String date, ZoneId zone) throws DateTimeParseException {
 
 		if (fw.type == FormatUtil.FORMAT_TYPE_DATE_TIME) {
 			return optimzeDate(ZonedDateTime.parse(date, fw.formatter)).toInstant().toEpochMilli();
@@ -706,6 +706,15 @@ public class FormatUtil {
 
 		}
 		return getEpochMillis(DEFAULT_DATE, LocalTime.parse(date, fw.formatter), zone);
+	}
+
+	public static Long parse(FormatterWrapper fw, String date, ZoneId zone, Long defaultValue) {
+		try {
+			return parse(fw, date, zone);
+		}
+		catch (Exception e) {
+			return defaultValue;
+		}
 	}
 
 	private static ZonedDateTime optimzeDate(ZonedDateTime zdt) {
