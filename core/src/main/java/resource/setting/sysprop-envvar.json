@@ -150,6 +150,11 @@
         "desc": ""
     },
     {
+        "sysprop": "lucee.controller.gc",
+        "envvar": "LUCEE_CONTROLLER_GC",
+        "desc": "Default false, previously Lucee always ran a System.GC() every 5 minutes, available since 6.2"
+    },
+    {
         "sysprop": "lucee.library.tld",
         "envvar": "LUCEE_LIBRARY_TLD",
         "desc": ""

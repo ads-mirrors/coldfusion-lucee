@@ -3866,7 +3866,7 @@ Defines the return type of this function:
         <description>
 Specifies a filter to be used to filter the results:
 - A string that uses `*` as a wildcard, for example, `*.cfm`.
-- A UDF (User Defined Function) using the following pattern: `functionName(String path):boolean`. The function is run for every single file; if the function returns `true`, the file is included in the list; otherwise, it is omitted.
+- A UDF (User Defined Function) using the following pattern: `functionName(String path, String type, String ext):boolean`. The function is run for every single file; if the function returns `true`, the file is included in the list; otherwise, it is omitted. Type is either File or Directory
         </description>
     </argument>
     <argument>

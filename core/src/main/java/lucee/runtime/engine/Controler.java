@@ -84,6 +84,7 @@ public final class Controler extends ParentThreasRefThread {
 	private ControllerState state;
 
 	private boolean poolValidate;
+	private boolean enableGC;
 
 	/**
 	 * @param contextes
@@ -96,6 +97,7 @@ public final class Controler extends ParentThreasRefThread {
 		this.state = state;
 		this.configServer = configServer;
 		this.poolValidate = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.datasource.pool.validate", null), true);
+		this.enableGC = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.controller.gc", null), false);
 		// shutdownHook=new ShutdownHook(configServer);
 		// Runtime.getRuntime().addShutdownHook(shutdownHook);
 	}
@@ -278,7 +280,7 @@ public final class Controler extends ParentThreasRefThread {
 		}
 
 		// every 5 minutes
-		if (do5Minute) {
+		if (this.enableGC && do5Minute) {
 			try {
 				System.gc();
 			}

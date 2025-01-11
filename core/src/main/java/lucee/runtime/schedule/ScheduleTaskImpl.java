@@ -181,8 +181,8 @@ public final class ScheduleTaskImpl implements ScheduleTaskPro {
 			else if (interval.equals("week")) return INTERVAL_WEEK;
 			throw new ScheduleException("invalid interval definition [" + interval + "], valid values are [once, daily, monthly, weekly or number]");
 		}
-		if (i < 1) {
-			throw new ScheduleException("interval must be at least 1");
+		if (i < 5) {
+			throw new ScheduleException("interval must be at least 5");
 		}
 		return i;
 	}

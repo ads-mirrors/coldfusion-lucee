@@ -77,7 +77,7 @@ public class ScheduledTaskThread extends ParentThreasRefThread {
 		this.endTime = task.getEndTime() == null ? DAY : util.getMilliSecondsInDay(timeZone, task.getEndTime().getTime());
 		this.unique = ((ScheduleTaskImpl) task).unique();
 		this.intervall = task.getInterval();
-		if (intervall >= 10) {
+		if (intervall >= 5) {
 			amount = intervall;
 			intervall = ScheduleTaskImpl.INTERVAL_EVEREY;
 		}
