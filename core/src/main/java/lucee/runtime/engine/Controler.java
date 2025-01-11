@@ -82,7 +82,8 @@ public final class Controler extends ParentThreasRefThread {
 	// private final ShutdownHook shutdownHook;
 	private ControllerState state;
 
-	private boolean poolValidate;
+	//private boolean poolValidate;
+	private boolean enableGC;
 
 	/**
 	 * @param contextes
@@ -94,7 +95,8 @@ public final class Controler extends ParentThreasRefThread {
 		this.interval = interval;
 		this.state = state;
 		this.configServer = configServer;
-		this.poolValidate = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.datasource.pool.validate", null), true);
+		//this.poolValidate = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.datasource.pool.validate", null), true);
+		this.enableGC = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.controller.gc", null), false);
 		// shutdownHook=new ShutdownHook(configServer);
 		// Runtime.getRuntime().addShutdownHook(shutdownHook);
 	}
@@ -276,17 +278,6 @@ public final class Controler extends ParentThreasRefThread {
 			}
 		}
 
-		// every 5 minutes
-		if (do5Minute) {
-			try {
-				System.gc();
-			}
-			catch (Throwable t) {
-				ExceptionUtil.rethrowIfNecessary(t);
-				if (log != null) log.error("controler", t);
-			}
-		}
-
 		for (int i = 0; i < factories.length; i++) {
 			control(factories[i], do10Seconds, doMinute, doHour, firstRun, log);
 		}
@@ -306,6 +297,17 @@ public final class Controler extends ParentThreasRefThread {
 			}
 			catch (Exception e) {
 				if (log != null) log.error("controler", e);
+			}
+		}
+
+		// every 5 minutes
+		if (this.enableGC && do5Minute) {
+			try {
+				System.gc();
+			}
+			catch (Throwable t) {
+				ExceptionUtil.rethrowIfNecessary(t);
+				if (log != null) log.error("controler", t);
 			}
 		}
 	}
