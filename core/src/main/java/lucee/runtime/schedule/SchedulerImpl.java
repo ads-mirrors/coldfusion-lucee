@@ -231,7 +231,15 @@ public final class SchedulerImpl implements Scheduler {
 	@Override
 	public void removeScheduleTask(String name, boolean throwWhenNotExist) throws IOException, ScheduleException {
 
-		tasks.removeIf(ref -> ref.task.getTask().equalsIgnoreCase(name));
+		tasks.removeIf(ref -> {
+			if (ref.task.getTask().equalsIgnoreCase(name)) {
+				ref.task.log(Log.LEVEL_INFO, "task gets removed");
+				ref.task.setValid(false);
+				return true;
+			}
+			return false;
+		});
+
 		try {
 			ConfigAdmin.removeScheduledTask((ConfigPro) config, name, true);
 		}
