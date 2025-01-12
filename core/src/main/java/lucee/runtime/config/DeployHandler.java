@@ -101,7 +101,7 @@ public class DeployHandler {
 							// Lucee core
 							else if (config instanceof ConfigServer && "lco".equalsIgnoreCase(ext)) ConfigAdmin.updateCore((ConfigServerImpl) config, child, true);
 							// CFConfig
-							if ("json".equalsIgnoreCase(ext) && ConfigServerFactory.isConfigFileName(child.getName())) {
+							if ("json".equalsIgnoreCase(ext) && ConfigFactoryImpl.isConfigFileName(child.getName())) {
 								try {
 									CFConfigImport ci = new CFConfigImport(config, child, config.getResourceCharset(), null, "server", null, false, false, false);
 									ci.execute(true);
