@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import lucee.commons.io.FileUtil;
+import lucee.commons.io.SystemUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.filter.AndResourceFilter;
 import lucee.commons.io.res.filter.ExtensionResourceFilter;
@@ -32,10 +33,12 @@ import lucee.commons.io.res.filter.ResourceFilter;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.mimetype.MimeType;
 import lucee.runtime.Component;
+import lucee.runtime.MappingImpl;
 import lucee.runtime.PageContext;
 import lucee.runtime.PageSource;
 import lucee.runtime.component.ComponentLoader;
 import lucee.runtime.config.Config;
+import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.config.Constants;
@@ -67,6 +70,10 @@ public class Mapping {
 
 	private List<Source> baseSources;
 	private Map<Resource, List<Source>> customSources = new HashMap<Resource, List<Source>>();
+
+	private MappingImpl base;
+
+	private PageSource root;
 
 	public Mapping(Config config, String virtual, String physical, boolean hidden, boolean readonly, boolean _default) {
 		if (!virtual.startsWith("/")) this.virtual = "/" + virtual;
@@ -239,5 +246,31 @@ public class Mapping {
 			baseSources = null;
 		}
 		customSources.clear();
+		if (base != null) base.close();
+		root = null;
+	}
+
+	public MappingImpl getMappingImpl(Config config) {
+		if (base == null) {
+			synchronized (SystemUtil.createToken("rest-mapping", "getMappingImpl")) {
+				if (base == null) {
+					base = new MappingImpl(config, getVirtual(), getStrPhysical(), null, ConfigPro.INSPECT_AUTO, 60000, 1000, true, true, true, true, true, false, null, -1, -1);
+				}
+			}
+
+		}
+		return base;
+	}
+
+	public PageSource getBase(Config config) {
+		if (root == null) {
+			synchronized (SystemUtil.createToken("rest-mapping", "getBase")) {
+				if (root == null) {
+					root = getMappingImpl(config).getPageSource("/");
+				}
+			}
+
+		}
+		return root;
 	}
 }
