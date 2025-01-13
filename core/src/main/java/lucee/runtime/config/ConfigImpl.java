@@ -1453,14 +1453,14 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 * @param logger
 	 * @throws PageException
 	 */
-	protected void setScheduler(CFMLEngine engine, Array scheduledTasks) throws PageException {
+	protected void setScheduler(CFMLEngine engine, Array scheduledTasks, boolean refresh) throws PageException {
 		if (scheduledTasks == null) {
 			if (this.scheduler == null) this.scheduler = new SchedulerImpl(engine, this, new ArrayImpl());
 			return;
 		}
-
 		try {
 			if (this.scheduler == null) this.scheduler = new SchedulerImpl(engine, this, scheduledTasks);
+			else if (refresh) this.scheduler.refresh(scheduledTasks);
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);

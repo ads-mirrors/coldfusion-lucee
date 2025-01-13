@@ -21,6 +21,7 @@ package lucee.runtime.schedule;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -31,6 +32,7 @@ import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.SerializableObject;
+import lucee.commons.lang.StringUtil;
 import lucee.loader.engine.CFMLEngine;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigAdmin;
@@ -42,6 +44,7 @@ import lucee.runtime.net.proxy.ProxyDataImpl;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.Struct;
+import lucee.runtime.type.util.KeyConstants;
 
 /**
  * scheduler class to execute the scheduled tasks
@@ -117,6 +120,27 @@ public final class SchedulerImpl implements Scheduler {
 		}
 	}
 
+	public void refresh(Array tasks) throws PageException, ScheduleException {
+		Queue<TaskRef> newTasks = readInAllTasks(tasks);
+
+		// changed,new
+		for (TaskRef ref: newTasks) {
+			addTask(ref.task);
+		}
+
+		// delete
+		try {
+			for (TaskRef ref: this.tasks) {
+				if (!hasScheduleTask(newTasks, ref.task.getTask())) {
+					removeScheduleTask(ref.task.getTask(), false);
+				}
+			}
+		}
+		catch (IOException ioe) {
+			throw Caster.toPageException(ioe);
+		}
+	}
+
 	/**
 	 * read in all schedule tasks
 	 * 
@@ -132,6 +156,19 @@ public final class SchedulerImpl implements Scheduler {
 			queue.add(new TaskRef(readInTask((Struct) it.next())));
 		}
 		return queue;
+	}
+
+	private static List<String> readTaskNames(Array tasks) {
+		List<String> list = new ArrayList<>();
+		Iterator<?> it = tasks.getIterator();
+		Struct sct;
+		String name;
+		while (it.hasNext()) {
+			sct = (Struct) it.next();
+			name = Caster.toString(sct.get(KeyConstants._name, null), null);
+			if (!StringUtil.isEmpty(name, true)) list.add(name.trim());
+		}
+		return list;
 	}
 
 	/**
@@ -171,7 +208,6 @@ public final class SchedulerImpl implements Scheduler {
 			}
 			return;
 		}
-
 		tasks.add(new TaskRef(task));
 		init(task);
 	}
@@ -226,6 +262,17 @@ public final class SchedulerImpl implements Scheduler {
 				ref.task.setPaused(pause);
 			}
 		}
+	}
+
+	public boolean hasScheduleTask(String name) {
+		return hasScheduleTask(tasks, name);
+	}
+
+	public static boolean hasScheduleTask(Queue<TaskRef> tasks, String name) {
+		for (TaskRef ref: tasks) {
+			if (ref.task.getTask().equals(name)) return true;
+		}
+		return false;
 	}
 
 	@Override

@@ -320,6 +320,13 @@ public final class ConfigAdmin {
 		_reload();
 	}
 
+	public synchronized void storeAndReload(boolean refreshScheduler)
+			throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
+		checkWriteAccess();
+		_store();
+		_reload(refreshScheduler);
+	}
+
 	private synchronized void _store() throws ConverterException, IOException {
 		JSONConverter json = new JSONConverter(true, CharsetUtil.UTF8, JSONDateFormat.PATTERN_CF, false);
 		String str = json.serialize(null, root, SerializationSettings.SERIALIZE_AS_ROW, true);
@@ -327,22 +334,26 @@ public final class ConfigAdmin {
 	}
 
 	private synchronized void _reload() throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException {
+		_reload(false);
+	}
+
+	private synchronized void _reload(boolean refreshScheduler) throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException {
 
 		// if(storeInMemoryData)XMLCaster.writeTo(doc,config.getConfigFile());
 		CFMLEngine engine = ConfigWebUtil.getEngine(config);
 		if (config instanceof ConfigServerImpl) {
 
 			ConfigServerImpl cs = (ConfigServerImpl) config;
-			ConfigServerFactory.reloadInstance(engine, cs);
+			ConfigServerFactory.reloadInstance(engine, cs, refreshScheduler);
 			ConfigWeb[] webs = cs.getConfigWebs();
 			for (ConfigWeb web: webs) {
-				ConfigWebFactory.reloadInstance(engine, (ConfigServerImpl) config, (ConfigWebImpl) web, true);
+				ConfigWebFactory.reloadInstance(engine, (ConfigServerImpl) config, (ConfigWebImpl) web, true, refreshScheduler);
 
 			}
 		}
 		else if (config instanceof ConfigWebImpl) {
 			ConfigServerImpl cs = ((ConfigWebImpl) config).getConfigServerImpl();
-			ConfigWebFactory.reloadInstance(engine, cs, (ConfigWebImpl) config, false);
+			ConfigWebFactory.reloadInstance(engine, cs, (ConfigWebImpl) config, false, refreshScheduler);
 		}
 		else if (config instanceof SingleContextConfigWeb) {
 			if (true) throw new RuntimeException("important exception, please report to Lucee");

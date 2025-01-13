@@ -140,14 +140,15 @@ public class CFConfigImport {
 			ConfigAdmin admin = ConfigAdmin.newInstance(config, pw, updated || !validatePassword);
 
 			admin.updateConfig(json, flushExistingData);
-			admin.storeAndReload();
+			admin.storeAndReload(true);
+
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			if (throwException) {
 				throw Caster.toPageException(t);
 			}
-			LogUtil.log("deploy", "config-imprt", t);
+			LogUtil.log("deploy", "config-import", t);
 		}
 		if (throwException && exd != null) throw exd;
 		return json;

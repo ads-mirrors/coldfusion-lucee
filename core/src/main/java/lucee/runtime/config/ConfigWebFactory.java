@@ -307,7 +307,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 		createContextFiles(configDir, doNew);
 
-		load(configServer, multiweb, (ConfigWebImpl) configWeb, root, false, doNew, false);
+		load(configServer, multiweb, (ConfigWebImpl) configWeb, root, false, doNew, false, false);
 		createContextFilesPost(configDir, configWeb, servletConfig, false, doNew);
 		((ThreadQueueImpl) configWeb.getThreadQueue()).setMode(configWeb.getQueueEnable() ? ThreadQueuePro.MODE_ENABLED : ThreadQueuePro.MODE_DISABLED);
 
@@ -389,7 +389,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @throws BundleException
 	 * @throws NoSuchAlgorithmException
 	 */ // MUST
-	public static void reloadInstance(CFMLEngine engine, ConfigServerImpl cs, ConfigWebImpl cwi, boolean force)
+	public static void reloadInstance(CFMLEngine engine, ConfigServerImpl cs, ConfigWebImpl cwi, boolean force, boolean refreshScheduler)
 			throws ClassException, PageException, IOException, TagLibException, FunctionLibException, BundleException {
 
 		boolean isSingle = cs.getAdminMode() == ConfigImpl.ADMINMODE_SINGLE;
@@ -440,7 +440,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		createContextFiles(configDir, doNew);
 		cwi.reset();
 		// TODO handle differtly
-		load(cs, mcw, cwi, root, true, doNew, false);
+		load(cs, mcw, cwi, root, true, doNew, false, refreshScheduler);
 		createContextFilesPost(configDir, cwi, null, false, doNew);
 
 		((ThreadQueueImpl) cwi.getThreadQueue()).setMode(cwi.getQueueEnable() ? ThreadQueuePro.MODE_ENABLED : ThreadQueuePro.MODE_DISABLED);
@@ -465,8 +465,8 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @throws PageException
 	 * @throws BundleException
 	 */
-	synchronized static void load(ConfigServerImpl cs, ConfigImpl config, ConfigWebImpl cwi, Struct root, boolean isReload, boolean doNew, boolean essentialOnly)
-			throws IOException {
+	synchronized static void load(ConfigServerImpl cs, ConfigImpl config, ConfigWebImpl cwi, Struct root, boolean isReload, boolean doNew, boolean essentialOnly,
+			boolean refreshScheduler) throws IOException {
 		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(cs == null ? config : cs), Log.LEVEL_INFO, ConfigWebFactory.class.getName(), "start reading config");
 		ThreadLocalConfig.register(config);
 		boolean reload = false;
@@ -634,7 +634,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			_loadSearch(cs, config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(cs == null ? config : cs), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded search");
 
-			_loadScheduler(cs, config, root, log);
+			_loadScheduler(cs, config, root, refreshScheduler, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(cs == null ? config : cs), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded scheduled tasks");
 
 			_loadDebug(cs, config, root, log);
@@ -4651,7 +4651,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @throws IOException
 	 * @throws PageException
 	 */
-	private static void _loadScheduler(ConfigServer configServer, ConfigImpl config, Struct root, Log log) {
+	private static void _loadScheduler(ConfigServer configServer, ConfigImpl config, Struct root, boolean refresh, Log log) {
 		try {
 			if (config instanceof ConfigServer) {
 				short mode = ((ConfigServerImpl) config).getAdminMode();
@@ -4661,7 +4661,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 			Resource configDir = config.getConfigDir();
 			Array scheduledTasks = ConfigWebUtil.getAsArray("scheduledTasks", root);
-			config.setScheduler(configServer != null ? configServer.getCFMLEngine() : ((ConfigServer) config).getCFMLEngine(), scheduledTasks);
+			config.setScheduler(configServer != null ? configServer.getCFMLEngine() : ((ConfigServer) config).getCFMLEngine(), scheduledTasks, refresh);
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);

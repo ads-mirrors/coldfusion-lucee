@@ -214,8 +214,14 @@ public final class ConfigServerFactory extends ConfigFactory {
 	 * @throws FunctionLibException
 	 * @throws BundleException
 	 */
+
 	public static void reloadInstance(CFMLEngine engine, ConfigServerImpl configServer)
 			throws ClassException, PageException, IOException, TagLibException, FunctionLibException, BundleException {
+		reloadInstance(engine, configServer, false);
+	}
+
+	public static void reloadInstance(CFMLEngine engine, ConfigServerImpl configServer, boolean refreshScheduler)
+			throws ClassException, PageException, IOException, TagLibException, FunctionLibException {
 		boolean quick = CFMLEngineImpl.quick(engine);
 		Resource configFile = configServer.getConfigFile();
 		if (configFile == null) return;
@@ -224,7 +230,7 @@ public final class ConfigServerFactory extends ConfigFactory {
 		}
 		int iDoNew = getNew(engine, configServer.getConfigDir(), quick, UpdateInfo.NEW_NONE).updateType;
 		boolean doNew = iDoNew != NEW_NONE;
-		load(configServer, loadDocumentCreateIfFails(configFile, "server"), true, doNew, quick);
+		load(configServer, loadDocumentCreateIfFails(configFile, "server"), true, doNew, quick, refreshScheduler);
 		((CFMLEngineImpl) ConfigWebUtil.getEngine(configServer)).onStart(configServer, true);
 	}
 
@@ -245,7 +251,14 @@ public final class ConfigServerFactory extends ConfigFactory {
 	static void load(ConfigServerImpl configServer, Struct root, boolean isReload, boolean doNew, boolean essentialOnly)
 			throws ClassException, PageException, IOException, TagLibException, FunctionLibException, BundleException {
 		ConfigBase.onlyFirstMatch = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.mapping.first", null), true); // changed behaviour in 6.0
-		ConfigWebFactory.load(null, configServer, null, root, isReload, doNew, essentialOnly);
+		ConfigWebFactory.load(null, configServer, null, root, isReload, doNew, essentialOnly, false);
+		loadLabel(configServer, root);
+	}
+
+	static void load(ConfigServerImpl configServer, Struct root, boolean isReload, boolean doNew, boolean essentialOnly, boolean refreshScheduler)
+			throws ClassException, IOException, TagLibException, FunctionLibException {
+		ConfigBase.onlyFirstMatch = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.mapping.first", null), true); // changed behaviour in 6.0
+		ConfigWebFactory.load(null, configServer, null, root, isReload, doNew, essentialOnly, refreshScheduler);
 		loadLabel(configServer, root);
 	}
 
