@@ -1414,7 +1414,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 						scheduler.refresh(getScheduledTasks());
 					}
 					catch (Exception e) {
-						print.e(e);
 						SchedulerImpl tmp = scheduler;
 						scheduler = null;
 						tmp.stop();
