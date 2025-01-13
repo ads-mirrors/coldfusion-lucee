@@ -324,6 +324,13 @@ public final class ConfigAdmin {
 		_reload();
 	}
 
+	public synchronized void storeAndReload(boolean refreshScheduler)
+			throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
+		checkWriteAccess();
+		_store();
+		_reload(refreshScheduler);
+	}
+
 	private synchronized void _cleanup() {
 		removeIf("allowCompression", ConfigImpl.DEFAULT_ALLOW_COMPRESSION);
 		removeIf("bufferTagBodyOutput", ConfigImpl.DEFAULT_BUFFER_TAG_BODY_OUTPUT);
@@ -336,6 +343,7 @@ public final class ConfigAdmin {
 
 	private void removeIf(Collection.Key name, Boolean expected) {
 		if (expected.equals(Caster.toBoolean(root.get(name, null), null))) root.removeEL(name);
+
 	}
 
 	private synchronized void _store() throws ConverterException, IOException {
@@ -346,22 +354,26 @@ public final class ConfigAdmin {
 	}
 
 	private synchronized void _reload() throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException {
+		_reload(false);
+	}
+
+	private synchronized void _reload(boolean refreshScheduler) throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException {
 
 		// if(storeInMemoryData)XMLCaster.writeTo(doc,config.getConfigFile());
 		CFMLEngine engine = ConfigWebUtil.getEngine(config);
 		if (config instanceof ConfigServerImpl) {
 
 			ConfigServerImpl cs = (ConfigServerImpl) config;
-			ConfigServerFactory.reloadInstance(engine, cs);
+			ConfigServerFactory.reloadInstance(engine, cs, refreshScheduler);
 			ConfigWeb[] webs = cs.getConfigWebs();
 			for (ConfigWeb web: webs) {
-				ConfigWebFactory.reloadInstance(engine, (ConfigServerImpl) config, (ConfigWebImpl) web, true);
+				ConfigWebFactory.reloadInstance(engine, (ConfigServerImpl) config, (ConfigWebImpl) web, true, refreshScheduler);
 
 			}
 		}
 		else if (config instanceof ConfigWebImpl) {
 			ConfigServerImpl cs = ((ConfigWebImpl) config).getConfigServerImpl();
-			ConfigWebFactory.reloadInstance(engine, cs, (ConfigWebImpl) config, false);
+			ConfigWebFactory.reloadInstance(engine, cs, (ConfigWebImpl) config, false, refreshScheduler);
 		}
 		else if (config instanceof SingleContextConfigWeb) {
 			if (true) throw new RuntimeException("important exception, please report to Lucee");

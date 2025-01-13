@@ -862,7 +862,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		try {
 			ConfigServerFactory.reloadInstance(engine, this);
 			for (ConfigWeb web: webs) {
-				ConfigWebFactory.reloadInstance(engine, this, (ConfigWebImpl) web, true);
+				ConfigWebFactory.reloadInstance(engine, this, (ConfigWebImpl) web, true, false);
 			}
 
 		}
