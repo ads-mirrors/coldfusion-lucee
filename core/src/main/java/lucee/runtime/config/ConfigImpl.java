@@ -1410,9 +1410,16 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (scheduler != null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getScheduler")) {
 				if (scheduler != null) {
-					SchedulerImpl tmp = scheduler;
-					scheduler = null;
-					tmp.stop();
+					try {
+						scheduler.refresh(getScheduledTasks());
+					}
+					catch (Exception e) {
+						print.e(e);
+						SchedulerImpl tmp = scheduler;
+						scheduler = null;
+						tmp.stop();
+					}
+
 				}
 			}
 		}

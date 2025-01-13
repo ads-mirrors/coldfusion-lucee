@@ -98,6 +98,14 @@ public final class LogUtil {
 		log((Config) null, type, t, Log.LEVEL_WARN, "application");
 	}
 
+	public static void info(String type, Throwable t) {
+		log((Config) null, type, t, Log.LEVEL_INFO, "application");
+	}
+
+	public static void trace(String type, Throwable t) {
+		log((Config) null, type, t, Log.LEVEL_TRACE, "application");
+	}
+
 	//////////
 	public static void log(String type, Throwable t) {
 		log((Config) null, type, t, Log.LEVEL_ERROR, "application");
