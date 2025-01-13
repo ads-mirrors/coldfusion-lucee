@@ -2641,7 +2641,8 @@ public final class PageContextImpl extends PageContext {
 				getLog("rest").error("REST", "no rest service for [" + pathInfo + "] found");
 			}
 			else {
-				base = config.toPageSource(null, mapping.getPhysical(), null);
+				base = mapping.getBase(config);
+
 				listener = ((MappingImpl) base.getMapping()).getApplicationListener();
 				listener.onRequest(this, base, rl);
 			}
