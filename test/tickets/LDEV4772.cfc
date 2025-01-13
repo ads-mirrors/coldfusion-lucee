@@ -50,7 +50,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip="false" {
 				queryAddRow(qry, {id=1,name="Bob"});
 				var spreadsheet = spreadsheetNew("test");  // createObject("java", javaclass, "cfspreadsheet", "3.0.1") errors
 				spreadsheetAddRows( spreadsheet, qry );
-				SpreadsheetWrite( spreadsheet, "test.xls", true );
+				var xls = getTempDirectory() & "ldev-4772-test.xls";
+				if ( fileExists( xls ) )
+					fileDelete( xls );
+				SpreadsheetWrite( spreadsheet, xls, true );
 			});
 
 		});
