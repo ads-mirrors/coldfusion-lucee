@@ -850,7 +850,7 @@ public final class ConfigAdmin {
 
 			}
 		}
-
+		((ConfigImpl) config).resetMappings();
 	}
 
 	public void updateRestMapping(String virtual, String physical, boolean _default) throws ExpressionException, SecurityException {
@@ -1114,6 +1114,8 @@ public final class ConfigAdmin {
 		if (ConfigPro.INSPECT_INTERVAL_FAST != inspectTemplateIntervalFast && ConfigPro.INSPECT_INTERVAL_UNDEFINED != inspectTemplateIntervalFast)
 			el.setEL("inspectTemplateIntervalFast", Caster.toString(inspectTemplateIntervalFast, ""));
 		el.setEL("virtual", StringUtil.isEmpty(virtual) ? createVirtual(el) : virtual);
+
+		((ConfigImpl) config).resetCustomTagMappings();
 	}
 
 	private Struct _getScheduledTask(String name, boolean throwWhenNotExist) throws ExpressionException {
@@ -1215,6 +1217,7 @@ public final class ConfigAdmin {
 		if (ConfigPro.INSPECT_INTERVAL_FAST != inspectTemplateIntervalFast && ConfigPro.INSPECT_INTERVAL_UNDEFINED != inspectTemplateIntervalFast)
 			el.setEL("inspectTemplateIntervalFast", Caster.toString(inspectTemplateIntervalFast, ""));
 		el.setEL("virtual", StringUtil.isEmpty(virtual) ? createVirtual(el) : virtual);
+		((ConfigImpl) config).resetComponentMappings();
 	}
 
 	public static String createVirtual(Struct data) {
