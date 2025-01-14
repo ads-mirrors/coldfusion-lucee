@@ -1,18 +1,3 @@
-<!---
-Defaults --->
-
-<cfif structKeyExists(form,"adminMode")>		
-	<cfadmin
-		action="updateAdminMode"
-		type="#request.adminType#"
-		password="#session["password"&request.adminType]#"
-		mode="#form.adminMode#"
-		merge="#!isNull(form.switch) && form.switch=="merge"#"
-		keep="#!isNull(form.keep)#">
-	<cflocation url="#request.self#?action=#url.action#" addtoken=false>
-</cfif>
-
-
 <cfset current.label = "Lucee " & server.lucee.version & " - " & current.label>
 <cfset error.message="">
 <cfset error.detail="">
@@ -79,57 +64,6 @@ Error Output --->
 
 <cfhtmlbody>
     <script src="../res/js/echarts-all.js.cfm" type="text/javascript"></script>
-
-	<cfoutput><script type="text/javascript">
-		var submitted = false;
-		function adminmode(field) {
-			field.disabled = true;
-			submitted = true;
-			url='adminmode.cfm?adminType=#request.admintype#';
-			
-			// adminMode
-			var f=field.form["adminMode"]
-			url+="&adminMode="+$(f).val();
-
-			// switch
-			var f=field.form["switch"]
-			if(f) {
-				url+="&switch="+$(f).val();
-			}
-			// keep
-			var f=field.form["keep"]
-			if(f) {
-				url+="&keep="+$(f).val();
-			}			
-			//disableBlockUI = true;
-			//$('##updateInfoDesc').html('<img src="../res/img/spinner16.gif.cfm">');
-			
-			$.ajax(url )
-				.done(function( data, textStatus, xhr ) {
-					var response = $.trim(data);
-					if (response == ""){
-						setTimeout(function(){
-							// load the admin page to trigger a deploy, so css/js loads correctly
-							$.get("?", function(response) {
-								window.location=('?action=overview');
-							});
-						}, 6500); // LDEV-4568 give Lucee enough time to startup, otherwise, the admin login may show without css/js
-					} else {
-						// $('##updateInfoDesc').addClass("error").attr("style", null).html(response);
-						
-					}
-				})
-				.fail(function( xhr, textStatus, errorThrown ) {
-					// $('##updateInfoDesc').addClass("error").attr("style", null).html( "<b>" + xhr.status + "</b><br>"  + xhr.responseText);
-				})
-				.always(function() {
-					field.disabled = false;
-				});
-			
-		}
-	</script></cfoutput>
-
-
     <script type="text/javascript">
     	var chartTimer;
     	labels={'heap':"Heap",'nonheap':"Non-Heap",'cpuSystem':"Whole System",'cpuProcess':"Lucee Process"};
@@ -384,64 +318,6 @@ Error Output --->
 			<cfset flds=listToArray(valueList(flds.displayname))>
 		</cfif>
 	</cfif>
-
-<cfif request.adminType=="server">
-	<form method="post">
-		<input type="hidden" name="adminMode" value="#request.singlemode?"multi":"single"#">
-		<h2>#stText.Overview[request.singlemode?"modeSingle":"modeMulti"]#</h2>
-		<div class="itemintro">#stText.Overview[request.singlemode?"modeSingleDesc":"modeMultiDesc"]#</div>
-		<!--- <div id="updateInfoDesc" style="text-align: center;">
-			<p>#stText.services.update.restartDesc#</p>
-		</div> --->
-		<table class="maintbl">
-		<tbody>
-			<tr>
-				<th scope="row">
-					<h4>#stText.Overview[request.singlemode?"modeSingleSwitch":"modeMultiSwitch"]#</h4>
-#stText.Overview[request.singlemode?"modeSingleSwitchDesc":"modeMultiSwitchDesc"]#
-				</th>
-				<cfif !request.singleMode>
-	
-				<td>
-					<ul class="radiolist" id="sp_options">
-						<li>
-							<label>
-								<input type="radio" class="radio" name="switch" value="merge" checked="checked">
-								<b>#stText.Overview.switchMerge#</b>
-							</label>
-							<div class="comment">#stText.Overview.switchMergeDesc#</div>
-						</li>
-						<li>
-							<label>
-								<input type="radio" class="radio" name="switch" value="leave">
-								<b>#stText.Overview.switchLeave#</b>
-							</label>
-							<div class="comment">#stText.Overview.switchLeaveDesc#</div>
-						</li>
-					</ul>
-					<br><br>
-					<input type="checkbox" class="checkbox" name="keep" value="keep" checked="checked">
-					<div class="comment">#stText.Overview.switchKeep#</div>
-				</td>
-				</cfif>
-			</tr>
-		</tbody>
-		<tfoot>
-			<tr>
-				<td colspan="2">
-					<input type="button" class="b button submit" name="mainAction" value="#stText.Buttons.switch#" onclick="adminmode(this)">
-				</td>
-			</tr>
-		</tfoot>
-		</table>
-	</form>
-
-</cfif>
-
-
-
-
-
 
 	<table>
 		<tr>
