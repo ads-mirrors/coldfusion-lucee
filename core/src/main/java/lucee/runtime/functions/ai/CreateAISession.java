@@ -14,19 +14,14 @@ public final class CreateAISession extends BIF {
 
 	private static final long serialVersionUID = 5632258425708603692L;
 
-	public static Object call(PageContext pc, String nameAI) throws PageException {
-		return call(pc, nameAI, null);
-	}
-
-	public static Object call(PageContext pc, String nameAI, String systemMessage) throws PageException {
-		if (nameAI.startsWith("default:")) nameAI = ((PageContextImpl) pc).getNameFromDefault(nameAI.substring(8));
-		return ((PageContextImpl) pc).createAISession(nameAI, systemMessage);
-	}
-
 	@Override
 	public Object invoke(PageContext pc, Object[] args) throws PageException {
-		if (args.length == 1) return call(pc, Caster.toString(args[0]));
-		if (args.length == 2) return call(pc, Caster.toString(args[0]), Caster.toString(args[1]));
-		throw new FunctionException(pc, "CreateAISession", 1, 2, args.length);
+		if (args.length < 1 || args.length > 2) throw new FunctionException(pc, "CreateAISession", 1, 2, args.length);
+
+		String nameAI = Caster.toString(args[0]);
+		String systemMessage = args.length > 1 ? Caster.toString(args[1]) : null;
+
+		if (nameAI.startsWith("default:")) nameAI = ((PageContextImpl) pc).getNameFromDefault(nameAI.substring(8));
+		return ((PageContextImpl) pc).createAISession(nameAI, systemMessage);
 	}
 }

@@ -449,7 +449,7 @@ public final class MappingImpl implements Mapping {
 			else if (realPath.startsWith("./")) {
 				realPath = realPath.substring(1);
 			}
-			else if (!ResourceUtil.isWindowsPath(realPath)){
+			else if (!ResourceUtil.isWindowsPath(realPath)) {
 				realPath = "/" + realPath;
 			}
 		}
@@ -467,7 +467,7 @@ public final class MappingImpl implements Mapping {
 			else if (realPath.startsWith("./")) {
 				realPath = realPath.substring(1);
 			}
-			else if (!ResourceUtil.isWindowsPath(realPath)){
+			else if (!ResourceUtil.isWindowsPath(realPath)) {
 				realPath = "/" + realPath;
 			}
 		}
