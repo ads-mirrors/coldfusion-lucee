@@ -21,6 +21,7 @@ import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.util.List;
 import java.util.Map;
 
 import org.osgi.framework.BundleException;
@@ -31,10 +32,14 @@ import lucee.commons.lang.ClassException;
 import lucee.commons.lang.ClassUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
+import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.Identification;
 import lucee.runtime.db.ClassDefinition;
 import lucee.runtime.engine.ThreadLocalPageContext;
+import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.listener.JavaSettingsImpl;
+import lucee.runtime.mvn.MavenUtil;
+import lucee.runtime.mvn.MavenUtil.GAVSO;
 import lucee.runtime.op.Caster;
 import lucee.runtime.osgi.OSGiUtil;
 import lucee.runtime.type.KeyImpl;
@@ -50,16 +55,24 @@ public class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externalizabl
 	private String className;
 	private String name;
 	private Version version;
+
 	private Identification id;
 	private boolean versionOnlyMattersWhenDownloading = false;
+	private String maven;
 
 	private transient Class<T> clazz;
+	private transient GAVSO[] gavsos;
 
 	public ClassDefinitionImpl(String className, String name, String version, Identification id) {
 		this.className = className == null ? null : className.trim();
 		this.name = StringUtil.isEmpty(name, true) ? null : name.trim();
 		this.version = OSGiUtil.toVersion(version, null);
 		this.id = id;
+	}
+
+	public ClassDefinitionImpl(String className, String maven) {
+		this.className = className == null ? null : className.trim();
+		this.maven = maven;
 	}
 
 	public ClassDefinitionImpl(String className) {
@@ -82,7 +95,7 @@ public class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externalizabl
 
 		String cl = toClassName(sct, prefix);
 
-		// bundle?
+		// OSGi?
 		String bn = toBundleName(sct, prefix, strict);
 		String bv = toBundleVersion(sct, prefix, strict);
 
@@ -90,7 +103,12 @@ public class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externalizabl
 			return new ClassDefinitionImpl(cl, bn, bv, id);
 		}
 
-		// TODO Maven?
+		// Maven?
+		String maven = Caster.toString(sct.get(KeyConstants._maven, null), null);
+		if (!StringUtil.isEmpty(maven, true)) {
+			return new ClassDefinitionImpl(cl, maven);
+		}
+
 		return new ClassDefinitionImpl(cl, null, null, id);
 	}
 
@@ -159,6 +177,7 @@ public class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externalizabl
 		out.writeObject(name);
 		out.writeObject(version == null ? null : version.toString());
 		out.writeObject(id);
+		out.writeObject(maven);
 	}
 
 	@Override
@@ -168,6 +187,7 @@ public class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externalizabl
 		String tmp = (String) in.readObject();
 		if (tmp != null) this.version = OSGiUtil.toVersion(tmp, null);
 		id = (Identification) in.readObject();
+		maven = (String) in.readObject();
 	}
 
 	@Override
@@ -178,19 +198,34 @@ public class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externalizabl
 	public Class<T> getClazz(boolean forceLoadingClass) throws ClassException, BundleException {
 		if (!forceLoadingClass && clazz != null) return clazz;
 
-		// regular class definition
-		if (name == null) {
+		// OSGi
+		if (name != null) {
+			return clazz = ClassUtil.loadClassByBundle(className, name, version, id, JavaSettingsImpl.getBundleDirectories(null), versionOnlyMattersWhenDownloading);
+		}
+
+		// Maven
+		if (maven != null) {
+			ConfigPro config = (ConfigPro) ThreadLocalPageContext.getConfig();
 			try {
-				return clazz = ClassUtil.loadClass(ThreadLocalPageContext.getRPCClassLoader(forceLoadingClass), className);
+				return clazz = (Class<T>) config.getRPCClassLoader(false, JavaSettingsImpl.getInstance(config, getMaven()), null).loadClass(className);
 			}
-			catch (IOException e) {
-				ClassException ce = new ClassException(e.getMessage());
+			catch (Exception e) {
+				ClassException ce = new ClassException("Failes to load class [" + className + "]");
 				ExceptionUtil.initCauseEL(ce, e);
 				throw ce;
 			}
 		}
 
-		return clazz = ClassUtil.loadClassByBundle(className, name, version, id, JavaSettingsImpl.getBundleDirectories(null), versionOnlyMattersWhenDownloading);
+		// regular class definition
+		try {
+			return clazz = ClassUtil.loadClass(ThreadLocalPageContext.getRPCClassLoader(forceLoadingClass), className);
+		}
+		catch (IOException e) {
+			ClassException ce = new ClassException(e.getMessage());
+			ExceptionUtil.initCauseEL(ce, e);
+			throw ce;
+		}
+
 	}
 
 	@Override
@@ -212,6 +247,18 @@ public class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externalizabl
 	@Override
 	public boolean isBundle() {
 		return !StringUtil.isEmpty(name, true);
+	}
+
+	public boolean isMaven() {
+		return maven != null;
+	}
+
+	public GAVSO[] getMaven() throws ApplicationException {
+		if (gavsos == null) {
+			List<GAVSO> gavsos = MavenUtil.toGAVSOs(maven);
+			if (gavsos != null && gavsos.size() > 0) this.gavsos = gavsos.toArray(new GAVSO[gavsos.size()]);
+		}
+		return gavsos;
 	}
 
 	@Override
@@ -243,6 +290,15 @@ public class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externalizabl
 	@Override
 	public String toString() { // do not remove, this is used as key in ConfigWebFactory
 		if (isBundle()) return "class:" + className + ";name:" + name + ";version:" + version + ";";
+		else if (isMaven()) {
+			String maven = this.maven;
+			try {
+				maven = MavenUtil.toString(getMaven());
+			}
+			catch (Exception e) {
+			}
+			return "class:" + className + ";maven:" + maven + ";";
+		}
 		return className;
 	}
 

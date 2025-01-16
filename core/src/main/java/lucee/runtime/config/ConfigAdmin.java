@@ -119,6 +119,7 @@ import lucee.runtime.gateway.GatewayEntryImpl;
 import lucee.runtime.listener.AppListenerUtil;
 import lucee.runtime.listener.SerializationSettings;
 import lucee.runtime.monitor.Monitor;
+import lucee.runtime.mvn.MavenUtil;
 import lucee.runtime.net.proxy.ProxyData;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
@@ -6705,14 +6706,22 @@ public final class ConfigAdmin {
 		catch (Exception e) {
 			throw Caster.toPageException(e);
 		}
+
+		// first clean up
+		if (el.containsKey(hp ? prefix + "BundleName" : "bundleName")) el.remove(hp ? prefix + "BundleName" : "bundleName");
+		if (el.containsKey(hp ? prefix + "BundleVersion" : "bundleVersion")) el.remove(hp ? prefix + "BundleVersion" : "bundleVersion");
+		if (el.containsKey(hp ? prefix + "Maven" : "maven")) el.remove(hp ? prefix + "Maven" : "maven");
+
 		el.setEL(hp ? prefix + "Class" : "class", cd.getClassName().trim());
+
+		// OSGi
 		if (cd.isBundle()) {
 			el.setEL(hp ? prefix + "BundleName" : "bundleName", cd.getName());
 			if (cd.hasVersion()) el.setEL(hp ? prefix + "BundleVersion" : "bundleVersion", cd.getVersionAsString());
 		}
-		else {
-			if (el.containsKey(hp ? prefix + "BundleName" : "bundleName")) el.remove(hp ? prefix + "BundleName" : "bundleName");
-			if (el.containsKey(hp ? prefix + "BundleVersion" : "bundleVersion")) el.remove(hp ? prefix + "BundleVersion" : "bundleVersion");
+		// Maven
+		else if (((ClassDefinitionImpl) cd).isMaven()) {
+			el.setEL(hp ? prefix + "Maven" : "maven", MavenUtil.toString(((ClassDefinitionImpl) cd).getMaven()));
 		}
 	}
 
@@ -6722,6 +6731,7 @@ public final class ConfigAdmin {
 		el.removeEL(KeyImpl.init(hp ? prefix + "Class" : "class"));
 		el.removeEL(KeyImpl.init(hp ? prefix + "BundleName" : "bundleName"));
 		el.removeEL(KeyImpl.init(hp ? prefix + "BundleVersion" : "bundleVersion"));
+		el.removeEL(KeyImpl.init(hp ? prefix + "Maven" : "maven"));
 	}
 
 	public final static class PluginFilter implements ResourceFilter {

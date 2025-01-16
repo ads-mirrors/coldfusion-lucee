@@ -39,6 +39,7 @@ import lucee.runtime.config.ConfigPro;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.mvn.MavenUtil;
+import lucee.runtime.mvn.MavenUtil.GAVSO;
 import lucee.runtime.mvn.POM;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
@@ -55,6 +56,8 @@ public class JavaSettingsImpl implements JavaSettings {
 	private static final int DEFAULT_WATCH_INTERVAL = 60;
 
 	private static final Resource[] RESOURCE_EMPTY = new Resource[0];
+
+	private static final String[] STRING_EMPTY = new String[0];
 
 	private Collection<POM> poms;
 	private Collection<BD> osgis;
@@ -350,6 +353,51 @@ public class JavaSettingsImpl implements JavaSettings {
 		return watchedExtensions;
 	}
 
+	public static JavaSettings getInstance(Config config, GAVSO... gavsoArr) {
+
+		List<String> names = new ArrayList<>();
+
+		// maven
+		Collection<POM> poms = null;
+		{
+
+			if (gavsoArr != null) {
+				Map<String, POM> mapPoms = new HashMap<>();
+				Resource dir = ((ConfigPro) config).getMavenDir();
+				dir.mkdirs();
+				Log log = LogUtil.getLog(config, "mvn", "application");
+				for (GAVSO gavso: gavsoArr) {
+					if (gavso != null) {
+						POM tmp = POM.getInstance(dir, gavso.g, gavso.a, gavso.v, MavenUtil.toScopes(gavso.s, POM.SCOPE_COMPILE), log);
+						mapPoms.put("maven:" + tmp.getGroupId() + ":" + tmp.getArtifactId() + ":" + tmp.getVersion(), tmp);
+					}
+				}
+
+				for (String k: mapPoms.keySet()) {
+					names.add(k);
+				}
+				poms = mapPoms.values();
+			}
+		}
+
+		names.add("loadCFMLClassPath:false");
+		names.add("reloadOnChange:false");
+		names.add("watchInterval:" + DEFAULT_WATCH_INTERVAL);
+
+		Collections.sort(names);
+		String id = HashUtil.create64BitHashAsString(names.toString());
+
+		JavaSettings js = ((ConfigPro) config).getJavaSettings(id);
+		if (js != null) {
+			return js;
+		}
+
+		js = new JavaSettingsImpl(id, config, poms, null, RESOURCE_EMPTY, RESOURCE_EMPTY, false, false, DEFAULT_WATCH_INTERVAL, STRING_EMPTY);
+
+		((ConfigPro) config).setJavaSettings(id, js);
+		return js;
+	}
+
 	public static JavaSettings getInstance(Config config, Struct data, Object addionalResources) {
 
 		List<String> names = new ArrayList<>();
@@ -372,7 +420,6 @@ public class JavaSettingsImpl implements JavaSettings {
 				if (arr != null) {
 					Map<String, POM> mapPoms = new HashMap<>();
 					Iterator<Object> it = arr.valueIterator();
-					String g, a, v, s;
 					// TODO add method getMavenDir to config
 					Resource dir = ((ConfigPro) config).getMavenDir();
 					dir.mkdirs();
@@ -554,9 +601,17 @@ public class JavaSettingsImpl implements JavaSettings {
 			return js;
 		}
 
-		js = new JavaSettingsImpl(id, config, poms, osgis, paths == null ? RESOURCE_EMPTY : paths.toArray(new Resource[paths.size()]),
-				bundles == null ? RESOURCE_EMPTY : bundles.toArray(new Resource[bundles.size()]), loadCFMLClassPath, reloadOnChange, watchInterval,
-				extensions.toArray(new String[extensions.size()]));
+		js = new JavaSettingsImpl(id, config, poms, osgis,
+
+				paths == null || paths.size() == 0 ? RESOURCE_EMPTY : paths.toArray(new Resource[paths.size()]),
+
+				bundles == null || bundles.size() == 0 ? RESOURCE_EMPTY : bundles.toArray(new Resource[bundles.size()]),
+
+				loadCFMLClassPath, reloadOnChange, watchInterval,
+
+				extensions == null || extensions.size() == 0 ? STRING_EMPTY : extensions.toArray(new String[extensions.size()])
+
+		);
 
 		((ConfigPro) config).setJavaSettings(id, js);
 		return js;

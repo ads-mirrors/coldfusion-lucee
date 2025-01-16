@@ -27,7 +27,6 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
-import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.ClassException;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.lang.types.RefInteger;
@@ -511,7 +510,6 @@ public class VariableImpl extends ExpressionBase implements Variable {
 
 	private Type _writeOutFirst(BytecodeContext bc, Member member, int mode, boolean last, boolean doOnlyScope, Expression defaultValue, RefInteger startIndex)
 			throws TransformerException {
-
 		if (member instanceof DataMember) return _writeOutFirstDataMember(bc, (DataMember) member, scope, last, doOnlyScope, defaultValue, startIndex);
 		else if (member instanceof UDF) return _writeOutFirstUDF(bc, (UDF) member, scope, doOnlyScope);
 		else return _writeOutFirstBIF(bc, (BIF) member, mode, last, getStart());
@@ -528,7 +526,7 @@ public class VariableImpl extends ExpressionBase implements Variable {
 			clazzz = di.getClazz(bifCD.getClazz());
 		}
 		catch (Exception e) {
-			LogUtil.log(VariableImpl.class.getName(), e);
+			throw new TransformerException(bc, e, line);
 		}
 		Type rtnType = Types.toType(bc, bif.getReturnType());
 		if (rtnType == Types.VOID) rtnType = Types.STRING;

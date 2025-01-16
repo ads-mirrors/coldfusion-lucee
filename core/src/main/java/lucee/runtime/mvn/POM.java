@@ -450,7 +450,7 @@ public class POM {
 			else sb.append(", ");
 			sb.append(url.toExternalForm());
 		}
-		throw new IOException("could not find a valid endpoint [" + this + "] for type [" + type + "], possibles endpoint are [" + sb + "]");
+		throw new IOException("could not find a valid endpoint [" + toString() + "] for type [" + type + "], possibles endpoint are [" + sb + "]");
 	}
 
 	@Override
@@ -471,11 +471,19 @@ public class POM {
 	 * ===========================================================================================
 	 */
 	public List<TreeNode<POM>> getAllDependenciesAsTrees() throws IOException {
-		return getDependencies(this, true, 0, new TreeNode<POM>(this)).getChildren();
+		return getAllDependenciesAsTrees(true);
+	}
+
+	public List<TreeNode<POM>> getAllDependenciesAsTrees(boolean optional) throws IOException {
+		return getDependencies(this, true, 0, new TreeNode<POM>(this), optional).getChildren();
 	}
 
 	public List<POM> getAllDependencies() throws IOException {
-		List<POM> list = getDependencies(this, true, 0, new TreeNode<POM>(this)).asList();
+		return getAllDependencies(true);
+	}
+
+	public List<POM> getAllDependencies(boolean optional) throws IOException {
+		List<POM> list = getDependencies(this, true, 0, new TreeNode<POM>(this), optional).asList();
 		list.remove(0);
 		return list;
 	}
@@ -487,7 +495,7 @@ public class POM {
 				for (POM p: deps) {
 					try {
 						if (!node.addChild(p)) continue;
-						if (recursive) getDependencies(p, recursive, level + 1, node);
+						if (recursive) getDependencies(p, recursive, level + 1, node, true);
 					}
 					catch (IOException ioe) {
 						node.removeChild(p);
@@ -505,7 +513,7 @@ public class POM {
 		}
 	}
 
-	private static TreeNode<POM> getDependencies(POM pom, boolean recursive, int level, TreeNode<POM> node) throws IOException {
+	private static TreeNode<POM> getDependencies(POM pom, boolean recursive, int level, TreeNode<POM> node, boolean optional) throws IOException {
 		ExecutorService executor = null;
 		try {
 			List<POM> deps = pom.getDependencies();
@@ -513,13 +521,13 @@ public class POM {
 				executor = ThreadUtil.createExecutorService(deps.size(), false);
 				List<Future<Pair<IOException, POM>>> futures = new ArrayList<>();
 				for (POM p: deps) {
-					if (!node.addChild(p)) continue;
+					if (!node.addChild(p) || (!optional && p.getOptional())) continue;
 
 					// Handle recursive processing in a separate thread
 					if (recursive) {
 						Future<Pair<IOException, POM>> future = executor.submit(() -> {
 							try {
-								getDependencies(p, recursive, level + 1, node);
+								getDependencies(p, recursive, level + 1, node, optional);
 							}
 							catch (IOException ioe) {
 								return new Pair<IOException, POM>(ioe, p);
@@ -632,6 +640,10 @@ public class POM {
 	}
 
 	public Resource[] getJars() throws IOException {
+		return getJars(true);
+	}
+
+	public Resource[] getJars(boolean optional) throws IOException {
 		List<Resource> jars = new ArrayList<>();
 		initXML();
 		// current
@@ -642,7 +654,7 @@ public class POM {
 			}
 		}
 
-		List<POM> dependencies = getAllDependencies();
+		List<POM> dependencies = getAllDependencies(optional);
 		if (dependencies != null) {
 			for (POM p: dependencies) {
 				if ("jar".equalsIgnoreCase(p.artifactExtension)) {
