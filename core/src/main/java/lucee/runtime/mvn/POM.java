@@ -19,6 +19,7 @@ import lucee.commons.digest.HashUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.res.Resource;
+import lucee.commons.io.res.ResourcesImpl;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.Pair;
 import lucee.commons.lang.SerializableObject;
@@ -91,12 +92,11 @@ public class POM {
 		return getInstance(localDirectory, null, groupId, artifactId, version, null, null, dependencyScope, SCOPE_ALL, log);
 	}
 
-	/*
-	 * public static void main(String[] args) throws IOException { Resource dir =
-	 * ResourcesImpl.getFileResourceProvider().getResource("/Users/mic/tmp9/mvn/"); POM pom =
-	 * getInstance(dir, "org.apache.maven", "maven-core", "3.8.1", SCOPE_COMPILE, null); pom.getJars();
-	 * }
-	 */
+	public static void main(String[] args) throws IOException {
+		Resource dir = ResourcesImpl.getFileResourceProvider().getResource("/Users/mic/tmp9/mvn/");
+		POM pom = getInstance(dir, "org.apache.maven", "maven-core", "3.8.1", SCOPE_COMPILE, null);
+		pom.getJars();
+	}
 
 	public static POM getInstance(Resource localDirectory, Collection<Repository> repositories, String groupId, String artifactId, String version, int dependencyScope,
 			int dependencyScopeManagement, Log log) {
@@ -644,13 +644,22 @@ public class POM {
 	}
 
 	public Resource[] getJars(boolean optional) throws IOException {
-		List<Resource> jars = new ArrayList<>();
+		List<POM> poms = getJarPOMs(optional);
+		Resource[] jars = new Resource[poms.size()];
+		int index = 0;
+		for (POM p: poms) {
+			jars[index++] = p.getArtifact();
+		}
+		return jars;
+	}
+
+	public List<POM> getJarPOMs(boolean optional) throws IOException {
+		List<POM> poms = new ArrayList<>();
 		initXML();
 		// current
 		if ("jar".equalsIgnoreCase(this.artifactExtension)) {
-			Resource r = getArtifact();
-			if (r != null) {
-				jars.add(r);
+			if (getArtifact() != null) {
+				poms.add(this);
 			}
 		}
 
@@ -658,13 +667,12 @@ public class POM {
 		if (dependencies != null) {
 			for (POM p: dependencies) {
 				if ("jar".equalsIgnoreCase(p.artifactExtension)) {
-					Resource r = p.getArtifact();
-					if (r != null) {
-						jars.add(r);
+					if (p.getArtifact() != null) {
+						poms.add(p);
 					}
 				}
 			}
 		}
-		return jars.toArray(new Resource[jars.size()]);
+		return poms;
 	}
 }

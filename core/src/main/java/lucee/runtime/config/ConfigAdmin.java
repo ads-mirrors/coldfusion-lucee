@@ -4834,6 +4834,12 @@ public final class ConfigAdmin {
 					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy webcontext [" + realpath + "]");
 					updateWebContexts(zis, realpath, false, false);
 				}
+				// maven
+				if (!entry.isDirectory() && ((first = startsWith(path, type, "mvn")) || startsWith(path, type, "maven")) && !StringUtil.startsWith(fileName(entry), '.')) {
+					realpath = path.substring(first ? 4 : 6);
+					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy maven library bundled with extension [" + realpath + "]");
+					updateMaven(zis, realpath, false, false, logger);
+				}
 				// applications
 				if (!entry.isDirectory() && (startsWith(path, type, "applications") || startsWith(path, type, "web.applications") || startsWith(path, type, "web"))
 						&& !StringUtil.startsWith(fileName(entry), '.')) {
@@ -5541,38 +5547,41 @@ public final class ConfigAdmin {
 	}
 
 	void updateTLD(InputStream is, String name, boolean closeStream) throws IOException {
-		write(config.getTldFile(), is, name, closeStream);
+		write(config.getTldFile(), is, name, closeStream, true);
 	}
 
 	void updateFLD(InputStream is, String name, boolean closeStream) throws IOException {
-		write(config.getFldFile(), is, name, closeStream);
+		write(config.getFldFile(), is, name, closeStream, true);
 	}
 
 	void updateTag(InputStream is, String name, boolean closeStream) throws IOException {
-		write(config.getDefaultTagMapping().getPhysical(), is, name, closeStream);
+		write(config.getDefaultTagMapping().getPhysical(), is, name, closeStream, true);
 	}
 
 	void updateFunction(InputStream is, String name, boolean closeStream) throws IOException {
-		write(config.getDefaultFunctionMapping().getPhysical(), is, name, closeStream);
+		write(config.getDefaultFunctionMapping().getPhysical(), is, name, closeStream, true);
 	}
 
 	void updateEventGateway(InputStream is, String name, boolean closeStream) throws IOException {
-		write(config.getEventGatewayDirectory(), is, name, closeStream);
+		write(config.getEventGatewayDirectory(), is, name, closeStream, true);
 	}
 
 	void updateArchive(InputStream is, String name, boolean closeStream) throws IOException, PageException {
-		Resource res = write(SystemUtil.getTempDirectory(), is, name, closeStream);
+		Resource res = write(SystemUtil.getTempDirectory(), is, name, closeStream, true);
 		// Resource res = write(DeployHandler.getDeployDirectory(config),is,name,closeStream);
 		updateArchive(config, res);
 	}
 
-	private static Resource write(Resource dir, InputStream is, String name, boolean closeStream) throws IOException {
+	private static Resource write(Resource dir, InputStream is, String name, boolean closeStream, boolean overwrite) throws IOException {
 		if (!dir.exists()) dir.createDirectory(true);
 		Resource file = dir.getRealResource(name);
 		Resource p = file.getParentResource();
 		if (!p.exists()) p.createDirectory(true);
-		IOUtil.copy(is, file.getOutputStream(), closeStream, true);
-		return file;
+		if (overwrite || !file.exists()) {
+			IOUtil.copy(is, file.getOutputStream(), closeStream, true);
+			return file;
+		}
+		return null;
 	}
 
 	public void removeTLD(String name) throws IOException {
@@ -5963,6 +5972,14 @@ public final class ConfigAdmin {
 		else ConfigAdmin._updateWebContexts(config, is, realpath, closeStream, filesDeployed, store);
 
 		return filesDeployed.toArray(new Resource[filesDeployed.size()]);
+	}
+
+	void updateMaven(InputStream is, String realpath, boolean closeStream, boolean store, Log log) throws IOException {
+		Resource dir = config.getMavenDir();
+		Resource localFile = write(config.getMavenDir(), is, realpath, closeStream, false);
+		if (localFile != null) {
+			log.info("extension", "created file [" + localFile + "] provided by the extension");
+		}
 	}
 
 	private static void _updateWebContexts(Config config, InputStream is, String realpath, boolean closeStream, List<Resource> filesDeployed, boolean store)

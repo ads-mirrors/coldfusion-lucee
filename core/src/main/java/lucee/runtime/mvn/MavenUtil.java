@@ -404,8 +404,10 @@ public class MavenUtil {
 						}
 					}
 					catch (IOException ioe) {
+						IOException ex = new IOException("tied to download [" + type + "], because no local copy at [" + res + "] is available.");
+						ExceptionUtil.initCauseEL(ex, ioe);
 						// MUST add again ResourceUtil.deleteEmptyFoldersInside(pom.getLocalDirectory());
-						throw ioe;
+						throw ex;
 					}
 				}
 			}

@@ -27,6 +27,7 @@ import java.util.Map;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
+import lucee.print;
 import lucee.commons.digest.HashUtil;
 import lucee.commons.lang.ClassException;
 import lucee.commons.lang.ClassUtil;
@@ -98,13 +99,12 @@ public class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externalizabl
 		// OSGi?
 		String bn = toBundleName(sct, prefix, strict);
 		String bv = toBundleVersion(sct, prefix, strict);
-
 		if (!StringUtil.isEmpty(bn)) {
 			return new ClassDefinitionImpl(cl, bn, bv, id);
 		}
 
 		// Maven?
-		String maven = Caster.toString(sct.get(KeyConstants._maven, null), null);
+		String maven = toMaven(sct, prefix);
 		if (!StringUtil.isEmpty(maven, true)) {
 			return new ClassDefinitionImpl(cl, maven);
 		}
@@ -135,6 +135,15 @@ public class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externalizabl
 		if (StringUtil.isEmpty(className)) className = Caster.toString(sct.get(prefix != null ? KeyImpl.init(prefix + "-class-name") : KeyImpl.init("class-name"), null), null);
 		if (StringUtil.isEmpty(className)) return null;
 		return className;
+	}
+
+	public static String toMaven(Struct sct, String prefix) {
+		if (sct == null) return null;
+		prefix = improvePrefix(prefix);
+
+		String maven = Caster.toString(sct.get(prefix != null ? KeyImpl.init(prefix + "maven") : KeyConstants._maven, null), null);
+		if (StringUtil.isEmpty(maven)) return null;
+		return maven;
 	}
 
 	public static String toBundleName(Struct sct, String prefix, boolean strict) {
@@ -205,6 +214,7 @@ public class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externalizabl
 
 		// Maven
 		if (maven != null) {
+			print.ds(toString());
 			ConfigPro config = (ConfigPro) ThreadLocalPageContext.getConfig();
 			try {
 				return clazz = (Class<T>) config.getRPCClassLoader(false, JavaSettingsImpl.getInstance(config, getMaven()), null).loadClass(className);

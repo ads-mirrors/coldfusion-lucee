@@ -18,9 +18,14 @@
  **/
 package lucee.runtime.tag;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.util.Iterator;
 import java.util.Map;
 
+import lucee.commons.io.log.Log;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
@@ -51,6 +56,8 @@ public final class Search extends TagImpl {
 	private static final lucee.runtime.type.Collection.Key KEYWORDS = KeyConstants._keywords;
 	private static final lucee.runtime.type.Collection.Key KEYWORD_SCORE = KeyConstants._keywordScore;
 
+	private static MethodHandle methodHandle;
+
 	/** Specifies the criteria type for the search. */
 	private short type = SearchCollection.SEARCH_TYPE_SIMPLE;
 
@@ -72,14 +79,19 @@ public final class Search extends TagImpl {
 	/** A name for the search query. */
 	private String name;
 
+	private static final int CONTEXT_PASSAGES = 0;
+	private static final int CONTEXT_BYTES = 300;
+	private static final String CONTEXT_HL_BEGIN = "<b>";
+	private static final String CONTEXT_HL_END = "</b>";
+
 	private String[] category = EMPTY;
 	private String categoryTree = "";
 	private String status;
 	private int suggestions = SUGGESTIONS_NEVER;
-	private int contextPassages = 0;
-	private int contextBytes = 300;
-	private String contextHighlightBegin = "<b>";
-	private String contextHighlightEnd = "</b>";
+	private int contextPassages = CONTEXT_PASSAGES;
+	private int contextBytes = CONTEXT_BYTES;
+	private String contextHighlightBegin = CONTEXT_HL_BEGIN;
+	private String contextHighlightEnd = CONTEXT_HL_END;
 	private String previousCriteria;
 
 	// private int spellCheckMaxLevel=10;
@@ -103,7 +115,7 @@ public final class Search extends TagImpl {
 		contextHighlightBegin = "<b>";
 		contextHighlightEnd = "</b>";
 		previousCriteria = null;
-
+		methodHandle = null;
 		// spellCheckMaxLevel=10;
 		// result=null;
 
@@ -303,6 +315,15 @@ public final class Search extends TagImpl {
 		// TODO support context
 		String[] types = new String[] { v, v, v, d, d, v, v, v, v, v, v, v, v, d, d, v, v, v };
 		SearchData data = pageContext.getConfig().getSearchEngine(pageContext).createSearchData(suggestions);
+
+		// addional attributes
+		if (CONTEXT_BYTES != contextBytes) setAddionalAttribute(data, "contextBytes", contextBytes);
+		if (CONTEXT_PASSAGES != contextPassages) setAddionalAttribute(data, "contextPassages", contextPassages);
+		if (!CONTEXT_HL_BEGIN.equals(contextHighlightBegin)) setAddionalAttribute(data, "contextHighlightBegin", contextHighlightBegin);
+		if (!CONTEXT_HL_BEGIN.equals(contextHighlightEnd)) setAddionalAttribute(data, "contextHighlightEnd", contextHighlightEnd);
+
+		// MethodType.methodType(void.class, new Class<?>[] { String.class, Object.class });
+
 		SuggestionItem item = null;// this is already here to make sure the classloader load this sinstance
 
 		lucee.runtime.type.Query qry = new QueryImpl(cols, types, 0, "query");
@@ -403,4 +424,29 @@ public final class Search extends TagImpl {
 		return EVAL_PAGE;
 	}
 
+	private static void setAddionalAttribute(Object target, String name, Object value) {
+		try {
+			// Get method handle bound to the specific target instance
+			MethodHandle boundHandle = getMethodHandle(target).bindTo(target);
+
+			// Now invoke with just the method parameters
+			boundHandle.invokeWithArguments(name, value);
+		}
+		catch (Throwable t) {
+			LogUtil.log(Log.LEVEL_ERROR, "search", t);
+		}
+	}
+
+	private static MethodHandle getMethodHandle(Object target) throws NoSuchMethodException, IllegalAccessException {
+		if (methodHandle == null) {
+			MethodHandles.Lookup lookup = MethodHandles.lookup();
+
+			// Define the method type (return type and parameter types)
+			MethodType methodType = MethodType.methodType(void.class, String.class, Object.class);
+
+			// Find the method handle for the instance method
+			methodHandle = lookup.findVirtual(target.getClass(), "setAddionalAttribute", methodType);
+		}
+		return methodHandle;
+	}
 }
