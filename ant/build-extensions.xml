@@ -149,7 +149,6 @@
 		<available file="${cache}/${extPostgreSQL}-${extPostgreSQLVersion}.lex" property="postgre.present"/>
 		<available file="${cache}/${extJDTsSQL}-${extJDTsSQLVersion}.lex" property="jdts.present"/>
 		<available file="${cache}/${extS3}-${extS3Version}.lex" property="s3.present"/>
-		<available file="${cache}/${extEHCache}-${extEHCacheVersion}.lex" property="ehcache.present"/>
 		<available file="${cache}/${extAdmin}-${extAdminVersion}.lex" property="admin.present"/>
 		<available file="${cache}/${extDoc}-${extDocVersion}.lex" property="doc.present"/>
 		<available file="${cache}/${extPDF}-${extPDFVersion}.lex" property="pdf.present"/>
@@ -172,9 +171,6 @@
 	</target>
 	<target name="check-s3" depends="check-cache" unless="s3.present">
 		<get src="${extURL}${extS3}?version=${extS3Version}" dest="${cache}/${extS3}-${extS3Version}.lex"/>
-	</target>
-	<target name="check-ehcache" depends="check-cache" unless="ehcache.present">
-		<get src="${extURL}${extEHCache}?version=${extEHCacheVersion}" dest="${cache}/${extEHCache}-${extEHCacheVersion}.lex"/>
 	</target>
 	<target name="check-pdf" depends="check-cache" unless="pdf.present">
 		<get src="${extURL}${extPDF}?version=${extPDFVersion}" dest="${cache}/${extPDF}-${extPDFVersion}.lex"/>
@@ -262,18 +258,6 @@
 			tofile="${goal}/extensions/${ext_s3.filename}"/>
 		<echo level="info">add:${goal}/extensions/${ext_s3.filename}</echo>
 		<echo file="${goal}/extensions/.index" append="true">${ext_s3.filename};</echo>
-		
-		<!-- add extension EHCache -->
-		<loadmf jar="${cache}/${extEHCache}-${extEHCacheVersion}.lex" prefix="ext_ehcache."/>
-		<toFileName id="${ext_ehcache.id}" name="${ext_ehcache.name}" version="${ext_ehcache.version}" property="ext_ehcache.filename"/>
-		<copy 
-			file="${cache}/${extEHCache}-${extEHCacheVersion}.lex" 
-			todir="${goal}/extensions/"/>
-		<move 
-			file="${goal}/extensions/${extEHCache}-${extEHCacheVersion}.lex" 
-			tofile="${goal}/extensions/${ext_ehcache.filename}"/>
-		<echo level="info">add:${goal}/extensions/${ext_ehcache.filename}</echo>
-		<echo file="${goal}/extensions/.index" append="true">${ext_ehcache.filename};</echo>
 
 		<!-- add extension PDF -->
 		<loadmf jar="${cache}/${extPDF}-${extPDFVersion}.lex" prefix="ext_pdf."/>
