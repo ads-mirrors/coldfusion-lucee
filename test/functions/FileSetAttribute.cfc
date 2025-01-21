@@ -1,7 +1,6 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function beforeAll(){
-		variables.base = GetDirectoryFromPath( getCurrentTemplatepath() );
-		variables.path = base & "fileSetAttribute";
+		variables.path = getTempDirectory() & "fileSetAttribute\";
 		if ( !directoryExists( variables.path ) ){
 			directoryCreate( variables.path );
 		}
@@ -10,7 +9,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function isNotSupported() {
 		var isWindows =find("Windows", server.os.name );
 		if (isWindows > 0 ) return false;
-		else return  true;
+		return  true;
 	}
 
 	function afterAll(){
@@ -62,7 +61,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			});
 		});
 		describe( "Testcase for LDEV-2410", function() {
-			xit( title = "Checking changing file attribute between NORMAL and READONLY", body = function( currentSpec ) {
+			it( title = "Checking changing file attribute between NORMAL and READONLY", body = function( currentSpec ) {
 				var testFile = path & "\ro_normal_LDEV2410_#CreateUUID()#.txt";
 				FileWrite(testFile, "I am in normal file");
 
