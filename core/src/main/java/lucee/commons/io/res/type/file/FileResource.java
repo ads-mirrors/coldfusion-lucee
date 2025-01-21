@@ -543,7 +543,8 @@ public final class FileResource extends File implements Resource {
 
 		try {
 			provider.lock(this);
-			Runtime.getRuntime().exec("attrib -R " + getAbsolutePath());
+			Path path = Paths.get(getPath());
+			Files.setAttribute(path, "dos:readonly", !value);
 		}
 		catch (IOException ioe) {
 			return false;
