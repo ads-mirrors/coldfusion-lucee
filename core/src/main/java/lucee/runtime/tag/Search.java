@@ -80,7 +80,8 @@ public final class Search extends TagImpl {
 	private String name;
 
 	private static final int CONTEXT_PASSAGES = 0;
-	private static final int CONTEXT_BYTES = 300;
+	private static final int CONTEXT_PASSAGE_LENGTH = 150;
+	private static final int CONTEXT_BYTES = 1000;
 	private static final String CONTEXT_HL_BEGIN = "<b>";
 	private static final String CONTEXT_HL_END = "</b>";
 
@@ -89,6 +90,7 @@ public final class Search extends TagImpl {
 	private String status;
 	private int suggestions = SUGGESTIONS_NEVER;
 	private int contextPassages = CONTEXT_PASSAGES;
+	private int contextPassageLength = CONTEXT_PASSAGE_LENGTH;
 	private int contextBytes = CONTEXT_BYTES;
 	private String contextHighlightBegin = CONTEXT_HL_BEGIN;
 	private String contextHighlightEnd = CONTEXT_HL_END;
@@ -110,10 +112,11 @@ public final class Search extends TagImpl {
 		categoryTree = "";
 		status = null;
 		suggestions = SUGGESTIONS_NEVER;
-		contextPassages = 0;
-		contextBytes = 300;
-		contextHighlightBegin = "<b>";
-		contextHighlightEnd = "</b>";
+		contextPassages = CONTEXT_PASSAGES;
+		contextPassageLength = CONTEXT_PASSAGE_LENGTH;
+		contextBytes = CONTEXT_BYTES;
+		contextHighlightBegin = CONTEXT_HL_BEGIN;
+		contextHighlightEnd = CONTEXT_HL_END;
 		previousCriteria = null;
 		methodHandle = null;
 		// spellCheckMaxLevel=10;
@@ -268,6 +271,10 @@ public final class Search extends TagImpl {
 		this.contextPassages = (int) contextPassages;
 	}
 
+	public void setContextpassagelength(double contextPassageLength) {
+		this.contextPassageLength = (int) contextPassageLength;
+	}
+
 	/**
 	 * @param previousCriteria the previousCriteria to set
 	 * @throws ApplicationException
@@ -319,8 +326,9 @@ public final class Search extends TagImpl {
 		// addional attributes
 		if (CONTEXT_BYTES != contextBytes) setAddionalAttribute(data, "contextBytes", contextBytes);
 		if (CONTEXT_PASSAGES != contextPassages) setAddionalAttribute(data, "contextPassages", contextPassages);
+		if (CONTEXT_PASSAGE_LENGTH != contextPassageLength) setAddionalAttribute(data, "contextPassageLength", contextPassageLength);
 		if (!CONTEXT_HL_BEGIN.equals(contextHighlightBegin)) setAddionalAttribute(data, "contextHighlightBegin", contextHighlightBegin);
-		if (!CONTEXT_HL_BEGIN.equals(contextHighlightEnd)) setAddionalAttribute(data, "contextHighlightEnd", contextHighlightEnd);
+		if (!CONTEXT_HL_END.equals(contextHighlightEnd)) setAddionalAttribute(data, "contextHighlightEnd", contextHighlightEnd);
 
 		// MethodType.methodType(void.class, new Class<?>[] { String.class, Object.class });
 

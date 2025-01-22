@@ -10572,45 +10572,57 @@ Permits searching collections by title or displaying a separate title from the k
 			for possibly misspelled words.</description>
 		</attribute>
 		<attribute>
-			<type>number</type>
-			<name>contextPassages</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description>The number of passages/sentences Lucene returns in
-			the context summary (that is, the context column of
-			the results).
-			Default: 3</description>
+		    <type>number</type>
+		    <name>contextPassages</name>
+		    <required>false</required>
+		    <default>0</default>
+		    <rtexprvalue>true</rtexprvalue>
+		    <description>Maximum number of text paragraphs to return that contain matches for the search terms. 
+		    Each paragraph is scored based on how well it matches the search terms, and only the highest scoring paragraphs are returned. 
+		    A value of 0 means no context is returned.
+		    Default: 0</description>
 		</attribute>
+		
 		<attribute>
-			<type>number</type>
-			<name>contextBytes</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description>The maximum number of bytes Lucene returns in the
-			context summary.
-			Default: 300</description>
+		    <type>number</type>
+		    <name>contextPassageLength</name>
+		    <required>false</required>
+		    <default>150</default>
+		    <rtexprvalue>true</rtexprvalue>
+		    <description>Used as a guide for splitting the text into paragraphs. The splitter tries to keep paragraphs close to this length 
+		    while maintaining natural text boundaries. Note that paragraphs may exceed this length if no suitable break point is found.
+		    Default: 150</description>
 		</attribute>
+		
 		<attribute>
-			<type>string</type>
-			<name>contextHighlightBegin</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description>The HTML to prepend to search terms in the context
-			summary. Use this attribute in conjunction with
-			contextHighlightEnd to highlight search terms in the
-			context summary.
-			Default: &lt;b&gt;</description>
+		    <type>number</type>
+		    <name>contextBytes</name>
+		    <required>false</required>
+		    <default>1000</default>
+		    <rtexprvalue>true</rtexprvalue>
+		    <description>The maximum total length in bytes of all returned paragraphs combined. If this limit is reached, 
+		    no additional paragraphs will be returned even if contextPassages hasn't been reached yet.
+		    Default: 1000</description>
 		</attribute>
+		
 		<attribute>
-			<type>string</type>
-			<name>contextHighlightEnd</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description>The HTML to prepend to search terms in the context
-			summary. Use this attribute in conjunction with
-			contextHighlightEnd to highlight search terms in the
-			context summary.
-			Default: &lt;/b&gt;</description>
+		    <type>string</type>
+		    <name>contextHighlightBegin</name>
+		    <required>false</required>
+		    <rtexprvalue>true</rtexprvalue>
+		    <description>HTML tag or text to insert before each matched search term. The resulting tag will automatically include 
+		    a score attribute showing the match relevance, e.g. &lt;b score="1.2"&gt;searchterm&lt;/b&gt;
+		    Default: &lt;b&gt;</description>
+		</attribute>
+		
+		<attribute>
+		    <type>string</type>
+		    <name>contextHighlightEnd</name>
+		    <required>false</required>
+		    <rtexprvalue>true</rtexprvalue>
+		    <description>HTML tag or text to insert after each matched search term. Works in conjunction with contextHighlightBegin 
+		    to highlight search terms in the returned paragraphs.
+		    Default: &lt;/b&gt;</description>
 		</attribute>
 		<attribute>
 			<type>string</type>
