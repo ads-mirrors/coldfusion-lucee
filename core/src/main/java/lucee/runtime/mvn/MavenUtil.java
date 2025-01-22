@@ -356,7 +356,7 @@ public class MavenUtil {
 			if (!modifed) break;
 		}
 		if (value != null && value.indexOf("${") != -1) {
-			throw new IOException("cannot resolve [" + value + "] for [" + pom + "], available properties are [" + ListUtil.toList(properties.keySet(), ", ") + "]");
+			throw new IOException("Cannot resolve [" + value + "] for [" + pom + "], available properties are [" + ListUtil.toList(properties.keySet(), ", ") + "]");
 		}
 		return value;
 	}
@@ -404,7 +404,7 @@ public class MavenUtil {
 						}
 					}
 					catch (IOException ioe) {
-						IOException ex = new IOException("tied to download [" + type + "], because no local copy at [" + res + "] is available.");
+						IOException ex = new IOException("Failed to download [" + type + "], because no local copy found at [" + res + "].");
 						ExceptionUtil.initCauseEL(ex, ioe);
 						// MUST add again ResourceUtil.deleteEmptyFoldersInside(pom.getLocalDirectory());
 						throw ex;

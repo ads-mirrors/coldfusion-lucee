@@ -33,6 +33,10 @@ public class POM {
 
 	public static final Repository DEFAULT_REPOSITORY = new Repository("maven-central", "Maven Central", "https://repo1.maven.org/maven2/");
 
+	public static final int CONNECTION_TIMEOUT = 50000;
+	public static final int READ_TIMEOUT_HEAD = 5000;
+	public static final int READ_TIMEOUT_GET = 20000;
+
 	public static final int SCOPE_COMPILE = 1;
 	public static final int SCOPE_TEST = 2;
 	public static final int SCOPE_PROVIDED = 4;
@@ -428,6 +432,8 @@ public class POM {
 			url = new URL(r.getUrl() + groupId.replace('.', '/') + "/" + artifactId + "/" + version + "/" + artifactId + "-" + version + "." + type);
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("HEAD");
+			connection.setConnectTimeout(CONNECTION_TIMEOUT);
+			connection.setReadTimeout(READ_TIMEOUT_HEAD);
 			int responseCode = connection.getResponseCode();
 			if (responseCode == 200) {
 				return url;
@@ -440,6 +446,8 @@ public class POM {
 					url = new URL(newUrl);
 					connection = (HttpURLConnection) url.openConnection();
 					connection.setRequestMethod("HEAD");
+					connection.setConnectTimeout(CONNECTION_TIMEOUT);
+					connection.setReadTimeout(READ_TIMEOUT_HEAD);
 					responseCode = connection.getResponseCode();
 					if (responseCode == 200) {
 						return url;
@@ -450,7 +458,7 @@ public class POM {
 			else sb.append(", ");
 			sb.append(url.toExternalForm());
 		}
-		throw new IOException("could not find a valid endpoint [" + toString() + "] for type [" + type + "], possibles endpoint are [" + sb + "]");
+		throw new IOException("Failed to download java artifact [" + toString() + "] for type [" + type + "], attempted endpoint(s): [" + sb + "]");
 	}
 
 	@Override
