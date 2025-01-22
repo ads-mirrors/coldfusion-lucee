@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.ServletException;
 
+import lucee.aprint;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.loader.engine.CFMLEngine;
@@ -77,6 +78,7 @@ public class LSPEndpointFactory {
 		if (Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.lsp.enabled", null), false)) {
 			synchronized (SystemUtil.createToken("LSPEndpointFactory", "init")) {
 				if (forceRestart) {
+					aprint.e("- LSPEndpointFactory Restarting");
 					if (instance != null) {
 						instance.stop();
 					}
@@ -84,10 +86,12 @@ public class LSPEndpointFactory {
 				}
 				else {
 					if (instance == null) {
+						aprint.e("- LSPEndpointFactory Starting");
 						instance = new LSPEndpointFactory(config).start();
 					}
 				}
 			}
+			aprint.e("- LSPEndpointFactory Initialized");
 		}
 		return instance;
 	}
