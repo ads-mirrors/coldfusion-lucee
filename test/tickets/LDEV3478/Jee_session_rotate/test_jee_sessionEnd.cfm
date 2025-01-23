@@ -1,5 +1,6 @@
 <cfscript>
 	initialSessionId = session.sessionid;
-	sessionRotate();
+	if ( !structKeyExists( url, "rotateOnSessionStart" ) )
+		sessionRotate();
 	echo( initialSessionId );
 </cfscript>
