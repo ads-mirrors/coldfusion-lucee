@@ -6973,8 +6973,8 @@ if this attribute is not provided all types are returned.</description>
 		<argument>
 			<name>dir</name>
 			<type>string</type>
-			<required>Yes</required>
-			<description>Directory name</description>
+			<required>false</required>
+			<description>Directory name, defaults to getTempDirectory()</description>
 		</argument>
 		<argument>
 			<name>prefix</name>
