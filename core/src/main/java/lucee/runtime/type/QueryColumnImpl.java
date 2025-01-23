@@ -611,17 +611,23 @@ public class QueryColumnImpl implements QueryColumnPro, Objects {
 
 	public QueryColumnImpl cloneColumnImpl(boolean deepCopy) {
 		QueryColumnImpl clone = new QueryColumnImpl();
-		populate(clone, deepCopy);
+		populate(clone, deepCopy, null);
 		return clone;
 	}
 
-	protected void populate(QueryColumnImpl trg, boolean deepCopy) {
+	public QueryColumnImpl cloneColumnImpl(boolean deepCopy, QueryImpl targetQry) {
+		QueryColumnImpl clone = new QueryColumnImpl();
+		populate(clone, deepCopy, targetQry);
+		return clone;
+	}
+
+	protected void populate(QueryColumnImpl trg, boolean deepCopy, QueryImpl targetQry) {
 
 		boolean inside = ThreadLocalDuplication.set(this, trg);
 		try {
 			trg.key = this.key;
-			trg.query = this.query;
-			trg.size = this.size;
+			trg.query = (targetQry != null) ? targetQry : this.query;
+			trg.size = new AtomicInteger(size());
 			trg.type = this.type;
 			trg.key = this.key;
 			if (trg.query != null) trg.query.disableIndex();

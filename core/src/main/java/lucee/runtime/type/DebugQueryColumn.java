@@ -110,7 +110,7 @@ public final class DebugQueryColumn extends QueryColumnImpl implements QueryColu
 
 	public DebugQueryColumn cloneColumnImpl(boolean deepCopy) {
 		DebugQueryColumn clone = new DebugQueryColumn();
-		populate(clone, deepCopy);
+		populate(clone, deepCopy, null);
 		return clone;
 	}
 
