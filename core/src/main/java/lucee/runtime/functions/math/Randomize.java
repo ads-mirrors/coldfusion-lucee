@@ -22,7 +22,7 @@
 package lucee.runtime.functions.math;
 
 import lucee.runtime.PageContext;
-import lucee.runtime.crypt.CFMXCompat;
+import lucee.runtime.crypt.Cryptor;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.ext.function.Function;
@@ -33,7 +33,7 @@ public final class Randomize implements Function {
 	private static final long serialVersionUID = -7493245881811279645L;
 
 	public static Number call(PageContext pc, Number number) throws ExpressionException {
-		return call(pc, number, CFMXCompat.ALGORITHM_NAME);
+		return call(pc, number, Cryptor.DEFAULT_ALGORITHM);
 	}
 
 	public static Number call(PageContext pc, Number number, String algorithm) throws ExpressionException {

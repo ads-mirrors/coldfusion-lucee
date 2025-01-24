@@ -18,6 +18,7 @@
 package lucee.runtime.functions.math;
 
 import lucee.runtime.PageContext;
+import lucee.runtime.crypt.Cryptor;
 import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.ext.function.Function;
 import lucee.runtime.op.Caster;
@@ -26,7 +27,7 @@ public final class RandRange implements Function {
 	private static final long serialVersionUID = 2380288324240209290L;
 
 	public static Number call(PageContext pc, Number number1, Number number2) throws ExpressionException {
-		return call(pc, number1, number2, "cfmx_compat");
+		return call(pc, number1, number2, Cryptor.DEFAULT_ALGORITHM);
 	}
 
 	public static Number call(PageContext pc, Number number1, Number number2, String algo) throws ExpressionException {
@@ -51,7 +52,7 @@ public final class RandRange implements Function {
 			max = tmp;
 		}
 		int diff = max - min;
-		return (Caster.toIntValue(Rand.call(null, "cfmx_compat")) * (diff + 1)) + min;
+		return (Caster.toIntValue(Rand.call(null, Cryptor.DEFAULT_ALGORITHM)) * (diff + 1)) + min;
 	}
 
 }

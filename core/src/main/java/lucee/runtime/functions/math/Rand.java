@@ -26,6 +26,7 @@ import java.util.Random;
 
 import lucee.runtime.PageContext;
 import lucee.runtime.crypt.CFMXCompat;
+import lucee.runtime.crypt.Cryptor;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.ext.function.Function;
@@ -37,7 +38,7 @@ public final class Rand implements Function {
 	private static Map<String, Random> randoms = new HashMap<String, Random>();
 
 	public static Number call(PageContext pc) throws ExpressionException {
-		return call(pc, CFMXCompat.ALGORITHM_NAME);
+		return call(pc, Cryptor.DEFAULT_ALGORITHM);
 	}
 
 	public static Number call(PageContext pc, String algorithm) throws ExpressionException {
