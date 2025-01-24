@@ -1738,7 +1738,9 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	 * @param searchEngine The searchEngine to set.
 	 */
 	protected void setSearchEngine(ClassDefinition cd, String directory) {
-		this.searchEngineClassDef = cd;
+		if (this.searchEngineClassDef == null || !this.searchEngineClassDef.equals(cd)) {
+			this.searchEngineClassDef = cd;
+		}
 		this.searchEngineDirectory = directory;
 	}
 
