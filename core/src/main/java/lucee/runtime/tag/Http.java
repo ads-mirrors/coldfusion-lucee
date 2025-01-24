@@ -1282,9 +1282,7 @@ public final class Http extends BodyTagImpl {
 				file = ResourceUtil.toResourceNotExisting(pageContext, strPath);
 				// Resource dir = file.getParentResource();
 				if (file.isDirectory()) {
-					file = file.getRealResource(GetFileFromPath.call(pageContext,req.getURI().getPath()));// TODO was getName()
-					
-					// ->http://hc.apache.org/httpclient-3.x/apidocs/org/apache/commons/httpclient/URI.html#getName()
+					file = file.getRealResource(GetFileFromPath.call(pageContext,req.getURI().getPath()));
 				}
 
 			}
