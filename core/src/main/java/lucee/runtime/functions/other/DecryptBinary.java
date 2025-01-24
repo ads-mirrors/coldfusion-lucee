@@ -22,7 +22,7 @@
 package lucee.runtime.functions.other;
 
 import lucee.runtime.PageContext;
-import lucee.runtime.crypt.CFMXCompat;
+import lucee.runtime.crypt.Cryptor;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.Function;
 import lucee.runtime.op.Caster;
@@ -32,7 +32,7 @@ public final class DecryptBinary implements Function {
 	private static final long serialVersionUID = -2165470615366870733L;
 
 	public static Object call(PageContext pc, Object oBytes, String key) throws PageException {
-		return Decrypt.invoke(Caster.toBinary(oBytes), key, CFMXCompat.ALGORITHM_NAME, null, 0, true);
+		return Decrypt.invoke(Caster.toBinary(oBytes), key, Cryptor.DEFAULT_ALGORITHM, null, 0, true);
 	}
 
 	public static Object call(PageContext pc, Object oBytes, String key, String algorithm) throws PageException {

@@ -19,7 +19,7 @@
 package lucee.runtime.config;
 
 import lucee.commons.lang.ExceptionUtil;
-import lucee.runtime.crypt.CFMXCompat;
+import lucee.runtime.crypt.Cryptor;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.functions.other.Encrypt;
@@ -117,7 +117,7 @@ public class RemoteClientImpl implements RemoteClient {
 	@Override
 	public String getAdminPasswordEncrypted() {
 		try {
-			return Encrypt.invoke(getAdminPassword(), getSecurityKey(), CFMXCompat.ALGORITHM_NAME, "uu", null, 0, true);
+			return Encrypt.invoke(getAdminPassword(), getSecurityKey(), Cryptor.DEFAULT_ALGORITHM, "uu", null, 0, true);
 		}
 		catch (PageException e) {
 			return null;

@@ -36,7 +36,7 @@ public final class Encrypt implements Function {
 	private static final long serialVersionUID = -4144513980542568375L;
 
 	public static String call(PageContext pc, String input, String key) throws PageException {
-		return invoke(input, key, CFMXCompat.ALGORITHM_NAME, Cryptor.DEFAULT_ENCODING, null, 0, true);
+		return invoke(input, key, Cryptor.DEFAULT_ALGORITHM, Cryptor.DEFAULT_ENCODING, null, 0, true);
 	}
 
 	public static String call(PageContext pc, String input, String key, String algorithm) throws PageException {

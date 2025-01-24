@@ -29,6 +29,7 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.PBEParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import lucee.commons.io.SystemUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.coder.Coder;
@@ -41,10 +42,15 @@ import lucee.runtime.op.Caster;
 public class Cryptor {
 
 	public final static String DEFAULT_CHARSET = "UTF-8";
+	public final static String DEFAULT_ALGORITHM;
 	public final static String DEFAULT_ENCODING = "UU";
 	public final static int DEFAULT_ITERATIONS = 1000; // minimum recommended per NIST
 
 	private final static SecureRandom secureRandom = new SecureRandom();
+
+	static {
+		DEFAULT_ALGORITHM = SystemUtil.getSystemPropOrEnvVar("lucee.encryption.algorithm", "cfmx_compat");
+	}
 
 	/**
 	 * @param input - the clear-text input to be encrypted, or the encrypted input to be decrypted
