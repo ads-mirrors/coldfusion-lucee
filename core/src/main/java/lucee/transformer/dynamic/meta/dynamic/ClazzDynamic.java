@@ -42,6 +42,7 @@ import lucee.runtime.converter.JavaConverter.ObjectInputStreamImpl;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.reflection.Reflector;
 import lucee.runtime.thread.ThreadUtil;
+import lucee.runtime.type.ObjectWrap;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.dynamic.meta.Clazz;
 import lucee.transformer.dynamic.meta.Constructor;
@@ -275,6 +276,7 @@ public class ClazzDynamic extends Clazz {
 
 	@Override
 	public Method getMethod(String methodName, Object[] args, boolean nameCaseSensitive, boolean convertArgument, boolean convertComparsion, Method defaultValue) {
+
 		// like
 		Class[] parameterTypes;
 		outer: for (Method fm: methods) {
@@ -404,7 +406,6 @@ public class ClazzDynamic extends Clazz {
 
 	@Override
 	public Constructor getConstructor(Object[] args, boolean convertArgument, boolean convertComparsion, Constructor defaultValue) {
-
 		// like
 		Class[] parameterTypes;
 		outer: for (Constructor fm: constructors) {
@@ -824,4 +825,16 @@ public class ClazzDynamic extends Clazz {
 		return o;
 	}
 
+	private static Object[] cleanArgs(Object[] args) {
+		if (args == null) {
+			return new Object[0];
+		}
+
+		for (int i = 0; i < args.length; i++) {
+			if (args[i] instanceof ObjectWrap) {
+				args[i] = ((ObjectWrap) args[i]).getEmbededObject(args[i]);
+			}
+		}
+		return args;
+	}
 }
