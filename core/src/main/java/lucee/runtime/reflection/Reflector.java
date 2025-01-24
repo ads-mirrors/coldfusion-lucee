@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.Vector;
@@ -74,6 +75,7 @@ import lucee.runtime.type.util.CollectionUtil;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 import lucee.runtime.type.util.Type;
+import lucee.runtime.util.ObjectIdentityHashSet;
 import lucee.transformer.bytecode.util.JavaProxyFactory;
 import lucee.transformer.dynamic.DynamicInvoker;
 import lucee.transformer.dynamic.meta.Clazz;
@@ -1569,6 +1571,73 @@ public final class Reflector {
 		catch (Exception e) {
 		}
 		return defaultValue;
+	}
+
+	public static Object[] cleanArgs(Object[] args) {
+		if (args == null) {
+			return new Object[0];
+		}
+
+		boolean digg = false;
+		for (int i = 0; i < args.length; i++) {
+			if (args[i] instanceof ObjectWrap) {
+				args[i] = ((ObjectWrap) args[i]).getEmbededObject(args[i]);
+			}
+			else if (args[i] instanceof Collection) {
+				digg = ((Collection) args[i]).size() > 0;
+				if (digg) break;
+			}
+		}
+
+		if (!digg) return args;
+
+		ObjectIdentityHashSet done = new ObjectIdentityHashSet();
+		for (int i = 0; i < args.length; i++) {
+			args[i] = _clean(done, args[i]);
+		}
+		return args;
+	}
+
+	private static Object _clean(ObjectIdentityHashSet done, Object obj) {
+		if (done.contains(obj)) return obj;
+		done.add(obj);
+		try {
+			if (obj instanceof ObjectWrap) {
+
+				return ((ObjectWrap) obj).getEmbededObject(obj);
+			}
+			if (obj instanceof Collection) return _clean(done, (Collection) obj);
+			// if (obj instanceof Map) return _clean(done, (Map) obj);
+			// if (obj instanceof List) return _clean(done, (List) obj);
+			// if (obj instanceof Object[]) return _clean(done, (Object[]) obj);
+		}
+		finally {
+			done.remove(obj);
+		}
+		return obj;
+	}
+
+	private static Object _clean(ObjectIdentityHashSet done, Collection coll) {
+		Iterator<Object> vit = coll.valueIterator();
+		Object v;
+		boolean change = false;
+		while (vit.hasNext()) {
+			v = vit.next();
+			if (v != _clean(done, v)) {
+				change = true;
+				break;
+			}
+		}
+		if (!change) return coll;
+
+		coll = coll.duplicate(false);
+		Iterator<Entry<Key, Object>> eit = coll.entryIterator();
+		Entry<Key, Object> e;
+		while (eit.hasNext()) {
+			e = eit.next();
+			coll.setEL(e.getKey(), _clean(done, e.getValue()));
+		}
+		return coll;
 	}
 
 }

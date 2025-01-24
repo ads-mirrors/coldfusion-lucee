@@ -42,7 +42,6 @@ import lucee.runtime.converter.JavaConverter.ObjectInputStreamImpl;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.reflection.Reflector;
 import lucee.runtime.thread.ThreadUtil;
-import lucee.runtime.type.ObjectWrap;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.dynamic.meta.Clazz;
 import lucee.transformer.dynamic.meta.Constructor;
@@ -823,18 +822,5 @@ public class ClazzDynamic extends Clazz {
 			IOUtil.close(ois);
 		}
 		return o;
-	}
-
-	private static Object[] cleanArgs(Object[] args) {
-		if (args == null) {
-			return new Object[0];
-		}
-
-		for (int i = 0; i < args.length; i++) {
-			if (args[i] instanceof ObjectWrap) {
-				args[i] = ((ObjectWrap) args[i]).getEmbededObject(args[i]);
-			}
-		}
-		return args;
 	}
 }

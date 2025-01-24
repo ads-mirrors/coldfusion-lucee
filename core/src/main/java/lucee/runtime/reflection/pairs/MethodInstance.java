@@ -25,6 +25,7 @@ import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
+import lucee.runtime.reflection.Reflector;
 import lucee.runtime.type.Collection.Key;
 import lucee.transformer.dynamic.DynamicInvoker;
 import lucee.transformer.dynamic.meta.Clazz;
@@ -48,7 +49,7 @@ public final class MethodInstance {
 	public MethodInstance(Class clazz, Method method, Object[] args, boolean nameCaseSensitive, boolean convertComparsion) {
 		this.clazz = clazz;
 		this.method = method;
-		this.args = args;
+		this.args = Reflector.cleanArgs(args);
 		this.convertComparsion = convertComparsion;
 		this.nameCaseSensitive = nameCaseSensitive;
 	}
@@ -56,7 +57,7 @@ public final class MethodInstance {
 	public MethodInstance(Class clazz, Key methodName, Object[] args, boolean nameCaseSensitive, boolean convertComparsion) {
 		this.clazz = clazz;
 		this.methodName = methodName;
-		this.args = args;
+		this.args = Reflector.cleanArgs(args);
 		this.convertComparsion = convertComparsion;
 		this.nameCaseSensitive = nameCaseSensitive;
 	}
