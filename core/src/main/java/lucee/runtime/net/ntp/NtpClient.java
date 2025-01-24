@@ -81,7 +81,7 @@ public final class NtpClient {
 		}
 		catch (SocketTimeoutException ste) {
 			SocketTimeoutException e = new SocketTimeoutException("failed to get time offset from server [" + serverName + "]");
-			e.initCause(ste);
+			ExceptionUtil.initCauseEL(e, ste);
 			throw e;
 		}
 		finally {
