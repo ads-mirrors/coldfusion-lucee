@@ -27,7 +27,6 @@ import java.util.Map;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
-import lucee.print;
 import lucee.commons.digest.HashUtil;
 import lucee.commons.lang.ClassException;
 import lucee.commons.lang.ClassUtil;
@@ -214,7 +213,6 @@ public class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externalizabl
 
 		// Maven
 		if (maven != null) {
-			print.ds(toString());
 			ConfigPro config = (ConfigPro) ThreadLocalPageContext.getConfig();
 			try {
 				return clazz = (Class<T>) config.getRPCClassLoader(false, JavaSettingsImpl.getInstance(config, getMaven()), null).loadClass(className);
@@ -291,16 +289,15 @@ public class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externalizabl
 	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof ClassDefinition)) return false;
-		if (obj == this) return true;
-		ClassDefinition other = (ClassDefinition) obj;
-		return StringUtil.emptyIfNull(other.getClassName()).equals(StringUtil.emptyIfNull(className))
-				&& StringUtil.emptyIfNull(other.getName()).equals(StringUtil.emptyIfNull(name))
-				&& (other.getVersion() != null ? other.getVersion().equals(version) : version == null);
+		return toString().equals(obj.toString());
 	}
 
 	@Override
-	public String toString() { // do not remove, this is used as key in ConfigWebFactory
-		if (isBundle()) return "class:" + className + ";name:" + name + ";version:" + version + ";";
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		if (isBundle()) {
+			sb.append("class:").append(className).append(";name:").append(name).append(";version:").append(version).append(";");
+		}
 		else if (isMaven()) {
 			String maven = this.maven;
 			try {
@@ -308,9 +305,12 @@ public class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externalizabl
 			}
 			catch (Exception e) {
 			}
-			return "class:" + className + ";maven:" + maven + ";";
+			sb.append("class:").append(className).append(";maven:").append(maven).append(";");
 		}
-		return className;
+		else {
+			return className;
+		}
+		return sb.toString();
 	}
 
 	@Override

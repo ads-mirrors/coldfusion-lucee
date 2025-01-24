@@ -67,6 +67,7 @@ public class ConfigWebHelper {
 	private Map<String, Mapping> serverTagMappings;
 	private Map<String, Mapping> serverFunctionMappings;
 	private SearchEngine searchEngine;
+	private ClassDefinition<SearchEngine> searchEngineCD;
 	private static final LockManager lockManager = LockManagerImpl.getInstance(false);
 	private AMFEngine amfEngine;
 	protected IdentificationWeb id;
@@ -127,7 +128,8 @@ public class ConfigWebHelper {
 	}
 
 	public SearchEngine getSearchEngine(PageContext pc) throws PageException {
-		if (searchEngine == null) {
+		if (searchEngine == null || searchEngineCD != cw.getSearchEngineClassDefinition()) {
+			searchEngineCD = cw.getSearchEngineClassDefinition();
 			try {
 				Object o = ClassUtil.loadInstance(cw.getSearchEngineClassDefinition().getClazz());
 				if (o instanceof SearchEngine) searchEngine = (SearchEngine) o;
