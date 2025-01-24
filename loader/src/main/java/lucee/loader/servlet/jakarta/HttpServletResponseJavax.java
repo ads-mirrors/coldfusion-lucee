@@ -17,7 +17,7 @@ public class HttpServletResponseJavax extends ServletResponseJavax implements Ht
 
 	@Override
 	public void addCookie(Cookie cookie) {
-		rsp.addCookie((jakarta.servlet.http.Cookie) ((CookieJavax) cookie).getJakartaInstance());
+		rsp.addCookie(Jakarta.toCookie(cookie));
 	}
 
 	@Override
