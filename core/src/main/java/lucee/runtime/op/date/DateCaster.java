@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import lucee.print;
 import lucee.commons.date.DateTimeUtil;
 import lucee.commons.date.JREDateTimeUtil;
 import lucee.commons.date.TimeZoneConstants;
@@ -307,9 +306,10 @@ public final class DateCaster {
 		return (dt == null) ? defaultValue : dt;
 	}
 
-	public static void main(String[] args) {
-		print.e(toDateTimeNew(Locale.ENGLISH, "2024/12/23 12:07:11 CET", TimeZoneConstants.CET, null, true));
-	}
+	/*
+	 * public static void main(String[] args) { print.e(toDateTimeNew(Locale.ENGLISH,
+	 * "2024/12/23 12:07:11 CET", TimeZoneConstants.CET, null, true)); }
+	 */
 
 	public static DateTime toDateTimeNew(Locale locale, String str, TimeZone tz, DateTime defaultValue, boolean useCommomDateParserAsWell) {
 		countCheck++;

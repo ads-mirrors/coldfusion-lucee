@@ -99,6 +99,18 @@ This is <em><strong>TXTMARK</strong></em>
 					if( fileExists( file ) ) fileDelete( file );
 				}
 			});
+
+			it( title = "Checking markdownToHTML supports tables", skip=true, body=function( currentSpec ) {
+				var md = [
+					"| First Header  | Second Header |",
+					"| ------------- | ------------- |",
+					"| Content Cell  | Content Cell  |"
+				].toList( chr( 10 ) );
+				var html = markdownToHtml( md );
+				expect( html ).toInclude( "<table>" );
+				expect( html ).toInclude( "</table>" );
+			});
+
 		});
 	} 
 

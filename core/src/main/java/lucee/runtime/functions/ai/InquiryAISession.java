@@ -20,15 +20,19 @@ public final class InquiryAISession extends BIF {
 
 	private static final long serialVersionUID = 4034033693139930644L;
 
-	public static String call(PageContext pc, Object oSession, String question) throws PageException {
-		return call(pc, oSession, question, null);
-	}
+	@Override
+	public Object invoke(PageContext pc, Object[] args) throws PageException {
+		if (args.length < 2 || args.length > 3) throw new FunctionException(pc, "InquiryAISession", 2, 3, args.length);
 
-	public static String call(PageContext pc, Object oSession, String question, UDF listener) throws PageException {
+		Object oSession = args[0];
 		if (!(oSession instanceof AISession)) {
 			throw new CasterException(oSession, AISession.class);
 		}
 		AISession ais = (AISession) oSession;
+
+		String question = Caster.toString(args[1]);
+		UDF listener = args.length > 2 ? Caster.toFunction(args[2]) : null;
+
 		Response rsp;
 
 		LogUtil.logx(pc.getConfig(), Log.LEVEL_INFO, "ai", "Submitting question to AI endpoint [" + ais.getEngine().getFactory().getName() + "] from type ["
@@ -38,12 +42,5 @@ public final class InquiryAISession extends BIF {
 		else rsp = ais.inquiry(question);
 
 		return rsp.getAnswer();
-	}
-
-	@Override
-	public Object invoke(PageContext pc, Object[] args) throws PageException {
-		if (args.length == 2) return call(pc, Caster.toString(args[0]), Caster.toString(args[1]));
-		if (args.length == 3) return call(pc, Caster.toString(args[0]), Caster.toString(args[1]), Caster.toFunction(args[2]));
-		throw new FunctionException(pc, "InquiryAISession", 2, 3, args.length);
 	}
 }

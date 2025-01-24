@@ -425,13 +425,13 @@ public class QueryUtil {
 	}
 
 	public static QueryColumnImpl duplicate2QueryColumnImpl(QueryImpl targetQuery, QueryColumn col, boolean deepCopy) {
-		if (col instanceof QueryColumnImpl) return ((QueryColumnImpl) col).cloneColumnImpl(deepCopy);
+		if (col instanceof QueryColumnImpl) return ((QueryColumnImpl) col).cloneColumnImpl(deepCopy, targetQuery);
 
 		// fill array for column
-		Array content = new ArrayImpl();
 		int len = col.size();
+		Array content = new ArrayImpl(len);
 		for (int i = 1; i <= len; i++) {
-			content.setEL(i, col.get(i, null));
+			content.setEL(i, col.get(i, null)); // TODO no deepcopy here?
 		}
 
 		// create and return column

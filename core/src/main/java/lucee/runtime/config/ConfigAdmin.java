@@ -327,6 +327,13 @@ public final class ConfigAdmin {
 		_reload();
 	}
 
+	public synchronized void storeAndReload(boolean refreshScheduler)
+			throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
+		checkWriteAccess();
+		_store();
+		_reload(refreshScheduler);
+	}
+
 	private synchronized void _cleanup() {
 		removeIf("allowCompression", ConfigPro.DEFAULT_ALLOW_COMPRESSION);
 		removeIf("bufferTagBodyOutput", ConfigPro.DEFAULT_BUFFER_TAG_BODY_OUTPUT);
@@ -349,6 +356,10 @@ public final class ConfigAdmin {
 	}
 
 	private synchronized void _reload() throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException {
+		_reload(false);
+	}
+
+	private synchronized void _reload(boolean refreshScheduler) throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException {
 
 		// if(storeInMemoryData)XMLCaster.writeTo(doc,config.getConfigFile());
 		CFMLEngine engine = ConfigUtil.getEngine(config);
@@ -4829,6 +4840,12 @@ public final class ConfigAdmin {
 					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy webcontext [" + realpath + "]");
 					updateWebContexts(zis, realpath, false, false);
 				}
+				// maven
+				if (!entry.isDirectory() && ((first = startsWith(path, type, "mvn")) || startsWith(path, type, "maven")) && !StringUtil.startsWith(fileName(entry), '.')) {
+					realpath = path.substring(first ? 4 : 6);
+					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy maven library bundled with extension [" + realpath + "]");
+					updateMaven(zis, realpath, false, false, logger);
+				}
 				// applications
 				if (!entry.isDirectory() && (startsWith(path, type, "applications") || startsWith(path, type, "web.applications") || startsWith(path, type, "web"))
 						&& !StringUtil.startsWith(fileName(entry), '.')) {
@@ -5594,38 +5611,41 @@ public final class ConfigAdmin {
 	}
 
 	void updateTLD(InputStream is, String name, boolean closeStream) throws IOException {
-		write(config.getTldFile(), is, name, closeStream);
+		write(config.getTldFile(), is, name, closeStream, true);
 	}
 
 	void updateFLD(InputStream is, String name, boolean closeStream) throws IOException {
-		write(config.getFldFile(), is, name, closeStream);
+		write(config.getFldFile(), is, name, closeStream, true);
 	}
 
 	void updateTag(InputStream is, String name, boolean closeStream) throws IOException {
-		write(config.getDefaultTagMapping().getPhysical(), is, name, closeStream);
+		write(config.getDefaultTagMapping().getPhysical(), is, name, closeStream, true);
 	}
 
 	void updateFunction(InputStream is, String name, boolean closeStream) throws IOException {
-		write(config.getDefaultFunctionMapping().getPhysical(), is, name, closeStream);
+		write(config.getDefaultFunctionMapping().getPhysical(), is, name, closeStream, true);
 	}
 
 	void updateEventGateway(InputStream is, String name, boolean closeStream) throws IOException {
-		write(config.getEventGatewayDirectory(), is, name, closeStream);
+		write(config.getEventGatewayDirectory(), is, name, closeStream, true);
 	}
 
 	void updateArchive(InputStream is, String name, boolean closeStream) throws IOException, PageException {
-		Resource res = write(SystemUtil.getTempDirectory(), is, name, closeStream);
+		Resource res = write(SystemUtil.getTempDirectory(), is, name, closeStream, true);
 		// Resource res = write(DeployHandler.getDeployDirectory(config),is,name,closeStream);
 		updateArchive(config, res);
 	}
 
-	private static Resource write(Resource dir, InputStream is, String name, boolean closeStream) throws IOException {
+	private static Resource write(Resource dir, InputStream is, String name, boolean closeStream, boolean overwrite) throws IOException {
 		if (!dir.exists()) dir.createDirectory(true);
 		Resource file = dir.getRealResource(name);
 		Resource p = file.getParentResource();
 		if (!p.exists()) p.createDirectory(true);
-		IOUtil.copy(is, file.getOutputStream(), closeStream, true);
-		return file;
+		if (overwrite || !file.exists()) {
+			IOUtil.copy(is, file.getOutputStream(), closeStream, true);
+			return file;
+		}
+		return null;
 	}
 
 	public void removeTLD(String name) throws IOException {
@@ -6013,6 +6033,14 @@ public final class ConfigAdmin {
 		else ConfigAdmin._updateWebContexts(config, is, realpath, closeStream, filesDeployed, store);
 
 		return filesDeployed.toArray(new Resource[filesDeployed.size()]);
+	}
+
+	void updateMaven(InputStream is, String realpath, boolean closeStream, boolean store, Log log) throws IOException {
+		Resource dir = config.getMavenDir();
+		Resource localFile = write(config.getMavenDir(), is, realpath, closeStream, false);
+		if (localFile != null) {
+			log.info("extension", "created file [" + localFile + "] provided by the extension");
+		}
 	}
 
 	private static void _updateWebContexts(Config config, InputStream is, String realpath, boolean closeStream, List<Resource> filesDeployed, boolean store)
@@ -6756,14 +6784,22 @@ public final class ConfigAdmin {
 		catch (Exception e) {
 			throw Caster.toPageException(e);
 		}
+
+		// first clean up
+		if (el.containsKey(hp ? prefix + "BundleName" : "bundleName")) el.remove(hp ? prefix + "BundleName" : "bundleName");
+		if (el.containsKey(hp ? prefix + "BundleVersion" : "bundleVersion")) el.remove(hp ? prefix + "BundleVersion" : "bundleVersion");
+		if (el.containsKey(hp ? prefix + "Maven" : "maven")) el.remove(hp ? prefix + "Maven" : "maven");
+
 		el.setEL(hp ? prefix + "Class" : "class", cd.getClassName().trim());
+
+		// OSGi
 		if (cd.isBundle()) {
 			el.setEL(hp ? prefix + "BundleName" : "bundleName", cd.getName());
 			if (cd.hasVersion()) el.setEL(hp ? prefix + "BundleVersion" : "bundleVersion", cd.getVersionAsString());
 		}
-		else {
-			if (el.containsKey(hp ? prefix + "BundleName" : "bundleName")) el.remove(hp ? prefix + "BundleName" : "bundleName");
-			if (el.containsKey(hp ? prefix + "BundleVersion" : "bundleVersion")) el.remove(hp ? prefix + "BundleVersion" : "bundleVersion");
+		// Maven
+		else if (((ClassDefinitionImpl) cd).isMaven()) {
+			el.setEL(hp ? prefix + "Maven" : "maven", MavenUtil.toString(((ClassDefinitionImpl) cd).getMaven()));
 		}
 	}
 
@@ -6773,6 +6809,7 @@ public final class ConfigAdmin {
 		el.removeEL(KeyImpl.init(hp ? prefix + "Class" : "class"));
 		el.removeEL(KeyImpl.init(hp ? prefix + "BundleName" : "bundleName"));
 		el.removeEL(KeyImpl.init(hp ? prefix + "BundleVersion" : "bundleVersion"));
+		el.removeEL(KeyImpl.init(hp ? prefix + "Maven" : "maven"));
 	}
 
 	public final static class PluginFilter implements ResourceFilter {

@@ -8,26 +8,21 @@ import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.BIF;
 import lucee.runtime.op.Caster;
-import lucee.runtime.type.Struct;
 
 public final class AIGetMetaData extends BIF {
 
 	private static final long serialVersionUID = 6532201888958323478L;
 
-	public static Struct call(PageContext pc, String nameAI) throws PageException {
-		return call(pc, nameAI, false);
-	}
+	@Override
+	public Object invoke(PageContext pc, Object[] args) throws PageException {
+		if (args.length < 1 || args.length > 2) throw new FunctionException(pc, "AIGetMetaData", 1, 2, args.length);
 
-	public static Struct call(PageContext pc, String nameAI, boolean detailed) throws PageException {
+		String nameAI = Caster.toString(args[0]);
+		boolean detailed = args.length > 1 ? Caster.toBooleanValue(args[1]) : false;
+
 		if (nameAI.startsWith("default:")) nameAI = ((PageContextImpl) pc).getNameFromDefault(nameAI.substring(8));
 		AIEngine aie = ((PageContextImpl) pc).getAIEngine(nameAI);
 		return AIUtil.getMetaData(aie, detailed, detailed);
-	}
-
-	@Override
-	public Object invoke(PageContext pc, Object[] args) throws PageException {
-		if (args.length == 1) return call(pc, Caster.toString(args[0]));
-		throw new FunctionException(pc, "AIListModels", 1, 1, args.length);
 	}
 
 }

@@ -31,7 +31,6 @@ import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.Function;
 import lucee.runtime.functions.other.CreatePageContext;
-import lucee.runtime.listener.ApplicationContext;
 import lucee.runtime.net.http.HttpServletResponseDummy;
 import lucee.runtime.net.http.ReqRspUtil;
 import lucee.runtime.op.Caster;

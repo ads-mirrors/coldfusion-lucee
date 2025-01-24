@@ -27,6 +27,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.osgi.framework.BundleException;
+
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
@@ -39,10 +41,12 @@ import lucee.runtime.config.ConfigPro;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.mvn.MavenUtil;
+import lucee.runtime.mvn.MavenUtil.GAVSO;
 import lucee.runtime.mvn.POM;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
 import lucee.runtime.osgi.BundleFile;
+import lucee.runtime.osgi.OSGiUtil;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.ArrayImpl;
 import lucee.runtime.type.Struct;
@@ -55,6 +59,8 @@ public class JavaSettingsImpl implements JavaSettings {
 	private static final int DEFAULT_WATCH_INTERVAL = 60;
 
 	private static final Resource[] RESOURCE_EMPTY = new Resource[0];
+
+	private static final String[] STRING_EMPTY = new String[0];
 
 	private Collection<POM> poms;
 	private Collection<BD> osgis;
@@ -88,131 +94,60 @@ public class JavaSettingsImpl implements JavaSettings {
 
 	}
 
-	private static JavaSettings merge(Config config, JavaSettings l, JavaSettings r) {
-		if (l == null) return r;
-		if (r == null) return l;
-
-		JavaSettingsImpl li = (JavaSettingsImpl) l;
-		JavaSettingsImpl ri = (JavaSettingsImpl) r;
-
-		String fid = HashUtil.create64BitHashAsString(li.id + ":" + ri.id);
-
-		JavaSettings js = ((ConfigPro) config).getJavaSettings(fid);
-		if (js != null) {
-			return js;
-		}
-		List<String> names = new ArrayList<>();
-
-		boolean lEmpty = true;
-		boolean rEmpty = true;
-		// poms
-		Map<String, POM> mapPOMs = new HashMap<>();
-		if (ri.getPoms() != null) {
-			for (POM pom: ri.getPoms()) {
-				mapPOMs.put(pom.id(), pom);
-				rEmpty = false;
-			}
-		}
-		if (li.getPoms() != null) {
-			for (POM pom: li.getPoms()) {
-				mapPOMs.put(pom.id(), pom);
-				lEmpty = false;
-			}
-		}
-		for (POM pom: mapPOMs.values()) {
-			names.add("maven:" + pom.getGroupId() + ":" + pom.getArtifactId() + ":" + pom.getVersion());
-		}
-
-		// osgis
-		Map<String, BD> mapOSGIs = new HashMap<>();
-		if (ri.osgis != null) {
-			for (BD bd: ri.osgis) {
-				mapOSGIs.put(bd.toString(), bd);
-				rEmpty = false;
-			}
-		}
-		if (li.osgis != null) {
-			for (BD bd: li.osgis) {
-				mapOSGIs.put(bd.toString(), bd);
-				lEmpty = false;
-			}
-		}
-		for (BD bd: mapOSGIs.values()) {
-			names.add("osgi:" + bd.name + ":" + bd.version);
-		}
-
-		// resources
-		Map<String, Resource> mapResources = new HashMap<>();
-		for (Resource res: ri.getResources()) {
-			mapResources.put(res.getAbsolutePath(), res);
-			rEmpty = false;
-		}
-		for (Resource res: li.getResources()) {
-			mapResources.put(res.getAbsolutePath(), res);
-			lEmpty = false;
-		}
-		for (Resource res: mapResources.values()) {
-			names.add("paths:" + res.getAbsolutePath());
-		}
-
-		// bundles
-		Map<String, Resource> mapBundles = new HashMap<>();
-		for (Resource res: ri.getBundles()) {
-			mapBundles.put(res.getAbsolutePath(), res);
-			rEmpty = false;
-		}
-		for (Resource res: li.getBundles()) {
-			mapBundles.put(res.getAbsolutePath(), res);
-			lEmpty = false;
-		}
-		for (Resource res: mapBundles.values()) {
-			names.add("bundles:" + res.getAbsolutePath());
-		}
-
-		// watched extensions
-		Map<String, String> mapWatched = new HashMap<>();
-		if (ri.watchedExtensions != null) {
-			for (String str: ri.watchedExtensions) {
-				mapWatched.put(str, "");
-			}
-		}
-		if (li.watchedExtensions != null) {
-			for (String str: li.watchedExtensions) {
-				mapWatched.put(str, "");
-			}
-		}
-		for (String ext: mapWatched.keySet()) {
-			names.add("ext:" + ext);
-		}
-
-		if (lEmpty) {
-			((ConfigPro) config).setJavaSettings(fid, r);
-			return r;
-		}
-		if (rEmpty) {
-			((ConfigPro) config).setJavaSettings(fid, l);
-			return l;
-		}
-
-		names.add("loadCFMLClassPath:" + ri.loadCFMLClassPath);
-		names.add("reloadOnChange:" + ri.reloadOnChange);
-		names.add("watchInterval:" + ri.watchInterval);
-
-		Collections.sort(names);
-		String id = HashUtil.create64BitHashAsString(names.toString());
-
-		js = ((ConfigPro) config).getJavaSettings(id);
-		if (js != null) {
-			return js;
-		}
-		js = new JavaSettingsImpl(id, config, mapPOMs.values(), mapOSGIs.values(), mapResources.values().toArray(new Resource[mapResources.size()]),
-				mapBundles.values().toArray(new Resource[mapBundles.size()]), ri.loadCFMLClassPath, ri.reloadOnChange, ri.watchInterval,
-				mapWatched.keySet().toArray(new String[mapWatched.size()]));
-
-		((ConfigPro) config).setJavaSettings(fid, js);
-		((ConfigPro) config).setJavaSettings(id, js);
-		return js;
-	}
+	/*
+	 * private static JavaSettings merge(Config config, JavaSettings l, JavaSettings r) { if (l == null)
+	 * return r; if (r == null) return l;
+	 * 
+	 * JavaSettingsImpl li = (JavaSettingsImpl) l; JavaSettingsImpl ri = (JavaSettingsImpl) r;
+	 * 
+	 * String fid = HashUtil.create64BitHashAsString(li.id + ":" + ri.id);
+	 * 
+	 * JavaSettings js = ((ConfigPro) config).getJavaSettings(fid); if (js != null) { return js; }
+	 * List<String> names = new ArrayList<>();
+	 * 
+	 * boolean lEmpty = true; boolean rEmpty = true; // poms Map<String, POM> mapPOMs = new HashMap<>();
+	 * if (ri.getPoms() != null) { for (POM pom: ri.getPoms()) { mapPOMs.put(pom.id(), pom); rEmpty =
+	 * false; } } if (li.getPoms() != null) { for (POM pom: li.getPoms()) { mapPOMs.put(pom.id(), pom);
+	 * lEmpty = false; } } for (POM pom: mapPOMs.values()) { names.add("maven:" + pom.getGroupId() + ":"
+	 * + pom.getArtifactId() + ":" + pom.getVersion()); }
+	 * 
+	 * // osgis Map<String, BD> mapOSGIs = new HashMap<>(); if (ri.osgis != null) { for (BD bd:
+	 * ri.osgis) { mapOSGIs.put(bd.toString(), bd); rEmpty = false; } } if (li.osgis != null) { for (BD
+	 * bd: li.osgis) { mapOSGIs.put(bd.toString(), bd); lEmpty = false; } } for (BD bd:
+	 * mapOSGIs.values()) { names.add("osgi:" + bd.name + ":" + bd.version); }
+	 * 
+	 * // resources Map<String, Resource> mapResources = new HashMap<>(); for (Resource res:
+	 * ri.getResources()) { mapResources.put(res.getAbsolutePath(), res); rEmpty = false; } for
+	 * (Resource res: li.getResources()) { mapResources.put(res.getAbsolutePath(), res); lEmpty = false;
+	 * } for (Resource res: mapResources.values()) { names.add("paths:" + res.getAbsolutePath()); }
+	 * 
+	 * // bundles Map<String, Resource> mapBundles = new HashMap<>(); for (Resource res:
+	 * ri.getBundles()) { mapBundles.put(res.getAbsolutePath(), res); rEmpty = false; } for (Resource
+	 * res: li.getBundles()) { mapBundles.put(res.getAbsolutePath(), res); lEmpty = false; } for
+	 * (Resource res: mapBundles.values()) { names.add("bundles:" + res.getAbsolutePath()); }
+	 * 
+	 * // watched extensions Map<String, String> mapWatched = new HashMap<>(); if (ri.watchedExtensions
+	 * != null) { for (String str: ri.watchedExtensions) { mapWatched.put(str, ""); } } if
+	 * (li.watchedExtensions != null) { for (String str: li.watchedExtensions) { mapWatched.put(str,
+	 * ""); } } for (String ext: mapWatched.keySet()) { names.add("ext:" + ext); }
+	 * 
+	 * if (lEmpty) { ((ConfigPro) config).setJavaSettings(fid, r); return r; } if (rEmpty) {
+	 * ((ConfigPro) config).setJavaSettings(fid, l); return l; }
+	 * 
+	 * names.add("loadCFMLClassPath:" + ri.loadCFMLClassPath); names.add("reloadOnChange:" +
+	 * ri.reloadOnChange); names.add("watchInterval:" + ri.watchInterval);
+	 * 
+	 * Collections.sort(names); String id = HashUtil.create64BitHashAsString(names.toString());
+	 * 
+	 * js = ((ConfigPro) config).getJavaSettings(id); if (js != null) { return js; } js = new
+	 * JavaSettingsImpl(id, config, mapPOMs.values(), mapOSGIs.values(),
+	 * mapResources.values().toArray(new Resource[mapResources.size()]), mapBundles.values().toArray(new
+	 * Resource[mapBundles.size()]), ri.loadCFMLClassPath, ri.reloadOnChange, ri.watchInterval,
+	 * mapWatched.keySet().toArray(new String[mapWatched.size()]));
+	 * 
+	 * ((ConfigPro) config).setJavaSettings(fid, js); ((ConfigPro) config).setJavaSettings(id, js);
+	 * return js; }
+	 */
 
 	public boolean hasPoms() {
 		return poms != null && poms.size() > 0;
@@ -233,17 +168,40 @@ public class JavaSettingsImpl implements JavaSettings {
 	public Collection<Resource> getAllResources() throws IOException {
 		Map<String, Resource> mapJars = new HashMap<>();
 
-		Resource[] tmp;
-
 		// maven
 		if (poms != null) {
+			List<POM> jarPoms;
+			Map<String, POM> map = new HashMap<>();
+			String key;
+			POM existing;
 			for (POM pom: poms) {
-				tmp = pom.getJars();
-				if (tmp != null) {
-					for (Resource r: tmp) {
-						mapJars.put(r.getAbsolutePath(), r);
+				jarPoms = pom.getJarPOMs(true);
+				if (jarPoms != null) {
+
+					for (POM p: jarPoms) {
+						key = p.getGroupId() + ":" + p.getArtifactId();
+						existing = map.get(key);
+						if (existing != null) {
+							try {
+								if (OSGiUtil.compare(OSGiUtil.toVersion(existing.getVersion()), OSGiUtil.toVersion(p.getVersion())) < 0) {
+									map.put(key, p);
+								}
+							}
+							catch (BundleException e) {
+								map.put(key, p);
+							}
+
+						}
+						else {
+							map.put(key, p);
+						}
 					}
 				}
+			}
+			Resource r;
+			for (POM p: map.values()) {
+				r = p.getArtifact();
+				mapJars.put(r.getAbsolutePath(), r);
 			}
 		}
 
@@ -350,6 +308,51 @@ public class JavaSettingsImpl implements JavaSettings {
 		return watchedExtensions;
 	}
 
+	public static JavaSettings getInstance(Config config, GAVSO... gavsoArr) {
+
+		List<String> names = new ArrayList<>();
+
+		// maven
+		Collection<POM> poms = null;
+		{
+
+			if (gavsoArr != null) {
+				Map<String, POM> mapPoms = new HashMap<>();
+				Resource dir = ((ConfigPro) config).getMavenDir();
+				dir.mkdirs();
+				Log log = LogUtil.getLog(config, "mvn", "application");
+				for (GAVSO gavso: gavsoArr) {
+					if (gavso != null) {
+						POM tmp = POM.getInstance(dir, gavso.g, gavso.a, gavso.v, MavenUtil.toScopes(gavso.s, POM.SCOPE_COMPILE), log);
+						mapPoms.put("maven:" + tmp.getGroupId() + ":" + tmp.getArtifactId() + ":" + tmp.getVersion(), tmp);
+					}
+				}
+
+				for (String k: mapPoms.keySet()) {
+					names.add(k);
+				}
+				poms = mapPoms.values();
+			}
+		}
+
+		names.add("loadCFMLClassPath:false");
+		names.add("reloadOnChange:false");
+		names.add("watchInterval:" + DEFAULT_WATCH_INTERVAL);
+
+		Collections.sort(names);
+		String id = HashUtil.create64BitHashAsString(names.toString());
+
+		JavaSettings js = ((ConfigPro) config).getJavaSettings(id);
+		if (js != null) {
+			return js;
+		}
+
+		js = new JavaSettingsImpl(id, config, poms, null, RESOURCE_EMPTY, RESOURCE_EMPTY, false, false, DEFAULT_WATCH_INTERVAL, STRING_EMPTY);
+
+		((ConfigPro) config).setJavaSettings(id, js);
+		return js;
+	}
+
 	public static JavaSettings getInstance(Config config, Struct data, Object addionalResources) {
 
 		List<String> names = new ArrayList<>();
@@ -372,7 +375,6 @@ public class JavaSettingsImpl implements JavaSettings {
 				if (arr != null) {
 					Map<String, POM> mapPoms = new HashMap<>();
 					Iterator<Object> it = arr.valueIterator();
-					String g, a, v, s;
 					// TODO add method getMavenDir to config
 					Resource dir = ((ConfigPro) config).getMavenDir();
 					dir.mkdirs();
@@ -554,9 +556,17 @@ public class JavaSettingsImpl implements JavaSettings {
 			return js;
 		}
 
-		js = new JavaSettingsImpl(id, config, poms, osgis, paths == null ? RESOURCE_EMPTY : paths.toArray(new Resource[paths.size()]),
-				bundles == null ? RESOURCE_EMPTY : bundles.toArray(new Resource[bundles.size()]), loadCFMLClassPath, reloadOnChange, watchInterval,
-				extensions.toArray(new String[extensions.size()]));
+		js = new JavaSettingsImpl(id, config, poms, osgis,
+
+				paths == null || paths.size() == 0 ? RESOURCE_EMPTY : paths.toArray(new Resource[paths.size()]),
+
+				bundles == null || bundles.size() == 0 ? RESOURCE_EMPTY : bundles.toArray(new Resource[bundles.size()]),
+
+				loadCFMLClassPath, reloadOnChange, watchInterval,
+
+				extensions == null || extensions.size() == 0 ? STRING_EMPTY : extensions.toArray(new String[extensions.size()])
+
+		);
 
 		((ConfigPro) config).setJavaSettings(id, js);
 		return js;

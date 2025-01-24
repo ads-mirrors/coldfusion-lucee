@@ -131,7 +131,7 @@ public class ExtensionMetadata {
 	public void setMaven(String str, Log logger) {
 		mavenRaw = str;
 		if (!StringUtil.isEmpty(str, true)) {
-			maven = MavenUtil.toGAVSOs(str);
+			maven = MavenUtil.toGAVSOs(str, null);
 		}
 		if (maven == null) maven = new ArrayList<GAVSO>();
 	}

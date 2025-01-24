@@ -30,11 +30,6 @@ public class JSONExpressionInterpreter extends CFMLExpressionInterpreter {
 	public static final int FORMAT_JSON = 1;
 	public static final int FORMAT_JSON5 = 2;
 
-	public static void main(String[] args) throws PageException {
-		new JSONExpressionInterpreter(false, FORMAT_JSON).interpret(null, "{\"b\":2}");
-		new JSONExpressionInterpreter(false, FORMAT_JSON5).interpret(null, "{a:1,\"b\":2}");
-	}
-
 	public JSONExpressionInterpreter() {
 		this(false, FORMAT_JSON5);
 	}

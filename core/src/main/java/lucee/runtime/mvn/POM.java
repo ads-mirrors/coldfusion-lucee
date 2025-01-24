@@ -19,6 +19,7 @@ import lucee.commons.digest.HashUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.res.Resource;
+import lucee.commons.io.res.ResourcesImpl;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.Pair;
 import lucee.commons.lang.SerializableObject;
@@ -31,6 +32,10 @@ import lucee.runtime.thread.ThreadUtil;
 public class POM {
 
 	public static final Repository DEFAULT_REPOSITORY = new Repository("maven-central", "Maven Central", "https://repo1.maven.org/maven2/");
+
+	public static final int CONNECTION_TIMEOUT = 50000;
+	public static final int READ_TIMEOUT_HEAD = 5000;
+	public static final int READ_TIMEOUT_GET = 20000;
 
 	public static final int SCOPE_COMPILE = 1;
 	public static final int SCOPE_TEST = 2;
@@ -91,12 +96,11 @@ public class POM {
 		return getInstance(localDirectory, null, groupId, artifactId, version, null, null, dependencyScope, SCOPE_ALL, log);
 	}
 
-	/*
-	 * public static void main(String[] args) throws IOException { Resource dir =
-	 * ResourcesImpl.getFileResourceProvider().getResource("/Users/mic/tmp9/mvn/"); POM pom =
-	 * getInstance(dir, "org.apache.maven", "maven-core", "3.8.1", SCOPE_COMPILE, null); pom.getJars();
-	 * }
-	 */
+	public static void main(String[] args) throws IOException {
+		Resource dir = ResourcesImpl.getFileResourceProvider().getResource("/Users/mic/tmp9/mvn/");
+		POM pom = getInstance(dir, "org.apache.maven", "maven-core", "3.8.1", SCOPE_COMPILE, null);
+		pom.getJars();
+	}
 
 	public static POM getInstance(Resource localDirectory, Collection<Repository> repositories, String groupId, String artifactId, String version, int dependencyScope,
 			int dependencyScopeManagement, Log log) {
@@ -428,6 +432,8 @@ public class POM {
 			url = new URL(r.getUrl() + groupId.replace('.', '/') + "/" + artifactId + "/" + version + "/" + artifactId + "-" + version + "." + type);
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("HEAD");
+			connection.setConnectTimeout(CONNECTION_TIMEOUT);
+			connection.setReadTimeout(READ_TIMEOUT_HEAD);
 			int responseCode = connection.getResponseCode();
 			if (responseCode == 200) {
 				return url;
@@ -440,6 +446,8 @@ public class POM {
 					url = new URL(newUrl);
 					connection = (HttpURLConnection) url.openConnection();
 					connection.setRequestMethod("HEAD");
+					connection.setConnectTimeout(CONNECTION_TIMEOUT);
+					connection.setReadTimeout(READ_TIMEOUT_HEAD);
 					responseCode = connection.getResponseCode();
 					if (responseCode == 200) {
 						return url;
@@ -450,7 +458,7 @@ public class POM {
 			else sb.append(", ");
 			sb.append(url.toExternalForm());
 		}
-		throw new IOException("could not find a valid endpoint [" + this + "] for type [" + type + "], possibles endpoint are [" + sb + "]");
+		throw new IOException("Failed to download java artifact [" + toString() + "] for type [" + type + "], attempted endpoint(s): [" + sb + "]");
 	}
 
 	@Override
@@ -471,11 +479,19 @@ public class POM {
 	 * ===========================================================================================
 	 */
 	public List<TreeNode<POM>> getAllDependenciesAsTrees() throws IOException {
-		return getDependencies(this, true, 0, new TreeNode<POM>(this)).getChildren();
+		return getAllDependenciesAsTrees(true);
+	}
+
+	public List<TreeNode<POM>> getAllDependenciesAsTrees(boolean optional) throws IOException {
+		return getDependencies(this, true, 0, new TreeNode<POM>(this), optional).getChildren();
 	}
 
 	public List<POM> getAllDependencies() throws IOException {
-		List<POM> list = getDependencies(this, true, 0, new TreeNode<POM>(this)).asList();
+		return getAllDependencies(true);
+	}
+
+	public List<POM> getAllDependencies(boolean optional) throws IOException {
+		List<POM> list = getDependencies(this, true, 0, new TreeNode<POM>(this), optional).asList();
 		list.remove(0);
 		return list;
 	}
@@ -487,7 +503,7 @@ public class POM {
 				for (POM p: deps) {
 					try {
 						if (!node.addChild(p)) continue;
-						if (recursive) getDependencies(p, recursive, level + 1, node);
+						if (recursive) getDependencies(p, recursive, level + 1, node, true);
 					}
 					catch (IOException ioe) {
 						node.removeChild(p);
@@ -505,7 +521,7 @@ public class POM {
 		}
 	}
 
-	private static TreeNode<POM> getDependencies(POM pom, boolean recursive, int level, TreeNode<POM> node) throws IOException {
+	private static TreeNode<POM> getDependencies(POM pom, boolean recursive, int level, TreeNode<POM> node, boolean optional) throws IOException {
 		ExecutorService executor = null;
 		try {
 			List<POM> deps = pom.getDependencies();
@@ -513,13 +529,13 @@ public class POM {
 				executor = ThreadUtil.createExecutorService(deps.size(), false);
 				List<Future<Pair<IOException, POM>>> futures = new ArrayList<>();
 				for (POM p: deps) {
-					if (!node.addChild(p)) continue;
+					if (!node.addChild(p) || (!optional && p.getOptional())) continue;
 
 					// Handle recursive processing in a separate thread
 					if (recursive) {
 						Future<Pair<IOException, POM>> future = executor.submit(() -> {
 							try {
-								getDependencies(p, recursive, level + 1, node);
+								getDependencies(p, recursive, level + 1, node, optional);
 							}
 							catch (IOException ioe) {
 								return new Pair<IOException, POM>(ioe, p);
@@ -632,27 +648,39 @@ public class POM {
 	}
 
 	public Resource[] getJars() throws IOException {
-		List<Resource> jars = new ArrayList<>();
+		return getJars(true);
+	}
+
+	public Resource[] getJars(boolean optional) throws IOException {
+		List<POM> poms = getJarPOMs(optional);
+		Resource[] jars = new Resource[poms.size()];
+		int index = 0;
+		for (POM p: poms) {
+			jars[index++] = p.getArtifact();
+		}
+		return jars;
+	}
+
+	public List<POM> getJarPOMs(boolean optional) throws IOException {
+		List<POM> poms = new ArrayList<>();
 		initXML();
 		// current
 		if ("jar".equalsIgnoreCase(this.artifactExtension)) {
-			Resource r = getArtifact();
-			if (r != null) {
-				jars.add(r);
+			if (getArtifact() != null) {
+				poms.add(this);
 			}
 		}
 
-		List<POM> dependencies = getAllDependencies();
+		List<POM> dependencies = getAllDependencies(optional);
 		if (dependencies != null) {
 			for (POM p: dependencies) {
 				if ("jar".equalsIgnoreCase(p.artifactExtension)) {
-					Resource r = p.getArtifact();
-					if (r != null) {
-						jars.add(r);
+					if (p.getArtifact() != null) {
+						poms.add(p);
 					}
 				}
 			}
 		}
-		return jars.toArray(new Resource[jars.size()]);
+		return poms;
 	}
 }

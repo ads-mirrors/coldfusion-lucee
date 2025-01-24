@@ -950,8 +950,8 @@ public class QueryImpl implements Query, Objects, QueryResult {
 			// must start with a letter and can be followed by
 			// letters numbers and underscores [_]. RegExp:[a-zA-Z][a-zA-Z0-9_]*",null,null,null);
 
-			if (testMap.contains(columnNames[i].getLowerString())) throw new DatabaseException("invalid parameter for query, ambiguous column name " + columnNames[i],
-					"columnNames: " + ListUtil.arrayToListTrim(_toStringKeys(columnNames), ","), null, null);
+			if (testMap.contains(columnNames[i].getLowerString())) throw new DatabaseException("invalid parameter for query, ambiguous/duplicate column name [" + columnNames[i] + "]",
+					"columnNames: [" + ListUtil.arrayToListTrim(_toStringKeys(columnNames), ",") +"]", null, null);
 			testMap.add(columnNames[i].getLowerString());
 		}
 	}
@@ -3367,7 +3367,6 @@ public class QueryImpl implements Query, Objects, QueryResult {
 			if (tmp != null) {
 				newResult.columnNames = new Collection.Key[tmp.length];
 				newResult.columns = new QueryColumnImpl[tmp.length];
-				QueryColumn col;
 				for (int i = 0; i < tmp.length; i++) {
 					newResult.columnNames[i] = tmp[i];
 					newResult.columns[i] = QueryUtil.duplicate2QueryColumnImpl(newResult, qry.getColumn(tmp[i], null), deepCopy);

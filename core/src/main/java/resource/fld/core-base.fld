@@ -9612,6 +9612,7 @@ The following things are considered to be empty:
 	<!-- LogAllThreads -->
 <function>
     <name>LogAllThreads</name>
+	<introduced>6.2.0.219</introduced>
     <class>lucee.runtime.functions.system.LogAllThreads</class>
     <keywords>system,log,debugging,threads,performance,analysis</keywords>
     <description>
@@ -10886,13 +10887,13 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<name>query</name>
 			<type>query</type>
 			<required>Yes</required>
-			<description></description>
+			<description>Name of the query to check</description>
     	</argument>	
 		<argument>
 			<name>column</name>
 			<type>string</type>
 			<required>Yes</required>
-			<description></description>
+			<description>Name of the column to be checked if it exists</description>
     	</argument>	
 		<return>
 			<type>boolean</type>
@@ -11308,20 +11309,20 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<alias>query</alias>
 			<type>query</type>
 			<required>Yes</required>
-		<description>Name of an executed query. </description>
+		<description>Name of the query to update. </description>
     </argument>
 		<argument>
 			<name>column_name</name>
 			<alias>columnName</alias>
 			<type>string</type>
 			<required>Yes</required>
-		<description></description>
+		<description>Name of the column to update</description>
     </argument>
 		<argument>
 			<name>value</name>
 			<type>any</type>
 			<required>Yes</required>
-		<description></description>
+		<description>New value for the cell</description>
     </argument>
 		<argument>
 			<name>row_number</name>
@@ -11329,7 +11330,7 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<type>number</type>
 			<required>No</required>
 			<default>-9999</default>
-		<description></description>
+		<description>Which row to update, defaults to the the last row in the query</description>
     </argument>
 		<return>
 			<type>boolean</type>
@@ -11381,20 +11382,20 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<name>query</name>
 			<type>query</type>
 			<required>Yes</required>
-		<description></description>
-    </argument>
+			<description>Name of the query to slice</description>
+		</argument>
 		<argument>
 			<name>offset</name>
 			<type>number</type>
 			<required>Yes</required>
-		<description></description>
-    </argument>
+			<description>The first row to include in the new query</description>
+		</argument>
 		<argument>
 			<name>length</name>
 			<type>number</type>
 			<required>No</required>
-		<description></description>
-    </argument>
+			<description>The number of rows to include in the new query, defaults to all remaining rows</description>
+		</argument>
 		<return>
 			<type>query</type>
 		</return>

@@ -724,6 +724,67 @@ public final class ParserString {
 		return false;
 	}
 
+	public Range currentLine() {
+
+		return line(pos);
+	}
+
+	public Range line(int pos) {
+		// Handle the case when position is after last character
+		int from = pos;
+		if (isAfterLast()) from--;
+
+		// Find start of line by scanning backwards to newline
+		while (from >= 0) {
+			if (text[from] == '\n') {
+				from++; // Move to first char after newline
+				break;
+			}
+			from--;
+		}
+		if (from < 0) from = 0; // If no newline found, start at beginning
+
+		// Find end of line by scanning forward to newline
+		int to = pos;
+		while (to < text.length) {
+			if (text[to] == '\n') {
+				to--;
+				break; // Stop at newline without decrementing
+			}
+			to++;
+		}
+		if (to >= length()) to = length() - 1; // If no newline found, to at end
+
+		// empty line
+		if (from > to) {
+			return null;
+		}
+
+		return new Range(from, to);
+	}
+
+	public int line() {
+		int line = 1;
+		int p = pos;
+		while (p > 0) {
+			p--;
+			if (text[p] == '\n') line++;
+
+		}
+		return line;
+	}
+
+	public boolean previousLine() {
+		while (!isBeforeFirst() && text[pos] != '\n') {
+			previous();
+		}
+		if (!isBeforeFirst() && text[pos] == '\n') {
+			previous();
+			return !isBeforeFirst();
+		}
+		return false;
+	}
+
 	/**
 	 * Gibt eine Untermenge des CFMLString als Zeichenkette zurueck, ausgehend von start bis zum Ende
 	 * des CFMLString.
@@ -840,6 +901,10 @@ public final class ParserString {
 	 */
 	public boolean isAfterLast() {
 		return pos >= text.length;
+	}
+
+	public boolean isBeforeFirst() {
+		return pos < 0;
 	}
 
 	/**

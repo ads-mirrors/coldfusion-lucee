@@ -2,6 +2,7 @@ package lucee.runtime.mvn;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -211,7 +212,7 @@ public class MavenUtil {
 		// dependencies.add(p);
 	}
 
-	public static class GAVSO {
+	public static class GAVSO implements Serializable {
 		public final String g;
 		public final String a;
 		public final String v;
@@ -311,6 +312,7 @@ public class MavenUtil {
 			if (!StringUtil.isEmpty(o, true)) sct.setEL(KeyConstants._optional, o);
 			return sct;
 		}
+
 	}
 
 	public static boolean allowed(int allowedScopes, int scope) {
@@ -409,7 +411,7 @@ public class MavenUtil {
 			if (!modifed) break;
 		}
 		if (value != null && value.indexOf("${") != -1) {
-			throw new IOException("cannot resolve [" + value + "] for [" + pom + "], available properties are [" + ListUtil.toList(properties.keySet(), ", ") + "]");
+			throw new IOException("Cannot resolve [" + value + "] for [" + pom + "], available properties are [" + ListUtil.toList(properties.keySet(), ", ") + "]");
 		}
 		return value;
 	}
@@ -457,8 +459,10 @@ public class MavenUtil {
 						}
 					}
 					catch (IOException ioe) {
+						IOException ex = new IOException("Failed to download [" + type + "], because no local copy found at [" + res + "].");
+						ExceptionUtil.initCauseEL(ex, ioe);
 						// MUST add again ResourceUtil.deleteEmptyFoldersInside(pom.getLocalDirectory());
-						throw ioe;
+						throw ex;
 					}
 				}
 			}
@@ -526,12 +530,63 @@ public class MavenUtil {
 		}
 	}
 
-	public static List<GAVSO> toGAVSOs(String str) {
-		String[] arr = ListUtil.listToStringArray(str, ',');
+	public static List<GAVSO> toGAVSOs(Object obj, List<GAVSO> defaultValue) {
+		// array
 		List<GAVSO> list = new ArrayList<>();
-		for (String el: arr) {
-			GAVSO gavso = toGAVSO(el, null);
-			if (gavso != null) list.add(gavso);
+		Object[] arr = Caster.toNativeArray(obj, null);
+		if (arr != null) {
+			GAVSO tmp;
+			for (Object o: arr) {
+				tmp = toGAVSO(o, null);
+				if (tmp != null) list.add(tmp);
+			}
+			return list;
+		}
+		// struct
+		Struct el = Caster.toStruct(obj, null);
+		if (el != null) {
+			GAVSO tmp = toGAVSO(el, null);
+			if (tmp != null) list.add(tmp);
+			return list;
+		}
+
+		// gradle style?
+		String str = Caster.toString(obj, null);
+		if (!StringUtil.isEmpty(str)) {
+			GAVSO tmp;
+			for (String s: ListUtil.listToStringArray(str, ',')) {
+				tmp = toGAVSO(s, null);
+				if (tmp != null) list.add(tmp);
+			}
+			return list;
+		}
+		return list;
+	}
+
+	public static List<GAVSO> toGAVSOs(Object obj) throws ApplicationException {
+		// array
+		List<GAVSO> list = new ArrayList<>();
+		Object[] arr = Caster.toNativeArray(obj, null);
+		if (arr != null) {
+			for (Object o: arr) {
+				list.add(toGAVSO(o));
+			}
+			return list;
+		}
+		// struct
+		Struct el = Caster.toStruct(obj, null);
+		if (el != null) {
+			list.add(toGAVSO(el));
+			return list;
+		}
+
+		// gradle style?
+		String str = Caster.toString(obj, null);
+		if (!StringUtil.isEmpty(str)) {
+			for (String s: ListUtil.listToStringArray(str, ',')) {
+				list.add(toGAVSO(s));
+			}
+			return list;
 		}
 		return list;
 	}
@@ -547,6 +602,8 @@ public class MavenUtil {
 			if (!StringUtil.isEmpty(g) && !StringUtil.isEmpty(a)) {
 				String v = Caster.toString(el.get(KeyConstants._version, null), null);
 				if (StringUtil.isEmpty(v)) v = Caster.toString(el.get(KeyConstants._v, null), null);
+
+				if (!MavenUtil.isValidVersion(v)) return defaultValue;
 				return new GAVSO(g, a,
 
 						v,
@@ -562,6 +619,7 @@ public class MavenUtil {
 		if (!StringUtil.isEmpty(str)) {
 			String[] arr = ListUtil.listToStringArray(str, ':');
 			if (arr.length > 1 && arr.length < 6) {
+				if (arr.length > 2 && !MavenUtil.isValidVersion(arr[2].trim())) return defaultValue;
 				return new GAVSO(
 
 						arr[0].trim(), // group
@@ -596,6 +654,8 @@ public class MavenUtil {
 			if (StringUtil.isEmpty(v)) v = Caster.toString(el.get(KeyConstants._v, null), null);
 			if (StringUtil.isEmpty(v)) throw new ApplicationException("Missing required field: version. Ensure that the 'version' key is present and not empty.");
 
+			if (!MavenUtil.isValidVersion(v)) throw new ApplicationException("maven version [" + v + "]is invalid");
+
 			return new GAVSO(g, a, v,
 
 					Caster.toString(el.get(KeyConstants._scope, null), null),
@@ -608,6 +668,7 @@ public class MavenUtil {
 		if (!StringUtil.isEmpty(str)) {
 			String[] arr = ListUtil.listToStringArray(str, ':');
 			if (arr.length > 1 && arr.length < 6) {
+				if (arr.length > 2 && !MavenUtil.isValidVersion(arr[2].trim())) throw new ApplicationException("maven version [" + arr[2].trim() + "]is invalid");
 				return new GAVSO(
 
 						arr[0].trim(), // group
@@ -629,4 +690,28 @@ public class MavenUtil {
 				+ "2) A String in the format 'group:artifact:version[:scope[:optional]]'. " + "Ensure the input conforms to one of these formats.");
 
 	}
+
+	public static String toString(GAVSO[] gavsos) {
+		StringBuilder sb = new StringBuilder();
+		for (GAVSO g: gavsos) {
+			if (sb.length() > 0) sb.append(',');
+			sb.append(g.toString());
+		}
+		return sb.toString();
+	}
+
+	public static boolean isValidVersion(String version) {
+		if (StringUtil.isEmpty(version)) return false;
+
+		// Basic version pattern
+		String versionPattern = "^(\\d+)" + // Major (required)
+				"(?:\\.(\\d+))?" + // Minor (optional)
+				"(?:\\.(\\d+))?" + // Micro (optional)
+				"(?:[-.]?" + // Separator for qualifier (optional)
+				"([A-Za-z0-9_-]+(?:[-._][A-Za-z0-9_-]+)*))?" + // Qualifier
+				"$";
+
+		return version.matches(versionPattern);
+	}
+
 }
