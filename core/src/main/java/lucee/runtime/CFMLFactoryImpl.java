@@ -63,6 +63,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.exp.PageExceptionImpl;
 import lucee.runtime.exp.RequestTimeoutException;
 import lucee.runtime.functions.string.Hash;
+import lucee.runtime.net.http.ReqRspUtil;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.ArrayImpl;
@@ -185,7 +186,7 @@ public final class CFMLFactoryImpl extends CFMLFactory {
 					if (opc != null) {
 						HttpServletRequest tmpReq = opc.getHttpServletRequest();
 						if (tmpReq != null) {
-							tmp = tmpReq.getRemoteAddr();
+							tmp = ReqRspUtil.getRemoteAddr(tmpReq, null);
 							if (ra.equals(tmp)) count++;
 						}
 					}

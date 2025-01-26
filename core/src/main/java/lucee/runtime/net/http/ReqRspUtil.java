@@ -48,6 +48,7 @@ import org.xml.sax.InputSource;
 
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.IOUtil;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.Pair;
 import lucee.commons.lang.StringUtil;
@@ -664,5 +665,17 @@ public final class ReqRspUtil {
 			ExceptionUtil.rethrowIfNecessary(t);
 			return defaultValue;
 		}
+	}
+
+	public static String getRemoteAddr(HttpServletRequest req, String defaultValue) {
+		try {
+			return req.getRemoteAddr();
+		}
+		// tomcat may throw: java.lang.IllegalStateException: The request object has been recycled and is no
+		// longer associated with this facade
+		catch (Exception e) {
+			LogUtil.log("request", e);
+		}
+		return defaultValue;
 	}
 }
