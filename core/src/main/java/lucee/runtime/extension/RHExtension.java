@@ -160,6 +160,7 @@ public class RHExtension implements Serializable {
 	private List<Map<String, String>> monitors;
 	private List<Map<String, String>> resources;
 	private List<Map<String, String>> searchs;
+	private List<Map<String, String>> mavens;
 	private List<Map<String, String>> amfs;
 	private List<Map<String, String>> jdbcs;
 	private List<Map<String, String>> startupHooks;
@@ -180,6 +181,7 @@ public class RHExtension implements Serializable {
 	// private Config config;
 
 	private String searchsJson;
+	private String mavensJson;
 
 	private String ormsJson;
 	private String webservicesJson;
@@ -203,17 +205,17 @@ public class RHExtension implements Serializable {
 	private static Map<String, RHExtension> instances = new ConcurrentHashMap<>();
 
 	public static RHExtension getInstance(Config config, Resource ext) throws PageException, IOException, BundleException, ConverterException {
-		RHExtension instance = instances.get(ext.getAbsolutePath());
+		// TODO cache again, but handle extensionFile correctly
+		RHExtension instance = null;
+		instances.get(ext.getAbsolutePath());
+
 		if (instance == null) {
 			instance = new RHExtension(config, ext);
 			instances.put(instance.getId() + ":" + instance.getVersion(), instance);
-			instances.put(ext.getAbsolutePath(), instance);
+			// instances.put(ext.getAbsolutePath(), instance);
 		}
-		return instance;
-	}
 
-	private RHExtension(Config config, Resource ext) throws PageException, IOException, BundleException, ConverterException {
-		init(config, ext);
+		return instance;
 	}
 
 	public static RHExtension getInstance(Config config, String id, String version) throws PageException, IOException, BundleException, ConverterException {
@@ -221,10 +223,14 @@ public class RHExtension implements Serializable {
 		if (instance == null) {
 			instance = new RHExtension(config, id, version);
 			instances.put(instance.getId() + ":" + instance.getVersion(), instance);
-			instances.put(instance.extensionFile.getAbsolutePath(), instance);
+			// instances.put(instance.extensionFile.getAbsolutePath(), instance);
 		}
 		return instance;
 
+	}
+
+	private RHExtension(Config config, Resource ext) throws PageException, IOException, BundleException, ConverterException {
+		init(config, ext);
 	}
 
 	public RHExtension(Config config, String id, String version) throws PageException, IOException, BundleException, ConverterException {
@@ -255,7 +261,6 @@ public class RHExtension implements Serializable {
 		// is it a web or server context?
 		this.type = config instanceof ConfigWeb ? "web" : "server";
 		this.extensionFile = ext;
-
 		load(config, ext);
 		// write metadata to XML
 		Resource mdf = getMetaDataFile(config, id, version);
@@ -588,6 +593,7 @@ public class RHExtension implements Serializable {
 		readAMF(label, StringUtil.unwrap(attr.getValue("amf")), logger);
 		readResource(label, StringUtil.unwrap(attr.getValue("resource")), logger);
 		readSearch(label, StringUtil.unwrap(attr.getValue("search")), logger);
+		readMaven(label, StringUtil.unwrap(attr.getValue("maven")), logger);
 		readORM(label, StringUtil.unwrap(attr.getValue("orm")), logger);
 		readWebservice(label, StringUtil.unwrap(attr.getValue("webservice")), logger);
 		readMonitor(label, StringUtil.unwrap(attr.getValue("monitor")), logger);
@@ -715,6 +721,14 @@ public class RHExtension implements Serializable {
 			searchsJson = str;
 		}
 		if (searchs == null) searchs = new ArrayList<Map<String, String>>();
+	}
+
+	private void readMaven(String label, String str, Log logger) {
+		if (!StringUtil.isEmpty(str, true)) {
+			mavens = toSettings(logger, str);
+			mavensJson = str;
+		}
+		if (mavens == null) mavens = new ArrayList<Map<String, String>>();
 	}
 
 	private void readResource(String label, String str, Log logger) {
@@ -1062,6 +1076,10 @@ public class RHExtension implements Serializable {
 		// search
 		if (!StringUtil.isEmpty(searchsJson)) el.setEL("search", toStringForAttr(searchsJson));
 		else el.removeEL(KeyImpl.init("search"));
+
+		// maven
+		if (!StringUtil.isEmpty(mavensJson)) el.setEL("maven", toStringForAttr(mavensJson));
+		else el.removeEL(KeyImpl.init("maven"));
 
 		// orm
 		if (!StringUtil.isEmpty(ormsJson)) el.setEL("orm", toStringForAttr(ormsJson));
@@ -1449,6 +1467,10 @@ public class RHExtension implements Serializable {
 
 	public List<Map<String, String>> getSearchs() {
 		return searchs;
+	}
+
+	public List<Map<String, String>> getMavens() {
+		return mavens;
 	}
 
 	public List<Map<String, String>> getResources() {

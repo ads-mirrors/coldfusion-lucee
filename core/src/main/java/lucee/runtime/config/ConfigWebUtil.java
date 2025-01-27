@@ -858,6 +858,26 @@ public final class ConfigWebUtil {
 		return getAsArray(child, getAsStruct(parent, sct));
 	}
 
+	public static Array getAsArray(Struct input, boolean replacePlaceholders, String... names) {
+		Array arr = null;
+		if (input == null) return arr;
+
+		Object obj;
+		for (String name: names) {
+			obj = input.get(name, null);
+			if (obj instanceof Array && ((arr = (Array) obj).size() > 0)) {
+				break;
+			}
+		}
+
+		if (arr == null) {
+			arr = new ArrayImpl();
+			input.put(names[0], arr);
+			return arr;
+		}
+		return replacePlaceholders ? (Array) replaceConfigPlaceHolders(arr) : arr;
+	}
+
 	public static Struct getAsStruct(Struct input, boolean allowCSSString, String... names) {
 		Struct sct = null;
 		if (input == null) return sct;

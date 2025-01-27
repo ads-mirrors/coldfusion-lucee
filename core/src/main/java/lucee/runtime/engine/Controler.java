@@ -82,7 +82,7 @@ public final class Controler extends ParentThreasRefThread {
 	// private final ShutdownHook shutdownHook;
 	private ControllerState state;
 
-	//private boolean poolValidate;
+	// private boolean poolValidate;
 	private boolean enableGC;
 
 	/**
@@ -95,10 +95,8 @@ public final class Controler extends ParentThreasRefThread {
 		this.interval = interval;
 		this.state = state;
 		this.configServer = configServer;
-		//this.poolValidate = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.datasource.pool.validate", null), true);
+		if (configServer == null) throw new RuntimeException("configServer cannot be null");
 		this.enableGC = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.controller.gc", null), false);
-		// shutdownHook=new ShutdownHook(configServer);
-		// Runtime.getRuntime().addShutdownHook(shutdownHook);
 	}
 
 	private static class ControlerThread extends ParentThreasRefThread {

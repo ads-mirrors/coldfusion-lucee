@@ -258,6 +258,57 @@ public class MavenUtil {
 			}
 			return sb.toString();
 		}
+
+		private String toGAV() {
+			StringBuilder sb = new StringBuilder();
+
+			if (!StringUtil.isEmpty(g, true)) sb.append(g);
+			if (!StringUtil.isEmpty(a, true)) {
+				if (sb.length() > 0) sb.append(':');
+				sb.append(a);
+			}
+			if (!StringUtil.isEmpty(v, true)) {
+				if (sb.length() > 0) sb.append(':');
+				sb.append(v);
+			}
+			return sb.toString();
+		}
+
+		private String toGA() {
+			StringBuilder sb = new StringBuilder();
+
+			if (!StringUtil.isEmpty(g, true)) sb.append(g);
+			if (!StringUtil.isEmpty(a, true)) {
+				if (sb.length() > 0) sb.append(':');
+				sb.append(a);
+			}
+			return sb.toString();
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			if (!(other instanceof GAVSO)) return false;
+			return toGAV().equals(((GAVSO) other).toGAV());
+		}
+
+		/**
+		 * same endpoint with different versions
+		 * 
+		 * @param other
+		 * @return
+		 */
+		public boolean same(GAVSO other) {
+			return toGA().equals(other.toGA());
+		}
+
+		public Struct populate(Struct sct) {
+			if (!StringUtil.isEmpty(g, true)) sct.setEL(KeyConstants._groupId, g);
+			if (!StringUtil.isEmpty(a, true)) sct.setEL(KeyConstants._artifactId, a);
+			if (!StringUtil.isEmpty(v, true)) sct.setEL(KeyConstants._version, v);
+			if (!StringUtil.isEmpty(s, true)) sct.setEL(KeyConstants._scope, s);
+			if (!StringUtil.isEmpty(o, true)) sct.setEL(KeyConstants._optional, o);
+			return sct;
+		}
 	}
 
 	public static boolean allowed(int allowedScopes, int scope) {
@@ -537,7 +588,7 @@ public class MavenUtil {
 	}
 
 	public static GAVSO toGAVSO(Object obj, GAVSO defaultValue) {
-		Struct el = Caster.toStruct(obj, null);
+		Struct el = Caster.toStruct(obj, null, false);
 		if (el != null) {
 			String g = Caster.toString(el.get(KeyConstants._groupId, null), null);
 			if (StringUtil.isEmpty(g)) g = Caster.toString(el.get(KeyConstants._g, null), null);
