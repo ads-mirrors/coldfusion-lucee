@@ -45,14 +45,17 @@ public class OpenAISession extends AISessionSupport {
 	private OpenAIEngine openaiEngine;
 	private String systemMessage;
 
-	public OpenAISession(OpenAIEngine engine, String systemMessage, long timeout) {
-		super(engine, timeout);
+	public OpenAISession(OpenAIEngine engine, String systemMessage, int connectTimeout, int socketTimeout) {
+		super(engine, connectTimeout, socketTimeout);
 		this.openaiEngine = engine;
 		this.systemMessage = systemMessage;
 	}
 
 	@Override
 	public Response inquiry(String message, AIResponseListener listener) throws PageException {
+		// for the moment we always use a listener to avoid the timeout when not streaming
+		if (listener == null) listener = DEV_NULL_LISTENER;
+
 		try {
 			Struct msg;
 			Array arr = new ArrayImpl();
@@ -111,9 +114,7 @@ public class OpenAISession extends AISessionSupport {
 				StringEntity entity = new StringEntity(str, openaiEngine.charset);
 				post.setEntity(entity);
 
-				int timeout = Caster.toIntValue(getTimeout());
-				RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout) // Timeout for establishing the connection
-						.setSocketTimeout(timeout).build();
+				RequestConfig config = AISessionSupport.setTimeout(RequestConfig.custom(), this).build();
 				post.setConfig(config);
 
 				// Execute the request
@@ -177,7 +178,7 @@ public class OpenAISession extends AISessionSupport {
 		}
 		catch (SocketTimeoutException ste) {
 			ApplicationException ae = new ApplicationException(
-					"A timeout occurred while querying the AI Engine [" + openaiEngine.getLabel() + "]. The configured timeout was " + getTimeout() + " ms.");
+					"A socket timeout occurred while querying the AI Engine [" + openaiEngine.getLabel() + "]. The configured timeout was " + getSocketTimeout() + " ms.");
 			ExceptionUtil.initCauseEL(ae, ste);
 			throw ae;
 		}

@@ -2,17 +2,21 @@ package lucee.runtime.ai.google;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.net.URL;
+
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 
 import lucee.commons.io.CharsetUtil;
-import lucee.commons.io.res.ContentType;
 import lucee.commons.lang.StringUtil;
-import lucee.commons.net.http.HTTPResponse;
-import lucee.commons.net.http.Header;
-import lucee.commons.net.http.httpclient.HTTPEngine4Impl;
-import lucee.commons.net.http.httpclient.HeaderImpl;
+import lucee.commons.lang.mimetype.MimeType;
 import lucee.loader.util.Util;
-import lucee.runtime.ai.AIEngineSupport;
 import lucee.runtime.ai.AIResponseListener;
 import lucee.runtime.ai.AISessionSupport;
 import lucee.runtime.ai.AIUtil;
@@ -37,109 +41,92 @@ public class GeminiSession extends AISessionSupport {
 	private GeminiEngine geminiEngine;
 	private String systemMessage;
 
-	public GeminiSession(GeminiEngine engine, String systemMessage, long timeout) {
-		super(engine, timeout);
+	public GeminiSession(GeminiEngine engine, String systemMessage, int connectTimeout, int socketTimeout) {
+		super(engine, connectTimeout, socketTimeout);
 		this.geminiEngine = engine;
 		this.systemMessage = systemMessage;
 	}
 
 	@Override
-	public Response inquiry(String message) throws PageException {
-		return inquiry(message, null);
-	}
-
-	@Override
 	public Response inquiry(String message, AIResponseListener listener) throws PageException {
-		try {
-			// if (listener != null) throw new ApplicationException("listener not supported yet.");
-			Struct root = new StructImpl(StructImpl.TYPE_LINKED);
+		if (listener == null) listener = DEV_NULL_LISTENER;
 
-			// contents
+		try {
+			Struct root = new StructImpl(StructImpl.TYPE_LINKED);
 			Array contents = new ArrayImpl();
 			root.set(KeyConstants._contents, contents);
 
-			// add system
 			if (!StringUtil.isEmpty(systemMessage, true)) {
 				contents.append(createParts("user", systemMessage));
 			}
 
-			// Add conversation history
-			for (Conversation c: getHistoryAsList()) { // question msg = new StructImpl();
+			for (Conversation c: getHistoryAsList()) {
 				contents.append(createParts("user", c.getRequest().getQuestion()));
 				contents.append(createParts("model", c.getResponse().getAnswer()));
 			}
 
-			// https://ai.google.dev/gemini-api/docs/get-started/tutorial?lang=rest&hl=de
-			// curl
-
-			// parts
 			contents.append(createParts("user", message));
+
+			HttpPost post = new HttpPost(
+					geminiEngine.toURL(geminiEngine.baseURL, GeminiEngine.CHAT, listener != null ? GeminiEngine.TYPE_STREAM : GeminiEngine.TYPE_REG).toExternalForm());
+			post.setHeader("Content-Type", AIUtil.createJsonContentType(geminiEngine.charset));
 
 			JSONConverter json = new JSONConverter(true, CharsetUtil.UTF8, JSONDateFormat.PATTERN_CF, false);
 			String str = json.serialize(null, root, SerializationSettings.SERIALIZE_AS_COLUMN, null);
-			URL url = geminiEngine.toURL(geminiEngine.baseURL, GeminiEngine.CHAT, listener != null ? GeminiEngine.TYPE_STREAM : GeminiEngine.TYPE_REG);
-			HTTPResponse rsp = HTTPEngine4Impl.post(url, null, null, getTimeout(), false, null, geminiEngine.charset, AIEngineSupport.DEFAULT_USERAGENT, geminiEngine.proxy,
-					new Header[] {
+			StringEntity entity = new StringEntity(str, geminiEngine.charset);
+			post.setEntity(entity);
 
-							// new HeaderImpl("Authorization", "Bearer " + geminiEngine.apikey),
+			RequestConfig config = AISessionSupport.setTimeout(RequestConfig.custom(), this).build();
+			post.setConfig(config);
 
-							new HeaderImpl("Content-Type", AIUtil.createJsonContentType(geminiEngine.charset))
+			try (CloseableHttpClient httpClient = HttpClients.createDefault(); CloseableHttpResponse response = httpClient.execute(post)) {
 
-					}, geminiEngine.formfields, str);
+				HttpEntity responseEntity = response.getEntity();
+				Header ct = responseEntity.getContentType();
+				MimeType mt = MimeType.getInstance(ct.getValue());
 
-			ContentType ct = rsp.getContentType();
+				String t = mt.getType() + "/" + mt.getSubtype();
+				String cs = mt.getCharset() != null ? mt.getCharset().toString() : geminiEngine.charset;
 
-			// stream true
-			if ("text/event-stream".equals(ct.getMimeType())) {
-				String cs = ct.getCharset();
-				if (Util.isEmpty(cs, true)) cs = geminiEngine.charset;
-				JSONExpressionInterpreter interpreter = new JSONExpressionInterpreter();
-				GeminiStreamResponse response = new GeminiStreamResponse(cs, listener);
-				try (BufferedReader reader = new BufferedReader(
-						cs == null ? new InputStreamReader(rsp.getContentAsStream()) : new InputStreamReader(rsp.getContentAsStream(), cs))) {
-					String line;
-					while ((line = reader.readLine()) != null) {
-						if (!line.startsWith("data: ")) continue;
-						line = line.substring(6);
-						response.addPart(Caster.toStruct(interpreter.interpret(null, line)));
+				if ("text/event-stream".equals(t)) {
+					if (Util.isEmpty(cs, true)) cs = geminiEngine.charset;
+					JSONExpressionInterpreter interpreter = new JSONExpressionInterpreter();
+					GeminiStreamResponse r = new GeminiStreamResponse(cs, listener);
+
+					try (BufferedReader reader = new BufferedReader(
+							cs == null ? new InputStreamReader(responseEntity.getContent()) : new InputStreamReader(responseEntity.getContent(), cs))) {
+						String line;
+						while ((line = reader.readLine()) != null) {
+							if (!line.startsWith("data: ")) continue;
+							line = line.substring(6);
+							r.addPart(Caster.toStruct(interpreter.interpret(null, line)));
+						}
 					}
+
+					AIUtil.addConversation(geminiEngine, getHistoryAsList(), new ConversationImpl(new RequestSupport(message), r));
+					return r;
 				}
-				catch (Exception e) {
-					throw Caster.toPageException(e);
+				else if ("application/json".equals(t)) {
+					if (Util.isEmpty(cs, true)) cs = geminiEngine.charset;
+					String rawStr = EntityUtils.toString(responseEntity, geminiEngine.charset);
+					Struct raw = Caster.toStruct(new JSONExpressionInterpreter().interpret(null, rawStr));
+
+					Struct err = Caster.toStruct(raw.get(KeyConstants._error, null), null);
+					if (err != null) {
+						throw AIUtil.toException(this.getEngine(), Caster.toString(err.get(KeyConstants._message)), Caster.toString(err.get(KeyConstants._status, null), null),
+								Caster.toString(err.get(KeyConstants._code, null), null), AIUtil.getStatusCode(response));
+					}
+
+					Response r = new GeminiResponse(raw, cs);
+					AIUtil.addConversation(geminiEngine, getHistoryAsList(), new ConversationImpl(new RequestSupport(message), r));
+					return r;
 				}
-				AIUtil.addConversation(geminiEngine, getHistoryAsList(), new ConversationImpl(new RequestSupport(message), response));
-				return response;
-			}
-
-			else if ("application/json".equals(ct.getMimeType())) {
-				String cs = ct.getCharset();
-				if (Util.isEmpty(cs, true)) cs = geminiEngine.charset;
-
-				Struct raw = Caster.toStruct(new JSONExpressionInterpreter().interpret(null, rsp.getContentAsString(cs)));
-				Struct err = Caster.toStruct(raw.get(KeyConstants._error, null), null);
-				if (err != null) {
-					String msg = Caster.toString(err.get(KeyConstants._message, null), null);
-					String code = Caster.toString(err.get(KeyConstants._code, null), null);
-					String status = Caster.toString(err.get(KeyConstants._status, null), null);
-					if (!StringUtil.isEmpty(msg, true)) throw AIUtil.toException(getEngine(), msg, status, code, AIUtil.getStatusCode(rsp));
-					throw AIUtil.toException(getEngine(), getEngine().getLabel() + " did reposne with status code [" + rsp.getStatusCode() + "]", null,
-							Caster.toString(rsp.getStatusCode(), null), AIUtil.getStatusCode(rsp));
+				else {
+					throw new ApplicationException("Unsupported mime type [" + t + "], only [application/json] is supported");
 				}
-
-				GeminiResponse response = new GeminiResponse(raw, cs);
-				AIUtil.addConversation(geminiEngine, getHistoryAsList(), new ConversationImpl(new RequestSupport(message), response));
-				return response;
-
-			}
-			else {
-				String cs = ct.getCharset();
-				if (Util.isEmpty(cs, true)) cs = geminiEngine.charset;
-				throw new ApplicationException("Gemini did answer with the mime type [" + ct.getMimeType() + "] that is not supported, only [application/json] is supported");
 			}
 		}
-		catch (
-
-		Exception e) {
+		catch (Exception e) {
 			throw Caster.toPageException(e);
 		}
 	}

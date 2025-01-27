@@ -23,13 +23,21 @@ component extends="AI" {
 			description = "The initial system message sent to the AI when starting a new session.",
 			type = "textarea"
 		)
-		,field(displayName = "Timeout",
-			name = "timeout",
+		,field(displayName = "Connect Timeout",
+			name = "connectTimeout",
 			defaultValue = "2000",
 			required = true,
-			description = "Set the timeout duration for AI responses in milliseconds.",
+			description = "Maximum time to establish initial connection (milliseconds).",
+			type = "select", 
+			values = "500,1000,2000,3000,5000"
+		)
+		,field(displayName = "Socket Timeout", 
+			name = "socketTimeout",
+			defaultValue = "10000",
+			required = true,
+			description = "Maximum time between data packets after connection (milliseconds).",
 			type = "select",
-			values = "500,1000,2000,3000,5000,10000"
+			values = "5000,10000,20000,30000,60000"
 		)
 	];
 

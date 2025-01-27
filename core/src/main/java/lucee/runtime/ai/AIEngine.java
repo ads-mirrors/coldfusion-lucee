@@ -10,7 +10,8 @@ import lucee.runtime.type.Struct;
  * initialization, invocation, and lifecycle management methods.
  */
 public interface AIEngine {
-	public static final long DEFAULT_TIMEOUT = 3000L;
+	public static final int DEFAULT_CONNECT_TIMEOUT = -1;
+	public static final int DEFAULT_SOCKET_TIMEOUT = -1;
 
 	/**
 	 * Initializes the AI engine with the specified properties.
@@ -30,11 +31,13 @@ public interface AIEngine {
 	 *            the default defined with the driver.
 	 * @return the session created
 	 */
-	public AISession createSession(String inialMessage, long timeout) throws PageException;
+	public AISession createSession(String inialMessage, int connectTimeout, int socketTimeout) throws PageException;
 
 	public AIEngineFactory getFactory();
 
-	public long getTimeout();
+	public int getSocketTimeout();
+
+	public int getConnectTimeout();
 
 	public String getLabel();
 

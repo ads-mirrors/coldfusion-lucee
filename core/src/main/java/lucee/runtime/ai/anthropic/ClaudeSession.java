@@ -42,14 +42,16 @@ public class ClaudeSession extends AISessionSupport {
 	private ClaudeEngine engine;
 	private String systemMessage;
 
-	public ClaudeSession(ClaudeEngine engine, String systemMessage, long timeout) {
-		super(engine, timeout);
+	public ClaudeSession(ClaudeEngine engine, String systemMessage, int connectTimeout, int socketTimeout) {
+		super(engine, connectTimeout, socketTimeout);
 		this.engine = engine;
 		this.systemMessage = systemMessage;
 	}
 
 	@Override
 	public Response inquiry(String message, AIResponseListener listener) throws PageException {
+		// for the moment we always use a listener to avoid the timeout when not streaming
+
 		try {
 
 			Struct requestBody = new StructImpl();
@@ -84,14 +86,12 @@ public class ClaudeSession extends AISessionSupport {
 			// Convert request body to JSON
 			JSONConverter json = new JSONConverter(true, CharsetUtil.UTF8, JSONDateFormat.PATTERN_CF, false);
 			String str = json.serialize(null, requestBody, SerializationSettings.SERIALIZE_AS_COLUMN, null);
-
 			// Create entity and set it to the post request
 			StringEntity entity = new StringEntity(str, engine.getCharset());
 			post.setEntity(entity);
 
 			// Set timeout
-			int timeout = Caster.toIntValue(getTimeout());
-			RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout).setSocketTimeout(timeout).build();
+			RequestConfig config = AISessionSupport.setTimeout(RequestConfig.custom(), this).build();
 			post.setConfig(config);
 
 			// Execute request
