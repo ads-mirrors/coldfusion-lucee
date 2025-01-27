@@ -317,7 +317,7 @@ public final class ConfigServerFactory extends ConfigFactory {
 
 		// AI Drivers
 		Resource aiDir = adminDir.getRealResource("aidriver");
-		create("/resource/context/admin/aidriver/", new String[] { "AI.cfc", "Gemini.cfc", "OpenAI.cfc", "Field.cfc", "Group.cfc" }, aiDir, doNew);
+		create("/resource/context/admin/aidriver/", new String[] { "AI.cfc", "Claude.cfc", "Gemini.cfc", "OpenAI.cfc", "Field.cfc", "Group.cfc" }, aiDir, doNew);
 
 		Resource wcdDir = configDir.getRealResource("web-context-deployment/admin");
 
