@@ -49,7 +49,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					expect(ImmutableList.of("a", "b", "c").size()).toBe(3);
 				}
 				finally {
-					if(directoryExists(data.directory)) directoryDelete(data.directory, true);
+					cleanup(data);
 				}
 			});
 
@@ -62,7 +62,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					expect(ImmutableList.of("a", "b", "c").size()).toBe(3);
 				}
 				finally {
-					if(directoryExists(data.directory)) directoryDelete(data.directory, true);
+					cleanup(data);
 				}
 			});
 
@@ -93,7 +93,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					expect(ObjectMapper.writeValueAsString({"key":"value"})).toBe('{"key":"value"}');
 				}
 				finally {
-					if(directoryExists(data.directory)) directoryDelete(data.directory, true);
+					cleanup(data);
 				}
 			});
 
@@ -106,7 +106,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					expect(ObjectMapper.writeValueAsString({"key":"value"})).toBe('{"key":"value"}');
 				}
 				finally {
-					if(directoryExists(data.directory)) directoryDelete(data.directory, true);
+					cleanup(data);
 				}
 			});
 
@@ -138,7 +138,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					expect(Logger.getLogger("TestLogger").isDebugEnabled()).toBeFalse();
 				}
 				finally {
-					if(directoryExists(data.directory)) directoryDelete(data.directory, true);
+					cleanup(data);
 				}
 			});
 
@@ -151,7 +151,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					expect(Logger.getLogger("TestLogger").isDebugEnabled()).toBeFalse();
 				}
 				finally {
-					if(directoryExists(data.directory)) directoryDelete(data.directory, true);
+					cleanup(data);
 				}
 			});
 
@@ -183,7 +183,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					expect(StringUtils.isEmpty("")).toBeTrue();
 				}
 				finally {
-					if(directoryExists(data.directory)) directoryDelete(data.directory, true);
+					cleanup(data);
 				}
 			});
 
@@ -196,7 +196,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					expect(StringUtils.isEmpty("")).toBeTrue();
 				}
 				finally {
-					if(directoryExists(data.directory)) directoryDelete(data.directory, true);
+					cleanup(data);
 				}
 			});
 
@@ -227,7 +227,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					expect(HttpClients.createDefault().getClass().getSimpleName()).toBe("InternalHttpClient");
 				}
 				finally {
-					if(directoryExists(data.directory)) directoryDelete(data.directory, true);
+					cleanup(data);
 				}
 			});
 
@@ -240,7 +240,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					expect(HttpClients.createDefault().getClass().getSimpleName()).toBe("InternalHttpClient");
 				}
 				finally {
-					if(directoryExists(data.directory)) directoryDelete(data.directory, true);
+					cleanup(data);
 				}
 			});
 
@@ -271,7 +271,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					var LoggerFactory=createObject("java","ch.qos.logback.classic.Logger",data.jars);
 				}
 				finally {
-					if(directoryExists(data.directory)) directoryDelete(data.directory, true);
+					cleanup(data);
 				}
 			});
 
@@ -283,7 +283,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					var LoggerFactory=createObject("java","ch.qos.logback.classic.Logger",data.directory);
 				}
 				finally {
-					if(directoryExists(data.directory)) directoryDelete(data.directory, true);
+					cleanup(data);
 				}
 			});
 
@@ -317,7 +317,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					expect(Matchers.is(1).matches(1)).toBeTrue();
 				}
 				finally {
-					if(directoryExists(data.directory)) directoryDelete(data.directory, true);
+					cleanup(data);
 				}
 			});
 
@@ -330,7 +330,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					expect(Matchers.is(1).matches(1)).toBeTrue();
 				}
 				finally {
-					if(directoryExists(data.directory)) directoryDelete(data.directory, true);
+					cleanup(data);
 				}
 			});
 
@@ -359,7 +359,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					expect(Observable.just("Hello").blockingFirst()).toBe("Hello");
 				}
 				finally {
-					if(directoryExists(data.directory)) directoryDelete(data.directory, true);
+					cleanup(data);
 				}
 			});
 
@@ -372,7 +372,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					expect(Observable.just("Hello").blockingFirst()).toBe("Hello");
 				}
 				finally {
-					if(directoryExists(data.directory)) directoryDelete(data.directory, true);
+					cleanup(data);
 				}
 			});
 
@@ -405,7 +405,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					expect(len(msg)>0).toBeTrue();
 				}
 				finally {
-					if(directoryExists(data.directory)) directoryDelete(data.directory, true);
+					cleanup(data);
 				}
 			});
 
@@ -418,13 +418,34 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					expect(len(msg)>0).toBeTrue();
 				}
 				finally {
-					if(directoryExists(data.directory)) directoryDelete(data.directory, true);
+					systemOutput(currentspec, true);
+					cleanup(data);
 				}
 			});
 
 
 
 		});
+	}
+
+	private function cleanup(data){
+		try {
+			if(directoryExists(arguments.data.directory)) 
+				directoryDelete(arguments.data.directory, true);
+		} catch( e ){
+			if (!isWindows() || e.message does not contain "delete file") {
+				rethrow;
+			} else if (isWindows()) {
+				systemOutput("ERROR: LDEV-5145 Windows locked jars", true);
+				//systemOutput( e.stacktrace, true );
+				rethrow;
+				
+			}
+		}
+	}
+
+	private function isWindows(){
+		return (server.os.name contains "windows");
 	}
 
 
