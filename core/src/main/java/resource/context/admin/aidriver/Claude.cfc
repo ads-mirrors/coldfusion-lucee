@@ -22,7 +22,7 @@ component extends="AI" {
 			name = "model",
 			defaultValue = "claude-3-sonnet-20240229",
 			required = true,
-			description = "Specify the Claude model to use (e.g., claude-3-sonnet-20240229, claude-3-opus-20240229).",
+			description = "Specify the Claude model to use. See https://docs.anthropic.com/claude/docs/models-overview for available models.",
 			type = "text"
 		)
 		,field(displayName = "System Message",
