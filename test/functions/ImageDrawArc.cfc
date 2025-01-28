@@ -1,7 +1,7 @@
 component extends = "org.lucee.cfml.test.LuceeTestCase"{
 
 	function beforeAll(){
-		variables.path = "/test/#listLast(getDirectoryFromPath(getCurrenttemplatepath()),"\/")#/" &"imageDrawArc/";
+		variables.path = getTempDirectory() & "imageDrawArc/";
 		if(!directoryExists(path)){
 			directorycreate(path);
 		}

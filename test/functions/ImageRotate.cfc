@@ -1,7 +1,7 @@
 component extends="org.lucee.cfml.test.LuceeTestCase" skip=true{
 
 	function beforeAll(){
-		variables.path = "/test/#listLast(getDirectoryFromPath(getCurrenttemplatepath()),"\/")#/" &"ImageRotate/";
+		variables.path = getTempDirectory() & "ImageRotate/";
 		if(!directoryExists(path)){
 			directorycreate(path);
 		}
