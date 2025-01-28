@@ -25,6 +25,7 @@ import lucee.runtime.Component;
 import lucee.runtime.PageContext;
 import lucee.runtime.config.Config;
 import lucee.runtime.engine.ThreadLocalPageContext;
+import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.functions.conversion.DeserializeJSON;
 import lucee.runtime.functions.conversion.SerializeJSON;
@@ -175,7 +176,7 @@ public class LSPEndpointFactory {
 					// Process complete messages in the buffer
 					while (true) {
 						// Look for Content-Length header
-						String content = buffer.toString();
+						final String content = buffer.toString();
 						int headerIndex = content.indexOf("Content-Length: ");
 						if (headerIndex == -1) break;
 
@@ -184,7 +185,8 @@ public class LSPEndpointFactory {
 						int lengthEnd = content.indexOf("\r\n", lengthStart);
 						if (lengthEnd == -1) break;
 
-						int contentLength = Integer.parseInt(content.substring(lengthStart, lengthEnd));
+						String strContentLength = content.substring(lengthStart, lengthEnd);
+						int contentLength = Integer.parseInt(strContentLength);
 
 						// Find start of JSON content
 						int contentStart = content.indexOf("\r\n\r\n", lengthEnd);
@@ -196,6 +198,14 @@ public class LSPEndpointFactory {
 
 						// Extract the JSON message
 						String jsonMessage = content.substring(contentStart, contentStart + contentLength).trim();
+
+						// simple validation of the message
+						if (jsonMessage.startsWith("{") != jsonMessage.endsWith("}")) {
+							throw new ApplicationException(
+									"parsed json message with content length [" + strContentLength + ":" + contentLength + "] is not valid: " + jsonMessage + "\n\n" +
+
+											"raw message was: " + content);
+						}
 
 						// Here you would call your component to handle the message
 						String response = processMessage(jsonMessage);
