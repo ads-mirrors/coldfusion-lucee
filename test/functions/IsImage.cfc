@@ -1,4 +1,4 @@
-component extends="org.lucee.cfml.test.LuceeTestCase" {
+component extends="org.lucee.cfml.test.LuceeTestCase" labels="image" {
 	function run( testResults, textbox ) {
 		describe("testcase for isImage()", function() {
 			it(title="checking isImage() function", body=function( currentSpec ) {

@@ -1,8 +1,16 @@
-<cfcomponent extends="org.lucee.cfml.test.LuceeTestCase">
+component extends="org.lucee.cfml.test.LuceeTestCase" labels="image"{
 
-	<cffunction name="testImageGetEXIFMetadata" localMode="modern">
-		<cfset img=imageRead(GetDirectoryFromPath(GetCurrentTemplatePath())&"images/BigBen.jpg")>
-		<cfset assertEquals("1",ImageGetEXIFTag(img,'ColorSpace'))>
-		<cfset assertEquals("204",ImageGetEXIFTag(img,'ExifOffset'))>
-	</cffunction>
-</cfcomponent>
+	function run( testResults , testBox ) {
+
+		describe( "test case for imageGetEXIFMetadata", function() {
+			it(title = "Checking with imageGetEXIFMetadata", body = function( currentSpec ) {
+				var img=imageRead(GetDirectoryFromPath(GetCurrentTemplatePath())&"images/BigBen.jpg");
+				var meta = imageGetEXIFMetadata(img);
+				expect( meta.Compression ).toBe( "6" );
+				expect( meta.Flash ).toBe( "16" );
+			});
+		});
+
+	}
+
+}
