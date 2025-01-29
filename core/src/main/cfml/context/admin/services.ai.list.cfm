@@ -192,15 +192,10 @@ function defaultValue(field) {
 			<div class="itemintro">#stText.Settings.ai.descCreate#</div>
 			
 			<cfformClassic onerror="customError" action="#request.self#?action=#url.action#&action2=create" method="post">
-				<table class="maintbl" style="width:600px;">
+				<table class="maintbl" >
 					<tbody>
 						<tr>
-							<th scope="row" nowrap="nowrap">#stText.Settings.cache.Name#</th>
-							<td><cfinputClassic type="text" name="_name" value="" class="xlarge" required="yes" 
-								message="#stText.Settings.cache.nameMissing#"></td>
-						</tr>
-						<tr>
-							<th scope="row">#stText.Settings.cache.type#</th>
+							<th style="width:10%" scope="row">#stText.Settings.cache.type#</th>
 							<td>
 								<table>
 								<cfloop list="#_drivers#" index="key">

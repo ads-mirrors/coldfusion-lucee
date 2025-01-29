@@ -45,7 +45,6 @@
 		</cfcase>
 	</cfswitch>
 	<cfcatch>
-		<cfrethrow>
 		<cfset error.message=cfcatch.message>
 		<cfset error.detail=cfcatch.Detail>
 		<cfset error.cfcatch=cfcatch>
@@ -86,12 +85,12 @@ Redirtect to entry --->
 	<cfset connection.class=form.class>
 	<cfset connection.storage=false>
 	<cfset connection.default=false>
-	<cfset connection.name=trim(form._name)>
 	<cfset connection.custom=struct()>
 	<cfset driver=drivers[form.class]>
 	<cfset btnClearCache = "">
+	<!--- <cfset connection.name=lcase(driver.getLabel())&"_"&FormatBaseN(randRange(1,999999),36)> --->
+	<cfset connection.name="">
 
-	<cfif isEmpty(connection.name)><cfset connection.name=driver.getLabel()&"_"&FormatBaseN(randRange(1,999999),36)></cfif>
 	
 </cfif>
 <cftry>
@@ -142,10 +141,9 @@ Redirtect to entry --->
 		</cfswitch>
 	</cfif>
 	<cfcatch>
-		<cfrethrow>
-		<!--- <cfset error.message=cfcatch.message>
+		<cfset error.message=cfcatch.message>
 		<cfset error.detail=cfcatch.Detail>
-		<cfset error.cfcatch=cfcatch>--->
+		<cfset error.cfcatch=cfcatch>
 	</cfcatch>
 </cftry>
 <!--- 
@@ -164,13 +162,23 @@ Redirtect to entry --->
 		<cfif !isNull(driver.getBundleName)><cfinputClassic type="hidden" name="bundleName" value="#driver.getBundleName()#"></cfif>
 		<cfif !isNull(driver.getBundleVersion)><cfinputClassic type="hidden" name="bundleVersion" value="#driver.getBundleVersion()#"></cfif>
 		
-		<cfinputClassic type="hidden" name="name" value="#connection.name#" >
 		<cfinputClassic type="hidden" name="_name" value="#connection.name#" >
 		<table class="maintbl">
 			<tbody>
 				<tr>
 					<th scope="row">#stText.Settings.cache.Name#</th>
-					<td>#connection.name#</td>
+					<td>
+						<cfif isNew>
+							<cfinputClassic type="text" 
+									name="name" 
+									value="#connection.name#" class="large" style="width:100%" required="true" 
+									message="Missing value for field name">
+							
+						<cfelse>
+						<h3>#connection.name#</h3>
+						<cfinputClassic type="hidden" name="name" value="#connection.name#" >
+						</cfif><div class="comment">#stText.Settings.ai.NameDesc#</div>
+					</td>
 				</tr>
 			</tbody>
 		</table>
