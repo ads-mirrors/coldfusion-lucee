@@ -39,6 +39,7 @@ component extends="AI" {
 			description = "Initial system message sent to the AI when initializing a session.",
 			type = "textarea"
 		)
+		,group("Timeout", "")
 		,field(displayName = "Connect Timeout",
 			name = "connectTimeout",
 			defaultValue = "2000",
@@ -66,7 +67,11 @@ component extends="AI" {
 		return "OpenAI";
 	}
 
+	public string function getLabelLong() {
+		return "OpenAI (ChatGPT, Ollama, Perplexity, Deepseek)";
+	}
+
 	public string function getDescription() {
-		return "The OpenAI interface enables integration with AI models like ChatGPT but also supports other engines like Ollama.";
+		return "Connect to OpenAI's models (https://platform.openai.com) and other AI providers that support the OpenAI-compatible REST API (like Ollama, Perplexity, Deepseek)."
 	}
 }

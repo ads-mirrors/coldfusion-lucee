@@ -59,6 +59,6 @@ component extends="AI" {
 	}
 
 	public string function getDescription() {
-		return "The Claude interface enables integration with Anthropic's Claude AI models through their official API.";
+		return "Connect to Anthropic's Claude AI models (https://claude.ai/) through their official API.";
 	}
 }

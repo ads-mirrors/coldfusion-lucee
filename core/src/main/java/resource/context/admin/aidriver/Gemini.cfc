@@ -51,6 +51,6 @@ component extends="AI" {
 	}
 
 	public string function getDescription() {
-		return "The Gemini interface enables integration with Google's AI models, offering powerful natural language processing capabilities.";
-	}	
+		return "Connect to Google's Gemini AI models (https://ai.google.dev) through their official API.";
+	}
 }

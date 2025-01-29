@@ -188,7 +188,7 @@ function defaultValue(field) {
 	<cfoutput>
 		<cfset _drivers=ListSort(StructKeyList(drivers),'textnocase')>
 		<cfif listLen(_drivers)>
-			<h1>#stText.Settings.cache.titleCreate#</h1>
+			<h1>#stText.Settings.ai.titleCreate#</h1>
 			<div class="itemintro">#stText.Settings.ai.descCreate#</div>
 			
 			<cfformClassic onerror="customError" action="#request.self#?action=#url.action#&action2=create" method="post">
@@ -202,17 +202,20 @@ function defaultValue(field) {
 						<tr>
 							<th scope="row">#stText.Settings.cache.type#</th>
 							<td>
-								<select name="class" class="xlarge">
-									<cfloop list="#_drivers#" index="key">
-										<cfset driver=drivers[key]>
-										<!--- Workaround for EHCache Extension --->
-										<cfset clazz=trim(driver.getClass())>
-										<cfif "lucee.extension.io.cache.eh.EHCache" EQ clazz or "lucee.runtime.cache.eh.EHCache" EQ clazz>
-											<cfset clazz="org.lucee.extension.cache.eh.EHCache">
-										</cfif>
-										<option value="#clazz#">#trim(driver.getLabel())#</option>
-									</cfloop>
-								</select>
+								<table>
+								<cfloop list="#_drivers#" index="key">
+									<cfset driver=drivers[key]>
+									<tr>
+										<td style="border:0;padding:0px;margin:0px"><input type="radio" checked="checked" class="radio" name="class" value="#driver.getClass()#"></td>
+										<td style="border:0;padding:3px;margin:0px">
+											<h3><cfif structKeyExists(driver,"getLabelLong")>#driver.getLabelLong()#<cfelse>#driver.getLabel()#</cfif></h3>
+											<div>#driver.getDescription()#</div>
+											
+										</td>
+									</tr>
+								</cfloop>
+								</table>
+								<br>
 								<div class="comment">#stText.Settings.cache.typeDesc#</div>
 							</td>
 						</tr>

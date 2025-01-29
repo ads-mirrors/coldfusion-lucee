@@ -86,10 +86,13 @@ Redirtect to entry --->
 	<cfset connection.class=form.class>
 	<cfset connection.storage=false>
 	<cfset connection.default=false>
-	<cfset connection.name=form._name>
+	<cfset connection.name=trim(form._name)>
 	<cfset connection.custom=struct()>
 	<cfset driver=drivers[form.class]>
 	<cfset btnClearCache = "">
+
+	<cfif isEmpty(connection.name)><cfset connection.name=driver.getLabel()&"_"&createUniqueID()></cfif>
+	
 </cfif>
 <cftry>
 	<cfset stVeritfyMessages = StructNew()>
@@ -307,16 +310,25 @@ Redirtect to entry --->
 						</td>
 					</tr>
 				</cfloop>
+				</tbody>
+			</table>
+			<h2>#stText.Settings.ai.default#</h2>
+			<div class="itemintro">#stText.Settings.ai.defaultDesc#</div>
+			<table class="maintbl">
+				<tbody>
 				<tr>
-					<th scope="row">#stText.Settings.cache.default#</th>
 					<td>
-						<select name="default">
-							<option value="">------</option>
-							<cfloop item="type" array="#defaults#">
-								<option <cfif connection.default EQ type>selected="selected"</cfif> value="#type#">#stText.Settings.cache['defaultType'& type]?:ucFirst(type)#</option>
+						<table>
+							<cfloop array="#defaults#" item="type" >
+								<tr>
+									<td style="border:0;padding:0px;margin:0px"><input <cfif connection.default EQ type>checked="checked"</cfif> type="radio" class="radio" name="default" value="#type#"></td>
+									<td style="border:0;padding:3px;margin:0px">
+										<h3>#stText.Settings.ai['defaultType'& type]?:ucFirst(type)#</h3>
+										<div>#stText.Settings.ai['defaultType'& type& 'Desc']?:''#</div>
+									</td>
+								</tr>
 							</cfloop>
-						</select>
-						<div class="comment">#stText.Settings.cache.defaultDesc#</div>
+						</table>
 					</td>
 				</tr>
 			</tbody>
