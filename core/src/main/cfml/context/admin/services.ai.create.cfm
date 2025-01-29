@@ -91,7 +91,7 @@ Redirtect to entry --->
 	<cfset driver=drivers[form.class]>
 	<cfset btnClearCache = "">
 
-	<cfif isEmpty(connection.name)><cfset connection.name=driver.getLabel()&"_"&createUniqueID()></cfif>
+	<cfif isEmpty(connection.name)><cfset connection.name=driver.getLabel()&"_"&FormatBaseN(randRange(1,999999),36)></cfif>
 	
 </cfif>
 <cftry>
