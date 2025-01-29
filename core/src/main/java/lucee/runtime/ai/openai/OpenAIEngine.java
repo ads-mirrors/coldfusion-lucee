@@ -596,4 +596,9 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 	public int getConversationSizeLimit() {
 		return conversationSizeLimit;
 	}
+
+	@Override
+	public Double getTemperature() {
+		return temperature;
+	}
 }

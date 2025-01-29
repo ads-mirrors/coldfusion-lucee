@@ -155,7 +155,7 @@ Redirtect to entry --->
 	<!--- 
 	Error Output --->
 	<cfset printError(error)>
-	<h2>#driver.getLabel()# (#connection.class#)</h2>
+	<h2><cfif structKeyExists(driver,"getLabelLong")>#driver.getLabelLong()#<cfelse>#driver.getLabel()#</cfif></h2>
 	<div class="pageintro">#driver.getDescription()#</div>
 	<cfformClassic onerror="customError" action="#request.self#?action=#url.action#&action2=create#iif(isDefined('url.name'),de('&name=##url.name##'),de(''))#" method="post">
 		<cfinputClassic type="hidden" name="class" value="#driver.getClass()#">
@@ -279,7 +279,7 @@ Redirtect to entry --->
 								</cfif>
 								<select name="custom_#field.getName()#">
 									<cfif not field.getRequired()><option value=""> ---------- </option></cfif>
-									<cfif len(trim(default))>
+									<cfif true>
 										<cfloop index="item" list="#field.getValues()#">
 											<option <cfif item EQ default>selected="selected"</cfif> >#item#</option>
 										</cfloop>
@@ -343,7 +343,7 @@ Redirtect to entry --->
 			<tfoot>
 				<tr>
 					<td colspan="2">
-						<input type="submit" class="bs button submit" name="mainAction" value="#stText.Buttons.submit#">
+						<input type="submit" class="bl button submit" name="mainAction" value="#stText.Buttons.submit#">
 						<input type="submit" class="br button submit" name="mainAction" value="#stText.Buttons.Cancel#">
 					</td>
 				</tr>

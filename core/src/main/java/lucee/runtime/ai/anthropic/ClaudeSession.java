@@ -59,6 +59,12 @@ public class ClaudeSession extends AISessionSupport {
 			requestBody.set("max_tokens", 4096);
 			requestBody.set("stream", listener != null);
 
+			// Add temperature if set in engine
+			Double temperature = engine.getTemperature();
+			if (temperature != null) {
+				requestBody.set("temperature", temperature);
+			}
+
 			// Set system message at top level if exists
 			if (!StringUtil.isEmpty(systemMessage)) {
 				requestBody.set(KeyConstants._system, systemMessage);
