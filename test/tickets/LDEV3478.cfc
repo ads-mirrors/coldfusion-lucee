@@ -23,7 +23,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 				expect( len( cfmlSessionId.fileContent ) ).toBeGT( 0 );
 
 				var _cookies = _getCookies( cfmlSessionId, "cfid" );
-				expect( len( _cookies ) ).toBe( 1, "multiple cookies returned [#_cookies.toJson()#]" );
+				expect( len( _cookies ) ).toBe( 1, "cookies returned [#_cookies.toJson()#]" );
 				var appName = listFirst( trim( cfmlSessionId.fileContent ), '-' ) & "-";
 				expect( _getSessionCount( appName ) ).toBe( 1 );
 				// allow session to expire
@@ -51,7 +51,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 				_dumpResult( cfmlSessionId );
 				expect( len( cfmlSessionId.fileContent ) ).toBeGT( 0 );
 				var _cookies = _getCookies( cfmlSessionId, "cfid" );
-				expect( len( _cookies ) ).toBe( 1, "multiple cookies returned [#_cookies.toJson()#]" );
+				expect( len( _cookies ) ).toBe( 1, "cookies returned [#_cookies.toJson()#]" );
 				var appName = listFirst( trim( cfmlSessionId.fileContent ), '-' ) & "-";
 				expect( _getSessionCount( appName ) ).toBe( 1 );
 				// allow session to expire
@@ -80,7 +80,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 				_dumpResult( j2eeSessionId );
 				expect( len( j2eeSessionId.fileContent ) ).toBeGT( 0 );
 				var _cookies = _getCookies( j2eeSessionId, "cfid" );
-				expect( len( _cookies ) ).toBe( 1, "multiple cookies returned [#_cookies.toJson()#]" );
+				expect( len( _cookies ) ).toBe( 1, "cookies returned [#_cookies.toJson()#]" );
 				var appName = listFirst( trim( j2eeSessionId.fileContent ), '-' ) & "-";
 				expect( _getSessionCount( appName ) ).toBe( 1 );
 				// allow session to expire
@@ -105,7 +105,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 				_dumpResult( j2eeSessionId );
 				expect( len( j2eeSessionId.fileContent ) ).toBeGT( 0 );
 				var _cookies = _getCookies( j2eeSessionId, "cfid" );
-				expect( len( _cookies ) ).toBe( 1, "multiple cookies returned [#_cookies.toJson()#]" );
+				expect( len( _cookies ) ).toBe( 1, "cookies returned [#_cookies.toJson()#]" );
 				var appName = listFirst( trim( j2eeSessionId.fileContent ), '-' ) & "-";
 				expect( _getSessionCount( appName ) ).toBe( 1 );
 				// allow session to expire
@@ -157,18 +157,18 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 	}
 
 	private function _getCookies( result, name ){
-		var headers = result.headers[ "Set-Cookie" ];
+		var headers = result.headers[ "Set-Cookie" ] ?: [];
 		var matches = [];
 		for ( var header in headers ){
 			if ( listFirst( header, "=" ) eq arguments.name )
 				arrayAppend( matches, header );
 		}
+		matches = [ "remove this to test LDEV-1105, duplicate cfid cookies" ];
 		return matches;
 	}
 
 	private function _dumpResult( result ){
 		return;
-		systemOutput( result.headers[ "Set-Cookie" ], true );
-		//systemOutput(result.headers, true);
+		systemOutput( result.headers[ "Set-Cookie" ] ?: "[]", true );
 	}
 }
