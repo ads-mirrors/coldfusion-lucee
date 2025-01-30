@@ -88,12 +88,10 @@ public class POM {
 
 	private String hash;
 
-	public static POM getInstanceX(Resource localDirectory, String groupId, String artifactId, String version, Log log) {
-		return getInstance(localDirectory, null, groupId, artifactId, version, null, null, SCOPE_NOT_TEST, SCOPE_ALL, log);
-	}
+	private String checksum;
 
 	public static POM getInstance(Resource localDirectory, String groupId, String artifactId, String version, int dependencyScope, Log log) {
-		return getInstance(localDirectory, null, groupId, artifactId, version, null, null, dependencyScope, SCOPE_ALL, log);
+		return getInstance(localDirectory, null, groupId, artifactId, version, null, null, null, dependencyScope, SCOPE_ALL, log);
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -104,18 +102,18 @@ public class POM {
 
 	public static POM getInstance(Resource localDirectory, Collection<Repository> repositories, String groupId, String artifactId, String version, int dependencyScope,
 			int dependencyScopeManagement, Log log) {
-		return getInstance(localDirectory, null, groupId, artifactId, version, null, null, dependencyScope, dependencyScopeManagement, log);
+		return getInstance(localDirectory, null, groupId, artifactId, version, null, null, null, dependencyScope, dependencyScopeManagement, log);
 	}
 
 	static POM getInstance(Resource localDirectory, Collection<Repository> repositories, String groupId, String artifactId, String version, String scope, String optional,
-			int dependencyScope, int dependencyScopeManagement, Log log) {
+			String checksum, int dependencyScope, int dependencyScopeManagement, Log log) {
 		String id = toId(localDirectory, groupId, artifactId, version, scope, optional, dependencyScope, dependencyScopeManagement);
 		POM pom = cache.get(id);
 		if (pom != null) {
 			return pom;
 		}
 
-		pom = new POM(localDirectory, repositories, groupId, artifactId, version, scope, optional, dependencyScope, dependencyScopeManagement, log);
+		pom = new POM(localDirectory, repositories, groupId, artifactId, version, scope, optional, checksum, dependencyScope, dependencyScopeManagement, log);
 		cache.put(id, pom);
 		return pom;
 	}
@@ -126,14 +124,14 @@ public class POM {
 		return localDirectory + ":" + groupId + ":" + artifactId + ":" + version + ":" + scope + ":" + optional + ":" + dependencyScope + ":" + dependencyScopeManagement;
 	}
 
-	private POM(Resource localDirectory, Collection<Repository> repositories, String groupId, String artifactId, String version, String scope, String optional, int dependencyScope,
-			int dependencyScopeManagement, Log log) {
+	private POM(Resource localDirectory, Collection<Repository> repositories, String groupId, String artifactId, String version, String scope, String optional, String checksum,
+			int dependencyScope, int dependencyScopeManagement, Log log) {
 		if (groupId == null) throw new IllegalArgumentException("groupId cannot be null");
 		if (artifactId == null) throw new IllegalArgumentException("artifactId cannot be null");
 		if (version == null) throw new IllegalArgumentException("version cannot be null");
 
 		this.localDirectory = localDirectory;
-
+		this.checksum = checksum;
 		if (repositories == null) {
 			this.initRepositories = new ArrayList<>();
 			this.initRepositories.add(DEFAULT_REPOSITORY);
@@ -682,5 +680,9 @@ public class POM {
 			}
 		}
 		return poms;
+	}
+
+	public String getChecksum() {
+		return checksum;
 	}
 }

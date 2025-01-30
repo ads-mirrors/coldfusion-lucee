@@ -135,7 +135,7 @@ public class MavenUtil {
 				if (gavso == null) continue;
 
 				Future<POM> future = executor.submit(() -> {
-					POM p = POM.getInstance(localDirectory, current.getRepositories(), gavso.g, gavso.a, gavso.v, gavso.s, gavso.o, current.getDependencyScope(),
+					POM p = POM.getInstance(localDirectory, current.getRepositories(), gavso.g, gavso.a, gavso.v, gavso.s, gavso.o, gavso.c, current.getDependencyScope(),
 							current.getDependencyScopeManagement(), log);
 					p.initXML();
 					return p;
@@ -205,7 +205,7 @@ public class MavenUtil {
 			}
 		}
 		if (o != null) s = resolvePlaceholders(current, o, properties);
-		return new GAVSO(g, a, v, s, o);
+		return new GAVSO(g, a, v, s, o, null);
 		// p = POM.getInstance(localDirectory, g, a, v, s, o, current.getDependencyScope(),
 		// current.getDependencyScopeManagement());
 
@@ -213,11 +213,12 @@ public class MavenUtil {
 	}
 
 	public static class GAVSO implements Serializable {
-		public final String g;
-		public final String a;
-		public final String v;
-		public final String s;
-		public final String o;
+		public final String g;// groupId
+		public final String a;// artifactId
+		public final String v;// version
+		public final String s;// scope
+		public final String o;// optional
+		public final String c;// checksum
 
 		public GAVSO(String g, String a, String v) {
 			this.g = g;
@@ -225,14 +226,16 @@ public class MavenUtil {
 			this.v = v;
 			this.s = null;
 			this.o = null;
+			this.c = null;
 		}
 
-		public GAVSO(String g, String a, String v, String s, String o) {
+		public GAVSO(String g, String a, String v, String s, String o, String c) {
 			this.g = g;
 			this.a = a;
 			this.v = v;
 			this.s = s;
 			this.o = o;
+			this.c = c;
 		}
 
 		@Override
@@ -365,7 +368,7 @@ public class MavenUtil {
 					LogUtil.log(null, "mvn", ioe, Log.LEVEL_WARN, "application");
 				}
 				if (gavso == null) continue;
-				POM p = POM.getInstance(localDirectory, current.getRepositories(), gavso.g, gavso.a, gavso.v, gavso.s, gavso.o, current.getDependencyScope(),
+				POM p = POM.getInstance(localDirectory, current.getRepositories(), gavso.g, gavso.a, gavso.v, gavso.s, gavso.o, gavso.c, current.getDependencyScope(),
 						current.getDependencyScopeManagement(), log);
 				dependencies.add(p);
 			}
@@ -460,7 +463,7 @@ public class MavenUtil {
 									}
 									finally {
 										IOUtil.closeEL(is);
-										HTTPUtil.validateDownload(url, response, tmp, true, ex);
+										HTTPUtil.validateDownload(url, response, tmp, pom.getChecksum(), true, ex);
 										tmp.moveTo(res);
 									}
 								}
@@ -493,7 +496,7 @@ public class MavenUtil {
 
 				resolvePlaceholders(null, dependency.version, properties),
 
-				null, null,
+				null, null, null,
 
 				dependencyScope, dependencyScopeManagement,
 
@@ -623,7 +626,9 @@ public class MavenUtil {
 
 						Caster.toString(el.get(KeyConstants._scope, null), null),
 
-						Caster.toString(el.get(KeyConstants._optional, null), null));
+						Caster.toString(el.get(KeyConstants._optional, null), null),
+
+						Caster.toString(el.get(KeyConstants._checksum, null), null));
 			}
 			return defaultValue;
 		}
@@ -631,7 +636,7 @@ public class MavenUtil {
 		String str = Caster.toString(obj, null);
 		if (!StringUtil.isEmpty(str)) {
 			String[] arr = ListUtil.listToStringArray(str, ':');
-			if (arr.length > 1 && arr.length < 6) {
+			if (arr.length > 1 && arr.length < 7) {
 				if (arr.length > 2 && !MavenUtil.isValidVersion(arr[2].trim())) return defaultValue;
 				return new GAVSO(
 
@@ -643,7 +648,9 @@ public class MavenUtil {
 
 						arr.length > 3 ? arr[3].trim() : null, // scope
 
-						arr.length > 4 ? arr[4].trim() : null // optional
+						arr.length > 4 ? arr[4].trim() : null, // optional
+
+						arr.length > 5 ? arr[5].trim() : null // checksum
 
 				);
 			}
@@ -673,14 +680,18 @@ public class MavenUtil {
 
 					Caster.toString(el.get(KeyConstants._scope, null), null),
 
-					Caster.toString(el.get(KeyConstants._optional, null), null));
+					Caster.toString(el.get(KeyConstants._optional, null), null),
+
+					Caster.toString(el.get(KeyConstants._checksum, null), null)
+
+			);
 
 		}
 		// gradle style?
 		String str = Caster.toString(obj, null);
 		if (!StringUtil.isEmpty(str)) {
 			String[] arr = ListUtil.listToStringArray(str, ':');
-			if (arr.length > 1 && arr.length < 6) {
+			if (arr.length > 1 && arr.length < 7) {
 				if (arr.length > 2 && !MavenUtil.isValidVersion(arr[2].trim())) throw new ApplicationException("maven version [" + arr[2].trim() + "]is invalid");
 				return new GAVSO(
 
@@ -692,7 +703,9 @@ public class MavenUtil {
 
 						arr.length > 3 ? arr[3].trim() : null, // scope
 
-						arr.length > 4 ? arr[4].trim() : null // optional
+						arr.length > 4 ? arr[4].trim() : null, // optional
+
+						arr.length > 5 ? arr[5].trim() : null // checksum
 
 				);
 			}

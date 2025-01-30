@@ -363,7 +363,7 @@ public final class BundleProvider extends DefaultHandler {
 		}
 		Resource tmp = SystemUtil.getTempFile("jar", false);
 		IOUtil.copy((InputStream) conn.getContent(), tmp.getOutputStream(), true, true);
-		HTTPUtil.validateDownload(updateUrl, conn, tmp, true, null);
+		HTTPUtil.validateDownload(updateUrl, conn, tmp, null, true, null);
 		ResourceUtil.toFile(tmp).renameTo(jar);
 		conn.disconnect();
 		return jar;

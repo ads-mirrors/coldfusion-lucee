@@ -430,7 +430,7 @@ public class DeployHandler {
 					ResourceUtil.touch(res);
 					IOUtil.copy(rsp.getContentAsStream(), res, true);
 
-					HTTPUtil.validateDownload(url, rsp, res, true, null);
+					HTTPUtil.validateDownload(url, rsp, res, null, true, null);
 
 					if (log != null) log.info("main", "Downloaded extension [" + ed + "] to [" + res + "]");
 					return res;

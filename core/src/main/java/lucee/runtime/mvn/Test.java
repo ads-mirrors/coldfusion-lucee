@@ -7,7 +7,7 @@ import lucee.runtime.mvn.MavenUtil.GAVSO;
 
 public class Test {
 	public static void main(String[] args) throws Exception {
-		Resource dir = ResourcesImpl.getFileResourceProvider().getResource("/Users/mic/Tmp3");
+		Resource dir = ResourcesImpl.getFileResourceProvider().getResource("/Users/mic/Tmp3/www");
 		GAVSO[] arr = new GAVSO[] {
 
 				new GAVSO("org.apache.maven", "maven-parent", "40"),
@@ -32,7 +32,7 @@ public class Test {
 
 				new GAVSO("net.bytebuddy", "byte-buddy-parent", "1.14.17"),
 
-				new GAVSO("commons-beanutils", "commons-beanutils", "1.9.4"),
+				new GAVSO("commons-beanutils", "commons-beanutils", "1.9.4", null, null, "sha1:d52b9abcd97f38c81342bb7e7ae1eee9b73cba51"),
 
 				new GAVSO("org.apache.maven.resolver", "maven-resolver-impl", "2.0.0"),
 
@@ -42,7 +42,7 @@ public class Test {
 
 		};
 
-		arr = new GAVSO[] { new GAVSO("commons-beanutils", "commons-beanutils", "1.9.4")
+		arr = new GAVSO[] { new GAVSO("commons-beanutils", "commons-beanutils", "1.9.4", null, null, "sha1:d52b9abcd97f38c81342bb7e7ae1eee9b73cba51")
 				// new GAVSO("org.apache.commons", "commons-jexl3", "3.4.0")
 
 		};
@@ -81,9 +81,11 @@ public class Test {
 		 */
 		long start = System.currentTimeMillis();
 		for (GAVSO gav: arr) {
-			POM pom = POM.getInstance(dir, gav.g, gav.a, gav.v, POM.SCOPE_NOT_TEST, null);
+			POM pom = POM.getInstance(dir, null, gav.g, gav.a, gav.v, null, null, gav.c, POM.SCOPE_NOT_TEST, POM.SCOPE_ALL, null);
+
 			print.e("==========================================");
 			print.e(pom.getName());
+			print.e(pom.getChecksum());
 			print.e(pom);
 			print.e("==========================================");
 

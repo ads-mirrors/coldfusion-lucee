@@ -699,19 +699,20 @@ public final class HTTPUtil {
 		return StringUtil.indexOfIgnoreCase(url.getProtocol(), "https") != -1;
 	}
 
-	public static void validateDownload(URL url, HttpURLConnection conn, Resource res, boolean deleteFileWhenInvalid, Exception cause) throws IOException {
-		_validateDownload(url, new HeadersHttpURLConnection(conn), res, deleteFileWhenInvalid, cause);
+	public static void validateDownload(URL url, HttpURLConnection conn, Resource res, String checksum, boolean deleteFileWhenInvalid, Exception cause) throws IOException {
+		_validateDownload(url, new HeadersHttpURLConnection(conn), res, checksum, deleteFileWhenInvalid, cause);
 	}
 
-	public static void validateDownload(URL url, HTTPResponse rsp, Resource res, boolean deleteFileWhenInvalid, Exception cause) throws IOException {
-		_validateDownload(url, new HeadersHTTPResponse(rsp), res, deleteFileWhenInvalid, cause);
+	public static void validateDownload(URL url, HTTPResponse rsp, Resource res, String checksum, boolean deleteFileWhenInvalid, Exception cause) throws IOException {
+		_validateDownload(url, new HeadersHTTPResponse(rsp), res, checksum, deleteFileWhenInvalid, cause);
 	}
 
-	public static void validateDownload(URL url, HttpResponse rsp, Resource res, boolean deleteFileWhenInvalid, Exception cause) throws IOException {
-		_validateDownload(url, new HeadersHttpResponseApache(rsp), res, deleteFileWhenInvalid, cause);
+	public static void validateDownload(URL url, HttpResponse rsp, Resource res, String checksum, boolean deleteFileWhenInvalid, Exception cause) throws IOException {
+		_validateDownload(url, new HeadersHttpResponseApache(rsp), res, checksum, deleteFileWhenInvalid, cause);
 	}
 
-	private static void _validateDownload(URL url, HeadersCollection headersCollection, Resource res, boolean deleteFileWhenInvalid, Exception cause) throws IOException {
+	private static void _validateDownload(URL url, HeadersCollection headersCollection, Resource res, String checksum, boolean deleteFileWhenInvalid, Exception cause)
+			throws IOException {
 		// in case of an exception, the file may was not created
 		if (cause != null && !res.exists()) return;
 		Header[] headers;
@@ -733,6 +734,7 @@ public final class HTTPUtil {
 						else if ("sha256".equalsIgnoreCase(name)) fileHash = Hash.sha256(res);
 						else if ("sha512".equalsIgnoreCase(name)) fileHash = Hash.sha512(res);
 						else continue;
+
 						if (!fileHash.equalsIgnoreCase(h.getValue())) {
 							if (deleteFileWhenInvalid) {
 								res.remove(true);
@@ -744,6 +746,17 @@ public final class HTTPUtil {
 							if (cause != null) ExceptionUtil.initCauseEL(ioe, cause);
 							throw ioe;
 						}
+						if (!StringUtil.isEmpty(checksum, true) && StringUtil.startsWithIgnoreCase(checksum, name + ":")
+								&& StringUtil.endsWithIgnoreCase(url.toExternalForm(), ".jar") && !(name + "-" + fileHash).equalsIgnoreCase(checksum)) {
+
+							IOException ioe = new IOException(String.format(label + " validation failed: The checksum defined in the dependency [" + checksum
+									+ "] does not match the computed checksum [" + name + "-" + fileHash + "] based on the downloaded file [" + res
+									+ "]. File integrity could get compromised" + (deleteFileWhenInvalid ? " and file got deleted" : "") + "."));
+							if (cause != null) ExceptionUtil.initCauseEL(ioe, cause);
+							throw ioe;
+
+						}
+
 						if (cause != null) throw ExceptionUtil.toIOException(cause);
 						return;
 					}
