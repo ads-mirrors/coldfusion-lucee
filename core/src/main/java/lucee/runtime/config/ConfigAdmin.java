@@ -302,7 +302,7 @@ public final class ConfigAdmin {
 		try {
 			ConfigAdmin admin = ConfigAdmin.newInstance(ci, null);
 			admin._reload();
-			LogUtil.log(ThreadLocalPageContext.getConfig(config), Log.LEVEL_INFO, ConfigAdmin.class.getName(), "reloaded the configuration [" + file + "] automatically");
+			LogUtil.log(ThreadLocalPageContext.getConfig(config), Log.LEVEL_INFO, "deploy", ConfigAdmin.class.getName(), "reloaded the configuration [" + file + "] automatically");
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
@@ -1926,6 +1926,60 @@ public final class ConfigAdmin {
 	private void _updateSearchEngine(ClassDefinition cd) throws PageException {
 		Struct orm = _getRootElement("search");
 		setClass(orm, SearchEngine.class, "engine", cd);
+	}
+
+	private void _updateMaven(GAVSO mvnEntry) throws PageException {
+		Struct javasettings = _getRootElement("javasettings");
+		Array maven = ConfigWebUtil.getAsArray(javasettings, false, "maven", "mvn");
+
+		// update
+		GAVSO ex;
+		Struct sct;
+		Iterator<Object> it = maven.valueIterator();
+		Version exVersion, newVersion;
+
+		while (it.hasNext()) {
+			sct = Caster.toStruct(it.next());
+			ex = MavenUtil.toGAVSO(sct);
+
+			// same GAV
+			if (ex.equals(mvnEntry)) {
+				LogUtil.logx(config, Log.LEVEL_INFO, "config", "Maven endpoint [" + mvnEntry + "] already exists", "deploy", "application");
+				return;
+			}
+
+			// same GA, but different V
+			if (ex.same(mvnEntry)) {
+				newVersion = OSGiUtil.toVersion(mvnEntry.v, null);
+				if (newVersion == null) {
+					LogUtil.logx(config, Log.LEVEL_WARN, "config", "Skipping update for [" + mvnEntry + "], invalid version format", "deploy", "application");
+					return;
+				}
+
+				try {
+					exVersion = OSGiUtil.toVersion(ex.v);
+				}
+				catch (BundleException e) {
+					throw Caster.toPageException(e);
+				}
+
+				// new version is bigger
+				int com = OSGiUtil.compare(newVersion, exVersion);
+				if (com > 0) {
+					LogUtil.logx(config, Log.LEVEL_INFO, "config", "Upgrading Maven endpoint from [" + ex + "] to [" + mvnEntry + "]", "deploy", "application");
+					sct.set(KeyConstants._version, mvnEntry.v);
+				}
+				else if (com == 0) {
+					LogUtil.logx(config, Log.LEVEL_INFO, "config", "version [" + ex + "] already installed", "deploy", "application");
+				}
+				else {
+					LogUtil.logx(config, Log.LEVEL_INFO, "config", "Skipping downgrade for [" + ex + "],newer version already installed", "deploy", "application");
+				}
+				return;
+			}
+		}
+
+		maven.append(mvnEntry.populate(new StructImpl(Struct.TYPE_LINKED)));
 	}
 
 	public void removeSearchEngine() throws SecurityException {
@@ -4947,6 +5001,20 @@ public final class ConfigAdmin {
 				}
 			}
 
+			// update Maven
+			if (!ArrayUtil.isEmpty(rhext.getMavens())) {
+				Iterator<Map<String, String>> itl = rhext.getMavens().iterator();
+				GAVSO gavso;
+				while (itl.hasNext()) {
+					gavso = MavenUtil.toGAVSO(itl.next());
+					if (gavso != null) {
+						_updateMaven(gavso);
+						reloadNecessary = true;
+					}
+					logger.info("extension", "Update maven endpoint [" + gavso + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
+				}
+			}
+
 			// update Resource
 			List<Map<String, String>> resources = rhext.getMetadata().getResources();
 			if (!ArrayUtil.isEmpty(resources)) {
@@ -5327,6 +5395,7 @@ public final class ConfigAdmin {
 					logger.info("extension", "Remove search engine [" + cd + "] from extension [" + rhe.getMetadata().getName() + ":" + rhe.getVersion() + "]");
 				}
 			}
+			// TODO remove maven?
 
 			// remove resource
 			List<Map<String, String>> resources = rhe.getMetadata().getResources();

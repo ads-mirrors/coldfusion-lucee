@@ -19,7 +19,6 @@
  **/
 package lucee.runtime.engine;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -83,7 +82,7 @@ public final class Controler extends ParentThreasRefThread {
 	// private final ShutdownHook shutdownHook;
 	private ControllerState state;
 
-	private boolean poolValidate;
+	// private boolean poolValidate;
 	private boolean enableGC;
 
 	/**
@@ -96,10 +95,8 @@ public final class Controler extends ParentThreasRefThread {
 		this.interval = interval;
 		this.state = state;
 		this.configServer = configServer;
-		this.poolValidate = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.datasource.pool.validate", null), true);
+		if (configServer == null) throw new RuntimeException("configServer cannot be null");
 		this.enableGC = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.controller.gc", null), false);
-		// shutdownHook=new ShutdownHook(configServer);
-		// Runtime.getRuntime().addShutdownHook(shutdownHook);
 	}
 
 	private static class ControlerThread extends ParentThreasRefThread {
@@ -279,32 +276,6 @@ public final class Controler extends ParentThreasRefThread {
 			}
 		}
 
-		// every 5 minutes
-		if (this.enableGC && do5Minute) {
-			try {
-				System.gc();
-			}
-			catch (Throwable t) {
-				ExceptionUtil.rethrowIfNecessary(t);
-				if (log != null) log.error("controler", t);
-			}
-		}
-
-		if (doHour) {
-			// check felix.log file size
-			try {
-				File rr = configServer.getEngine().getCFMLEngineFactory().getResourceRoot();
-				File felixLog = new File(rr, "context/logs/felix.log");
-				if (felixLog.isFile() && felixLog.length() > 1024 * 1024 * 1024) {
-					if (felixLog.delete()) ResourceUtil.touch(felixLog);
-				}
-			}
-			catch (Throwable t) {
-				ExceptionUtil.rethrowIfNecessary(t);
-				if (log != null) log.error("controler", t);
-			}
-		}
-
 		for (int i = 0; i < factories.length; i++) {
 			control(factories[i], do10Seconds, doMinute, doHour, firstRun, log);
 		}
@@ -324,6 +295,17 @@ public final class Controler extends ParentThreasRefThread {
 			}
 			catch (Exception e) {
 				if (log != null) log.error("controler", e);
+			}
+		}
+
+		// every 5 minutes
+		if (this.enableGC && do5Minute) {
+			try {
+				System.gc();
+			}
+			catch (Throwable t) {
+				ExceptionUtil.rethrowIfNecessary(t);
+				if (log != null) log.error("controler", t);
 			}
 		}
 	}
@@ -438,6 +420,15 @@ public final class Controler extends ParentThreasRefThread {
 					ExceptionUtil.rethrowIfNecessary(t);
 					if (log != null) log.error("controler", t);
 				}
+				// Memory usage
+				// clear Query Cache
+				/*
+				 * try{ ConfigWebUtil.getCacheHandlerFactories(config).query.clean(null);
+				 * ConfigWebUtil.getCacheHandlerFactories(config).include.clean(null);
+				 * ConfigWebUtil.getCacheHandlerFactories(config).function.clean(null);
+				 * //cfmlFactory.getDefaultQueryCache().clearUnused(null); }catch(Throwable
+				 * t){ExceptionUtil.rethrowIfNecessary(t);}
+				 */
 
 				try {
 					doCheckMappings(config);

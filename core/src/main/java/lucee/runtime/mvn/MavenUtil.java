@@ -259,6 +259,55 @@ public class MavenUtil {
 			return sb.toString();
 		}
 
+		private String toGAV() {
+			StringBuilder sb = new StringBuilder();
+			if (!StringUtil.isEmpty(g, true)) sb.append(g);
+			if (!StringUtil.isEmpty(a, true)) {
+				if (sb.length() > 0) sb.append(':');
+				sb.append(a);
+			}
+			if (!StringUtil.isEmpty(v, true)) {
+				if (sb.length() > 0) sb.append(':');
+				sb.append(v);
+			}
+			return sb.toString();
+		}
+
+		private String toGA() {
+			StringBuilder sb = new StringBuilder();
+			if (!StringUtil.isEmpty(g, true)) sb.append(g);
+			if (!StringUtil.isEmpty(a, true)) {
+				if (sb.length() > 0) sb.append(':');
+				sb.append(a);
+			}
+			return sb.toString();
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			if (!(other instanceof GAVSO)) return false;
+			return toGAV().equals(((GAVSO) other).toGAV());
+		}
+
+		/**
+		 * same endpoint with different versions
+		 * 
+		 * @param other
+		 * @return
+		 */
+		public boolean same(GAVSO other) {
+			return toGA().equals(other.toGA());
+		}
+
+		public Struct populatee(Struct sct) {
+			if (!StringUtil.isEmpty(g, true)) sct.setEL(KeyConstants._groupId, g);
+			if (!StringUtil.isEmpty(a, true)) sct.setEL(KeyConstants._artifactId, a);
+			if (!StringUtil.isEmpty(v, true)) sct.setEL(KeyConstants._version, v);
+			if (!StringUtil.isEmpty(s, true)) sct.setEL(KeyConstants._scope, s);
+			if (!StringUtil.isEmpty(o, true)) sct.setEL(KeyConstants._optional, o);
+			return sct;
+		}
+
 		/**
 		 * same group and artifact id, but version MAY differ
 		 * 
@@ -275,42 +324,6 @@ public class MavenUtil {
 		public boolean equalIDAndVersion(GAVSO other) {
 			if (!v.equalsIgnoreCase(other.v)) return false;
 			return equalID(other);
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (!(obj instanceof GAVSO)) return false;
-			GAVSO other = (GAVSO) obj;
-			if (!equalIDAndVersion(other)) return false;
-
-			if (s != null) {
-				if (other.s == null) return false;
-				if (!s.equalsIgnoreCase(other.s)) return false;
-			}
-			if (other.s != null) {
-				if (s == null) return false;
-				if (!other.s.equalsIgnoreCase(s)) return false;
-			}
-
-			if (o != null) {
-				if (other.o == null) return false;
-				if (!o.equalsIgnoreCase(other.o)) return false;
-			}
-			if (other.o != null) {
-				if (o == null) return false;
-				if (!other.o.equalsIgnoreCase(o)) return false;
-			}
-
-			return true;
-		}
-
-		public Struct populate(Struct sct) {
-			if (!StringUtil.isEmpty(g, true)) sct.setEL(KeyConstants._groupId, g);
-			if (!StringUtil.isEmpty(a, true)) sct.setEL(KeyConstants._artifactId, a);
-			if (!StringUtil.isEmpty(v, true)) sct.setEL(KeyConstants._version, v);
-			if (!StringUtil.isEmpty(s, true)) sct.setEL(KeyConstants._scope, s);
-			if (!StringUtil.isEmpty(o, true)) sct.setEL(KeyConstants._optional, o);
-			return sct;
 		}
 
 	}
