@@ -7,7 +7,7 @@ component extends="AI" {
 			required = true,
 			description = "Select one of the predefined endpoints for this interface, or choose 'other' to specify a custom URL below.",
 			type = "select",
-			values = "other,chatgpt,ollama"
+			values = "other,chatgpt,ollama,perplexity,deepseek"
 		)
 		,field(displayName = "URL",
 			name = "url",

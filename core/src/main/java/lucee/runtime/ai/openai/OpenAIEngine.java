@@ -167,6 +167,11 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 				if (!str.endsWith("/")) str += "/";
 				try {
 					baseURL = HTTPUtil.toURL(str.trim(), HTTPUtil.ENCODED_AUTO);
+
+					if (baseURL.equals(DEFAULT_URL_OPENAI)) label = "ChatGPT";
+					if (baseURL.equals(DEFAULT_URL_PERPLEXITY)) label = "Perplexity";
+					if (baseURL.equals(DEFAULT_URL_DEEPSEEK)) label = "DeepSeek";
+
 				}
 				catch (Exception e) {
 					throw Caster.toPageException(e);

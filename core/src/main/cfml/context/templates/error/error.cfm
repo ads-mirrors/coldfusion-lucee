@@ -73,7 +73,63 @@
 			}
 		}
 	}
+
+function luceeLoadError(jsonData) {
+    const cell = document.getElementById('ai-response-cell');
+    // Clear existing content
+    cell.innerHTML = '';
+    luceeSpinner();
+    fetch('/lucee/debug/modern/error.cfm', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(jsonData)
+    })
+    .then(response => {
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        
+        function readStream(text) {
+            return reader.read().then(({done, value}) => {
+                if (done) {
+                    return;
+                }
+                spinner=false;
+                // Decode and append the new chunk
+                text += decoder.decode(value, {stream: true});
+                cell.innerHTML = text;
+                
+                // Continue reading
+                return readStream(text);
+            });
+        }
+        
+        return readStream("");
+    })
+    .catch(error => {
+		spinner=false;
+        cell.innerHTML = 'Error loading content';
+        console.error('Error:', error);
+    });
+}
+
+spinner=true;
+function luceeSpinner(index) {
+	var spinnerElement = document.getElementById('ai-response-cell');
+	
+	var dotCycle = ['⠁', '⠈', '⠐', '⠠', '⢀', '⡀', '⠄', '⠂'];
+	if(!index) index = 0;
+	if(!spinner) return;
+	spinnerElement.innerText = dotCycle[index];
+	index = (index + 1) % dotCycle.length;
+	setTimeout(luceeSpinner, 200, index)
+}
+
+
+<cfoutput>luceeCatchData=#luceeCatchToString()#;</cfoutput>
 </script>
+
 <cfscript>
 function luceeMonoBlock(input,tablengt=1) {
 	var rtn=HTMLEditFormat( trim( input ) );
@@ -82,6 +138,34 @@ function luceeMonoBlock(input,tablengt=1) {
 	rtn=replace( rtn, ' ', '&nbsp;', 'all' );
 	return rtn;
 }
+function luceeCatchToString() {try{
+	var catchi=duplicate(catch);
+	var path=catch.TagContext[1].template?:"";
+	var line=catch.TagContext[1].line?:"";
+	
+	if(!fileExists(path)) path=expandPath(path);
+	if(fileExists(path)) {
+		catchi["content"]=fileRead(path);
+
+	}
+	catchi.path=path;
+	catchi.line=line;
+	//structDelete(catchi, "TagContext",false);
+	if(structKeyExists(catchi, "TagContext")) {
+		loop array=catchi.TagContext item="el" {
+			structDelete(el, "id",false);
+			structDelete(el, "column",false);
+			structDelete(el, "Raw_Trace",false);
+			structDelete(el, "codePrintHTML",false);
+			structDelete(el, "type",false);
+		}
+	}
+	structDelete(catchi, "ErrorCode",false);
+
+	return serializeJSON(catchi);}catch(e) {dump(e);}
+}
+
+
 </cfscript>
 <cfoutput>
 <table id="-lucee-err" cellpadding="4" cellspacing="1">
@@ -101,28 +185,16 @@ function luceeMonoBlock(input,tablengt=1) {
 		</tr>
 	</cfif>
 	<!--- AI --->
-	<cfset hasAI=LuceeAIHas('default:exception')>
-	<cfif hasAI>
-		<cftry>
-			<tr>
-				<td class="label">
-					<cfset meta=LuceeAIGetMetaData('default:exception')>
-					AI (#meta.label?:''#)
-				</td>
-				<td id="ai-response-cell" class="mono">...</td>
-			</tr>
-			<cfcatch></cfcatch>
-		</cftry>
-	<cfelse>
-		<tr>
-			<td class="label">
-				AI (Experimental)
-			</td>
-			<td id="ai-response-cell">
+	<tr>
+		<td class="label">
+			AI (Experimental)
+		</td>
+		<td id="ai-response-cell" class="mono">
+		    <cfif LuceeAIHas('default:exception')>
+				<a href="##" onclick="luceeLoadError(luceeCatchData); return false;">Analyse</a><cfelse>
 				For AI-driven exception analysis setup, see <a target="blank" href="https://github.com/lucee/lucee-docs/blob/master/docs/recipes/ai.md">AI Setup Guide</a>.
-			</td>
-		</tr>
-	</cfif>
+			</cfif></td>
+	</tr>
 	<cfif structkeyexists( catch, 'errorcode' ) && len( catch.errorcode ) && catch.errorcode NEQ 0>
 		<tr>
 			<td class="label">Error Code</td>
@@ -186,101 +258,4 @@ function luceeMonoBlock(input,tablengt=1) {
 		</td>
 	</tr>
 </table>
-
-<cfif hasAI>
-	<cftry>
-		<script>
-			var val= "";
-			spinner=true;
-			function luceeSpinner(index) {
-				var spinnerElement = document.getElementById('ai-response-cell');
-				
-				var dotCycle = ['⠁', '⠈', '⠐', '⠠', '⢀', '⡀', '⠄', '⠂'];
-				if(!index) index = 0;
-				if(!spinner) return;
-				spinnerElement.innerText = dotCycle[index];
-				index = (index + 1) % dotCycle.length;
-				setTimeout(luceeSpinner, 200, index)
-			}
-			luceeSpinner();
-
-			completeMsg="";
-			function l(msg) {
-				completeMsg+=msg;
-				document.getElementById('ai-response-cell').innerHTML=completeMsg;
-			}
-		
-		</script>
-<cfflush throwonerror=false>
-
-		<cfscript>
-			path=catch.TagContext[1].template?:"";
-			line=catch.TagContext[1].line?:"";
-			
-if(!structKeyExists(session, "exceptionAISession")) {
-			ais=LuceeCreateAISession('default:exception', 
-			"You are a Lucee expert. You will analyse exception that happen while executing Lucee (CFML) code.
-Analyze the provided JSON containing exception details of the issue. 
-The 'content' key contains the source code of the template that failed.
-The 'path' key contains the file name and 'line' the line number where it happens.
-Respond concisely in plain HTML, without using triple backticks or mentioning the origin of the data. 
-Biggest heading tag you can use is h3.
-For multi-line code examples, use <code class=""lucee-ml"">.
-For inline code, use <code>. Avoid <code> within heading tags, and ensure all code is properly escaped with &lt;.
-Do not referencing how the data was provided or mentioning any specific JSON keys. 
-Avoid repeating exception details, as those will be presented elsewhere. Keep your response short and flat structured for inclusion in existing HTML output. example code is welcome."
-
-);
-session.exceptionAISession=ais;
-}
-else {
-	ais=session.exceptionAISession;
-}
-			catchi=duplicate(catch);
-			path=catch.TagContext[1].template?:"";
-			if(!fileExists(path)) path=expandPath(path);
-			if(fileExists(path)) {
-				catchi["content"]=fileRead(path);
-
-			}
-			catchi.path=path;
-			catchi.line=line;
-			//structDelete(catchi, "TagContext",false);
-			if(structKeyExists(catchi, "TagContext")) {
-				loop array=catchi.TagContext item="el" {
-					structDelete(el, "id",false);
-					structDelete(el, "column",false);
-					structDelete(el, "Raw_Trace",false);
-					structDelete(el, "codePrintHTML",false);
-					structDelete(el, "type",false);
-				}
-			}
-			
-			
-			structDelete(catchi, "ErrorCode",false);
-			variables.aiFirst=true;
-			answer=LuceeInquiryAISession(ais,serializeJSON(catchi),function(msg) {
-				echo('<script>');
-				if(variables.aiFirst) {
-					echo('spinner=false;');
-					echo('document.getElementById("ai-response-cell").innerHTML="";');
-					//echo("l('<span id=""lucee-error"">sss</span>');");	
-					variables.aiFirst=false;
-				}
-				echo("l(#serializeJson(msg)#);");	
-				echo('</script>
-');
-				cfflush(throwonerror=false);
-				
-			});
-	
-		</cfscript>
-		<script>
-			//document.getElementById('ai-response-cell').innerHTML ='<span id="aivalue">'+ #serializeJSON(markdowntohtml(replaceNoCase(answer,"Coldfusion","CFML","all") ))# 
-			//	+'</span><p class="-lucee-comment"> created by #meta.label# (#(meta.model)#)</p>';
-		</script>
-		<cfcatch></cfcatch>
-	</cftry>
-</cfif>
-<br>
 </cfoutput>
