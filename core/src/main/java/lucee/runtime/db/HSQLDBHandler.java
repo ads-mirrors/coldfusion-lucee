@@ -106,8 +106,8 @@ public final class HSQLDBHandler {
 	 */
 	private static String createTable(Connection conn, PageContext pc, String dbTableName, String cfQueryName, boolean doSimpleTypes) throws SQLException, PageException {
 
-		//Stopwatch stopwatch = new Stopwatch(Stopwatch.UNIT_MILLI);
-		//stopwatch.start();
+		// Stopwatch stopwatch = new Stopwatch(Stopwatch.UNIT_MILLI);
+		// stopwatch.start();
 
 		Query query = Caster.toQuery(pc.getVariable(StringUtil.removeQuotes(cfQueryName, true)));
 		Statement stat;
@@ -579,7 +579,7 @@ public final class HSQLDBHandler {
 						cfQueryName = it.next().toString();// tables.get(i).toString();
 						dbTableName = cfQueryName.replace('.', '_');
 
-						if (!cfQueryName.toLowerCase().equals(dbTableName.toLowerCase())){
+						if (!cfQueryName.toLowerCase().equals(dbTableName.toLowerCase())) {
 							// TODO this could match the wrong strings, ??
 							modSql = StringUtil.replace(sql.getSQLString(), cfQueryName, dbTableName, false);
 							sql.setSQLString(modSql);
@@ -633,16 +633,20 @@ public final class HSQLDBHandler {
 
 				}
 				catch (SQLException e) {
-					throw (IllegalQoQException) (new IllegalQoQException("QoQ HSQLDB: error executing sql statement on query.", e.getMessage(), sql, null).initCause(e));
+					IllegalQoQException ex = new IllegalQoQException("QoQ HSQLDB: error executing sql statement on query.", e.getMessage(), sql, null);
+					ExceptionUtil.initCauseEL(ex, e);
+					throw ex;
 				}
 			}
 			catch (Exception ee) {
-				throw (IllegalQoQException) (new IllegalQoQException("QoQ HSQLDB: error executing sql statement on query.", ee.getMessage(), sql, null).initCause(ee));
+				IllegalQoQException ex = new IllegalQoQException("QoQ HSQLDB: error executing sql statement on query.", ee.getMessage(), sql, null);
+				ExceptionUtil.initCauseEL(ex, ee);
+				throw ex;
 			}
 			finally {
 				if (conn != null) {
 					removeAll(conn, qoqTables);
-					//executeStatement(conn, "DISCONNECT"); // close HSQLDB session with temp tables
+					// executeStatement(conn, "DISCONNECT"); // close HSQLDB session with temp tables
 					DBUtil.setAutoCommitEL(conn, true);
 				}
 				if (dc != null) ((DatasourceConnectionPro) dc).release();
@@ -653,6 +657,6 @@ public final class HSQLDBHandler {
 			if (nqr != null) nqr.setExecutionTime(stopwatch.time());
 			return nqr;
 		}
-		
+
 	}
 }
