@@ -19,9 +19,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 					template : "#uri#/cfml_session_rotate/test_cfml_sessionend.cfm"
 				);
 				_dumpSessions("before");
-				//dumpResult( "cfmlSessionId: " & cfmlSessionId.fileContent );
+				_dumpResult( cfmlSessionId );
 				expect( len( cfmlSessionId.fileContent ) ).toBeGT( 0 );
 
+				var _cookies = _getCookies( cfmlSessionId, "cfid" );
+				expect( len( _cookies ) ).toBe( 1, "multiple cookies returned [#_cookies.toJson()#]" );
 				var appName = listFirst( trim( cfmlSessionId.fileContent ), '-' ) & "-";
 				expect( _getSessionCount( appName ) ).toBe( 1 );
 				// allow session to expire
@@ -46,9 +48,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 						rotateOnSessionStart: "onSessionStart"
 					}
 				);
-				//dumpResult( "cfmlSessionId: " & cfmlSessionId.fileContent );
+				_dumpResult( cfmlSessionId );
 				expect( len( cfmlSessionId.fileContent ) ).toBeGT( 0 );
-
+				var _cookies = _getCookies( cfmlSessionId, "cfid" );
+				expect( len( _cookies ) ).toBe( 1, "multiple cookies returned [#_cookies.toJson()#]" );
 				var appName = listFirst( trim( cfmlSessionId.fileContent ), '-' ) & "-";
 				expect( _getSessionCount( appName ) ).toBe( 1 );
 				// allow session to expire
@@ -74,9 +77,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 					template : "#uri#/jee_session_rotate/test_jee_sessionend.cfm"
 				);
 				_dumpSessions("before");
-				//dumpResult( "j2eeSessionId: " & j2eeSessionId.fileContent );
+				_dumpResult( j2eeSessionId );
 				expect( len( j2eeSessionId.fileContent ) ).toBeGT( 0 );
-
+				var _cookies = _getCookies( j2eeSessionId, "cfid" );
+				expect( len( _cookies ) ).toBe( 1, "multiple cookies returned [#_cookies.toJson()#]" );
 				var appName = listFirst( trim( j2eeSessionId.fileContent ), '-' ) & "-";
 				expect( _getSessionCount( appName ) ).toBe( 1 );
 				// allow session to expire
@@ -98,9 +102,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 						rotateOnSessionStart: "onSessionStart"
 					}
 				);
-				//dumpResult( "j2eeSessionId: " & j2eeSessionId.fileContent );
+				_dumpResult( j2eeSessionId );
 				expect( len( j2eeSessionId.fileContent ) ).toBeGT( 0 );
-
+				var _cookies = _getCookies( j2eeSessionId, "cfid" );
+				expect( len( _cookies ) ).toBe( 1, "multiple cookies returned [#_cookies.toJson()#]" );
 				var appName = listFirst( trim( j2eeSessionId.fileContent ), '-' ) & "-";
 				expect( _getSessionCount( appName ) ).toBe( 1 );
 				// allow session to expire
@@ -149,5 +154,21 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 			server.LDEV3478["start_JEE_Sessions"] = {};
 			server.LDEV3478["ended_JEE_Sessions"] = {};
 		}
+	}
+
+	private function _getCookies( result, name ){
+		var headers = result.headers[ "Set-Cookie" ];
+		var matches = [];
+		for ( var header in headers ){
+			if ( listFirst( header, "=" ) eq arguments.name )
+				arrayAppend( matches, header );
+		}
+		return matches;
+	}
+
+	private function _dumpResult( result ){
+		return;
+		systemOutput( result.headers[ "Set-Cookie" ], true );
+		//systemOutput(result.headers, true);
 	}
 }
