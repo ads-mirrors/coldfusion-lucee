@@ -5,7 +5,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="thread,cookie,sess
 			it( title='JSessionID cookie should not be set by cfthread, no session', body=function( currentSpec ) {
 				uri = createURI("LDEV2308");
 				local.result = _InternalRequest(
-					template : "#uri#\no-session\testThreadCookies.cfm"
+					template : "#uri#/no-session/testThreadCookies.cfm"
 				);
 				//dumpResult(local.result);
 			 	expect( structCount(result.cookies ) ).toBe( 0 );
@@ -16,7 +16,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="thread,cookie,sess
 			it( title='JSessionID cookie should not be set by cfthread, set no client cookies', body=function( currentSpec ) {
 				uri = createURI("LDEV2308");
 				local.result = _InternalRequest(
-					template : "#uri#\no-cookies\testThreadCookies.cfm"
+					template : "#uri#/no-cookies/testThreadCookies.cfm"
 				);
 				//dumpResult(local.result);
 			 	expect( structCount(result.cookies ) ).toBe( 0 );
@@ -27,7 +27,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="thread,cookie,sess
 			it( title='JSessionID cookie should not be set by cfthread, cfml session', body=function( currentSpec ) {
 				uri = createURI("LDEV2308");
 				local.result = _InternalRequest(
-					template : "#uri#\cfml-session\testThreadCookies.cfm"
+					template : "#uri#/cfml-session/testThreadCookies.cfm"
 				);
 				//dumpResult(local.result);
 				expect( structCount(result.cookies ) ).toBeGT( 0 );
@@ -36,16 +36,17 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="thread,cookie,sess
 			});
 
 			// test disabled, see LDEV-4030
-			it( title='CFID cookie should not be set by cfthread, j2ee session', skip=true, body=function( currentSpec ) {
+			it( title='CFID cookie should not be set by cfthread, without j2ee session', skip=true, body=function( currentSpec ) {
 				uri = createURI("LDEV2308");
 				local.result = _InternalRequest(
-					template : "#uri#\j2ee-session\testThreadCookies.cfm"
+					template : "#uri#/j2ee-session/testThreadCookies.cfm"
 				);
 				dumpResult(local.result);
 				expect( structCount(result.cookies ) ).toBe( 1 );
 				expect( structKeyExists(result.cookies, "CFID" ) ).toBeFalse();
 				expect( structKeyExists(result.cookies, "JsessionId" ) ).toBeTrue();
 			});
+
 		});
 	}
 
@@ -55,14 +56,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="thread,cookie,sess
 		// systemOutput("Headers: " & serializeJson(r.headers), true);
 		// systemOutput("", true);
 	}
-	
+
 	private string function createURI(string calledName){
 		var baseURI = "/test/#listLast(getDirectoryFromPath(getCurrentTemplatePath()),"\/")#/";
 		return baseURI&""&calledName;
 	}
 }
-
-
-
-
-

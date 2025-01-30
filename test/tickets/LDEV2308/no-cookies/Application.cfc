@@ -1,8 +1,7 @@
 component {
 	this.setClientCookies = false;
 	this.sessionManagement = true;
-	this.name="session-no-cookies";
-
+	this.name="ldev-2308-session-no-cookies";
 	
 	public function onRequestStart() {
 		setting requesttimeout=10;
