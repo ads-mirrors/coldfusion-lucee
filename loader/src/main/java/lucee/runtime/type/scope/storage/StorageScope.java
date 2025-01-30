@@ -18,7 +18,9 @@
  **/
 package lucee.runtime.type.scope.storage;
 
+import java.util.Map;
 import lucee.runtime.config.Config;
+import lucee.runtime.type.Collection;
 import lucee.runtime.type.scope.SharedScope;
 
 /**
@@ -100,4 +102,9 @@ public interface StorageScope extends SharedScope {
 	public String generateToken(String key, boolean forceNew);
 
 	public boolean verifyToken(String token, String key, boolean remove);
+
+	public Map<Collection.Key, String> getTokens();
+
+	public void setTokens(Map<Collection.Key, String> tokens);
+
 }

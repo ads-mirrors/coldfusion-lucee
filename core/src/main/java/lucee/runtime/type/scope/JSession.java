@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpSession;
@@ -54,7 +55,7 @@ public final class JSession extends ScopeSupport implements Session, HttpSession
 	private transient HttpSession httpSession;
 	private long lastAccess;
 	private long created;
-	private final Struct _tokens = new StructImpl();
+	private final Struct _tokens = new StructImpl(Struct.TYPE_SYNC, 4);
 	private Component component;
 
 	/**
@@ -182,6 +183,20 @@ public final class JSession extends ScopeSupport implements Session, HttpSession
 	public boolean verifyToken(String token, String key, boolean remove) {
 		return ScopeUtil.verifyCsrfToken(_tokens, token, key, remove);
 	}
+
+	public Struct getTokens(){
+		return _tokens;
+	};
+
+	public void setTokens(Map<Collection.Key, String> newTokens){
+		_tokens.clear();
+		Iterator<Entry<Key, String>> it = newTokens.entrySet().iterator();
+		Entry<Key, String> e;
+		while (it.hasNext()) {
+			e = it.next();
+			_tokens.setEL(e.getKey(), e.getValue());
+		}
+	};
 
 	public void setComponent(Component component) {
 		this.component = component;

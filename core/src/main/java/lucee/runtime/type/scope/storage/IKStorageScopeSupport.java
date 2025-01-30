@@ -97,7 +97,7 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 	protected int type;
 	private long timeSpan = -1;
 	private String storage;
-	private Struct tokens = new StructImpl(Struct.TYPE_SYNC);
+	private Struct tokens = new StructImpl(Struct.TYPE_SYNC, 4);
 	private long lastModified;
 
 	private IKHandler handler;
@@ -600,6 +600,20 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 	public boolean verifyToken(String token, String key, boolean remove) {
 		return ScopeUtil.verifyCsrfToken(tokens, token, key, remove);
 	}
+
+	public Struct getTokens(){
+		return tokens;
+	};
+
+	public void setTokens(Map<Collection.Key, String> tokens){
+		tokens.clear();
+		Iterator<Entry<Key, String>> it = tokens.entrySet().iterator();
+		Entry<Key, String> e;
+		while (it.hasNext()) {
+			e = it.next();
+			tokens.put(e.getKey(), e.getValue());
+		}
+	};
 
 	public static void merge(Map<Key, IKStorageScopeItem> local, Map<Key, IKStorageScopeItem> storage) {
 		Iterator<Entry<Key, IKStorageScopeItem>> it = local.entrySet().iterator();
