@@ -24,6 +24,7 @@ public class ClaudeEngine extends AIEngineSupport {
 	private static final int DEFAULT_CONVERSATION_SIZE_LIMIT = 100;
 	private static final String DEFAULT_VERSION = "2023-06-01";
 	private static final String DEFAULT_CHARSET = "UTF-8";
+	private static final String DEFAULT_MODEL = "claude-3-sonnet-20240229";
 
 	private String label = "Claude";
 	private Struct properties;
@@ -68,8 +69,8 @@ public class ClaudeEngine extends AIEngineSupport {
 
 		// Model
 		// TODO read available models and throw exception
-		model = Caster.toString(properties.get(KeyConstants._model, "claude-3-sonnet-20240229"), "claude-3-sonnet-20240229");
-
+		model = Caster.toString(properties.get(KeyConstants._model, DEFAULT_MODEL), DEFAULT_MODEL);
+		if (StringUtil.isEmpty(model, true)) model = DEFAULT_MODEL;
 		// System Message
 		systemMessage = Caster.toString(properties.get(KeyConstants._message, null), null);
 		// version

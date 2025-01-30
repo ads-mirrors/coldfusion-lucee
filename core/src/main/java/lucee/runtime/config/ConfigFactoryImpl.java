@@ -3883,7 +3883,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		// AI Drivers
 		if (doNew) {
 			Resource aiDir = configDir.getRealResource("context/admin/aidriver");
-			create("/resource/context/admin/aidriver/", new String[] { "AI.cfc", "Gemini.cfc", "OpenAI.cfc", "Field.cfc", "Group.cfc" }, aiDir, doNew);
+			create("/resource/context/admin/aidriver/", new String[] { "AI.cfc", "Claude.cfc", "Gemini.cfc", "OpenAI.cfc", "Field.cfc", "Group.cfc" }, aiDir, doNew);
 		}
 
 		// Mail Server Drivers
