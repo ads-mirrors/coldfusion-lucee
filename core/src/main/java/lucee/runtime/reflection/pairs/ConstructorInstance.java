@@ -26,6 +26,7 @@ import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
+import lucee.runtime.reflection.Reflector;
 import lucee.transformer.dynamic.DynamicInvoker;
 import lucee.transformer.dynamic.meta.Clazz;
 import lucee.transformer.dynamic.meta.Constructor;
@@ -52,7 +53,7 @@ public final class ConstructorInstance {
 	 */
 	public ConstructorInstance(Class clazz, Object[] args, boolean convertComparsion) {
 		this.clazz = clazz;
-		this.args = args;
+		this.args = Reflector.cleanArgs(args);
 		this.convertComparsion = convertComparsion;
 	}
 

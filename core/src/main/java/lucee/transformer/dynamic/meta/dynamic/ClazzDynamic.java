@@ -275,6 +275,7 @@ public class ClazzDynamic extends Clazz {
 
 	@Override
 	public Method getMethod(String methodName, Object[] args, boolean nameCaseSensitive, boolean convertArgument, boolean convertComparsion, Method defaultValue) {
+
 		// like
 		Class[] parameterTypes;
 		outer: for (Method fm: methods) {
@@ -404,7 +405,6 @@ public class ClazzDynamic extends Clazz {
 
 	@Override
 	public Constructor getConstructor(Object[] args, boolean convertArgument, boolean convertComparsion, Constructor defaultValue) {
-
 		// like
 		Class[] parameterTypes;
 		outer: for (Constructor fm: constructors) {
@@ -823,5 +823,4 @@ public class ClazzDynamic extends Clazz {
 		}
 		return o;
 	}
-
 }
