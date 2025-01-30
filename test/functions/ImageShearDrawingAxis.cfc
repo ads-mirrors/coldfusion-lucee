@@ -1,4 +1,4 @@
-component extends="org.lucee.cfml.test.LuceeTestCase"{
+component extends="org.lucee.cfml.test.LuceeTestCase" labels="image" {
 
 	function beforeAll(){
 		variables.path = getTempDirectory() & "ImageShearDrawingAxis/";
@@ -11,7 +11,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 		describe( "test case for ImageShearDrawingAxis", function() {
 
 			it(title = "Checking with ImageShearDrawingAxis", body = function( currentSpec ) {
-				newimg = imageNew("",152,152,"rgb","A52A2A");
+				var newimg = imageNew("",152,152,"rgb","A52A2A");
 				ImageShearDrawingAxis(newimg,1.1,0.4);
 				ImageDrawRect(newimg,40,50,70,50,"yes");
 				cfimage( action = "write", source = newimg, destination = path&'sheardrawImg.jpg', overwrite = "yes");
@@ -19,7 +19,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			});
 
 			it(title = "Checking with Image.ShearDrawingAxis()", body = function( currentSpec ) {
-				imgObj = imageNew("",200,200,"rgb","149c82");
+				var imgObj = imageNew("",200,200,"rgb","149c82");
 				imgObj.shearDrawingAxis(0.4,0.2);
 				imgObj.drawRect(40,50,70,50,"yes");
 				cfimage( action = "write", source = imgObj, destination = path&'sheardrawObj.png', overwrite = "yes" );

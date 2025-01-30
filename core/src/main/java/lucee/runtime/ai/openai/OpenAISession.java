@@ -57,6 +57,7 @@ public class OpenAISession extends AISessionSupport {
 		if (listener == null) listener = DEV_NULL_LISTENER;
 
 		try {
+
 			Struct msg;
 			Array arr = new ArrayImpl();
 			// add system
@@ -93,7 +94,13 @@ public class OpenAISession extends AISessionSupport {
 			sct.set(KeyConstants._model, openaiEngine.getModel());
 			sct.set(KeyConstants._messages, arr);
 			sct.set(KeyConstants._stream, listener != null);
-			if (openaiEngine.temperature != null) sct.set(KeyConstants._temperature, openaiEngine.temperature);
+
+			// Add temperature if set in engine
+			Double temperature = openaiEngine.getTemperature();
+			if (temperature != null) {
+				sct.set(KeyConstants._temperature, temperature);
+			}
+
 			// TODO response_format
 			// TODO frequency_penalty
 			// TODO logit_bias

@@ -7,24 +7,27 @@
 	stText.Settings.ai.default="Default";	
 	stText.Settings.ai.defaultTitle="Default AI connections";
 	stText.Settings.ai.defaultDesc="In addition to explicitly using AI connections, you can also set default connections for specific functionalities.";
+	stText.Settings.ai.titleCreate="Create a new AI connection";
+	stText.Settings.ai.descCreate="Configure a connection to an AI provider of your choice to access their language models and features. Each provider offers different capabilities to enhance your applications.";
+	stText.Settings.cache.typeDesc="Choose your AI provider to connect to their models and services. Each option offers different capabilities and some, like OpenAI, support multiple platforms through a compatible API.";
+
+	stText.Settings.ai.default="Default";
+	stText.Settings.ai.defaultDesc="Choose how this AI connection will be used. You can bind it to specific functionality like exception analysis or documentation support.";
 	
-	stText.Settings.ai.descCreate="Set up a new connection to an AI engine, allowing you to integrate and manage different AI models within your environment.";
-	stText.Settings.cache.typeDesc="Select the type of AI engine you want to connect to, allowing integration with various AI models and platforms."
-
-
 	stText.Settings.ai.defaultTypeException="Exception";
-	stText.Settings.ai.defaultTypeExceptionDesc="Lucee will use that connection to analyze any exceptions that are thrown and displayed in the error output. Lucee will detact secrets before sending it to the AI and log everything it send to the ai to the ai.log.";
-	stText.Settings.ai.defaultTypeDocumentation="Documentation";
-	stText.Settings.ai.defaultTypeExceptionDesc="Lucee will use that connection to provide documentation information in the Monitor part of the Lucee request.";
+	stText.Settings.ai.defaultTypeExceptionDesc="Use this connection to analyze exceptions in error templates. Sensitive information is automatically removed before sending to the AI, and all interactions are logged to ai.log.";
 	
+	stText.Settings.ai.defaultTypeDocumentation="Documentation";
+	stText.Settings.ai.defaultTypeDocumentationDesc="Use this connection to provide additional documentation context in the Monitor section of the requests.";
 
-
+	stText.Settings.ai.NameDesc="you can use this name to reference this connection in our code.";
 	error.message="";
 	error.detail="";
 	param name="url.action2" default="list";
 	param name="form.mainAction" default="none";
 	param name="form.subAction" default="none";
 	defaults=["exception","documentation"];
+
 
 
 	sctDefaults=[:];

@@ -62,6 +62,7 @@ public class GeminiEngine extends AIEngineSupport {
 	String systemMessage;
 	String baseURL = null;
 	private int conversationSizeLimit = DEFAULT_CONVERSATION_SIZE_LIMIT;
+	public Double temperature = null;
 
 	@Override
 	public AIEngine init(AIEngineFactory factory, Struct properties) throws PageException {
@@ -85,6 +86,13 @@ public class GeminiEngine extends AIEngineSupport {
 
 		// conversation Size Limit
 		conversationSizeLimit = Caster.toIntValue(properties.get("conversationSizeLimit", null), DEFAULT_CONVERSATION_SIZE_LIMIT);
+
+		// temperature
+		temperature = Caster.toDouble(properties.get(KeyConstants._temperature, null), null);
+		if (temperature != null && (temperature < 0D || temperature > 1D)) {
+			throw new ApplicationException("temperature has to be a number between 0 and 1, now it is [" + temperature + "]");
+		}
+
 		// location
 		location = Caster.toStringTrim(properties.get(KeyConstants._location, null), DEFAULT_LOCATION);
 		if (Util.isEmpty(location, true)) location = DEFAULT_LOCATION;
@@ -206,5 +214,10 @@ public class GeminiEngine extends AIEngineSupport {
 	@Override
 	public int getConversationSizeLimit() {
 		return conversationSizeLimit;
+	}
+
+	@Override
+	public Double getTemperature() {
+		return temperature;
 	}
 }

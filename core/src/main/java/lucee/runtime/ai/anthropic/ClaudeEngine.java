@@ -38,6 +38,7 @@ public class ClaudeEngine extends AIEngineSupport {
 	private int connectTimeout;
 	private String charset;
 	ProxyData proxy = null;
+	private int conversationSizeLimit = DEFAULT_CONVERSATION_SIZE_LIMIT;
 
 	@Override
 	public AIEngine init(AIEngineFactory factory, Struct properties) throws PageException {
@@ -70,6 +71,8 @@ public class ClaudeEngine extends AIEngineSupport {
 		if (temperature != null && (temperature < 0D || temperature > 1D)) {
 			throw new ApplicationException("temperature has to be a number between 0 and 1, now it is [" + temperature + "]");
 		}
+		// conversation Size Limit
+		conversationSizeLimit = Caster.toIntValue(properties.get("conversationSizeLimit", null), DEFAULT_CONVERSATION_SIZE_LIMIT);
 
 		// Model
 		// TODO read available models and throw exception
@@ -140,7 +143,11 @@ public class ClaudeEngine extends AIEngineSupport {
 
 	@Override
 	public int getConversationSizeLimit() {
-		// TODO Auto-generated method stub
-		return DEFAULT_CONVERSATION_SIZE_LIMIT;
+		return conversationSizeLimit;
+	}
+
+	@Override
+	public Double getTemperature() {
+		return temperature;
 	}
 }

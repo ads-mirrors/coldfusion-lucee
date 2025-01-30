@@ -56,6 +56,12 @@ public class GeminiSession extends AISessionSupport {
 			Array contents = new ArrayImpl();
 			root.set(KeyConstants._contents, contents);
 
+			// Add temperature if set in engine
+			Double temperature = geminiEngine.getTemperature();
+			if (temperature != null) {
+				root.set("temperature", temperature);
+			}
+
 			if (!StringUtil.isEmpty(systemMessage, true)) {
 				contents.append(createParts("user", systemMessage));
 			}

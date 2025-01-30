@@ -39,6 +39,23 @@ component extends="AI" {
 			description = "Initial system message sent to the AI when initializing a session.",
 			type = "textarea"
 		)
+        ,field(displayName = "Conversation History Limit",
+            name = "conversationSizeLimit",
+            defaultValue = "100",
+            required = true,
+            description = "Maximum number of question-answer pairs to keep in the conversation history. Once reached, older messages will be removed.",
+            type = "select",
+            values = "10,50,100,200,500"
+        )
+        ,field(displayName = "Temperature",
+            name = "temperature",
+            defaultValue = "0.7",
+            required = false,
+            description = "Controls response randomness (0.0 to 1.0). Lower values make responses more focused and deterministic, higher values make them more creative and varied.",
+            type = "select",
+            values = "0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0"
+        )
+		,group("Timeout", "")
 		,field(displayName = "Connect Timeout",
 			name = "connectTimeout",
 			defaultValue = "2000",
@@ -66,7 +83,11 @@ component extends="AI" {
 		return "OpenAI";
 	}
 
+	public string function getLabelLong() {
+		return "OpenAI (ChatGPT, Ollama, Perplexity, Deepseek)";
+	}
+
 	public string function getDescription() {
-		return "The OpenAI interface enables integration with AI models like ChatGPT but also supports other engines like Ollama.";
+		return "Connect to OpenAI's models (https://platform.openai.com) and other AI providers that support the OpenAI-compatible REST API (like Ollama, Perplexity, Deepseek)."
 	}
 }

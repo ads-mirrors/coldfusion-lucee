@@ -45,7 +45,6 @@
 		</cfcase>
 	</cfswitch>
 	<cfcatch>
-		<cfrethrow>
 		<cfset error.message=cfcatch.message>
 		<cfset error.detail=cfcatch.Detail>
 		<cfset error.cfcatch=cfcatch>
@@ -86,10 +85,13 @@ Redirtect to entry --->
 	<cfset connection.class=form.class>
 	<cfset connection.storage=false>
 	<cfset connection.default=false>
-	<cfset connection.name=form._name>
 	<cfset connection.custom=struct()>
 	<cfset driver=drivers[form.class]>
 	<cfset btnClearCache = "">
+	<!--- <cfset connection.name=lcase(driver.getLabel())&"_"&FormatBaseN(randRange(1,999999),36)> --->
+	<cfset connection.name="">
+
+	
 </cfif>
 <cftry>
 	<cfset stVeritfyMessages = StructNew()>
@@ -139,10 +141,9 @@ Redirtect to entry --->
 		</cfswitch>
 	</cfif>
 	<cfcatch>
-		<cfrethrow>
-		<!--- <cfset error.message=cfcatch.message>
+		<cfset error.message=cfcatch.message>
 		<cfset error.detail=cfcatch.Detail>
-		<cfset error.cfcatch=cfcatch>--->
+		<cfset error.cfcatch=cfcatch>
 	</cfcatch>
 </cftry>
 <!--- 
@@ -154,20 +155,30 @@ Redirtect to entry --->
 	<!--- 
 	Error Output --->
 	<cfset printError(error)>
-	<h2>#driver.getLabel()# (#connection.class#)</h2>
+	<h2><cfif structKeyExists(driver,"getLabelLong")>#driver.getLabelLong()#<cfelse>#driver.getLabel()#</cfif></h2>
 	<div class="pageintro">#driver.getDescription()#</div>
 	<cfformClassic onerror="customError" action="#request.self#?action=#url.action#&action2=create#iif(isDefined('url.name'),de('&name=##url.name##'),de(''))#" method="post">
 		<cfinputClassic type="hidden" name="class" value="#driver.getClass()#">
 		<cfif !isNull(driver.getBundleName)><cfinputClassic type="hidden" name="bundleName" value="#driver.getBundleName()#"></cfif>
 		<cfif !isNull(driver.getBundleVersion)><cfinputClassic type="hidden" name="bundleVersion" value="#driver.getBundleVersion()#"></cfif>
 		
-		<cfinputClassic type="hidden" name="name" value="#connection.name#" >
 		<cfinputClassic type="hidden" name="_name" value="#connection.name#" >
 		<table class="maintbl">
 			<tbody>
 				<tr>
 					<th scope="row">#stText.Settings.cache.Name#</th>
-					<td>#connection.name#</td>
+					<td>
+						<cfif isNew>
+							<cfinputClassic type="text" 
+									name="name" 
+									value="#connection.name#" class="large" style="width:100%" required="true" 
+									message="Missing value for field name">
+							
+						<cfelse>
+						<h3>#connection.name#</h3>
+						<cfinputClassic type="hidden" name="name" value="#connection.name#" >
+						</cfif><div class="comment">#stText.Settings.ai.NameDesc#</div>
+					</td>
 				</tr>
 			</tbody>
 		</table>
@@ -268,7 +279,7 @@ Redirtect to entry --->
 								</cfif>
 								<select name="custom_#field.getName()#">
 									<cfif not field.getRequired()><option value=""> ---------- </option></cfif>
-									<cfif len(trim(default))>
+									<cfif true>
 										<cfloop index="item" list="#field.getValues()#">
 											<option <cfif item EQ default>selected="selected"</cfif> >#item#</option>
 										</cfloop>
@@ -307,23 +318,32 @@ Redirtect to entry --->
 						</td>
 					</tr>
 				</cfloop>
+				</tbody>
+			</table>
+			<h2>#stText.Settings.ai.default#</h2>
+			<div class="itemintro">#stText.Settings.ai.defaultDesc#</div>
+			<table class="maintbl">
+				<tbody>
 				<tr>
-					<th scope="row">#stText.Settings.cache.default#</th>
 					<td>
-						<select name="default">
-							<option value="">------</option>
-							<cfloop item="type" array="#defaults#">
-								<option <cfif connection.default EQ type>selected="selected"</cfif> value="#type#">#stText.Settings.cache['defaultType'& type]?:ucFirst(type)#</option>
+						<table>
+							<cfloop array="#defaults#" item="type" >
+								<tr>
+									<td style="border:0;padding:0px;margin:0px"><input <cfif connection.default EQ type>checked="checked"</cfif> type="radio" class="radio" name="default" value="#type#"></td>
+									<td style="border:0;padding:3px;margin:0px">
+										<h3>#stText.Settings.ai['defaultType'& type]?:ucFirst(type)#</h3>
+										<div>#stText.Settings.ai['defaultType'& type& 'Desc']?:''#</div>
+									</td>
+								</tr>
 							</cfloop>
-						</select>
-						<div class="comment">#stText.Settings.cache.defaultDesc#</div>
+						</table>
 					</td>
 				</tr>
 			</tbody>
 			<tfoot>
 				<tr>
 					<td colspan="2">
-						<input type="submit" class="bs button submit" name="mainAction" value="#stText.Buttons.submit#">
+						<input type="submit" class="bl button submit" name="mainAction" value="#stText.Buttons.submit#">
 						<input type="submit" class="br button submit" name="mainAction" value="#stText.Buttons.Cancel#">
 					</td>
 				</tr>
