@@ -21,7 +21,9 @@ public interface AISession {
 
 	public AIEngine getEngine();
 
-	public long getTimeout();
+	public int getSocketTimeout();
+
+	public int getConnectTimeout();
 
 	public void release() throws PageException;
 }

@@ -34,8 +34,8 @@ public class ClaudeEngine extends AIEngineSupport {
 	private String systemMessage;
 	private String version;
 	private Double temperature;
-	private long timeout;
-	private long initTimeout;
+	private int socketTimeout;
+	private int connectTimeout;
 	private String charset;
 	ProxyData proxy = null;
 
@@ -45,21 +45,25 @@ public class ClaudeEngine extends AIEngineSupport {
 		this.properties = properties;
 
 		// API Key
-		apiKey = Caster.toString(properties.get(KeyConstants._apiKey, null), null);
+		apiKey = Caster.toStringTrim(properties.get(KeyConstants._apiKey, null), null);
 		if (Util.isEmpty(apiKey, true)) throw new ApplicationException("the property [apiKey] is required for Claude");
 
 		// Base URL
-		String urlStr = Caster.toString(properties.get(KeyConstants._URL, DEFAULT_URL), DEFAULT_URL);
+		String urlStr = Caster.toStringTrim(properties.get(KeyConstants._URL, DEFAULT_URL), DEFAULT_URL);
+		if (Util.isEmpty(urlStr, true)) urlStr = DEFAULT_URL;
 		try {
-			baseURL = HTTPUtil.toURL(urlStr.trim(), HTTPUtil.ENCODED_AUTO);
+			baseURL = HTTPUtil.toURL(urlStr, HTTPUtil.ENCODED_AUTO);
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);
 		}
 
-		// timeout
-		timeout = Caster.toLongValue(properties.get(KeyConstants._timeout, null), DEFAULT_TIMEOUT);
-		initTimeout = Caster.toLongValue(properties.get("initTimeout", null), DEFAULT_TIMEOUT * 2);
+		// Timeout
+		connectTimeout = Caster.toIntValue(properties.get("connectTimeout", null), DEFAULT_CONNECT_TIMEOUT);
+		if (connectTimeout <= 0) connectTimeout = DEFAULT_CONNECT_TIMEOUT;
+
+		socketTimeout = Caster.toIntValue(properties.get("socketTimeout", null), DEFAULT_SOCKET_TIMEOUT);
+		if (socketTimeout <= 0) socketTimeout = DEFAULT_SOCKET_TIMEOUT;
 
 		// temperature
 		temperature = Caster.toDouble(properties.get(KeyConstants._temperature, null), null);
@@ -69,22 +73,26 @@ public class ClaudeEngine extends AIEngineSupport {
 
 		// Model
 		// TODO read available models and throw exception
-		model = Caster.toString(properties.get(KeyConstants._model, DEFAULT_MODEL), DEFAULT_MODEL);
+		model = Caster.toStringTrim(properties.get(KeyConstants._model, DEFAULT_MODEL), DEFAULT_MODEL);
 		if (StringUtil.isEmpty(model, true)) model = DEFAULT_MODEL;
+
 		// System Message
-		systemMessage = Caster.toString(properties.get(KeyConstants._message, null), null);
+		systemMessage = Caster.toStringTrim(properties.get(KeyConstants._message, null), null);
+
 		// version
-		version = Caster.toString(properties.get(KeyConstants._version, DEFAULT_VERSION), DEFAULT_VERSION);
+		version = Caster.toStringTrim(properties.get(KeyConstants._version, DEFAULT_VERSION), DEFAULT_VERSION);
+		if (StringUtil.isEmpty(version, true)) version = DEFAULT_VERSION;
+
 		// charset
-		charset = Caster.toString(properties.get(KeyConstants._charset, null), DEFAULT_CHARSET);
+		charset = Caster.toStringTrim(properties.get(KeyConstants._charset, null), DEFAULT_CHARSET);
 		if (Util.isEmpty(charset, true)) charset = DEFAULT_CHARSET;
 
 		return this;
 	}
 
 	@Override
-	public AISession createSession(String initialMessage, long timeout) {
-		return new ClaudeSession(this, StringUtil.isEmpty(initialMessage, true) ? systemMessage : initialMessage.trim(), timeout);
+	public AISession createSession(String initialMessage, int connectTimeout, int socketTimeout) {
+		return new ClaudeSession(this, StringUtil.isEmpty(initialMessage, true) ? systemMessage : initialMessage.trim(), connectTimeout, socketTimeout);
 	}
 
 	@Override
@@ -98,8 +106,13 @@ public class ClaudeEngine extends AIEngineSupport {
 	}
 
 	@Override
-	public long getTimeout() {
-		return timeout;
+	public int getSocketTimeout() {
+		return socketTimeout;
+	}
+
+	@Override
+	public int getConnectTimeout() {
+		return connectTimeout;
 	}
 
 	public URL getBaseURL() {

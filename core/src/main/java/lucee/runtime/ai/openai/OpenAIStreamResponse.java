@@ -51,7 +51,6 @@ public class OpenAIStreamResponse implements Response {
 		if (raw == null) raw = part;
 		// raw.appendEL(part);
 		Array arr = Caster.toArray(part.get("choices", null), null);
-		// print.e(arr);
 		if (arr == null) return;
 		Struct sct = Caster.toStruct(arr.get(1, null), null);
 		if (sct == null) return;

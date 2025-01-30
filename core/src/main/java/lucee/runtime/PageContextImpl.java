@@ -4255,11 +4255,11 @@ public final class PageContextImpl extends PageContext {
 	}
 
 	public AISession createAISession(String nameAI, String systemMessage) throws PageException {
-		return getAIEngine(nameAI).createSession(systemMessage, -1);
+		return getAIEngine(nameAI).createSession(systemMessage, -1, -1);
 	}
 
-	public AISession createAISession(String nameAI, String systemMessage, long timeout) throws PageException {
-		return getAIEngine(nameAI).createSession(systemMessage, timeout);
+	public AISession createAISession(String nameAI, String systemMessage, int connectTimeout, int socketTimeout) throws PageException {
+		return getAIEngine(nameAI).createSession(systemMessage, connectTimeout, socketTimeout);
 	}
 
 	public String getNameFromDefault(String defaultName) throws PageException {

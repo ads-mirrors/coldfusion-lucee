@@ -10,7 +10,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -23,14 +25,10 @@ import org.apache.http.util.EntityUtils;
 
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.IOUtil;
-import lucee.commons.io.res.ContentType;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.StringUtil;
+import lucee.commons.lang.mimetype.MimeType;
 import lucee.commons.net.HTTPUtil;
-import lucee.commons.net.http.HTTPResponse;
-import lucee.commons.net.http.Header;
-import lucee.commons.net.http.httpclient.HTTPEngine4Impl;
-import lucee.commons.net.http.httpclient.HeaderImpl;
 import lucee.loader.util.Util;
 import lucee.runtime.ai.AIEngine;
 import lucee.runtime.ai.AIEngineFactory;
@@ -40,6 +38,7 @@ import lucee.runtime.ai.AIFile;
 import lucee.runtime.ai.AIFileSupport;
 import lucee.runtime.ai.AIModel;
 import lucee.runtime.ai.AISession;
+import lucee.runtime.ai.AISessionSupport;
 import lucee.runtime.ai.AIUtil;
 import lucee.runtime.converter.JSONConverter;
 import lucee.runtime.converter.JSONDateFormat;
@@ -120,8 +119,8 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 
 	Struct properties;
 	String secretKey;
-	long timeout = DEFAULT_TIMEOUT;
-	long initTimeout = DEFAULT_TIMEOUT * 2;
+	int socketTimeout = DEFAULT_SOCKET_TIMEOUT;
+	int connectTimeout = DEFAULT_CONNECT_TIMEOUT;
 	String charset;
 	ProxyData proxy = null;
 	Map<String, String> formfields = null;
@@ -140,21 +139,21 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 
 		// URL
 		/// we support some hard coded types to keep it simple
-		String str = Caster.toString(properties.get(KeyConstants._type, null), null);
+		String str = Caster.toStringTrim(properties.get(KeyConstants._type, null), null);
 		if (!Util.isEmpty(str, true)) {
-			if ("chatgpt".equals(str.trim()) || "openai".equals(str.trim())) {
+			if ("chatgpt".equals(str) || "openai".equals(str)) {
 				label = "ChatGPT";
 				baseURL = DEFAULT_URL_OPENAI;
 			}
-			else if ("ollama".equals(str.trim())) {
+			else if ("ollama".equals(str)) {
 				label = "Ollama";
 				baseURL = DEFAULT_URL_OLLAMA;
 			}
-			else if ("perplexity".equals(str.trim())) {
+			else if ("perplexity".equals(str)) {
 				label = "Perplexity";
 				baseURL = DEFAULT_URL_PERPLEXITY;
 			}
-			else if ("deepseek".equals(str.trim())) {
+			else if ("deepseek".equals(str)) {
 				label = "DeepSeek";
 				baseURL = DEFAULT_URL_DEEPSEEK;
 			}
@@ -163,7 +162,7 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 					"ATM only 4 types are supported [deepseek, openai, ollama, perplexity], for any other endpoint simply define the attribute `url` that looks like this [https://api.lucee.com/v1/].");
 		}
 		else {
-			str = Caster.toString(properties.get(KeyConstants._URL, null), null);
+			str = Caster.toStringTrim(properties.get(KeyConstants._URL, null), null);
 			if (!Util.isEmpty(str, true)) {
 				if (!str.endsWith("/")) str += "/";
 				try {
@@ -177,22 +176,26 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 		}
 
 		// secret key
-		str = Caster.toString(properties.get(KeyConstants._secretKey, null), null);
-		if (!Util.isEmpty(str, true)) secretKey = str.trim();
+		str = Caster.toStringTrim(properties.get(KeyConstants._secretKey, null), null);
+		if (!Util.isEmpty(str, true)) secretKey = str;
 
 		// conversation Size Limit
 		conversationSizeLimit = Caster.toIntValue(properties.get("conversationSizeLimit", null), DEFAULT_CONVERSATION_SIZE_LIMIT);
 
 		// timeout
-		timeout = Caster.toLongValue(properties.get(KeyConstants._timeout, null), DEFAULT_TIMEOUT);
-		initTimeout = Caster.toLongValue(properties.get("initTimeout", null), DEFAULT_TIMEOUT * 2);
-		// charset
-		charset = Caster.toString(properties.get(KeyConstants._charset, null), DEFAULT_CHARSET);
-		if (Util.isEmpty(charset, true)) charset = DEFAULT_CHARSET;
-		// model
-		model = Caster.toString(properties.get(KeyConstants._model, null), null);
-		if (Util.isEmpty(model, true)) {
+		connectTimeout = Caster.toIntValue(properties.get("connectTimeout", null), DEFAULT_CONNECT_TIMEOUT);
+		if (connectTimeout <= 0) connectTimeout = DEFAULT_CONNECT_TIMEOUT;
 
+		socketTimeout = Caster.toIntValue(properties.get("socketTimeout", null), DEFAULT_SOCKET_TIMEOUT);
+		if (socketTimeout <= 0) socketTimeout = DEFAULT_SOCKET_TIMEOUT;
+
+		// charset
+		charset = Caster.toStringTrim(properties.get(KeyConstants._charset, null), DEFAULT_CHARSET);
+		if (Util.isEmpty(charset, true)) charset = DEFAULT_CHARSET;
+
+		// model
+		model = Caster.toStringTrim(properties.get(KeyConstants._model, null), null);
+		if (Util.isEmpty(model, true)) {
 			// nice to have
 			String appendix = "";
 			try {
@@ -201,7 +204,7 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 					model = models.get(0);
 				}
 				else if (models.size() == 0) {
-					appendix = " There are no models availbale.";
+					appendix = " There are no models available.";
 				}
 				else {
 					appendix = " Available models for this engine are [" + AIUtil.getModelNamesAsStringList(this) + "].";
@@ -211,6 +214,7 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 			}
 			if (Util.isEmpty(model, true)) throw new ApplicationException("the property [model] is required for a OpenAI Engine!." + appendix);
 		}
+
 		// temperature
 		temperature = Caster.toDouble(properties.get(KeyConstants._temperature, null), null);
 		if (temperature != null && (temperature < 0D || temperature > 1D)) {
@@ -218,17 +222,18 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 		}
 
 		// message
-		systemMessage = Caster.toString(properties.get(KeyConstants._message, null), null);
+		systemMessage = Caster.toStringTrim(properties.get(KeyConstants._message, null), null);
+		if (!Util.isEmpty(systemMessage, true)) systemMessage = systemMessage.trim();
 
 		// validate
 		boolean validate = Caster.toBooleanValue(properties.get(KeyConstants._validate, null), true);
-		if (validate) AIUtil.valdate(this, initTimeout);
+		if (validate) AIUtil.valdate(this, getConnectTimeout(), getSocketTimeout());
 		return this;
 	}
 
 	@Override
-	public AISession createSession(String inialMessage, long timeout) {
-		return new OpenAISession(this, StringUtil.isEmpty(inialMessage, true) ? systemMessage : inialMessage.trim(), timeout);
+	public AISession createSession(String inialMessage, int connectTimeout, int socketTimeout) {
+		return new OpenAISession(this, StringUtil.isEmpty(inialMessage, true) ? systemMessage : inialMessage.trim(), connectTimeout, socketTimeout);
 	}
 
 	@Override
@@ -242,8 +247,13 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 	}
 
 	@Override
-	public long getTimeout() {
-		return timeout;
+	public int getSocketTimeout() {
+		return socketTimeout;
+	}
+
+	@Override
+	public int getConnectTimeout() {
+		return connectTimeout;
 	}
 
 	public URL getBaseURL() {
@@ -253,35 +263,43 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 	@Override
 	public List<AIModel> getModels() throws PageException {
 		try {
+			HttpGet get = new HttpGet(new URL(baseURL, "models").toExternalForm());
+			get.setHeader("Authorization", "Bearer " + secretKey);
+			get.setHeader("Content-Type", AIUtil.createJsonContentType(charset));
 
-			URL url = new URL(baseURL, "models");
-			HTTPResponse rsp = HTTPEngine4Impl.get(url, null, null, timeout, false, charset, AIEngineSupport.DEFAULT_USERAGENT, proxy,
-					new Header[] { new HeaderImpl("Authorization", "Bearer " + secretKey), new HeaderImpl("Content-Type", AIUtil.createJsonContentType(charset)) });
+			RequestConfig config = AISessionSupport.setTimeout(RequestConfig.custom(), getConnectTimeout(), getSocketTimeout()).build();
+			get.setConfig(config);
 
-			ContentType ct = rsp.getContentType();
-			if ("application/json".equals(ct.getMimeType())) {
-				String cs = ct.getCharset();
-				if (Util.isEmpty(cs, true)) cs = charset;
-				String str = rsp.getContentAsString(cs);
-				Struct raw = Caster.toStruct(new JSONExpressionInterpreter().interpret(null, str));
-				throwIfError(raw, AIUtil.getStatusCode(rsp));
+			try (CloseableHttpClient httpClient = HttpClients.createDefault(); CloseableHttpResponse response = httpClient.execute(get)) {
 
-				List<AIModel> list = new ArrayList<>();
-				Object o = raw.get(KeyConstants._data, null);
-				if (o != null) {
-					Array data = Caster.toArray(o);
-					Iterator<Object> it = data.valueIterator();
-					while (it.hasNext()) {
-						list.add(new OpenAIModel(Caster.toStruct(it.next()), charset));
+				HttpEntity responseEntity = response.getEntity();
+				Header ct = responseEntity.getContentType();
+				MimeType mt = MimeType.getInstance(ct.getValue());
+
+				String t = mt.getType() + "/" + mt.getSubtype();
+				String cs = mt.getCharset() != null ? mt.getCharset().toString() : charset;
+
+				if ("application/json".equals(t)) {
+					String rawStr = EntityUtils.toString(responseEntity, charset);
+					Struct raw = Caster.toStruct(new JSONExpressionInterpreter().interpret(null, rawStr));
+					throwIfError(raw, AIUtil.getStatusCode(response));
+
+					List<AIModel> list = new ArrayList<>();
+					Object o = raw.get(KeyConstants._data, null);
+					if (o != null) {
+						Array data = Caster.toArray(o);
+						Iterator<Object> it = data.valueIterator();
+						while (it.hasNext()) {
+							list.add(new OpenAIModel(Caster.toStruct(it.next()), charset));
+						}
 					}
+					else if (!CollectionUtil.hasKey(raw, KeyConstants._data)) {
+						throw new ApplicationException("unable to read models from response [" + rawStr + "]");
+					}
+					return list;
 				}
-				else if (!CollectionUtil.hasKey(raw, KeyConstants._data)) {
-					throw new ApplicationException("unable to read models from response [" + str + "]");
-				}
-				return list;
+				throw new ApplicationException("OpenAI API returned unsupported mime type [" + t + "], only [application/json] is supported");
 			}
-			throw new ApplicationException("OpenAI did answer with the mime type [" + ct.getMimeType() + "] that is not supported, only [application/json] is supported");
-
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);

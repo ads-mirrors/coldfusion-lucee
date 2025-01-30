@@ -22,7 +22,7 @@ public final class LuceeAI extends BodyTagTryCatchFinallyImpl {
 	private String name;
 	private AISession session;
 	private boolean throwonerror = true;
-	private long timeout = -1;
+	private int timeout = -1;
 	private String meta;
 
 	@Override
@@ -58,13 +58,13 @@ public final class LuceeAI extends BodyTagTryCatchFinallyImpl {
 	}
 
 	public void setTimeout(Object timeout) throws PageException {
-		if (timeout instanceof TimeSpan) this.timeout = ((TimeSpan) timeout).getMillis();
+		if (timeout instanceof TimeSpan) this.timeout = (int) ((TimeSpan) timeout).getMillis();
 		// seconds
 		else {
 			int i = Caster.toIntValue(timeout);
 			if (i < 0) throw new ApplicationException("invalid value [" + i + "] for attribute timeout, value must be a positive integer greater or equal than 0");
 
-			this.timeout = new TimeSpanImpl(0, 0, 0, i).getMillis();
+			this.timeout = (int) new TimeSpanImpl(0, 0, 0, i).getMillis();
 		}
 	}
 
@@ -79,7 +79,7 @@ public final class LuceeAI extends BodyTagTryCatchFinallyImpl {
 				PageContextImpl pci = ((PageContextImpl) pageContext);
 				String name = throwonerror ? pci.getNameFromDefault(_default.trim()) : pci.getNameFromDefault(_default.trim(), null);
 				if (!throwonerror && name == null) return SKIP_BODY;
-				session = ((PageContextImpl) pageContext).createAISession(name.trim(), message, timeout);
+				session = ((PageContextImpl) pageContext).createAISession(name.trim(), message, timeout, -1);
 				setMeta(session);
 			}
 			else {

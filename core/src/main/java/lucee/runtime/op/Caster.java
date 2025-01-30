@@ -2238,6 +2238,12 @@ public final class Caster {
 		return toString(o, true, defaultValue);
 	}
 
+	public static String toStringTrim(Object o, String defaultValue) {
+		String str = toString(o, true, defaultValue);
+		if (str != null) return str.trim();
+		return str;
+	}
+
 	public static String toString(Object o, boolean executeDefaultToStringMethod, String defaultValue) {
 		if (o instanceof CharSequence) return o.toString();
 		else if (o instanceof Boolean) return toString(((Boolean) o).booleanValue());

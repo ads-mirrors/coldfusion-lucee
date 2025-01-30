@@ -22,7 +22,7 @@ component extends="AI" {
 			name = "model",
 			defaultValue = "claude-3-sonnet-20240229",
 			required = true,
-			description = "Specify the Claude model to use (e.g., claude-3-sonnet-20240229, claude-3-opus-20240229).",
+			description = "Specify the Claude model to use. See https://docs.anthropic.com/claude/docs/models-overview for available models.",
 			type = "text"
 		)
 		,field(displayName = "System Message",
@@ -32,13 +32,21 @@ component extends="AI" {
 			description = "Initial system message for the conversation.",
 			type = "textarea"
 		)
-		,field(displayName = "Timeout",
-			name = "timeout",
+		,field(displayName = "Connect Timeout",
+			name = "connectTimeout",
 			defaultValue = "2000",
 			required = true,
-			description = "Session timeout in milliseconds.",
+			description = "Maximum time to establish initial connection (milliseconds).",
+			type = "select", 
+			values = "500,1000,2000,3000,5000"
+		)
+		,field(displayName = "Socket Timeout", 
+			name = "socketTimeout",
+			defaultValue = "10000",
+			required = true,
+			description = "Maximum time between data packets after connection (milliseconds).",
 			type = "select",
-			values = "500,1000,2000,3000,5000,10000"
+			values = "5000,10000,20000,30000,60000"
 		)
 	];
 
