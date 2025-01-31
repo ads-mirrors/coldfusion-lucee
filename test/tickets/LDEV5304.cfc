@@ -6,7 +6,6 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="thread,cookie,sess
 			it( title='unknown session cookies should be rotated', body=function( currentSpec ) {
 				var uri = createURI("LDEV5304");
 				var cfid = createGUID();
-				systemOutput("", true);
 				local.result = _InternalRequest(
 					template : "#uri#/cfml-session/testUnknownSessionCookies.cfm",
 					cookies: {
@@ -25,7 +24,6 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="thread,cookie,sess
 			it( title='unknown url session cookies should be rotated', body=function( currentSpec ) {
 				var uri = createURI("LDEV5304");
 				var cfid = createGUID();
-				systemOutput("", true);
 				local.result = _InternalRequest(
 					template : "#uri#/cfml-session/testUnknownSessionCookies.cfm",
 					url: {
@@ -52,7 +50,6 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="thread,cookie,sess
 
 	private function _getCookies( result, name ){
 		var headers = result.headers[ "Set-Cookie" ] ?: [];
-		systemOutput(headers, true);
 		var matches = [];
 		for ( var header in headers ){
 			if ( listFirst( header, "=" ) eq arguments.name )
