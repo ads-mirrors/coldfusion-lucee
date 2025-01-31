@@ -5166,7 +5166,6 @@ public final class ConfigAdmin {
 			}
 
 			// update event-gateway-instance
-
 			if (!ArrayUtil.isEmpty(rhext.getEventGatewayInstances())) {
 				Iterator<Map<String, Object>> itl = rhext.getEventGatewayInstances().iterator();
 				Map<String, Object> map;
@@ -5205,6 +5204,7 @@ public final class ConfigAdmin {
 					// print.e(custom);
 
 					if (!StringUtil.isEmpty(id) && (!StringUtil.isEmpty(cfcPath) || (cd != null && cd.hasClass()))) {
+						reloadNecessary = true;
 						_updateGatewayEntry(id, cd, cfcPath, listenerCfcPath, startupMode, custom, readOnly);
 					}
 

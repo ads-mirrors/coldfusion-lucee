@@ -16,6 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.servlet.ServletException;
 
 import lucee.aprint;
+import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.loader.engine.CFMLEngine;
@@ -36,7 +37,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 
-public class LSPEndpointFactory {
+public class LSPEndpointFactory implements MessageProcessor {
 	public static final int DEFAULT_LSP_PORT = 2089;
 	public static final String DEFAULT_COMPONENT = "org.lucee.cfml.lsp.LSPEndpoint";
 	public static final long TIMEOUT = 3000;
@@ -163,62 +164,10 @@ public class LSPEndpointFactory {
 			OutputStream out = clientSocket.getOutputStream();
 			clientOutputStreams.put(clientId, out);
 
-			BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-			StringBuilder buffer = new StringBuilder();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream(), CharsetUtil.UTF8));
 
 			while (!clientSocket.isClosed()) {
-				// Read incoming data into buffer
-				char[] cbuf = new char[1024];
-				int len;
-				while ((len = reader.read(cbuf)) != -1) {
-					buffer.append(cbuf, 0, len);
-
-					// Process complete messages in the buffer
-					while (true) {
-						// Look for Content-Length header
-						final String content = buffer.toString();
-						int headerIndex = content.indexOf("Content-Length: ");
-						if (headerIndex == -1) break;
-
-						// Parse content length
-						int lengthStart = headerIndex + 16;
-						int lengthEnd = content.indexOf("\r\n", lengthStart);
-						if (lengthEnd == -1) break;
-
-						String strContentLength = content.substring(lengthStart, lengthEnd);
-						int contentLength = Integer.parseInt(strContentLength);
-
-						// Find start of JSON content
-						int contentStart = content.indexOf("\r\n\r\n", lengthEnd);
-						if (contentStart == -1) break;
-						contentStart += 4;
-
-						// Check if we have the complete message
-						if (buffer.length() < contentStart + contentLength) break;
-
-						// Extract the JSON message
-						String jsonMessage = content.substring(contentStart, contentStart + contentLength).trim();
-
-						// simple validation of the message
-						if (jsonMessage.startsWith("{") != jsonMessage.endsWith("}")) {
-							throw new ApplicationException(
-									"parsed json message with content length [" + strContentLength + ":" + contentLength + "] is not valid: " + jsonMessage + "\n\n" +
-
-											"raw message was: " + content);
-						}
-
-						// Here you would call your component to handle the message
-						String response = processMessage(jsonMessage);
-
-						if (response != null) {
-							String formattedResponse = LSPUtil.formatLSPMessage(response);
-							out.write(formattedResponse.getBytes());
-							out.flush();
-						}
-
-						buffer.delete(0, contentStart + contentLength);
-					}
-				}
+				readStream(this, reader, out);
 			}
 		}
 		catch (Exception e) {
@@ -230,6 +179,81 @@ public class LSPEndpointFactory {
 		}
 	}
 
+	public static void readStream(MessageProcessor mp, BufferedReader reader, OutputStream out) throws ApplicationException, NumberFormatException, IOException {
+		StringBuilder buffer = new StringBuilder();
+		// Read incoming data into buffer
+		char[] cbuf = new char[1024];
+		int len;
+		while ((len = reader.read(cbuf)) != -1) {
+			buffer.append(cbuf, 0, len);
+
+			// Process complete messages in the buffer
+			while (true) {
+				// Look for Content-Length header
+				final String content = buffer.toString();
+				int headerIndex = content.indexOf("Content-Length: ");
+				if (headerIndex == -1) break;
+
+				// Parse content length
+				int lengthStart = headerIndex + 16;
+				int lengthEnd = content.indexOf("\r\n", lengthStart);
+				if (lengthEnd == -1) break;
+
+				String strContentLength = content.substring(lengthStart, lengthEnd);
+				int contentLength = Integer.parseInt(strContentLength);
+
+				// Find start of JSON content
+				// int contentStart = content.indexOf("\r\n\r\n", lengthEnd);
+				// if (contentStart == -1) break;
+
+				// TODO allow json message as array [...]
+				// we do not trust the whitespace, so we simply search for the start of the json message
+				int contentStart = content.indexOf("{", lengthEnd);
+				if (contentStart == -1) break;
+
+				// Check if we have the complete message
+				if (buffer.length() < contentStart + contentLength) break;
+
+				// Extract the JSON message
+				int endIndex = contentStart + contentLength;
+				String jsonMessage = content.substring(contentStart, endIndex).trim();
+
+				// in case content length is invalid
+
+				int contentEnd = jsonMessage.lastIndexOf("}");
+				int off = (jsonMessage.length() - 1) - contentEnd;
+				if (off > 0) {
+					endIndex -= off;
+					jsonMessage = content.substring(contentStart, endIndex).trim();
+				}
+
+				// simple validation of the message
+				if (jsonMessage.startsWith("{") != jsonMessage.endsWith("}")) {
+					throw new ApplicationException(
+							"parsed json message with content length [" + strContentLength + ":" + contentLength + "] is not valid: " + jsonMessage + "\n\n" +
+
+									"raw message was: " + content);
+				}
+
+				processMessage(mp, jsonMessage, out);
+
+				buffer.delete(0, endIndex);
+			}
+		}
+
+	}
+
+	private static void processMessage(MessageProcessor mp, String jsonMessage, OutputStream out) throws IOException {
+		String response = mp.processMessage(jsonMessage);
+
+		if (response != null) {
+			String formattedResponse = LSPUtil.formatLSPMessage(response);
+			out.write(formattedResponse.getBytes());
+			out.flush();
+		}
+	}
+
+	@Override
 	public String processMessage(String jsonMessage) {
 		PageContext previousPC = null, pc = null;
 		try {
