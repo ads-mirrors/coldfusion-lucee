@@ -179,7 +179,9 @@ public class LSPEndpointFactory implements MessageProcessor {
 		}
 	}
 
-	public static void readStream(MessageProcessor mp, BufferedReader reader, OutputStream out) throws ApplicationException, NumberFormatException, IOException {
+	private static final String CONTENT_LENGTH = "Content-Length:";
+
+	public static void readStream(MessageProcessor mp, BufferedReader reader, OutputStream out) throws PageException, IOException {
 		StringBuilder buffer = new StringBuilder();
 		// Read incoming data into buffer
 		char[] cbuf = new char[1024];
@@ -191,48 +193,39 @@ public class LSPEndpointFactory implements MessageProcessor {
 			while (true) {
 				// Look for Content-Length header
 				final String content = buffer.toString();
-				int headerIndex = content.indexOf("Content-Length: ");
+				int headerIndex = content.indexOf(CONTENT_LENGTH);
 				if (headerIndex == -1) break;
-
-				// Parse content length
-				int lengthStart = headerIndex + 16;
-				int lengthEnd = content.indexOf("\r\n", lengthStart);
-				if (lengthEnd == -1) break;
-
-				String strContentLength = content.substring(lengthStart, lengthEnd);
-				int contentLength = Integer.parseInt(strContentLength);
-
-				// Find start of JSON content
-				// int contentStart = content.indexOf("\r\n\r\n", lengthEnd);
-				// if (contentStart == -1) break;
 
 				// TODO allow json message as array [...]
 				// we do not trust the whitespace, so we simply search for the start of the json message
-				int contentStart = content.indexOf("{", lengthEnd);
+				final int contentStart = content.indexOf("{", headerIndex + CONTENT_LENGTH.length());
 				if (contentStart == -1) break;
+
+				// number is between
+				String strContentLength = content.substring(headerIndex + CONTENT_LENGTH.length(), contentStart).trim();
+				int contentLength = Caster.toIntValue(strContentLength);
 
 				// Check if we have the complete message
 				if (buffer.length() < contentStart + contentLength) break;
 
 				// Extract the JSON message
 				int endIndex = contentStart + contentLength;
-				String jsonMessage = content.substring(contentStart, endIndex).trim();
-
+				String jsonMessage = content.substring(contentStart, endIndex);
 				// in case content length is invalid
 
 				int contentEnd = jsonMessage.lastIndexOf("}");
 				int off = (jsonMessage.length() - 1) - contentEnd;
+				String prev = null;
 				if (off > 0) {
+					prev = "[" + jsonMessage.substring(0, 10) + "..." + jsonMessage.substring(jsonMessage.length() - 11) + "]";
 					endIndex -= off;
-					jsonMessage = content.substring(contentStart, endIndex).trim();
+					jsonMessage = content.substring(contentStart, endIndex);
 				}
 
 				// simple validation of the message
 				if (jsonMessage.startsWith("{") != jsonMessage.endsWith("}")) {
-					throw new ApplicationException(
-							"parsed json message with content length [" + strContentLength + ":" + contentLength + "] is not valid: " + jsonMessage + "\n\n" +
-
-									"raw message was: " + content);
+					throw new ApplicationException("json message with content length [" + strContentLength + "] and offset [" + off + "] is not valid: ["
+							+ jsonMessage.substring(0, 10) + "..." + jsonMessage.substring(jsonMessage.length() - 11) + "], before correction:" + prev);
 				}
 
 				processMessage(mp, jsonMessage, out);
