@@ -179,8 +179,8 @@ public final class JSession extends ScopeSupport implements Session, HttpSession
 	}
 
 	@Override
-	public boolean verifyToken(String token, String key) {
-		return ScopeUtil.verifyCsrfToken(_tokens, token, key);
+	public boolean verifyToken(String token, String key, boolean remove) {
+		return ScopeUtil.verifyCsrfToken(_tokens, token, key, remove);
 	}
 
 	public void setComponent(Component component) {
