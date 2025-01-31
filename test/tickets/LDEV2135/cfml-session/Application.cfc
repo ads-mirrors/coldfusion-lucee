@@ -3,9 +3,9 @@ component {
 	param name="url.SessionStorage";
 	this.sessionManagement = true;
 	this.sessionStorage="memory";
-	this.sessionTimeout="#createTimeSpan(0,0,0,10)#";
+	this.sessionTimeout="#createTimeSpan(0,0,0,20)#";
 	this.setClientCookies="yes";
-	this.applicationTimeout="#createTimeSpan(0,0,0,10)#";
+	this.applicationTimeout="#createTimeSpan(0,0,0,20)#";
 	this.name="ldev-2135-thread-session-cfml-#url.sessionCluster#-#url.SessionStorage#";
 	this.sessionType="cfml";
 	this.sessionCluster = url.sessionCluster;
