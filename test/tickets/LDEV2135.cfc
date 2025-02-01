@@ -2,6 +2,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 
 	function run( testResults , testBox ) {
 		describe( "Test suite for LDEV-2135 using memory", function() {
+
+			//beforeEach(function (currentSpec, data){ _beforeEach(currentSpec, data); });
+
 			it( title='thread looses session variables - sessionCluster=false', body=function( currentSpec ) {
 				test( {sessionCluster: false, sessionStorage: "memory"} );
 			});
@@ -12,21 +15,27 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 		});
 
 		describe( title="Test suite for LDEV-2135 using redis", skip=skipRedis(), body=function() {
+			
+			//beforeEach(function (currentSpec, data){ _beforeEach(currentSpec, data); });
+
 			it( title='thread looses session variables - redis- sessionCluster=false', body=function( currentSpec ) {
 				test( {sessionCluster: false, sessionStorage: "redis"} );
 			});
 
-			it( title='thread looses session variables - redis - sessionCluster=true', skip=true, body=function( currentSpec ) {
+			it( title='thread looses session variables - redis - sessionCluster=true', body=function( currentSpec ) {
 				test( {sessionCluster: true, sessionStorage: "redis"} );
 			});
 		});
 
 		describe( title="Test suite for LDEV-2135 using memcached", skip=skipMemcached(), body=function() {
+
+			//beforeEach(function (currentSpec, data){ _beforeEach(currentSpec, data); });
+
 			it( title='thread looses session variables - memcached -sessionCluster=false', body=function( currentSpec ) {
 				test( {sessionCluster: false, sessionStorage: "memcached"} );
 			});
 
-			it( title='thread looses session variables - memcached -sessionCluster=true', skip=true, body=function( currentSpec ) {
+			it( title='thread looses session variables - memcached -sessionCluster=true', body=function( currentSpec ) {
 				test( {sessionCluster: true, sessionStorage: "memcached"} );
 			});
 		});
@@ -44,7 +53,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 			cfid: first.session.cfid,
 			cftoken: first.session.cftoken
 		};
-
+		// systemOutput("-- before secondRequest.cfm", true); 
 		var second = _InternalRequest(
 			template : "#uri#/cfml-session/secondRequest.cfm",
 			url: args,
@@ -75,5 +84,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 
 	private function skipMemcached(){
 		return (structCount(server.getTestService( "memcached" )) eq 0);
+	}
+
+	private function _beforeEach(currentSpec, data){
+		systemOutput("", true);
+		systemOutput(currentspec, true);
 	}
 }

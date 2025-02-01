@@ -12646,7 +12646,16 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<type>string</type>
 		</return>
 	</function>
-	
+
+	<!-- SessionCommit -->
+	<function>
+		<name>SessionCommit</name>
+		<class>lucee.runtime.functions.system.SessionCommit</class>
+		<description>Force saving the session to storage, useful when sessionCluster is enabled.</description>
+		<return>
+			<type>void</type>
+		</return>
+	</function>
 	
 	<!-- SessionStartTime -->
 	<function>
