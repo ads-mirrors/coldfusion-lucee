@@ -1,7 +1,7 @@
 <cfscript>
 	session.ldev3125 = {};
 	session.ldev3125.sessionCluster = url.sessionCluster;
-	session.ldev3125.before = 'survived';
+	session.ldev3125.start = 'survived';
 	session.ldev3125.threads = [];
 	session.ldev3125.sessionStorage = url.sessionStorage;
 
@@ -22,6 +22,6 @@
 	}
 
 	thread action="join" name="#_threads.toList()#";
-	session.ldev3125.after = 'goodbye';
-	echo(session.ldev3125.toJson());
+	session.ldev3125.afterJoin = 'goodbye';
+	echo( session.ldev3125.toJson() );
 </cfscript>
