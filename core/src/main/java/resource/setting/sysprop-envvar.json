@@ -408,5 +408,15 @@
         "sysprop": "lucee.debugging.maxPageParts",
         "envvar": "LUCEE_DEBUGGING_MAXPAGEPARTS",
         "desc": "Maximum number of debugging page parts (executionLogs to output), 0 to disable max limit"
+    },
+    {
+        "sysprop": "lucee.logging.force.appender",
+        "envvar": "LUCEE_LOGGING_FORCE_APPENDER",
+        "desc": "If set, override the default log4j appender, which is usually resource (log files), use console to log all logs to console"
+    },
+    {
+        "sysprop": "lucee.logging.force.level",
+        "envvar": "LUCEE_LOGGING_FORCE_LEVEL",
+        "desc": "If set, override the default log4j log level for all logs, which is usually ERROR"
     }
 ]

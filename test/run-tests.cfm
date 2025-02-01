@@ -304,7 +304,10 @@ try {
 	logsDir = configDir & server.separator.file & "logs";
 	deployLog = logsDir & server.separator.file & "deploy.log";
 	//dump(deployLog);
-	content = fileRead( deployLog );
+	if ( fileExists( deployLog ) )
+		content = fileRead( deployLog );
+	else
+		content = "deploy.log not found, is logging redirected to console?";
 
 	systemOutput("-------------- Deploy.Log ------------",true);
 	systemOutput( content, true );
