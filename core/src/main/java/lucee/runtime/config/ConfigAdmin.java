@@ -278,16 +278,21 @@ public final class ConfigAdmin {
 	}
 
 	private ConfigAdmin(ConfigPro config, Password password) throws IOException, PageException {
-		this.config = config;
+		this.config = toConfigServerWhenSingle(config);
 		this.password = password;
 		root = ConfigWebFactory.loadDocument(config.getConfigFile());
 	}
 
 	private ConfigAdmin(ConfigPro config, Password password, boolean optionalPW) throws IOException, PageException {
-		this.config = config;
+		this.config = toConfigServerWhenSingle(config);
 		this.password = password;
 		root = ConfigWebFactory.loadDocument(config.getConfigFile());
 		this.optionalPW = optionalPW;
+	}
+
+	private static ConfigPro toConfigServerWhenSingle(ConfigPro config) {
+		if (config.getAdminMode() == ConfigImpl.ADMINMODE_SINGLE && config instanceof ConfigWebImpl) return ((ConfigWebImpl) config).getConfigServerImpl();
+		return config;
 	}
 
 	public static void checkForChangesInConfigFile(Config config) {
