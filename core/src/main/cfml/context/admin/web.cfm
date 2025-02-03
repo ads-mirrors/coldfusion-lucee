@@ -51,7 +51,7 @@
 <cfset ad = request.adminType>
 <cfset request.self = (request.singleMode?"index": request.adminType )& ".cfm">
 <cfscript>
-	if(structKeyExists(url, "reinit") && (url.action?:"") != "logout" && (url.action?:"") != "ext.applications") {
+	if(structKeyExists(url, "reinit") && (url.action?:"") != "logout") {
 		location url="#cgi.SCRIPT_NAME#?action=logout&full=true" addtoken="No";
 	}
 </cfscript>
