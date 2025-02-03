@@ -716,23 +716,58 @@ public final class ConfigAdmin {
 		_updateMapping(virtual, physical, archive, primary, inspect, inspectTemplateIntervalSlow, inspectTemplateIntervalFast, toplevel, listenerMode, listenerType, readOnly);
 	}
 
-	private void _updateMaven(MavenUtil.GAVSO gavso) {
-		Array maven = ConfigUtil.getAsArray("maven", ConfigUtil.getAsStruct("javasettings", root));
+	private void _updateMaven(GAVSO mvnEntry) throws PageException {
+		Struct javasettings = _getRootElement("javasettings");
+		Array maven = ConfigUtil.getAsArray(javasettings, false, "maven", "mvn");
 
-		Iterator<?> it = maven.getIterator();
-		Struct el = null;
-		GAVSO existing;
+		// update
+		GAVSO ex;
+		Struct sct;
+		Iterator<Object> it = maven.valueIterator();
+		Version exVersion, newVersion;
 
 		while (it.hasNext()) {
-			el = Caster.toStruct(it.next(), null);
-			if (el == null) continue;
-			existing = MavenUtil.toGAVSO(el, null);
-			if (existing.equalIDAndVersion(gavso)) {
-				gavso.populate(el);
+			sct = Caster.toStruct(it.next());
+			ex = MavenUtil.toGAVSO(sct);
+
+			// same GAV
+			if (ex.equals(mvnEntry)) {
+				LogUtil.logx(config, Log.LEVEL_INFO, "config", "Maven endpoint [" + mvnEntry + "] already exists", "deploy", "application");
+				return;
+			}
+
+			// same GA, but different V
+			if (ex.same(mvnEntry)) {
+				newVersion = OSGiUtil.toVersion(mvnEntry.v, null);
+				if (newVersion == null) {
+					LogUtil.logx(config, Log.LEVEL_WARN, "config", "Skipping update for [" + mvnEntry + "], invalid version format", "deploy", "application");
+					return;
+				}
+
+				try {
+					exVersion = OSGiUtil.toVersion(ex.v);
+				}
+				catch (BundleException e) {
+					throw Caster.toPageException(e);
+				}
+
+				// new version is bigger
+				int com = OSGiUtil.compare(newVersion, exVersion);
+				if (com > 0) {
+					LogUtil.logx(config, Log.LEVEL_INFO, "config", "Upgrading Maven endpoint from [" + ex + "] to [" + mvnEntry + "]", "deploy", "application");
+					sct.set(KeyConstants._version, mvnEntry.v);
+				}
+				else if (com == 0) {
+					LogUtil.logx(config, Log.LEVEL_INFO, "config", "version [" + ex + "] already installed", "deploy", "application");
+				}
+				else {
+					LogUtil.logx(config, Log.LEVEL_INFO, "config", "Skipping downgrade for [" + ex + "],newer version already installed", "deploy", "application");
+				}
 				return;
 			}
 		}
-		maven.appendEL(gavso.populate(new StructImpl(Struct.TYPE_LINKED)));
+
+		maven.append(mvnEntry.populate(new StructImpl(Struct.TYPE_LINKED)));
 	}
 
 	private void _removeMaven(MavenUtil.GAVSO gavso) {
@@ -1926,60 +1961,6 @@ public final class ConfigAdmin {
 	private void _updateSearchEngine(ClassDefinition cd) throws PageException {
 		Struct orm = _getRootElement("search");
 		setClass(orm, SearchEngine.class, "engine", cd);
-	}
-
-	private void _updateMaven(GAVSO mvnEntry) throws PageException {
-		Struct javasettings = _getRootElement("javasettings");
-		Array maven = ConfigWebUtil.getAsArray(javasettings, false, "maven", "mvn");
-
-		// update
-		GAVSO ex;
-		Struct sct;
-		Iterator<Object> it = maven.valueIterator();
-		Version exVersion, newVersion;
-
-		while (it.hasNext()) {
-			sct = Caster.toStruct(it.next());
-			ex = MavenUtil.toGAVSO(sct);
-
-			// same GAV
-			if (ex.equals(mvnEntry)) {
-				LogUtil.logx(config, Log.LEVEL_INFO, "config", "Maven endpoint [" + mvnEntry + "] already exists", "deploy", "application");
-				return;
-			}
-
-			// same GA, but different V
-			if (ex.same(mvnEntry)) {
-				newVersion = OSGiUtil.toVersion(mvnEntry.v, null);
-				if (newVersion == null) {
-					LogUtil.logx(config, Log.LEVEL_WARN, "config", "Skipping update for [" + mvnEntry + "], invalid version format", "deploy", "application");
-					return;
-				}
-
-				try {
-					exVersion = OSGiUtil.toVersion(ex.v);
-				}
-				catch (BundleException e) {
-					throw Caster.toPageException(e);
-				}
-
-				// new version is bigger
-				int com = OSGiUtil.compare(newVersion, exVersion);
-				if (com > 0) {
-					LogUtil.logx(config, Log.LEVEL_INFO, "config", "Upgrading Maven endpoint from [" + ex + "] to [" + mvnEntry + "]", "deploy", "application");
-					sct.set(KeyConstants._version, mvnEntry.v);
-				}
-				else if (com == 0) {
-					LogUtil.logx(config, Log.LEVEL_INFO, "config", "version [" + ex + "] already installed", "deploy", "application");
-				}
-				else {
-					LogUtil.logx(config, Log.LEVEL_INFO, "config", "Skipping downgrade for [" + ex + "],newer version already installed", "deploy", "application");
-				}
-				return;
-			}
-		}
-
-		maven.append(mvnEntry.populate(new StructImpl(Struct.TYPE_LINKED)));
 	}
 
 	public void removeSearchEngine() throws SecurityException {
@@ -5002,16 +4983,16 @@ public final class ConfigAdmin {
 			}
 
 			// update Maven
-			if (!ArrayUtil.isEmpty(rhext.getMavens())) {
-				Iterator<Map<String, String>> itl = rhext.getMavens().iterator();
+			if (!ArrayUtil.isEmpty(rhext.getMetadata().getMaven())) {
+				Iterator<GAVSO> itl = rhext.getMetadata().getMaven().iterator();
 				GAVSO gavso;
 				while (itl.hasNext()) {
-					gavso = MavenUtil.toGAVSO(itl.next());
+					gavso = itl.next();
 					if (gavso != null) {
 						_updateMaven(gavso);
 						reloadNecessary = true;
 					}
-					logger.info("extension", "Update maven endpoint [" + gavso + "] from extension [" + rhext.getName() + ":" + rhext.getVersion() + "]");
+					logger.info("extension", "Update maven endpoint [" + gavso + "] from extension [" + rhext.getMetadata().getName() + ":" + rhext.getVersion() + "]");
 				}
 			}
 
@@ -5241,6 +5222,7 @@ public final class ConfigAdmin {
 					// print.e(custom);
 
 					if (!StringUtil.isEmpty(id) && (!StringUtil.isEmpty(cfcPath) || (cd != null && cd.hasClass()))) {
+						reloadNecessary = true;
 						_updateGatewayEntry(id, cd, cfcPath, listenerCfcPath, startupMode, custom, readOnly);
 						ConfigUtil.getConfigServerImpl(config).resetGatewayEntries();
 					}

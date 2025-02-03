@@ -4,7 +4,7 @@ component {
 	this.sessiontimeout="#createTimeSpan(0,0,0,10)#";
 	this.setclientcookies="yes";
 	this.applicationtimeout="#createTimeSpan(0,0,0,10)#";
-	this.name="thread-session-cfml";
+	this.name="ldev-2308-thread-session-cfml";
 	this.sessionType="cfml"; // lucee default
 	
 	public function onRequestStart() {

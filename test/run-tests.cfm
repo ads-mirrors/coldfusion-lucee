@@ -304,7 +304,10 @@ try {
 	logsDir = configDir & server.separator.file & "logs";
 	deployLog = logsDir & server.separator.file & "deploy.log";
 	//dump(deployLog);
-	content = fileRead( deployLog );
+	if ( fileExists( deployLog ) )
+		content = fileRead( deployLog );
+	else
+		content = "deploy.log not found, is logging redirected to console?";
 
 	systemOutput("-------------- Deploy.Log ------------",true);
 	systemOutput( content, true );
@@ -373,10 +376,16 @@ try {
 	arrayAppend( results, "Test Execution time: (#NumberFormat( result.getTotalDuration() /1000 )# s)");
 	arrayAppend( results, "Average Test Overhead: (#NumberFormat( ArrayAvg( request.overhead ) )# ms)");
 	arrayAppend( results, "Total Test Overhead: (#NumberFormat( ArraySum( request.overhead ) )# ms)");
-	javaManagementFactory = createObject( "java", "java.lang.management.ManagementFactory" );
-	threadCount = javaManagementFactory.getThreadMXBean().getThreadCount();
-	arrayAppend( results, "Active Threads: #NumberFormat( threadCount )#");
-	arrayAppend( results, "CFTHREADS: #NumberFormat( ThreadData().len() )#");
+	ManagementFactoryError = false;
+	try {
+		arrayAppend( results, "CFTHREADS: #NumberFormat( ThreadData().len() )#");
+		javaManagementFactory = createObject( "java", "java.lang.management.ManagementFactory" );
+		threadCount = javaManagementFactory.getThreadMXBean().getThreadCount();
+		arrayAppend( results, "Active Threads: #NumberFormat( threadCount )#");
+	} catch (e) {
+		arrayAppend( results, "ERROR getting thread count: #e.message#"); // backwards compat for lucee 6.0
+		ManagementFactoryError = true;
+	}
 	
 	postTestMeM = reportMem( "", _reportMemStat.usage );
 	arrayAppend( results, postTestMeM.report, true );
@@ -392,7 +401,8 @@ try {
 	arrayAppend( results, "Force GC after structClear(cfthread)");
 	createObject( "java", "java.lang.System" ).gc();
 	arrayAppend( results, "CFTHREADS: #NumberFormat( ThreadData().len() )#");
-	arrayAppend( results, "Active Threads: #NumberFormat( threadCount )#");
+	if ( !ManagementFactoryError )
+		arrayAppend( results, "Active Threads: #NumberFormat( threadCount )#");
 	arrayAppend( results, "");
 	arrayAppend( results, reportMem( "", postTestGC.usage ).report, true );
 	

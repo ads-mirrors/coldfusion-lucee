@@ -98,7 +98,7 @@
 				assertEquals("-{ts '2008-04-06 00:00:00'}", "-#lsParseDateTime("4/6/2008","english (US)")#");
 
 			});
-			it( title="checking LSparseDateTime() German (swiss)", body = function( currentSpec ) {
+			it( title="checking LSparseDateTime() German (swiss) with timezone #getTimeZone()#", body = function( currentSpec ) {
 				setlocale('German (swiss)');
 				assertEquals("-{ts '2008-04-06 00:00:00'}", "-#lsParseDateTime("06.04.08")#");
 				//assertEquals("-{ts '1899-12-30 01:02:00'}", "-#lsParseDateTime("01:02")#");

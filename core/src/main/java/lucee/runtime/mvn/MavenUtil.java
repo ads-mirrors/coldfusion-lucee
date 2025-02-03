@@ -302,12 +302,13 @@ public class MavenUtil {
 			return toGA().equals(other.toGA());
 		}
 
-		public Struct populatee(Struct sct) {
+		public Struct populate(Struct sct) {
 			if (!StringUtil.isEmpty(g, true)) sct.setEL(KeyConstants._groupId, g);
 			if (!StringUtil.isEmpty(a, true)) sct.setEL(KeyConstants._artifactId, a);
 			if (!StringUtil.isEmpty(v, true)) sct.setEL(KeyConstants._version, v);
 			if (!StringUtil.isEmpty(s, true)) sct.setEL(KeyConstants._scope, s);
 			if (!StringUtil.isEmpty(o, true)) sct.setEL(KeyConstants._optional, o);
+			if (!StringUtil.isEmpty(c, true)) sct.setEL(KeyConstants._checksum, c);
 			return sct;
 		}
 
@@ -328,7 +329,6 @@ public class MavenUtil {
 			if (!v.equalsIgnoreCase(other.v)) return false;
 			return equalID(other);
 		}
-
 	}
 
 	public static boolean allowed(int allowedScopes, int scope) {
