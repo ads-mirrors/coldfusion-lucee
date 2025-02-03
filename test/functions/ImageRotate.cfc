@@ -1,4 +1,4 @@
-component extends="org.lucee.cfml.test.LuceeTestCase" skip=true labels="image"{
+component extends="org.lucee.cfml.test.LuceeTestCase" labels="image"{
 
 	function beforeAll(){
 		variables.path = getTempDirectory() & "ImageRotate/";
