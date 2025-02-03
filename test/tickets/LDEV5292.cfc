@@ -85,20 +85,20 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="thread,cookie,sess
 			} else {
 				throw "failed to extract host [#hostIdx#] from cgi [#cgi.script_name#], [#cgi.request_url#]";
 			}
-			var webResult = "";
-			http method="get" url="#webUrl#" result="webResult"{
+			var httpResult = "";
+			http method="get" url="#webUrl#" result="httpResult"{
 				structEach(arguments.args, function(k,v){
 					httpparam name="#k#" value="#v#" type="url";
 				});
 			}
 			
 			// force cfhttp result to be like internalRequest result;
-			webResult.cookies = queryToStruct(webResult.cookies, "name");
-			webResult.headers = webResult.responseHeader;
-			//debug(webResult, "cfhttp");
-			var _cookies = _getCookies( webResult, "cfid" );
+			httpResult.cookies = queryToStruct(httpResult.cookies, "name");
+			httpResult.headers = httpResult.responseHeader;
+			//debug(httpResult, "cfhttp");
+			var _cookies = _getCookies( httpResult, "cfid" );
 			if (expectedCookieCount gt 0 ) {
-				expect( structKeyExists(webResult.cookies, "CFID" ) ).toBeTrue();				
+				expect( structKeyExists(httpResult.cookies, "CFID" ) ).toBeTrue();
 				expect( len( _cookies ) ).toBe( 1, "cookies returned [#_cookies.toJson()#]" );
 			} else {
 				expect( ArrayLen( _cookies ) ).toBe( expectedCookieCount, "cfhttp cookies returned [#_cookies.toJson()#]" );
