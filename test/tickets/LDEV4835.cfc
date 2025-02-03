@@ -9,7 +9,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				var dir=curr&name;
 				try {
 						directoryCreate(dir);
-						RestInitApplication(dir, '/'&name, false, "server");
+						RestInitApplication(dir, '/'&name, false, request.webadminpassword);
 						
 						var mappings=getPageContext().getConfig().getRestMappings();
 						var has=false;
