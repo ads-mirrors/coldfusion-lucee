@@ -17,13 +17,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip="true" {
 								if(m.getVirtual()=='/'&name) has=true; 
 								dump(m.getVirtual()&":"&m.getPhysical());	
 						}
-						dump(has);
 				}
 				finally {
 						if(directoryExists(dir)) directoryDelete(dir, true);
 				}
-		
-
 				expect(has).toBeTrue();
 			});
 
