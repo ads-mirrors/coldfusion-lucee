@@ -559,7 +559,7 @@ public final class PageContextImpl extends PageContext {
 		timeoutStacktrace = null;
 
 		if (clone) {
-			tmplPC.getCFID();
+			if (needsSession) tmplPC.getCFID();
 			this.cfid = tmplPC.cfid;
 			this.cftoken = tmplPC.cftoken;
 
@@ -2960,6 +2960,10 @@ public final class PageContextImpl extends PageContext {
 	public String getCFID() {
 		if (cfid == null) initIdAndToken();
 		return cfid;
+	}
+
+	public boolean hasCFID() {
+		return (cfid != null);
 	}
 
 	@Override
