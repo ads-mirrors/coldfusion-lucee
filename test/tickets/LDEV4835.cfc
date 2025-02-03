@@ -15,7 +15,6 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip="true" {
 						var has=false;
 						loop array=mappings item="m" {
 								if(m.getVirtual()=='/'&name) has=true; 
-								dump(m.getVirtual()&":"&m.getPhysical());	
 						}
 				}
 				finally {
