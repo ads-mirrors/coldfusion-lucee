@@ -166,7 +166,7 @@ public final class ConfigAdmin {
 	private static final BundleInfo[] EMPTY = new BundleInfo[0];
 	private static final Set<Key> EXCLUDE_LIST;
 	private static final Map<Key, Key> ARRAY_INDEX;
-	private ConfigPro config;
+	private ConfigServerImpl config;
 	private final Struct root;
 	private Password password;
 	private boolean optionalPW;
@@ -268,24 +268,24 @@ public final class ConfigAdmin {
 	 */
 	public void removePassword(String contextPath) throws PageException, IOException, TagLibException, FunctionLibException, BundleException, SAXException {
 		checkWriteAccess();
-		if (contextPath == null || contextPath.length() == 0 || !(config instanceof ConfigServerImpl)) {
+		if (contextPath == null || contextPath.length() == 0) {
 			// config.setPassword(password); do nothing!
 		}
 		else {
-			ConfigServerImpl cs = (ConfigServerImpl) config;
+			ConfigServerImpl cs = config;
 			ConfigWebImpl cw = (ConfigWebImpl) cs.getConfigWeb(contextPath);
 			if (cw != null) cw.updatePassword(false, cw.getPassword(), null);
 		}
 	}
 
 	private ConfigAdmin(ConfigPro config, Password password) throws IOException, PageException {
-		this.config = config;
+		this.config = ConfigUtil.getConfigServerImpl(config);
 		this.password = password;
 		root = ConfigFactoryImpl.loadDocument(config.getConfigFile());
 	}
 
 	private ConfigAdmin(ConfigPro config, Password password, boolean optionalPW) throws IOException, PageException {
-		this.config = config;
+		this.config = ConfigUtil.getConfigServerImpl(config);
 		this.password = password;
 		root = ConfigFactoryImpl.loadDocument(config.getConfigFile());
 		this.optionalPW = optionalPW;
@@ -362,20 +362,13 @@ public final class ConfigAdmin {
 	private synchronized void _reload(boolean refreshScheduler) throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException {
 
 		// if(storeInMemoryData)XMLCaster.writeTo(doc,config.getConfigFile());
-		CFMLEngine engine = ConfigUtil.getEngine(config);
-		if (config instanceof ConfigServerImpl) {
+		CFMLEngine engine = ConfigUtil.getCFMLEngine(config);
+		ConfigServerImpl cs = config;
+		ConfigFactoryImpl.reloadInstance(engine, cs);
+		ConfigWeb[] webs = cs.getConfigWebs();
+		for (ConfigWeb web: webs) {
+			ConfigFactoryImpl.reloadInstance(engine, config, (ConfigWebImpl) web, true);
 
-			ConfigServerImpl cs = (ConfigServerImpl) config;
-			ConfigFactoryImpl.reloadInstance(engine, cs);
-			ConfigWeb[] webs = cs.getConfigWebs();
-			for (ConfigWeb web: webs) {
-				ConfigFactoryImpl.reloadInstance(engine, (ConfigServerImpl) config, (ConfigWebImpl) web, true);
-
-			}
-		}
-		else if (config instanceof ConfigWebImpl) {
-			ConfigServerImpl cs = ((ConfigWebImpl) config).getConfigServerImpl();
-			ConfigFactoryImpl.reloadInstance(engine, cs, (ConfigWebImpl) config, false);
 		}
 	}
 
@@ -896,7 +889,7 @@ public final class ConfigAdmin {
 
 			}
 		}
-		((ConfigImpl) config).resetMappings();
+		config.resetMappings();
 	}
 
 	public void updateRestMapping(String virtual, String physical, boolean _default) throws ExpressionException, SecurityException {
@@ -1161,7 +1154,7 @@ public final class ConfigAdmin {
 			el.setEL("inspectTemplateIntervalFast", Caster.toString(inspectTemplateIntervalFast, ""));
 		el.setEL("virtual", StringUtil.isEmpty(virtual) ? createVirtual(el) : virtual);
 
-		((ConfigImpl) config).resetCustomTagMappings();
+		config.resetCustomTagMappings();
 	}
 
 	private Struct _getScheduledTask(String name, boolean throwWhenNotExist) throws ExpressionException {
@@ -1263,7 +1256,7 @@ public final class ConfigAdmin {
 		if (ConfigPro.INSPECT_INTERVAL_FAST != inspectTemplateIntervalFast && ConfigPro.INSPECT_INTERVAL_UNDEFINED != inspectTemplateIntervalFast)
 			el.setEL("inspectTemplateIntervalFast", Caster.toString(inspectTemplateIntervalFast, ""));
 		el.setEL("virtual", StringUtil.isEmpty(virtual) ? createVirtual(el) : virtual);
-		((ConfigImpl) config).resetComponentMappings();
+		config.resetComponentMappings();
 	}
 
 	public static String createVirtual(Struct data) {
@@ -2538,15 +2531,11 @@ public final class ConfigAdmin {
 			String n = key.getString();
 			if (n != null && n.equalsIgnoreCase(name)) {
 
-				if (config instanceof ConfigWeb) {
-					_removeGatewayEntry((ConfigWebPro) config, n);
+				ConfigWeb[] cws = config.getConfigWebs();
+				for (ConfigWeb cw: cws) {
+					_removeGatewayEntry((ConfigWebPro) cw, name);
 				}
-				else {
-					ConfigWeb[] cws = ((ConfigServerImpl) config).getConfigWebs();
-					for (ConfigWeb cw: cws) {
-						_removeGatewayEntry((ConfigWebPro) cw, name);
-					}
-				}
+
 				children.removeEL(key);
 			}
 		}
@@ -3322,7 +3311,6 @@ public final class ConfigAdmin {
 			short customTag, short cfxSetting, short cfxUsage, short debugging, short search, short scheduledTasks, short tagExecute, short tagImport, short tagObject,
 			short tagRegistry, short cache, short gateway, short orm, short accessRead, short accessWrite) throws SecurityException {
 		checkWriteAccess();
-		if (!(config instanceof ConfigServer)) throw new SecurityException("can't change security settings from this context");
 
 		Struct security = _getRootElement("security");
 		updateSecurityFileAccess(security, fileAccess, file);
@@ -3355,7 +3343,6 @@ public final class ConfigAdmin {
 
 	public void updateDefaultSecurity(short accessRead, short accessWrite) throws SecurityException {
 		checkWriteAccess();
-		if (!(config instanceof ConfigServer)) throw new SecurityException("can't change security settings from this context");
 
 		Struct security = _getRootElement("security");
 
@@ -3420,7 +3407,6 @@ public final class ConfigAdmin {
 			short customTag, short cfxSetting, short cfxUsage, short debugging, short search, short scheduledTasks, short tagExecute, short tagImport, short tagObject,
 			short tagRegistry, short cache, short gateway, short orm, short accessRead, short accessWrite) throws SecurityException, ApplicationException {
 		checkWriteAccess();
-		if (!(config instanceof ConfigServer)) throw new SecurityException("can't change security settings from this context");
 
 		Struct security = _getRootElement("security");
 		Array children = ConfigUtil.getAsArray("accessor", security);
@@ -3468,10 +3454,7 @@ public final class ConfigAdmin {
 	 */
 	public Password getDefaultPassword() throws SecurityException {
 		checkReadAccess();
-		if (config instanceof ConfigServerImpl) {
-			return ((ConfigServerImpl) config).getDefaultPassword();
-		}
-		throw new SecurityException("can't access default password within this context");
+		return config.getDefaultPassword();
 	}
 
 	/**
@@ -3483,13 +3466,13 @@ public final class ConfigAdmin {
 	public void updateDefaultPassword(String password) throws SecurityException, IOException {
 		// MUST this is not very good, make it better
 		checkWriteAccess();
-		((ConfigServerImpl) config).setDefaultPassword(PasswordImpl.writeToStruct(root, password, true));
+		config.setDefaultPassword(PasswordImpl.writeToStruct(root, password, true));
 	}
 
 	public void removeDefaultPassword() throws SecurityException {
 		checkWriteAccess();
 		PasswordImpl.removeFromStruct(root, true);
-		((ConfigServerImpl) config).resetDefaultPassword();
+		config.resetDefaultPassword();
 	}
 
 	/**
@@ -3539,9 +3522,6 @@ public final class ConfigAdmin {
 	public void updateUpdate(String type, String location) throws SecurityException {
 		checkWriteAccess();
 
-		if (!(config instanceof ConfigServer)) {
-			throw new SecurityException("can't change update setting from this context, access is denied");
-		}
 		root.setEL("updateType", type);
 		try {
 			location = HTTPUtil.toURL(location, HTTPUtil.ENCODED_AUTO).toString();
@@ -3952,8 +3932,7 @@ public final class ConfigAdmin {
 		checkWriteAccess();
 
 		if (StringUtil.isEmpty(charset)) {
-			if (config instanceof ConfigWeb) rem(root, "webCharset");
-			else root.setEL("webCharset", "UTF-8");
+			root.setEL("webCharset", "UTF-8");
 		}
 		else {
 			charset = checkCharset(charset);
@@ -5834,9 +5813,6 @@ public final class ConfigAdmin {
 	public void updateSerial(String serial) throws PageException {
 
 		checkWriteAccess();
-		if (!(config instanceof ConfigServer)) {
-			throw new SecurityException("Can't change serial number from this context, access is denied");
-		}
 
 		if (!StringUtil.isEmpty(serial)) {
 			serial = serial.trim();
@@ -6078,10 +6054,7 @@ public final class ConfigAdmin {
 	Resource[] updateWebContexts(InputStream is, String realpath, boolean closeStream, boolean store) throws PageException, IOException, BundleException, ConverterException {
 		List<Resource> filesDeployed = new ArrayList<Resource>();
 
-		if (config instanceof ConfigWeb) {
-			ConfigAdmin._updateContextClassic(config, is, realpath, closeStream, filesDeployed);
-		}
-		else ConfigAdmin._updateWebContexts(config, is, realpath, closeStream, filesDeployed, store);
+		ConfigAdmin._updateWebContexts(config, is, realpath, closeStream, filesDeployed, store);
 
 		return filesDeployed.toArray(new Resource[filesDeployed.size()]);
 	}
@@ -6313,11 +6286,7 @@ public final class ConfigAdmin {
 
 	Resource[] updateApplication(InputStream is, String realpath, boolean closeStream) throws PageException, IOException {
 		List<Resource> filesDeployed = new ArrayList<Resource>();
-		Resource dir;
-		// server context
-		if (config instanceof ConfigServer) dir = config.getConfigDir().getRealResource("web-deployment");
-		// if web context we simply deploy to that webcontext, that's all
-		else dir = config.getRootDirectory();
+		Resource dir = config.getRootDirectory();
 
 		deployFilesFromStream(config, dir, is, realpath, closeStream, filesDeployed);
 
@@ -6737,7 +6706,7 @@ public final class ConfigAdmin {
 		key = key.trim();
 
 		// merge new key and existing
-		ConfigServerImpl cs = (ConfigServerImpl) config;
+		ConfigServerImpl cs = config;
 		String[] keys = cs.getAuthenticationKeys();
 		Set<String> set = new HashSet<String>();
 		for (int i = 0; i < keys.length; i++) {
@@ -6754,7 +6723,7 @@ public final class ConfigAdmin {
 		key = key.trim();
 
 		// remove key
-		ConfigServerImpl cs = (ConfigServerImpl) config;
+		ConfigServerImpl cs = config;
 		String[] keys = cs.getAuthenticationKeys();
 		Set<String> set = new HashSet<String>();
 		for (int i = 0; i < keys.length; i++) {
