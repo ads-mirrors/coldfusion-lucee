@@ -23,6 +23,9 @@ import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.cache.CacheUtil;
 import lucee.runtime.config.ConfigAdmin;
+import lucee.runtime.config.ConfigImpl;
+import lucee.runtime.config.ConfigPro;
+import lucee.runtime.config.ConfigWebImpl;
 import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.config.Password;
 import lucee.runtime.exp.PageException;
@@ -84,7 +87,13 @@ public class RestInitApplication {
 
 	private static void update(PageContext pc, Resource dir, String virtual, Password webAdminPassword, boolean defaultMapping) throws PageException {
 		try {
-			ConfigAdmin admin = ConfigAdmin.newInstance(pc.getConfig(), webAdminPassword);
+			ConfigPro config = (ConfigPro) pc.getConfig();
+			// this is just a patch, that will be obsolete in Lucee 7
+			boolean singleMode = config.getAdminMode() == ConfigImpl.ADMINMODE_SINGLE;
+			if (singleMode && config instanceof ConfigWebImpl) {
+				config = ((ConfigWebImpl) config).getConfigServerImpl();
+			}
+			ConfigAdmin admin = ConfigAdmin.newInstance(config, webAdminPassword);
 			admin.updateRestMapping(virtual, dir.getAbsolutePath(), defaultMapping);
 			admin.storeAndReload();
 		}
