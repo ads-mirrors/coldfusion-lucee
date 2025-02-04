@@ -25,6 +25,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 			it( title='thread looses session variables - redis - sessionCluster=true', body=function( currentSpec ) {
 				test( {sessionCluster: true, sessionStorage: "redis"} );
 			});
+
+			it( title='thread looses session topLevel variables - redis - sessionCluster=true', body=function( currentSpec ) {
+				test( {sessionCluster: true, sessionStorage: "redis"}, "TopLevel" );
+			});
 		});
 
 		describe( title="Test suite for LDEV-2135 using memcached", skip=skipMemcached(), body=function() {
@@ -41,21 +45,22 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 		});
 	}
 
-	private function test( args ){
+	private function test( args, string template="" ){
 		var uri = createURI( "LDEV2135" );
 		var first = _InternalRequest(
-			template : "#uri#/cfml-session/testThreadSession.cfm",
+			template : "#uri#/cfml-session/testThreadSession#template#.cfm",
 			url: args
 		);
+		systemOutput(args, true);
 		checkSess( first.fileContent );
 
 		var cookies = {
 			cfid: first.session.cfid,
 			cftoken: first.session.cftoken
 		};
-		// systemOutput("-- before secondRequest.cfm", true); 
+		systemOutput("-- before secondRequest.cfm", true); 
 		var second = _InternalRequest(
-			template : "#uri#/cfml-session/secondRequest.cfm",
+			template : "#uri#/cfml-session/secondRequest#template#.cfm",
 			url: args,
 			cookies: cookies
 		);
@@ -72,10 +77,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 		expect( s.threads ).toHaveLength( 5 );
 		expect( s ).toHaveKey( "afterJoin" );
 	}
-
-	private string function createURI(string calledName){
-		var baseURI = "/test/#listLast(getDirectoryFromPath(getCurrentTemplatePath()),"\/")#/";
-		return baseURI&""&calledName;
+	private string function createURI(string calledName, boolean contract=true){
+		var base = getDirectoryFromPath( getCurrentTemplatePath() );
+		var baseURI = contract ? contractPath( base ) : "/test/#listLast(base,"\/")#";
+		return baseURI & "/" & calledName;
 	}
 
 	private function skipRedis(){

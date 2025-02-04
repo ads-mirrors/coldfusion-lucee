@@ -26,5 +26,6 @@
 	session.ldev3125.afterJoin = 'goodbye';
 	echo( session.ldev3125.toJson() );
 	//systemOutput(session.toJson(), true);
-	sessionCommit();
+	//session.topLevel = true;
+	//sessionCommit();
 </cfscript>
