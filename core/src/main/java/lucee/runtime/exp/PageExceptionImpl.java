@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import lucee.commons.io.IOUtil;
+import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.util.ResourceUtil;
@@ -141,28 +142,33 @@ public abstract class PageExceptionImpl extends PageException {
 			// S3 secret
 			startIndex = StringUtil.indexOfIgnoreCase(msg, "s3://", startIndex);
 			if (startIndex != -1) {
-				startIndex += 5;
-				int atIndex = msg.indexOf('@', startIndex + 1);
-				int colonIndex = msg.indexOf(':', startIndex + 1);
-				int slashIndex = msg.indexOf('/', startIndex + 1);
-				if (atIndex != -1) {
-					if (colonIndex != -1 && colonIndex < atIndex) {
-						String secretAccessKey = msg.substring(colonIndex + 1, atIndex);
+				try {
+					startIndex += 5;
+					int atIndex = msg.indexOf('@', startIndex + 1);
+					int colonIndex = msg.indexOf(':', startIndex + 1);
+					int slashIndex = msg.indexOf('/', startIndex + 1);
+					if (atIndex != -1) {
+						if (colonIndex != -1 && colonIndex < atIndex) {
+							String secretAccessKey = msg.substring(colonIndex + 1, atIndex);
+							int index = secretAccessKey.indexOf(':');
+							if (index != -1) {
+								secretAccessKey = secretAccessKey.substring(0, index);
+							}
+							msg = StringUtil.replace(msg, secretAccessKey, "{SECRET_ACCESS_KEY}", false, true);
+							return msg;
+						}
+					}
+					if (slashIndex != -1 && colonIndex != -1 && slashIndex > (colonIndex + 1)) {
+						String secretAccessKey = msg.substring(colonIndex + 1, slashIndex);
 						int index = secretAccessKey.indexOf(':');
 						if (index != -1) {
 							secretAccessKey = secretAccessKey.substring(0, index);
 						}
 						msg = StringUtil.replace(msg, secretAccessKey, "{SECRET_ACCESS_KEY}", false, true);
-						return msg;
 					}
 				}
-				if (slashIndex != -1) {
-					String secretAccessKey = msg.substring(colonIndex + 1, slashIndex);
-					int index = secretAccessKey.indexOf(':');
-					if (index != -1) {
-						secretAccessKey = secretAccessKey.substring(0, index);
-					}
-					msg = StringUtil.replace(msg, secretAccessKey, "{SECRET_ACCESS_KEY}", false, true);
+				catch (Exception e) {
+					LogUtil.log(Log.LEVEL_ERROR, "parsing", "failed to parse [" + msg + "] with startindex [" + startIndex + "]");
 				}
 			}
 		}
