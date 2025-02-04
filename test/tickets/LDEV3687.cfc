@@ -1,6 +1,7 @@
 component extends="org.lucee.cfml.test.LuceeTestCase" labels="smtp" {
 	function beforeAll(){
 		variables.uri = createURI("LDEV3687");
+		executeSpoolerTask();
 	}
 	function run( testResults , testBox ) {
 		describe( "test case for LDEV-3687", function() {
@@ -10,6 +11,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="smtp" {
 					forms:"Scene=1"
 				);
 				expect(local.result.filecontent.trim()).toBe('success');
+				executeSpoolerTask();
 			});
 			
 			it(title = "Checking 'from' of mail using display name with comma",  skip=isAvailable(), body = function( currentSpec ) {
@@ -18,6 +20,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="smtp" {
 					forms:{Scene=2}
 				);
 				expect(local.result.filecontent.trim()).toBe('success');
+				executeSpoolerTask();
 			});
 			
 			it(title = "Checking 'to' of mail with trailing spaces",  skip=isAvailable(), body = function( currentSpec ) {
@@ -26,6 +29,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="smtp" {
 					forms:{Scene=3}
 				);
 				expect(local.result.filecontent.trim()).toBe('success');
+				executeSpoolerTask();
 			});
 
 			it(title = "Checking 'bcc' of mail with trailing spaces",  skip=isAvailable(), body = function( currentSpec ) {
@@ -34,8 +38,25 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="smtp" {
 					forms:{Scene=4}
 				);
 				expect(local.result.filecontent.trim()).toBe('success');
+				executeSpoolerTask();
 			});
+
 		});
+	}
+
+	private function executeSpoolerTask(){
+		admin
+			action="getSpoolerTasks"
+			type="server"
+			password="#server.SERVERADMINPASSWORD#"
+			returnVariable="local.spoolerTasks";
+		for (var task in spoolerTasks){
+			admin 
+				action="executeSpoolerTask" 
+				type="server" 
+				password=server.SERVERADMINPASSWORD 
+				id="#task.id#";
+		}
 	}
 
 	private boolean function isAvailable(){
