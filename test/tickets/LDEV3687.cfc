@@ -42,10 +42,20 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="smtp" {
 				variables.countSpoolerTasks += executeSpoolerTask();
 			});
 
-			
+			it(title = "Checking to and from",  skip=isAvailable(), body = function( currentSpec ) {
+				local.result = _InternalRequest(
+					template:"#variables.uri#/LDEV3687.cfm",
+					forms:{Scene=5}
+				);
+				expect(local.result.filecontent.trim()).toBe('success');
+				variables.countSpoolerTasks += executeSpoolerTask();
+			});
+
 			it(title = "Checking mails where spooled",  skip=isAvailable(), body = function( currentSpec ) {
 				// this might conflict with the background controller thread? so one is enough
-				expect( countSpoolerTasks ).toBeGT(0, "Error, expected at least one mail spooler task to be found"); 
+				if (countSpoolerTasks neq 5)
+					systemOutput("WARNING! LDEV-3867 only [#countSpoolerTasks#] mails found to spool, expected 5, maybe controller spooled them", true);
+				expect( countSpoolerTasks ).toBeGT(0, "Error, expected at least one mail spooler task to be found, check remote-client.log, [#countSpoolerTasks#] found, 5 sent");
 			});
 
 		});
