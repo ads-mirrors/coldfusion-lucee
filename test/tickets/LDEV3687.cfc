@@ -2,6 +2,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="smtp" {
 	function beforeAll(){
 		variables.uri = createURI("LDEV3687");
 		executeSpoolerTask();
+		variables.countSpoolerTasks = 0;
 	}
 	function run( testResults , testBox ) {
 		describe( "test case for LDEV-3687", function() {
@@ -11,7 +12,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="smtp" {
 					forms:"Scene=1"
 				);
 				expect(local.result.filecontent.trim()).toBe('success');
-				executeSpoolerTask();
+				variables.countSpoolerTasks += executeSpoolerTask();
 			});
 			
 			it(title = "Checking 'from' of mail using display name with comma",  skip=isAvailable(), body = function( currentSpec ) {
@@ -20,7 +21,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="smtp" {
 					forms:{Scene=2}
 				);
 				expect(local.result.filecontent.trim()).toBe('success');
-				executeSpoolerTask();
+				variables.countSpoolerTasks += executeSpoolerTask();
 			});
 			
 			it(title = "Checking 'to' of mail with trailing spaces",  skip=isAvailable(), body = function( currentSpec ) {
@@ -29,7 +30,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="smtp" {
 					forms:{Scene=3}
 				);
 				expect(local.result.filecontent.trim()).toBe('success');
-				executeSpoolerTask();
+				variables.countSpoolerTasks += executeSpoolerTask();
 			});
 
 			it(title = "Checking 'bcc' of mail with trailing spaces",  skip=isAvailable(), body = function( currentSpec ) {
@@ -38,13 +39,19 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="smtp" {
 					forms:{Scene=4}
 				);
 				expect(local.result.filecontent.trim()).toBe('success');
-				executeSpoolerTask();
+				variables.countSpoolerTasks += executeSpoolerTask();
+			});
+
+			
+			it(title = "Checking mails where spooled",  skip=isAvailable(), body = function( currentSpec ) {
+				// this might conflict with the background controller thread? so one is enough
+				expect( countSpoolerTasks ).toBeGT(0, "Error, expected at least one mail spooler task to be found"); 
 			});
 
 		});
 	}
 
-	private function executeSpoolerTask(){
+	private function executeSpoolerTask(boolean throwWhenEmpty=false){
 		admin
 			action="getSpoolerTasks"
 			type="server"
@@ -57,6 +64,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="smtp" {
 				password=server.SERVERADMINPASSWORD 
 				id="#task.id#";
 		}
+		return len(spoolerTasks);
 	}
 
 	private boolean function isAvailable(){
