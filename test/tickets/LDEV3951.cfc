@@ -2,7 +2,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 	
 	function run( testResults, testBox ) {
 		describe("Testcase for LDEV-3951, inline comments", function() {
-			xit( title="Inline comment in tag-in-script syntax", body=function( currentSpec ){
+			it( title="Inline comment in tag-in-script syntax", body=function( currentSpec ){
 				try {
 					var result = "success";
 					local.result = _InternalRequest(
