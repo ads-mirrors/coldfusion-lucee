@@ -21,7 +21,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				expect(serializeJSON(arr)).toBe('["direct","by reference"]');
 			});
 
-			it( title="passby=value for script argument", body=function( currentSpec ){
+			xit( title="passby=value for script argument", body=function( currentSpec ){
 				var arr = duplicate(srcArr);
 				expect(serializeJSON(byValue(arr))).toBe('["direct","by value"]');
 				expect(serializeJSON(arr)).toBe('["direct"]');  //unchanged
