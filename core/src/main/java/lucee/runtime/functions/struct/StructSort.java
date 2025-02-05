@@ -34,6 +34,7 @@ import lucee.runtime.type.Array;
 import lucee.runtime.type.ArrayImpl;
 import lucee.runtime.type.Collection;
 import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.comparator.ExceptionComparator;
 import lucee.runtime.type.comparator.NumberSortRegisterComparator;
 import lucee.runtime.type.comparator.SortRegister;
@@ -56,6 +57,10 @@ public final class StructSort extends BIF {
 	}
 
 	public static Array call(PageContext pc, Struct base, String sortType, String sortOrder, String pathToSubElement) throws PageException {
+		return ((Array) _call(pc, "array", base, sortType, sortOrder, pathToSubElement));
+	}
+
+	public static Object _call(PageContext pc, String type, Struct base, String sortType, String sortOrder, String pathToSubElement) throws PageException {
 
 		boolean isAsc = true;
 		PageException ee = null;
@@ -97,12 +102,19 @@ public final class StructSort extends BIF {
 			throw ee;
 		}
 
+		if (type.equalsIgnoreCase("struct")){
+			StructImpl rtn = new StructImpl(StructImpl.TYPE_LINKED, arr.length);
+			for (int i = 0; i < arr.length; i++) {
+				String key = keys[arr[i].getOldPosition()].getString();
+				rtn.set(key, base.get(Caster.toKey(key))); // TODO duplicate?
+			}
+			return rtn;
+		}
 		Array rtn = new ArrayImpl();
 		for (int i = 0; i < arr.length; i++) {
 			rtn.append(keys[arr[i].getOldPosition()].getString());
 		}
 		return rtn;
-
 	}
 
 	@Override
