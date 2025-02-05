@@ -1,9 +1,9 @@
 <cfscript>
 	try {
-		function foo() secured:api {}
+		function foo() secured:api {}; // secured:api works in tag syntax
 		writeOutput(structKeyExists(getMetadata( foo ),"secured:api"))
 	}
 	catch(any e) {
-		writeOutput(e.message) 
+		writeOutput(e.stracktrace) 
 	}
 </cfscript>
