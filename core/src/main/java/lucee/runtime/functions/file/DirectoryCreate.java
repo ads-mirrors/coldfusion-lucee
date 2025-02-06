@@ -22,6 +22,7 @@ import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.util.ResourceUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.exp.PageException;
+import lucee.runtime.op.Caster;
 import lucee.runtime.tag.Directory;
 import lucee.runtime.tag.util.FileUtil;
 
@@ -36,8 +37,12 @@ public class DirectoryCreate {
 	}
 
 	public static String call(PageContext pc, String path, boolean createPath, boolean ignoreExists) throws PageException {
+		return call(pc, path, createPath, ignoreExists, null);
+	}
+
+	public static String call(PageContext pc, String path, boolean createPath, boolean ignoreExists, String mode) throws PageException {
 		Resource dir = ResourceUtil.toResourceNotExisting(pc, path);
-		Directory.actionCreate(pc, dir, null, createPath, -1, null, null, ignoreExists ? FileUtil.NAMECONFLICT_SKIP : FileUtil.NAMECONFLICT_ERROR);
+		Directory.actionCreate(pc, dir, null, createPath, Caster.toIntValue(mode,0), null, null, ignoreExists ? FileUtil.NAMECONFLICT_SKIP : FileUtil.NAMECONFLICT_ERROR);
 		return null;
 	}
 }
