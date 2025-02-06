@@ -1,18 +1,10 @@
 component {
 	this.name = "ldev1323";
 	mySQL= getCredentials();
-	this.datasource = {
-		 type: "mysql"
-		 ,host: "#mySQL.server#"
-		 ,port: "#mySQL.port#"
-		 ,database: "#mySQL.database#?"
-		 ,username: "#mySQL.username#"
-		 ,password: "#mySQL.password#"
-		 ,custom: { useUnicode:true }
-	};
+	this.datasource = mysql;
 
 	public function onRequestStart() {
-		setting requesttimeout=10;
+		createTable();
 	}
 	
 	private struct function getCredentials() {
@@ -21,13 +13,16 @@ component {
 
 	private function createTable() {
 		query {
-	        echo("DROP TABLE IF EXISTS users1323;");
+			echo("DROP TABLE IF EXISTS ldev1323;");
 		}
 		query {
-	        echo("CREATE TABLE users1323 (sNo varchar(50), FirstName varchar(50), Title varchar(50))");
+			echo("DROP TABLE IF EXISTS ldev1323_missing;");
 		}
 		query {
-	        echo("INSERT INTO users1323 (sNo,FirstName,Title) VALUES (22,'john','test'),(33,'jose','sample');");
+			echo("CREATE TABLE ldev1323 (sNo varchar(50), FirstName varchar(50), Title varchar(50))");
+		}
+		query {
+			echo("INSERT INTO ldev1323 (sNo,FirstName,Title) VALUES (22,'john','test'),(33,'jose','sample');");
 		}
 	}
 }
