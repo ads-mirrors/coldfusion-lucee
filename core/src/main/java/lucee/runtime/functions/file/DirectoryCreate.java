@@ -42,7 +42,7 @@ public class DirectoryCreate {
 
 	public static String call(PageContext pc, String path, boolean createPath, boolean ignoreExists, String mode) throws PageException {
 		Resource dir = ResourceUtil.toResourceNotExisting(pc, path);
-		Directory.actionCreate(pc, dir, null, createPath, Caster.toIntValue(mode,0), null, null, ignoreExists ? FileUtil.NAMECONFLICT_SKIP : FileUtil.NAMECONFLICT_ERROR);
+		Directory.actionCreate(pc, dir, null, createPath, Caster.toIntValue(mode,-1), null, null, ignoreExists ? FileUtil.NAMECONFLICT_SKIP : FileUtil.NAMECONFLICT_ERROR);
 		return null;
 	}
 }

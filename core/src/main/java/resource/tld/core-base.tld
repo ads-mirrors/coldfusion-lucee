@@ -1001,7 +1001,8 @@ Example:
 			<rtexprvalue>true</rtexprvalue>
 			<description>Used with action = "Create" to define the permissions for a directory on UNIX and Linux
 		platforms. Ignored on Windows. Options correspond to the octal values of the UNIX chmod command. From
-		left to right, permissions are assigned for owner, group, and other.</description>
+		left to right, permissions are assigned for owner, group, and other. Pass -1 to inherit.
+		</description>
 		</attribute>
 		<attribute>
 			<type>string</type>
