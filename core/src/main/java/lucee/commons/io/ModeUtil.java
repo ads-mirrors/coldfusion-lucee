@@ -72,7 +72,7 @@ public final class ModeUtil {
 	public static String fromOctalMode(int mode) throws IOException {
 		String octalString = String.format("%03o", mode);
 		if (octalString.length() <= 4 && octalString.length() > 3)
-			throw new IOException("can't translate [" + mode + "] to a permissions string");
+			throw new IOException("Can't translate [" + mode + "] to a permissions string, [" + octalString + "] is invalid");
 		String permString = "";
 		for (char c : octalString.toCharArray()) {
 			switch (c) {
