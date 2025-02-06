@@ -15,9 +15,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 		describe( "LDEV-3506 test case for directoryCreate mode with createPath", function() {
 			it(title = "Checking mode directoryCreate()", skip=isWindows(), body = function( currentSpec ) {
 				var testDir = dir & "mode";
-				directoryCreate( path=testDir, mode="644", createPath=true );
+				directoryCreate( path=testDir, mode="775", createPath=true );
 
-				test( testDir, "644", "644" );
+				test( testDir, "775", "775" );
 			});
 
 			it(title = "Checking default mode directoryCreate()", skip=isWindows(), body = function( currentSpec ) {

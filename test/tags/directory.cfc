@@ -62,10 +62,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 		describe( "test case for cfdirectory action=create with mode", function() {
 			it(title = "Checking mode directoryCreate()", skip=isWindows(), body = function( currentSpec ) {
 				var testDir = path & "mode";
-				directory action="create" directory="#testDir#" mode="644";
+				directory action="create" directory="#testDir#" mode="775";
 
 				expect( directoryExists( testDir ) ).toBeTrue();
-				expect( directoryInfo( testDir ).mode ).toBe("644");
+				expect( directoryInfo( testDir ).mode ).toBe("775");
 			});
 
 			it(title = "Checking default mode directoryCreate()", skip=isWindows(), body = function( currentSpec ) {
@@ -73,7 +73,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				directory action="create" directory="#testDir#";
 
 				expect( directoryExists( testDir ) ).toBeTrue();
-				expect( directoryInfo( testDir ).mode ).toBe("777");
+				expect( directoryInfo( testDir ).mode ).toBe("755");
 			});
 
 			it(title = "Checking preserve mode -1 directoryCreate()", skip=isWindows(), body = function( currentSpec ) {

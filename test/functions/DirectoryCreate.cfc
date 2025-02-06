@@ -38,10 +38,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 		describe( "test case for directoryCreate mode", function() {
 			it(title = "Checking mode directoryCreate()", skip=isWindows(), body = function( currentSpec ) {
 				var testDir = dir & "mode";
-				directoryCreate(path=testDir, mode="644");
+				directoryCreate(path=testDir, mode="775");
 
 				expect( directoryExists( testDir ) ).toBeTrue();
-				expect( directoryInfo( testDir ).mode ).toBe("644");
+				expect( directoryInfo( testDir ).mode ).toBe("775");
 			});
 
 			it(title = "Checking default mode directoryCreate()", skip=isWindows(), body = function( currentSpec ) {

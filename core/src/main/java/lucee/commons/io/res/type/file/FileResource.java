@@ -474,9 +474,12 @@ public final class FileResource extends File implements Resource {
 		try {
 			provider.lock(this);
 			// print.ln(ModeUtil.toStringMode(mode));
-			Files.setPosixFilePermissions(toPath(), PosixFilePermissions.fromString(ModeUtil.fromOctalMode(mode)));
-		} catch (IOException e) {
-			throw new IOException("Interrupted setPosixFilePermissions [" + toString() + "]");
+			String permissions = ModeUtil.fromOctalMode(mode);
+			Files.setPosixFilePermissions(toPath(), PosixFilePermissions.fromString(permissions));
+		} catch (IOException ioe) {
+			IOException e = new IOException("Error setting mode: [" + toString() + "]");
+			ExceptionUtil.initCauseEL(e, ioe);
+			throw e;
 		}
 		finally {
 			provider.unlock(this);
