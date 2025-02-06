@@ -858,14 +858,20 @@ public final class JSONConverter extends ConverterSupport {
 	 * @throws ConverterException
 	 */
 	public String serialize(PageContext pc, Object object, int queryFormat) throws ConverterException {
-		StringBuilder sb = new StringBuilder(256);
-		_serialize(pc, null, object, sb, queryFormat, null, Collections.newSetFromMap(new IdentityHashMap<>()));
-		return sb.toString();
+		return serialize(pc, object, queryFormat, null);
 	}
 
 	public String serialize(PageContext pc, Object object, int queryFormat, Boolean preserveCase) throws ConverterException {
 		StringBuilder sb = new StringBuilder(256);
-		_serialize(pc, null, object, sb, queryFormat, preserveCase, Collections.newSetFromMap(new IdentityHashMap<>()));
+		try {
+			_serialize(pc, null, object, sb, queryFormat, preserveCase, Collections.newSetFromMap(new IdentityHashMap<>()));
+		}
+		catch (OutOfMemoryError ome) {
+			ConverterException ce = new ConverterException("Failed to serialize JSON: resulting string (current size: " + (sb.length() / 1024 / 1024)
+					+ "mb) would exceed memory limits. Consider breaking down the data into smaller chunks or increasing the heap size.");
+			ExceptionUtil.initCauseEL(ce, ome);
+			throw ce;
+		}
 		return sb.toString();
 	}
 
