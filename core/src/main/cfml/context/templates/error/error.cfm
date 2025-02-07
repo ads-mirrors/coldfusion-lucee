@@ -132,10 +132,27 @@ function luceeSpinner(index) {
 
 <cfscript>
 function luceeMonoBlock(input,tablengt=1) {
-	var rtn=HTMLEditFormat( trim( input ) );
-	rtn=replace( rtn, chr(10), '<br>', 'all' );
-	rtn=replace( rtn, '	',repeatString('&nbsp;', tablengt) , 'all' );
-	rtn=replace( rtn, ' ', '&nbsp;', 'all' );
+	try {
+		var lines=listToArray(HTMLEditFormat( trim( input ) ),chr(10));
+		var rtn="";
+		// we make any whitespace not breaking at the begin of a line
+		loop array=lines item="local.line" {
+			if(len(rtn)) rtn&="<br>";
+			
+			// Replace leading whitespace with '&nbsp;'
+			var finds=reFind("[ \t]+", line,1,true);
+			if(finds.pos[1]==1) {
+				var len=finds.len[1];
+				var match=finds.match[1];
+				var replacement=replace( replace( match, ' ', '&nbsp;', 'all'), '	', repeatString('&nbsp;', tablengt), 'all');
+				line=replacement&mid(line,len+1);
+			}
+			rtn &= line;
+		}
+	}
+	catch(ex) {
+		return input;
+	}
 	return rtn;
 }
 function luceeCatchToString() {try{
