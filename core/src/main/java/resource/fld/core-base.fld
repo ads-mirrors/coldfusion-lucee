@@ -9752,7 +9752,9 @@ mavenLoad([
 	<function>
 		<name>LuceeCreateAISession</name>
 		<class>lucee.runtime.functions.ai.CreateAISession</class>
-		<description>Creates a new AI session for interaction with Large Language Models (LLMs). 
+		<description>This feature is experimental and may be subject to change. If you encounter any issues while using this functionality, please report bugs and errors in our bug tracking system.
+		
+		Creates a new AI session for interaction with Large Language Models (LLMs). 
 		The session maintains conversation history and context between interactions. 
 		Each session can be configured with different parameters to optimize for specific use cases like code analysis, content generation, or data processing.
 		
@@ -9810,7 +9812,9 @@ The system message persists throughout the session and influences all responses.
 	<function>
 		<name>LuceeInquiryAISession</name>
 		<class>lucee.runtime.functions.ai.InquiryAISession</class>
-		<description>Sends a question/message to an AI session and returns the response. The function maintains conversation context from previous interactions within the same session.
+		<description>This feature is experimental and may be subject to change. If you encounter any issues while using this functionality, please report bugs and errors in our bug tracking system.
+		
+		Sends a question/message to an AI session and returns the response. The function maintains conversation context from previous interactions within the same session.
 	
 	The response can either be returned as a complete string or streamed in chunks to a listener function for real-time processing.</description>
 		<argument>
