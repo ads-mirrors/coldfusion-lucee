@@ -61,6 +61,7 @@ public final class FunctionLibFunction {
 
 	private FunctionLib functionLib;
 	private String name;
+	private String alias;
 	private ArrayList<FunctionLibFunctionArg> argument = new ArrayList<FunctionLibFunctionArg>();
 
 	private int argMin = 0;
@@ -99,6 +100,39 @@ public final class FunctionLibFunction {
 		this.core = core;
 	}
 
+	public FunctionLibFunction duplicate() {
+		FunctionLibFunction dbl = new FunctionLibFunction(functionLib, core);
+
+		dbl.functionLib = functionLib;
+		dbl.name = name;
+		dbl.alias = alias;
+
+		dbl.argMin = argMin;
+		dbl.argMax = argMax;
+		dbl.argType = argType;
+		dbl.strReturnType = strReturnType;
+		dbl.clazz = clazz;
+		dbl.description = description;
+		dbl.hasDefaultValues = hasDefaultValues;
+		dbl.eval = eval;
+		dbl.tteCD = tteCD;
+		dbl.status = status;
+		dbl.memberNames = memberNames;
+		dbl.memberPosition = memberPosition;
+		dbl.memberType = memberType;
+		dbl.memberChaining = memberChaining;
+		dbl.bif = bif;
+		dbl.bif = bif;
+		dbl.functionCD = functionCD;
+		dbl.introduced = introduced;
+
+		dbl.argument = new ArrayList<FunctionLibFunctionArg>();
+		for (FunctionLibFunctionArg arg: argument) {
+			dbl.argument.add(arg.duplicate(dbl));
+		}
+		return dbl;
+	}
+
 	/**
 	 * Gibt den Namen der Funktion zurueck.
 	 * 
@@ -106,6 +140,15 @@ public final class FunctionLibFunction {
 	 */
 	public String getName() {
 		return name;
+	}
+
+	public String getAlias() {
+		return alias;
+	}
+
+	public void setAlias(String alias) {
+		if (StringUtil.isEmpty(alias, true)) return;
+		this.alias = alias.toLowerCase().trim();
 	}
 
 	/**

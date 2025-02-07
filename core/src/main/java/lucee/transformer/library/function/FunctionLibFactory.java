@@ -318,6 +318,8 @@ public final class FunctionLibFactory extends DefaultHandler {
 				else if (inside.equals("argument-min")) function.setArgMin(Integer.parseInt(value));
 
 				else if (inside.equals("argument-max")) function.setArgMax(Integer.parseInt(value));
+
+				else if (inside.equals("alias")) function.setAlias(value);
 			}
 
 		}

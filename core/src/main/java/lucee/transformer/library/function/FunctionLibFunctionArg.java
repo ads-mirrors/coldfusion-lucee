@@ -34,13 +34,6 @@ public final class FunctionLibFunctionArg {
 
 	private static final short UNDEFINED = -12553;
 
-	/**
-	 * @return the hidden
-	 */
-	public boolean isHidden() {
-		return hidden;
-	}
-
 	private String strType;
 	private boolean required;
 	private FunctionLibFunction function;
@@ -61,6 +54,22 @@ public final class FunctionLibFunctionArg {
 
 	public FunctionLibFunctionArg(FunctionLibFunction function) {
 		this.function = function;
+	}
+
+	public FunctionLibFunctionArg duplicate(FunctionLibFunction function) {
+		FunctionLibFunctionArg dbl = new FunctionLibFunctionArg(function);
+
+		dbl.strType = strType;
+		dbl.required = required;
+		dbl.name = name;
+		dbl.description = description;
+		dbl.alias = alias;
+		dbl.defaultValue = defaultValue;
+		dbl.hidden = hidden;
+		dbl.status = status;
+		dbl.type = type;
+		dbl.introduced = introduced;
+		return dbl;
 	}
 
 	/**
@@ -239,5 +248,12 @@ public final class FunctionLibFunctionArg {
 
 	public Version getIntroduced() {
 		return introduced;
+	}
+
+	/**
+	 * @return the hidden
+	 */
+	public boolean isHidden() {
+		return hidden;
 	}
 }
