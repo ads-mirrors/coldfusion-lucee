@@ -79,7 +79,7 @@ public final class LuceeAI extends BodyTagTryCatchFinallyImpl {
 				PageContextImpl pci = ((PageContextImpl) pageContext);
 				String name = throwonerror ? pci.getNameFromDefault(_default.trim()) : pci.getNameFromDefault(_default.trim(), null);
 				if (!throwonerror && name == null) return SKIP_BODY;
-				session = ((PageContextImpl) pageContext).createAISession(name.trim(), message, timeout, -1);
+				session = ((PageContextImpl) pageContext).createAISession(name.trim(), message, -1, -1D, timeout, -1);
 				setMeta(session);
 			}
 			else {

@@ -4258,10 +4258,6 @@ public final class PageContextImpl extends PageContext {
 		return getAIEngine(nameAI).createSession(systemMessage, -1, -1D, -1, -1);
 	}
 
-	public AISession createAISession(String nameAI, String systemMessage, int connectTimeout, int socketTimeout) throws PageException {
-		return getAIEngine(nameAI).createSession(systemMessage, -1, -1D, connectTimeout, socketTimeout);
-	}
-
 	public AISession createAISession(String nameAI, String systemMessage, int limit, double temp, int connectTimeout, int socketTimeout) throws PageException {
 		return getAIEngine(nameAI).createSession(systemMessage, limit, temp, connectTimeout, socketTimeout);
 	}
