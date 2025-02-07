@@ -9,9 +9,11 @@ function createOutput() {
 
     
     // create session
-    if(!structKeyExists(session, "exceptionAISession") or true) {
-        ais=LuceeCreateAISession('default:exception', 
-        "You are a Lucee expert specializing in debugging CFML applications. You will analyze exceptions that occur during Lucee (CFML) code execution.
+    if(!structKeyExists(session, "exceptionAISession")) {
+        ais=LuceeCreateAISession(
+            name:'default:exception', 
+            conversationHistoryLimit:5,
+            systemMessage:"You are a Lucee expert specializing in debugging CFML applications. You will analyze exceptions that occur during Lucee (CFML) code execution.
 
 When analyzing the exception details:
 - Consider the broader context of common CFML patterns and practices
