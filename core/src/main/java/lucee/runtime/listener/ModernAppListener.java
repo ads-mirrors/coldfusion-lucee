@@ -22,7 +22,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import lucee.commons.io.DevNullOutputStream;
 import lucee.commons.io.log.Log;
@@ -30,6 +32,7 @@ import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.ExceptionUtil;
+import lucee.commons.lang.Pair;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.lang.mimetype.MimeType;
 import lucee.commons.lang.types.RefBoolean;
@@ -92,6 +95,9 @@ public class ModernAppListener extends AppListenerSupport {
 	// private Map<String,Component> apps=new HashMap<String,Component>();// TODO no longer use this,
 	// find a better way to store components for end methods
 	protected int mode = MODE_CURRENT2ROOT;
+	private boolean singelton = false;
+
+	private Map<String, Pair<Long, Component>> components = new ConcurrentHashMap<>();
 
 	@Override
 	public void onRequest(PageContext pc, PageSource requestedPage, RequestListener rl) throws PageException {
@@ -100,13 +106,31 @@ public class ModernAppListener extends AppListenerSupport {
 		_onRequest(pc, requestedPage, appPS, rl);
 	}
 
+	private Component getComponent(PageContext pc, Page appP) throws PageException {
+		Component app;
+		String callPath = appP.getPageSource().getComponentName();
+		if (singelton) {
+			Pair<Long, Component> pair = components.get(appP.getPageSource().getDisplayPath());
+			if (pair != null && pair.getName() == appP.getSourceLastModified()) {
+				app = pair.getValue();
+			}
+			else {
+				app = ComponentLoader.loadComponent(pc, appP, callPath, false, false, false, true);
+				components.put(appP.getPageSource().getDisplayPath(), new Pair<Long, Component>(appP.getSourceLastModified(), app));
+			}
+		}
+		else {
+			app = ComponentLoader.loadComponent(pc, appP, callPath, false, false, false, true);
+		}
+		return app;
+	}
+
 	protected void _onRequest(PageContext pc, PageSource requestedPage, Page appP, RequestListener rl) throws PageException {
 		PageContextImpl pci = (PageContextImpl) pc;
 		pci.setAppListenerType(ApplicationListener.TYPE_MODERN);
 		if (appP != null) {
-			String callPath = appP.getPageSource().getComponentName();
 
-			Component app = ComponentLoader.loadComponent(pci, appP, callPath, false, false, false, true);
+			Component app = getComponent(pc, appP);
 
 			// init
 			ModernApplicationContext appContext = initApplicationContext(pci, app);
@@ -521,6 +545,14 @@ public class ModernAppListener extends AppListenerSupport {
 	@Override
 	public int getMode() {
 		return mode;
+	}
+
+	public boolean isSingeltong() {
+		return singelton;
+	}
+
+	public void setSingelton(boolean singelton) {
+		this.singelton = singelton;
 	}
 
 	@Override

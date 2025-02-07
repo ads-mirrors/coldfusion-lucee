@@ -122,6 +122,7 @@ import lucee.runtime.listener.ApplicationListener;
 import lucee.runtime.listener.JavaSettings;
 import lucee.runtime.listener.JavaSettingsImpl;
 import lucee.runtime.listener.MixedAppListener;
+import lucee.runtime.listener.ModernAppListener;
 import lucee.runtime.net.mail.Server;
 import lucee.runtime.net.proxy.ProxyData;
 import lucee.runtime.net.proxy.ProxyDataImpl;
@@ -3082,8 +3083,15 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 					if (StringUtil.isEmpty(strLM)) strLM = ConfigFactoryImpl.getAttr(root, new String[] { "listenerMode", "applicationMode" });
 					int listenerMode = ConfigUtil.toListenerMode(strLM, -1);
 					if (listenerMode == -1) listenerMode = ApplicationListener.MODE_CURRENT2ROOT;
-
 					listener.setMode(listenerMode);
+
+					// singelton
+					if (listener instanceof ModernAppListener) {
+						String strSi = SystemUtil.getSystemPropOrEnvVar("lucee.listener.singelton", null);
+						if (StringUtil.isEmpty(strSi)) strSi = SystemUtil.getSystemPropOrEnvVar("lucee.application.singelton", null);
+						if (StringUtil.isEmpty(strSi)) strSi = ConfigFactoryImpl.getAttr(root, new String[] { "listenerSingelton", "applicationSingelton" });
+						((ModernAppListener) listener).setSingelton(Caster.toBooleanValue(strSi, false));
+					}
 					applicationListener = listener;
 
 				}
