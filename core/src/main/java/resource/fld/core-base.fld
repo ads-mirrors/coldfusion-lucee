@@ -9752,7 +9752,9 @@ mavenLoad([
 	<function>
 		<name>LuceeCreateAISession</name>
 		<class>lucee.runtime.functions.ai.CreateAISession</class>
-		<description>Creates a new AI session for interaction with Large Language Models (LLMs). 
+		<description>This feature is experimental and may be subject to change. If you encounter any issues while using this functionality, please report bugs and errors in our bug tracking system.
+		
+		Creates a new AI session for interaction with Large Language Models (LLMs). 
 		The session maintains conversation history and context between interactions. 
 		Each session can be configured with different parameters to optimize for specific use cases like code analysis, content generation, or data processing.
 		
@@ -9838,7 +9840,9 @@ For exception analysis and debugging, lower temperatures (0.2-0.3) are recommend
 	<function>
 		<name>LuceeInquiryAISession</name>
 		<class>lucee.runtime.functions.ai.InquiryAISession</class>
-		<description>Sends a question/message to an AI session and returns the response. The function maintains conversation context from previous interactions within the same session.
+		<description>This feature is experimental and may be subject to change. If you encounter any issues while using this functionality, please report bugs and errors in our bug tracking system.
+		
+		Sends a question/message to an AI session and returns the response. The function maintains conversation context from previous interactions within the same session.
 	
 	The response can either be returned as a complete string or streamed in chunks to a listener function for real-time processing.</description>
 		<argument>
@@ -9876,43 +9880,60 @@ For exception analysis and debugging, lower temperatures (0.2-0.3) are recommend
 	<!-- AIGetMetaData -->
 	<function>
 		<name>LuceeAIGetMetaData</name>
-		<status>hidden</status>
 		<class>lucee.runtime.functions.ai.AIGetMetaData</class>
-		<description></description>
+		<description>This feature is experimental and may be subject to change. If you encounter any issues while using this functionality, please report bugs and errors in our bug tracking system.
+		
+		Retrieves metadata about a configured AI endpoint. 
+		Returns information about the endpoint's configuration, 
+		and optionally detailed information about available models and associated files.</description>
 		<argument>
 			<name>name</name>
 			<alias>aiName,nameAI</alias>
 			<type>string</type>
 			<required>yes</required>
-			<description></description>
+			<description>The name of the AI endpoint to get metadata for. Can be either:
+	1. A direct endpoint name as configured in the Lucee Administrator
+	2. A default reference (e.g., "default:exception") which will resolve to the configured default endpoint for that category</description>
 		</argument>
 		<argument>
 			<name>detailed</name>
 			<type>boolean</type>
 			<required>false</required>
 			<default>false</default>
-			<description></description>
+			<description>When true, includes additional detailed information:
+	- Models: List of available models with their names, labels, descriptions, and custom settings
+	- Files: For file-capable engines, lists associated files with their IDs, purposes, sizes, creation dates, and status information</description>
 		</argument>
 		<return>
 			<type>struct</type>
+			<description>Returns a structure containing:
+	- label: The display label of the endpoint
+	- model: The current model being used
+	- name: The engine factory name (if available)
+	- models: Query object with model details (if detailed=true)
+	- files: Query object with file information (if detailed=true and engine supports files)</description>
 		</return>
 	</function>
 	
 	<!-- AIHas -->
 	<function>
 		<name>LuceeAIHas</name>
-		<status>hidden</status>
 		<class>lucee.runtime.functions.ai.AIHas</class>
-		<description></description>
+		<description>This feature is experimental and may be subject to change. If you encounter any issues while using this functionality, please report bugs and errors in our bug tracking system.
+		
+		Checks whether a specific AI endpoint is configured and available for use.</description>
 		<argument>
 			<name>name</name>
 			<alias>aiName,nameAI</alias>
 			<type>string</type>
 			<required>yes</required>
-			<description></description>
+			<description>The name of the AI endpoint to check. Can be either:
+	1. A direct endpoint name as configured in the Lucee Administrator
+	2. A default reference (e.g., "default:exception") which will check if a default endpoint is configured for that category</description>
 		</argument>
 		<return>
 			<type>boolean</type>
+			<description>Returns true if the specified AI endpoint exists and is available for use, false otherwise.</description>
 		</return>
 	</function>
 	
