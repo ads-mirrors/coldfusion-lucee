@@ -94,8 +94,8 @@ public class ClaudeEngine extends AIEngineSupport {
 	}
 
 	@Override
-	public AISession createSession(String initialMessage, int connectTimeout, int socketTimeout) {
-		return new ClaudeSession(this, StringUtil.isEmpty(initialMessage, true) ? systemMessage : initialMessage.trim(), connectTimeout, socketTimeout);
+	public AISession createSession(String initialMessage, int limit, double temp, int connectTimeout, int socketTimeout) {
+		return new ClaudeSession(this, StringUtil.isEmpty(initialMessage, true) ? systemMessage : initialMessage.trim(), limit, temp, connectTimeout, socketTimeout);
 	}
 
 	@Override

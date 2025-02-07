@@ -19,7 +19,10 @@ public abstract class AISessionSupport implements AISession {
 	private int socketTimeout;
 	private int connectTimeout;
 
-	public AISessionSupport(AIEngine engine, int connectTimeout, int socketTimeout) {
+	private int limit;
+	private Double temp;
+
+	public AISessionSupport(AIEngine engine, int limit, double temp, int connectTimeout, int socketTimeout) {
 		this.engine = engine;
 
 		if (socketTimeout < 0) this.socketTimeout = engine.getSocketTimeout();
@@ -27,6 +30,23 @@ public abstract class AISessionSupport implements AISession {
 
 		if (connectTimeout < 0) this.connectTimeout = engine.getConnectTimeout();
 		else this.connectTimeout = connectTimeout;
+
+		if (limit <= 0) this.limit = engine.getConversationSizeLimit();
+		else this.limit = limit;
+
+		if (temp <= 0D) this.temp = engine.getTemperature();
+		else this.temp = temp;
+
+	}
+
+	@Override
+	public final int getConversationSizeLimit() {
+		return limit;
+	}
+
+	@Override
+	public final Double getTemperature() {
+		return temp;
 	}
 
 	@Override
