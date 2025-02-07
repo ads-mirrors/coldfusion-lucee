@@ -9826,99 +9826,189 @@ mavenLoad([
 	<!-- CreateAISession -->
 	<function>
 		<name>LuceeCreateAISession</name>
-		<status>hidden</status>
 		<class>lucee.runtime.functions.ai.CreateAISession</class>
-		<description></description>
+		<description>This feature is experimental and may be subject to change. If you encounter any issues while using this functionality, please report bugs and errors in our bug tracking system.
+		
+		Creates a new AI session for interaction with Large Language Models (LLMs). 
+		The session maintains conversation history and context between interactions. 
+		Each session can be configured with different parameters to optimize for specific use cases like code analysis, content generation, or data processing.
+		
+		Common usage patterns:
+		- Exception analysis and debugging assistance
+		- Code documentation generation
+		- Query optimization suggestions
+		- Security review assistance
+		- Performance optimization recommendations
+		
+		The session persists until explicitly terminated or the application restarts.</description>
 		<argument>
 			<name>name</name>
 			<alias>aiName,nameAI</alias>
 			<type>string</type>
 			<required>yes</required>
-			<description></description>
+			<description>Specifies which AI endpoint configuration to use. Can be provided in two formats:
+
+1. Direct endpoint name:
+   The name of an endpoint as defined in the Lucee Administrator (similar to how datasource names work)
+
+2. Default reference:
+   Using the format "default:category" to use the endpoint configured as the default for that specific category in the Lucee Administrator.
+
+Currently supported default categories:
+- exception: For exception analysis
+- documentation: For documentation tasks
+
+The endpoint configurations and their default category assignments are managed in the Lucee Administrator.</description>
 		</argument>
 		<argument>
 			<name>systemMessage</name>
 			<alias>initalMesssage,message</alias>
 			<type>string</type>
 			<required>no</required>
-			<description></description>
+			<description>Initial instruction set that defines the AI's behavior and expertise for this session. This message sets the context and rules for all subsequent interactions.
+
+Best practices:
+- Be specific about the AI's role and expertise
+- Define output format requirements clearly
+- Include any necessary constraints or rules
+- Specify error handling preferences
+- Define response structure expectations
+
+The system message persists throughout the session and influences all responses.</description>
+		</argument>
+		<argument>
+		<name>limit</name>
+			<alias>conversationHistoryLimit</alias>
+			<type>numeric</type>
+			<required>no</required>
+			<default>50</default>
+			<description>Maximum number of question-answer pairs to keep in the conversation history. Once reached, older messages will be removed.
+		
+Consider:
+- Higher limits provide more context but consume more memory
+- Lower limits are more memory efficient but may lose important context
+- For complex analysis tasks, consider limits of 10-20
+- For simple Q&amp;A, limits of 5-10 may suffice</description>
+		</argument>
+		<argument>
+			<name>temperature</name>
+			<type>numeric</type>
+			<required>no</required>
+			<default>0.7</default>
+		<description>Controls response randomness (0.0 to 1.0). Lower values make responses more focused and deterministic, higher values make them more creative and varied.
+		
+Recommended settings:
+- 0.0-0.3: Technical analysis, debugging, code review
+- 0.3-0.5: Documentation generation, error explanations
+- 0.5-0.7: General purpose interactions
+- 0.7-1.0: Creative content generation
+
+For exception analysis and debugging, lower temperatures (0.2-0.3) are recommended for more consistent and precise responses.</description>
 		</argument>
 		<return>
 			<type>object</type>
+			<description>Returns an AI session object that can be used for subsequent interactions. The object maintains conversation history and configured parameters throughout its lifecycle.</description>
 		</return>
 	</function>
 
 	<!-- InquiryAISession -->
 	<function>
 		<name>LuceeInquiryAISession</name>
-		<status>hidden</status>
 		<class>lucee.runtime.functions.ai.InquiryAISession</class>
-		<description></description>
+		<description>This feature is experimental and may be subject to change. If you encounter any issues while using this functionality, please report bugs and errors in our bug tracking system.
+		
+		Sends a question/message to an AI session and returns the response. The function maintains conversation context from previous interactions within the same session.
+	
+	The response can either be returned as a complete string or streamed in chunks to a listener function for real-time processing.</description>
 		<argument>
 			<name>session</name>
 			<alias>aiSession</alias>
 			<type>any</type>
 			<required>yes</required>
-			<description></description>
+			<description>The AI session object returned by LuceeCreateAISession(). This session maintains the conversation history and configuration settings like temperature and system message.</description>
 		</argument>
 		<argument>
 			<name>question</name>
 			<alias>message</alias>
 			<type>string</type>
 			<required>yes</required>
-			<description></description>
+			<description>The question or message to send to the AI. This can be plain text or structured data (like JSON) depending on how the session was configured in its system message.
+	
+	The question becomes part of the conversation history and provides context for future interactions within the same session.</description>
 		</argument>
 		<argument>
 			<name>listener</name>
-    		<type>function</type>
+			<type>function</type>
 			<required>no</required>
-			<description></description>
+			<description>A user-defined function that receives the response in chunks as they arrive from the AI. This enables real-time processing or display of the response.
+	
+	The listener function should accept a single argument which will contain the response chunk.
+	
+	When a listener is provided, the function still returns the complete response as a string, but also streams each chunk to the listener as it arrives.</description>
 		</argument>
 		<return>
 			<type>string</type>
+			<description>Returns the complete response from the AI as a string. If a listener was provided, this is the same complete response that was streamed in chunks to the listener.</description>
 		</return>
 	</function>
 	
 	<!-- AIGetMetaData -->
 	<function>
 		<name>LuceeAIGetMetaData</name>
-		<status>hidden</status>
 		<class>lucee.runtime.functions.ai.AIGetMetaData</class>
-		<description></description>
+		<description>This feature is experimental and may be subject to change. If you encounter any issues while using this functionality, please report bugs and errors in our bug tracking system.
+		
+		Retrieves metadata about a configured AI endpoint. 
+		Returns information about the endpoint's configuration, 
+		and optionally detailed information about available models and associated files.</description>
 		<argument>
 			<name>name</name>
 			<alias>aiName,nameAI</alias>
 			<type>string</type>
 			<required>yes</required>
-			<description></description>
+			<description>The name of the AI endpoint to get metadata for. Can be either:
+	1. A direct endpoint name as configured in the Lucee Administrator
+	2. A default reference (e.g., "default:exception") which will resolve to the configured default endpoint for that category</description>
 		</argument>
 		<argument>
 			<name>detailed</name>
 			<type>boolean</type>
 			<required>false</required>
 			<default>false</default>
-			<description></description>
+			<description>When true, includes additional detailed information:
+	- Models: List of available models with their names, labels, descriptions, and custom settings
+	- Files: For file-capable engines, lists associated files with their IDs, purposes, sizes, creation dates, and status information</description>
 		</argument>
 		<return>
 			<type>struct</type>
+			<description>Returns a structure containing:
+	- label: The display label of the endpoint
+	- model: The current model being used
+	- name: The engine factory name (if available)
+	- models: Query object with model details (if detailed=true)
+	- files: Query object with file information (if detailed=true and engine supports files)</description>
 		</return>
 	</function>
 	
 	<!-- AIHas -->
 	<function>
 		<name>LuceeAIHas</name>
-		<status>hidden</status>
 		<class>lucee.runtime.functions.ai.AIHas</class>
-		<description></description>
+		<description>This feature is experimental and may be subject to change. If you encounter any issues while using this functionality, please report bugs and errors in our bug tracking system.
+		
+		Checks whether a specific AI endpoint is configured and available for use.</description>
 		<argument>
 			<name>name</name>
 			<alias>aiName,nameAI</alias>
 			<type>string</type>
 			<required>yes</required>
-			<description></description>
+			<description>The name of the AI endpoint to check. Can be either:
+	1. A direct endpoint name as configured in the Lucee Administrator
+	2. A default reference (e.g., "default:exception") which will check if a default endpoint is configured for that category</description>
 		</argument>
 		<return>
 			<type>boolean</type>
+			<description>Returns true if the specified AI endpoint exists and is available for use, false otherwise.</description>
 		</return>
 	</function>
 	

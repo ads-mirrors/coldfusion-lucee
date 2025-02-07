@@ -42,8 +42,8 @@ public class ClaudeSession extends AISessionSupport {
 	private ClaudeEngine engine;
 	private String systemMessage;
 
-	public ClaudeSession(ClaudeEngine engine, String systemMessage, int connectTimeout, int socketTimeout) {
-		super(engine, connectTimeout, socketTimeout);
+	public ClaudeSession(ClaudeEngine engine, String systemMessage, int limit, double temp, int connectTimeout, int socketTimeout) {
+		super(engine, limit, temp, connectTimeout, socketTimeout);
 		this.engine = engine;
 		this.systemMessage = systemMessage;
 	}
@@ -60,7 +60,7 @@ public class ClaudeSession extends AISessionSupport {
 			requestBody.set("stream", listener != null);
 
 			// Add temperature if set in engine
-			Double temperature = engine.getTemperature();
+			Double temperature = getTemperature();
 			if (temperature != null) {
 				requestBody.set("temperature", temperature);
 			}
@@ -125,7 +125,7 @@ public class ClaudeSession extends AISessionSupport {
 
 					// Create response object
 					Response r = new ClaudeResponse(raw, cs);
-					AIUtil.addConversation(engine, getHistoryAsList(), new ConversationImpl(new RequestSupport(message), r));
+					AIUtil.addConversation(this, getHistoryAsList(), new ConversationImpl(new RequestSupport(message), r));
 
 					return r;
 				}
@@ -146,7 +146,7 @@ public class ClaudeSession extends AISessionSupport {
 						}
 					}
 
-					AIUtil.addConversation(engine, getHistoryAsList(), new ConversationImpl(new RequestSupport(message), r));
+					AIUtil.addConversation(this, getHistoryAsList(), new ConversationImpl(new RequestSupport(message), r));
 					return r;
 				}
 				else {

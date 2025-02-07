@@ -16,12 +16,16 @@ public final class CreateAISession extends BIF {
 
 	@Override
 	public Object invoke(PageContext pc, Object[] args) throws PageException {
-		if (args.length < 1 || args.length > 2) throw new FunctionException(pc, "CreateAISession", 1, 2, args.length);
+		if (args.length < 1 || args.length > 4) throw new FunctionException(pc, "CreateAISession", 1, 4, args.length);
 
 		String nameAI = Caster.toString(args[0]);
 		String systemMessage = args.length > 1 ? Caster.toString(args[1]) : null;
-
+		int limit = args.length > 2 ? Caster.toIntValue(args[2]) : -1;
+		double temp = args.length > 3 ? Caster.toDoubleValue(args[3]) : -1D;
+		if (temp > 1D) throw new FunctionException(pc, "CreateAISession", "4th", "temperature",
+				"temperature must be between 0.0 and 1.0 (inclusive). Lower values (0.0-0.3) produce more focused, deterministic responses, while higher values create more varied output. Values less than 0 will use the default defined with the configuration of the nedpoint.",
+				null);
 		if (nameAI.startsWith("default:")) nameAI = ((PageContextImpl) pc).getNameFromDefault(nameAI.substring(8));
-		return ((PageContextImpl) pc).createAISession(nameAI, systemMessage);
+		return ((PageContextImpl) pc).createAISession(nameAI, systemMessage, limit, temp, -1, -1);
 	}
 }

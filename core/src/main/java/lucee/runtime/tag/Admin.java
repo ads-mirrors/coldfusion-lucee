@@ -3881,7 +3881,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 
 	private void doVerifyAIConnection() throws PageException {
 		AIEngine engine = config.getAIEnginePool().getEngine(config, getString("admin", action, "name"));
-		AISession session = engine.createSession("You are a connection test assistant. Respond with 'pong' to verify the API is working on the question:ping.",
+		AISession session = engine.createSession("You are a connection test assistant. Respond with 'pong' to verify the API is working on the question:ping.", -1, -1D,
 				AIEngine.DEFAULT_CONNECT_TIMEOUT, AIEngine.DEFAULT_SOCKET_TIMEOUT);
 		Response rsp = session.inquiry("ping");
 

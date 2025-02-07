@@ -41,8 +41,8 @@ public class GeminiSession extends AISessionSupport {
 	private GeminiEngine geminiEngine;
 	private String systemMessage;
 
-	public GeminiSession(GeminiEngine engine, String systemMessage, int connectTimeout, int socketTimeout) {
-		super(engine, connectTimeout, socketTimeout);
+	public GeminiSession(GeminiEngine engine, String systemMessage, int limit, double temp, int connectTimeout, int socketTimeout) {
+		super(engine, limit, temp, connectTimeout, socketTimeout);
 		this.geminiEngine = engine;
 		this.systemMessage = systemMessage;
 	}
@@ -57,7 +57,7 @@ public class GeminiSession extends AISessionSupport {
 			root.set(KeyConstants._contents, contents);
 
 			// Add temperature if set in engine
-			Double temperature = geminiEngine.getTemperature();
+			Double temperature = getTemperature();
 			if (temperature != null) {
 				root.set("temperature", temperature);
 			}
@@ -109,7 +109,7 @@ public class GeminiSession extends AISessionSupport {
 						}
 					}
 
-					AIUtil.addConversation(geminiEngine, getHistoryAsList(), new ConversationImpl(new RequestSupport(message), r));
+					AIUtil.addConversation(this, getHistoryAsList(), new ConversationImpl(new RequestSupport(message), r));
 					return r;
 				}
 				else if ("application/json".equals(t)) {
@@ -124,7 +124,7 @@ public class GeminiSession extends AISessionSupport {
 					}
 
 					Response r = new GeminiResponse(raw, cs);
-					AIUtil.addConversation(geminiEngine, getHistoryAsList(), new ConversationImpl(new RequestSupport(message), r));
+					AIUtil.addConversation(this, getHistoryAsList(), new ConversationImpl(new RequestSupport(message), r));
 					return r;
 				}
 				else {

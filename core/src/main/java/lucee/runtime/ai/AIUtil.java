@@ -43,7 +43,7 @@ public class AIUtil {
 	}
 
 	public static void valdate(AIEngine aie, int connectTimeout, int socketTimeout) throws PageException {
-		AISession session = aie.createSession("keep the answer short", connectTimeout <= 0 ? aie.getConnectTimeout() : connectTimeout,
+		AISession session = aie.createSession("keep the answer short", -1, -1D, connectTimeout <= 0 ? aie.getConnectTimeout() : connectTimeout,
 				socketTimeout <= 0 ? aie.getSocketTimeout() : socketTimeout);
 		session.inquiry("ping");
 	}
@@ -140,9 +140,9 @@ public class AIUtil {
 		return "ISO-8859-1";
 	}
 
-	public static void addConversation(AIEngine engine, List<Conversation> history, Conversation conversation) {
+	public static void addConversation(AISession session, List<Conversation> history, Conversation conversation) {
 		history.add(conversation);
-		while (history.size() > engine.getConversationSizeLimit()) {
+		while (history.size() > session.getConversationSizeLimit()) {
 			history.remove(0);
 		}
 	}

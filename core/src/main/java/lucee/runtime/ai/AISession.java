@@ -21,6 +21,10 @@ public interface AISession {
 
 	public AIEngine getEngine();
 
+	public int getConversationSizeLimit();
+
+	public Double getTemperature();
+
 	public int getSocketTimeout();
 
 	public int getConnectTimeout();

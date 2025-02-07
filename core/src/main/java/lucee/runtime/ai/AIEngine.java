@@ -27,11 +27,13 @@ public interface AIEngine {
 	/**
 	 * 
 	 * @param inialMessage inital message to send to the AI, set null for no message
+	 * @param limit conversion history limit, when 0 the setting from the config is used
+	 * @param temp temperature, when 0 the setting from the config is used
 	 * @param timeout connection/read timeout for the calls to AI, set 0 for not timeout and -1 to use
 	 *            the default defined with the driver.
 	 * @return the session created
 	 */
-	public AISession createSession(String inialMessage, int connectTimeout, int socketTimeout) throws PageException;
+	public AISession createSession(String inialMessage, int limit, double temp, int connectTimeout, int socketTimeout) throws PageException;
 
 	public AIEngineFactory getFactory();
 

@@ -45,8 +45,8 @@ public class OpenAISession extends AISessionSupport {
 	private OpenAIEngine openaiEngine;
 	private String systemMessage;
 
-	public OpenAISession(OpenAIEngine engine, String systemMessage, int connectTimeout, int socketTimeout) {
-		super(engine, connectTimeout, socketTimeout);
+	public OpenAISession(OpenAIEngine engine, String systemMessage, int limit, double temp, int connectTimeout, int socketTimeout) {
+		super(engine, limit, temp, connectTimeout, socketTimeout);
 		this.openaiEngine = engine;
 		this.systemMessage = systemMessage;
 	}
@@ -96,7 +96,7 @@ public class OpenAISession extends AISessionSupport {
 			sct.set(KeyConstants._stream, listener != null);
 
 			// Add temperature if set in engine
-			Double temperature = openaiEngine.getTemperature();
+			Double temperature = getTemperature();
 			if (temperature != null) {
 				sct.set(KeyConstants._temperature, temperature);
 			}
@@ -149,7 +149,7 @@ public class OpenAISession extends AISessionSupport {
 						}
 
 						OpenAIResponse r = new OpenAIResponse(raw, cs);
-						AIUtil.addConversation(openaiEngine, getHistoryAsList(), new ConversationImpl(new RequestSupport(message), r));
+						AIUtil.addConversation(this, getHistoryAsList(), new ConversationImpl(new RequestSupport(message), r));
 
 						return r;
 					}
@@ -173,7 +173,7 @@ public class OpenAISession extends AISessionSupport {
 						catch (Exception e) {
 							throw Caster.toPageException(e);
 						}
-						AIUtil.addConversation(openaiEngine, getHistoryAsList(), new ConversationImpl(new RequestSupport(message), r));
+						AIUtil.addConversation(this, getHistoryAsList(), new ConversationImpl(new RequestSupport(message), r));
 						return r;
 					}
 					else {

@@ -20,6 +20,7 @@ package lucee.runtime.converter;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -40,8 +41,10 @@ import java.util.TimeZone;
 
 import org.w3c.dom.Node;
 
+import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.LogUtil;
+import lucee.commons.io.res.Resource;
 import lucee.commons.lang.CFTypes;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
@@ -156,10 +159,11 @@ public final class JSONConverter extends ConverterSupport {
 	 * @param serializeQueryByColumns
 	 * @param done
 	 * @throws ConverterException
+	 * @throws IOException
 	 */
 
-	private void _serializeClass(PageContext pc, Set test, Class clazz, Object obj, StringBuilder sb, int queryFormat, Boolean preserveCase, Set<Object> done)
-			throws ConverterException {
+	private void _serializeClass(PageContext pc, Set test, Class clazz, Object obj, Appendable sb, int queryFormat, Boolean preserveCase, Set<Object> done)
+			throws ConverterException, IOException {
 
 		Struct sct = new StructImpl(Struct.TYPE_LINKED);
 		if (test == null) test = new HashSet();
@@ -209,9 +213,10 @@ public final class JSONConverter extends ConverterSupport {
 	 * 
 	 * @param date Date to serialize
 	 * @param sb
+	 * @throws IOException
 	 * @throws ConverterException
 	 */
-	private void _serializeDate(Date date, StringBuilder sb) {
+	private void _serializeDate(Date date, Appendable sb) throws IOException {
 		_serializeDateTime(new DateTimeImpl(date), sb);
 	}
 
@@ -220,9 +225,10 @@ public final class JSONConverter extends ConverterSupport {
 	 * 
 	 * @param dateTime DateTime to serialize
 	 * @param sb
+	 * @throws IOException
 	 * @throws ConverterException
 	 */
-	private void _serializeDateTime(DateTime dateTime, StringBuilder sb) {
+	private void _serializeDateTime(DateTime dateTime, Appendable sb) throws IOException {
 
 		sb.append(StringUtil.escapeJS(JSONDateFormat.format(dateTime, null, pattern), '"', charsetEncoder));
 
@@ -243,8 +249,10 @@ public final class JSONConverter extends ConverterSupport {
 	 * @param serializeQueryByColumns
 	 * @param done
 	 * @throws ConverterException
+	 * @throws IOException
 	 */
-	private void _serializeArray(PageContext pc, Set test, Array array, StringBuilder sb, int queryFormat, Boolean preserveCase, Set<Object> done) throws ConverterException {
+	private void _serializeArray(PageContext pc, Set test, Array array, Appendable sb, int queryFormat, Boolean preserveCase, Set<Object> done)
+			throws ConverterException, IOException {
 		_serializeList(pc, test, array.toList(), sb, queryFormat, preserveCase, done);
 	}
 
@@ -256,8 +264,10 @@ public final class JSONConverter extends ConverterSupport {
 	 * @param serializeQueryByColumns
 	 * @param done
 	 * @throws ConverterException
+	 * @throws IOException
 	 */
-	private void _serializeList(PageContext pc, Set test, List list, StringBuilder sb, int queryFormat, Boolean preserveCase, Set<Object> done) throws ConverterException {
+	private void _serializeList(PageContext pc, Set test, List list, Appendable sb, int queryFormat, Boolean preserveCase, Set<Object> done)
+			throws ConverterException, IOException {
 		sb.append("[");
 		sb.append(eol);
 		right();
@@ -283,7 +293,8 @@ public final class JSONConverter extends ConverterSupport {
 		sb.append(']');
 	}
 
-	private void _serializeArray(PageContext pc, Set test, Object[] arr, StringBuilder sb, int queryFormat, Boolean preserveCase, Set<Object> done) throws ConverterException {
+	private void _serializeArray(PageContext pc, Set test, Object[] arr, Appendable sb, int queryFormat, Boolean preserveCase, Set<Object> done)
+			throws ConverterException, IOException {
 		sb.append("[");
 		sb.append(eol);
 		right();
@@ -316,9 +327,10 @@ public final class JSONConverter extends ConverterSupport {
 	 * @param addUDFs
 	 * @param done
 	 * @throws ConverterException
+	 * @throws IOException
 	 */
-	public void _serializeStruct(PageContext pc, Set test, Struct struct, StringBuilder sb, int queryFormat, Boolean preserveCase, boolean addUDFs, Set<Object> done)
-			throws ConverterException {
+	public void _serializeStruct(PageContext pc, Set test, Struct struct, Appendable sb, int queryFormat, Boolean preserveCase, boolean addUDFs, Set<Object> done)
+			throws ConverterException, IOException {
 
 		// preserve case by default for Struct
 		boolean preCase = getPreserveCase(pc, preserveCase, false);
@@ -422,8 +434,9 @@ public final class JSONConverter extends ConverterSupport {
 	 * @param serializeQueryByColumns
 	 * @param done
 	 * @throws ConverterException
+	 * @throws IOException
 	 */
-	private void _serializeMap(PageContext pc, Set test, Map map, StringBuilder sb, int queryFormat, Boolean preserveCase, Set<Object> done) throws ConverterException {
+	private void _serializeMap(PageContext pc, Set test, Map map, Appendable sb, int queryFormat, Boolean preserveCase, Set<Object> done) throws ConverterException, IOException {
 		sb.append("{");
 		sb.append(eol);
 		right();
@@ -459,14 +472,15 @@ public final class JSONConverter extends ConverterSupport {
 	 * @param serializeQueryByColumns
 	 * @param done
 	 * @throws ConverterException
+	 * @throws IOException
 	 */
-	private void _serializeComponent(PageContext pc, Set test, Component component, StringBuilder sb, int queryFormat, Boolean preserveCase, Set<Object> done)
-			throws ConverterException {
+	private void _serializeComponent(PageContext pc, Set test, Component component, Appendable sb, int queryFormat, Boolean preserveCase, Set<Object> done)
+			throws ConverterException, IOException {
 		ComponentSpecificAccess cw = ComponentSpecificAccess.toComponentSpecificAccess(Component.ACCESS_PRIVATE, component);
 		_serializeStruct(pc, test, cw, sb, queryFormat, preserveCase, false, done);
 	}
 
-	private void _serializeUDF(PageContext pc, Set test, UDF udf, StringBuilder sb, int queryFormat, Boolean preserveCase, Set<Object> done) throws ConverterException {
+	private void _serializeUDF(PageContext pc, Set test, UDF udf, Appendable sb, int queryFormat, Boolean preserveCase, Set<Object> done) throws ConverterException, IOException {
 		Struct sct = new StructImpl();
 		try {
 			// Meta
@@ -502,8 +516,10 @@ public final class JSONConverter extends ConverterSupport {
 	 * @param serializeQueryByColumns
 	 * @param done
 	 * @throws ConverterException
+	 * @throws IOException
 	 */
-	private void _serializeQuery(PageContext pc, Set test, Query query, StringBuilder sb, int queryFormat, Boolean preserveCase, Set<Object> done) throws ConverterException {
+	private void _serializeQuery(PageContext pc, Set test, Query query, Appendable sb, int queryFormat, Boolean preserveCase, Set<Object> done)
+			throws ConverterException, IOException {
 
 		boolean preCase = getPreserveCase(pc, preserveCase, true); // UPPERCASE column keys by default for Query
 
@@ -686,19 +702,20 @@ public final class JSONConverter extends ConverterSupport {
 	 * serialize an Object to his xml Format represenation
 	 * 
 	 * @param object Object to serialize
-	 * @param sb StringBuilder to write data
+	 * @param sb Appendable to write data
 	 * @param serializeQueryByColumns
 	 * @param done
 	 * @throws ConverterException
+	 * @throws IOException
 	 */
-	private void _serialize(PageContext pc, Set test, Object object, StringBuilder sb, int queryFormat, Boolean preserveCase, Set done) throws ConverterException {
+	private void _serialize(PageContext pc, Set test, Object object, Appendable sb, int queryFormat, Boolean preserveCase, Set done) throws ConverterException, IOException {
 		// NULL
 		if (object == null || object == CollectionUtil.NULL) {
 			sb.append("null");
 			return;
 		}
 		// String
-		if (object instanceof String || object instanceof StringBuilder) {
+		if (object instanceof CharSequence) {
 			sb.append(StringUtil.escapeJS(object.toString(), '"', charsetEncoder));
 			return;
 		}
@@ -832,16 +849,16 @@ public final class JSONConverter extends ConverterSupport {
 		}
 	}
 
-	private void _serializeXML(Node node, StringBuilder sb) {
+	private void _serializeXML(Node node, Appendable sb) throws IOException {
 		node = XMLCaster.toRawNode(node);
 		sb.append(indent());
 		sb.append(StringUtil.escapeJS(XMLCaster.toString(node, ""), '"', charsetEncoder));
 	}
 
-	private void _serializeTimeSpan(TimeSpan ts, StringBuilder sb) throws ConverterException {
+	private void _serializeTimeSpan(TimeSpan ts, Appendable sb) throws ConverterException, IOException {
 		sb.append(indent());
 		try {
-			sb.append(ts.castToDoubleValue());
+			sb.append(Caster.toString(ts.castToDoubleValue()));
 		}
 		catch (PageException e) {// should never happen because TimeSpanImpl does not throw an exception
 			throw new ConverterException(e.getMessage());
@@ -865,6 +882,11 @@ public final class JSONConverter extends ConverterSupport {
 		try {
 			_serialize(pc, null, object, sb, queryFormat, preserveCase, Collections.newSetFromMap(new IdentityHashMap<>()));
 		}
+		catch (IOException ioe) {
+			ConverterException ce = new ConverterException("Failed to serialize JSON");
+			ExceptionUtil.initCauseEL(ce, ioe);
+			throw ce;
+		}
 		catch (OutOfMemoryError ome) {
 			ConverterException ce = new ConverterException("Failed to serialize JSON: resulting string (current size: " + (sb.length() / 1024 / 1024)
 					+ "mb) would exceed memory limits. Consider breaking down the data into smaller chunks or increasing the heap size.");
@@ -872,6 +894,35 @@ public final class JSONConverter extends ConverterSupport {
 			throw ce;
 		}
 		return sb.toString();
+	}
+
+	public void serialize(PageContext pc, Object object, Resource target, Charset charset, int queryFormat, Boolean preserveCase) throws ConverterException {
+		OutputStream os = null;
+		Writer writer = null;
+		try {
+			os = target.getOutputStream();
+			writer = IOUtil.getWriter(os, charset);
+			_serialize(pc, null, object, writer, queryFormat, preserveCase, Collections.newSetFromMap(new IdentityHashMap<>()));
+		}
+		catch (IOException ioe) {
+			ConverterException ce = new ConverterException("Failed to serialize JSON");
+			ExceptionUtil.initCauseEL(ce, ioe);
+			throw ce;
+		}
+		finally {
+			IOUtil.closeEL(writer);
+		}
+	}
+
+	public void serialize(PageContext pc, Object object, Writer writer, int queryFormat, Boolean preserveCase) throws ConverterException {
+		try {
+			_serialize(pc, null, object, writer, queryFormat, preserveCase, Collections.newSetFromMap(new IdentityHashMap<>()));
+		}
+		catch (IOException ioe) {
+			ConverterException ce = new ConverterException("Failed to serialize JSON");
+			ExceptionUtil.initCauseEL(ce, ioe);
+			throw ce;
+		}
 	}
 
 	@Override

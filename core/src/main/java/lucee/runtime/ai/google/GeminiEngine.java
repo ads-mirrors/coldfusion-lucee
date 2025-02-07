@@ -143,8 +143,8 @@ public class GeminiEngine extends AIEngineSupport {
 	}
 
 	@Override
-	public AISession createSession(String inialMessage, int connectTimeout, int socketTimeout) {
-		return new GeminiSession(this, StringUtil.isEmpty(inialMessage, true) ? systemMessage : inialMessage.trim(), connectTimeout, socketTimeout);
+	public AISession createSession(String inialMessage, int limit, double temp, int connectTimeout, int socketTimeout) {
+		return new GeminiSession(this, StringUtil.isEmpty(inialMessage, true) ? systemMessage : inialMessage.trim(), limit, temp, connectTimeout, socketTimeout);
 	}
 
 	@Override
