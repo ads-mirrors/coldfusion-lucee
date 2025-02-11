@@ -168,6 +168,35 @@ class JavaRegex implements Regex {
 		}
 	}
 
+	@Override
+	public String escape(String strInput) throws PageException {
+		try {
+			StringBuilder strEscape = new StringBuilder();
+			for (char c : strInput.toCharArray()) {
+				if (!Character.isLetterOrDigit(c)) {
+					strEscape.append("\\");
+				}
+				strEscape.append(c);
+			}
+			return strEscape.toString();
+			/* 
+			// Pattern.quote just wraps the string with \Q \E
+			return removeQE(Pattern.compile(Pattern.quote(strInput)).toString());
+			*/
+		}
+		catch (Exception e) {
+			throw Caster.toPageException(e);
+		}
+	}
+	/*
+	private static String removeQE(String input) {
+		if (input.startsWith("\\Q") && input.endsWith("\\E")) {
+			return input.substring(2, input.length() - 2);
+		}
+		return input;
+	}
+	*/
+
 	private Struct findEmpty() {
 		Struct sct = new StructImpl(StructImpl.TYPE_LINKED);
 		Array a = new ArrayImpl();

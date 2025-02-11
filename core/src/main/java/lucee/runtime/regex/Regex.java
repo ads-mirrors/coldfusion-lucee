@@ -68,6 +68,8 @@ public interface Regex {
 
 	public String replaceAll(String strInput, String strPattern, String replacement, boolean caseSensitive, boolean multiLine) throws PageException;
 
+	public String escape(String strInput) throws PageException;
+
 	public String getTypeName();
 
 }

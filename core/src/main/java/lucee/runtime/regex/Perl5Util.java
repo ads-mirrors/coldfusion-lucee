@@ -263,6 +263,10 @@ final class Perl5Util {
 		return replacement;
 	}
 
+	public static String quotemeta(String str){
+		return Perl5Compiler.quotemeta(str);
+	}
+
 	private static String _escape(String str) {
 		StringBuffer sb = new StringBuffer();
 		int len = str.length();
