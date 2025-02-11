@@ -48,7 +48,7 @@ import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.StructSupport;
 import lucee.runtime.type.util.StructUtil;
 
-public abstract class StorageScopeImpl extends StructSupport implements StorageScope, CSRFTokenSupport {
+public abstract class StorageScopeImpl extends StructSupport implements StorageScopePro, CSRFTokenSupport {
 
 	public static Collection.Key CFID = KeyConstants._cfid;
 	public static Collection.Key CFTOKEN = KeyConstants._cftoken;
@@ -102,7 +102,7 @@ public abstract class StorageScopeImpl extends StructSupport implements StorageS
 	private long timeSpan = -1;
 	private String storage;
 
-	private final Map<Collection.Key, String> tokens = new ConcurrentHashMap<Collection.Key, String>();
+	private final Map<Collection.Key, String> tokens = new ConcurrentHashMap<Collection.Key, String>(4);
 
 	/**
 	 * Constructor of the class
@@ -524,7 +524,26 @@ public abstract class StorageScopeImpl extends StructSupport implements StorageS
 	}
 
 	@Override
+	public boolean verifyToken(String token, String key) {
+		return ScopeUtil.verifyCsrfToken(tokens, token, key, false);
+	}
+
+	@Override
 	public boolean verifyToken(String token, String key, boolean remove) {
 		return ScopeUtil.verifyCsrfToken(tokens, token, key, remove);
 	}
+
+	public Map<Collection.Key, String> getTokens(){
+		return tokens;
+	};
+
+	public void setTokens(Map<Collection.Key, String> newTokens){
+		tokens.clear();
+		Iterator<Entry<Key, String>> it = newTokens.entrySet().iterator();
+		Entry<Key, String> e;
+		while (it.hasNext()) {
+			e = it.next();
+			tokens.put(e.getKey(), e.getValue());
+		}
+	};
 }

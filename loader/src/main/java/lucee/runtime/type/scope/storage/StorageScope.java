@@ -99,5 +99,6 @@ public interface StorageScope extends SharedScope {
 
 	public String generateToken(String key, boolean forceNew);
 
-	public boolean verifyToken(String token, String key, boolean remove);
+	public boolean verifyToken(String token, String key);
+
 }

@@ -66,6 +66,7 @@ import lucee.runtime.type.scope.storage.IKHandlerDatasource;
 import lucee.runtime.type.scope.storage.IKStorageScopeSupport;
 import lucee.runtime.type.scope.storage.MemoryScope;
 import lucee.runtime.type.scope.storage.StorageScope;
+import lucee.runtime.type.scope.storage.StorageScopePro;
 import lucee.runtime.type.scope.storage.StorageScopeCleaner;
 import lucee.runtime.type.scope.storage.StorageScopeEngine;
 import lucee.runtime.type.scope.storage.StorageScopeImpl;
@@ -969,22 +970,22 @@ public final class ScopeContext {
 		ApplicationContext appContext = pc.getApplicationContext();
 		RefBoolean isNew = new RefBooleanImpl();
 
-		boolean hasClientManagment = appContext.isSetClientManagement();
-		boolean hasSessionManagment = appContext.isSetSessionManagement();
+		boolean hasClientManagement = appContext.isSetClientManagement();
+		boolean hasSessionManagement = appContext.isSetSessionManagement();
 
 		// get in memory scopes
 		UserScope oldClient = null;
-		if (hasClientManagment) {
+		if (hasClientManagement) {
 			Map<String, Scope> clientContext = getSubMap(cfClientContexts, appContext.getName());
 			oldClient = (UserScope) clientContext.get(pc.getCFID());
 		}
 		UserScope oldSession = null;
-		if (hasSessionManagment) {
+		if (hasSessionManagement) {
 			Map<String, Scope> sessionContext = getSubMap(cfSessionContexts, appContext.getName());
 			oldSession = (UserScope) sessionContext.get(pc.getCFID());
 		}
 
-		if (hasSessionManagment) {
+		if (hasSessionManagement) {
 			ApplicationListener listener = factory.getConfig().getApplicationListener();
 			try {
 				listener.onSessionEnd(factory, appContext.getName(), pc.getCFID());
@@ -995,9 +996,9 @@ public final class ScopeContext {
 			}
 		}
 
-		// remove Scopes completly
-		if (hasSessionManagment) removeCFSessionScope(pc);
-		if (hasClientManagment) removeClientScope(pc);
+		// remove Scopes completely
+		if (hasSessionManagement) removeCFSessionScope(pc);
+		if (hasClientManagement) removeClientScope(pc);
 
 		pc.resetIdAndToken();
 		pc.resetSession();
@@ -1020,7 +1021,11 @@ public final class ScopeContext {
 				if (StorageScopeImpl.KEYS.contains(e.getKey())) continue;
 				newScope.setEL(e.getKey(), e.getValue());
 			}
-			if (newScope instanceof StorageScope) ((StorageScope) newScope).store(pc.getConfig());
+			if (newScope instanceof StorageScopePro){
+				((StorageScopePro) newScope).store(pc.getConfig());
+				((StorageScopePro) newScope).setTokens(((StorageScopePro) oldScope).getTokens());
+			} 
+			
 		}
 	}
 }
