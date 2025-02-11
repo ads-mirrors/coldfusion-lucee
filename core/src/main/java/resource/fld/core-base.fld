@@ -6990,7 +6990,7 @@ if this attribute is not provided all types are returned.</description>
 			<name>dir</name>
 			<type>string</type>
 			<required>false</required>
-			<description>Directory name, defaults to getTempDirectory()</description>
+			<description>Directory name, defaults to getTempDirectory() since 6.2.1.19</description>
 		</argument>
 		<argument>
 			<name>prefix</name>
