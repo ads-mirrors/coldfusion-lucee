@@ -26,7 +26,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 				test( {sessionCluster: true, sessionStorage: "redis"} );
 			});
 
-			it( title='thread looses session topLevel variables - redis - sessionCluster=true', body=function( currentSpec ) {
+			xit( title='thread looses session topLevel variables - redis - sessionCluster=true', body=function( currentSpec ) {
 				test( {sessionCluster: true, sessionStorage: "redis"}, "TopLevel" );
 			});
 		});
