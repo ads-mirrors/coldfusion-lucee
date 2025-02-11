@@ -6144,6 +6144,18 @@ If you terminate a thread, the thread scope includes an ERROR metadata structure
 			page thread, the page continues waiting until the threads are joined,
 			even if you specify a page timeout. (optional, default=0)</description>
 		</attribute>
+		<attribute>
+			<type>boolean</type>
+			<name>throwOnError</name>
+			<required>false</required>
+			<default-value>false</default-value>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Only for action="join"
+			Boolean value specifying whether to throw an
+			exception if any of the joined thread(s) have errored,
+			only the first error found will be thrown.
+			Default: false</description>
+		</attribute>
 	</tag>
 	
 	
