@@ -33,6 +33,38 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 
 			<!--- end old test code --->
 			});
-		});	
+		});
+
+		describe( "test case for directoryCreate mode", function() {
+			it(title = "Checking mode directoryCreate()", skip=isWindows(), body = function( currentSpec ) {
+				var testDir = dir & "mode";
+				directoryCreate(path=testDir, mode="775");
+
+				expect( directoryExists( testDir ) ).toBeTrue();
+				expect( directoryInfo( testDir ).mode ).toBe("775");
+			});
+
+			it(title = "Checking default mode directoryCreate()", skip=isWindows(), body = function( currentSpec ) {
+				var testDir = dir & "mode-default";
+				directoryCreate(path=testDir);
+				
+				expect( directoryExists( testDir ) ).toBeTrue();
+				expect( directoryInfo( testDir ).mode ).toBe("777");
+			});
+
+			it(title = "Checking preserve mode -1 directoryCreate()", skip=isWindows(), body = function( currentSpec ) {
+				var testDir = dir & "mode-1";
+				directoryCreate(path=testDir, mode="-1");
+				
+				expect( directoryExists( testDir ) ).toBeTrue();
+				var parentDirMode = directoryInfo( getTempDirectory() ).mode;
+				expect( directoryInfo( testDir ).mode ).toBe( parentDirMode );
+			});
+		});
+
+	}
+
+	private function isWindows(){
+		return (server.os.name contains "windows");
 	}
 }

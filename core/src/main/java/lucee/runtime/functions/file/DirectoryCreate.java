@@ -18,10 +18,14 @@
  **/
 package lucee.runtime.functions.file;
 
+import java.io.IOException;
+
+import lucee.commons.io.ModeUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.util.ResourceUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.exp.PageException;
+import lucee.runtime.op.Caster;
 import lucee.runtime.tag.Directory;
 import lucee.runtime.tag.util.FileUtil;
 
@@ -36,8 +40,20 @@ public class DirectoryCreate {
 	}
 
 	public static String call(PageContext pc, String path, boolean createPath, boolean ignoreExists) throws PageException {
+		return call(pc, path, createPath, ignoreExists, null);
+	}
+
+	public static String call(PageContext pc, String path, boolean createPath, boolean ignoreExists, String mode) throws PageException {
+		int octalMode = -1;
+		try {
+			if (Caster.toIntValue(mode, -1) > 0) octalMode = ModeUtil.toOctalMode(mode);
+		}
+		catch (IOException e) {
+			throw Caster.toPageException(e);
+		}
+		
 		Resource dir = ResourceUtil.toResourceNotExisting(pc, path);
-		Directory.actionCreate(pc, dir, null, createPath, -1, null, null, ignoreExists ? FileUtil.NAMECONFLICT_SKIP : FileUtil.NAMECONFLICT_ERROR);
+		Directory.actionCreate(pc, dir, null, createPath, octalMode, null, null, ignoreExists ? FileUtil.NAMECONFLICT_SKIP : FileUtil.NAMECONFLICT_ERROR);
 		return null;
 	}
 }

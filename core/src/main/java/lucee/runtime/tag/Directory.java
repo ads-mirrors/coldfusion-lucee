@@ -26,7 +26,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import lucee.commons.io.ModeUtil;
 import lucee.commons.io.SystemUtil;
@@ -701,6 +703,17 @@ public final class Directory extends TagImpl {
 		}
 		// if(!directory.mkdirs()) throw new ApplicationException("can't create directory
 		// ["+directory.toString()+"]");
+		List<Resource> newDirectories = new ArrayList<Resource>();
+		if (createPath && mode != -1 && !directory.getParentResource().exists()) {
+			// need to create paths and apply mode to them
+			Resource tmp = directory.getParentResource();
+			while (!tmp.exists()){
+				newDirectories.add(tmp);
+				tmp = tmp.getParentResource();
+			}
+			lucee.aprint.o(newDirectories);
+		}
+
 		try {
 			// set S3 region before creation
 			setS3region(pc, directory, storage);
@@ -717,6 +730,9 @@ public final class Directory extends TagImpl {
 		if (mode != -1) {
 			try {
 				directory.setMode(mode);
+				for (Resource newDir: newDirectories){
+					newDir.setMode(mode);
+				}
 				// FileUtil.setMode(directory,mode);
 			}
 			catch (IOException e) {
