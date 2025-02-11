@@ -133,7 +133,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="cookie" {
 				expect( result.TIMEOUT ).toBe("1.0");
 				expect( result.SECURE ).toBeTrue();
 
- 			});
+			});
 		
 		});
 
@@ -142,6 +142,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="cookie" {
 	private string function getCookieFromHeaders( struct headers, string name ){
 		local.arr = arguments.headers[ 'Set-Cookie' ];
 		local.str = '';
+		if ( isSimpleValue( arr ) ) arr = [ arr ]; // single cookies don't end up in an array
 		loop array=arr item="local.entry" {
 			if( findNoCase( arguments.name & '=', entry ) eq 1 )
 				str = entry;
