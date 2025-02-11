@@ -524,7 +524,7 @@ public abstract class StorageScopeImpl extends StructSupport implements StorageS
 	}
 
 	@Override
-	public boolean verifyToken(String token, String key) {
-		return ScopeUtil.verifyCsrfToken(tokens, token, key);
+	public boolean verifyToken(String token, String key, boolean remove) {
+		return ScopeUtil.verifyCsrfToken(tokens, token, key, remove);
 	}
 }

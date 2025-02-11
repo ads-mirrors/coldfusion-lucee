@@ -597,8 +597,8 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 	}
 
 	@Override
-	public boolean verifyToken(String token, String key) {
-		return ScopeUtil.verifyCsrfToken(tokens, token, key);
+	public boolean verifyToken(String token, String key, boolean remove) {
+		return ScopeUtil.verifyCsrfToken(tokens, token, key, remove);
 	}
 
 	public static void merge(Map<Key, IKStorageScopeItem> local, Map<Key, IKStorageScopeItem> storage) {
