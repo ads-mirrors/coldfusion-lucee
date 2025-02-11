@@ -30,8 +30,8 @@
         "desc": ""
     },
     {
-        "sysprop": "lucee-extensions",
-        "envvar": "LUCEE-EXTENSIONS",
+        "sysprop": "lucee.extensions",
+        "envvar": "LUCEE_EXTENSIONS",
         "desc": ""
     },
     {
