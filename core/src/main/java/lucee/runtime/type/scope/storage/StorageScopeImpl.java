@@ -48,7 +48,7 @@ import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.StructSupport;
 import lucee.runtime.type.util.StructUtil;
 
-public abstract class StorageScopeImpl extends StructSupport implements StorageScope, CSRFTokenSupport {
+public abstract class StorageScopeImpl extends StructSupport implements StorageScopePro, CSRFTokenSupport {
 
 	public static Collection.Key CFID = KeyConstants._cfid;
 	public static Collection.Key CFTOKEN = KeyConstants._cftoken;
@@ -521,6 +521,11 @@ public abstract class StorageScopeImpl extends StructSupport implements StorageS
 	@Override
 	public String generateToken(String key, boolean forceNew) {
 		return ScopeUtil.generateCsrfToken(tokens, key, forceNew);
+	}
+
+	@Override
+	public boolean verifyToken(String token, String key) {
+		return ScopeUtil.verifyCsrfToken(tokens, token, key, false);
 	}
 
 	@Override

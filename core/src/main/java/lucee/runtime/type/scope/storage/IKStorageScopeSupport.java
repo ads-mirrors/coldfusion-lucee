@@ -59,7 +59,7 @@ import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.StructSupport;
 import lucee.runtime.type.util.StructUtil;
 
-public abstract class IKStorageScopeSupport extends StructSupport implements StorageScope, CSRFTokenSupport {
+public abstract class IKStorageScopeSupport extends StructSupport implements StorageScopePro, CSRFTokenSupport {
 
 	protected static final IKStorageScopeItem ONE = new IKStorageScopeItem("1");
 
@@ -594,6 +594,11 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 	@Override
 	public String generateToken(String key, boolean forceNew) {
 		return ScopeUtil.generateCsrfToken(tokens, key, forceNew);
+	}
+
+	@Override
+	public boolean verifyToken(String token, String key) {
+		return ScopeUtil.verifyCsrfToken(tokens, token, key, false);
 	}
 
 	@Override
