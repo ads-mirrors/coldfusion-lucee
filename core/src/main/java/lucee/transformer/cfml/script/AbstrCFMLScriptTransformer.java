@@ -2483,6 +2483,7 @@ public abstract class AbstrCFMLScriptTransformer extends AbstrCFMLExprTransforme
 		StringBuffer sbType = new StringBuffer();
 		RefBoolean dynamic = new RefBooleanImpl(false);
 
+		comments(data);
 		// Name
 		String name = attributeName(data.srcCode, args, tlt, dynamic, sbType, allowTwiceAttr, !allowColonSeparator);
 		String nameLC = name == null ? null : name.toLowerCase();
