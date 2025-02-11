@@ -611,27 +611,19 @@ public final class FileTag extends BodyTagImpl {
 		}
 	}
 
-	private static Resource makeUnique(Resource res) {
+	private static Resource makeUnique(Resource res) throws PageException {
 		String name = ResourceUtil.getName(res);
 		String ext = ResourceUtil.getExtension(res, "");
 		if (!StringUtil.isEmpty(ext)) ext = "." + ext;
-		while (res.exists()) {
-			res = res.getParentResource().getRealResource(name + "_" + Long.toString(System.currentTimeMillis(), Character.MAX_RADIX) + "_" + CreateUniqueId.invoke() + ext);
-		}
-
-		return res;
+		return ResourceUtil.getUniqueTempFile(res.getParentResource(), name, ext);
 	}
 
-	private static Resource forceUnique(Resource res) {
+	private static Resource forceUnique(Resource res) throws PageException {
 		String name = ResourceUtil.getName(res);
 		String ext = ResourceUtil.getExtension(res, "");
 		if (!StringUtil.isEmpty(ext)) ext = "." + ext;
-		do {
-			// forceunique always create a new name for fileUpload
-			res = res.getParentResource().getRealResource(name + "_" + Long.toString(System.currentTimeMillis(), Character.MAX_RADIX) + "_" + CreateUniqueId.invoke() + ext);
-		}
-		while (res.exists());
-		return res;
+		// forceunique always create a new name for fileUpload
+		return ResourceUtil.getUniqueTempFile(res.getParentResource(), name, ext);
 	}
 
 	/**
