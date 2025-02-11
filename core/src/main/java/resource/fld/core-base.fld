@@ -6982,6 +6982,7 @@ if this attribute is not provided all types are returned.</description>
 	<!-- GetSystemPropOrEnvVar -->
 	<function>
 		<name>GetSystemPropOrEnvVar</name>
+		<introduced>6.2.1.23</introduced>
 		<class>lucee.runtime.functions.system.GetSystemPropOrEnvVar</class>
 		<description>Return the list of supported system properties or env vars Lucee supports.</description>
 		<argument>
