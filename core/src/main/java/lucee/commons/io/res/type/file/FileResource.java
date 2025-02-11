@@ -90,6 +90,7 @@ public final class FileResource extends File implements Resource {
 		if (res instanceof File && (!append || !this.isFile())) {
 			try {
 				Files.copy(((File) res).toPath(), this.toPath(), COPY_OPTIONS);
+				applyPermissionsFromResource(res);
 				return;
 			}
 			catch (Exception e) {
@@ -98,15 +99,18 @@ public final class FileResource extends File implements Resource {
 		}
 
 		IOUtil.copy(res, this.getOutputStream(append), true);
+		applyPermissionsFromResource(res);
+	}
 
+	private void applyPermissionsFromResource( Resource res ){
 		// executable?
 		boolean e = res instanceof File && ((File) res).canExecute();
-		boolean w = res.canWrite();
-		boolean r = res.canRead();
+		boolean w = res.isWriteable();
+		boolean r = res.isReadable();
 
 		if (e) this.setExecutable(true);
-		if (w != this.canWrite()) this.setWritable(w);
-		if (r != this.canRead()) this.setReadable(r);
+		if (w != this.isWriteable()) this.setWritable(w);
+		if (r != this.isReadable()) this.setReadable(r);
 	}
 
 	@Override
@@ -115,6 +119,7 @@ public final class FileResource extends File implements Resource {
 		if (res instanceof File && (!append || !res.isFile())) {
 			try {
 				Files.copy(this.toPath(), ((File) res).toPath(), COPY_OPTIONS);
+				applyPermissionsToResource(res);
 				return;
 			}
 			catch (Exception e) {
@@ -123,14 +128,17 @@ public final class FileResource extends File implements Resource {
 		}
 
 		IOUtil.copy(this, res.getOutputStream(append), true);
+		applyPermissionsToResource(res);
+	}
+
+	private void applyPermissionsToResource( Resource res ){
 		boolean e = canExecute();
-		boolean w = canWrite();
-		boolean r = canRead();
+		boolean w = isWriteable();
+		boolean r = isReadable();
 
 		if (e && res instanceof File) ((File) res).setExecutable(true);
-		if (w != res.canWrite()) res.setWritable(w);
-		if (r != res.canRead()) res.setReadable(r);
-
+		if (w != res.isWriteable()) res.setWritable(w);
+		if (r != res.isReadable()) res.setReadable(r);
 	}
 
 	public Resource getNormalizedResource() {
