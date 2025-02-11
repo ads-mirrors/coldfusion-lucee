@@ -3058,6 +3058,7 @@ public final class PageContextImpl extends PageContext {
 			}
 			if (oCfid != null && ROTATE_UNKNOWN_COOKIE) {
 				if (!scopeContext.hasExistingCFID(this, Caster.toString(oCfid, null))) {
+					LogUtil.log(this, Log.LEVEL_DEBUG, PageContextImpl.class.getName(), "Unknown Session cookie rejected");
 					oCfid = null;
 					oCftoken = null;
 					ReqRspUtil.removeCookie(getHttpServletResponse(), "cfid");
