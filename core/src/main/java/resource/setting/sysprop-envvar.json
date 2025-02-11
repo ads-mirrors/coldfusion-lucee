@@ -176,7 +176,7 @@
     },
     {
         "sysprop": "lucee.cfml.writer",
-        "envvar": "LUCEE.CFML.WRITER",
+        "envvar": "LUCEE_CFML_WRITER",
         "desc": ""
     },
     {

@@ -9,12 +9,26 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect(	len(props) ).toBeGT( 0 );
 			});
 
-			xit( title = "Checking GetSystemPropOrEnvVar(prop) function", body = function( currentSpec ) {
+			it( title = "Check sysprop matches envVar", body = function( currentSpec ) {
 				var props = GetSystemPropOrEnvVar();
 				ArrayEach( props, function( item ){
-					var envVar = GetSystemPropOrEnvVar( item.envvar );
-					var sysProp = GetSystemPropOrEnvVar( item.sysprop );
-					expect( sysProp ).toBe( envVar, item.envvar ); // first configured value is ever resolved, env before property
+					var sysPropNameAsEnv = uCase(Replace( item.sysProp, ".", "_", "all" ));
+					expect( item.envVar ).toBe( sysPropNameAsEnv );
+					expect( item ).toHaveKey( "desc", item.sysProp );
+				});
+			});
+
+			it( title = "Checking GetSystemPropOrEnvVar(prop) function", body = function( currentSpec ) {
+				var props = GetSystemPropOrEnvVar();
+				ArrayEach( props, function( item ){
+					var envVar = GetSystemPropOrEnvVar( item.envVar );
+					var sysProp = GetSystemPropOrEnvVar( item.sysProp );
+					// first configured value is ever resolved, env before property
+
+					if ( sysProp neq envVar) {
+						// manually fail as not to reveal secrets
+						fail( "envar [#item.envvar#] neq sysprop [#item.sysprop#]" );
+					}
 				});
 			});
 
