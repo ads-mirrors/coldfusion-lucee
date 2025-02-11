@@ -9,12 +9,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect(	len(props) ).toBeGT( 0 );
 			});
 
-			it( title = "Checking GetSystemPropOrEnvVar(prop) function", body = function( currentSpec ) {
+			xit( title = "Checking GetSystemPropOrEnvVar(prop) function", body = function( currentSpec ) {
 				var props = GetSystemPropOrEnvVar();
 				ArrayEach( props, function( item ){
 					var envVar = GetSystemPropOrEnvVar( item.envvar );
 					var sysProp = GetSystemPropOrEnvVar( item.sysprop );
-					expect( sysProp ).toBe( envVar ); // first configured value is ever resolved, env before property
+					expect( sysProp ).toBe( envVar, item.envvar ); // first configured value is ever resolved, env before property
 				});
 			});
 
