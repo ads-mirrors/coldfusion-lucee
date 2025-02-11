@@ -6962,6 +6962,7 @@ if this attribute is not provided all types are returned.</description>
 			<default>false</default>
 			<required>no</required>
 			<description>If true or not empty, creates and returns a unique temp directory, optionally prefixed</description>
+			<introduced>6.2.1.20</introduced>
 		</argument>
 		<return>
 			<type>string</type>
