@@ -6150,6 +6150,7 @@ If you terminate a thread, the thread scope includes an ERROR metadata structure
 			<required>false</required>
 			<default-value>false</default-value>
 			<rtexprvalue>true</rtexprvalue>
+			<introduced>6.2.1.24</introduced>
 			<description>Only for action="join"
 			Boolean value specifying whether to throw an
 			exception if any of the joined thread(s) have errored,
