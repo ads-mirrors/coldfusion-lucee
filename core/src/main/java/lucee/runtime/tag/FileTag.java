@@ -320,6 +320,7 @@ public final class FileTag extends BodyTagImpl {
 	 * @throws ApplicationException
 	 * @deprecated only exists for backward compatibility to old ra files.
 	 **/
+	@Deprecated
 	public void setAcl(String acl) throws ApplicationException {
 		this.acl = acl;
 	}
