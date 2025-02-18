@@ -21,6 +21,7 @@ public class ServletRequestJavax implements ServletRequest, Jakarta {
 	private jakarta.servlet.ServletRequest req;
 
 	public ServletRequestJavax(jakarta.servlet.ServletRequest req) {
+		if (req == null) throw new NullPointerException();
 		this.req = req;
 	}
 
