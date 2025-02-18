@@ -134,14 +134,16 @@ public class HttpServletRequestJavax extends ServletRequestJavax implements Http
 
 	@Override
 	public HttpSession getSession(boolean create) {
-		return new HttpSessionJavax(req.getSession(create));
+		jakarta.servlet.http.HttpSession sess = req.getSession(create);
+		if (sess == null && !create) {
+			return null; // can be null, what is okay
+		}
+		return new HttpSessionJavax(sess);
 	}
 
 	@Override
 	public HttpSession getSession() {
-		jakarta.servlet.http.HttpSession sess = req.getSession();
-		if (sess == null) return null; // can be null, what is okay
-		return new HttpSessionJavax(sess);
+		return getSession(false);
 	}
 
 	@Override
