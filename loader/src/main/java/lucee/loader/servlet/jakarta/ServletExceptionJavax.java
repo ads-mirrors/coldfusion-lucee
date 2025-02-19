@@ -8,6 +8,7 @@ public class ServletExceptionJavax extends ServletException implements Jakarta {
 
 	public ServletExceptionJavax(jakarta.servlet.ServletException exp) {
 		super(exp);
+		if (exp == null) throw new NullPointerException();
 		this.exp = exp;
 	}
 

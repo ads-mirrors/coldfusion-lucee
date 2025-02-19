@@ -12,6 +12,7 @@ public class ServletResponseJavax implements ServletResponse, Jakarta {
 	private jakarta.servlet.ServletResponse rsp;
 
 	public ServletResponseJavax(jakarta.servlet.ServletResponse rsp) {
+		if (rsp == null) throw new NullPointerException();
 		this.rsp = rsp;
 	}
 

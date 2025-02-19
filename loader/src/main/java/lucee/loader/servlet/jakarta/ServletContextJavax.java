@@ -22,6 +22,7 @@ public class ServletContextJavax implements ServletContext {
 	private jakarta.servlet.ServletContext context;
 
 	public ServletContextJavax(jakarta.servlet.ServletContext context) {
+		if (context == null) throw new NullPointerException();
 		this.context = context;
 	}
 

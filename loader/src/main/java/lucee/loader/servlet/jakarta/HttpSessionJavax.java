@@ -13,6 +13,7 @@ public class HttpSessionJavax implements HttpSession {
 	private jakarta.servlet.http.HttpSession session;
 
 	public HttpSessionJavax(jakarta.servlet.http.HttpSession session) {
+		if (session == null) throw new NullPointerException();
 		this.session = session;
 	}
 

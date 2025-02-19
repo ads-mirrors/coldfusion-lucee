@@ -18,6 +18,7 @@ public class HttpServletJavax extends HttpServlet implements Jakarta {
 	private jakarta.servlet.http.HttpServlet servlet;
 
 	public HttpServletJavax(jakarta.servlet.http.HttpServlet servlet) {
+		if (servlet == null) throw new NullPointerException();
 		this.servlet = servlet;
 	}
 
