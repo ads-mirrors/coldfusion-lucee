@@ -236,7 +236,6 @@ public abstract class ApplicationContextSupport implements ApplicationContext {
 				else tag = lib.getTag(e.getKey().getLowerString());
 
 				if (tag != null) {
-					sct.removeEL(e.getKey());
 					map = new HashMap<Collection.Key, Object>();
 					iit = attrs.entryIterator();
 					while (iit.hasNext()) {
