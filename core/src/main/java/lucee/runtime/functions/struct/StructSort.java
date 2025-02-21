@@ -38,7 +38,6 @@ import lucee.runtime.type.Array;
 import lucee.runtime.type.ArrayImpl;
 import lucee.runtime.type.Collection;
 import lucee.runtime.type.Struct;
-import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.UDF;
 import lucee.runtime.type.comparator.ExceptionComparator;
 import lucee.runtime.type.comparator.NumberSortRegisterComparator;
@@ -53,12 +52,8 @@ public final class StructSort extends BIF {
 		return call(pc, base, "text", "asc", null);
 	}
 
-	public static Array call(PageContext pc, Struct base, String sortType) throws PageException {
-		return call(pc, base, sortType, "asc", null);
-	}
-
 	public static Array call(PageContext pc, Struct base, Object sortTypeOrSortFunc) throws PageException {
-		if(Decision.isSimpleValue(sortTypeOrSortFunc)) call(pc, base, Caster.toString(sortTypeOrSortFunc), "asc", null); 
+		if(Decision.isSimpleValue(sortTypeOrSortFunc)) return call(pc, base, Caster.toString(sortTypeOrSortFunc), "asc", null);
 		return _call(pc, base, Caster.toFunction(sortTypeOrSortFunc));
 	}
 

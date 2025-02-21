@@ -14507,8 +14507,8 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<name>base</name>
 			<type>struct</type>
 			<required>Yes</required>
-		<description>A structure with one field (an associative array).</description>
-    </argument>
+			<description>A structure with one field (an associative array).</description>
+		</argument>
 		<argument>
 			<name>sortTypeOrSortFunc</name>
 			<alias>sortType</alias>
@@ -14524,7 +14524,7 @@ or a function to be used as a comparator
 
 function(value1, value2, key1, key2)
 </description>
-    </argument>
+		</argument>
 		<argument>
 			<name>sortOrder</name>
 			<type>string</type>
