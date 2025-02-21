@@ -71,7 +71,6 @@ public final class StructSort extends BIF {
 		Collection.Key[] keys = CollectionUtil.keys(base);
 		SortRegister[] arr = new SortRegister[keys.length];
 		boolean hasSubDef = pathToSubElement != null;
-
 		for (int i = 0; i < keys.length; i++) {
 			Object value = base.get(keys[i], null);
 
@@ -102,14 +101,6 @@ public final class StructSort extends BIF {
 			throw ee;
 		}
 
-		if (type.equalsIgnoreCase("struct")){
-			StructImpl rtn = new StructImpl(StructImpl.TYPE_LINKED, arr.length);
-			for (int i = 0; i < arr.length; i++) {
-				String key = keys[arr[i].getOldPosition()].getString();
-				rtn.set(key, base.get(Caster.toKey(key))); // TODO duplicate?
-			}
-			return rtn;
-		}
 		Array rtn = new ArrayImpl();
 		for (int i = 0; i < arr.length; i++) {
 			rtn.append(keys[arr[i].getOldPosition()].getString());
