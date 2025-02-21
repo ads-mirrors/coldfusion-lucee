@@ -14510,15 +14510,19 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 		<description>A structure with one field (an associative array).</description>
     </argument>
 		<argument>
-			<name>sortType</name>
-			<type>string</type>
+			<name>sortTypeOrSortFunc</name>
+			<alias>sortType</alias>
+			<type>any</type>
 			<required>No</required>
 			<default>text</default>
-		<description>
-		define one of the following:
+			<description>define one of the following:
 - numeric: sorts numbers
 - text: sorts text alphabetically, taking case into account (case sensitive)
 - textNoCase: sorts text alphabetically, without regard to case (case insensitive)
+
+or a function to be used as a comparator
+
+function(value1, value2, key1, key2)
 </description>
     </argument>
 		<argument>
@@ -14570,7 +14574,7 @@ _- asc (default): ascending (a to z) sort order
 
 or a function to be used as a comparator
 
-function(value1, value2, key1, key2)
+function(key1, key2)
 </description>
 		</argument>
 		<argument>

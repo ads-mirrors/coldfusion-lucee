@@ -130,6 +130,5 @@ public final class StructToSorted extends BIF {
 				throw new PageRuntimeException(pe);
 			}
 		}
-
 	}
 }
