@@ -793,8 +793,7 @@ public final class PageContextImpl extends PageContext {
 		while ((p = p.getParentPageContext()) != null) {
 			if (p.getStartTime() > 0) return false;
 		}
-		if (getParentPageContext() == null
-			&& (tmp != null && tmp.size() == 0 )) return true; // TODO nested children?
+		if (getParentPageContext() == null && (tmp != null && tmp.size() == 0)) return true; // TODO nested children?
 		return false;
 	}
 
@@ -3024,7 +3023,7 @@ public final class PageContextImpl extends PageContext {
 		// check cookie value
 		if (oCfid != null) {
 			// cookie value is invalid, maybe from ACF
-			
+
 			if (!Decision.isGUIdSimple(oCfid)) {
 				oCfid = null;
 				oCftoken = null;
@@ -3901,7 +3900,7 @@ public final class PageContextImpl extends PageContext {
 	}
 
 	public void resetSession() {
-		if (this.session != null && this.session instanceof JSession){
+		if (this.session != null && this.session instanceof JSession) {
 			getSession().invalidate();
 		}
 		this.session = null;

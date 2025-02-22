@@ -49,8 +49,6 @@ public class GeminiSession extends AISessionSupport {
 
 	@Override
 	public Response inquiry(String message, AIResponseListener listener) throws PageException {
-		if (listener == null) listener = DEV_NULL_LISTENER;
-
 		try {
 			Struct root = new StructImpl(StructImpl.TYPE_LINKED);
 			Array contents = new ArrayImpl();
@@ -59,7 +57,9 @@ public class GeminiSession extends AISessionSupport {
 			// Add temperature if set in engine
 			Double temperature = getTemperature();
 			if (temperature != null) {
-				root.set("temperature", temperature);
+				Struct generationConfig = new StructImpl();
+				generationConfig.set("temperature", temperature);
+				root.set("generationConfig", generationConfig);
 			}
 
 			if (!StringUtil.isEmpty(systemMessage, true)) {
