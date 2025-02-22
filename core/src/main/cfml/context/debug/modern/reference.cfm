@@ -2,7 +2,8 @@
 	<cfscript>
 	setting show=false;
 	develop=false;
-	
+	collectionName="lucee-recipes";
+
 	minmax="It must have at least {min} arguments but a maximum of {max}.";
 	min="It must have at least {min} arguments.";
 	max="Only the number of arguments is restricted to {max}.";
@@ -27,20 +28,20 @@
 	if(!isNull(url.typ)) form.typ=url.typ;
 	
 	function enhanceHTML(html) {
-		var code=replace(html,"<code class=""language-","<code id=""lucee"" class=""language-","all");
-		code=replace(code,"<code>","<code class=""lucee"">","all");
-		code=replace(code,"<blockquote>","<blockquote class=""lucee"">","all");
-		code=replace(code,"<h1>","<h1 class=""lucee"">","all");
+		var code=replace(html,"<code class=""language-","<code class=""lucee-ml"" lang=""language-","all");
+		//code=replace(code,"<code>","<code class=""lucee"">","all");
+		//code=replace(code,"<blockquote>","<blockquote class=""lucee"">","all");
+		//code=replace(code,"<h1>","<h1 class=""lucee"">","all");
 		code=replace(code,"</h1>",(isEmpty(data.since?:"")?"":(" (Lucee #data.since#)"))&"</h1>","all");
-		code=replace(code,"<h2>","<h2 class=""lucee"">","all");
-		code=replace(code,"<h3>","<h3 class=""lucee"">","all");
-		code=replace(code,"<h4>","<h4 class=""lucee"">","all");
-		code=replace(code,"<h5>","<h5 class=""lucee"">","all");
-		code=replace(code,"<h6>","<h6 class=""lucee"">","all");
-		code=replace(code,"<p>","<p class=""lucee"">","all");
+		//code=replace(code,"<h2>","<h2 class=""lucee"">","all");
+		//code=replace(code,"<h3>","<h3 class=""lucee"">","all");
+		//code=replace(code,"<h4>","<h4 class=""lucee"">","all");
+		//code=replace(code,"<h5>","<h5 class=""lucee"">","all");
+		//code=replace(code,"<h6>","<h6 class=""lucee"">","all");
+		//code=replace(code,"<p>","<p class=""lucee"">","all");
 			
 		code=replace(code,"~","`","all");
-		return code;	
+		return '<span class="lucee-debug">#code#</span>' ;	
 	}
 
 	function markdownToHTMLLine(md) {
@@ -111,7 +112,12 @@
 		return arguments.defaultValue;
 	}
 
-	function importRecipes() {
+	function recipeHash() {
+
+	}
+
+
+	function importRecipes(loadContent=false,giveHash=false) {
 		var tmp=listToArray(server.lucee.version,".");
 		var branch=tmp[1]&"."&tmp[2];
 		
@@ -163,6 +169,7 @@
 			var remoteIndexHash=hash(remoteIndexContent);
 		}
 
+		var indexHash=localIndexHash;
 		// in case the local data differs from remote or we do not have local data at all
 		if(!offline && (first || localIndexHash!=remoteIndexHash)) {
 			setting requesttimeout="120";
@@ -189,6 +196,7 @@
 			}
 			try { 
 				if(hasLocalDir) {
+					indexHash=remoteIndexHash;
 					fileWrite(localIndex, remoteIndexContent);
 				}
 			}
@@ -214,7 +222,12 @@
         arraySort(indexData,function(l,r) {
             return compareNoCase(l.title, r.title);
         });
-		return indexData;
+		if(loadContent) {
+			loop array=indexData item="local.record" {
+				getContent(record);
+			}
+		}
+		return giveHash?indexHash:indexData;
 	}
 
     function resetRecipes() {
@@ -247,15 +260,161 @@
 		return data.content;
 	}
 
-	
-
-
     function recipesAsStruct(index) {
         var data=[:];
         loop array=index item="local.entry" {
             data[entry.title]=entry;
         }
         return data;
+	}
+
+	function recipesAsQuery(index, keywordsFlat=true) {
+        loop array=index item="local.entry" {
+            if(isNull(asQry)) {
+				var columns=entry.keyArray();
+				var asQry=QueryNew(columns);
+			}
+			var row=queryAddRow(asQry);
+			loop array=columns item="local.col" {
+				var val=entry[col];
+				if(keywordsFlat && col=="keywords" && isArray(val)) val=val.toList();
+				querySetCell(asQry, col, val);
+			}
+        }
+        return asQry;
+	}
+
+
+	function searchSupported() {
+		var id="EFDEB172-F52E-4D84-9CD1A1F561B3DFC8";
+		if(!extensionexists(id)) return false;
+		
+		var info=extensionInfo(id);
+		var major=listFirst(info.version,".");
+		return major>=3;
+	}
+
+
+	function createCollection() {
+		if(!searchSupported()) return;
+		
+		// create if needed
+		collection action= "list" name="local.collections";
+		var hasColl=false;
+		loop query=collections {
+			if(collections.name==collectionName) {
+				hasColl=true;
+				break;
+			}
+		}
+		if(!hasColl) {
+			// collection directory
+			try {
+				var collDirectory=expandPath("{lucee-config-dir}/recipes/search");
+				if(!directoryExists(collDirectory)) {
+					directoryCreate(collDirectory,true);
+				}
+			}
+			catch(ex) {
+				dump(ex);
+				var collDirectory=expandPath("{temp-directory}");
+			}
+			// create collection
+			collection action= "Create" collection=name path=collDirectory;
+			
+		}	
+	}
+
+	function createIndex() {
+		if(!searchSupported()) return criteria;
+		createCollection();
+		var indexHash=server.system.properties["lucee.recipe.hash"]?:"";
+		if(isEmpty(indexHash)) {
+			indexHash=importRecipes(true,true);
+			System::setProperty("lucee.recipe.hash",indexHash);
+		}
+		dump(indexHash);
+		index action="list"
+			name="local.indexes"
+			collection=collectionName;
+		
+		// do we have a it?
+		var update=true;
+		loop query=indexes {
+			if(left(indexes.custom4,12)=="recipe-hash:" && indexes.custom4=="recipe-hash:"&indexHash) {
+				update=false;
+				break;
+			}
+		}
+		// index collection
+		if(update) {
+			var qryRecipes=recipesAsQuery(importRecipes(true));
+			index action="update" 
+				type="custom"
+				collection=collectionName 
+				key="url"
+				title="title"
+				body="CONTENT,keywords"
+				custom1="keywords"
+				custom2="url"
+				custom3="local"
+				custom4="recipe-hash:"&indexHash
+				query="qryRecipes";
+		}
+	}
+
+	function augmentSearchCriteria( criteria) {
+		if(!searchSupported()) return criteria;	
+		createIndex();
+
+		criteria=rereplace(criteria, "([+\-&|!(){}\[\]\^""~*?:\\\/])", "\\1", "ALL");
+		
+		search 
+			contextpassages=3
+			contextHighlightBegin="<match>" contextHighlightEnd="</match>"
+			contextBytes=3000
+			contextpassageLength=1000
+			name="local.searchResults"
+			collection=collectionName 
+			criteria=criteria
+			suggestions="always"
+			maxrows=3;
+
+		var augmentedQuery="User Query: #criteria#";
+		var searchResultsAsArray=[];
+		var total=0;
+		var maxSize4Full=100;
+		loop query=searchResults  {
+			var cntxt=searchResults.context;
+			var pass=cntxt.passages;
+			var src=searchResults.custom2;
+			src=replace(src,"https://raw.githubusercontent.com/lucee/lucee-docs/master/","https://github.com/lucee/lucee-docs/blob/master/");
+			var arrSrc=[];
+			loop query=pass {
+				arrayAppend(arrSrc, [
+					"start":pass.start,
+					"end":pass.end,
+					"score":pass.score,
+					"data": pass.original
+				]);
+			}
+
+			
+			arrayAppend(searchResultsAsArray, [
+				"title":searchResults.title,
+				"summary":searchResults.summary,
+				"keywords":searchResults.custom1,
+				"source":src,
+				"score":searchResults.score,
+				"rank":searchResults.rank,
+				"content":arrSrc
+			]);
+		}
+		if(len(searchResultsAsArray)) {
+			augmentedQuery&="
+Documentation Context: #serializeJSON(searchResultsAsArray)#";
+		}
+		return augmentedQuery;
 	}
 
 
@@ -324,6 +483,9 @@
 	</cfscript>
 	<cfoutput>
 		<style>
+			span.lucee-debug  {
+				font-size: 16px !important;
+			}
 			span.lucee-debug h1, span.lucee-debug h2, span.lucee-debug h3, span.lucee-debug h4, span.lucee-debug h5, span.lucee-debug h6 {
 				color: ##4e7620 !important;
 			}
@@ -333,8 +495,11 @@
 			}
 			span.lucee-debug h2 {font-size: 28px !important;}
 			span.lucee-debug h3 {font-size: 22px !important;}
+			span.lucee-debug h4 {font-size: 18px !important;}
+			span.lucee-debug h5 {font-size: 16px !important;}
+			span.lucee-debug h6 {font-size: 16px !important;}
 			span.lucee-debug p {
-				font-size: 16px !important;
+				font-size: 18px !important;
 				align:center;
 				color: ##333 !important;
 			}
@@ -440,24 +605,47 @@
 	<cfif isNull(type)>
 		
 			<cfscript>
+				NL="
+";
 				endpoint='default:documentation';
 				if(LuceeAIHas(endpoint)) {
-					if(true || !structKeyExists(session, "documentationAISession")) {
+					if(!structKeyExists(session, "documentationAISession")) {
 						ais=LuceeCreateAISession(endpoint, 
 						"You are a Lucee expert and documentation guide. "
-						&"Users will ask questions about Lucee functions, tags, or configurations. "
-						&"Respond concisely in plain HTML, without using triple backticks or mentioning the origin of the data. "
-						&"Biggest heading tag you can use is h2."
+						&"Users will ask questions about Lucee functions, tags, or configurations running Lucee version #server.lucee.version#. "
+						&"Some queries will include relevant documentation context while others may not have matching documentation. "
+						&"When documentation context is provided, it will be an array of documents, each containing: "&NL
+						&"- A 'title' field containing the document title "&NL
+						&"- A 'summary' field with a brief overview "&NL
+						&"- A 'keywords' field listing relevant terms "&NL
+						&"- A 'content' field containing the documentation text in markdown format in pieces as an array, every element contains the folowing pieces"&NL
+						&"   - start - start position in the original text"&NL
+						&"   - end - end position in the original text"&NL
+						&"   - score - score  score from Lucene for that piece"&NL
+						&"   - data - the content piece itself"&NL
+						&"- A 'source' field with the documentation URL "&NL
+						&"- A 'score' field indicating the relevance to the query "&NL
+						&"- A 'rank' field indicating the position in search results "&NL&NL
+						&"Documents are ordered by relevance, with the most relevant first. "
+						&"When documentation context is provided, base your response primarily on that information and include the source URLs for reference. "
+						&"When no context is provided, respond based on your general knowledge of Lucee. "
+						&"Respond concisely in plain HTML, without using triple backticks. "
+						&"Biggest heading tag you can use is h2. "
+						&"Start every answer with a h2 tag containg a title for your answer."
+						&"Regular text in a p tag."
 						&"For multi-line code examples, use <code class=""lucee-ml"">. "
 						&"For inline code, use <code>. Avoid <code> within heading tags, and ensure all code is properly escaped with &lt;. "
-						&"Structure responses clearly and briefly for direct HTML integration."
-						
-						// &"Inside <code class=""lucee-ml"">, use syntax coloring like this "
-						// &"<code class=""lucee-ml""><span class=""variable"">x</span><span class=""p"">=</span><span class=""keyword"">myFunction</span>"
-						// &"<span class=""p"">(</span><span class=""literal"">""Susi""</span><span class=""p"">,</span> "
-						// &"<span class=""literal"">123</span><span class=""p"">,</span> <span class=""literal"">true</span><span class=""p"">,</span>"
-						// &" <span class=""variable"">test</span><span class=""p"">);</span>. "
-						// &"Use this css classes for all kind of syntax."
+						&"Structure responses clearly and briefly for direct HTML integration. "
+						&"When responding: "&NL
+						&"1. Use provided documentation context when available "&NL
+						&"2. Include source URLs when referencing specific documentation "&NL
+						&"3. Maintain consistent HTML formatting throughout your response "&NL
+						&"4. if the request is nt clear, say so and do not assume to much "&NL
+						&"5. whenever possible make a code example "&NL
+						&"6. code examples as much as possible in cfscript code "&NL
+						&"7. For queries without context, provide the best possible answer based on general Lucee expertise"
+						,4
+						,0.3
 						);
 						// 	Respond concisely in plain markdown format (no starting ```markdown) without mentioning the origin of the data. 
 						try {
@@ -475,12 +663,16 @@
 					}
 					//echo("<!-- start pre -->");
 					echo("<span class=""lucee-debug"">");
-					md=LuceeInquiryAISession(ais,form.search,function(msg) {
+					md=LuceeInquiryAISession(ais,augmentSearchCriteria(form.search),function(msg) {
 						echo(msg);
 						cfflush(throwonerror=false);
 						
 					});
-					echo("<h4>#label#</h4></span");
+					echo("</span><h4>#label#</h4>");
+
+					if(develop) {
+						dump(md);
+					}
 					//echo("<!-- end pre -->");
 					//md=LuceeInquiryAISession(ais,form.search);
 					//md=executeCodeFragments(md);
@@ -808,6 +1000,6 @@
 		<cfcatch>
 			<p style="color:red">An error occurred; see application log for more details</p>
 			<cflog log="application" exception="#cfcatch#">
-			<cfdump var="#cfcatch#">
+			<cfdump var="#cfcatch#" enabled="#develop?:false#">
 		</cfcatch>
 	</cftry>
