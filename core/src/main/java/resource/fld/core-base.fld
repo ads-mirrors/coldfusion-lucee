@@ -9979,6 +9979,24 @@ For exception analysis and debugging, lower temperatures (0.2-0.3) are recommend
 		</return>
 	</function>
 	
+	<!-- AIGetNameForDefault -->
+	<function>
+		<name>LuceeAIGetNameForDefault</name>
+		<class>lucee.runtime.functions.ai.AIGetNameForDefault</class>
+		<description></description>
+		<status>hidden</status>
+		<argument>
+			<name>name</name>
+			<alias>default</alias>
+			<type>string</type>
+			<required>yes</required>
+			<description></description>
+		</argument>
+		<return>
+			<type>String</type>
+		</return>
+	</function>
+	
 	<!-- LuceeVersionsDetail -->
 	<function>
 		<name>LuceeVersionsDetail</name>
