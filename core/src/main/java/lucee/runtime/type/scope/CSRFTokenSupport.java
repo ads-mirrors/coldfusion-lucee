@@ -4,6 +4,8 @@ public interface CSRFTokenSupport {
 
 	public String generateToken(String key, boolean forceNew);
 
+	public boolean verifyToken(String token, String key);
+
 	public boolean verifyToken(String token, String key, boolean remove);
 
 }
