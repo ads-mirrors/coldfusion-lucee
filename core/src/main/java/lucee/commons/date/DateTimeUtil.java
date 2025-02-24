@@ -27,7 +27,6 @@ import lucee.commons.i18n.FormatterWrapper;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.engine.ThreadLocalPageContext;
-import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.functions.displayFormatting.DateTimeFormat;
 import lucee.runtime.type.dt.DateTime;
 import lucee.runtime.type.dt.DateTimeImpl;

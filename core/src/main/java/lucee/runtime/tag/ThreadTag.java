@@ -42,7 +42,6 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.spooler.ExecutionPlan;
 import lucee.runtime.spooler.ExecutionPlanImpl;
 import lucee.runtime.spooler.SpoolerEngineImpl;
-import lucee.runtime.tag.Throw;
 import lucee.runtime.thread.ChildSpoolerTask;
 import lucee.runtime.thread.ChildThread;
 import lucee.runtime.thread.ChildThreadImpl;
@@ -152,10 +151,9 @@ public final class ThreadTag extends BodyTagImpl implements DynamicAttributes {
 	 * @param throwonerror value to set
 	 **/
 	public void setThrowonerror(boolean throwonerror) throws ApplicationException {
-		if (this.action != ACTION_JOIN && throwonerror) throw new ApplicationException("Attribute [throwonerror] is only supported for action [join]"); 
+		if (this.action != ACTION_JOIN && throwonerror) throw new ApplicationException("Attribute [throwonerror] is only supported for action [join]");
 		this.throwonerror = throwonerror;
 	}
-
 
 	private Collection.Key name(boolean create) {
 		if (name == null && create) name = KeyImpl.init("thread" + RandomUtil.createRandomStringLC(5));
@@ -458,8 +456,8 @@ public final class ThreadTag extends BodyTagImpl implements DynamicAttributes {
 				catch (InterruptedException e) {
 				}
 			}
-			if (throwonerror && threadError == null && ts.containsKey(KeyConstants._error) ){
-				threadError = lucee.runtime.tag.Throw.toPageException(ts.get(KeyConstants._error), null );
+			if (throwonerror && threadError == null && ts.containsKey(KeyConstants._error)) {
+				threadError = lucee.runtime.tag.Throw.toPageException(ts.get(KeyConstants._error), null);
 			}
 			if (_timeout != -1) {
 				_timeout = _timeout - (System.currentTimeMillis() - start);

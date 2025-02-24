@@ -28,11 +28,8 @@ import java.util.Map.Entry;
 
 import javax.servlet.jsp.tagext.Tag;
 
-import org.osgi.framework.BundleException;
-
 import lucee.commons.io.DevNullOutputStream;
 import lucee.commons.io.log.LogUtil;
-import lucee.commons.lang.ClassException;
 import lucee.commons.lang.ClassUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.Pair;

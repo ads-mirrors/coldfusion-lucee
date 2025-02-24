@@ -63,7 +63,6 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.tag.BodyTagImpl;
 import lucee.runtime.functions.list.ListFirst;
 import lucee.runtime.functions.list.ListLast;
-import lucee.runtime.functions.other.CreateUniqueId;
 import lucee.runtime.listener.ApplicationContext;
 import lucee.runtime.listener.ApplicationContextSupport;
 import lucee.runtime.op.Caster;
@@ -232,7 +231,7 @@ public final class FileTag extends BodyTagImpl {
 		else if (strAction.equals("info")) action = ACTION_INFO;
 		else if (strAction.equals("touch")) action = ACTION_TOUCH;
 		else throw new ApplicationException("Invalid value [" + strAction + "] for attribute action",
-		"Supported actions are: [info, move, rename, copy, delete, read, readbinary, write, append, upload, uploadall, touch]");
+				"Supported actions are: [info, move, rename, copy, delete, read, readbinary, write, append, upload, uploadall, touch]");
 	}
 
 	/**

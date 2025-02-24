@@ -22,7 +22,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import lucee.runtime.exp.DatabaseException;
 import lucee.runtime.exp.DeprecatedException;
 
 /**
@@ -106,6 +105,7 @@ public final class DebugQueryColumn extends QueryColumnImpl implements QueryColu
 		return cloneColumnImpl(deepCopy);
 	}
 
+	@Override
 	public DebugQueryColumn cloneColumnImpl(boolean deepCopy) {
 		DebugQueryColumn clone = new DebugQueryColumn();
 		populate(clone, deepCopy, null);

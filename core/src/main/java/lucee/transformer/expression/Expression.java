@@ -17,7 +17,6 @@
  */
 package lucee.transformer.expression;
 
-import lucee.runtime.exp.TemplateException;
 import lucee.transformer.Context;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;

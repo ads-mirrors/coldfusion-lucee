@@ -21,7 +21,6 @@ package lucee.runtime.component;
 import java.io.Serializable;
 
 import lucee.runtime.exp.ApplicationException;
-import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.type.Duplicable;
 import lucee.runtime.type.util.ComponentUtil;
 

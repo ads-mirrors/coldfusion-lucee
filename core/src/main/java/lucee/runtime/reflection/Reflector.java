@@ -19,7 +19,6 @@
 package lucee.runtime.reflection;
 
 import java.io.IOException;
-import java.lang.instrument.UnmodifiableClassException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;

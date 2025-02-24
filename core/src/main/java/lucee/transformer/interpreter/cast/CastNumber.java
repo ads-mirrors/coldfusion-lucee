@@ -3,7 +3,6 @@ package lucee.transformer.interpreter.cast;
 import java.math.BigDecimal;
 
 import lucee.runtime.exp.PageException;
-import lucee.runtime.exp.TemplateException;
 import lucee.transformer.cast.Cast;
 import lucee.transformer.expression.ExprNumber;
 import lucee.transformer.expression.Expression;

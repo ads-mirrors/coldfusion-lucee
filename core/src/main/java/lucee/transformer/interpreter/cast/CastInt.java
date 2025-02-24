@@ -1,7 +1,6 @@
 package lucee.transformer.interpreter.cast;
 
 import lucee.runtime.exp.PageException;
-import lucee.runtime.exp.TemplateException;
 import lucee.transformer.cast.Cast;
 import lucee.transformer.expression.ExprInt;
 import lucee.transformer.expression.Expression;

@@ -24,7 +24,6 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
-import lucee.runtime.exp.TemplateException;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.expression.ExpressionBase;
@@ -69,7 +68,7 @@ public final class CastNumber extends ExpressionBase implements ExprNumber, Cast
 
 	/**
 	 * lucee.transformer.expression.Expression#_writeOut(lucee.transformer.bytecode.BytecodeContext,
-	 *      int)
+	 * int)
 	 */
 	@Override
 	public Type _writeOut(BytecodeContext bc, int mode) throws TransformerException {

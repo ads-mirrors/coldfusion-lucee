@@ -12,18 +12,17 @@ import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.ext.function.BIF;
-import lucee.runtime.functions.query.QuerySort.QueryRow;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
 import lucee.runtime.type.Collection;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.UDF;
 import lucee.runtime.type.comparator.ExceptionComparator;
 import lucee.runtime.type.comparator.NumberSortRegisterComparator;
 import lucee.runtime.type.comparator.SortRegister;
 import lucee.runtime.type.comparator.SortRegisterComparator;
 import lucee.runtime.type.comparator.StructSortRegister;
-import lucee.runtime.type.UDF;
 import lucee.runtime.type.util.CollectionUtil;
 
 public final class StructToSorted extends BIF {
@@ -34,7 +33,7 @@ public final class StructToSorted extends BIF {
 	}
 
 	public static Struct call(PageContext pc, Struct base, Object sortTypeOrSortFunc) throws PageException {
-		if(Decision.isSimpleValue(sortTypeOrSortFunc)) call(pc, base, Caster.toString(sortTypeOrSortFunc), "asc", false);
+		if (Decision.isSimpleValue(sortTypeOrSortFunc)) call(pc, base, Caster.toString(sortTypeOrSortFunc), "asc", false);
 		return _call(pc, base, Caster.toFunction(sortTypeOrSortFunc));
 	}
 
@@ -56,7 +55,7 @@ public final class StructToSorted extends BIF {
 
 		Collection.Key[] keys = CollectionUtil.keys(base);
 		SortRegister[] arr = new SortRegister[keys.length];
-		
+
 		for (int i = 0; i < keys.length; i++) {
 			arr[i] = new SortRegister(i, keys[i]);
 		}
@@ -87,7 +86,7 @@ public final class StructToSorted extends BIF {
 	public static Struct _call(PageContext pc, Struct base, UDF sortFunc) throws PageException {
 		Collection.Key[] keys = CollectionUtil.keys(base);
 		StructSortRegister[] arr = new StructSortRegister[keys.length];
-		
+
 		for (int i = 0; i < keys.length; i++) {
 			arr[i] = new StructSortRegister(i, keys[i].toString(), base.get(keys[i], null));
 		}
@@ -116,15 +115,15 @@ public final class StructToSorted extends BIF {
 		private PageContext pc;
 		private final UDF udf;
 
-		public StructComparator(PageContext pc,UDF udf) {
-			this.pc=pc;
-			this.udf=udf;
+		public StructComparator(PageContext pc, UDF udf) {
+			this.pc = pc;
+			this.udf = udf;
 		}
 
 		@Override
 		public int compare(StructSortRegister left, StructSortRegister right) {
 			try {
-				return Caster.toIntValue(udf.call(pc, new Object[]{left.getValue(), right.getValue(), left.getKey(), right.getKey()}, true));
+				return Caster.toIntValue(udf.call(pc, new Object[] { left.getValue(), right.getValue(), left.getKey(), right.getKey() }, true));
 			}
 			catch (PageException pe) {
 				throw new PageRuntimeException(pe);

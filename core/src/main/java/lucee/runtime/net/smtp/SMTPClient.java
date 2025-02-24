@@ -18,7 +18,6 @@
  */
 package lucee.runtime.net.smtp;
 
-import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.lang.ref.SoftReference;

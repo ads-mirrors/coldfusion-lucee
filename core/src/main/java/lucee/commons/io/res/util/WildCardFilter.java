@@ -21,8 +21,6 @@ package lucee.commons.io.res.util;
 
 import java.util.regex.Pattern;
 
-import org.apache.oro.text.regex.MalformedPatternException;
-
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.StringUtil;

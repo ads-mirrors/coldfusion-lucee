@@ -1,7 +1,6 @@
 package lucee.transformer.interpreter.op;
 
 import lucee.runtime.exp.PageException;
-import lucee.runtime.exp.TemplateException;
 import lucee.transformer.Position;
 import lucee.transformer.expression.ExprBoolean;
 import lucee.transformer.expression.Expression;

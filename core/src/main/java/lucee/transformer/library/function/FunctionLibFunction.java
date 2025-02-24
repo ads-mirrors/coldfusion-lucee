@@ -26,7 +26,6 @@ import java.util.Map;
 import org.osgi.framework.Version;
 
 import lucee.commons.lang.CFTypes;
-import lucee.commons.lang.ClassException;
 import lucee.commons.lang.ClassUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.Md5;

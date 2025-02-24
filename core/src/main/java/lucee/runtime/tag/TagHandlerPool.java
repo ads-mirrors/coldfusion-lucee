@@ -27,7 +27,6 @@ import javax.servlet.jsp.tagext.Tag;
 import lucee.commons.lang.ClassUtil;
 import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.config.Identification;
-import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.transformer.library.ClassDefinitionImpl;

@@ -50,7 +50,6 @@ import lucee.runtime.coder.Base64Util;
 import lucee.runtime.converter.WDDXConverter;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.ExpressionException;
-import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.Function;
 import lucee.runtime.functions.conversion.IsJSON;
 import lucee.runtime.image.ImageUtil;

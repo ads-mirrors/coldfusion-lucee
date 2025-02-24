@@ -19,7 +19,6 @@
 package lucee.runtime.config;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;

@@ -30,7 +30,6 @@ import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.ext.function.BIF;
-import lucee.runtime.functions.struct.StructToSorted.StructComparator;
 import lucee.runtime.interpreter.VariableInterpreter;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
@@ -53,7 +52,7 @@ public final class StructSort extends BIF {
 	}
 
 	public static Array call(PageContext pc, Struct base, Object sortTypeOrSortFunc) throws PageException {
-		if(Decision.isSimpleValue(sortTypeOrSortFunc)) return call(pc, base, Caster.toString(sortTypeOrSortFunc), "asc", null);
+		if (Decision.isSimpleValue(sortTypeOrSortFunc)) return call(pc, base, Caster.toString(sortTypeOrSortFunc), "asc", null);
 		return _call(pc, base, Caster.toFunction(sortTypeOrSortFunc));
 	}
 
@@ -110,7 +109,7 @@ public final class StructSort extends BIF {
 	public static Array _call(PageContext pc, Struct base, UDF sortFunc) throws PageException {
 		Collection.Key[] keys = CollectionUtil.keys(base);
 		SortRegister[] arr = new SortRegister[keys.length];
-		
+
 		for (int i = 0; i < keys.length; i++) {
 			arr[i] = new SortRegister(i, keys[i].toString());
 		}
@@ -132,20 +131,21 @@ public final class StructSort extends BIF {
 		if (args.length == 1) return call(pc, Caster.toStruct(args[0]));
 		throw new FunctionException(pc, "StructSort", 1, 4, args.length);
 	}
+
 	public static class StructComparator implements Comparator<SortRegister> {
 
 		private PageContext pc;
 		private final UDF udf;
 
-		public StructComparator(PageContext pc,UDF udf) {
-			this.pc=pc;
-			this.udf=udf;
+		public StructComparator(PageContext pc, UDF udf) {
+			this.pc = pc;
+			this.udf = udf;
 		}
 
 		@Override
 		public int compare(SortRegister left, SortRegister right) {
 			try {
-				return Caster.toIntValue(udf.call(pc, new Object[]{left.getValue(), right.getValue()}, true));
+				return Caster.toIntValue(udf.call(pc, new Object[] { left.getValue(), right.getValue() }, true));
 			}
 			catch (PageException pe) {
 				throw new PageRuntimeException(pe);

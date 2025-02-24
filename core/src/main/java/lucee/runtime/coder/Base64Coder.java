@@ -21,7 +21,6 @@ package lucee.runtime.coder;
 import java.io.UnsupportedEncodingException;
 
 import lucee.commons.digest.Base64Encoder;
-import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.op.Caster;
 
 /**

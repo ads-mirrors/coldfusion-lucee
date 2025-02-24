@@ -26,7 +26,6 @@ import lucee.runtime.component.Member;
 import lucee.runtime.component.Property;
 import lucee.runtime.dump.DumpData;
 import lucee.runtime.dump.DumpProperties;
-import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.type.Collection;
 import lucee.runtime.type.KeyImpl;

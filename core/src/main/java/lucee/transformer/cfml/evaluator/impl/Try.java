@@ -21,8 +21,6 @@ package lucee.transformer.cfml.evaluator.impl;
 import java.util.Iterator;
 import java.util.List;
 
-import org.w3c.dom.Element;
-
 import lucee.transformer.bytecode.Body;
 import lucee.transformer.bytecode.Statement;
 import lucee.transformer.bytecode.statement.tag.Tag;

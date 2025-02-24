@@ -107,7 +107,6 @@ import lucee.commons.net.http.httpclient.entity.ResourceHttpEntity;
 import lucee.commons.net.http.httpclient.entity.TemporaryStreamHttpEntity;
 import lucee.runtime.PageContextImpl;
 import lucee.runtime.engine.ThreadLocalPageContext;
-import lucee.runtime.exp.PageException;
 import lucee.runtime.net.http.ReqRspUtil;
 import lucee.runtime.net.http.sni.DefaultHostnameVerifierImpl;
 import lucee.runtime.net.http.sni.DefaultHttpClientConnectionOperatorImpl;

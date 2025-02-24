@@ -1,7 +1,5 @@
 package lucee.runtime.regex;
 
-import org.apache.oro.text.regex.MalformedPatternException;
-
 import lucee.runtime.exp.PageException;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.Struct;

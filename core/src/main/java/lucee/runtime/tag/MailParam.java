@@ -33,7 +33,6 @@ import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.tag.TagImpl;
-import lucee.runtime.functions.other.CreateUniqueId;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.util.ListUtil;
 

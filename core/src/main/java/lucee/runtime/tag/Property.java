@@ -21,7 +21,6 @@ package lucee.runtime.tag;
 import lucee.runtime.Component;
 import lucee.runtime.ComponentScope;
 import lucee.runtime.exp.ApplicationException;
-import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.tag.DynamicAttributes;
 import lucee.runtime.ext.tag.TagImpl;

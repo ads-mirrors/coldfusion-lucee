@@ -60,7 +60,6 @@ import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.lang.types.RefBoolean;
 import lucee.commons.net.URLEncoder;
-import lucee.runtime.exp.PageException;
 import lucee.runtime.reflection.Reflector;
 
 /**
