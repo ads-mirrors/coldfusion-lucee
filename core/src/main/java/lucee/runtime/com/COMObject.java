@@ -77,7 +77,6 @@ public final class COMObject implements Objects, Iteratorable {
 	 * Public Constructor of the class
 	 * 
 	 * @param dispatch
-	 * @throws ExpressionException
 	 */
 	public COMObject(Config config, String dispatch) {
 		this(config, null, new Dispatch(dispatch), dispatch);

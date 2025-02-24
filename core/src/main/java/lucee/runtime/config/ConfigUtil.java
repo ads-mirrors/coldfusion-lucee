@@ -352,10 +352,11 @@ public final class ConfigUtil {
 	 * 
 	 * @param sc
 	 * @param strDir
-	 * @param defaultDir
 	 * @param configDir
 	 * @param type
 	 * @param config
+	 * @param checkFromWebroot
+	 * @param existing
 	 * @return existing file
 	 */
 	public static Resource getResource(ServletContext sc, String strDir, Resource configDir, short type, Config config, boolean checkFromWebroot, boolean existing) {

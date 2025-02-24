@@ -62,7 +62,7 @@ public final class DynamicClassLoader extends ClassLoader implements ExtendableC
 	 * Constructor of the class
 	 * 
 	 * @param directory
-	 * @param parent
+	 * @param log
 	 * @throws IOException
 	 */
 	public DynamicClassLoader(Resource directory, Log log) throws IOException {

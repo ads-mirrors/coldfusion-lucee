@@ -167,7 +167,7 @@ public class CollectionUtil {
 	/**
 	 * creates a md5 hash for the given Array
 	 * 
-	 * @param array
+	 * @param coll
 	 * @return
 	 * @throws NoSuchAlgorithmException
 	 */

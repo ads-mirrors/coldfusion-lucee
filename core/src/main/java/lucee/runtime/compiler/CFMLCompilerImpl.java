@@ -63,8 +63,6 @@ public final class CFMLCompilerImpl implements CFMLCompiler {
 
 	/**
 	 * Constructor of the compiler
-	 * 
-	 * @param config
 	 */
 	public CFMLCompilerImpl() {
 		cfmlTransformer = new CFMLTransformer();
