@@ -794,7 +794,8 @@ public final class PageContextImpl extends PageContext {
 		while ((p = p.getParentPageContext()) != null) {
 			if (p.getStartTime() > 0) return false;
 		}
-
+		if (getParentPageContext() == null
+			&& (tmp != null && tmp.size() == 0 )) return true; // TODO nested children?
 		return false;
 	}
 
@@ -3060,6 +3061,7 @@ public final class PageContextImpl extends PageContext {
 			}
 			if (oCfid != null && ROTATE_UNKNOWN_COOKIE) {
 				if (!scopeContext.hasExistingCFID(this, Caster.toString(oCfid, null))) {
+					LogUtil.log(this, Log.LEVEL_DEBUG, PageContextImpl.class.getName(), "Unknown Session cookie rejected");
 					oCfid = null;
 					oCftoken = null;
 					ReqRspUtil.removeCookie(getHttpServletResponse(), "cfid");
