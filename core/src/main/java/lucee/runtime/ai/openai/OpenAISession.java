@@ -53,9 +53,6 @@ public class OpenAISession extends AISessionSupport {
 
 	@Override
 	public Response inquiry(String message, AIResponseListener listener) throws PageException {
-		// for the moment we always use a listener to avoid the timeout when not streaming
-		if (listener == null) listener = DEV_NULL_LISTENER;
-
 		try {
 
 			Struct msg;

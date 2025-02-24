@@ -10,8 +10,6 @@ import lucee.runtime.functions.other.CreateUniqueId;
 
 public abstract class AISessionSupport implements AISession {
 
-	protected static final AIResponseListener DEV_NULL_LISTENER = new DevNullAIResponseListener();
-
 	private String id;
 	private AIEngine engine;
 	List<Conversation> history = new ArrayList<>();
