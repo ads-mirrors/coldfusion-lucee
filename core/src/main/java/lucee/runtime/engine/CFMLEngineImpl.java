@@ -809,9 +809,21 @@ public final class CFMLEngineImpl implements CFMLEngine {
 	}
 
 	private void addEventListener(ServletContext sc) {
+
+		// we have a wrapper
+		Object objSC = sc;
+		if ("lucee.loader.servlet.jakarta.ServletContextJavax".equals(sc.getClass().getName())) {
+			try {
+				Method getJakartaContext = sc.getClass().getMethod("getJakartaContext");
+				objSC = getJakartaContext.invoke(sc);
+			}
+			catch (Exception e) {
+			}
+		}
+
 		// TOMCAT
-		if ("org.apache.catalina.core.ApplicationContextFacade".equals(sc.getClass().getName())) {
-			Object obj = extractServletContext(sc);
+		if ("org.apache.catalina.core.ApplicationContextFacade".equals(objSC.getClass().getName())) {
+			Object obj = extractServletContext(objSC);
 			obj = extractServletContext(obj);
 			if ("org.apache.catalina.core.StandardContext".equals(obj.getClass().getName())) {
 				Method m = null;
@@ -849,7 +861,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 			}
 		}
 
-		LogUtil.log(configServer, Log.LEVEL_INFO, "startup", "Lucee was not able to register an event listener with " + (sc == null ? "null" : sc.getClass().getName()));
+		LogUtil.log(configServer, Log.LEVEL_INFO, "startup", "Lucee was not able to register an event listener with " + (objSC == null ? "null" : objSC.getClass().getName()));
 	}
 
 	private Object extractServletContext(Object sc) {
