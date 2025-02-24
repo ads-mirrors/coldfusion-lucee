@@ -170,27 +170,25 @@ public final class MailParam extends TagImpl {
 
 		if (content != null) {
 			required("mailparam", "file", file);
-			String id = "id-" + CreateUniqueId.invoke();
 			String ext = ResourceUtil.getExtension(file, "tmp");
 
 			if (StringUtil.isEmpty(fileName) && !StringUtil.isEmpty(file)) fileName = ListUtil.last(file, "/\\", true);
 
-			Resource res = SystemUtil.getTempDirectory().getRealResource(id + "." + ext);
-			if (res.exists()) ResourceUtil.removeEL(res, true);
+			Resource res = ResourceUtil.getUniqueTempFile(SystemUtil.getTempDirectory(), "mailparam-content", ext);
 			try {
 				IOUtil.write(res, content);
 			}
 			catch (IOException e) {
 				throw Caster.toPageException(e);
 			}
-			this.file = ResourceUtil.getCanonicalPathEL(res);
+			this.file = ResourceUtil.getNormalizedPathEL(res);
 			remove = true;
 		}
 		else if (!StringUtil.isEmpty(this.file)) {
 			Resource res = ResourceUtil.toResourceNotExisting(pageContext, this.file);
 			if (res != null) {
 				if (res.exists()) pageContext.getConfig().getSecurityManager().checkFileLocation(res);
-				this.file = ResourceUtil.getCanonicalPathEL(res);
+				this.file = ResourceUtil.getNormalizedPathEL(res);
 			}
 		}
 
@@ -199,11 +197,11 @@ public final class MailParam extends TagImpl {
 		boolean hasName = !StringUtil.isEmpty(name);
 		// both attributes
 		if (hasName && hasFile) {
-			throw new ApplicationException("Wrong Context for tag [MailParam], you cannot use the attributes [file] and [name] together");
+			throw new ApplicationException("Invalid attribute combination for tag [MailParam], you cannot use the attributes [file] and [name] together");
 		}
 		// no attributes
 		if (!hasName && !hasFile) {
-			throw new ApplicationException("Wrong Context for tag [MailParam], one of the attributes [file] or [name] is required");
+			throw new ApplicationException("Invalid attribute combination for tag [MailParam], one of the attributes [file] or [name] is required");
 		}
 
 		// get Mail Tag

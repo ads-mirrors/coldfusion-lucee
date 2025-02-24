@@ -63,6 +63,7 @@ import lucee.runtime.config.Constants;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.PageException;
+import lucee.runtime.functions.other.CreateUniqueId;
 import lucee.runtime.functions.system.ExpandPath;
 import lucee.runtime.op.Caster;
 import lucee.runtime.reflection.Reflector;
@@ -107,6 +108,8 @@ public final class ResourceUtil {
 	 */
 	public static final short LEVEL_GRAND_PARENT_FILE = 2;
 	public static final short LEVEL_ALL = 4;
+
+	private static final int MAX_RETRY_TEMP = 3;
 
 	public static final HashMap<String, String> EXT_MT = new HashMap<String, String>();
 	private static Map<String, Boolean> allowMatchings = new ConcurrentHashMap<>();
@@ -1768,6 +1771,38 @@ public final class ResourceUtil {
 		catch (Exception e) {
 			return defaultValue;
 		}
+	}
+
+	public static Resource getUniqueTempFile(Resource dir, String prefix, String extension) throws PageException {
+		if (!dir.isDirectory()) throw new ExpressionException("[" + dir + "] is not a directory");
+		Resource tmpFile;
+
+		if (StringUtil.isEmpty(extension, true)) {
+			extension = ".tmp";
+		}
+		else if (extension.charAt(0) != '.') {
+			extension = "." + extension;
+		}
+
+		IOException ioe = null;
+		int max = MAX_RETRY_TEMP;
+		while (max-- > 0) {
+			tmpFile = dir.getRealResource(prefix + "-" + Long.toString(System.currentTimeMillis(), Character.MAX_RADIX) + "_" + CreateUniqueId.invoke() + extension);
+			synchronized (SystemUtil.createToken("", tmpFile.getAbsolutePath())) {
+				try {
+					if (tmpFile.exists()) continue;
+					tmpFile.createFile(true);
+					return tmpFile;
+				}
+				catch (IOException e) {
+					ioe = e;
+				}
+			}
+		}
+
+		ExpressionException ee = new ExpressionException("Unable to create temporary file", "Temp directory [" + dir + "] after " + MAX_RETRY_TEMP + " attempts");
+		ExceptionUtil.initCauseEL(ee, ioe);
+		throw ee;
 	}
 
 }

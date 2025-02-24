@@ -17,13 +17,12 @@
  * 
  **/
 /**
- * Implements the CFML Function gettempfile
+ * Implements the CFML Function getTempFile
  */
 package lucee.runtime.functions.system;
 
 import java.io.IOException;
 
-import lucee.commons.io.SystemUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.ExceptionUtil;
@@ -32,48 +31,28 @@ import lucee.runtime.PageContext;
 import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.Function;
-import lucee.runtime.functions.other.CreateUniqueId;
 
 public final class GetTempFile implements Function {
 
 	private static final long serialVersionUID = -166719554831864953L;
-	private static final int MAX_RETRY = 3;
 
 	public static String call(PageContext pc, String strDir, String prefix) throws PageException {
 		return call(pc, strDir, prefix, ".tmp");
 	}
 
 	public static String call(PageContext pc, String strDir, String prefix, String extension) throws PageException {
-		Resource dir = ResourceUtil.toResourceExisting(pc, strDir);
+		Resource dir;
+		if (StringUtil.isEmpty(strDir)) dir = pc.getConfig().getTempDirectory();
+		else dir = ResourceUtil.toResourceExisting(pc, strDir);
 		pc.getConfig().getSecurityManager().checkFileLocation(dir);
-		if (!dir.isDirectory()) throw new ExpressionException("[" + strDir + "] is not a directory");
-		Resource file;
 
-		if (StringUtil.isEmpty(extension, true)) {
-			extension = ".tmp";
+		try {
+			return ResourceUtil.getUniqueTempFile(dir, prefix, extension).getCanonicalPath();
 		}
-		else if (extension.charAt(0) != '.') {
-			extension = "." + extension;
+		catch (IOException e) {
+			ExpressionException ee = new ExpressionException("Unable to create temporary file", "In temp directory [" + strDir + "]"); // don't expose path in error message
+			ExceptionUtil.initCauseEL(ee, e);
+			throw ee;
 		}
-
-		IOException ioe = null;
-		int max = MAX_RETRY;
-		while (max-- > 0) {
-			file = dir.getRealResource(prefix + "-" + Long.toString(System.currentTimeMillis(), Character.MAX_RADIX) + "_" + CreateUniqueId.invoke() + extension);
-			synchronized (SystemUtil.createToken("", file.getAbsolutePath())) {
-				try {
-					if (file.exists()) continue;
-					file.createFile(true);
-					return file.getCanonicalPath();
-				}
-				catch (IOException e) {
-					ioe = e;
-				}
-			}
-		}
-
-		ExpressionException ee = new ExpressionException("Unable to create temporary file in [" + strDir + "] after " + MAX_RETRY + " tries");
-		ExceptionUtil.initCauseEL(ee, ioe);
-		throw ee;
 	}
 }

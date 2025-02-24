@@ -6954,7 +6954,16 @@ if this attribute is not provided all types are returned.</description>
 	<function>
 		<name>getTempDirectory</name>
 		<class>lucee.runtime.functions.system.GetTempDirectory</class>
-		<description>Returns the full path to the currently assigned temporary directory</description>
+		<description>Returns the full path to the currently assigned temporary directory, optionally creating a unique temp directory</description>
+		<argument>
+			<name>unique</name>
+			<alias>prefix</alias>
+			<type>string</type>
+			<default>false</default>
+			<required>no</required>
+			<description>If true or not empty, creates and returns a unique temp directory, optionally prefixed</description>
+			<introduced>6.2.1.20</introduced>
+		</argument>
 		<return>
 			<type>string</type>
 		</return>
@@ -6989,8 +6998,8 @@ if this attribute is not provided all types are returned.</description>
 		<argument>
 			<name>dir</name>
 			<type>string</type>
-			<required>Yes</required>
-			<description>Directory name</description>
+			<required>false</required>
+			<description>Directory name, defaults to getTempDirectory() since 6.2.1.19</description>
 		</argument>
 		<argument>
 			<name>prefix</name>
