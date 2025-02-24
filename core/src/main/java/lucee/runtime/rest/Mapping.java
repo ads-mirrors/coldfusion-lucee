@@ -201,6 +201,11 @@ public class Mapping {
 		return _default;
 	}
 
+	public String toString(){
+		return "physical:" + getPhysical() + ", virtual:" + getVirtual() + ", strPhysical:"+ getStrPhysical() 
+			+ ", hidden:" +isHidden() + ", readOnly:" + isReadonly() + " default:" + isDefault();
+	}
+
 	public Result getResult(PageContext pc, String path, Struct matrix, int format, boolean hasFormatExtension, List<MimeType> accept, MimeType contentType, Result defaultValue)
 			throws PageException {
 		List<Source> sources = init(pc, false);

@@ -301,7 +301,7 @@ public final class PageContextImpl extends PageContext {
 	// Pools
 	private ErrorPagePool errorPagePool = new ErrorPagePool();
 	private TagHandlerPool tagHandlerPool;
-	private FTPPoolImpl ftpPool = new FTPPoolImpl();
+	private FTPPoolImpl ftpPool;
 
 	private Component activeComponent;
 	private UDF activeUDF;
@@ -736,7 +736,7 @@ public final class PageContextImpl extends PageContext {
 		// activeComponent=null;
 		remoteUser = null;
 		exception = null;
-		ftpPool.clear();
+		if (ftpPool != null) ftpPool.clear();
 		parentTag = null;
 		currentTag = null;
 
@@ -3434,6 +3434,7 @@ public final class PageContextImpl extends PageContext {
 	}
 
 	public FTPPoolImpl getFTPPool() {
+		if (ftpPool == null) ftpPool = new FTPPoolImpl();
 		return ftpPool;
 	}
 

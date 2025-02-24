@@ -32,7 +32,7 @@ import lucee.runtime.exp.ApplicationException;
  */
 public final class FTPPoolImpl {
 
-	Map<String, FTPWrap> wraps = new HashMap<String, FTPWrap>();
+	Map<String, FTPWrap> wraps = new HashMap<String, FTPWrap>(4);
 
 	public AFTPClient get(FTPConnection conn) throws IOException, ApplicationException {
 		AFTPClient client = _get(conn).getClient();
