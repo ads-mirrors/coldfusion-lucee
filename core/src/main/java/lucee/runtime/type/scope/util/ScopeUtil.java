@@ -132,14 +132,20 @@ public class ScopeUtil {
 	}
 
 	public static boolean verifyCsrfToken(Map mapTokens, String token, String strKey) {
+		return verifyCsrfToken(mapTokens, token, strKey, false);
+	}
+
+	public static boolean verifyCsrfToken(Map mapTokens, String token, String strKey, boolean remove) {
 		Collection.Key key = KeyImpl.init(strKey == null ? "" : strKey.trim());
 		if (mapTokens instanceof Struct) {
 			Struct tokens = (Struct) mapTokens;
 			String _token = Caster.toString(tokens.get(key, null), null);
+			if (remove && _token != null) mapTokens.remove(key);
 			return (_token != null) && _token.equalsIgnoreCase(token);
 		}
 
 		String _token = Caster.toString(mapTokens.get(key), null);
+		if (remove && _token != null) mapTokens.remove(key);
 		return (_token != null) && _token.equalsIgnoreCase(token);
 	}
 }

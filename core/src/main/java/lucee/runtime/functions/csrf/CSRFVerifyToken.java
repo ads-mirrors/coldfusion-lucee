@@ -31,6 +31,10 @@ public class CSRFVerifyToken implements Function {
 	}
 
 	public static boolean call(PageContext pc, String token, String key) throws PageException {
-		return CSRFGenerateToken.getStorageScope(pc).verifyToken(token, key);
+		return CSRFGenerateToken.getStorageScope(pc).verifyToken(token, key, false);
+	}
+
+	public static boolean call(PageContext pc, String token, String key, boolean remove) throws PageException {
+		return CSRFGenerateToken.getStorageScope(pc).verifyToken(token, key, remove);
 	}
 }

@@ -221,6 +221,7 @@ component {
 						case "pop":
 							break;
 						case "smtp":
+							verify = verifySMTP(cfg, arguments.service);
 							break;
 						case "ftp":
 							verify = verifyFTP(cfg, arguments.service);
@@ -329,6 +330,24 @@ component {
 		name = conn.command("buildInfo").version; // & ", " & q.name;
 		//conn.disconnect();
 		return "MongoDB " & name;
+	}
+
+	public function verifySMTP ( smtp, service ) localmode=true {
+		try {
+			mail from="testsuite@lucee.org"
+					to="testsuite@lucee.org"
+					subject="service test"
+					async=false
+					server=smtp.SERVER
+					port=smtp.PORT_INSECURE
+					username=smtp.USERNAME
+					password=smtp.PASSWORD {
+				echo("test suite service test email");
+			}
+		} catch (e) {
+			throw e.message;
+		}
+		return "SMTP Connection Verified";
 	}
 
 	public function verifyFTP ( ftp, service ) localmode=true {
