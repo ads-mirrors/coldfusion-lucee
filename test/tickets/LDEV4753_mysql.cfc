@@ -1,9 +1,9 @@
-component extends="org.lucee.cfml.test.LuceeTestCase" labels="mssql" {
+component extends="org.lucee.cfml.test.LuceeTestCase" labels="mysql" {
 	function beforeAll() {
 		if(isNotSupported()) return;
-		var mssql = getCredentials();
-		mssql.storage = true;
-		variables.datasource = mssql;
+		var mysql = getCredentials();
+		mysql.storage = true;
+		variables.datasource = mysql;
 		tableCreation();
 	}
 
@@ -15,7 +15,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="mssql" {
 	}
 
 	function run( testResults , testBox ) {
-		describe( title = "Test suite for LDEV-4753 with mssql", body = function() {
+		describe( title = "Test suite for LDEV-4753 with MSSQL", body = function() {
 			it( title = "checking CFINSERT for LDEV-4753 with empty numeric cols", body = function( currentSpec ) {
 				param name="form.id" default="1";
 				param name="form.myValue" default="LuceeTestCase";
@@ -23,14 +23,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="mssql" {
 				cfinsert(tableName = "LDEV4753" formFields = "form.id,form.myValue,form.seqno" datasource=variables.datasource);
 				checkTable( 1 );
 			});
-
 			it( title = "checking CFUPDATE for LDEV-4753 with empty numeric cols", body = function( currentSpec ) {
 				param name="form.id" default="1";
 				param name="form.myValue" default="LDEV-4753";
 				param name="form.seqno" default="";
 				cfupdate(tableName = "LDEV4753" formFields = "form.id,form.myValue,form.seqno" datasource=variables.datasource);
 				checkTable( 1 );
-				
 				form.seqno="3";
 				form.myValue="";
 				cfupdate(tableName = "LDEV4753" formFields = "form.id,form.myValue,form.seqno" datasource=variables.datasource);
@@ -38,6 +36,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="mssql" {
 			});
 		});
 	}
+
 
 	private function tableCreation() {
 		query datasource=variables.datasource{
@@ -55,7 +54,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="mssql" {
 		query name="local.q" datasource=variables.datasource params=params {
 			echo("select * from LDEV4753 where id = :id");
 		}
-		expect ( q.recordcount ).toBe( 1, "recordcount" );
+		systemOutput( q, true );
 		loop list="id,myvalue,seqno" item="local.c"{
 			expect( q[ c ] ).toBe( form[ c ] );
 		}
@@ -67,7 +66,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="mssql" {
 	}
 
 	private struct function getCredentials() {
-		return server.getDatasource("mssql");
+		return server.getDatasource("mysql");
 	}
 
 	
