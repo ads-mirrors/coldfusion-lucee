@@ -14578,20 +14578,24 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<name>base</name>
 			<type>struct</type>
 			<required>Yes</required>
-		<description>A structure with one field (an associative array).</description>
-    </argument>
+			<description>A structure with one field (an associative array).</description>
+		</argument>
 		<argument>
-			<name>sortType</name>
-			<type>string</type>
+			<name>sortTypeOrSortFunc</name>
+			<alias>sortType</alias>
+			<type>any</type>
 			<required>No</required>
 			<default>text</default>
-		<description>
-		define one of the following:
+			<description>define one of the following:
 - numeric: sorts numbers
 - text: sorts text alphabetically, taking case into account (case sensitive)
 - textNoCase: sorts text alphabetically, without regard to case (case insensitive)
+
+or a function to be used as a comparator
+
+function(value1, value2, key1, key2)
 </description>
-    </argument>
+		</argument>
 		<argument>
 			<name>sortOrder</name>
 			<type>string</type>
@@ -14620,41 +14624,45 @@ _- asc (default): ascending (a to z) sort order
 		<member-name>toSorted</member-name>
 		<keywords>struct,sort</keywords>
 		<description>Returns a struct sorted by the top level keys in a structure.
-        Sorts using alphabetic or numeric sorting, and can sort based
-        on the values of any structure element.</description>
+        Sorts using alphabetic or numeric sorting.</description>
 		<argument>
 			<name>base</name>
 			<type>struct</type>
 			<required>Yes</required>
-		<description>A structure with one field (an associative array).</description>
-    </argument>
+			<description>A structure with one field (an associative array).</description>
+		</argument>
 		<argument>
-			<name>sortType</name>
-			<type>string</type>
+			<name>sortTypeOrSortFunc</name>
+			<alias>sortType</alias>
+			<type>any</type>
 			<required>No</required>
 			<default>text</default>
-		<description>
-		define one of the following:
+			<description>
+		The following sort types are available:
 - numeric: sorts numbers
-- text: sorts text alphabetically, taking case into account (case sensitive)
+- text: sorts text alphabetically, taking case into account (case sensitive, defualt)
 - textNoCase: sorts text alphabetically, without regard to case (case insensitive)
+
+or a function to be used as a comparator
+
+function(key1, key2)
 </description>
-    </argument>
+		</argument>
 		<argument>
 			<name>sortOrder</name>
 			<type>string</type>
 			<required>No</required>
 			<default>asc</default>
-		<description>sort direction:
-_- asc (default): ascending (a to z) sort order
+			<description>Sort direction:
+- asc (default): ascending (a to z) sort order
 - desc: descending (z to a) sort order</description>
-    </argument>
+		</argument>
 		<argument>
-			<name>pathToSubElement</name>
-			<alias>path</alias>
-			<type>string</type>
+			<name>localeSensitive</name>
+			<type>boolean</type>
 			<required>No</required>
-			<description>String or a variable that contains one</description>
+			<default>false</default>
+			<description>Use locale aware sort</description>
 		</argument>
 		<return>
 			<type>struct</type>
