@@ -1,6 +1,7 @@
 package lucee.runtime.ai;
 
 import lucee.commons.io.log.LogUtil;
+import lucee.runtime.exp.PageException;
 import lucee.runtime.functions.other.CreateUniqueId;
 
 public abstract class AIEngineSupport implements AIEngine {
@@ -18,6 +19,11 @@ public abstract class AIEngineSupport implements AIEngine {
 	@Override
 	public AIEngineFactory getFactory() {
 		return factory;
+	}
+
+	@Override
+	public final AISession createSession(String inialMessage) throws PageException {
+		return createSession(inialMessage, -1, -1D, -1, -1);
 	}
 
 	@Override

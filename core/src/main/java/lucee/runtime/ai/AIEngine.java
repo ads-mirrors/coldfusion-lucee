@@ -24,6 +24,8 @@ public interface AIEngine {
 
 	public String getId();
 
+	public AISession createSession(String inialMessage) throws PageException;
+
 	/**
 	 * 
 	 * @param inialMessage inital message to send to the AI, set null for no message
