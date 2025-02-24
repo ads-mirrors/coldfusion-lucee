@@ -253,7 +253,7 @@ public class ServletContextJavax implements ServletContext {
 
 	@Override
 	public <T extends EventListener> void addListener(T t) {
-		context.addListener(t);
+		context.addListener(ServletContextListenerJakarta.getinstance(this, t));
 	}
 
 	@Override
