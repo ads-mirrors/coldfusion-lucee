@@ -13,8 +13,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect( isStruct(local.resourceProviders) ).toBeTrue();
 				expect( local.resourceProviders ).toHaveKey( "mode" );
 				expect( local.resourceProviders ).toHaveKey( "type" );
+				expect( local.resourceProviders ).toHaveKey( "singelton" );
 				expect( local.resourceProviders ).toHaveKey( "applicationPathTimeout" );
-				expect( local.resourceProviders.count() ).toBe( 3 );
+				expect( local.resourceProviders.count() ).toBe( 4 );
 			});
 		});
 	}
