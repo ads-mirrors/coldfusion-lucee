@@ -79,10 +79,6 @@ public class ConfigWebHelper {
 
 	}
 
-	public short getPasswordSource() {
-		return cs.hasCustomDefaultPassword() ? ConfigWebImpl.PASSWORD_ORIGIN_DEFAULT : ConfigWebImpl.PASSWORD_ORIGIN_SERVER;
-	}
-
 	public boolean hasIndividualSecurityManager(ConfigWebPro cwp) {
 		return cs.hasIndividualSecurityManager(cwp.getIdentification().getId());
 	}

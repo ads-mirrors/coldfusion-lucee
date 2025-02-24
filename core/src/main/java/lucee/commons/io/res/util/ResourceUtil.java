@@ -56,8 +56,7 @@ import lucee.runtime.PageContextImpl;
 import lucee.runtime.PageSource;
 import lucee.runtime.PageSourceImpl;
 import lucee.runtime.config.Config;
-import lucee.runtime.config.ConfigWeb;
-import lucee.runtime.config.ConfigWebPro;
+import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.config.Constants;
 import lucee.runtime.engine.ThreadLocalPageContext;
@@ -227,9 +226,9 @@ public final class ResourceUtil {
 
 		if (StringUtil.startsWith(path, '/')) {
 			PageContextImpl pci = (PageContextImpl) pc;
-			ConfigWeb cw = pc.getConfig();
+			Config cw = pc.getConfig();
 
-			Resource[] sources = ((ConfigWebPro) cw).getResources(pci,
+			Resource[] sources = ((ConfigPro) cw).getResources(pci,
 					ExpandPath.mergeMappings(pc.getApplicationContext().getMappings(), pc.getApplicationContext().getComponentMappings()), path, false, pci.useSpecialMappings(),
 					true, false, false);
 			if (!ArrayUtil.isEmpty(sources)) {
@@ -303,9 +302,9 @@ public final class ResourceUtil {
 
 		if (StringUtil.startsWith(destination, '/')) {
 			PageContextImpl pci = (PageContextImpl) pc;
-			ConfigWeb cw = pc.getConfig();
+			Config cw = pc.getConfig();
 
-			Resource[] sources = ((ConfigWebPro) cw).getResources(pci,
+			Resource[] sources = ((ConfigPro) cw).getResources(pci,
 					ExpandPath.mergeMappings(pc.getApplicationContext().getMappings(), pc.getApplicationContext().getComponentMappings()), destination, false,
 					pci.useSpecialMappings(), false, true, false);
 
@@ -351,8 +350,8 @@ public final class ResourceUtil {
 		boolean isUNC;
 		if (!(isUNC = isUNCPath(destination)) && StringUtil.startsWith(destination, '/')) {
 			PageContextImpl pci = (PageContextImpl) pc;
-			ConfigWeb cw = pc.getConfig();
-			Resource[] sources = ((ConfigWebPro) cw).getResources(pci,
+			Config cw = pc.getConfig();
+			Resource[] sources = ((ConfigPro) cw).getResources(pci,
 					ExpandPath.mergeMappings(pc.getApplicationContext().getMappings(), pc.getApplicationContext().getComponentMappings()), destination, false,
 					pci.useSpecialMappings(), SystemUtil.isWindows(), checkComponentMappings, false);
 			if (!ArrayUtil.isEmpty(sources)) {

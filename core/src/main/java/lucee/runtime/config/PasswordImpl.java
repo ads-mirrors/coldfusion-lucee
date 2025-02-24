@@ -215,14 +215,10 @@ public class PasswordImpl implements Password {
 	public static Password updatePasswordIfNecessary(ConfigPro config, Password passwordOld, String strPasswordNew) {
 
 		try {
-			// is the server context default password used
-			boolean defPass = false;
-			if (config instanceof ConfigWebPro) defPass = ((ConfigWebPro) config).isDefaultPassword();
-
 			int origin = config.getPasswordOrigin();
 
 			// current is old style password and not a default password!
-			if ((origin == Password.ORIGIN_HASHED || origin == Password.ORIGIN_ENCRYPTED) && !defPass) {
+			if ((origin == Password.ORIGIN_HASHED || origin == Password.ORIGIN_ENCRYPTED)) {
 				// is passord valid!
 				if (config.isPasswordEqual(strPasswordNew) != null) {
 					// new salt
@@ -297,8 +293,8 @@ public class PasswordImpl implements Password {
 		int pwType;
 		String pwSalt;
 		if (server) {
-			pwType = cwi.getServerPasswordType();
-			pwSalt = cwi.getServerPasswordSalt();
+			pwType = ConfigUtil.getConfigServerImpl(cwi).getPasswordType();
+			pwSalt = ConfigUtil.getConfigServerImpl(cwi).getPasswordSalt();
 		}
 		else {
 			pwType = cwi.getPasswordType();

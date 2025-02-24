@@ -1562,11 +1562,6 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 		return config.getServletName();
 	}
 
-	@Override
-	public Mapping getDefaultServerTagMapping() {
-		return cs.defaultTagMapping;
-	}
-
 	// FYI used by Extensions, do not remove
 	public Mapping getApplicationMapping(String virtual, String physical) {
 		return getApplicationMapping("application", virtual, physical, null, true, false);
@@ -1595,32 +1590,6 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	@Override
 	public Mapping getServerTagMapping(String mappingName) {
 		return helper.getServerTagMapping(mappingName);
-	}
-
-	@Override
-	public Map<String, String> getAllLabels() {
-		return cs.getLabels();
-	}
-
-	@Override
-	public boolean isDefaultPassword() {
-		// TODO no sure about this
-		return false;
-	}
-
-	@Override
-	public int getServerPasswordType() {
-		return cs.getPasswordType();
-	}
-
-	@Override
-	public String getServerPasswordSalt() {
-		return cs.getPasswordSalt();
-	}
-
-	@Override
-	public int getServerPasswordOrigin() {
-		return cs.getPasswordOrigin();
 	}
 
 	@Override
@@ -1659,6 +1628,7 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 		return helper.getBaseComponentPage(pc);
 	}
 
+	@Override
 	public void resetBaseComponentPage() {
 		helper.resetBaseComponentPage();
 	}
@@ -1717,21 +1687,6 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	@Override
 	public Password updatePasswordIfNecessary(boolean server, String passwordRaw) {
 		return PasswordImpl.updatePasswordIfNecessary(cs, cs.password, passwordRaw);
-	}
-
-	@Override
-	public Password isServerPasswordEqual(String password) {
-		return cs.isPasswordEqual(password);
-	}
-
-	@Override
-	public boolean hasIndividualSecurityManager() {
-		return false;
-	}
-
-	@Override
-	public short getPasswordSource() {
-		return ConfigWebPro.PASSWORD_ORIGIN_SERVER;
 	}
 
 	@Override

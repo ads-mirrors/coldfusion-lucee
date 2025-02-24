@@ -34,7 +34,7 @@ import lucee.runtime.ComponentImpl;
 import lucee.runtime.PageContext;
 import lucee.runtime.PageContextImpl;
 import lucee.runtime.PageSource;
-import lucee.runtime.config.ConfigWeb;
+import lucee.runtime.config.Config;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.NativeException;
@@ -283,7 +283,7 @@ public final class ExceptionUtil {
 	}
 
 	private static String abs(PageContextImpl pc, String template) {
-		ConfigWeb config = pc.getConfig();
+		Config config = pc.getConfig();
 
 		Resource res = config.getResource(template);
 		if (res.exists()) return template;

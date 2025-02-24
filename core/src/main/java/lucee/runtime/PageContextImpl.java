@@ -91,6 +91,7 @@ import lucee.runtime.cache.tag.include.IncludeCacheItem;
 import lucee.runtime.component.ComponentLoader;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
+import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.config.Constants;
@@ -2762,7 +2763,7 @@ public final class PageContextImpl extends PageContext {
 			if (index > -1) {
 				String type = realPath.substring(9, index);
 				if (type.equalsIgnoreCase("tag")) {
-					base = getPageSource(new Mapping[] { config.getDefaultTagMapping(), config.getDefaultServerTagMapping() }, realPath.substring(index));
+					base = getPageSource(new Mapping[] { config.getDefaultTagMapping(), ConfigUtil.getConfigServerImpl(config).getDefaultTagMapping() }, realPath.substring(index));
 				}
 				else if (type.equalsIgnoreCase("customtag")) {
 					base = getPageSource(config.getCustomTagMappings(), realPath.substring(index));
@@ -3271,12 +3272,6 @@ public final class PageContextImpl extends PageContext {
 		}
 		if (state != Tag.EVAL_BODY_INCLUDE) popBody();
 	}
-
-	/*
-	 * *
-	 * 
-	 * @return returns the cfml compiler / public CFMLCompiler getCompiler() { return compiler; }
-	 */
 
 	@Override
 	public void setVariablesScope(Variables variables) {

@@ -3043,6 +3043,9 @@ public class KeyConstants {
 	public static final Key _isAttributesSupported = KeyImpl._const("isAttributesSupported");
 	public static final Key _isModeSupported = KeyImpl._const("isModeSupported");
 	public static final Key _listenerSingelton = KeyImpl._const("listenerSingelton");
+	public static final Key _origin = KeyImpl._const("origin");
+	public static final Key _captcha = KeyImpl._const("captcha");
+	public static final Key _delay = KeyImpl._const("delay");
 
 	private static Map<String, Key> _____keys;
 

@@ -368,12 +368,6 @@ public final class ConfigAdmin {
 		}
 	}
 
-	/*
-	 * private void createAbort() { try {
-	 * ConfigWebFactory.getChildByName(doc.getDocumentElement(),"cfabort",true); } catch(Throwable t)
-	 * {ExceptionUtil.rethrowIfNecessary(t);} }
-	 */
-
 	public void setTaskMaxThreads(Integer maxThreads) throws SecurityException {
 		checkWriteAccess();
 		boolean hasAccess = ConfigUtil.hasAccess(config, SecurityManager.TYPE_SETTING);

@@ -36,6 +36,7 @@ import lucee.runtime.PageContextImpl;
 import lucee.runtime.PageSource;
 import lucee.runtime.component.ComponentLoader;
 import lucee.runtime.component.Member;
+import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.customtag.CustomTagUtil;
 import lucee.runtime.customtag.InitFile;
@@ -344,7 +345,7 @@ public class CFTag extends BodyTagTryCatchFinallyImpl implements DynamicAttribut
 			Mapping m = source.getPageSource().getMapping();
 
 			ConfigWebPro c = (ConfigWebPro) pageContext.getConfig();
-			if (m == c.getDefaultTagMapping()) m = c.getDefaultServerTagMapping();
+			if (m == c.getDefaultTagMapping()) m = ConfigUtil.getConfigServerImpl(c).getDefaultTagMapping();
 			else m = null;
 			// is te page source from a tag mapping, so perhaps it was moved from server to web context
 			if (m != null) {

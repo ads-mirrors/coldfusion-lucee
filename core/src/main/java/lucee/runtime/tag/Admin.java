@@ -573,7 +573,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		try {
 			// Password
 			String strPW = getString("password", "");
-			Password tmp = type == TYPE_SERVER ? configWeb.isServerPasswordEqual(strPW) : config.isPasswordEqual(strPW); // hash password if
+			Password tmp = type == TYPE_SERVER ? ConfigUtil.getConfigServerImpl(configWeb).isPasswordEqual(strPW) : config.isPasswordEqual(strPW); // hash password if
 			// necessary (for
 			// backward
 			// compatibility)
@@ -1225,7 +1225,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 			qry.setAtEL(KeyConstants._id, row, id == null ? "" : id.getId());
 			qry.setAtEL(KeyConstants._hash, row, SystemUtil.hash(factory.getConfig().getServletContext()));
 			qry.setAtEL(KeyConstants._label, row, factory.getLabel());
-			qry.setAtEL(HAS_OWN_SEC_CONTEXT, row, Caster.toBoolean(cw.hasIndividualSecurityManager()));
+			qry.setAtEL(HAS_OWN_SEC_CONTEXT, row, Caster.toBoolean(false));
 
 			setScopeDirInfo(qry, row, CLIENT_SIZE, CLIENT_ELEMENTS, cw.getClientScopeDir());
 			setScopeDirInfo(qry, row, SESSION_SIZE, SESSION_ELEMENTS, cw.getSessionScopeDir());
@@ -5239,25 +5239,22 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		String port = pd == null || pd.getPort() <= 0 ? "" : Caster.toString(pd.getPort());
 
 		// sct.set("enabled",Caster.toBoolean(config.isProxyEnable()));
-		sct.set("port", port);
-		sct.set("server", pd == null ? "" : emptyIfNull(pd.getServer()));
-		sct.set("username", pd == null ? "" : emptyIfNull(pd.getUsername()));
-		sct.set("password", pd == null ? "" : emptyIfNull(pd.getPassword()));
+		sct.set(KeyConstants._port, port);
+		sct.set(KeyConstants._server, pd == null ? "" : emptyIfNull(pd.getServer()));
+		sct.set(KeyConstants._username, pd == null ? "" : emptyIfNull(pd.getUsername()));
+		sct.set(KeyConstants._password, pd == null ? "" : emptyIfNull(pd.getPassword()));
 	}
 
 	private void doGetLoginSettings() throws ApplicationException, PageException {
 		Struct sct = new StructImpl();
 		ConfigPro c = (ConfigPro) ThreadLocalPageContext.getConfig(config);
 		pageContext.setVariable(getString("admin", action, "returnVariable"), sct);
-		sct.set("captcha", Caster.toBoolean(c.getLoginCaptcha()));
-		sct.set("delay", Caster.toDouble(c.getLoginDelay()));
-		sct.set("rememberme", Caster.toBoolean(c.getRememberMe()));
+		sct.set(KeyConstants._captcha, Caster.toBoolean(c.getLoginCaptcha()));
+		sct.set(KeyConstants._delay, Caster.toDouble(c.getLoginDelay()));
+		sct.set(KeyConstants._rememberMe, Caster.toBoolean(c.getRememberMe()));
 		if (c instanceof ConfigWebPro) {
 			ConfigWebPro cw = (ConfigWebPro) c;
-			short origin = cw.getPasswordSource();
-			if (origin == ConfigWebPro.PASSWORD_ORIGIN_DEFAULT) sct.set("origin", "default");
-			else if (origin == ConfigWebPro.PASSWORD_ORIGIN_WEB) sct.set("origin", "web");
-			else if (origin == ConfigWebPro.PASSWORD_ORIGIN_SERVER) sct.set("origin", "server");
+			sct.set(KeyConstants._origin, "server");
 		}
 
 	}
@@ -5284,8 +5281,8 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		String type = config.getUpdateType();
 		if (StringUtil.isEmpty(type)) type = "manual";
 
-		sct.set("location", location.toExternalForm());
-		sct.set("type", type);
+		sct.set(KeyConstants._location, location.toExternalForm());
+		sct.set(KeyConstants._type, type);
 
 	}
 

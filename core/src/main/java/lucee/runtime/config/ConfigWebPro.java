@@ -2,7 +2,6 @@ package lucee.runtime.config;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Map;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
@@ -27,12 +26,6 @@ import lucee.runtime.writer.CFMLWriter;
 //FUTURE add to Config
 public interface ConfigWebPro extends ConfigWeb, ConfigPro {
 
-	public static final short PASSWORD_ORIGIN_DEFAULT = 1;
-	public static final short PASSWORD_ORIGIN_SERVER = 2;
-	public static final short PASSWORD_ORIGIN_WEB = 3;
-
-	public Mapping getDefaultServerTagMapping();
-
 	public Mapping getApplicationMapping(String type, String virtual, String physical, String archive, boolean physicalFirst, boolean ignoreVirtual);
 
 	public Collection<Mapping> getServerFunctionMappings();
@@ -42,16 +35,6 @@ public interface ConfigWebPro extends ConfigWeb, ConfigPro {
 	public Collection<Mapping> getServerTagMappings();
 
 	public Mapping getServerTagMapping(String mappingName);
-
-	public Map<String, String> getAllLabels();
-
-	public boolean isDefaultPassword();
-
-	public int getServerPasswordType();
-
-	public String getServerPasswordSalt();
-
-	public int getServerPasswordOrigin();
 
 	public WSHandler getWSHandler() throws PageException;
 
@@ -87,12 +70,6 @@ public interface ConfigWebPro extends ConfigWeb, ConfigPro {
 	public void updatePassword(boolean server, String passwordOld, String passwordNew) throws PageException, IOException, SAXException, BundleException;
 
 	public Password updatePasswordIfNecessary(boolean server, String passwordRaw);
-
-	public Password isServerPasswordEqual(String password);
-
-	public boolean hasIndividualSecurityManager();
-
-	public short getPasswordSource();
 
 	public void resetServerFunctionMappings();
 

@@ -36,7 +36,6 @@ import lucee.runtime.PageContextImpl;
 import lucee.runtime.PageSource;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigUtil;
-import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.engine.ThreadLocalPageContext;
 
 /**
@@ -313,7 +312,7 @@ public final class LogUtil {
 
 	private static String abs(PageContext pc, String template) {
 		try {
-			ConfigWeb config = pc.getConfig();
+			Config config = pc.getConfig();
 			Resource res = config.getResource(template);
 			if (res.exists()) return template;
 			String tmp;

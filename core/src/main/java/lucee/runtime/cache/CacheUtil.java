@@ -31,7 +31,6 @@ import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.PageContextImpl;
 import lucee.runtime.config.Config;
-import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.config.Constants;
 import lucee.runtime.config.Password;
 import lucee.runtime.config.PasswordImpl;
@@ -253,7 +252,7 @@ public class CacheUtil {
 		return cc.getInstance(config);
 	}
 
-	public static boolean removeEL(ConfigWeb config, CacheConnection cc) {
+	public static boolean removeEL(Config config, CacheConnection cc) {
 		try {
 			remove(config, cc);
 			return true;
@@ -264,7 +263,7 @@ public class CacheUtil {
 		}
 	}
 
-	public static void remove(ConfigWeb config, CacheConnection cc) throws Throwable {
+	public static void remove(Config config, CacheConnection cc) throws Throwable {
 		Cache c = cc.getInstance(config);
 		// FUTURE no reflection needed
 		Object[] empty = new Object[0];

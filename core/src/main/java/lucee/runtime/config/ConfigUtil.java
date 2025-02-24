@@ -31,6 +31,7 @@ import java.util.Map.Entry;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
+import lucee.print;
 import lucee.commons.digest.MD5;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
@@ -307,14 +308,7 @@ public final class ConfigUtil {
 			}
 			else if (config instanceof ServletConfig) {
 				Map<String, String> labels = null;
-				// web
-				if (config instanceof ConfigWebPro) {
-					labels = ((ConfigWebPro) config).getAllLabels();
-				}
-				// server
-				else if (config instanceof ConfigServerImpl) {
-					labels = ((ConfigServerImpl) config).getLabels();
-				}
+				labels = ConfigUtil.getConfigServerImpl(config).getLabels();
 				if (labels != null) str = SystemUtil.parsePlaceHolder(str, ((ServletConfig) config).getServletContext(), labels);
 			}
 			else str = SystemUtil.parsePlaceHolder(str);
@@ -1113,9 +1107,14 @@ public final class ConfigUtil {
 		/// special mappings
 		if (useSpecialMappings && lcRealPath.startsWith("/mapping-", 0)) {
 			String virtual = "/mapping-tag";
+
 			// tag mappings
-			Mapping[] tagMappings = (config instanceof ConfigWebPro) ? new Mapping[] { ((ConfigWebPro) config).getDefaultServerTagMapping(), config.getDefaultTagMapping() }
+
+			Mapping[] tagMappings = (config instanceof ConfigWebPro)
+					? new Mapping[] { ConfigUtil.getConfigServerImpl(config).getDefaultTagMapping(), config.getDefaultTagMapping() }
 					: new Mapping[] { config.getDefaultTagMapping() };
+
+			print.e(tagMappings);
 			if (lcRealPath.startsWith(virtual, 0)) {
 				for (int i = 0; i < tagMappings.length; i++) {
 					if (asPageSource) {
@@ -1254,7 +1253,8 @@ public final class ConfigUtil {
 		if (useSpecialMappings && lcRealPath.startsWith("/mapping-", 0)) {
 			String virtual = "/mapping-tag";
 			// tag mappings
-			Mapping[] tagMappings = (config instanceof ConfigWebPro) ? new Mapping[] { ((ConfigWebPro) config).getDefaultServerTagMapping(), config.getDefaultTagMapping() }
+			Mapping[] tagMappings = (config instanceof ConfigWebPro)
+					? new Mapping[] { ConfigUtil.getConfigServerImpl(config).getDefaultTagMapping(), config.getDefaultTagMapping() }
 					: new Mapping[] { config.getDefaultTagMapping() };
 			if (lcRealPath.startsWith(virtual, 0)) {
 				for (int i = 0; i < tagMappings.length; i++) {

@@ -130,7 +130,7 @@ public class CFConfigImport {
 			String strPW = ConfigUtil.decrypt(password);
 			Password pw; // hash password if
 			if (isServer && config instanceof ConfigWebPro) {
-				pw = ((ConfigWebPro) config).isServerPasswordEqual(strPW);
+				pw = ConfigUtil.getConfigServerImpl(config).isPasswordEqual(strPW);
 			}
 			else {
 				pw = config.isPasswordEqual(strPW);
