@@ -2221,7 +2221,7 @@ public class OSGiUtil {
 	}
 
 	/**
-	 * value can be a String (for a single entry) or a List<String> for multiple entries
+	 * value can be a String (for a single entry) or a List&lt;String&gt; for multiple entries
 	 *
 	 * @param b
 	 * @return
