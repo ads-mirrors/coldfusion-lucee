@@ -142,8 +142,8 @@ import lucee.runtime.gateway.GatewayEntry;
 import lucee.runtime.gateway.GatewayEntryImpl;
 import lucee.runtime.gateway.GatewayUtil;
 import lucee.runtime.i18n.LocaleFactory;
+import lucee.runtime.listener.AppListenerSupport;
 import lucee.runtime.listener.AppListenerUtil;
-import lucee.runtime.listener.ApplicationListener;
 import lucee.runtime.listener.JavaSettingsImpl;
 import lucee.runtime.monitor.IntervallMonitor;
 import lucee.runtime.monitor.Monitor;
@@ -1020,7 +1020,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 
 				else admin.updateMapping(mapping.getVirtual(), mapping.getStrPhysical(), strFile, mapping.isPhysicalFirst() ? "physical" : "archive",
 						mapping.getInspectTemplateRaw(), mapping.getInspectTemplateAutoIntervalRaw(true), mapping.getInspectTemplateAutoIntervalRaw(false), mapping.isTopLevel(),
-						mapping.getListenerMode(), mapping.getListenerType(), mapping.isReadonly());
+						mapping.getListenerMode(), mapping.getListenerType(), mapping.getListenerSingelton(), mapping.isReadonly());
 				store();
 				ConfigUtil.getConfigWebIfPossible(config).resetMappings();
 			}
@@ -2089,7 +2089,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 				getString("admin", action, "primary"), ConfigUtil.inspectTemplate(getString("inspect", ""), ConfigPro.INSPECT_UNDEFINED),
 				getInt("inspectTemplateIntervalSlow", ConfigPro.INSPECT_INTERVAL_UNDEFINED), getInt("inspectTemplateIntervalFast", ConfigPro.INSPECT_INTERVAL_UNDEFINED),
 				Caster.toBooleanValue(getString("toplevel", "true")), ConfigUtil.toListenerMode(getString("listenerMode", ""), -1),
-				ConfigUtil.toListenerType(getString("listenerType", ""), -1), Caster.toBooleanValue(getString("readonly", "false"))
+				ConfigUtil.toListenerType(getString("listenerType", ""), -1), getBool("listenerSingelton", null), Caster.toBooleanValue(getString("readonly", "false"))
 
 		);
 		store();
@@ -5034,7 +5034,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	}
 
 	private void doUpdateApplicationListener() throws PageException {
-		admin.updateApplicationListener(getString("admin", action, "listenerType"), getString("admin", action, "listenerMode"));
+		admin.updateApplicationListener(getString("admin", action, "listenerType"), getString("admin", action, "listenerMode"), getBool("listenerSingelton", null));
 		admin.updateApplicationPathTimeout(getTimespan("admin", action, "applicationPathTimeout"));
 		store();
 		ConfigUtil.getConfigServerImpl(config).resetApplicationListener().resetApplicationPathCacheTimeout();
@@ -5138,9 +5138,11 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void doGetApplicationListener() throws PageException {
 		Struct sct = new StructImpl();
 		pageContext.setVariable(getString("admin", action, "returnVariable"), sct);
-		ApplicationListener appListener = config.getApplicationListener();
+		AppListenerSupport appListener = (AppListenerSupport) config.getApplicationListener();
 		sct.set("type", AppListenerUtil.toStringType(appListener));
 		sct.set("mode", AppListenerUtil.toStringMode(appListener.getMode()));
+		sct.set("singelton", appListener.isSingelton());
+
 		sct.set("applicationPathTimeout", TimeSpanImpl.fromMillis(config.getApplicationPathCacheTimeout()));
 		// replaced with encoding outputsct.set("defaultencoding", config.get DefaultEncoding());
 	}

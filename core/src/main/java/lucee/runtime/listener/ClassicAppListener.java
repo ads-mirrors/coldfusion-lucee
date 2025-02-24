@@ -37,6 +37,7 @@ import lucee.runtime.util.PageContextUtil;
 public final class ClassicAppListener extends AppListenerSupport {
 
 	private int mode = MODE_CURRENT2ROOT;
+	private boolean singelton = false;
 
 	@Override
 	public void onRequest(PageContext pc, PageSource requestedPage, RequestListener rl) throws PageException {
@@ -177,5 +178,14 @@ public final class ClassicAppListener extends AppListenerSupport {
 	@Override
 	public String getType() {
 		return "classic";
+	}
+
+	@Override
+	public boolean isSingelton() {
+		return singelton;
+	}
+
+	public void setSingelton(boolean singelton) {
+		this.singelton = singelton;
 	}
 }

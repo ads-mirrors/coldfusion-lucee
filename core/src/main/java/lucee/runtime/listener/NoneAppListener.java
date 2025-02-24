@@ -32,6 +32,7 @@ import lucee.runtime.util.PageContextUtil;
 public final class NoneAppListener extends AppListenerSupport {
 
 	private int mode;
+	private boolean singelton = false;
 
 	@Override
 	public void onRequest(PageContext pc, PageSource requestedPage, RequestListener rl) throws PageException {
@@ -102,5 +103,15 @@ public final class NoneAppListener extends AppListenerSupport {
 	@Override
 	public String getType() {
 		return "none";
+	}
+
+	@Override
+	public boolean isSingelton() {
+		return singelton;
+	}
+
+	@Override
+	public void setSingelton(boolean singelton) {
+		this.singelton = singelton;
 	}
 }

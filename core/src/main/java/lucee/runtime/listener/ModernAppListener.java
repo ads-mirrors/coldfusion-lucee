@@ -547,10 +547,12 @@ public class ModernAppListener extends AppListenerSupport {
 		return mode;
 	}
 
-	public boolean isSingeltong() {
+	@Override
+	public boolean isSingelton() {
 		return singelton;
 	}
 
+	@Override
 	public void setSingelton(boolean singelton) {
 		this.singelton = singelton;
 	}

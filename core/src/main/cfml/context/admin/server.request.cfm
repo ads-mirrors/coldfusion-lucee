@@ -121,6 +121,7 @@ Defaults --->
 
 					listenerType="#form.type#"
 					listenerMode="#form.mode#"
+					listenerSingelton="#form.singelton?:false#"
 					applicationPathTimeout="#CreateTimeSpan(form.apppath_days?:0,form.apppath_hours?:0,form.apppath_minutes?:0,form.apppath_seconds?:0)#"
 					
 					remoteClients="#request.getRemoteClients()#">
@@ -136,6 +137,7 @@ Defaults --->
 
 					listenerType=""
 					listenerMode=""
+					listenerSingelton=""
 					applicationPathTimeout=""
 
 					remoteClients="#request.getRemoteClients()#">
@@ -556,10 +558,33 @@ Error Output --->
 
 	<h2>#stText.application.listener#</h2>
 	<div class="itemintro">#stText.application.listenerDescription#</div>
-
+	<cfscript>
+		stText.application.singelton="Singelton";
+		stText.application.singeltonDesc="When enabled, Lucee loads the Application.cfc component only once when the application context starts or when the component file changes. 
+		This reduces overhead for applications that follow best practices of containing logic within lifecycle methods. When disabled (default), Application.cfc is loaded for every request.";
+	</cfscript>
 	<cfformClassic onerror="customError" action="#request.self#?action=#url.action#" method="post">
 		<table class="maintbl">
 			<tbody>
+				<!--- singelton --->
+				<tr>
+					<th scope="row">#stText.application.singelton#</th>
+					<td>
+						<span id="singelton"><cfif hasAccess>
+							<input type="checkbox" name="singelton" value="true" class="checkbox"
+							<cfif (listener.singelton?:false)>  checked="checked"</cfif>>
+						<cfelse>
+							<b>#yesNoFormat(listener.singelton?:false)#</b>
+						</cfif>
+						<div class="comment">#stText.application.singeltonDesc#</div></span>
+
+						<cfsavecontent variable="codeSample">
+						example
+						</cfsavecontent>
+						<cfset renderSysPropEnvVar( "lucee.application.singelton",listener.singelton?:false)>
+					</td>
+				</tr>
+
 				<!--- listener type --->
 				<tr>
 					<th scope="row">

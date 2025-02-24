@@ -51,4 +51,8 @@ public abstract class AppListenerSupport implements ApplicationListener {
 	public abstract void onSessionStart(PageContext pc, Session session) throws PageException;
 
 	public abstract boolean onApplicationStart(PageContext pc, Application application) throws PageException;
+
+	public abstract boolean isSingelton();
+
+	public abstract void setSingelton(boolean singelton);
 }

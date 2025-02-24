@@ -3014,7 +3014,7 @@ public class KeyConstants {
 	public static final Key _write = KeyImpl._const("write");
 	public static final Key _cffile = KeyImpl._const("cffile");
 	public static final Key _timelastmodified = KeyImpl._const("timelastmodified");
-	public static final Key _datelastaccessed  = KeyImpl._const("datelastaccessed");
+	public static final Key _datelastaccessed = KeyImpl._const("datelastaccessed");
 	public static final Key _filesize = KeyImpl._const("filesize");
 	public static final Key _oldfilesize = KeyImpl._const("oldfilesize");
 	public static final Key _contenttype = KeyImpl._const("contenttype");
@@ -3042,6 +3042,7 @@ public class KeyConstants {
 	public static final Key _isCaseSensitive = KeyImpl._const("isCaseSensitive");
 	public static final Key _isAttributesSupported = KeyImpl._const("isAttributesSupported");
 	public static final Key _isModeSupported = KeyImpl._const("isModeSupported");
+	public static final Key _listenerSingelton = KeyImpl._const("listenerSingelton");
 
 	private static Map<String, Key> _____keys;
 

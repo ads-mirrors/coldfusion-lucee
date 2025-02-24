@@ -677,6 +677,10 @@ public final class MappingImpl implements Mapping {
 
 	}
 
+	public Boolean getListenerSingelton() {
+		return false;
+	}
+
 	@Override
 	public int getListenerMode() {
 		return listenerMode;

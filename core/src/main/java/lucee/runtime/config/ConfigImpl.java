@@ -116,6 +116,7 @@ import lucee.runtime.extension.ExtensionProvider;
 import lucee.runtime.extension.RHExtension;
 import lucee.runtime.extension.RHExtensionProvider;
 import lucee.runtime.functions.other.CreateUniqueId;
+import lucee.runtime.listener.AppListenerSupport;
 import lucee.runtime.listener.AppListenerUtil;
 import lucee.runtime.listener.ApplicationContext;
 import lucee.runtime.listener.ApplicationListener;
@@ -3090,7 +3091,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 						String strSi = SystemUtil.getSystemPropOrEnvVar("lucee.listener.singelton", null);
 						if (StringUtil.isEmpty(strSi)) strSi = SystemUtil.getSystemPropOrEnvVar("lucee.application.singelton", null);
 						if (StringUtil.isEmpty(strSi)) strSi = ConfigFactoryImpl.getAttr(root, new String[] { "listenerSingelton", "applicationSingelton" });
-						((ModernAppListener) listener).setSingelton(Caster.toBooleanValue(strSi, false));
+						((AppListenerSupport) listener).setSingelton(Caster.toBooleanValue(strSi, false));
 					}
 					applicationListener = listener;
 
