@@ -140,12 +140,10 @@ public class HTTPEngine4Impl {
 	 * @param username
 	 * @param password
 	 * @param timeout
+	 * @param redirect
 	 * @param charset
 	 * @param useragent
-	 * @param proxyserver
-	 * @param proxyport
-	 * @param proxyuser
-	 * @param proxypassword
+	 * @param proxy
 	 * @param headers
 	 * @return
 	 * @throws IOException
@@ -164,12 +162,10 @@ public class HTTPEngine4Impl {
 	 * @param username
 	 * @param password
 	 * @param timeout
+	 * @param redirect
 	 * @param charset
 	 * @param useragent
-	 * @param proxyserver
-	 * @param proxyport
-	 * @param proxyuser
-	 * @param proxypassword
+	 * @param proxy
 	 * @param headers
 	 * @return
 	 * @throws IOException
@@ -202,18 +198,16 @@ public class HTTPEngine4Impl {
 	 * @param username
 	 * @param password
 	 * @param timeout
+	 * @param redirect
+	 * @param mimetype
 	 * @param charset
 	 * @param useragent
-	 * @param proxyserver
-	 * @param proxyport
-	 * @param proxyuser
-	 * @param proxypassword
+	 * @param proxy
 	 * @param headers
 	 * @param body
 	 * @return
 	 * @throws IOException
 	 * @throws GeneralSecurityException
-	 * @throws PageException
 	 */
 	public static HTTPResponse put(URL url, String username, String password, long timeout, boolean redirect, String mimetype, String charset, String useragent, ProxyData proxy,
 			lucee.commons.net.http.Header[] headers, Object body) throws IOException, GeneralSecurityException {
@@ -230,12 +224,10 @@ public class HTTPEngine4Impl {
 	 * @param username
 	 * @param password
 	 * @param timeout
+	 * @param redirect
 	 * @param charset
 	 * @param useragent
-	 * @param proxyserver
-	 * @param proxyport
-	 * @param proxyuser
-	 * @param proxypassword
+	 * @param proxy
 	 * @param headers
 	 * @return
 	 * @throws IOException
@@ -254,12 +246,10 @@ public class HTTPEngine4Impl {
 	 * @param username
 	 * @param password
 	 * @param timeout
+	 * @param redirect
 	 * @param charset
 	 * @param useragent
-	 * @param proxyserver
-	 * @param proxyport
-	 * @param proxyuser
-	 * @param proxypassword
+	 * @param proxy
 	 * @param headers
 	 * @return
 	 * @throws IOException

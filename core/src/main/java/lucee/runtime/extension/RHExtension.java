@@ -291,7 +291,6 @@ public class RHExtension implements Serializable {
 	/**
 	 * copy the extension resource file to the installed folder
 	 * 
-	 * @param ext
 	 * @return
 	 * @throws PageException
 	 * @throws ConverterException
@@ -308,7 +307,6 @@ public class RHExtension implements Serializable {
 	/**
 	 * copy the extension resource file to the installed folder
 	 * 
-	 * @param ext
 	 * @return
 	 * @throws PageException
 	 * @throws ConverterException

@@ -372,7 +372,6 @@ public final class Query extends BodyTagTryCatchFinallyImpl {
 	 * specified, dbName overrides the default database specified in the data source.
 	 * 
 	 * @param dbname value to set
-	 * @throws ApplicationException
 	 **/
 	public void setDbname(String dbname) {
 		// DeprecatedUtil.tagAttribute(pageContext,"Query", "dbname");
@@ -401,7 +400,6 @@ public final class Query extends BodyTagTryCatchFinallyImpl {
 	 * set the value provider COM provider, OLE-DB only.
 	 * 
 	 * @param provider value to set
-	 * @throws ApplicationException
 	 **/
 	public void setProvider(String provider) {
 		// DeprecatedUtil.tagAttribute(pageContext,"Query", "provider");
@@ -413,7 +411,6 @@ public final class Query extends BodyTagTryCatchFinallyImpl {
 	 * data source.
 	 * 
 	 * @param dbserver value to set
-	 * @throws ApplicationException
 	 **/
 	public void setDbserver(String dbserver) {
 		// DeprecatedUtil.tagAttribute(pageContext,"Query", "dbserver");

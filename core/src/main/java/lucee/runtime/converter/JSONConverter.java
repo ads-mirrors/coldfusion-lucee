@@ -117,7 +117,6 @@ public final class JSONConverter extends ConverterSupport {
 	/**
 	 * @param ignoreRemotingFetch
 	 * @param charset if set, characters not supported by the charset are escaped.
-	 * @param patternCf
 	 */
 	public JSONConverter(boolean ignoreRemotingFetch, Charset charset) {
 		this(ignoreRemotingFetch, charset, JSONDateFormat.PATTERN_CF, true, null);
@@ -321,9 +320,12 @@ public final class JSONConverter extends ConverterSupport {
 	/**
 	 * serialize a Struct
 	 * 
+	 * @param pc
+	 * @param test
 	 * @param struct Struct to serialize
 	 * @param sb
-	 * @param serializeQueryByColumns
+	 * @param queryFormat
+	 * @param preserveCase
 	 * @param addUDFs
 	 * @param done
 	 * @throws ConverterException
@@ -868,8 +870,9 @@ public final class JSONConverter extends ConverterSupport {
 	/**
 	 * serialize an Object to his literal Format
 	 * 
+	 * @param pc
 	 * @param object Object to serialize
-	 * @param serializeQueryByColumns
+	 * @param queryFormat
 	 * @return serialized wddx package
 	 * @throws ConverterException
 	 */

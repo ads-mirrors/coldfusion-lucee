@@ -149,7 +149,17 @@
         <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.5.0</version>
+          <version>3.7.0</version>
+          <configuration>
+            <sourcepath>src/main/java</sourcepath>
+            <additionalparam>-Xdoclint:missing</additionalparam>
+            <additionalJOptions>
+              <additionalJOption>-Xmaxerrs</additionalJOption>
+              <additionalJOption>65536</additionalJOption>
+              <additionalJOption>-Xmaxwarns</additionalJOption>
+              <additionalJOption>10</additionalJOption>
+            </additionalJOptions>
+          </configuration>
           <executions>
             <execution>
               <id>attach-javadocs</id>

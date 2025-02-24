@@ -219,8 +219,7 @@ public final class Search extends TagImpl {
 	}
 
 	/**
-	 * @param category the category to set
-	 * @throws ApplicationException
+	 * @param listCategories the category to set
 	 */
 	public void setCategory(String listCategories) {
 		if (StringUtil.isEmpty(listCategories)) return;
@@ -229,7 +228,6 @@ public final class Search extends TagImpl {
 
 	/**
 	 * @param categoryTree the categoryTree to set
-	 * @throws ApplicationException
 	 */
 	public void setCategorytree(String categoryTree) {
 		if (StringUtil.isEmpty(categoryTree)) return;
@@ -249,7 +247,6 @@ public final class Search extends TagImpl {
 
 	/**
 	 * @param contextHighlightBegin the contextHighlightBegin to set
-	 * @throws ApplicationException
 	 */
 	public void setContexthighlightbegin(String contextHighlightBegin) {
 		this.contextHighlightBegin = contextHighlightBegin;
@@ -257,7 +254,6 @@ public final class Search extends TagImpl {
 
 	/**
 	 * @param contextHighlightEnd the contextHighlightEnd to set
-	 * @throws ApplicationException
 	 */
 	public void setContexthighlightend(String contextHighlightEnd) {
 		this.contextHighlightEnd = contextHighlightEnd;
@@ -287,7 +283,6 @@ public final class Search extends TagImpl {
 
 	/**
 	 * @param status the status to set
-	 * @throws ApplicationException
 	 */
 	public void setStatus(String status) {
 		if (!StringUtil.isEmpty(status)) this.status = status;
@@ -295,7 +290,7 @@ public final class Search extends TagImpl {
 
 	/**
 	 * @param suggestions the suggestions to set
-	 * @throws ApplicationException
+	 * @throws PageException
 	 */
 	public void setSuggestions(String suggestions) throws PageException {
 		if (StringUtil.isEmpty(suggestions)) return;

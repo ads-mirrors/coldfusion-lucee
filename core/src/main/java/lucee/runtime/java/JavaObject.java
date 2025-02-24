@@ -64,6 +64,13 @@ public class JavaObject implements Objects, ObjectWrap {
 	private transient VariableUtil _variableUtil;
 	private boolean allowInit;
 
+	/**
+	 * constructor with className to load
+	 * 
+	 * @param variableUtil
+	 * @param clazz
+	 * @param allowInit
+	 */
 	public JavaObject(VariableUtil variableUtil, Class clazz, boolean allowInit) {
 		this._variableUtil = variableUtil;
 		this.clazz = clazz;

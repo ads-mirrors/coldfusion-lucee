@@ -207,7 +207,6 @@ public final class ConfigAdmin {
 	 * @param config
 	 * @param password
 	 * @return returns a new instance of the class
-	 * @throws SAXException
 	 * @throws IOException
 	 * @throws PageException
 	 */
@@ -229,9 +228,8 @@ public final class ConfigAdmin {
 
 	/**
 	 * @param password
+	 * @throws SecurityException
 	 * @throws IOException
-	 * @throws DOMException
-	 * @throws ExpressionException
 	 */
 	public void setPassword(Password password) throws SecurityException, IOException {
 		checkWriteAccess();
@@ -257,11 +255,9 @@ public final class ConfigAdmin {
 
 	/**
 	 * @param contextPath
-	 * @param password
 	 * @throws FunctionLibException
 	 * @throws TagLibException
 	 * @throws IOException
-	 * @throws ClassNotFoundException
 	 * @throws SAXException
 	 * @throws PageException
 	 * @throws BundleException
@@ -698,8 +694,13 @@ public final class ConfigAdmin {
 	 * @param physical
 	 * @param archive
 	 * @param primary
-	 * @param trusted
+	 * @param inspect
+	 * @param inspectTemplateIntervalSlow
+	 * @param inspectTemplateIntervalFast
 	 * @param toplevel
+	 * @param listenerMode
+	 * @param listenerType
+	 * @param readOnly
 	 * @throws ExpressionException
 	 * @throws SecurityException
 	 */
@@ -1081,7 +1082,9 @@ public final class ConfigAdmin {
 	 * @param physical
 	 * @param archive
 	 * @param primary
-	 * @param trusted
+	 * @param inspect
+	 * @param inspectTemplateIntervalSlow
+	 * @param inspectTemplateIntervalFast
 	 * @throws ExpressionException
 	 * @throws SecurityException
 	 */
@@ -1410,7 +1413,7 @@ public final class ConfigAdmin {
 	 * insert or update a Java CFX Tag
 	 * 
 	 * @param name
-	 * @param strClass
+	 * @param cd
 	 * @throws PageException
 	 */
 	public void updateJavaCFX(String name, ClassDefinition cd) throws PageException {
@@ -1501,8 +1504,10 @@ public final class ConfigAdmin {
 	/**
 	 * update or insert new database connection
 	 * 
+	 * @param id
 	 * @param name
-	 * @param clazzName
+	 * @param newName
+	 * @param cd
 	 * @param dsn
 	 * @param username
 	 * @param password
@@ -1510,12 +1515,23 @@ public final class ConfigAdmin {
 	 * @param database
 	 * @param port
 	 * @param connectionLimit
-	 * @param connectionTimeout
+	 * @param idleTimeout
+	 * @param liveTimeout
+	 * @param metaCacheTimeout
 	 * @param blob
 	 * @param clob
 	 * @param allow
+	 * @param validate
 	 * @param storage
+	 * @param timezone
 	 * @param custom
+	 * @param dbdriver
+	 * @param paramSyntax
+	 * @param literalTimestampWithTSOffset
+	 * @param alwaysSetTimeout
+	 * @param requestExclusive
+	 * @param alwaysResetConnections
+	 * 
 	 * @throws PageException
 	 */
 	public void updateDataSource(String id, String name, String newName, ClassDefinition cd, String dsn, String username, String password, String host, String database, int port,
@@ -3100,7 +3116,7 @@ public final class ConfigAdmin {
 	 * 
 	 * @param strAccess
 	 * @throws SecurityException
-	 * @throws ExpressionException
+	 * @throws ApplicationException
 	 */
 	public void updateComponentDataMemberDefaultAccess(String strAccess) throws SecurityException, ApplicationException {
 		checkWriteAccess();
@@ -6667,11 +6683,10 @@ public final class ConfigAdmin {
 	 * returns the version if the extension is available
 	 * 
 	 * @param config
-	 * @param id
+	 * @param ed
 	 * @return
 	 * @throws PageException
 	 * @throws IOException
-	 * @throws SAXException
 	 */
 	public static RHExtension hasRHExtensionInstalled(ConfigPro config, ExtensionDefintion ed) throws PageException, IOException {
 		ConfigAdmin admin = new ConfigAdmin(config, null);

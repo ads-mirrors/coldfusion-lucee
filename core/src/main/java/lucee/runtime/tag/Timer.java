@@ -70,7 +70,7 @@ public final class Timer extends BodyTagImpl {
 	}
 
 	/**
-	 * @param type the type to set
+	 * @param strType the type to set
 	 * @throws ApplicationException
 	 */
 	public void setType(String strType) throws ApplicationException {
@@ -84,7 +84,7 @@ public final class Timer extends BodyTagImpl {
 	}
 
 	/**
-	 * @param unit the unit to set
+	 * @param strUnit the unit to set
 	 * @throws ApplicationException
 	 */
 	public void setUnit(String strUnit) throws ApplicationException {
