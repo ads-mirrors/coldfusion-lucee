@@ -1,7 +1,7 @@
-component extends="org.lucee.cfml.test.LuceeTestCase" labels="http" skip="true" {
+component extends="org.lucee.cfml.test.LuceeTestCase" labels="http" {
 
 	function beforeAll() {
-		variables.dir = "#getDirectoryFromPath(getCurrenttemplatepath())#LDEV3452"
+		variables.dir = getTempDirectory() & "LDEV3452/"
 		if(directoryExists(variables.dir)) directoryDelete(variables.dir,true);
 		directoryCreate(variables.dir);
 	}

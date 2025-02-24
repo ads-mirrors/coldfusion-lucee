@@ -6979,6 +6979,23 @@ if this attribute is not provided all types are returned.</description>
 		</return>
 	</function>
 
+	<!-- GetSystemPropOrEnvVar -->
+	<function>
+		<name>GetSystemPropOrEnvVar</name>
+		<introduced>6.2.1.23</introduced>
+		<class>lucee.runtime.functions.system.GetSystemPropOrEnvVar</class>
+		<description>Return the list of supported system properties or env vars Lucee supports.</description>
+		<argument>
+			<name>property</name>
+			<type>string</type>
+			<required>No</required>
+			<description>Optional, when set, the value of the property as configured is returned</description>
+		</argument>
+		<return>
+			<type>any</type>
+		</return>
+	</function>
+
 	<!-- getSystemTotalMemory -->
 	<function>
 		<name>GetSystemTotalMemory</name>
