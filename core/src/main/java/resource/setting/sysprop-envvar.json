@@ -418,5 +418,10 @@
         "sysprop": "lucee.logging.force.level",
         "envvar": "LUCEE_LOGGING_FORCE_LEVEL",
         "desc": "If set, override the default log4j log level for all logs, which is usually ERROR"
+    },
+    {
+        "sysprop": "lucee.sessionCookie.rotate.unknown",
+        "envvar": "LUCEE_SESSIONCOOKIE_ROTATE_UNKNOWN",
+        "desc": "Default true, when false, unknown cfml session cookies won't be automatically rotated"
     }
 ]

@@ -232,6 +232,7 @@ public final class PageContextImpl extends PageContext {
 	private static final boolean JAVA_SETTING_CLASSIC_MODE = false;
 	private static int counter = 0;
 	private static final boolean LINKED_REQUEST = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.request.linked", null), true);
+	private static final boolean ROTATE_UNKNOWN_COOKIE = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.sessionCookie.rotate.unknown", null), true);
 	/**
 	 * Field <code>pathList</code>
 	 */
@@ -3020,6 +3021,7 @@ public final class PageContextImpl extends PageContext {
 		// check cookie value
 		if (oCfid != null) {
 			// cookie value is invalid, maybe from ACF
+			
 			if (!Decision.isGUIdSimple(oCfid)) {
 				oCfid = null;
 				oCftoken = null;
@@ -3049,6 +3051,14 @@ public final class PageContextImpl extends PageContext {
 				if (oCfid != null) {
 					setCookie = true;
 					if (oCftoken == null) oCftoken = "0";
+				}
+			}
+			if (oCfid != null && ROTATE_UNKNOWN_COOKIE) {
+				if (!scopeContext.hasExistingCFID(this, Caster.toString(oCfid, null))) {
+					oCfid = null;
+					oCftoken = null;
+					ReqRspUtil.removeCookie(getHttpServletResponse(), "cfid");
+					ReqRspUtil.removeCookie(getHttpServletResponse(), "cftoken");
 				}
 			}
 		}

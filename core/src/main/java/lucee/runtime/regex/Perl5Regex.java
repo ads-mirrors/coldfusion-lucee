@@ -100,6 +100,11 @@ class Perl5Regex implements Regex {
 	}
 
 	@Override
+	public String escape(String strInput) throws PageException {
+		return Perl5Util.quotemeta(strInput);
+	}
+
+	@Override
 	public String getTypeName() {
 		return "perl";
 	}

@@ -11644,6 +11644,26 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<type>any</type>
 		</return>
 	</function>
+
+	<!-- rEEscape -->
+	<function>
+		<name>REEscape</name>
+		<class>lucee.runtime.functions.string.REEscape</class>
+		<member-name>reEscape</member-name>
+		<member-position>1</member-position>
+		<keywords>string,regex</keywords>
+		<description>Escapes regular expression control characters within a string.</description>
+		<argument>
+			<name>string</name>
+			<type>string</type>
+			<required>Yes</required>
+			<description>String to be escaped.</description>
+		</argument>
+		<return>
+			<type>string</type>
+		</return>
+	</function>
+	
 	<!-- rEFind -->
 	<function>
 		<name>rEFind</name>
