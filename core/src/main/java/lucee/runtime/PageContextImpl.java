@@ -233,7 +233,7 @@ public final class PageContextImpl extends PageContext {
 	private static final boolean JAVA_SETTING_CLASSIC_MODE = false;
 	private static int counter = 0;
 	private static final boolean LINKED_REQUEST = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.request.linked", null), true);
-	private static final boolean ROTATE_UNKNOWN_COOKIE = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.sessionCookie.rotate.unknown", null), true);
+	private static final boolean ROTATE_UNKNOWN_COOKIE = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.sessionCookie.rotate.unknown", null), false);
 	/**
 	 * Field <code>pathList</code>
 	 */

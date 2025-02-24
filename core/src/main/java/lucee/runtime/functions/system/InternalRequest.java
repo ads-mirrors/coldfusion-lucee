@@ -76,12 +76,12 @@ public class InternalRequest implements Function {
 		// add token
 		if (addToken) {
 			// if(true) throw new ApplicationException("addtoken==true");
-			if (cookies == null) cookies = new StructImpl();
+			if (cookies == null) cookies = new StructImpl(4);
 
 			cookies.set(KeyConstants._cfid, pc.getCFID());
 			cookies.set(KeyConstants._cftoken, pc.getCFToken());
 			String jsessionid = pc.getJSessionId();
-			if (jsessionid != null) cookies.set("jsessionid", jsessionid);
+			if (jsessionid != null) cookies.set(KeyConstants._jsessionid, jsessionid);
 		}
 
 		// charset

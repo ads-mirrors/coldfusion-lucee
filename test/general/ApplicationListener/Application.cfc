@@ -1,19 +1,19 @@
 component {
 	this.name = url.name;
-    this.sessionManagement = true;
-    this.sessionTimeout = createTimeSpan( 0, 1, 0, 0);
+	this.sessionManagement = true;
+	this.sessionTimeout = createTimeSpan( 0, 0, 0, 10);
 
-    public boolean function onApplicationStart() {
+	public boolean function onApplicationStart() {
  		echo('-onApplicationStart-');
  		return true;
  	}
-    public boolean function onSessionStart() {
+	public boolean function onSessionStart() {
  		echo('-onSessionStart-');
  		return true;
  	}
 	
-	 public function onRequestStart() {
-		 setting requesttimeout=10;
+	public function onRequestStart() {
+		setting requesttimeout=10;
 	 }
  
 }

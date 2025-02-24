@@ -16,20 +16,20 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  * 
  ---><cfscript>
-component extends="org.lucee.cfml.test.LuceeTestCase" skip=true	{
+component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 	times=[10,200,100,300,200,100,2,100,1,100];
 
 
 	public void function testFormOrder() {
-		forms=structNew('linked');
+		var forms=structNew('linked');
 		forms['a']='1';
 		forms['b']='2';
 		forms['e']='3';
 		forms['d']='4';
 		forms['f']='5';
 
-		uri=createURI("Scope/form.cfm");
+		var uri=createURI("Scope/form.cfm");
 		local.res=_InternalRequest(
 			template:uri,
 			forms:forms
@@ -53,7 +53,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip=true	{
 			createRAMCache(cacheName);
 			request["data"&cacheName]={};
 			local.names="";
-			uri=createURI("ScopeStorage/call.cfm");
+			var uri=createURI("ScopeStorage/call.cfm");
 			loop from=1 to=len(times) index="local.index" {
 				
 				sleep(1);
@@ -101,17 +101,14 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip=true	{
 				throw e.message&"->"&serialize(cfthread);
 			}
 
-			uri=createURI("ScopeStorage/dump.cfm");
-			res=_InternalRequest(
+			var uri=createURI("ScopeStorage/dump.cfm");
+			var res=_InternalRequest(
 				addToken:true,
 				template:uri,
 				urls:{
 					cacheName:cacheName
 				}
 			);
-			
-			
-			
 
 			local.scopes=evaluate(trim(res.filecontent));
 			for(var i=1;i<=times.len();i++) {
@@ -120,9 +117,6 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip=true	{
 				assertEquals(i,scopes.client['ca-a'&i]);
 				assertEquals(i,scopes.client['cb-a'&i]);
 			}
-
-
-
 		}
 		finally {
 			structDelete(request, "data"&cacheName);
