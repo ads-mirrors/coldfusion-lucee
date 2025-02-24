@@ -216,6 +216,7 @@ public final class Directory extends TagImpl {
 	 * @throws ApplicationException
 	 * @deprecated only exists for backward compatibility to old ra files.
 	 **/
+	@Deprecated
 	public void setAcl(String acl) throws ApplicationException {
 		this.acl = acl;
 	}
