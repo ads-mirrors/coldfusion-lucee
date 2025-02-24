@@ -9,6 +9,7 @@ public class ServletInputStreamJavax extends ServletInputStream {
 	private jakarta.servlet.ServletInputStream inputStream;
 
 	public ServletInputStreamJavax(jakarta.servlet.ServletInputStream inputStream) {
+		if (inputStream == null) throw new NullPointerException();
 		this.inputStream = inputStream;
 	}
 

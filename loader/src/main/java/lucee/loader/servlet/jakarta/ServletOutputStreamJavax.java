@@ -9,6 +9,7 @@ public class ServletOutputStreamJavax extends ServletOutputStream {
 	private jakarta.servlet.ServletOutputStream outputStream;
 
 	public ServletOutputStreamJavax(jakarta.servlet.ServletOutputStream outputStream) {
+		if (outputStream == null) throw new NullPointerException();
 		this.outputStream = outputStream;
 	}
 
