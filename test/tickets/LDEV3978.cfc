@@ -7,7 +7,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="logs" skip=false {
 
 	function run( testResults, testBox ) {
 		describe("Testcase for LDEV-3978", function( currentSpec ) {
-			it(title="Writing logs in files using cflog", body=function( currentSpec )  {
+			it(title="Writing logs in files using cflog", skip=areLogsSentToConsole(), body=function( currentSpec )  {
 				_InternalRequest(
 					template : "#createURI("LDEV3978")#\LDEV3978.cfm",
 					urls : {"uuid": uuid}
@@ -23,7 +23,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="logs" skip=false {
 				expect(findNoCase("testthree_first_#uuid#", testLogFile_3)).toBeGT(0);
 				expect(findNoCase("testthree_second_#uuid#", testLogFile_3)).toBeGT(0);
 			});
-			it(title="cflog without file attribute", body=function( currentSpec )  {
+			it(title="cflog without file attribute", skip=areLogsSentToConsole(), body=function( currentSpec )  {
 				var appLog = fileRead("#filePath#/application.log");
 				
 				expect(findNoCase("test_application_without_file_first_#uuid#", appLog)).toBeGT(0, "cflog without file attribute failed");
@@ -51,5 +51,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="logs" skip=false {
 	private string function createURI(string calledName) {
 		var baseURI = "/test/#listLast(getDirectoryFromPath(getCurrenttemplatepath()),"\/")#/";
 		return baseURI&""&calledName;
+	}
+
+	// if they are, logs files aren't created and tests will fail, so skip
+	private function areLogsSentToConsole(){ 
+		return (getSystemPropOrEnvVar("lucee_logging_force_appender") eq "console"); 
 	}
 }
