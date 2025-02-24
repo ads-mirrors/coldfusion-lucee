@@ -190,6 +190,7 @@ import lucee.runtime.type.scope.Cookie;
 import lucee.runtime.type.scope.CookieImpl;
 import lucee.runtime.type.scope.Form;
 import lucee.runtime.type.scope.FormImpl;
+import lucee.runtime.type.scope.JSession;
 import lucee.runtime.type.scope.Local;
 import lucee.runtime.type.scope.LocalNotSupportedScope;
 import lucee.runtime.type.scope.Request;
@@ -560,7 +561,7 @@ public final class PageContextImpl extends PageContext {
 		timeoutStacktrace = null;
 
 		if (clone) {
-			tmplPC.getCFID();
+			if (needsSession) tmplPC.getCFID();
 			this.cfid = tmplPC.cfid;
 			this.cftoken = tmplPC.cftoken;
 
@@ -2965,6 +2966,10 @@ public final class PageContextImpl extends PageContext {
 		return cfid;
 	}
 
+	public boolean hasCFID() {
+		return (cfid != null);
+	}
+
 	@Override
 	public String getCFToken() {
 		if (cftoken == null) initIdAndToken();
@@ -3908,6 +3913,9 @@ public final class PageContextImpl extends PageContext {
 	}
 
 	public void resetSession() {
+		if (this.session != null && this.session instanceof JSession){
+			getSession().invalidate();
+		}
 		this.session = null;
 	}
 

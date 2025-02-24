@@ -445,7 +445,8 @@ public final class ScopeContext {
 		else if ("registry".equalsIgnoreCase(storage)) storage = "file";
 		else storage = storage.toLowerCase();
 
-		Session session = (Session) context.get(pc.getCFID());
+		if (!((PageContextImpl) pc).hasCFID()) return false;
+		Session session = (Session) context.get(pc.getCFID()); // getCFID creates a CFID if missing
 
 		if (!(session instanceof StorageScope) || session.isExpired() || !((StorageScope) session).getStorage().equalsIgnoreCase(storage)) {
 
