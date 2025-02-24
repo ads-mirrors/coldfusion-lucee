@@ -38,8 +38,11 @@ public class FileServlet extends AbsServlet {
 		try {
 			engine = CFMLEngineFactory.getInstance(ServletConfigJavax.getInstance(sg), this);
 		}
+		catch (ServletExceptionJavax e) {
+			throw (ServletException) e.getJakartaInstance();
+		}
 		catch (javax.servlet.ServletException e) {
-			throw (ServletException) ((ServletExceptionJavax) e).getJakartaInstance();
+			throw new ServletException(e);
 		}
 	}
 
@@ -48,8 +51,11 @@ public class FileServlet extends AbsServlet {
 		try {
 			engine.serviceFile(myself, new HttpServletRequestJavax(req), new HttpServletResponseJavax(rsp));
 		}
+		catch (ServletExceptionJavax e) {
+			throw (ServletException) e.getJakartaInstance();
+		}
 		catch (javax.servlet.ServletException e) {
-			throw (ServletException) ((ServletExceptionJavax) e).getJakartaInstance();
+			throw new ServletException(e);
 		}
 	}
 }
