@@ -9,6 +9,7 @@
 
 	param name="test" default="";
 	param name="testFilter" default="";
+	param name="baseDir" default="";
 	param name="srcAll" default="../core/src/main/"; // used for compiling
 
 	param name="testBoxArchive" default="";
@@ -19,6 +20,8 @@
 		systemOutput(test, true);
 	}
 
+	if ( len( baseDir ) eq 0 )
+		basedir=test; // allow running test suite via browser
 
 	request.WEBADMINPASSWORD = "webweb";
 	request.SERVERADMINPASSWORD = "webweb";
@@ -67,7 +70,8 @@
 
 	// reset the webroot to be empty, to avoid any conflicting mappings
 	empty_webroot = "#getTempDirectory()#\empty_webroot";
-	DirectoryCreate(empty_webroot);
+	if ( !directoryExists( empty_webroot ) )
+		directoryCreate( empty_webroot );
 	admin
 		action="updateMapping"
 		type="web"
@@ -80,7 +84,7 @@
 		trusted="no";
 
 	if ( len(testBoxArchive) eq 0 ){
-		testboxVersion = "2.2.0";
+		testboxVersion = "3.2.0";
 		testboxArchive = "#getTempDirectory()#\testbox.zip";
 		testboxUrl ="https://downloads.ortussolutions.com/ortussolutions/testbox/#testboxVersion#/testbox-#testboxVersion#.zip";
 
