@@ -151,7 +151,7 @@
 			"appenderArguments": {
 				"path": "{lucee-config}/logs/application.log"
 			},
-			"level": "info",
+			"level": "error",
 			"layout": "classic"
 		},
 		"scope": {
