@@ -21,9 +21,13 @@ package lucee.loader.servlet.jakarta;
 import java.io.IOException;
 
 import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lucee.loader.engine.CFMLEngine;
 import lucee.loader.engine.CFMLEngineFactory;
 
 public class CFMLServlet extends AbsServlet {
@@ -37,6 +41,10 @@ public class CFMLServlet extends AbsServlet {
 		myself = new HttpServletJavax(this);
 		try {
 			engine = CFMLEngineFactory.getInstance(ServletConfigJavax.getInstance(sg), this);
+
+			// Register your ServletContextListener
+			ServletContext context = sg.getServletContext();
+			context.addListener(new CFMLServletContextListener(engine));
 		}
 		catch (ServletExceptionJavax e) {
 			throw (ServletException) e.getJakartaInstance();
@@ -56,6 +64,24 @@ public class CFMLServlet extends AbsServlet {
 		}
 		catch (javax.servlet.ServletException e) {
 			throw new ServletException(e);
+		}
+	}
+
+	private static class CFMLServletContextListener implements ServletContextListener {
+
+		private CFMLEngine engine;
+
+		public CFMLServletContextListener(CFMLEngine engine) {
+			this.engine = engine;
+		}
+
+		@Override
+		public void contextInitialized(ServletContextEvent sce) {
+		}
+
+		@Override
+		public void contextDestroyed(ServletContextEvent sce) {
+			engine.reset();
 		}
 	}
 }
