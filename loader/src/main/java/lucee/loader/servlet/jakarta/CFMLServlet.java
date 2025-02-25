@@ -52,4 +52,12 @@ public class CFMLServlet extends AbsServlet {
 			throw (ServletException) ((ServletExceptionJavax) e).getJakartaInstance();
 		}
 	}
+
+	@Override
+	public void destroy() {
+		if (engine != null) {
+			engine.reset();
+		}
+		super.destroy();
+	}
 }

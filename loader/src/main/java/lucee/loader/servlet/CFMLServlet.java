@@ -41,4 +41,12 @@ public class CFMLServlet extends AbsServlet {
 	protected void service(final HttpServletRequest req, final HttpServletResponse rsp) throws ServletException, IOException {
 		engine.serviceCFML(this, req, rsp);
 	}
+
+	@Override
+	public void destroy() {
+		if (engine != null) {
+			engine.reset();
+		}
+		super.destroy();
+	}
 }

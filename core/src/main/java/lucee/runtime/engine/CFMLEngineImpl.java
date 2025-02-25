@@ -26,7 +26,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.instrument.Instrumentation;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -60,7 +59,6 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
 import lucee.Info;
-import lucee.cli.servlet.ServletContextImpl;
 import lucee.commons.collection.MapFactory;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.DevNullOutputStream;
@@ -760,84 +758,12 @@ public final class CFMLEngineImpl implements CFMLEngine {
 			return;
 		}
 
-		// add EventListener
-		if (scl == null) {
-			addEventListener(config.getServletContext());
-		}
-
 		servletConfigs.add(config);
 		String real = ReqRspUtil.getRootPath(config.getServletContext());
 		if (!initContextes.containsKey(real)) {
 			CFMLFactory jspFactory = loadJSPFactory(getConfigServerImpl(null, false, false), config, initContextes.size());
 			initContextes.put(real, jspFactory);
 		}
-	}
-
-	private void addEventListener(ServletContext sc) {
-		// TOMCAT
-		if ("org.apache.catalina.core.ApplicationContextFacade".equals(sc.getClass().getName())) {
-			Object obj = extractServletContext(sc);
-			obj = extractServletContext(obj);
-			if ("org.apache.catalina.core.StandardContext".equals(obj.getClass().getName())) {
-				Method m = null;
-				try {
-					// TODO check if we already have a listener (lucee.loader.servlet.LuceeServletContextListener), if
-					// so we do nothing
-					// sc.getApplicationLifecycleListeners();
-					m = obj.getClass().getMethod("addApplicationLifecycleListener", new Class[] { Object.class });
-					CFMLServletContextListener tmp;
-					m.invoke(obj, new Object[] { tmp = new CFMLServletContextListener(this) });
-					scl = tmp;
-					return;
-				}
-				catch (Exception | NoSuchMethodError e) {
-					// because this is optional and not all servlet engine do support this, we keep the log level on
-					// info
-					LogUtil.log(configServer, "add-event-listener", e, Log.LEVEL_INFO, "application");
-				}
-
-			}
-		}
-
-		// GENERAL try add Event method directly (does not work with tomcat)
-		if (!ServletContextImpl.class.getName().equals(sc.getClass().getName())) { // ServletContextImpl does not support addListener
-			try {
-				CFMLServletContextListener tmp = new CFMLServletContextListener(this);
-				sc.addListener(tmp);
-				scl = tmp;
-				return;
-			}
-			catch (Exception | NoSuchMethodError e) {
-				// because this is optional and not all servlet engine do support this, we keep the log level on
-				// info
-				LogUtil.log(configServer, "add-event-listener", e, Log.LEVEL_INFO, "application");
-			}
-		}
-
-		LogUtil.log(configServer, Log.LEVEL_INFO, "startup", "Lucee was not able to register an event listener with " + (sc == null ? "null" : sc.getClass().getName()));
-	}
-
-	private Object extractServletContext(Object sc) {
-		Class<?> clazz = sc.getClass();
-		Field f = null;
-		try {
-			f = clazz.getDeclaredField("context");
-		}
-		catch (Exception e) {
-			LogUtil.log(configServer, "extract-servlet-context", e);
-		}
-		if (f != null) {
-			f.setAccessible(true);
-			Object obj = null;
-			try {
-				obj = f.get(sc);
-			}
-			catch (Exception e) {
-				LogUtil.log(configServer, "extract-servlet-context", e);
-			}
-			return obj;
-		}
-		return null;
 	}
 
 	@Override
