@@ -19,12 +19,18 @@
 package lucee.loader.servlet.jakarta;
 
 import java.io.IOException;
+import java.util.EnumSet;
 
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.FilterRegistration;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletContextEvent;
-import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lucee.loader.engine.CFMLEngine;
@@ -42,9 +48,13 @@ public class CFMLServlet extends AbsServlet {
 		try {
 			engine = CFMLEngineFactory.getInstance(ServletConfigJavax.getInstance(sg), this);
 
-			// Register your ServletContextListener
+			// Register the shutdown filter
 			ServletContext context = sg.getServletContext();
-			context.addListener(new CFMLServletContextListener(engine));
+			FilterRegistration.Dynamic registration = context.addFilter("shutdownFilter", new ShutdownFilter(engine));
+
+			if (registration != null) {
+				registration.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/*");
+			}
 		}
 		catch (ServletExceptionJavax e) {
 			throw (ServletException) e.getJakartaInstance();
@@ -67,21 +77,31 @@ public class CFMLServlet extends AbsServlet {
 		}
 	}
 
-	private static class CFMLServletContextListener implements ServletContextListener {
+	private static class ShutdownFilter implements Filter {
 
-		private CFMLEngine engine;
+		private final CFMLEngine engine;
 
-		public CFMLServletContextListener(CFMLEngine engine) {
+		public ShutdownFilter(CFMLEngine engine) {
 			this.engine = engine;
 		}
 
 		@Override
-		public void contextInitialized(ServletContextEvent sce) {
+		public void init(FilterConfig filterConfig) throws ServletException {
+			// Initialization if needed
 		}
 
 		@Override
-		public void contextDestroyed(ServletContextEvent sce) {
-			engine.reset();
+		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+			// Pass the request along the filter chain
+			chain.doFilter(request, response);
+		}
+
+		@Override
+		public void destroy() {
+			// This is called when the filter is being taken out of service
+			if (engine != null) {
+				engine.reset();
+			}
 		}
 	}
 }
