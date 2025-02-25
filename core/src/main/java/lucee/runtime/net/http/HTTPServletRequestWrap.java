@@ -449,7 +449,7 @@ public final class HTTPServletRequestWrap implements HttpServletRequest, Seriali
 			disconnectData.protocol = req.getProtocol();
 			disconnectData.locale = req.getLocale();
 			// only store it when j2ee sessions are enabled
-			if (pc.getSessionType() == Config.SESSION_TYPE_JEE) disconnectData.session = req.getSession(true); // create if necessary
+			if (pc.getSessionType() == Config.SESSION_TYPE_JEE && pc.hasCFSession()) disconnectData.session = req.getSession(true); // create if necessary
 
 			disconnectData.userPrincipal = req.getUserPrincipal();
 
