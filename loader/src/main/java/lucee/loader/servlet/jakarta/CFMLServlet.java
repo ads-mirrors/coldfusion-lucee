@@ -19,21 +19,11 @@
 package lucee.loader.servlet.jakarta;
 
 import java.io.IOException;
-import java.util.EnumSet;
 
-import jakarta.servlet.DispatcherType;
-import jakarta.servlet.Filter;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.FilterConfig;
-import jakarta.servlet.FilterRegistration;
 import jakarta.servlet.ServletConfig;
-import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lucee.loader.engine.CFMLEngine;
 import lucee.loader.engine.CFMLEngineFactory;
 
 public class CFMLServlet extends AbsServlet {
@@ -47,14 +37,6 @@ public class CFMLServlet extends AbsServlet {
 		myself = new HttpServletJavax(this);
 		try {
 			engine = CFMLEngineFactory.getInstance(ServletConfigJavax.getInstance(sg), this);
-
-			// Register the shutdown filter
-			ServletContext context = sg.getServletContext();
-			FilterRegistration.Dynamic registration = context.addFilter("shutdownFilter", new ShutdownFilter(engine));
-
-			if (registration != null) {
-				registration.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/*");
-			}
 		}
 		catch (ServletExceptionJavax e) {
 			throw (ServletException) e.getJakartaInstance();
@@ -77,31 +59,11 @@ public class CFMLServlet extends AbsServlet {
 		}
 	}
 
-	private static class ShutdownFilter implements Filter {
-
-		private final CFMLEngine engine;
-
-		public ShutdownFilter(CFMLEngine engine) {
-			this.engine = engine;
+	@Override
+	public void destroy() {
+		if (engine != null) {
+			engine.reset();
 		}
-
-		@Override
-		public void init(FilterConfig filterConfig) throws ServletException {
-			// Initialization if needed
-		}
-
-		@Override
-		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-			// Pass the request along the filter chain
-			chain.doFilter(request, response);
-		}
-
-		@Override
-		public void destroy() {
-			// This is called when the filter is being taken out of service
-			if (engine != null) {
-				engine.reset();
-			}
-		}
+		super.destroy();
 	}
 }
