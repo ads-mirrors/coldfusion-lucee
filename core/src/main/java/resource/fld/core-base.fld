@@ -6765,6 +6765,61 @@ if this attribute is not provided all types are returned.</description>
 			<type>string</type>
 		</return>
 	</function>
+
+	<!-- GetPropertyFile -->
+	<function>
+		<name>getPropertyFile</name>
+		<class>lucee.runtime.functions.system.GetPropertyFile</class>
+		<description>Read the properties from a properties file.</description>
+		<introduced>7.0.0.108</introduced>
+		<argument>
+			<name>filePath</name>
+			<type>string</type>
+			<required>Yes</required>
+			<description>Path of the properties initialization file</description>
+		</argument>
+		<argument>
+			<name>encoding</name>
+			<type>string</type>
+			<required>No</required>
+			<default>UTF-8</default>
+			<description>Encoding for the properties file</description>
+		</argument>
+		<return>
+			<type>struct</type>
+		</return>
+	</function>
+	
+	<!-- GetPropertyString -->
+	<function>
+		<name>getPropertyString</name>
+		<class>lucee.runtime.functions.system.GetPropertyString</class>
+		<description>Sets the value of a property entry in a properties file.</description>
+		<introduced>7.0.0.108</introduced>
+		<argument>
+			<name>filePath</name>
+			<type>string</type>
+			<required>Yes</required>
+			<description>Path of the properties file</description>
+		</argument>
+		<argument>
+			<name>key</name>
+			<type>string</type>
+			<required>Yes</required>
+			<description>Name of the key to return</description>
+		</argument>
+		<argument>
+			<name>encoding</name>
+			<type>string</type>
+			<required>No</required>
+			<default>UTF-8</default>
+			<description>Encoding for the properties file</description>
+		</argument>
+		<return>
+			<type>string</type>
+		</return>
+	</function>
+	
 	<!-- GetSOAPRequest -->
 	<function>
 		<name>getSOAPRequest</name>
@@ -13058,6 +13113,41 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<required>Yes</required>
 		<description>Value to which to set the entry</description>
     </argument>
+		<return>
+			<type>string</type>
+		</return>
+	</function>
+	<!-- setPropertyString -->
+	<function>
+		<name>setPropertyString</name>
+		<class>lucee.runtime.functions.system.SetPropertyString</class>
+		<description>Sets the value of a property entry in a properties file.</description>
+		<introduced>7.0.0.108</introduced>
+		<argument>
+			<name>filePath</name>
+			<type>string</type>
+			<required>Yes</required>
+			<description>Path of the properties initialization file</description>
+		</argument>
+		<argument>
+			<name>key</name>
+			<type>string</type>
+			<required>Yes</required>
+			<description>Name of the key to set</description>
+		</argument>
+		<argument>
+			<name>value</name>
+			<type>string</type>
+			<required>Yes</required>
+			<description>Value to which to set the property</description>
+		</argument>
+		<argument>
+			<name>encoding</name>
+			<type>string</type>
+			<required>No</required>
+			<default>UTF-8</default>
+			<description>Encoding for the properties file, default UTF-8</description>
+		</argument>
 		<return>
 			<type>string</type>
 		</return>
