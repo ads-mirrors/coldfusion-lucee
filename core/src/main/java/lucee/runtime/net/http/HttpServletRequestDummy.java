@@ -226,7 +226,7 @@ public final class HttpServletRequestDummy implements HttpServletRequest, Serial
 
 	public void setDateHeader(String name, long value) {
 		// TODO wrong format
-		setHeader(name, new DateTimeImpl(value, false).castToString());
+		setHeader(name, new DateTimeImpl(value).castToString());
 	}
 
 	@Override

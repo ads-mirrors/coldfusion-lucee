@@ -37,7 +37,7 @@ public class OracleTimestampNS implements Cast {
 		// we do not have oracle.sql.TIMESTAMPTZ in the core, so we need reflection for this
 		try {
 			Timestamp ts = (Timestamp) Reflector.callMethod(o, "timestampValue", new Object[] {});
-			return new DateTimeImpl(ts.getTime(), false);
+			return new DateTimeImpl(ts.getTime());
 		}
 		catch (PageException pe) {
 			throw ExceptionUtil.toIOException(pe);

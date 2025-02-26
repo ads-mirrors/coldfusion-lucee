@@ -57,7 +57,7 @@ public class FileStorageScopeCleaner extends StorageScopeCleanerSupport {
 
 		// for old files only the definition from admin can be used
 		long timeout = type == Scope.SCOPE_CLIENT ? cwi.getClientTimeout().getMillis() : cwi.getSessionTimeout().getMillis();
-		long time = new DateTimeImpl(cwi).getTime() - timeout;
+		long time = new DateTimeImpl().getTime() - timeout;
 
 		try {
 			// delete files that has expired

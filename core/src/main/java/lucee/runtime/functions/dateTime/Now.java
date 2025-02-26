@@ -32,7 +32,7 @@ public final class Now implements Function {
 	 * @return
 	 */
 	public static DateTime call(PageContext pc) {
-		return new DateTimeImpl(pc);
+		return new DateTimeImpl();
 	}
 
 	/*

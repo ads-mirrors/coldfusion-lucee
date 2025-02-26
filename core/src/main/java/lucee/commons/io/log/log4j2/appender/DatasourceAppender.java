@@ -125,7 +125,7 @@ public class DatasourceAppender extends AbstractAppender {
 
 							, new SQLItemImpl(threadId, Types.VARCHAR)
 
-							, new SQLItemImpl(new DateTimeImpl(event.getTimeMillis(), false), Types.TIMESTAMP)
+							, new SQLItemImpl(new DateTimeImpl(event.getTimeMillis()), Types.TIMESTAMP)
 
 							, new SQLItemImpl(application, Types.VARCHAR)
 

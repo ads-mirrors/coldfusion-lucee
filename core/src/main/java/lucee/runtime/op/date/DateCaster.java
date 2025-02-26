@@ -408,7 +408,7 @@ public final class DateCaster {
 	 * @param timeZone
 	 * 
 	 * @return coverted Date Time Object / public static DateTime toDateSimple(long l, TimeZone
-	 * timezone) { return new DateTimeImpl(l,false); }
+	 * timezone) { return new DateTimeImpl(l); }
 	 */
 
 	/**
@@ -1114,7 +1114,7 @@ public final class DateCaster {
 
 			if (isPlus) time -= offset;
 			else time += offset;
-			return new DateTimeImpl(time, false);
+			return new DateTimeImpl(time);
 		}
 		return defaultValue;
 	}

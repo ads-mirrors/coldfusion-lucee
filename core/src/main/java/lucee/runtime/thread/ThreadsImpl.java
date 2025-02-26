@@ -152,7 +152,7 @@ public class ThreadsImpl extends StructSupport implements lucee.runtime.type.sco
 		if (KeyConstants._NAME.equalsIgnoreCase(key)) return ct.getTagName();
 		if (KEY_OUTPUT.equalsIgnoreCase(key)) return getOutput();
 		if (KEY_PRIORITY.equalsIgnoreCase(key)) return ThreadUtil.toStringPriority(ct.getPriority());
-		if (KEY_STARTTIME.equalsIgnoreCase(key)) return new DateTimeImpl(ct.getStartTime(), true);
+		if (KEY_STARTTIME.equalsIgnoreCase(key)) return new DateTimeImpl(ct.getStartTime());
 		if (KEY_STATUS.equalsIgnoreCase(key)) return getState();
 		if (KEY_ERROR.equalsIgnoreCase(key)) return ct.catchBlock;
 		if (KEY_STACKTRACE.equalsIgnoreCase(key)) return getStackTrace();

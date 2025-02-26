@@ -30,11 +30,11 @@ import lucee.runtime.type.dt.DateTimeImpl;
 public final class GetHttpTimeString implements Function {
 
 	public static String call(PageContext pc) {
-		return DateTimeUtil.toHTTPTimeString(new DateTimeImpl(pc), true);
+		return DateTimeUtil.toHTTPTimeString(new DateTimeImpl(), true);
 	}
 
 	public static String call(PageContext pc, DateTime datetime) {
-		return DateTimeUtil.toHTTPTimeString(datetime == null ? new DateTimeImpl(pc) : datetime, true);
+		return DateTimeUtil.toHTTPTimeString(datetime == null ? new DateTimeImpl() : datetime, true);
 	}
 
 	public static String invoke(DateTime datetime) {

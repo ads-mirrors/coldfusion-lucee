@@ -216,7 +216,7 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 		data0.put(KeyConstants._cftoken, new IKStorageScopeItem(pc.getCFToken()));
 		data0.put(KeyConstants._urltoken, new IKStorageScopeItem(pc.getURLToken()));
 		data0.put(KeyConstants._lastvisit, new IKStorageScopeItem(_lastvisit));
-		_lastvisit = new DateTimeImpl(pc.getConfig());
+		_lastvisit = new DateTimeImpl();
 		lastvisit = System.currentTimeMillis();
 
 		if (type == SCOPE_CLIENT) {
@@ -233,8 +233,8 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 	}
 
 	public void resetEnv(PageContext pc) {
-		_lastvisit = new DateTimeImpl(pc.getConfig());
-		timecreated = new DateTimeImpl(pc.getConfig());
+		_lastvisit = new DateTimeImpl();
+		timecreated = new DateTimeImpl();
 		touchBeforeRequest(pc);
 
 	}
@@ -527,7 +527,7 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 	@Override
 	public void touch() {
 		lastvisit = System.currentTimeMillis();
-		_lastvisit = new DateTimeImpl(ThreadLocalPageContext.getConfig());
+		_lastvisit = new DateTimeImpl();
 	}
 
 	@Override
@@ -692,7 +692,7 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 	}
 
 	protected static DateTime doNowIfNull(Config config, DateTime dt) {
-		if (dt == null) return new DateTimeImpl(config);
+		if (dt == null) return new DateTimeImpl();
 		return dt;
 	}
 

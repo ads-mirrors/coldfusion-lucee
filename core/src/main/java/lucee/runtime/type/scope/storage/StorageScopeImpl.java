@@ -159,7 +159,7 @@ public abstract class StorageScopeImpl extends StructSupport implements StorageS
 		sct.setEL(KeyConstants._cftoken, pc.getCFToken());
 		sct.setEL(URLTOKEN, pc.getURLToken());
 		sct.setEL(LASTVISIT, _lastvisit);
-		_lastvisit = new DateTimeImpl(pc.getConfig());
+		_lastvisit = new DateTimeImpl();
 		lastvisit = System.currentTimeMillis();
 
 		if (type == SCOPE_CLIENT) {
@@ -172,8 +172,8 @@ public abstract class StorageScopeImpl extends StructSupport implements StorageS
 	}
 
 	public void resetEnv(PageContext pc) {
-		_lastvisit = new DateTimeImpl(pc.getConfig());
-		timecreated = new DateTimeImpl(pc.getConfig());
+		_lastvisit = new DateTimeImpl();
+		timecreated = new DateTimeImpl();
 		touchBeforeRequest(pc);
 
 	}
@@ -454,7 +454,7 @@ public abstract class StorageScopeImpl extends StructSupport implements StorageS
 	@Override
 	public void touch() {
 		lastvisit = System.currentTimeMillis();
-		_lastvisit = new DateTimeImpl(ThreadLocalPageContext.getConfig());
+		_lastvisit = new DateTimeImpl();
 	}
 
 	@Override

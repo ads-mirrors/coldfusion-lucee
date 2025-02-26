@@ -93,7 +93,7 @@ public abstract class StorageScopeCookie extends StorageScopeImpl {
 	}
 
 	private static DateTime doNowIfNull(PageContext pc, DateTime dt) {
-		if (dt == null) return new DateTimeImpl(pc.getConfig());
+		if (dt == null) return new DateTimeImpl();
 		return dt;
 	}
 
@@ -121,7 +121,7 @@ public abstract class StorageScopeCookie extends StorageScopeImpl {
 			}
 		}
 
-		Date exp = new DateTimeImpl(pc, System.currentTimeMillis() + timespan.getMillis(), true);
+		Date exp = new DateTimeImpl(System.currentTimeMillis() + timespan.getMillis());
 		try {
 			CookieImpl ci = (CookieImpl) cookie;
 			String ser = serializer.serializeStruct(sct, ignoreSet);
@@ -160,7 +160,7 @@ public abstract class StorageScopeCookie extends StorageScopeImpl {
 				str = (String) pc.cookieScope().get(cookieName + "_LV", null);
 				if (!StringUtil.isEmpty(str)) {
 					l = Caster.toLongValue(str, 0);
-					if (l > 0) sct.setEL(LASTVISIT, new DateTimeImpl(pc, l, true));
+					if (l > 0) sct.setEL(LASTVISIT, new DateTimeImpl(l));
 				}
 
 				if (type == SCOPE_CLIENT) {
@@ -172,7 +172,7 @@ public abstract class StorageScopeCookie extends StorageScopeImpl {
 					str = (String) pc.cookieScope().get(cookieName + "_TC", null);
 					if (!StringUtil.isEmpty(str)) {
 						l = Caster.toLongValue(str, 0);
-						if (l > 0) sct.setEL(TIMECREATED, new DateTimeImpl(pc, l, true));
+						if (l > 0) sct.setEL(TIMECREATED, new DateTimeImpl(l));
 					}
 				}
 

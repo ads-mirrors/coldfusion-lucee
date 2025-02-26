@@ -3008,22 +3008,22 @@ public class QueryImpl implements Query, Objects, QueryResult {
 
 	@Override
 	public void updateTime(int columnIndex, Time x) throws SQLException {
-		updateObject(columnIndex, new DateTimeImpl(x.getTime(), false));
+		updateObject(columnIndex, new DateTimeImpl(x.getTime()));
 	}
 
 	@Override
 	public void updateTime(String columnName, Time x) throws SQLException {
-		updateObject(columnName, new DateTimeImpl(x.getTime(), false));
+		updateObject(columnName, new DateTimeImpl(x.getTime()));
 	}
 
 	@Override
 	public void updateTimestamp(int columnIndex, Timestamp x) throws SQLException {
-		updateObject(columnIndex, new DateTimeImpl(x.getTime(), false));
+		updateObject(columnIndex, new DateTimeImpl(x.getTime()));
 	}
 
 	@Override
 	public void updateTimestamp(String columnName, Timestamp x) throws SQLException {
-		updateObject(columnName, new DateTimeImpl(x.getTime(), false));
+		updateObject(columnName, new DateTimeImpl(x.getTime()));
 	}
 
 	@Override

@@ -849,11 +849,11 @@ public final class FileTag extends BodyTagImpl {
 		sct.setEL(KeyConstants._write, file.isWriteable());
 		try {
 			attr = Files.readAttributes(files.toPath(), BasicFileAttributes.class);
-			sct.setEL(KeyConstants._fileCreated, new DateTimeImpl(pc, attr.creationTime().toMillis(), false));
+			sct.setEL(KeyConstants._fileCreated, new DateTimeImpl(attr.creationTime().toMillis()));
 		}
 		catch (Exception e) {
 		}
-		sct.setEL(KeyConstants._dateLastModified, new DateTimeImpl(pc, file.lastModified(), false));
+		sct.setEL(KeyConstants._dateLastModified, new DateTimeImpl(file.lastModified()));
 		sct.setEL(KeyConstants._attributes, getFileAttribute(file));
 		if (SystemUtil.isUnix()) sct.setEL(KeyConstants._mode, new ModeObjectWrap(file));
 
@@ -948,9 +948,9 @@ public final class FileTag extends BodyTagImpl {
 		Struct cffile = new StructImpl();
 
 		long length = formItem.getResource().length();
-		cffile.set(KeyConstants._timecreated, new DateTimeImpl(pageContext.getConfig()));
-		cffile.set(KeyConstants._timelastmodified, new DateTimeImpl(pageContext.getConfig()));
-		cffile.set(KeyConstants._datelastaccessed, new DateImpl(pageContext));
+		cffile.set(KeyConstants._timecreated, new DateTimeImpl());
+		cffile.set(KeyConstants._timelastmodified, new DateTimeImpl());
+		cffile.set(KeyConstants._datelastaccessed, new DateImpl());
 		cffile.set(KeyConstants._oldfilesize, Long.valueOf(length));
 		cffile.set(KeyConstants._filesize, Long.valueOf(length));
 
