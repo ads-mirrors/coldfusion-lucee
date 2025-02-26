@@ -512,8 +512,8 @@ public final class Directory extends TagImpl {
 			java.util.Iterator it = query.getIterator();
 			while (it.hasNext()) {
 				Struct row = (Struct) it.next();
-				if (namesOnly) array.appendEL(row.get("name"));
-				else array.appendEL(row.get("directory") + lucee.commons.io.FileUtil.FILE_SEPERATOR_STRING + row.get("name"));
+				if (namesOnly) array.appendEL(row.get(KeyConstants._name));
+				else array.appendEL(row.get(KeyConstants._directory) + lucee.commons.io.FileUtil.FILE_SEPERATOR_STRING + row.get(KeyConstants._name));
 			}
 		}
 
@@ -535,13 +535,14 @@ public final class Directory extends TagImpl {
 		sct.setEL(KeyConstants._size, Long.valueOf(directory.length()));
 		sct.setEL("isReadable", directory.isReadable());
 		sct.setEL(KeyConstants._path, directory.getAbsolutePath());
-		sct.setEL("dateLastModified", new DateTimeImpl(pc.getConfig()));
+		
 		if (SystemUtil.isUnix()) sct.setEL(KeyConstants._mode, new ModeObjectWrap(directory));
 		File file = new File(Caster.toString(directory));
 		BasicFileAttributes attr;
 		try {
 			attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
-			sct.setEL("directoryCreated", new DateTimeImpl(pc, attr.creationTime().toMillis(), false));
+			sct.setEL("directoryCreated", new DateTimeImpl(attr.creationTime().toMillis()));
+			sct.setEL(KeyConstants._dateLastModified, new DateTimeImpl(attr.lastModifiedTime().toMillis()));
 		}
 		catch (Exception e) {
 		}
