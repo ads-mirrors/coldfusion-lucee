@@ -9274,6 +9274,45 @@ The following things are considered to be empty:
 	</function>
 	<!-- ListRemoveDuplicates -->
 	<function>
+		<name>ListGetDuplicates</name>
+		<class>lucee.runtime.functions.list.ListGetDuplicates</class>
+		<keywords>list,string</keywords>
+		<member-name>listGetDuplicates</member-name>
+		<description>Removes duplicate values from list.</description>
+		<introduced>7.0.0.107</introduced>
+		<argument>
+			<name>list</name>
+			<type>string</type>
+			<required>Yes</required>
+			<description>a string list</description>
+		</argument>
+		<argument>
+			<name>delimiters</name>
+			<alias>delimiter</alias>
+			<type>string</type>
+			<required>No</required>
+			<default>,</default>
+			<description>Characters that separate list elements. The default value is comma.</description>
+		</argument>
+		<argument>
+			<name>ignoreCase</name>
+			<type>boolean</type>
+			<required>false</required>
+			<default>false</default>
+			<description>if set to true, the duplicate value test will not be case sensitive</description>
+		</argument>
+		<argument>
+			<name>includeEmptyFields</name>
+			<type>boolean</type>
+			<required>No</required>
+			<description>if set to true, empty values are included as well</description>
+		</argument>		
+		<return>
+			<type>string</type>
+		</return>
+	</function>
+	<!-- ListRemoveDuplicates -->
+	<function>
 		<name>ListRemoveDuplicates</name>
 		<class>lucee.runtime.functions.list.ListRemoveDuplicates</class>
 		<keywords>list,string</keywords>
@@ -9294,12 +9333,12 @@ The following things are considered to be empty:
 			<description>Characters that separate list elements. The default value is comma.</description>
 		</argument>
 		<argument>
-            <name>ignoreCase</name>
-            <type>boolean</type>
-            <required>false</required>
-            <default>false</default>
-            <description>if set to true, the duplicate value test will not be case sensitive</description>
-        </argument>
+			<name>ignoreCase</name>
+			<type>boolean</type>
+			<required>false</required>
+			<default>false</default>
+			<description>if set to true, the duplicate value test will not be case sensitive</description>
+		</argument>
 		<return>
 			<type>string</type>
 		</return>
