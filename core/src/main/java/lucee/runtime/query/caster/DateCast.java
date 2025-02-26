@@ -39,7 +39,7 @@ public class DateCast implements Cast {
 	public Object toCFType(TimeZone tz, ResultSet rst, int columnIndex) throws SQLException, IOException {
 		Date d = useTimeZone ? rst.getDate(columnIndex, JREDateTimeUtil.getThreadCalendar(tz)) : rst.getDate(columnIndex);
 		if (d == null) return null;
-		return new DateTimeImpl(d.getTime(), false);
+		return new DateTimeImpl(d.getTime());
 
 	}
 

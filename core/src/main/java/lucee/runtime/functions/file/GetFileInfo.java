@@ -44,10 +44,10 @@ public class GetFileInfo {
 		sct.set(KeyConstants._canRead, Caster.toBoolean(src.isReadable()));
 		sct.set(KeyConstants._canWrite, Caster.toBoolean(src.isWriteable()));
 		sct.set(KeyConstants._isHidden, Caster.toBoolean(src.getAttribute(Resource.ATTRIBUTE_HIDDEN)));
-		sct.set(KeyConstants._lastmodified, new DateTimeImpl(pc, src.lastModified(), false));
+		sct.set(KeyConstants._lastmodified, new DateTimeImpl(src.lastModified()));
 		try {
 			attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
-			sct.set(KeyConstants._fileCreated, new DateTimeImpl(pc, attr.creationTime().toMillis(), false));
+			sct.set(KeyConstants._fileCreated, new DateTimeImpl(attr.creationTime().toMillis()));
 		}
 		catch (Exception e) {
 		}

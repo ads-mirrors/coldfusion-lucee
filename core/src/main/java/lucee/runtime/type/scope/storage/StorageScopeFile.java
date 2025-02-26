@@ -69,7 +69,7 @@ public abstract class StorageScopeFile extends StorageScopeImpl {
 	}
 
 	private static DateTime doNowIfNull(PageContext pc, DateTime dt) {
-		if (dt == null) return new DateTimeImpl(pc.getConfig());
+		if (dt == null) return new DateTimeImpl();
 		return dt;
 	}
 

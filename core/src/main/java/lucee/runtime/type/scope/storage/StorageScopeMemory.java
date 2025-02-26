@@ -41,7 +41,7 @@ public abstract class StorageScopeMemory extends StorageScopeImpl implements Mem
 	 * @param log
 	 */
 	protected StorageScopeMemory(PageContext pc, String strType, int type, Log log) {
-		super(new StructImpl(Struct.TYPE_SYNC), new DateTimeImpl(pc.getConfig()), null, -1, 1, strType, type);
+		super(new StructImpl(Struct.TYPE_SYNC), new DateTimeImpl(), null, -1, 1, strType, type);
 		ScopeContext.debug(log, "create new memory based " + strType + " scope for " + pc.getApplicationContext().getName() + "/" + pc.getCFID());
 
 	}

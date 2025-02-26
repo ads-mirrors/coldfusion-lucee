@@ -135,7 +135,7 @@ public class CFMLResource extends ResourceSupport {
 	@Override
 	public boolean setLastModified(long time) {
 		PageContext pc = ThreadLocalPageContext.get();
-		return provider.callbooleanRTE(pc, component, "setLastModified", new Object[] { new DateTimeImpl(pc, time, false) });
+		return provider.callbooleanRTE(pc, component, "setLastModified", new Object[] { new DateTimeImpl(time) });
 	}
 
 	@Override

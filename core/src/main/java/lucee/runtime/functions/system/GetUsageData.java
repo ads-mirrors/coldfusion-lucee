@@ -138,7 +138,7 @@ public final class GetUsageData implements Function {
 				row = req.addRow();
 				req.setAt(KeyConstants._web, row, web.getLabel());
 				req.setAt(KeyConstants._uri, row, getPath(_pc.getHttpServletRequest()));
-				req.setAt(START_TIME, row, new DateTimeImpl(pc.getStartTime(), false));
+				req.setAt(START_TIME, row, new DateTimeImpl(pc.getStartTime()));
 				req.setAt(KeyConstants._timeout, row, Double.valueOf(pc.getRequestTimeout()));
 
 				// Query
@@ -149,7 +149,7 @@ public final class GetUsageData implements Function {
 						row = qry.addRow();
 						qry.setAt(KeyConstants._web, row, web.getLabel());
 						qry.setAt(KeyConstants._application, row, _pc.getApplicationContext().getName());
-						qry.setAt(START_TIME, row, new DateTimeImpl(web, aq.startTime, true));
+						qry.setAt(START_TIME, row, new DateTimeImpl(aq.startTime));
 						qry.setAt(KeyConstants._sql, row, aq.sql);
 					}
 				}
@@ -163,7 +163,7 @@ public final class GetUsageData implements Function {
 						lck.setAt(KeyConstants._web, row, web.getLabel());
 						lck.setAt(KeyConstants._application, row, _pc.getApplicationContext().getName());
 						lck.setAt(KeyConstants._name, row, al.name);
-						lck.setAt(START_TIME, row, new DateTimeImpl(web, al.startTime, true));
+						lck.setAt(START_TIME, row, new DateTimeImpl(al.startTime));
 						lck.setAt(KeyConstants._timeout, row, Caster.toDouble(al.timeoutInMillis / 1000));
 						lck.setAt(KeyConstants._type, row, al.type == LockManager.TYPE_EXCLUSIVE ? "exclusive" : "readonly");
 					}
@@ -212,7 +212,7 @@ public final class GetUsageData implements Function {
 		sct.set("uptime", new DateTimeImpl(engine.uptime(), true));
 
 		// now
-		sct.set("now", new DateTimeImpl(pc));
+		sct.set("now", new DateTimeImpl());
 
 		// SizeAndCount.Size size = SizeAndCount.sizeOf(pc.serverScope());
 

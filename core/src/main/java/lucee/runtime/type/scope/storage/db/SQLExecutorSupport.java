@@ -37,11 +37,11 @@ public abstract class SQLExecutorSupport implements SQLExecutor {
 	}
 
 	protected static String now(Config config) {
-		return Caster.toString(new DateTimeImpl(config).getTime());
+		return Caster.toString(new DateTimeImpl().getTime());
 	}
 
 	protected static String createExpires(Config config, long timespan) {
-		return Caster.toString(timespan + new DateTimeImpl(config).getTime());
+		return Caster.toString(timespan + new DateTimeImpl().getTime());
 	}
 
 }

@@ -54,10 +54,10 @@ public final class DateAdd extends BIF {
 		int n = (int) l;
 		char first = datepart.length() == 1 ? datepart.charAt(0) : (char) 0;
 
-		if (first == 'l') return new DateTimeImpl(pc, date.getTime() + l, false);
-		else if (first == 's') return new DateTimeImpl(pc, date.getTime() + (l * 1000), false);
-		else if (first == 'n') return new DateTimeImpl(pc, date.getTime() + (l * 60000), false);
-		else if (first == 'h') return new DateTimeImpl(pc, date.getTime() + (l * 3600000), false);
+		if (first == 'l') return new DateTimeImpl(date.getTime() + l);
+		else if (first == 's') return new DateTimeImpl(date.getTime() + (l * 1000));
+		else if (first == 'n') return new DateTimeImpl(date.getTime() + (l * 60000));
+		else if (first == 'h') return new DateTimeImpl(date.getTime() + (l * 3600000));
 
 		Calendar c = JREDateTimeUtil.getThreadCalendar();
 		// if (c == null)c=JREDateTimeUtil.newInstance();
@@ -101,7 +101,7 @@ public final class DateAdd extends BIF {
 		else {
 			throw new ExpressionException("invalid datepart identifier [" + datepart + "] for function dateAdd");
 		}
-		return new DateTimeImpl(pc, c.getTimeInMillis(), false);
+		return new DateTimeImpl(c.getTimeInMillis());
 		// }
 	}
 }

@@ -72,7 +72,7 @@ public abstract class FileStreamWrapper extends StructSupport implements Struct,
 	}
 
 	public final Date getLastmodified() {
-		return new DateTimeImpl(res.lastModified(), false);
+		return new DateTimeImpl(res.lastModified());
 	}
 
 	public Object getMetadata() {
