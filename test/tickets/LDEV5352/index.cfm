@@ -1,0 +1,1 @@
+<cfparam name="www" default="#function(value){return value;}#">
