@@ -42,13 +42,13 @@ import lucee.runtime.type.Collection.Key;
 public final class ListUtil {
 
 	/**
-	 * casts a list to Array object, the list can be have quoted (",') arguments and delimter in this
+	 * casts a list to Array object, the list can be have quoted (",') arguments and delimiter in this
 	 * arguments are ignored. quotes are not removed example:
 	 * listWithQuotesToArray("aab,a'a,b',a\"a,b\"",",","\"'") will be translated to
 	 * ["aab","a'a,b'","a\"a,b\""]
 	 *
 	 * @param list list to cast
-	 * @param delimiter delimter of the list
+	 * @param delimiter delimiter of the list
 	 * @param quotes quotes of the list
 	 * @return Array Object
 	 */
@@ -159,7 +159,7 @@ public final class ListUtil {
 	 * casts a list to Array object
 	 * 
 	 * @param list list to cast
-	 * @param delimiter delimter of the list
+	 * @param delimiter delimiter of the list
 	 * @return Array Object
 	 */
 	public static Array listToArray(String list, char delimiter) {
@@ -186,7 +186,7 @@ public final class ListUtil {
 	 * casts a list to Array object remove Empty Elements
 	 * 
 	 * @param list list to cast
-	 * @param delimiter delimter of the list
+	 * @param delimiter delimiter of the list
 	 * @return Array Object
 	 */
 	private static Array listToArrayRemoveEmpty(String list, String delimiter, boolean multiCharDelim) {
@@ -277,7 +277,7 @@ public final class ListUtil {
 	 * casts a list to Array object remove Empty Elements
 	 * 
 	 * @param list list to cast
-	 * @param delimiter delimter of the list
+	 * @param delimiter delimiter of the list
 	 * @return Array Object
 	 */
 	public static Array listToArrayRemoveEmpty(String list, char delimiter) {
@@ -344,7 +344,7 @@ public final class ListUtil {
 	 * casts a list to Array object remove Empty Elements
 	 * 
 	 * @param list list to cast
-	 * @param delimiter delimter of the list
+	 * @param delimiter delimiter of the list
 	 * @return Array Object
 	 */
 	public static StringList listToStringListRemoveEmpty(String list, char delimiter) {
@@ -368,7 +368,7 @@ public final class ListUtil {
 	 * casts a list to Array object, remove all empty items at start and end of the list
 	 * 
 	 * @param list list to cast
-	 * @param delimiter delimter of the list
+	 * @param delimiter delimiter of the list
 	 * @return Array Object
 	 */
 	public static Array listToArrayTrim(String list, String delimiter) {
@@ -409,7 +409,7 @@ public final class ListUtil {
 	 * to info
 	 * 
 	 * @param list list to cast
-	 * @param delimiter delimter of the list
+	 * @param delimiter delimiter of the list
 	 * @param info
 	 * @return Array Object
 	 */
@@ -453,7 +453,7 @@ public final class ListUtil {
 	 * attribute
 	 * 
 	 * @param list list to cast
-	 * @param delimiter delimter of the list
+	 * @param delimiter delimiter of the list
 	 * @param maxRange maximum range that element can
 	 * @return int array
 	 */
@@ -487,7 +487,7 @@ public final class ListUtil {
 	 * casts a list to Long array -- its used in CFIMAP/CFPOP tag with uid attribute
 	 * 
 	 * @param list list to cast
-	 * @param delimiter delimter of the list
+	 * @param delimiter delimiter of the list
 	 * @return long array
 	 */
 	public static long[] listToLongArray(String list, String delimiter) {
@@ -528,7 +528,7 @@ public final class ListUtil {
 	 * 
 	 * @param list list to cast
 	 * @param pos
-	 * @param delimiter delimter of the list
+	 * @param delimiter delimiter of the list
 	 * @return Array Object
 	 * @throws ExpressionException
 	 */
@@ -616,7 +616,7 @@ public final class ListUtil {
 	 * casts a list to Array object, remove all empty items at start and end of the list
 	 * 
 	 * @param list list to cast
-	 * @param delimiter delimter of the list
+	 * @param delimiter delimiter of the list
 	 * @return Array Object
 	 */
 	public static Array listToArrayTrim(String list, char delimiter) {
@@ -701,7 +701,7 @@ public final class ListUtil {
 	 * casts a list to Array object, remove all empty items at start and end of the list
 	 * 
 	 * @param list list to cast
-	 * @param delimiter delimter of the list
+	 * @param delimiter delimiter of the list
 	 * @param info
 	 * @return Array Object
 	 */
@@ -1552,7 +1552,7 @@ public final class ListUtil {
 	 * gets a value from list
 	 * 
 	 * @param list list to cast
-	 * @param delimiter delimter of the list
+	 * @param delimiter delimiter of the list
 	 * @param position
 	 * @return Array Object
 	 */
@@ -1595,7 +1595,7 @@ public final class ListUtil {
 	 * get an element at a specified position in list
 	 * 
 	 * @param list list to cast
-	 * @param delimiter delimter of the list
+	 * @param delimiter delimiter of the list
 	 * @param position
 	 * @return Array Object
 	 */
