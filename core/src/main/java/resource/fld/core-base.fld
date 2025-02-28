@@ -10096,12 +10096,13 @@ For exception analysis and debugging, lower temperatures (0.2-0.3) are recommend
 		and optionally detailed information about available models and associated files.</description>
 		<argument>
 			<name>name</name>
-			<alias>aiName,nameAI</alias>
-			<type>string</type>
+			<alias>aiName,nameAI,session</alias>
+			<type>any</type>
 			<required>yes</required>
 			<description>The name of the AI endpoint to get metadata for. Can be either:
-	1. A direct endpoint name as configured in the Lucee Administrator
-	2. A default reference (e.g., "default:exception") which will resolve to the configured default endpoint for that category</description>
+1. A direct endpoint name as configured in the Lucee Administrator
+2. A default reference (e.g., "default:exception") which will resolve to the configured default endpoint for that category
+3. A AI session object from which to retrieve and analyze AI endpoint metadata</description>
 		</argument>
 		<argument>
 			<name>detailed</name>

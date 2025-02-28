@@ -3,6 +3,7 @@ package lucee.runtime.functions.ai;
 import lucee.runtime.PageContext;
 import lucee.runtime.PageContextImpl;
 import lucee.runtime.ai.AIEngine;
+import lucee.runtime.ai.AISession;
 import lucee.runtime.ai.AIUtil;
 import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
@@ -16,9 +17,20 @@ public final class AIGetMetaData extends BIF {
 	@Override
 	public Object invoke(PageContext pc, Object[] args) throws PageException {
 		if (args.length < 1 || args.length > 2) throw new FunctionException(pc, "AIGetMetaData", 1, 2, args.length);
-
-		String nameAI = Caster.toString(args[0]);
 		boolean detailed = args.length > 1 ? Caster.toBooleanValue(args[1]) : false;
+
+		// AIEEngine as input
+		if (args[0] instanceof AIEngine) {
+			return AIUtil.getMetaData((AIEngine) args[0], detailed, detailed);
+		}
+
+		// AIEEngine as input
+		if (args[0] instanceof AISession) {
+			return AIUtil.getMetaData(((AISession) args[0]).getEngine(), detailed, detailed);
+		}
+
+		// string as input
+		String nameAI = Caster.toString(args[0]);
 
 		if (nameAI.startsWith("default:")) nameAI = ((PageContextImpl) pc).getNameFromDefault(nameAI.substring(8));
 		AIEngine aie = ((PageContextImpl) pc).getAIEngine(nameAI);

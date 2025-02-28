@@ -80,6 +80,7 @@ import lucee.commons.net.HTTPUtil;
 import lucee.intergral.fusiondebug.server.FDSignal;
 import lucee.loader.engine.CFMLEngine;
 import lucee.runtime.ai.AIEngine;
+import lucee.runtime.ai.AIEngineFactory;
 import lucee.runtime.ai.AISession;
 import lucee.runtime.cache.CacheConnection;
 import lucee.runtime.cache.CacheUtil;
@@ -4256,12 +4257,12 @@ public final class PageContextImpl extends PageContext {
 	}
 
 	public AIEngine getAIEngine(String nameAI) throws PageException {
-		return config.getAIEnginePool().getEngine(this.getConfig(), nameAI);
+		return getApplicationContext().getAIEngine(nameAI);
 	}
 
 	public AIEngine getAIEngine(String nameAI, AIEngine defaultValue) {
 		try {
-			return config.getAIEnginePool().getEngine(this.getConfig(), nameAI);
+			return getApplicationContext().getAIEngine(nameAI);
 		}
 		catch (Exception e) {
 			return defaultValue;
@@ -4276,9 +4277,18 @@ public final class PageContextImpl extends PageContext {
 		return getAIEngine(nameAI).createSession(systemMessage, limit, temp, connectTimeout, socketTimeout);
 	}
 
+	public AISession createAISessionById(String id, String systemMessage, int limit, double temp, int connectTimeout, int socketTimeout) throws PageException {
+		AIEngine aie = AIEngineFactory.getExistingInstance(id, null);
+		if (aie == null) throw new ApplicationException("there is no AIEngine stored with id [" + id + "]");
+		return aie.createSession(systemMessage, limit, temp, connectTimeout, socketTimeout);
+	}
+
 	public String getNameFromDefault(String defaultName) throws PageException {
 		if (StringUtil.isEmpty(defaultName, true)) throw new ApplicationException("default name cannot be empty.");
 		defaultName = defaultName.trim();
+
+		String res = getApplicationContext().getAIEngineNameForDefault(defaultName);
+		if (!StringUtil.isEmpty(res)) return res;
 
 		// TODO make a more direct way
 		ConfigPro cp = config;
@@ -4292,6 +4302,9 @@ public final class PageContextImpl extends PageContext {
 
 	public String getNameFromDefault(String defaultName, String defaultValue) {
 		if (StringUtil.isEmpty(defaultName, true)) return defaultValue;
+
+		String res = getApplicationContext().getAIEngineNameForDefault(defaultName);
+		if (!StringUtil.isEmpty(res)) return res;
 
 		// TODO make a more direct way
 		ConfigPro cp = config;

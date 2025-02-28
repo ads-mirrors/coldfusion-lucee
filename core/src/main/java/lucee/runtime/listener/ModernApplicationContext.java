@@ -50,11 +50,14 @@ import lucee.runtime.ComponentPageImpl;
 import lucee.runtime.ComponentSpecificAccess;
 import lucee.runtime.Mapping;
 import lucee.runtime.PageContext;
+import lucee.runtime.ai.AIEngine;
+import lucee.runtime.ai.AIEngineFactory;
 import lucee.runtime.cache.CacheConnection;
 import lucee.runtime.cache.CacheConnectionImpl;
 import lucee.runtime.cache.CacheUtil;
 import lucee.runtime.component.Member;
 import lucee.runtime.config.Config;
+import lucee.runtime.config.ConfigFactoryImpl;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.config.ConfigWeb;
@@ -256,6 +259,9 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 
 	private Server[] mailServers;
 	private boolean initMailServer;
+
+	private Map<String, AIEngineFactory> aiFactories;
+	private boolean aiFactoriesInit;
 
 	private boolean initLog;
 
@@ -744,6 +750,45 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	public String getDefaultCacheName(int type) {
 		initCache();
 		return defaultCaches.get(type);
+	}
+
+	@Override
+	public AIEngine getAIEngine(String name) throws PageException {
+		initAIEngineFactories();
+
+		if (aiFactories != null) {
+			AIEngineFactory factory = aiFactories.get(name.toLowerCase().trim());
+			// TODO better cache for this
+			try {
+				return AIEngineFactory.getInstance(config, factory);
+			}
+			catch (Exception e) {
+				LogUtil.log("ModernApplicationContext", e);
+			}
+		}
+		return ((ConfigPro) config).getAIEnginePool().getEngine(config, name);
+	}
+
+	public String getAIEngineNameForDefault(String defaultName) {
+		initAIEngineFactories();
+		if (aiFactories != null) {
+			for (AIEngineFactory f: aiFactories.values()) {
+				if (f.getDefault() != null && defaultName.equalsIgnoreCase(f.getDefault())) {
+					return f.getName();
+				}
+			}
+		}
+		return null;
+	}
+
+	private void initAIEngineFactories() {
+		if (!aiFactoriesInit) {
+			Struct sctAI = Caster.toStruct(get(component, KeyConstants._ai, null), null);
+			if (sctAI != null) {
+				aiFactories = ConfigFactoryImpl._loadAI(config, sctAI);
+			}
+			aiFactoriesInit = true;
+		}
 	}
 
 	@Override

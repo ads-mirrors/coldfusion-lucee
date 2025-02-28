@@ -9,10 +9,10 @@ function createOutput() {
 
     
     // create session
-    if(!structKeyExists(session, "exceptionAISession")) {
+	if(!structKeyExists(session, "exceptionAISession") || (session.exceptionAISession.id?:"") != url.id) {
         ais=LuceeCreateAISession(
-            name:'default:exception', 
-            conversationHistoryLimit:5,
+            name:'id:#url.id#', 
+            conversationHistoryLimit:3,
             systemMessage:"You are a Lucee expert specializing in debugging CFML applications. You will analyze exceptions that occur during Lucee (CFML) code execution.
 
 When analyzing the exception details:
@@ -41,12 +41,15 @@ HTML formatting rules:
 
 Focus on actionable solutions and preventive measures. Avoid repeating the exception details that are already shown elsewhere on the page."
         );
-        session.exceptionAISession=ais;
+        var meta=LuceeAIGetMetaData(ais);
+        var label="#meta.label?:''# (#meta.model?:''#)";
+        session.exceptionAISession={"ais":ais,"id":url.id,"label":label};
+        
     }
     else {
-        ais=session.exceptionAISession;
+        ais=session.exceptionAISession.ais;
+        var label=session.exceptionAISession.label?:"";
     }
-
     // inquiry
     var aiFirst=true;
 	var answer=LuceeInquiryAISession(ais,data.content,function(msg) {

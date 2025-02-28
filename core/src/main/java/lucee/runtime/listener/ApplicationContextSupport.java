@@ -34,6 +34,7 @@ import lucee.commons.io.res.type.ftp.FTPConnectionData;
 import lucee.commons.lang.Pair;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
+import lucee.runtime.ai.AIEngine;
 import lucee.runtime.cache.CacheConnection;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
@@ -510,4 +511,9 @@ public abstract class ApplicationContextSupport implements ApplicationContext {
 	public abstract void setDebugOptions(int option);
 
 	public abstract void remDebugOptions(int option);
+
+	public abstract AIEngine getAIEngine(String name) throws PageException;
+
+	public abstract String getAIEngineNameForDefault(String defaultName);
+
 }

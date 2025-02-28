@@ -37,6 +37,7 @@ import lucee.commons.lang.Pair;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.Mapping;
 import lucee.runtime.PageContext;
+import lucee.runtime.ai.AIEngine;
 import lucee.runtime.cache.CacheConnection;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.ConfigWeb;
@@ -1270,5 +1271,15 @@ public class ClassicApplicationContext extends ApplicationContextSupport {
 	@Override
 	public void remDebugOptions(int option) {
 		if (hasDebugOptions(option)) debugging -= option;
+	}
+
+	@Override
+	public AIEngine getAIEngine(String name) throws PageException {
+		return ((ConfigPro) config).getAIEnginePool().getEngine(config, name);
+	}
+
+	@Override
+	public String getAIEngineNameForDefault(String defaultName) {
+		return null;
 	}
 }

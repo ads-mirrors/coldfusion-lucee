@@ -74,12 +74,12 @@
 		}
 	}
 
-function luceeLoadError(jsonData) {
+function luceeLoadError(id,jsonData) {
     const cell = document.getElementById('ai-response-cell');
     // Clear existing content
     cell.innerHTML = '';
     luceeSpinner();
-    fetch('/lucee/debug/modern/error.cfm', {
+	fetch('/lucee/debug/modern/error.cfm?id='+id, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -207,8 +207,9 @@ function luceeCatchToString() {try{
 			AI (Experimental)
 		</td>
 		<td id="ai-response-cell" class="mono">
-		    <cfif LuceeAIHas('default:exception')>
-				<a href="##" onclick="luceeLoadError(luceeCatchData); return false;">Analyse</a><cfelse>
+			<cfif LuceeAIHas('default:exception')>
+				<cfset meta=aiGetMetadata('default:exception',false)>
+				<a href="##" onclick="luceeLoadError('#meta.id?:""#',luceeCatchData); return false;">Analyse</a><cfelse>
 				For AI-driven exception analysis setup, see <a target="blank" href="https://github.com/lucee/lucee-docs/blob/master/docs/recipes/ai.md">AI Setup Guide</a>.
 			</cfif></td>
 	</tr>

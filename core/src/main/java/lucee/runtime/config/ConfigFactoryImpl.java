@@ -90,7 +90,6 @@ import lucee.runtime.CFMLFactoryImpl;
 import lucee.runtime.Mapping;
 import lucee.runtime.MappingImpl;
 import lucee.runtime.PageContext;
-import lucee.runtime.ai.AIEngine;
 import lucee.runtime.ai.AIEngineFactory;
 import lucee.runtime.cache.CacheConnection;
 import lucee.runtime.cache.CacheConnectionImpl;
@@ -722,44 +721,38 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 			// we only load this for the server context
 			Struct ai = ConfigUtil.getAsStruct(root, false, "ai");
 			if (ai != null) {
-
-				ClassDefinition<AIEngine> cd;
-				String strId;
-				Iterator<Entry<Key, Object>> it = ai.entryIterator();
-				Entry<Key, Object> entry;
-				Struct data, custom;
-				String _default;
-				Map<String, AIEngineFactory> engines = new HashMap<>();
-
-				while (it.hasNext()) {
-					try {
-						entry = it.next();
-						data = Caster.toStruct(entry.getValue(), null);
-						if (data == null) continue;
-						strId = entry.getKey().getString();
-
-						cd = getClassDefinition(data, "", config.getIdentification());
-						if (cd.hasClass() && !StringUtil.isEmpty(strId)) {
-							strId = strId.trim().toLowerCase();
-
-							custom = Caster.toStruct(data.get(KeyConstants._custom, null), null);
-							if (custom == null) custom = Caster.toStruct(data.get(KeyConstants._properties, null), null);
-							if (custom == null) custom = Caster.toStruct(data.get(KeyConstants._arguments, null), null);
-							_default = Caster.toString(data.get(KeyConstants._default, null), null);
-							engines.put(strId, AIEngineFactory.load(config, cd, custom, strId, _default, false));
-						}
-					}
-					catch (Exception e) {
-						log(config, e);
-					}
-				}
-				return engines;
+				return _loadAI(config, ai);
 			}
 		}
 		catch (Exception ex) {
 			log(config, ex);
 		}
 		return defaultValue;
+	}
+
+	public static Map<String, AIEngineFactory> _loadAI(Config config, Struct ai) {
+		String strId;
+		Iterator<Entry<Key, Object>> it = ai.entryIterator();
+		Entry<Key, Object> entry;
+		Struct data;
+		Map<String, AIEngineFactory> engines = new HashMap<>();
+
+		while (it.hasNext()) {
+			try {
+				entry = it.next();
+				data = Caster.toStruct(entry.getValue(), null);
+				if (data == null) continue;
+				strId = entry.getKey().getString();
+				if (!StringUtil.isEmpty(strId)) {
+					strId = strId.trim().toLowerCase();
+					engines.put(strId, AIEngineFactory.load(config, strId, data));
+				}
+			}
+			catch (Exception e) {
+				log(config, e);
+			}
+		}
+		return engines;
 	}
 
 	public static DumpWriterEntry[] loadDumpWriter(ConfigImpl config, Struct root, DumpWriterEntry[] defaultValue) {

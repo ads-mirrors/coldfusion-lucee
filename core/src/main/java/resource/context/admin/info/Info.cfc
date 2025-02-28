@@ -428,13 +428,20 @@ function luceeSearchAI(val) {
 			}*/
     	}
   	};
-
+<cfscript>
+	 factoryId="";
+	if(LuceeAIHas('default:documentation')) {
+		meta=aiGetMetadata('default:documentation',false);
+		factoryId=meta.id?:"";
+	}
+</cfscript>
 
   	xhttp.open("POST", "/lucee/debug/modern/reference.cfm", true);
   	//xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
 	var formData = new FormData();
 	formData.append("search", val);
 	formData.append("typ", "ai");
+	formData.append("id",<cfoutput> "#factoryId?:''#"</cfoutput>);
   	xhttp.send(formData);
 }
 

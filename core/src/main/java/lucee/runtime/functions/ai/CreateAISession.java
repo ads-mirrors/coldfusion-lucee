@@ -25,6 +25,8 @@ public final class CreateAISession extends BIF {
 		if (temp > 1D) throw new FunctionException(pc, "CreateAISession", "4th", "temperature",
 				"temperature must be between 0.0 and 1.0 (inclusive). Lower values (0.0-0.3) produce more focused, deterministic responses, while higher values create more varied output. Values less than 0 will use the default defined with the configuration of the nedpoint.",
 				null);
+		if (nameAI.startsWith("id:")) return ((PageContextImpl) pc).createAISessionById(nameAI.substring(3), systemMessage, limit, temp, -1, -1);
+
 		if (nameAI.startsWith("default:")) nameAI = ((PageContextImpl) pc).getNameFromDefault(nameAI.substring(8));
 		return ((PageContextImpl) pc).createAISession(nameAI, systemMessage, limit, temp, -1, -1);
 	}
