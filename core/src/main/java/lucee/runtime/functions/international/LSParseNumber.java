@@ -27,6 +27,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.ExpressionException;
@@ -84,7 +85,7 @@ public final class LSParseNumber implements Function {
 			str = optimze(str.toCharArray());
 
 			ParsePosition pp = new ParsePosition(0);
-			BigDecimal result = (BigDecimal) df.parse(str, pp);
+			BigDecimal result = (BigDecimal) df.parse(StringUtil.trim(str, false, true, str), pp);
 
 			if (pp.getIndex() < str.length()) {
 				throw new ExpressionException("Can't parse String [" + str + "] against locale [" + LocaleFactory.getDisplayName(locale) + "] to a BigDecimal");

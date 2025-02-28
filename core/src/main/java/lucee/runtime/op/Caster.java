@@ -5162,7 +5162,18 @@ public final class Caster {
 		}
 		catch (NumberFormatException nfe) {
 			if (Util.isEmpty(str, true)) throw new CasterException("cannot convert string[" + str + "] to a number, the string is empty");
-			throw new CasterException("cannot convert string[" + str + "] to a number; " + nfe.getMessage());
+
+			// BigDecimal is very sensitive with "invisible" characters, so we clean them up and try again, this
+			// is done in the error
+			// so the average case is faster
+			try {
+				return new BigDecimal(StringUtil.trim(str, false, true, str), MathContext.DECIMAL128);
+			}
+			catch (NumberFormatException nfe2) {
+				CasterException ce = new CasterException("cannot convert string [" + str + "] to a number; " + nfe.getMessage());
+				ExceptionUtil.initCauseEL(ce, nfe2);
+				throw ce;
+			}
 		}
 	}
 

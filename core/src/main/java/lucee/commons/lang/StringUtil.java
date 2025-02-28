@@ -43,9 +43,14 @@ import lucee.runtime.type.util.ArrayUtil;
  */
 public final class StringUtil {
 
-	private static final char[] SPECIAL_WHITE_SPACE_CHARS = new char[] { 0x0020, // SPACE
+	private static final char[] SPECIAL_WHITE_SPACE_CHARS = new char[] { 0x0009, // HORIZONTAL TAB
+			0x000A, // LINE FEED
+			0x000D, // CARRIAGE RETURN
+			0x0020, // SPACE
 			0x0085, // NEL, Next line
 			0x00A0, // NO-BREAK SPACE
+			0x00AD, // SOFT HYPHEN
+			0x034F, // COMBINING GRAPHEME JOINER
 			0x1680, // OGHAM SPACE MARK
 			0x180E, // MONGOLIAN VOWEL SEPARATOR
 			0x2000, // EN QUAD
@@ -59,12 +64,22 @@ public final class StringUtil {
 			0x2008, // PUNCTUATION SPACE
 			0x2009, // THIN SPACE
 			0x200A, // HAIR SPACE
+			0x200B, // ZERO WIDTH SPACE
+			0x200C, // ZERO WIDTH NON-JOINER
+			0x200D, // ZERO WIDTH JOINER
+			0x200E, // LEFT-TO-RIGHT MARK
+			0x200F, // RIGHT-TO-LEFT MARK
 			0x2028, // LINE SEPARATOR
 			0x2029, // PARAGRAPH SEPARATOR
 			0x202F, // NARROW NO-BREAK SPACE
 			0x205F, // MEDIUM MATHEMATICAL SPACE
+			0x2060, // WORD JOINER
+			0x2061, // FUNCTION APPLICATION
+			0x2062, // INVISIBLE TIMES
+			0x2063, // INVISIBLE SEPARATOR
+			0x2064, // INVISIBLE PLUS
 			0x3000, // IDEOGRAPHIC SPACE
-			0x200B // ZERO WIDTH SPACE
+			0xFEFF // ZERO-WIDTH NO-BREAK SPACE (BOM)
 	};
 	private static final boolean[] WHITESPACES;
 
@@ -210,8 +225,8 @@ public final class StringUtil {
 	 *
 	 * @param str String to escape
 	 * @param quotesUsed
-	 * @param enc if not null, it checks if the given string is supported by the encoding, if not,
-	 *            lucee encodes the string
+	 * @param enc if not null, it checks if the given string is supported by the encoding, if not, lucee
+	 *            encodes the string
 	 * @return escapes String
 	 */
 	public static String escapeJS(String str, char quotesUsed, CharsetEncoder enc) {
