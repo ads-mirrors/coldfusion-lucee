@@ -319,7 +319,7 @@ Error Output --->
 		</cfif>
 	</cfif>
 
-	<table>
+	<table style="width:100%">
 		<tr>
 			<div id="updateInfoDesc"><div style="text-align: center;"><img src="../res/img/spinner16.gif.cfm"></div></div>
 			<cfhtmlbody>

@@ -30,7 +30,7 @@
 
 <cfparam name="attributes.onload" default="">
 <cfset mode=request.singleMode?"single":request.adminType>
-<body id="body" class="admin-#mode# #mode#<cfif application.adminfunctions.getdata('fullscreen') eq 1> full</cfif>" onload="#attributes.onload#">
+<body id="body" class="admin-single single full" onload="#attributes.onload#">
 	<div id="<cfif !hasNavigation>login<cfelse>layout</cfif>">
 		<table id="layouttbl">
 			<tbody>
@@ -38,27 +38,20 @@
 					<td colspan="2">
 						<div id="header">
 								<a id="logo" class="sprite" href="#home#"></a>
-							<cfif not request.singleMode>
-								<div id="admin-tabs" class="clearfix">
-									<a href="server.cfm#homeQS#" class="sprite server"></a>
-									<a href="web.cfm#homeQS#" class="sprite web"></a>
-								</div>
-							</cfif>
-						</div>	<!--- #header !--->
+								
+						</div>	<!--- #header !---><h5 style="margin-top:-30px;margin-left:50px">#server.lucee.version#</h5>
 					</td>
 				</tr>
 				<tr>
 				<cfif hasNavigation>
 					<td id="navtd" class="lotd">
 						<div id="nav">
-							<a href="##" id="resizewin" class="sprite" title="resize window"></a>
-
-								<form method="get" action="#cgi.SCRIPT_NAME#">
+								<!---<form method="get" action="#cgi.SCRIPT_NAME#">
 									<input type="hidden" name="action" value="admin.search">
 									<input type="text" name="q" size="15"  class="navSearch" id="lucee-admin-search-input" placeholder="#stText.buttons.search.ucase()#">
 									<button type="submit" class="sprite  btn-search"><!--- <span>#stText.buttons.search# ---></span></button>
 									<!--- btn-mini title="#stText.buttons.search#" --->
-								</form>
+								</form>--->
 
 								#attributes.navigation#
 						</div>
@@ -68,13 +61,13 @@
 						<div id="content">
 							 <div id="maintitle">
 								<cfif hasNavigation && application.adminfunctions.canAccessContext()>
-									<div id="logouts">
+									<!-- <div id="logouts">
 									<a class="sprite tooltipMe logout" href="#request.self#?action=logout" title="Logout"></a>
-									</div>
+									</div> -->
 									<!--- Favorites --->
 									<cfparam name="url.action" default="">
 									<cfset pageIsFavorite = application.adminfunctions.isFavorite(url.action)>
-									<div id="favorites">
+									<!--- <div id="favorites">
 
 
 										<cfif url.action eq "">
@@ -91,7 +84,7 @@
 												<li class="favtext"><i>No items yet.<br>Go to a page you use often, and click on "Favorites" to add it here.</i></li>
 											</cfif>
 										</ul>
-									</div>
+									</div>--->
 								</cfif>
 									<div class="box"><cfif structKeyExists(request,'title')>#request.title#<cfelse>#attributes.title#</cfif>
 									<cfif structKeyExists(request,'subTitle')> - #request.subTitle#</cfif></div>

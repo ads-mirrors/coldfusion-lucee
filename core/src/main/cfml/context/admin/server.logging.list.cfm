@@ -137,7 +137,7 @@ Redirtect to entry --->
 							<td><cfif showLayout>#isNull(layout)?listLast(logs.layoutClass,'.'):layout.getLabel()#<cfelse>&nbsp;</cfif></td>
 							<td>#logs.level#</td>
 							<td>
-								<cfif !isNull(appender)><a href="#request.self#?action=#url.action#&action2=create&name=#Hash(logs.name)#" class="sprite edit"></a></cfif>
+								<cfif !isNull(appender)><a href="#request.self#?action=#url.action#&action2=create&name=#Hash(logs.name)#" >Edit</a></cfif>
 							</td>
 						</tr>
 					</cfloop>
