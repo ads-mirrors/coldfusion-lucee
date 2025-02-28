@@ -48,27 +48,31 @@ public class AIUtil {
 		session.inquiry("ping");
 	}
 
-	public static List<String> getModelNames(AIEngine aie) throws PageException {
-		List<AIModel> models = aie.getModels();
+	public static List<String> getModelNames(AIEngine aie) {
+		List<AIModel> models = aie.getModels(null);
 		List<String> names = new ArrayList<>();
-		for (AIModel m: models) {
-			names.add(m.getName());
+		if (models != null) {
+			for (AIModel m: models) {
+				names.add(m.getName());
+			}
+			Collections.sort(names);
 		}
-		Collections.sort(names);
 		return names;
 	}
 
-	public static String findModelName(AIEngine aie, String name) throws PageException {
-		List<AIModel> models = aie.getModels();
-		for (AIModel m: models) {
-			if (m.getName().equalsIgnoreCase(name)) return m.getName();
-			if (m.getName().equalsIgnoreCase(name + ":latest")) return m.getName();
-			if (m.getLabel().equalsIgnoreCase(name)) return m.getName();
+	public static String findModelName(AIEngine aie, String name) {
+		List<AIModel> models = aie.getModels(null);
+		if (models != null) {
+			for (AIModel m: models) {
+				if (m.getName().equalsIgnoreCase(name)) return m.getName();
+				if (m.getName().equalsIgnoreCase(name + ":latest")) return m.getName();
+				if (m.getLabel().equalsIgnoreCase(name)) return m.getName();
+			}
 		}
 		return null;
 	}
 
-	public static String getModelNamesAsStringList(AIEngine aie) throws PageException {
+	public static String getModelNamesAsStringList(AIEngine aie) {
 		return getModelNamesAsStringList(getModelNames(aie));
 	}
 

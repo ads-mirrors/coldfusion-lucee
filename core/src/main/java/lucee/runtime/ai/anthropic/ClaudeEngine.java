@@ -142,6 +142,11 @@ public class ClaudeEngine extends AIEngineSupport {
 	}
 
 	@Override
+	public List<AIModel> getModels(List<AIModel> defaultValue) {
+		return defaultValue;
+	}
+
+	@Override
 	public int getConversationSizeLimit() {
 		return conversationSizeLimit;
 	}

@@ -1,5 +1,7 @@
 package lucee.runtime.ai;
 
+import java.util.List;
+
 import lucee.commons.io.log.LogUtil;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.functions.other.CreateUniqueId;
@@ -36,5 +38,15 @@ public abstract class AIEngineSupport implements AIEngine {
 
 	public static void log(Exception e) {
 		LogUtil.log("ai", "ai", e);
+	}
+
+	@Override
+	public List<AIModel> getModels(List<AIModel> defaultValue) {
+		try {
+			return getModels();
+		}
+		catch (Exception e) {
+			return defaultValue;
+		}
 	}
 }

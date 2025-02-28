@@ -49,6 +49,8 @@ public interface AIEngine {
 
 	public List<AIModel> getModels() throws PageException;
 
+	public List<AIModel> getModels(List<AIModel> defaultValue);
+
 	public int getConversationSizeLimit();
 
 	public Double getTemperature();
