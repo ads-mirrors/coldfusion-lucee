@@ -19,7 +19,6 @@
 package lucee.runtime.listener;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -102,7 +101,7 @@ public abstract class ApplicationContextSupport implements ApplicationContext {
 		applicationtoken = other.applicationtoken;
 
 		if (other.tagDefaultAttributeValues != null) {
-			tagDefaultAttributeValues = new HashMap<Collection.Key, Map<Collection.Key, Object>>();
+			tagDefaultAttributeValues = new ConcurrentHashMap<Collection.Key, Map<Collection.Key, Object>>();
 			Iterator<Entry<Collection.Key, Map<Collection.Key, Object>>> it = other.tagDefaultAttributeValues.entrySet().iterator();
 			Entry<Collection.Key, Map<Collection.Key, Object>> e;
 			Iterator<Entry<Collection.Key, Object>> iit;
@@ -111,7 +110,7 @@ public abstract class ApplicationContextSupport implements ApplicationContext {
 			while (it.hasNext()) {
 				e = it.next();
 				iit = e.getValue().entrySet().iterator();
-				map = new HashMap<Collection.Key, Object>();
+				map = new ConcurrentHashMap<Collection.Key, Object>();
 				while (iit.hasNext()) {
 					ee = iit.next();
 					map.put(ee.getKey(), ee.getValue());
@@ -188,7 +187,7 @@ public abstract class ApplicationContextSupport implements ApplicationContext {
 
 	@Override
 	public void setTagAttributeDefaultValues(PageContext pc, Struct sct) {
-		if (tagDefaultAttributeValues == null) tagDefaultAttributeValues = new HashMap<Collection.Key, Map<Collection.Key, Object>>();
+		if (tagDefaultAttributeValues == null) tagDefaultAttributeValues = new ConcurrentHashMap<Collection.Key, Map<Collection.Key, Object>>();
 		initTagDefaultAttributeValues(config, tagDefaultAttributeValues, sct);
 	}
 
@@ -236,7 +235,7 @@ public abstract class ApplicationContextSupport implements ApplicationContext {
 				else tag = lib.getTag(e.getKey().getLowerString());
 
 				if (tag != null) {
-					map = new HashMap<Collection.Key, Object>();
+					map = new ConcurrentHashMap<Collection.Key, Object>();
 					iit = attrs.entryIterator();
 					while (iit.hasNext()) {
 						e = iit.next();
@@ -354,7 +353,7 @@ public abstract class ApplicationContextSupport implements ApplicationContext {
 
 	private static Map<String, String> toMap(Struct sct) {
 		Iterator<Entry<Key, Object>> it = sct.entryIterator();
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, String> map = new ConcurrentHashMap<String, String>();
 		Entry<Key, Object> e;
 		while (it.hasNext()) {
 			e = it.next();
