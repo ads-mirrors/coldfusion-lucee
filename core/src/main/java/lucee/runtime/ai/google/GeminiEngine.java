@@ -113,10 +113,9 @@ public class GeminiEngine extends AIEngineSupport {
 		if (Util.isEmpty(model, true)) {
 			// nice to have
 			String appendix = "";
-			try {
-				appendix = " Available models for this engine are [" + AIUtil.getModelNamesAsStringList(this) + "]";
-			}
-			catch (PageException pe) {
+			String models = AIUtil.getModelNamesAsStringList(this);
+			if (!StringUtil.isEmpty(models, true)) {
+				appendix = " Available models for this engine are [" + models + "]";
 			}
 
 			throw new ApplicationException("the property [model] is required for a OpenAI Engine!." + appendix);

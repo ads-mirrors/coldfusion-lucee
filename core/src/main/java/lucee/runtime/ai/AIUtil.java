@@ -30,10 +30,10 @@ public class AIUtil {
 	public static PageException toException(AIEngine engine, String msg, String type, String code, int statusCode) {
 		String appendix = "";
 		if ("model_not_found".equals(code) || msg.equals("invalid_model") || msg.indexOf("models") != -1) {
-			try {
-				appendix = " Available model names are [" + AIUtil.getModelNamesAsStringList(engine) + "]";
-			}
-			catch (PageException e) {
+
+			String models = AIUtil.getModelNamesAsStringList(engine);
+			if (!StringUtil.isEmpty(models, true)) {
+				appendix = " Available model names are [" + models + "]";
 			}
 		}
 

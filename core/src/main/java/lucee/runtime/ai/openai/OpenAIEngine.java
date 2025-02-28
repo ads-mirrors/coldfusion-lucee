@@ -203,20 +203,17 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 		if (Util.isEmpty(model, true)) {
 			// nice to have
 			String appendix = "";
-			try {
-				List<String> models = AIUtil.getModelNames(this);
-				if (models.size() == 1) {
-					model = models.get(0);
-				}
-				else if (models.size() == 0) {
-					appendix = " There are no models available.";
-				}
-				else {
-					appendix = " Available models for this engine are [" + AIUtil.getModelNamesAsStringList(this) + "].";
-				}
+			List<String> models = AIUtil.getModelNames(this);
+			if (models.size() == 1) {
+				model = models.get(0);
 			}
-			catch (PageException pe) {
+			else if (models.size() == 0) {
+				appendix = " There are no models available.";
 			}
+			else {
+				appendix = " Available models for this engine are [" + AIUtil.getModelNamesAsStringList(this) + "].";
+			}
+
 			if (Util.isEmpty(model, true)) throw new ApplicationException("the property [model] is required for a OpenAI Engine!." + appendix);
 		}
 
