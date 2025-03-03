@@ -36,8 +36,8 @@ public final class InquiryAISession extends BIF {
 
 		Response rsp;
 
-		LogUtil.logx(pc.getConfig(), Log.LEVEL_INFO, "ai", "Submitting question to AI endpoint [" + ais.getEngine().getFactory().getName() + "] from type ["
-				+ ais.getEngine().getLabel() + "] with the following content: [" + question + "]", "ai", "application");
+		LogUtil.logx(pc.getConfig(), Log.LEVEL_INFO, "ai", "Submitting question to AI endpoint [" + ais.getEngine().getName() + "] from type [" + ais.getEngine().getLabel()
+				+ "] with the following content: [" + question + "]", "ai", "application");
 
 		if (listener != null) rsp = ais.inquiry(question, new UDFAIResponseListener(pc, listener));
 		else rsp = ais.inquiry(question);

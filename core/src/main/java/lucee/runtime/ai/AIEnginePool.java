@@ -19,24 +19,12 @@ public class AIEnginePool {
 		if (aie != null) return aie;
 
 		// loading new instance
-		AIEngineFactory factory = ((ConfigPro) config).getAIEngineFactory(name.toLowerCase());
-		if (factory == null) {
-			throw new ApplicationException(ExceptionUtil.similarKeyMessage(((ConfigPro) config).getAIEngineFactoryNames(), name, "source", "sources", "ai pool", true));
+		aie = ((ConfigPro) config).getAIEngine(name.toLowerCase());
+		if (aie == null) {
+			throw new ApplicationException(ExceptionUtil.similarKeyMessage(((ConfigPro) config).getAIEngineNames(), name, "source", "sources", "ai pool", true));
 		}
-
-		try {
-			aie = AIEngineFactory.getInstance(config, factory);
-			if (aie != null) {
-				instances.put(name, aie);
-				return aie;
-			}
-		}
-		catch (Exception e) {
-			ApplicationException ae = new ApplicationException("Cannot create and instance of the AI engine [" + name + "]; " + e.getMessage());
-			ExceptionUtil.initCauseEL(ae, e);
-			throw ae;
-		}
-		throw new ApplicationException("there is no matching engine for the name [" + name + "] found");
+		instances.put(name, aie);
+		return aie;
 	}
 
 }

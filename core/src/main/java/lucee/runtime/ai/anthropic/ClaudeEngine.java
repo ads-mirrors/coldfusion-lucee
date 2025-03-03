@@ -8,10 +8,10 @@ import lucee.commons.lang.StringUtil;
 import lucee.commons.net.HTTPUtil;
 import lucee.loader.util.Util;
 import lucee.runtime.ai.AIEngine;
-import lucee.runtime.ai.AIEngineFactory;
 import lucee.runtime.ai.AIEngineSupport;
 import lucee.runtime.ai.AIModel;
 import lucee.runtime.ai.AISession;
+import lucee.runtime.db.ClassDefinition;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.net.proxy.ProxyData;
@@ -41,8 +41,8 @@ public class ClaudeEngine extends AIEngineSupport {
 	private int conversationSizeLimit = DEFAULT_CONVERSATION_SIZE_LIMIT;
 
 	@Override
-	public AIEngine init(AIEngineFactory factory, Struct properties) throws PageException {
-		super.init(factory);
+	public AIEngine init(ClassDefinition<? extends AIEngine> cd, Struct properties, String name, String _default, String id) throws PageException {
+		super.init(cd, properties, name, _default, id);
 		this.properties = properties;
 
 		// API Key

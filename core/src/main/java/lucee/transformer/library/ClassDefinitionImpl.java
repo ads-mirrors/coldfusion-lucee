@@ -24,6 +24,8 @@ import java.io.ObjectOutput;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.felix.framework.BundleWiringImpl.BundleClassLoader;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
@@ -85,8 +87,18 @@ public class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externalizabl
 	public ClassDefinitionImpl(Class<T> clazz) {
 		this.className = clazz.getName();
 		this.clazz = clazz;
-		this.name = null;
-		this.version = null;
+		ClassLoader cl = clazz.getClassLoader();
+		if (cl instanceof BundleClassLoader) {
+			BundleClassLoader bcl = (BundleClassLoader) cl;
+			Bundle b = bcl.getBundle();
+			this.name = b.getSymbolicName();
+			this.version = b.getVersion();
+		}
+		else {
+			this.name = null;
+			this.version = null;
+		}
+
 		this.id = null;
 	}
 

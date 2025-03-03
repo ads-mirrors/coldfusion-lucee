@@ -80,7 +80,7 @@ import lucee.runtime.MappingImpl;
 import lucee.runtime.Page;
 import lucee.runtime.PageContext;
 import lucee.runtime.PageSource;
-import lucee.runtime.ai.AIEngineFactory;
+import lucee.runtime.ai.AIEngine;
 import lucee.runtime.cache.CacheConnection;
 import lucee.runtime.cache.ram.RamCache;
 import lucee.runtime.cache.tag.CacheHandler;
@@ -438,7 +438,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private Resource extInstalled;
 	private Resource extAvailable;
 
-	protected Map<String, AIEngineFactory> aiEngineFactories;
+	protected Map<String, AIEngine> aiEngines;
 
 	private Map<String, ClassDefinition> cacheDefinitions;
 
@@ -2134,32 +2134,32 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	@Override
-	public Collection<String> getAIEngineFactoryNames() {
-		return getAIEngineFactories().keySet();
+	public Collection<String> getAIEngineNames() {
+		return getAIEngines().keySet();
 	}
 
 	@Override
-	public AIEngineFactory getAIEngineFactory(String name) {
-		return getAIEngineFactories().get(name);
+	public AIEngine getAIEngine(String name) {
+		return getAIEngines().get(name);
 	}
 
-	private Map<String, AIEngineFactory> getAIEngineFactories() {
-		if (aiEngineFactories == null) {
+	private Map<String, AIEngine> getAIEngines() {
+		if (aiEngines == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getAIEngineFactories")) {
-				if (aiEngineFactories == null) {
-					aiEngineFactories = ConfigFactoryImpl.loadAI(this, root, null);
-					if (aiEngineFactories == null) aiEngineFactories = new HashMap<>();
+				if (aiEngines == null) {
+					aiEngines = ConfigFactoryImpl.loadAI(this, root, null);
+					if (aiEngines == null) aiEngines = new HashMap<>();
 				}
 			}
 		}
-		return aiEngineFactories;
+		return aiEngines;
 	}
 
 	public ConfigImpl resetAIEngineFactories() {
-		if (aiEngineFactories != null) {
+		if (aiEngines != null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getAIEngineFactories")) {
-				if (aiEngineFactories != null) {
-					aiEngineFactories = null;
+				if (aiEngines != null) {
+					aiEngines = null;
 				}
 			}
 		}

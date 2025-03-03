@@ -47,7 +47,7 @@ import lucee.runtime.Mapping;
 import lucee.runtime.MappingImpl;
 import lucee.runtime.PageContext;
 import lucee.runtime.PageSource;
-import lucee.runtime.ai.AIEngineFactory;
+import lucee.runtime.ai.AIEngine;
 import lucee.runtime.ai.AIEnginePool;
 import lucee.runtime.cache.CacheConnection;
 import lucee.runtime.cache.tag.CacheHandler;
@@ -2026,13 +2026,13 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	}
 
 	@Override
-	public Collection<String> getAIEngineFactoryNames() {
-		return cs.getAIEngineFactoryNames();
+	public Collection<String> getAIEngineNames() {
+		return cs.getAIEngineNames();
 	}
 
 	@Override
-	public AIEngineFactory getAIEngineFactory(String name) {
-		return cs.getAIEngineFactory(name);
+	public AIEngine getAIEngine(String name) {
+		return cs.getAIEngine(name);
 	}
 
 	@Override

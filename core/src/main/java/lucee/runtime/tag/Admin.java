@@ -85,7 +85,6 @@ import lucee.runtime.PageContextImpl;
 import lucee.runtime.PageSource;
 import lucee.runtime.PageSourceImpl;
 import lucee.runtime.ai.AIEngine;
-import lucee.runtime.ai.AIEngineFactory;
 import lucee.runtime.ai.AISession;
 import lucee.runtime.ai.AIUtil;
 import lucee.runtime.ai.Response;
@@ -3736,7 +3735,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	}
 
 	private void doGetAIConnections() throws PageException {
-		java.util.Collection<String> names = this.config.getAIEngineFactoryNames();
+		java.util.Collection<String> names = this.config.getAIEngineNames();
 		Map conns = config.getCacheConnections();
 		Iterator it = conns.entrySet().iterator();
 		lucee.runtime.type.Query qry = new QueryImpl(
@@ -3744,16 +3743,16 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 				"factories");
 
 		int row;
-		AIEngineFactory factory;
+		AIEngine aie;
 		for (String name: names) {
-			factory = this.config.getAIEngineFactory(name);
+			aie = this.config.getAIEngine(name);
 			row = qry.addRow();
-			qry.setAtEL(KeyConstants._default, row, factory.getDefault());
-			qry.setAtEL(KeyConstants._name, row, factory.getName());
-			qry.setAtEL(KeyConstants._class, row, factory.getClassDefinition().getClassName());
-			qry.setAtEL(KeyConstants._bundleName, row, factory.getClassDefinition().getName());
-			qry.setAtEL(KeyConstants._bundleVersion, row, factory.getClassDefinition().getVersionAsString());
-			qry.setAtEL(KeyConstants._custom, row, factory.getProperties());
+			qry.setAtEL(KeyConstants._default, row, aie.getDefault());
+			qry.setAtEL(KeyConstants._name, row, aie.getName());
+			qry.setAtEL(KeyConstants._class, row, aie.getClassDefinition().getClassName());
+			qry.setAtEL(KeyConstants._bundleName, row, aie.getClassDefinition().getName());
+			qry.setAtEL(KeyConstants._bundleVersion, row, aie.getClassDefinition().getVersionAsString());
+			qry.setAtEL(KeyConstants._custom, row, aie.getProperties());
 		}
 		pageContext.setVariable(getString("admin", action, "returnVariable"), qry);
 	}

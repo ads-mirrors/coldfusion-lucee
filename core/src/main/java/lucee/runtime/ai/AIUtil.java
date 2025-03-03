@@ -91,12 +91,11 @@ public class AIUtil {
 
 		meta.set(KeyConstants._label, aie.getLabel());
 		meta.set(KeyConstants._model, aie.getModel());
-		meta.set(KeyConstants._id, aie.getFactory().getId());
+		meta.set(KeyConstants._id, aie.getId());
 		if (aie.getTemperature() != null) meta.set(KeyConstants._temperature, aie.getTemperature());
 		meta.set("connectTimeout", aie.getConnectTimeout());
 		meta.set("conversationSizeLimit", aie.getConversationSizeLimit());
-		AIEngineFactory factory = aie.getFactory();
-		if (factory != null) meta.set(KeyConstants._name, factory.getName());
+		meta.set(KeyConstants._name, aie.getName());
 
 		// models
 		if (addModelsInfo) {

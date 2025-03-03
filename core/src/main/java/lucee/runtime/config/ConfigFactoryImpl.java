@@ -90,6 +90,7 @@ import lucee.runtime.CFMLFactoryImpl;
 import lucee.runtime.Mapping;
 import lucee.runtime.MappingImpl;
 import lucee.runtime.PageContext;
+import lucee.runtime.ai.AIEngine;
 import lucee.runtime.ai.AIEngineFactory;
 import lucee.runtime.cache.CacheConnection;
 import lucee.runtime.cache.CacheConnectionImpl;
@@ -716,7 +717,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		else throw new ClassException("object [" + Caster.toClassName(o) + "] must implement the interface " + CacheHandler.class.getName());
 	}
 
-	public static Map<String, AIEngineFactory> loadAI(ConfigImpl config, Struct root, Map<String, AIEngineFactory> defaultValue) {
+	public static Map<String, AIEngine> loadAI(ConfigImpl config, Struct root, Map<String, AIEngine> defaultValue) {
 		try {
 			// we only load this for the server context
 			Struct ai = ConfigUtil.getAsStruct(root, false, "ai");
@@ -730,12 +731,12 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		return defaultValue;
 	}
 
-	public static Map<String, AIEngineFactory> _loadAI(Config config, Struct ai) {
+	public static Map<String, AIEngine> _loadAI(Config config, Struct ai) {
 		String strId;
 		Iterator<Entry<Key, Object>> it = ai.entryIterator();
 		Entry<Key, Object> entry;
 		Struct data;
-		Map<String, AIEngineFactory> engines = new HashMap<>();
+		Map<String, AIEngine> engines = new HashMap<>();
 
 		while (it.hasNext()) {
 			try {
@@ -745,7 +746,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 				strId = entry.getKey().getString();
 				if (!StringUtil.isEmpty(strId)) {
 					strId = strId.trim().toLowerCase();
-					engines.put(strId, AIEngineFactory.load(config, strId, data));
+					engines.put(strId, AIEngineFactory.getInstance(config, strId, data));
 				}
 			}
 			catch (Exception e) {

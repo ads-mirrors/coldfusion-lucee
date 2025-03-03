@@ -4292,8 +4292,8 @@ public final class PageContextImpl extends PageContext {
 
 		// TODO make a more direct way
 		ConfigPro cp = config;
-		for (String name: cp.getAIEngineFactoryNames()) {
-			if (defaultName.equalsIgnoreCase(cp.getAIEngineFactory(name).getDefault())) {
+		for (String name: cp.getAIEngineNames()) {
+			if (defaultName.equalsIgnoreCase(cp.getAIEngine(name).getDefault())) {
 				return name;
 			}
 		}
@@ -4308,8 +4308,8 @@ public final class PageContextImpl extends PageContext {
 
 		// TODO make a more direct way
 		ConfigPro cp = config;
-		for (String name: cp.getAIEngineFactoryNames()) {
-			if (defaultName.equalsIgnoreCase(cp.getAIEngineFactory(name).getDefault())) {
+		for (String name: cp.getAIEngineNames()) {
+			if (defaultName.equalsIgnoreCase(cp.getAIEngine(name).getDefault())) {
 				return name;
 			}
 		}

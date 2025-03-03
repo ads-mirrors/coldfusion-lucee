@@ -31,7 +31,6 @@ import lucee.commons.lang.mimetype.MimeType;
 import lucee.commons.net.HTTPUtil;
 import lucee.loader.util.Util;
 import lucee.runtime.ai.AIEngine;
-import lucee.runtime.ai.AIEngineFactory;
 import lucee.runtime.ai.AIEngineFile;
 import lucee.runtime.ai.AIEngineSupport;
 import lucee.runtime.ai.AIFile;
@@ -42,6 +41,7 @@ import lucee.runtime.ai.AISessionSupport;
 import lucee.runtime.ai.AIUtil;
 import lucee.runtime.converter.JSONConverter;
 import lucee.runtime.converter.JSONDateFormat;
+import lucee.runtime.db.ClassDefinition;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.interpreter.JSONExpressionInterpreter;
@@ -133,8 +133,8 @@ public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 	private int conversationSizeLimit = DEFAULT_CONVERSATION_SIZE_LIMIT;
 
 	@Override
-	public AIEngine init(AIEngineFactory factory, Struct properties) throws PageException {
-		super.init(factory);
+	public AIEngine init(ClassDefinition<? extends AIEngine> cd, Struct properties, String name, String _default, String id) throws PageException {
+		super.init(cd, properties, name, _default, id);
 		this.properties = properties;
 
 		// URL

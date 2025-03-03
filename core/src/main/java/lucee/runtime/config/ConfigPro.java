@@ -24,7 +24,7 @@ import lucee.runtime.CIPage;
 import lucee.runtime.Mapping;
 import lucee.runtime.PageContext;
 import lucee.runtime.PageSource;
-import lucee.runtime.ai.AIEngineFactory;
+import lucee.runtime.ai.AIEngine;
 import lucee.runtime.ai.AIEnginePool;
 import lucee.runtime.cache.tag.CacheHandler;
 import lucee.runtime.component.ImportDefintion;
@@ -404,9 +404,9 @@ public interface ConfigPro extends Config {
 
 	public Resource getMavenDir();
 
-	public Collection<String> getAIEngineFactoryNames();
+	public Collection<String> getAIEngineNames();
 
-	public AIEngineFactory getAIEngineFactory(String name);
+	public AIEngine getAIEngine(String name);
 
 	public AIEnginePool getAIEnginePool();
 

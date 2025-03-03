@@ -2,6 +2,7 @@ package lucee.runtime.ai;
 
 import java.util.List;
 
+import lucee.runtime.db.ClassDefinition;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.type.Struct;
 
@@ -24,12 +25,11 @@ public interface AIEngine {
 	/**
 	 * Initializes the AI engine with the specified factory and configuration properties.
 	 *
-	 * @param factory The AIEngineFactory responsible for creating this engine instance
 	 * @param properties A Struct containing configuration properties for this engine instance
 	 * @return The initialized AIEngine instance
 	 * @throws PageException If initialization fails due to invalid properties or connection issues
 	 */
-	AIEngine init(AIEngineFactory factory, Struct properties) throws PageException;
+	AIEngine init(ClassDefinition<? extends AIEngine> cd, Struct properties, String name, String _default, String id) throws PageException;
 
 	/**
 	 * Returns a unique identifier for this engine instance, generated based on the factory and
@@ -66,13 +66,6 @@ public interface AIEngine {
 	 * @throws PageException If session creation fails or parameters are invalid
 	 */
 	public AISession createSession(String initialMessage, int limit, double temp, int connectTimeout, int socketTimeout) throws PageException;
-
-	/**
-	 * Returns the factory that created this engine instance.
-	 * 
-	 * @return The AIEngineFactory responsible for this engine
-	 */
-	public AIEngineFactory getFactory();
 
 	/**
 	 * Returns the current socket timeout setting for this engine.
@@ -137,4 +130,12 @@ public interface AIEngine {
 	 * @return Default temperature value as a Double
 	 */
 	public Double getTemperature();
+
+	public String getDefault();
+
+	public String getName();
+
+	public ClassDefinition<? extends AIEngine> getClassDefinition();
+
+	public Struct getProperties();
 }

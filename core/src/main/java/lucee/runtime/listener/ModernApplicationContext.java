@@ -51,7 +51,6 @@ import lucee.runtime.ComponentSpecificAccess;
 import lucee.runtime.Mapping;
 import lucee.runtime.PageContext;
 import lucee.runtime.ai.AIEngine;
-import lucee.runtime.ai.AIEngineFactory;
 import lucee.runtime.cache.CacheConnection;
 import lucee.runtime.cache.CacheConnectionImpl;
 import lucee.runtime.cache.CacheUtil;
@@ -260,7 +259,7 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 	private Server[] mailServers;
 	private boolean initMailServer;
 
-	private Map<String, AIEngineFactory> aiFactories;
+	private Map<String, AIEngine> aiFactories;
 	private boolean aiFactoriesInit;
 
 	private boolean initLog;
@@ -757,24 +756,19 @@ public class ModernApplicationContext extends ApplicationContextSupport {
 		initAIEngineFactories();
 
 		if (aiFactories != null) {
-			AIEngineFactory factory = aiFactories.get(name.toLowerCase().trim());
-			// TODO better cache for this
-			try {
-				return AIEngineFactory.getInstance(config, factory);
-			}
-			catch (Exception e) {
-				LogUtil.log("ModernApplicationContext", e);
-			}
+			AIEngine aie = aiFactories.get(name.toLowerCase().trim());
+			if (aie != null) return aie;
 		}
 		return ((ConfigPro) config).getAIEnginePool().getEngine(config, name);
 	}
 
+	@Override
 	public String getAIEngineNameForDefault(String defaultName) {
 		initAIEngineFactories();
 		if (aiFactories != null) {
-			for (AIEngineFactory f: aiFactories.values()) {
-				if (f.getDefault() != null && defaultName.equalsIgnoreCase(f.getDefault())) {
-					return f.getName();
+			for (AIEngine aie: aiFactories.values()) {
+				if (aie.getDefault() != null && defaultName.equalsIgnoreCase(aie.getDefault())) {
+					return aie.getName();
 				}
 			}
 		}

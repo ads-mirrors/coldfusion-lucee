@@ -19,12 +19,12 @@ import lucee.commons.lang.StringUtil;
 import lucee.commons.lang.mimetype.MimeType;
 import lucee.loader.util.Util;
 import lucee.runtime.ai.AIEngine;
-import lucee.runtime.ai.AIEngineFactory;
 import lucee.runtime.ai.AIEngineSupport;
 import lucee.runtime.ai.AIModel;
 import lucee.runtime.ai.AISession;
 import lucee.runtime.ai.AISessionSupport;
 import lucee.runtime.ai.AIUtil;
+import lucee.runtime.db.ClassDefinition;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.interpreter.JSONExpressionInterpreter;
@@ -65,8 +65,8 @@ public class GeminiEngine extends AIEngineSupport {
 	public Double temperature = null;
 
 	@Override
-	public AIEngine init(AIEngineFactory factory, Struct properties) throws PageException {
-		super.init(factory);
+	public AIEngine init(ClassDefinition<? extends AIEngine> cd, Struct properties, String name, String _default, String id) throws PageException {
+		super.init(cd, properties, name, _default, id);
 		this.properties = properties;
 
 		// base URL
