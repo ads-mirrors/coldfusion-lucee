@@ -2426,6 +2426,7 @@ sort direction:
 		</argument>
 		<argument>
 			<name>remove</name>
+			<introduced>6.2.1.11</introduced>
 			<type>boolean</type>
 			<default>false</default>
 			<required>No</required>
@@ -3745,6 +3746,7 @@ Filter to be used to filter the data copied:
 		</argument>
 		<argument>
 			<name>mode</name>
+			<intoduced>6.2.1.7</intoduced>
 			<type>string</type>
 			<required>no</required>
 			<default>777</default>
@@ -9922,6 +9924,7 @@ For exception analysis and debugging, lower temperatures (0.2-0.3) are recommend
 	<!-- AIGetMetaData -->
 	<function>
 		<name>LuceeAIGetMetaData</name>
+		<introduced>6.2.0.30</introduced>
 		<class>lucee.runtime.functions.ai.AIGetMetaData</class>
 		<description>This feature is experimental and may be subject to change. If you encounter any issues while using this functionality, please report bugs and errors in our bug tracking system.
 		
@@ -9960,6 +9963,7 @@ For exception analysis and debugging, lower temperatures (0.2-0.3) are recommend
 	<!-- AIHas -->
 	<function>
 		<name>LuceeAIHas</name>
+		<introduced>6.2.0.30</introduced>
 		<class>lucee.runtime.functions.ai.AIHas</class>
 		<description>This feature is experimental and may be subject to change. If you encounter any issues while using this functionality, please report bugs and errors in our bug tracking system.
 		
@@ -9983,6 +9987,7 @@ For exception analysis and debugging, lower temperatures (0.2-0.3) are recommend
 	<function>
 		<name>LuceeAIGetNameForDefault</name>
 		<class>lucee.runtime.functions.ai.AIGetNameForDefault</class>
+		<intoduced>6.2.1.31</intoduced>
 		<description></description>
 		<status>hidden</status>
 		<argument>
@@ -11628,6 +11633,7 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 	<!-- rEEscape -->
 	<function>
 		<name>REEscape</name>
+		<introduced>6.2.1.9</introduced>
 		<class>lucee.runtime.functions.string.REEscape</class>
 		<member-name>reEscape</member-name>
 		<member-position>1</member-position>
@@ -14568,6 +14574,7 @@ _- asc (default): ascending (a to z) sort order
 	<function>
 		<name>structToSorted</name>
 		<class>lucee.runtime.functions.struct.StructToSorted</class>
+		<introduced>6.2.1.6</introduced>
 		<member-name>toSorted</member-name>
 		<keywords>struct,sort</keywords>
 		<description>Returns a struct sorted by the top level keys in a structure.
