@@ -96,6 +96,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.PageContextImpl;
 import lucee.runtime.PageSource;
 import lucee.runtime.PageSourceImpl;
+import lucee.runtime.ai.AIUtil;
 import lucee.runtime.cache.CacheUtil;
 import lucee.runtime.cache.ram.RamCache;
 import lucee.runtime.config.Config;
@@ -148,6 +149,7 @@ import lucee.runtime.thread.ThreadUtil;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
+import lucee.runtime.util.AI;
 import lucee.runtime.util.Cast;
 import lucee.runtime.util.ClassUtil;
 import lucee.runtime.util.ClassUtilImpl;
@@ -1462,6 +1464,10 @@ public final class CFMLEngineImpl implements CFMLEngine {
 	@Override
 	public IO getIOUtil() {
 		return IOImpl.getInstance();
+	}
+
+	public AI getAIUtil() {
+		return AIUtil.INSTANCE;
 	}
 
 	@Override

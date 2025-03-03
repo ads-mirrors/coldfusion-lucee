@@ -47,6 +47,7 @@ import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.config.Identification;
 import lucee.runtime.config.Password;
 import lucee.runtime.exp.PageException;
+import lucee.runtime.util.AI;
 import lucee.runtime.util.Cast;
 import lucee.runtime.util.ClassUtil;
 import lucee.runtime.util.Creation;
@@ -197,6 +198,11 @@ public class CFMLEngineWrapper implements CFMLEngine {
 	@Override
 	public IO getIOUtil() {
 		return engine.getIOUtil();
+	}
+
+	@Override
+	public AI getAIUtil() {
+		return engine.getAIUtil();
 	}
 
 	@Override

@@ -21,11 +21,13 @@ import lucee.runtime.type.QueryImpl;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
+import lucee.runtime.util.AI;
 
 public class AIUtil {
 
 	private static final Key CREATED_AT = KeyImpl.init("createdAt");
 	private static final Key STATUS_DETAILS = KeyImpl.init("statusDetails");
+	public static final AI INSTANCE = new AIImpl();
 
 	public static PageException toException(AIEngine engine, String msg, String type, String code, int statusCode) {
 		String appendix = "";
@@ -194,5 +196,44 @@ public class AIUtil {
 		List<ResponsePart> parts = new ArrayList<>();
 		parts.add(new ResponsePartImpl(rsp.getAnswer()));
 		return parts;
+	}
+
+	private static class AIImpl implements AI {
+
+		@Override
+		public void valdate(AIEngine aie, int connectTimeout, int socketTimeout) throws PageException {
+			AIUtil.valdate(aie, connectTimeout, socketTimeout);
+		}
+
+		@Override
+		public List<String> getModelNames(AIEngine aie) {
+			return AIUtil.getModelNames(aie);
+		}
+
+		@Override
+		public String findModelName(AIEngine aie, String name) {
+			return AIUtil.findModelName(aie, name);
+		}
+
+		@Override
+		public String getModelNamesAsStringList(AIEngine aie) {
+			return AIUtil.getModelNamesAsStringList(aie);
+		}
+
+		@Override
+		public Struct getMetaData(AIEngine aie, boolean addModelsInfo, boolean addFilesInfo) throws PageException {
+			return AIUtil.getMetaData(aie, addModelsInfo, addFilesInfo);
+		}
+
+		@Override
+		public String extractStringAnswer(Response rsp) {
+			return AIUtil.extractStringAnswer(rsp);
+		}
+
+		@Override
+		public List<ResponsePart> getAnswersFromAnswer(Response rsp) {
+			return AIUtil.getAnswersFromAnswer(rsp);
+		}
+
 	}
 }

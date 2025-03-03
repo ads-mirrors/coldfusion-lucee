@@ -107,7 +107,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 	private static final long MB100 = 1024 * 1024 * 100;
 	private static final int MAX_REDIRECTS = 5;
 
-	private static final Version MIN_VERSION = toVersion("5.0.0.248", null);
+	private static final Version MIN_VERSION = toVersion("7.0.0.114", null);
 
 	private static CFMLEngineFactory factory;
 	// private static CFMLEngineWrapper engineListener;
