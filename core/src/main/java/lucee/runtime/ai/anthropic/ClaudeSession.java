@@ -131,16 +131,25 @@ public class ClaudeSession extends AISessionSupport {
 				else if ("text/event-stream".equals(t)) {
 					if (Util.isEmpty(cs, true)) cs = engine.getCharset();
 					JSONExpressionInterpreter interpreter = new JSONExpressionInterpreter();
-					Response r = new ClaudeStreamResponse(cs, listener);
+					ClaudeStreamResponse r = new ClaudeStreamResponse(cs, listener);
 
 					try (BufferedReader reader = new BufferedReader(
 							cs == null ? new InputStreamReader(responseEntity.getContent()) : new InputStreamReader(responseEntity.getContent(), cs))) {
 						String line;
+						int index = 0;
+						Struct prev = null;
 						while ((line = reader.readLine()) != null) {
+							if (prev != null) {
+								r.addPart(prev, index++, false);
+								prev = null;
+							}
 							if (!line.startsWith("data: ")) continue;
 							line = line.substring(6);
 							if ("[DONE]".equals(line)) break;
-							((ClaudeStreamResponse) r).addPart(Caster.toStruct(interpreter.interpret(null, line)));
+							prev = Caster.toStruct(interpreter.interpret(null, line));
+						}
+						if (prev != null) {
+							r.addPart(prev, index, true);
 						}
 					}
 

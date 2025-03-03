@@ -1,5 +1,7 @@
 package lucee.runtime.ai;
 
+import java.io.PrintStream;
+
 public class CommandPromptAIResponseListener implements AIResponseListener {
 
 	public static short OUT = 1;
@@ -11,8 +13,11 @@ public class CommandPromptAIResponseListener implements AIResponseListener {
 	}
 
 	@Override
-	public void listen(String part) {
-		if (streamType == OUT) System.out.print(part);
-		else System.err.print(part);
+	public void listen(String part, int chunkIndex, boolean isComplete) {
+		PrintStream stream = streamType == OUT ? System.err : System.err;
+
+		// stream.print("-------------- index:" + chunkIndex + ";complete?" + isComplete + "
+		// --------------");
+		stream.print(part);
 	}
 }

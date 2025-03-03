@@ -44,7 +44,7 @@ public class ClaudeStreamResponse implements Response {
 	 * public Struct getData() { return raw; }
 	 */
 
-	public void addPart(Struct part) throws PageException {
+	public void addPart(Struct part, int index, boolean complete) throws PageException {
 
 		if (raw == null) raw = part;
 
@@ -61,7 +61,7 @@ public class ClaudeStreamResponse implements Response {
 		if (StringUtil.isEmpty(text)) return;
 
 		answer.append(text);
-		if (listener != null) listener.listen(text);
+		if (listener != null) listener.listen(text, index, complete);
 	}
 
 	@Override

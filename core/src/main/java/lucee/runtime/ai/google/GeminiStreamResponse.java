@@ -50,7 +50,7 @@ public class GeminiStreamResponse implements Response {
 		return raw;
 	}
 
-	public void addPart(Struct part) throws PageException {
+	public void addPart(Struct part, int index, boolean complete) throws PageException {
 		raw.appendEL(part);
 		Array arr = Caster.toArray(part.get("candidates", null), null);
 		if (arr == null) return;
@@ -66,7 +66,7 @@ public class GeminiStreamResponse implements Response {
 		if (sct == null) return;
 
 		String str = Caster.toString(sct.get(KeyConstants._text, null), null);
-		if (listener != null) listener.listen(str);
+		if (listener != null) listener.listen(str, index, complete);
 		answer.append(str);
 	}
 

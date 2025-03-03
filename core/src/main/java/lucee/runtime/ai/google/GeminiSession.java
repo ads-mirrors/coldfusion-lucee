@@ -102,10 +102,20 @@ public class GeminiSession extends AISessionSupport {
 					try (BufferedReader reader = new BufferedReader(
 							cs == null ? new InputStreamReader(responseEntity.getContent()) : new InputStreamReader(responseEntity.getContent(), cs))) {
 						String line;
+						int index = 0;
+						Struct prev = null;
 						while ((line = reader.readLine()) != null) {
+							if (prev != null) {
+								r.addPart(prev, index++, false);
+								prev = null;
+							}
+
 							if (!line.startsWith("data: ")) continue;
 							line = line.substring(6);
-							r.addPart(Caster.toStruct(interpreter.interpret(null, line)));
+							prev = Caster.toStruct(interpreter.interpret(null, line));
+						}
+						if (prev != null) {
+							r.addPart(prev, index, true);
 						}
 					}
 

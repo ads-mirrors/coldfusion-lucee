@@ -15,7 +15,7 @@ public class UDFAIResponseListener implements AIResponseListener {
 	}
 
 	@Override
-	public void listen(String response) throws PageException {
-		listener.call(pc, new Object[] { response }, true);
+	public void listen(String part, int chunkIndex, boolean isComplete) throws PageException {
+		listener.call(pc, new Object[] { part, chunkIndex, isComplete }, true);
 	}
 }

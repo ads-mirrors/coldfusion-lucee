@@ -47,7 +47,7 @@ public class OpenAIStreamResponse implements Response {
 		return raw;
 	}
 
-	public void addPart(Struct part) throws PageException {
+	public void addPart(Struct part, int index, boolean complete) throws PageException {
 		if (raw == null) raw = part;
 		// raw.appendEL(part);
 		Array arr = Caster.toArray(part.get("choices", null), null);
@@ -61,7 +61,7 @@ public class OpenAIStreamResponse implements Response {
 		if (sct == null) return;
 		String str = Caster.toString(sct.get(KeyConstants._content, null), null);
 		answer.append(str);
-		if (listener != null) listener.listen(str);
+		if (listener != null) listener.listen(str, index, complete);
 	}
 
 	@Override
