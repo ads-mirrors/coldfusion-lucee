@@ -1,9 +1,13 @@
 package lucee.runtime.ai.anthropic;
 
+import java.util.List;
+
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.ai.AIResponseListener;
+import lucee.runtime.ai.AIUtil;
 import lucee.runtime.ai.Response;
+import lucee.runtime.ai.ResponsePart;
 import lucee.runtime.converter.ConverterException;
 import lucee.runtime.converter.JSONConverter;
 import lucee.runtime.converter.JSONDateFormat;
@@ -49,6 +53,7 @@ public class ClaudeStreamResponse implements Response {
 		if (raw == null) raw = part;
 
 		String type = Caster.toString(part.get(KeyConstants._type, null), null);
+
 		if (StringUtil.isEmpty(type) || !type.startsWith("content_block")) return;
 
 		Struct delta = Caster.toStruct(part.get("delta", null), null);
@@ -68,5 +73,17 @@ public class ClaudeStreamResponse implements Response {
 	public long getTotalTokenUsed() {
 		// Claude's streaming response doesn't provide token counts in the stream
 		return 0;
+	}
+
+	@Override
+	public List<ResponsePart> getAnswers() {
+		// TODO add support for multipart
+		return AIUtil.getAnswersFromAnswer(this);
+	}
+
+	@Override
+	public boolean isMultiPart() {
+		// TODO add support for multipart
+		return false;
 	}
 }

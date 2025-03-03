@@ -76,7 +76,7 @@ public class OpenAISession extends AISessionSupport {
 				// answer
 				msg = new StructImpl(StructImpl.TYPE_LINKED);
 				msg.set(KeyConstants._role, "assistant");
-				msg.set(KeyConstants._content, c.getResponse().getAnswer());
+				msg.set(KeyConstants._content, AIUtil.extractStringAnswer(c.getResponse()));
 				arr.append(msg);
 
 			}

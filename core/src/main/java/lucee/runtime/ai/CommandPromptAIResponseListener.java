@@ -2,6 +2,8 @@ package lucee.runtime.ai;
 
 import java.io.PrintStream;
 
+import lucee.runtime.exp.PageException;
+
 public class CommandPromptAIResponseListener implements AIResponseListener {
 
 	public static short OUT = 1;
@@ -19,5 +21,13 @@ public class CommandPromptAIResponseListener implements AIResponseListener {
 		// stream.print("-------------- index:" + chunkIndex + ";complete?" + isComplete + "
 		// --------------");
 		stream.print(part);
+	}
+
+	@Override
+	public void listen(Object part, String contentType, int chunkIndex, int partIndex, boolean isComplete) throws PageException {
+		PrintStream stream = streamType == OUT ? System.err : System.err;
+
+		stream.print("-------------- type:" + contentType + ";index:" + chunkIndex + ";complete?" + isComplete + " --------------");
+		stream.println(part);
 	}
 }

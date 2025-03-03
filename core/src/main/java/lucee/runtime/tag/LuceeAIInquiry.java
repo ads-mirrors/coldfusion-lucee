@@ -4,6 +4,7 @@ package lucee.runtime.tag;
 import javax.servlet.jsp.tagext.Tag;
 
 import lucee.runtime.PageContextImpl;
+import lucee.runtime.ai.AIUtil;
 import lucee.runtime.ai.Response;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
@@ -43,12 +44,12 @@ public final class LuceeAIInquiry extends TagImpl {
 			if (answer == null) {
 				PageContextImpl pci = ((PageContextImpl) pageContext);
 				if (pci.undefinedScope().getCheckArguments()) {
-					pci.localScope().set(KeyConstants._answer, rsp.getAnswer());
+					pci.localScope().set(KeyConstants._answer, AIUtil.extractStringAnswer(rsp));
 				}
 				answer = "answer";
 
 			}
-			if (answer != null) pageContext.setVariable(answer, rsp.getAnswer());
+			if (answer != null) pageContext.setVariable(answer, AIUtil.extractStringAnswer(rsp));
 		}
 		else {
 			throw new ApplicationException("the tag [LuceeAIInquiry] need to be insiide the tag [LuceeAI]");

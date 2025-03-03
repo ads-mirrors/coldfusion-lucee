@@ -1,7 +1,11 @@
 package lucee.runtime.ai.openai;
 
+import java.util.List;
+
 import lucee.commons.io.CharsetUtil;
+import lucee.runtime.ai.AIUtil;
 import lucee.runtime.ai.Response;
+import lucee.runtime.ai.ResponsePart;
 import lucee.runtime.converter.ConverterException;
 import lucee.runtime.converter.JSONConverter;
 import lucee.runtime.converter.JSONDateFormat;
@@ -59,4 +63,15 @@ public class OpenAIResponse implements Response {
 		return tokens;
 	}
 
+	@Override
+	public List<ResponsePart> getAnswers() {
+		// TODO add support for multipart
+		return AIUtil.getAnswersFromAnswer(this);
+	}
+
+	@Override
+	public boolean isMultiPart() {
+		// TODO add support for multipart
+		return false;
+	}
 }

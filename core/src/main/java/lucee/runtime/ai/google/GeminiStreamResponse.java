@@ -1,8 +1,12 @@
 package lucee.runtime.ai.google;
 
+import java.util.List;
+
 import lucee.commons.io.CharsetUtil;
 import lucee.runtime.ai.AIResponseListener;
+import lucee.runtime.ai.AIUtil;
 import lucee.runtime.ai.Response;
+import lucee.runtime.ai.ResponsePart;
 import lucee.runtime.converter.ConverterException;
 import lucee.runtime.converter.JSONConverter;
 import lucee.runtime.converter.JSONDateFormat;
@@ -81,5 +85,17 @@ public class GeminiStreamResponse implements Response {
 			return tokens = Caster.toLongValue(sct.get("totalTokenCount", null), 0L);
 		}
 		return tokens;
+	}
+
+	@Override
+	public List<ResponsePart> getAnswers() {
+		// TODO add support for multipart
+		return AIUtil.getAnswersFromAnswer(this);
+	}
+
+	@Override
+	public boolean isMultiPart() {
+		// TODO add support for multipart
+		return false;
 	}
 }

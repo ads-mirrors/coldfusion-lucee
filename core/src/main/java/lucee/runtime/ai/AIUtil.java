@@ -176,4 +176,24 @@ public class AIUtil {
 		}
 		return -1;
 	}
+
+	public static String extractStringAnswer(Response rsp) {
+		if (rsp.isMultiPart()) {
+			StringBuilder sb = new StringBuilder();
+			String a;
+			for (ResponsePart rp: rsp.getAnswers()) {
+				a = rp.getAsString();
+				if (a != null) sb.append(a);
+			}
+			return sb.toString();
+		}
+		return rsp.getAnswer();
+
+	}
+
+	public static List<ResponsePart> getAnswersFromAnswer(Response rsp) {
+		List<ResponsePart> parts = new ArrayList<>();
+		parts.add(new ResponsePartImpl(rsp.getAnswer()));
+		return parts;
+	}
 }

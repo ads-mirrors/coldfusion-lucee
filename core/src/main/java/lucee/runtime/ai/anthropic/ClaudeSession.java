@@ -74,7 +74,7 @@ public class ClaudeSession extends AISessionSupport {
 			// Add conversation history
 			for (Conversation c: getHistoryAsList()) {
 				messages.append(createMessage("user", c.getRequest().getQuestion()));
-				messages.append(createMessage("assistant", c.getResponse().getAnswer()));
+				messages.append(createMessage("assistant", AIUtil.extractStringAnswer(c.getResponse())));
 			}
 
 			// Add new message
@@ -122,7 +122,7 @@ public class ClaudeSession extends AISessionSupport {
 					}
 
 					// Create response object
-					Response r = new ClaudeResponse(raw, cs);
+					ClaudeResponse r = new ClaudeResponse(raw, cs);
 					AIUtil.addConversation(this, getHistoryAsList(), new ConversationImpl(new RequestSupport(message), r));
 
 					return r;

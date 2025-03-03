@@ -68,7 +68,7 @@ public class GeminiSession extends AISessionSupport {
 
 			for (Conversation c: getHistoryAsList()) {
 				contents.append(createParts("user", c.getRequest().getQuestion()));
-				contents.append(createParts("model", c.getResponse().getAnswer()));
+				contents.append(createParts("model", AIUtil.extractStringAnswer(c.getResponse())));
 			}
 
 			contents.append(createParts("user", message));
@@ -133,7 +133,7 @@ public class GeminiSession extends AISessionSupport {
 								Caster.toString(err.get(KeyConstants._code, null), null), AIUtil.getStatusCode(response));
 					}
 
-					Response r = new GeminiResponse(raw, cs);
+					GeminiResponse r = new GeminiResponse(raw, cs);
 					AIUtil.addConversation(this, getHistoryAsList(), new ConversationImpl(new RequestSupport(message), r));
 					return r;
 				}

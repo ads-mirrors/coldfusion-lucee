@@ -4,6 +4,7 @@ import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.ai.AISession;
+import lucee.runtime.ai.AIUtil;
 import lucee.runtime.ai.Response;
 import lucee.runtime.ai.UDFAIResponseListener;
 import lucee.runtime.exp.CasterException;
@@ -40,7 +41,6 @@ public final class InquiryAISession extends BIF {
 
 		if (listener != null) rsp = ais.inquiry(question, new UDFAIResponseListener(pc, listener));
 		else rsp = ais.inquiry(question);
-
-		return rsp.getAnswer();
+		return AIUtil.extractStringAnswer(rsp);
 	}
 }

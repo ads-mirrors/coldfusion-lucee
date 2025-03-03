@@ -87,6 +87,7 @@ import lucee.runtime.PageSourceImpl;
 import lucee.runtime.ai.AIEngine;
 import lucee.runtime.ai.AIEngineFactory;
 import lucee.runtime.ai.AISession;
+import lucee.runtime.ai.AIUtil;
 import lucee.runtime.ai.Response;
 import lucee.runtime.cache.CacheConnection;
 import lucee.runtime.cache.CacheUtil;
@@ -3887,7 +3888,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 
 		Struct sct = new StructImpl();
 		sct.set("question", "ping");
-		sct.set("answer", rsp.getAnswer());
+		sct.set("answer", AIUtil.extractStringAnswer(rsp));
 
 		pageContext.setVariable(getString("admin", action, "returnVariable"), sct);
 	}
