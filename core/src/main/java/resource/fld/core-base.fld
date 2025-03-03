@@ -3746,7 +3746,7 @@ Filter to be used to filter the data copied:
 		</argument>
 		<argument>
 			<name>mode</name>
-			<intoduced>6.2.1.7</intoduced>
+			<introduced>6.2.1.7</introduced>
 			<type>string</type>
 			<required>no</required>
 			<default>777</default>
@@ -14540,13 +14540,14 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<required>No</required>
 			<default>text</default>
 			<description>define one of the following:
+
 - numeric: sorts numbers
 - text: sorts text alphabetically, taking case into account (case sensitive)
 - textNoCase: sorts text alphabetically, without regard to case (case insensitive)
 
-or a function to be used as a comparator
+or a function to be used as a comparator (introduced 6.2.1)
 
-function(value1, value2, key1, key2)
+`function(value1, value2, key1, key2)`
 </description>
 		</argument>
 		<argument>
@@ -14593,13 +14594,14 @@ _- asc (default): ascending (a to z) sort order
 			<default>text</default>
 			<description>
 		The following sort types are available:
+
 - numeric: sorts numbers
 - text: sorts text alphabetically, taking case into account (case sensitive, defualt)
 - textNoCase: sorts text alphabetically, without regard to case (case insensitive)
 
-or a function to be used as a comparator
+or a function to be used as a comparator (introduced 6.2.1)
 
-function(key1, key2)
+`function(key1, key2)`
 </description>
 		</argument>
 		<argument>
