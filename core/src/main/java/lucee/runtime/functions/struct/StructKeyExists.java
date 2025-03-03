@@ -32,7 +32,6 @@ import lucee.runtime.type.Collection;
 import lucee.runtime.type.CollectionStruct;
 import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.Query;
-import lucee.runtime.type.util.StructSupport;
 
 public final class StructKeyExists extends BIF {
 
@@ -49,12 +48,8 @@ public final class StructKeyExists extends BIF {
 				return QueryColumnExists.call(pc, (Query) c, key);
 			}
 		}
-		if (struct instanceof StructSupport) { // FUTURE make available in Struct
-			if (!((StructSupport) struct).containsKey(pc, key)) return false;
-		}
-		else {
-			if (!struct.containsKey(key)) return false;
-		}
+		if (!struct.containsKey(pc, key)) return false;
+
 		if (NullSupportHelper.full(pc)) return true;
 		return struct.get(key, null) != null;// do not change, this has do be this way
 	}

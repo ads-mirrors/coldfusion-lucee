@@ -315,12 +315,6 @@ public interface Config {
 	public abstract long getLoadTime();
 
 	/**
-	 * @param dialect dialect
-	 * @return Returns the baseComponent.
-	 */
-	public abstract String getBaseComponentTemplate(int dialect);
-
-	/**
 	 * @return returns the client type
 	 */
 	public abstract short getClientType();
@@ -425,6 +419,7 @@ public interface Config {
 	/**
 	 * reload the time offset to a time server
 	 */
+	@Deprecated
 	public void reloadTimeServerOffset();
 
 	/**
@@ -494,6 +489,7 @@ public interface Config {
 	 * @param host Host
 	 * @return is proxy enabled
 	 */
+	@Deprecated
 	public boolean isProxyEnableFor(String host);
 
 	/**
@@ -631,17 +627,18 @@ public interface Config {
 	/**
 	 * @return classloader of ths context
 	 */
-	public ClassLoader getClassLoader(); // FUTURE deprecated, use instead getClassLoaderCore
-	// public ClassLoader getClassLoaderCore();
-	// public ClassLoader getClassLoaderLoader();
+	@Deprecated
+	public ClassLoader getClassLoader();
+
+	public ClassLoader getClassLoaderCore();
+
+	public ClassLoader getClassLoaderLoader();
 
 	public Resource getExtensionDirectory();
 
 	public ExtensionProvider[] getExtensionProviders();
 
 	public Extension[] getExtensions();
-
-	public PageSource getBaseComponentPageSource(int dialect);
 
 	public boolean allowRealPath();
 
@@ -724,44 +721,6 @@ public interface Config {
 	public PageSource[] getPageSources(PageContext pc, Mapping[] mappings, String realPath, boolean onlyTopLevel, boolean useSpecialMappings, boolean useDefaultMapping,
 			boolean useComponentMappings);
 
-	/**
-	 * get Resource of the first Mapping that match the given criteria
-	 * 
-	 * @param mappings per application mappings
-	 * @param relPath path to get PageSource for
-	 * @param alsoDefaultMapping also default mapping
-	 * @return Resource
-	 * @deprecated use instead getPhysicalResources or getPhysicalResourceExisting
-	 */
-	@Deprecated
-	public Resource getPhysical(Mapping[] mappings, String relPath, boolean alsoDefaultMapping);
-
-	/**
-	 * get all Resources that match the given criteria
-	 * 
-	 * @param pc current PageContext
-	 * @param mappings per application mappings
-	 * @param realPath path to get PageSource for
-	 * @param onlyTopLevel checks only toplevel mappings
-	 * @param useSpecialMappings invoke special mappings like "mapping-tag" or "mapping-customtag"
-	 * @param useDefaultMapping also invoke the always existing default mapping "/"
-	 * @return Resource
-	 */
-	public Resource[] getPhysicalResources(PageContext pc, Mapping[] mappings, String realPath, boolean onlyTopLevel, boolean useSpecialMappings, boolean useDefaultMapping);
-
-	/**
-	 * return existing Resource that match the given criteria, if there is no Resource null is returned.
-	 * 
-	 * @param pc current PageContext
-	 * @param mappings per application mappings
-	 * @param realPath path to get Resource for
-	 * @param onlyTopLevel checks only toplevel mappings
-	 * @param useSpecialMappings invoke special mappings like "mapping-tag" or "mapping-customtag"
-	 * @param useDefaultMapping also invoke the always existing default mapping "/"
-	 * @return Resource
-	 */
-	public Resource getPhysicalResourceExisting(PageContext pc, Mapping[] mappings, String realPath, boolean onlyTopLevel, boolean useSpecialMappings, boolean useDefaultMapping);
-
 	public Resource getRemoteClientDirectory();
 
 	public RemoteClient[] getRemoteClients();
@@ -818,6 +777,8 @@ public interface Config {
 	public boolean allowRequestTimeout();
 
 	public Log getLog(String name);
+
+	public String[] getLogNames();
 
 	public Boolean getHandleUnQuotedAttrValueAsString();
 

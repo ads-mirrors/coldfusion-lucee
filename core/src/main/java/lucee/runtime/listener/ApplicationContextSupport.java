@@ -18,10 +18,8 @@
  */
 package lucee.runtime.listener;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,13 +27,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.log.LoggerAndSourceData;
-import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.type.ftp.FTPConnectionData;
 import lucee.commons.lang.Pair;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
-import lucee.runtime.ai.AIEngine;
-import lucee.runtime.cache.CacheConnection;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.ConfigWeb;
@@ -43,7 +38,6 @@ import lucee.runtime.db.ClassDefinition;
 import lucee.runtime.db.DataSource;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
-import lucee.runtime.net.proxy.ProxyData;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Duplicator;
 import lucee.runtime.regex.Regex;
@@ -52,7 +46,6 @@ import lucee.runtime.type.Collection;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.Struct;
-import lucee.runtime.type.dt.TimeSpan;
 import lucee.runtime.type.util.ArrayUtil;
 import lucee.transformer.library.ClassDefinitionImpl;
 import lucee.transformer.library.tag.TagLib;
@@ -382,16 +375,6 @@ public abstract class ApplicationContextSupport implements ApplicationContext {
 	}
 
 	// FUTURE add to interface
-	public abstract Resource getAntiSamyPolicyResource(PageContext pc);
-
-	public abstract void setAntiSamyPolicyResource(Resource res);
-
-	public abstract CacheConnection getCacheConnection(String cacheName, CacheConnection defaultValue);
-
-	public abstract Key[] getCacheConnectionNames();
-
-	public abstract void setCacheConnection(String cacheName, CacheConnection value);
-
 	public abstract SessionCookieData getSessionCookie();
 
 	public abstract void setSessionCookie(SessionCookieData data);
@@ -400,33 +383,9 @@ public abstract class ApplicationContextSupport implements ApplicationContext {
 
 	public abstract void setAuthCookie(AuthCookieData data);
 
-	public abstract lucee.runtime.net.mail.Server[] getMailServers();
-
-	public abstract void setMailServers(lucee.runtime.net.mail.Server[] servers);
-
-	public abstract void setLoggers(Map<Key, Pair<Log, Struct>> logs);
-
-	public abstract java.util.Collection<Collection.Key> getLogNames() throws PageException;
-
-	public abstract Log getLog(String name) throws PageException;
-
-	public abstract Struct getLogMetaData(String string) throws PageException;
-
-	public abstract Object getMailListener();
-
-	public abstract void setMailListener(Object mailListener);
-
-	public abstract boolean getWSMaintainSession(); // used in extension Axis1
-
-	public abstract void setWSMaintainSession(boolean maintainSession);
-
 	public abstract FTPConnectionData getFTP();
 
 	public abstract void setFTP(FTPConnectionData ftp);
-
-	public abstract boolean getFullNullSupport();
-
-	public abstract void setFullNullSupport(boolean fullNullSupport);
 
 	public abstract TagListener getQueryListener();
 
@@ -436,84 +395,9 @@ public abstract class ApplicationContextSupport implements ApplicationContext {
 
 	public abstract void setSerializationSettings(SerializationSettings settings);
 
-	public abstract List<Resource> getFunctionDirectories();
-
-	public abstract void setFunctionDirectories(List<Resource> resources);
-
-	public abstract boolean getQueryPSQ();
-
-	public abstract void setQueryPSQ(boolean psq);
-
-	public abstract int getQueryVarUsage();
-
-	public abstract void setQueryVarUsage(int varUsage);
-
-	public abstract TimeSpan getQueryCachedAfter();
-
-	public abstract void setQueryCachedAfter(TimeSpan ts);
-
-	public abstract ProxyData getProxyData();
-
-	public abstract void setProxyData(ProxyData data);
-
-	public abstract String getBlockedExtForFileUpload();
-
-	public abstract void setJavaSettings(JavaSettings javaSettings);
-
-	public abstract ClassLoader getRPCClassLoader() throws IOException;
-
-	public abstract Struct getXmlFeatures();
-
-	public abstract void setXmlFeatures(Struct xmlFeatures);
-
-	public abstract boolean getAllowImplicidQueryCall();
-
-	public abstract void setAllowImplicidQueryCall(boolean allowImplicidQueryCall);
-
 	public abstract Regex getRegex();
 
 	public abstract void setRegex(Regex regex);
 
-	public abstract boolean getPreciseMath();
-
-	public abstract void setPreciseMath(boolean preciseMath);
-
-	public abstract boolean getLimitEvaluation();
-
-	public abstract void setLimitEvaluation(boolean limitEvaluation);
-
-	public abstract boolean getFormUrlAsStruct();
-
-	public abstract int getReturnFormat();
-
-	public abstract void setReturnFormat(int rf);
-
-	public abstract boolean getShowDebug();
-
-	public abstract boolean getShowDoc();
-
-	public abstract boolean getShowMetric();
-
-	public abstract boolean getShowTest();
-
-	public abstract void setShowDebug(boolean b);
-
-	public abstract void setShowDoc(boolean b);
-
-	public abstract void setShowMetric(boolean b);
-
-	public abstract void setShowTest(boolean b);
-
-	public abstract int getDebugOptions();
-
-	public abstract boolean hasDebugOptions(int option);
-
-	public abstract void setDebugOptions(int option);
-
-	public abstract void remDebugOptions(int option);
-
-	public abstract AIEngine getAIEngine(String name) throws PageException;
-
-	public abstract String getAIEngineNameForDefault(String defaultName);
-
+	public abstract void setLoggers(Map<Key, Pair<Log, Struct>> logs);
 }

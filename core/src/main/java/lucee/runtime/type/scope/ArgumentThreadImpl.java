@@ -123,6 +123,11 @@ public final class ArgumentThreadImpl implements Argument {
 	}
 
 	@Override
+	public boolean containsKey(PageContext pc, Key key) {
+		return sct.containsKey(pc, key);
+	}
+
+	@Override
 	public boolean containsKey(Key key) {
 		return sct.containsKey(key);
 	}

@@ -66,7 +66,6 @@ import lucee.runtime.type.scope.storage.IKHandlerDatasource;
 import lucee.runtime.type.scope.storage.IKStorageScopeSupport;
 import lucee.runtime.type.scope.storage.MemoryScope;
 import lucee.runtime.type.scope.storage.StorageScope;
-import lucee.runtime.type.scope.storage.StorageScopePro;
 import lucee.runtime.type.scope.storage.StorageScopeCleaner;
 import lucee.runtime.type.scope.storage.StorageScopeEngine;
 import lucee.runtime.type.scope.storage.StorageScopeImpl;
@@ -1022,11 +1021,11 @@ public final class ScopeContext {
 				if (StorageScopeImpl.KEYS.contains(e.getKey())) continue;
 				newScope.setEL(e.getKey(), e.getValue());
 			}
-			if (newScope instanceof StorageScopePro){
-				((StorageScopePro) newScope).store(pc.getConfig());
-				((StorageScopePro) newScope).setTokens(((StorageScopePro) oldScope).getTokens());
-			} 
-			
+			if (newScope instanceof StorageScope) {
+				((StorageScope) newScope).store(pc.getConfig());
+				((StorageScope) newScope).setTokens(((StorageScope) oldScope).getTokens());
+			}
+
 		}
 	}
 }

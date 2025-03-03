@@ -69,8 +69,6 @@ import lucee.runtime.PageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.type.Struct;
 
-// FUTURE all this needs to come from core
-
 public final class XMLUtilImpl implements XMLUtil {
 
 	public final static String NON_VALIDATING_DTD_GRAMMAR = "http://apache.org/xml/features/nonvalidating/load-dtd-grammar";

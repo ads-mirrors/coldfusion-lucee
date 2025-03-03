@@ -250,6 +250,12 @@ abstract class TOCollection extends TOObjects implements Collection {
 	}
 
 	@Override
+	public boolean containsKey(PageContext pageContext, Key key) {
+		log(key.getString());
+		return coll.containsKey(key);
+	}
+
+	@Override
 	public DumpData toDumpData(PageContext pageContext, int maxlevel, DumpProperties properties) {
 		log();
 		return coll.toDumpData(pageContext, maxlevel, properties);

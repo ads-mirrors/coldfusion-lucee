@@ -17,7 +17,6 @@ import lucee.runtime.config.DatasourceConnPool;
 import lucee.runtime.converter.JavaConverter;
 import lucee.runtime.db.DataSource;
 import lucee.runtime.db.DatasourceConnection;
-import lucee.runtime.db.DatasourceConnectionPro;
 import lucee.runtime.debug.DebuggerUtil;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.ApplicationException;
@@ -55,7 +54,7 @@ public class IKHandlerDatasource implements IKHandler {
 			throw Caster.toPageException(se);
 		}
 		finally {
-			if (dc != null) ((DatasourceConnectionPro) dc).release();
+			if (dc != null) dc.release();
 		}
 
 		if (query != null) {
@@ -145,7 +144,7 @@ public class IKHandlerDatasource implements IKHandler {
 			ScopeContext.error(log, e);
 		}
 		finally {
-			if (dc != null) ((DatasourceConnectionPro) dc).release();
+			if (dc != null) dc.release();
 		}
 	}
 
@@ -169,7 +168,7 @@ public class IKHandlerDatasource implements IKHandler {
 			ScopeContext.error(log, t);
 		}
 		finally {
-			if (dc != null) ((DatasourceConnectionPro) dc).release();
+			if (dc != null) dc.release();
 		}
 	}
 

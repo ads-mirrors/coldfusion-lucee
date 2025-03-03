@@ -111,6 +111,7 @@ import lucee.runtime.db.DataSource;
 import lucee.runtime.db.DataSourceImpl;
 import lucee.runtime.db.JDBCDriver;
 import lucee.runtime.db.ParamSyntax;
+import lucee.runtime.db.ParamSyntaxImpl;
 import lucee.runtime.dump.ClassicHTMLDumpWriter;
 import lucee.runtime.dump.DumpWriter;
 import lucee.runtime.dump.DumpWriterEntry;
@@ -126,8 +127,8 @@ import lucee.runtime.engine.InfoImpl;
 import lucee.runtime.engine.ThreadLocalConfig;
 import lucee.runtime.engine.ThreadLocalConfigServer;
 import lucee.runtime.engine.ThreadLocalPageContext;
+import lucee.runtime.engine.ThreadQueue;
 import lucee.runtime.engine.ThreadQueueImpl;
-import lucee.runtime.engine.ThreadQueuePro;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.PageException;
@@ -212,7 +213,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 				: new ConfigWebImpl(factory, configServer, servletConfig);
 		factory.setConfig(configServer, configWeb);
 
-		((ThreadQueueImpl) configWeb.getThreadQueue()).setMode(configWeb.getQueueEnable() ? ThreadQueuePro.MODE_ENABLED : ThreadQueuePro.MODE_DISABLED);
+		((ThreadQueueImpl) configWeb.getThreadQueue()).setMode(configWeb.getQueueEnable() ? ThreadQueue.MODE_ENABLED : ThreadQueue.MODE_DISABLED);
 
 		// call web.cfc for this context
 		((CFMLEngineImpl) ConfigUtil.getEngine(configWeb)).onStart(configWeb, false);
@@ -638,7 +639,6 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		String attrName;
 		String cn;
 
-		// FUTURE remove
 		if (StringUtil.isEmpty(prefix)) {
 			cn = getAttr(data, "class");
 			attrName = "class";
@@ -1139,7 +1139,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 
 	public static void flushPageSourcePool(Mapping... mappings) {
 		if (mappings != null) for (int i = 0; i < mappings.length; i++) {
-			if (mappings[i] instanceof MappingImpl) ((MappingImpl) mappings[i]).flush(); // FUTURE make "flush" part of the interface
+			mappings[i].flush();
 		}
 	}
 
@@ -1148,7 +1148,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		Mapping m;
 		while (it.hasNext()) {
 			m = it.next();
-			if (m instanceof MappingImpl) ((MappingImpl) m).flush(); // FUTURE make "flush" part of the interface
+			m.flush();
 		}
 	}
 
@@ -1589,7 +1589,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 				setDatasource(config, datasources, QOQ_DATASOURCE_NAME,
 						new ClassDefinitionImpl("org.hsqldb.jdbcDriver", "org.lucee.hsqldb", "2.7.2.jdk8", config.getIdentification()), "hypersonic-hsqldb", "", -1,
 						"jdbc:hsqldb:mem:tempQoQ;sql.regular_names=false;sql.enforce_strict_size=false;sql.enforce_types=false;", "sa", "", null, DEFAULT_MAX_CONNECTION, -1, -1,
-						60000, 0, 0, 0, true, true, DataSource.ALLOW_ALL, false, false, null, new StructImpl(), "", ParamSyntax.DEFAULT, false, false, false, false);
+						60000, 0, 0, 0, true, true, DataSource.ALLOW_ALL, false, false, null, new StructImpl(), "", ParamSyntaxImpl.DEFAULT, false, false, false, false);
 			}
 			catch (Throwable t) {
 				ExceptionUtil.rethrowIfNecessary(t);
@@ -1676,9 +1676,10 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 								Caster.toLongValue(getAttr(dataSource, "metaCacheTimeout"), 60000), toBoolean(getAttr(dataSource, "blob"), true),
 								toBoolean(getAttr(dataSource, "clob"), true), Caster.toIntValue(getAttr(dataSource, "allow"), DataSource.ALLOW_ALL),
 								toBoolean(getAttr(dataSource, "validate"), false), toBoolean(getAttr(dataSource, "storage"), false), getAttr(dataSource, "timezone"),
-								ConfigUtil.getAsStruct(dataSource, true, "custom"), getAttr(dataSource, "dbdriver"), ParamSyntax.toParamSyntax(dataSource, ParamSyntax.DEFAULT),
-								toBoolean(getAttr(dataSource, "literalTimestampWithTSOffset"), false), toBoolean(getAttr(dataSource, "alwaysSetTimeout"), false),
-								toBoolean(getAttr(dataSource, "requestExclusive"), false), toBoolean(getAttr(dataSource, "alwaysResetConnections"), false)
+								ConfigUtil.getAsStruct(dataSource, true, "custom"), getAttr(dataSource, "dbdriver"),
+								ParamSyntaxImpl.toParamSyntax(dataSource, ParamSyntaxImpl.DEFAULT), toBoolean(getAttr(dataSource, "literalTimestampWithTSOffset"), false),
+								toBoolean(getAttr(dataSource, "alwaysSetTimeout"), false), toBoolean(getAttr(dataSource, "requestExclusive"), false),
+								toBoolean(getAttr(dataSource, "alwaysResetConnections"), false)
 
 						);
 					}
@@ -2324,10 +2325,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 			if (!f.exists() || doNew) createFileFromResourceEL("/resource/library/function/trace." + TEMPLATE_EXTENSION, f);
 
 			f = dir.getRealResource("queryExecute." + TEMPLATE_EXTENSION);
-			// if (!f.exists() || doNew)
-			// createFileFromResourceEL("/resource/library/function/queryExecute."+TEMPLATE_EXTENSION, f);
-			if (f.exists())// FUTURE add this instead if(updateType=NEW_FRESH || updateType=NEW_FROM4)
-				delete(dir, "queryExecute." + TEMPLATE_EXTENSION);
+			if (f.exists()) delete(dir, "queryExecute." + TEMPLATE_EXTENSION);
 
 			f = dir.getRealResource("transactionCommit." + TEMPLATE_EXTENSION);
 			if (!f.exists() || doNew) createFileFromResourceEL("/resource/library/function/transactionCommit." + TEMPLATE_EXTENSION, f);

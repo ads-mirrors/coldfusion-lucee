@@ -18,7 +18,6 @@
  **/
 /**
  * Implements the CFML Function createobject
- * FUTURE neue attr unterstuestzen
  */
 package lucee.runtime.functions.other;
 

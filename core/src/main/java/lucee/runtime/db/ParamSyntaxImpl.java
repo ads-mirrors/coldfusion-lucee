@@ -1,6 +1,5 @@
 package lucee.runtime.db;
 
-import java.io.Serializable;
 import java.net.URLDecoder;
 
 import org.w3c.dom.Element;
@@ -9,23 +8,40 @@ import lucee.commons.lang.StringUtil;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.Struct;
 
-public class ParamSyntax implements Serializable {
+public class ParamSyntaxImpl implements ParamSyntax {
 
-	public static final ParamSyntax DEFAULT = new ParamSyntax("?", "&", "=");
+	private static final long serialVersionUID = 2079359336722626915L;
 
-	public final String leadingDelimiter;
-	public final String delimiter;
-	public final String separator;
+	public static final ParamSyntaxImpl DEFAULT = new ParamSyntaxImpl("?", "&", "=");
 
-	private ParamSyntax(String leadingDelimiter, String delimiter, String separator) {
+	private final String leadingDelimiter;
+	private final String delimiter;
+	private final String separator;
+
+	private ParamSyntaxImpl(String leadingDelimiter, String delimiter, String separator) {
 		this.leadingDelimiter = leadingDelimiter;
 		this.delimiter = delimiter;
 		this.separator = separator;
 	}
 
+	@Override
+	public String getLeadingDelimiter() {
+		return leadingDelimiter;
+	}
+
+	@Override
+	public String getDelimiter() {
+		return delimiter;
+	}
+
+	@Override
+	public String getSeparator() {
+		return separator;
+	}
+
 	public static ParamSyntax toParamSyntax(String leadingDelimiter, String delimiter, String separator) {
 		if (DEFAULT.delimiter.equals(delimiter) && DEFAULT.leadingDelimiter.equals(leadingDelimiter) && DEFAULT.separator.equals(separator)) return DEFAULT;
-		return new ParamSyntax(leadingDelimiter, delimiter, separator);
+		return new ParamSyntaxImpl(leadingDelimiter, delimiter, separator);
 	}
 
 	public static ParamSyntax toParamSyntax(Struct sct, ParamSyntax defaultValue) {
@@ -79,7 +95,7 @@ public class ParamSyntax implements Serializable {
 	public boolean equals(Object obj) {
 		if (!(obj instanceof ParamSyntax)) return false;
 		ParamSyntax other = (ParamSyntax) obj;
-		return other.delimiter.equals(delimiter) && other.leadingDelimiter.equals(leadingDelimiter) && other.separator.equals(separator);
+		return other.getDelimiter().equals(delimiter) && other.getLeadingDelimiter().equals(leadingDelimiter) && other.getSeparator().equals(separator);
 	}
 
 }

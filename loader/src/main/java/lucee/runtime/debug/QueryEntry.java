@@ -50,6 +50,7 @@ public interface QueryEntry extends Serializable {
 	 * 
 	 * @return Returns the query.
 	 */
+	@Deprecated
 	public Query getQry();
 
 	/**

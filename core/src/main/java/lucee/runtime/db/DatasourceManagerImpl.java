@@ -54,7 +54,7 @@ public final class DatasourceManagerImpl implements DataSourceManager {
 	private ConfigPro config;
 	boolean autoCommit = true;
 	private int isolation = Connection.TRANSACTION_NONE;
-	private Map<DataSource, DatasourceConnectionPro> transConnsReg = new HashMap<DataSource, DatasourceConnectionPro>();
+	private Map<DataSource, DatasourceConnection> transConnsReg = new HashMap<DataSource, DatasourceConnection>();
 	private Map<DataSource, ORMDatasourceConnection> transConnsORM = new HashMap<DataSource, ORMDatasourceConnection>();
 	private boolean inside;
 
@@ -75,12 +75,12 @@ public final class DatasourceManagerImpl implements DataSourceManager {
 
 	@Override
 	public DatasourceConnection getConnection(PageContext pc, DataSource ds, String user, String pass) throws PageException {
-		if (autoCommit && !((DataSourcePro) ds).isRequestExclusive()) {
+		if (autoCommit && !(ds).isRequestExclusive()) {
 			return config.getDatasourceConnectionPool(ds, user, pass).borrowObject();
 		}
 		pc = ThreadLocalPageContext.get(pc);
 		// DatasourceConnection newDC = _getConnection(pc,ds,user,pass);
-		DatasourceConnectionPro existingDC = null;
+		DatasourceConnection existingDC = null;
 		try {
 			existingDC = transConnsReg.get(ds);
 
@@ -89,7 +89,7 @@ public final class DatasourceManagerImpl implements DataSourceManager {
 				synchronized (SystemUtil.createToken("DatasourceManagerImpl", ds.id())) {
 					existingDC = transConnsReg.get(ds);
 					if (existingDC == null) {
-						DatasourceConnectionPro newDC = (DatasourceConnectionPro) config.getDatasourceConnectionPool().getDatasourceConnection(config, ds, user, pass);
+						DatasourceConnection newDC = config.getDatasourceConnectionPool().getDatasourceConnection(config, ds, user, pass);
 						if (!autoCommit) {
 							newDC.setAutoCommit(false);
 							if (isolation != Connection.TRANSACTION_NONE) DBUtil.setTransactionIsolationEL(newDC.getConnection(), isolation);
@@ -155,7 +155,7 @@ public final class DatasourceManagerImpl implements DataSourceManager {
 	}
 
 	private void _add(PageContext pc, ORMSession session, DataSource ds) throws PageException {
-		DatasourceConnectionPro existingDC = null;
+		DatasourceConnection existingDC = null;
 		try {
 			existingDC = transConnsORM.get(ds);
 			if (existingDC == null) {
@@ -184,13 +184,13 @@ public final class DatasourceManagerImpl implements DataSourceManager {
 	}
 
 	private void releaseConnection(PageContext pc, DatasourceConnection dc, boolean ignoreRequestExclusive) {
-		if (!((DatasourceConnectionPro) dc).isManaged() && autoCommit && (ignoreRequestExclusive || !((DataSourcePro) dc.getDatasource()).isRequestExclusive())) {
+		if (!dc.isManaged() && autoCommit && (ignoreRequestExclusive || !dc.getDatasource().isRequestExclusive())) {
 
 			if (pc != null && ((PageContextImpl) pc).getTimeoutStackTrace() != null) {
 				IOUtil.closeEL(dc);
 			}
 			else {
-				((DatasourceConnectionPro) dc).release();
+				dc.release();
 			}
 		}
 	}
@@ -225,7 +225,7 @@ public final class DatasourceManagerImpl implements DataSourceManager {
 		rollback(null);
 	}
 
-	// FUTURE
+	@Override
 	public void rollback(String savePointName) throws DatabaseException {
 		if (autoCommit || _size() == 0) return;
 		DatasourceConnection dc = null;
@@ -257,7 +257,7 @@ public final class DatasourceManagerImpl implements DataSourceManager {
 		}
 		// Reg
 		{
-			Iterator<DatasourceConnectionPro> it = this.transConnsReg.values().iterator();
+			Iterator<DatasourceConnection> it = this.transConnsReg.values().iterator();
 			while (it.hasNext()) {
 				dc = it.next();
 				try {
@@ -287,7 +287,7 @@ public final class DatasourceManagerImpl implements DataSourceManager {
 		savepoint(null);
 	}
 
-	// FUTURE
+	@Override
 	public void savepoint(String savePointName) throws DatabaseException {
 		if (autoCommit || _size() == 0) return;
 
@@ -312,7 +312,7 @@ public final class DatasourceManagerImpl implements DataSourceManager {
 		}
 		// Reg
 		{
-			Iterator<DatasourceConnectionPro> it = this.transConnsReg.values().iterator();
+			Iterator<DatasourceConnection> it = this.transConnsReg.values().iterator();
 			while (it.hasNext()) {
 				dc = it.next();
 				try {
@@ -359,7 +359,7 @@ public final class DatasourceManagerImpl implements DataSourceManager {
 		}
 		// Reg
 		{
-			Iterator<DatasourceConnectionPro> it = this.transConnsReg.values().iterator();
+			Iterator<DatasourceConnection> it = this.transConnsReg.values().iterator();
 			while (it.hasNext()) {
 				dc = it.next();
 				try {
@@ -393,7 +393,7 @@ public final class DatasourceManagerImpl implements DataSourceManager {
 	}
 
 	@Override
-	public void end() { // FUTURE add DatabaseException
+	public void end() {
 		end(false);
 	}
 
@@ -414,7 +414,7 @@ public final class DatasourceManagerImpl implements DataSourceManager {
 				dc = entry.getValue();
 				try {
 					dc.setAutoCommit(true);
-					DBUtil.setTransactionIsolationEL(dc.getConnection(), ((DatasourceConnectionPro) dc).getDefaultTransactionIsolation());
+					DBUtil.setTransactionIsolationEL(dc.getConnection(), dc.getDefaultTransactionIsolation());
 
 				}
 				catch (Exception e) {
@@ -430,11 +430,11 @@ public final class DatasourceManagerImpl implements DataSourceManager {
 
 		// Reg
 		if (transConnsReg.size() > 0) {
-			Map<DataSource, DatasourceConnectionPro> tmp = null;
-			if (onlyORM) tmp = new HashMap<DataSource, DatasourceConnectionPro>();
-			Iterator<Entry<DataSource, DatasourceConnectionPro>> it = this.transConnsReg.entrySet().iterator();
-			DatasourceConnectionPro dc;
-			Entry<DataSource, DatasourceConnectionPro> entry;
+			Map<DataSource, DatasourceConnection> tmp = null;
+			if (onlyORM) tmp = new HashMap<DataSource, DatasourceConnection>();
+			Iterator<Entry<DataSource, DatasourceConnection>> it = this.transConnsReg.entrySet().iterator();
+			DatasourceConnection dc;
+			Entry<DataSource, DatasourceConnection> entry;
 			while (it.hasNext()) {
 				entry = it.next();
 				dc = entry.getValue();

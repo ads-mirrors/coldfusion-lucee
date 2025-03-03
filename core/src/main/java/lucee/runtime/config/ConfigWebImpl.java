@@ -301,6 +301,11 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	}
 
 	@Override
+	public ClassLoader getClassLoaderLoader() {
+		return cs.getClassLoaderLoader();
+	}
+
+	@Override
 	public Locale getLocale() {
 		return cs.getLocale();
 	}
@@ -405,21 +410,6 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	}
 
 	@Override
-	public Resource getPhysical(Mapping[] mappings, String realPath, boolean alsoDefaultMapping) {
-		throw new PageRuntimeException(new DeprecatedException("method not supported"));
-	}
-
-	@Override
-	public Resource[] getPhysicalResources(PageContext pc, Mapping[] mappings, String realPath, boolean onlyTopLevel, boolean useSpecialMappings, boolean useDefaultMapping) {
-		throw new PageRuntimeException(new DeprecatedException("method not supported"));
-	}
-
-	@Override
-	public Resource getPhysicalResourceExisting(PageContext pc, Mapping[] mappings, String realPath, boolean onlyTopLevel, boolean useSpecialMappings, boolean useDefaultMapping) {
-		throw new PageRuntimeException(new DeprecatedException("method not supported"));
-	}
-
-	@Override
 	public PageSource toPageSource(Mapping[] mappings, Resource res, PageSource defaultValue) {
 		return ConfigUtil.toPageSource(this, mappings, res, defaultValue);
 	}
@@ -455,18 +445,8 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	}
 
 	@Override
-	public String getBaseComponentTemplate(int dialect) { // FUTURE remove
-		return cs.getBaseComponentTemplate(dialect);
-	}
-
-	@Override
 	public String getBaseComponentTemplate() {
 		return cs.getBaseComponentTemplate();
-	}
-
-	@Override
-	public PageSource getBaseComponentPageSource(int dialect) { // FUTURE remove
-		return cs.getBaseComponentPageSource(dialect);
 	}
 
 	@Override
@@ -1940,6 +1920,7 @@ public class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 		cs.putComponentMetadata(arg0, arg1);
 	}
 
+	@Override
 	public String[] getLogNames() {
 		return cs.getLogNames();
 	}

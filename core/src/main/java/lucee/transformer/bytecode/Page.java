@@ -49,7 +49,6 @@ import lucee.runtime.Component;
 import lucee.runtime.ComponentPageImpl;
 import lucee.runtime.InterfacePageImpl;
 import lucee.runtime.Mapping;
-import lucee.runtime.PageImpl;
 import lucee.runtime.PageSource;
 import lucee.runtime.SubPage;
 import lucee.runtime.component.ImportDefintion;
@@ -329,7 +328,7 @@ public final class Page extends BodyBase implements Root {
 		boolean isSub = comp != null && !comp.isMain();
 
 		// parent
-		String parent = PageImpl.class.getName();// "lucee/runtime/Page";
+		String parent = lucee.runtime.Page.class.getName();// "lucee/runtime/Page";
 		String[] interfaces = null;
 		if (isComponent(comp)) {
 			parent = ComponentPageImpl.class.getName();// "lucee/runtime/ComponentPage";
@@ -373,7 +372,7 @@ public final class Page extends BodyBase implements Root {
 			constrAdapter.invokeConstructor(t, CONSTRUCTOR);
 		}
 		else {
-			t = Types.PAGE_IMPL;
+			t = Types.PAGE;
 			constrAdapter.invokeConstructor(t, CONSTRUCTOR);
 		}
 

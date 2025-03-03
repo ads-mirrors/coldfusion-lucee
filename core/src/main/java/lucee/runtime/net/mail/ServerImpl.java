@@ -187,11 +187,13 @@ public final class ServerImpl implements Server, Serializable {
 		return idle;
 	}
 
-	public int getId() { // FUTURE add to interface
+	@Override
+	public int getId() {
 		return id;
 	}
 
-	public int getType() { // FUTURE add to interface
+	@Override
+	public int getType() {
 		return type;
 	}
 

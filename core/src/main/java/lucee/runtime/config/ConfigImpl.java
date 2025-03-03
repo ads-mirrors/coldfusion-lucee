@@ -73,6 +73,7 @@ import lucee.commons.lang.SerializableObject;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.lang.types.RefBoolean;
 import lucee.commons.net.IPRange;
+import lucee.loader.TP;
 import lucee.runtime.CIPage;
 import lucee.runtime.Component;
 import lucee.runtime.Mapping;
@@ -101,7 +102,6 @@ import lucee.runtime.dump.DumpWriter;
 import lucee.runtime.dump.DumpWriterEntry;
 import lucee.runtime.dump.HTMLDumpWriter;
 import lucee.runtime.engine.ExecutionLogFactory;
-import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.DatabaseException;
 import lucee.runtime.exp.DeprecatedException;
@@ -116,7 +116,6 @@ import lucee.runtime.extension.ExtensionProvider;
 import lucee.runtime.extension.RHExtension;
 import lucee.runtime.extension.RHExtensionProvider;
 import lucee.runtime.functions.other.CreateUniqueId;
-import lucee.runtime.listener.AppListenerSupport;
 import lucee.runtime.listener.AppListenerUtil;
 import lucee.runtime.listener.ApplicationContext;
 import lucee.runtime.listener.ApplicationListener;
@@ -512,7 +511,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	@Override
 	@Deprecated
 	public void reloadTimeServerOffset() {
-		// FUTURE remove methd
+		// FUTURE remove method
 	}
 
 	/**
@@ -973,7 +972,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return this;
 	}
 
-	// FUTURE add to interface
 	@Override
 	public boolean isMailSendPartial() {
 		if (sendPartial == null) {
@@ -997,7 +995,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return this;
 	}
 
-	// FUTURE add to interface and impl
 	@Override
 	public boolean isUserset() {
 		if (userSet == null) {
@@ -1142,6 +1139,11 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	@Override
 	public ClassLoader getClassLoaderCore() {
 		return new lucee.commons.lang.ClassLoaderHelper().getClass().getClassLoader();
+	}
+
+	@Override
+	public ClassLoader getClassLoaderLoader() {
+		return new TP().getClass().getClassLoader();
 	}
 
 	@Override
@@ -1664,31 +1666,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	public Resource[] getResources(PageContext pc, Mapping[] mappings, String realPath, boolean onlyTopLevel, boolean useSpecialMappings, boolean useDefaultMapping,
 			boolean useComponentMappings, boolean onlyFirstMatch) {
 		return ConfigUtil.getResources(pc, this, mappings, realPath, onlyTopLevel, useSpecialMappings, useDefaultMapping, useComponentMappings, onlyFirstMatch);
-	}
-
-	/**
-	 * @param mappings
-	 * @param realPath
-	 * @param alsoDefaultMapping ignore default mapping (/) or not
-	 * @return physical path from mapping
-	 */
-	@Override
-	public Resource getPhysical(Mapping[] mappings, String realPath, boolean alsoDefaultMapping) {
-		throw new PageRuntimeException(new DeprecatedException("method not supported"));
-	}
-
-	@Override
-	public Resource[] getPhysicalResources(PageContext pc, Mapping[] mappings, String realPath, boolean onlyTopLevel, boolean useSpecialMappings, boolean useDefaultMapping) {
-		// now that archives can be used the same way as physical resources, there is no need anymore to
-		// limit to that FUTURE remove
-		throw new PageRuntimeException(new DeprecatedException("method not supported"));
-	}
-
-	@Override
-	public Resource getPhysicalResourceExisting(PageContext pc, Mapping[] mappings, String realPath, boolean onlyTopLevel, boolean useSpecialMappings, boolean useDefaultMapping) {
-		// now that archives can be used the same way as physical resources, there is no need anymore to
-		// limit to that FUTURE remove
-		throw new PageRuntimeException(new DeprecatedException("method not supported"));
 	}
 
 	@Override
@@ -2230,14 +2207,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return this;
 	}
 
-	/**
-	 * @return pagesource of the base component
-	 */
-	@Override
-	public PageSource getBaseComponentPageSource(int dialect) {// FUTURE remove from interfaces
-		return getBaseComponentPageSource(ThreadLocalPageContext.get(), false);
-	}
-
 	@Override
 	public PageSource getBaseComponentPageSource(PageContext pc, boolean force) {
 		PageSource base = force ? null : baseComponentPageSource;
@@ -2329,12 +2298,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			}
 		}
 		return base;
-	}
-
-	@Override
-	@Deprecated
-	public String getBaseComponentTemplate(int dialect) { // FUTURE remove from interface
-		return baseComponentTemplate;
 	}
 
 	@Override
@@ -3091,7 +3054,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 						String strSi = SystemUtil.getSystemPropOrEnvVar("lucee.listener.singelton", null);
 						if (StringUtil.isEmpty(strSi)) strSi = SystemUtil.getSystemPropOrEnvVar("lucee.application.singelton", null);
 						if (StringUtil.isEmpty(strSi)) strSi = ConfigFactoryImpl.getAttr(root, new String[] { "listenerSingelton", "applicationSingelton" });
-						((AppListenerSupport) listener).setSingelton(Caster.toBooleanValue(strSi, false));
+						listener.setSingelton(Caster.toBooleanValue(strSi, false));
 					}
 					applicationListener = listener;
 
@@ -3159,7 +3122,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	@Override
-	public boolean isProxyEnableFor(String host) { // FUTURE remove
+	@Deprecated
+	public boolean isProxyEnableFor(String host) {
 		return ProxyDataImpl.isProxyEnableFor(getProxyData(), host);
 	}
 
@@ -5539,7 +5503,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return loggers;
 	}
 
-	// FUTURE add to interface
+	@Override
 	public String[] getLogNames() {
 		Set<String> keys = getLoggers().keySet();
 		return keys.toArray(new String[keys.size()]);

@@ -454,7 +454,7 @@ public final class BundleProvider {
 
 	private static URL[] getDefaultProviderDetail() {
 		if (defaultProviderDetail == null) {
-			String str = getSystemPropOrEnvVar("lucee.s3.bundle.detail", null);
+			String str = Util.getSystemPropOrEnvVar("lucee.s3.bundle.detail", null);
 			if (!Util.isEmpty(str, true)) {
 				try {
 					defaultProviderDetail = new URL[] { new URL(str.trim()) };
@@ -469,7 +469,7 @@ public final class BundleProvider {
 
 	private static URL getDefaultProviderDetailMvn() {
 		if (defaultProviderDetailMvn == null) {
-			String str = getSystemPropOrEnvVar("lucee.mvn.bundle.detail", null);
+			String str = Util.getSystemPropOrEnvVar("lucee.mvn.bundle.detail", null);
 			if (!Util.isEmpty(str, true)) {
 				try {
 					defaultProviderDetailMvn = new URL(str.trim());
@@ -597,11 +597,6 @@ public final class BundleProvider {
 		public String toString() {
 			return String.format("groupId:%s;artifactId:%s;bundleSymbolicName:%s", groupId, artifactId, bundleSymbolicName);
 		}
-	}
-
-	private static String getSystemPropOrEnvVar(String string, Object object) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	public static class BundleDefinition {

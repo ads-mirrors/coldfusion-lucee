@@ -288,8 +288,12 @@ public class QueryFQ implements Query, Objects, QueryResult, Serializable {
 
 	@Override
 	public boolean containsKey(Key key) {
-
 		return qry.containsKey(key);
+	}
+
+	@Override
+	public boolean containsKey(PageContext pc, Key key) {
+		return qry.containsKey(pc, key);
 	}
 
 	@Override

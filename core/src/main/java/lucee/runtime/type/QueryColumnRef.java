@@ -242,6 +242,12 @@ public final class QueryColumnRef implements QueryColumn {
 	}
 
 	@Override
+	public boolean containsKey(PageContext pc, Collection.Key key) {
+		Object _null = NullSupportHelper.NULL();
+		return get(key, _null) != _null;
+	}
+
+	@Override
 	public DumpData toDumpData(PageContext pageContext, int maxlevel, DumpProperties dp) {
 		return DumpUtil.toDumpData(get(query.getCurrentrow(pageContext.getId()), null), pageContext, maxlevel, dp);
 	}

@@ -63,7 +63,6 @@ import lucee.runtime.converter.WDDXConverter;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.functions.international.GetTimeZoneInfo;
-import lucee.runtime.functions.system.BundleInfo;
 import lucee.runtime.i18n.LocaleFactory;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
@@ -94,11 +93,6 @@ public class DumpUtil {
 		((DumpTable) MAX_LEVEL_REACHED).appendRow(new DumpRow(1, new SimpleDumpData("[Max Dump Level Reached]")));
 	}
 
-	public static void main(String[] args) {
-		toDumpData(new BundleInfo(), null, 1, DumpProperties.DEFAULT);
-	}
-
-	// FUTURE add to interface
 	public static DumpData toDumpData(Object o, PageContext pageContext, int maxlevel, DumpProperties props) {
 		if (maxlevel < 0) return MAX_LEVEL_REACHED;
 

@@ -44,7 +44,7 @@ import lucee.commons.net.http.Header;
 import lucee.commons.net.http.httpclient.HTTPEngine4Impl;
 import lucee.commons.net.http.httpclient.HeaderImpl;
 import lucee.runtime.engine.CFMLEngineImpl;
-import lucee.runtime.engine.ThreadQueuePro;
+import lucee.runtime.engine.ThreadQueue;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.extension.ExtensionDefintion;
@@ -80,9 +80,9 @@ public class DeployHandler {
 			Resource child;
 			String ext;
 			if (children.length > 0) {
-				ThreadQueuePro queue = (ThreadQueuePro) config.getThreadQueue();
-				short prevMode = ThreadQueuePro.MODE_UNDEFINED;
-				if (queue != null) prevMode = queue.setMode(ThreadQueuePro.MODE_BLOCKING);
+				ThreadQueue queue = config.getThreadQueue();
+				short prevMode = ThreadQueue.MODE_UNDEFINED;
+				if (queue != null) prevMode = queue.setMode(ThreadQueue.MODE_BLOCKING);
 				try {
 					for (int i = 0; i < children.length; i++) {
 						child = children[i];

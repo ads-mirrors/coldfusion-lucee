@@ -171,6 +171,11 @@ public class ArrayAsArrayPro implements ArrayPro {
 	}
 
 	@Override
+	public boolean containsKey(PageContext pc, Key key) {
+		return array.containsKey(pc, key);
+	}
+
+	@Override
 	public Collection duplicate(boolean arg0) {
 		return array.duplicate(arg0);
 	}

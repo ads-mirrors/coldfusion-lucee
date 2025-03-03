@@ -307,16 +307,15 @@ public final class PageSourceImpl implements PageSource {
 		// Page exists
 		if (page != null) {
 			// if(page!=null && !recompileAlways) {
-			if (srcLastModified != page.getSourceLastModified() || (page instanceof PagePro && ((PagePro) page).getSourceLength() != srcFile.length())) {
+			if (srcLastModified != page.getSourceLastModified() || (page.getSourceLength() != srcFile.length())) {
 				synchronized (this) {
 					// synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
-					if (srcLastModified != page.getSourceLastModified() || (page instanceof PagePro && ((PagePro) page).getSourceLength() != srcFile.length())) {
+					if (srcLastModified != page.getSourceLastModified() || (page.getSourceLength() != srcFile.length())) {
 						// same size, maybe the content has not changed?
 						boolean same = false;
-						if (page instanceof PagePro && ((PagePro) page).getSourceLength() == srcFile.length()) {
-							PagePro pp = (PagePro) page;
+						if (page.getSourceLength() == srcFile.length()) {
 							try {
-								same = pp.getHash() == PageSourceCode.toString(this, config.getTemplateCharset()).hashCode();
+								same = page.getHash() == PageSourceCode.toString(this, config.getTemplateCharset()).hashCode();
 							}
 							catch (IOException e) {
 							}
@@ -408,13 +407,9 @@ public final class PageSourceImpl implements PageSource {
 		long srcLastModified = srcFile.lastModified();
 		// Page exists
 		if (page != null) {
-			// if(page!=null && !recompileAlways) {
-
-			if (srcLastModified == 0 || srcLastModified != page.getSourceLastModified()) { // || (page instanceof PagePro && ((PagePro) page).getSourceLength() != srcFile.length())
+			if (srcLastModified == 0 || srcLastModified != page.getSourceLastModified()) {
 				synchronized (this) {
-					// synchronized (SystemUtil.createToken("PageSource", getRealpathWithVirtual())) {
-					if (srcLastModified == 0 || srcLastModified != page.getSourceLastModified()) {// || (page instanceof PagePro && ((PagePro) page).getSourceLength() !=
-																									// srcFile.length())
+					if (srcLastModified == 0 || srcLastModified != page.getSourceLastModified()) {
 						if (LogUtil.doesDebug(mapping.getLog())) mapping.getLog().debug("page-source", "release [" + getDisplayPath() + "] from page source pool");
 						resetLoaded();
 						flush();
@@ -1122,7 +1117,8 @@ public final class PageSourceImpl implements PageSource {
 	}
 
 	@Override
-	public int getDialect() { // FUTURE remove
+	@Deprecated
+	public int getDialect() {
 		return CFMLEngine.DIALECT_CFML;
 	}
 

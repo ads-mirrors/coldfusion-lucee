@@ -78,4 +78,7 @@ public interface Server {
 	 */
 	public abstract boolean isSSL();
 
+	public abstract int getId();
+
+	public abstract int getType();
 }

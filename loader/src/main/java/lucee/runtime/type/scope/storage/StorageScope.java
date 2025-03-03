@@ -18,7 +18,11 @@
  **/
 package lucee.runtime.type.scope.storage;
 
+import java.util.Map;
+
+import lucee.runtime.PageContext;
 import lucee.runtime.config.Config;
+import lucee.runtime.type.Collection;
 import lucee.runtime.type.scope.SharedScope;
 
 /**
@@ -55,12 +59,16 @@ public interface StorageScope extends SharedScope {
 	 */
 	public void store(Config config);
 
+	public void store(PageContext pc);
+
 	/**
 	 * remove stored data from persistent layer
 	 * 
 	 * @param config config
 	 */
 	public void unstore(Config config);
+
+	public void unstore(PageContext pc);
 
 	/**
 	 * sets the name of the storage used, this is not the storage type!
@@ -101,4 +109,9 @@ public interface StorageScope extends SharedScope {
 
 	public boolean verifyToken(String token, String key);
 
+	public boolean verifyToken(String token, String key, boolean remove);
+
+	public Map<Collection.Key, String> getTokens();
+
+	public void setTokens(Map<Collection.Key, String> tokens);
 }

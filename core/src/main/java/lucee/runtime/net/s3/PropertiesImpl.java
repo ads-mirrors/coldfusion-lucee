@@ -51,12 +51,10 @@ public final class PropertiesImpl implements Properties {
 		return accessKeyId;
 	}
 
-	// FUTURE add to interface
 	public String getACL() {
 		return acl;
 	}
 
-	// FUTURE add to interface
 	public void setACL(String acl) {
 		this.acl = acl;
 	}

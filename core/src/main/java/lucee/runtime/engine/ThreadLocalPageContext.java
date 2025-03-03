@@ -29,7 +29,6 @@ import lucee.runtime.PageContext;
 import lucee.runtime.PageContextImpl;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
-import lucee.runtime.listener.ApplicationContextSupport;
 import lucee.runtime.thread.ThreadUtil;
 
 /**
@@ -124,15 +123,15 @@ public final class ThreadLocalPageContext {
 
 	public static boolean preciseMath(PageContext pc) {
 		// pc provided
-		if (pc != null) return ((ApplicationContextSupport) pc.getApplicationContext()).getPreciseMath();
+		if (pc != null) return (pc.getApplicationContext()).getPreciseMath();
 
 		// pc from current thread
 		pc = pcThreadLocal.get();
-		if (pc != null) return ((ApplicationContextSupport) pc.getApplicationContext()).getPreciseMath();
+		if (pc != null) return (pc.getApplicationContext()).getPreciseMath();
 
 		// pc from parent thread
 		pc = pcThreadLocalInheritable.get();
-		if (pc != null) return ((ApplicationContextSupport) pc.getApplicationContext()).getPreciseMath();
+		if (pc != null) return (pc.getApplicationContext()).getPreciseMath();
 
 		Config c = ThreadLocalConfig.get();
 		if (c instanceof ConfigPro) return ((ConfigPro) c).getPreciseMath();

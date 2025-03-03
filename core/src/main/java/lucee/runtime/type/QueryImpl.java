@@ -154,7 +154,7 @@ public class QueryImpl implements Query, Objects, QueryResult {
 	}
 
 	@Override
-	public TemplateLine getTemplateLine() { // FUTURE add to interface
+	public TemplateLine getTemplateLine() {
 		return templateLine;
 	}
 
@@ -948,8 +948,9 @@ public class QueryImpl implements Query, Objects, QueryResult {
 			// must start with a letter and can be followed by
 			// letters numbers and underscores [_]. RegExp:[a-zA-Z][a-zA-Z0-9_]*",null,null,null);
 
-			if (testMap.contains(columnNames[i].getLowerString())) throw new DatabaseException("invalid parameter for query, ambiguous/duplicate column name [" + columnNames[i] + "]",
-					"columnNames: [" + ListUtil.arrayToListTrim(_toStringKeys(columnNames), ",") +"]", null, null);
+			if (testMap.contains(columnNames[i].getLowerString()))
+				throw new DatabaseException("invalid parameter for query, ambiguous/duplicate column name [" + columnNames[i] + "]",
+						"columnNames: [" + ListUtil.arrayToListTrim(_toStringKeys(columnNames), ",") + "]", null, null);
 			testMap.add(columnNames[i].getLowerString());
 		}
 	}
@@ -1153,7 +1154,7 @@ public class QueryImpl implements Query, Objects, QueryResult {
 	@Override
 	public int removeRow(int row) throws PageException {
 		// disconnectCache();
-		synchronized (this){
+		synchronized (this) {
 			for (int i = 0; i < columns.length; i++) {
 				columns[i].removeRow(row);
 			}
@@ -1201,7 +1202,7 @@ public class QueryImpl implements Query, Objects, QueryResult {
 	@Override
 	public QueryColumn removeColumnEL(Collection.Key key) {
 		// TODO should in that case not all method accessing columnNames,columns been locked down?
-		synchronized (this){
+		synchronized (this) {
 			int index = getIndexFromKey(key);
 			if (index != -1) {
 				int current = 0;
@@ -1527,7 +1528,7 @@ public class QueryImpl implements Query, Objects, QueryResult {
 
 	@Override
 	public int[] getTypes() {
-		synchronized (this){
+		synchronized (this) {
 			int[] types = new int[columns.length];
 			for (int i = 0; i < columns.length; i++) {
 				types[i] = columns[i].getType();
@@ -1538,7 +1539,7 @@ public class QueryImpl implements Query, Objects, QueryResult {
 
 	@Override
 	public Map<Collection.Key, String> getTypesAsMap() {
-		synchronized (this){
+		synchronized (this) {
 			Map<Collection.Key, String> map = new HashMap<Collection.Key, String>();
 			for (int i = 0; i < columns.length; i++) {
 				map.put(columnNames[i], columns[i].getTypeAsString());
@@ -1575,7 +1576,7 @@ public class QueryImpl implements Query, Objects, QueryResult {
 
 	@Override
 	public void rename(Collection.Key columnName, Collection.Key newColumnName) throws ExpressionException {
-		synchronized (this){
+		synchronized (this) {
 			int index = getIndexFromKey(columnName);
 			if (index == -1) {
 				throw new ExpressionException("Cannot rename Column [" + columnName.getString() + "] to [" + newColumnName.getString() + "], original column doesn't exist");
@@ -1764,7 +1765,7 @@ public class QueryImpl implements Query, Objects, QueryResult {
 	 */
 	public boolean cutRowsTo(int maxrows) {
 		// disconnectCache();
-		synchronized (this){
+		synchronized (this) {
 			if (maxrows > -1 && maxrows < getRecordcount()) {
 				for (int i = 0; i < columns.length; i++) {
 					QueryColumn column = columns[i];
@@ -1925,6 +1926,11 @@ public class QueryImpl implements Query, Objects, QueryResult {
 	}
 
 	@Override
+	public boolean containsKey(PageContext pc, Collection.Key key) {
+		return getColumn(key, null) != null;
+	}
+
+	@Override
 	public String castToString() throws ExpressionException {
 		throw new ExpressionException("Can't cast Complex Object Type Query to String", "Use Built-In-Function \"serialize(Query):String\" to create a String from Query");
 	}
@@ -1986,7 +1992,7 @@ public class QueryImpl implements Query, Objects, QueryResult {
 
 	@Override
 	public Array getMetaDataSimple() {
-		synchronized (this){
+		synchronized (this) {
 			Array cols = new ArrayImpl();
 			Struct column;
 			for (int i = 0; i < columns.length; i++) {
@@ -3344,7 +3350,7 @@ public class QueryImpl implements Query, Objects, QueryResult {
 
 	@Override
 	public void enableShowQueryUsage() {
-		synchronized (this){
+		synchronized (this) {
 			if (columns != null) for (int i = 0; i < columns.length; i++) {
 				columns[i] = columns[i]._toDebugColumn();
 			}

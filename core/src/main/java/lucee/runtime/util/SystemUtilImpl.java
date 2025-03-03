@@ -209,13 +209,14 @@ public class SystemUtilImpl implements SystemUtil {
 	}
 
 	@Override
+	@Deprecated
 	public void stop(Thread thread) {
 		lucee.commons.io.SystemUtil.stop(thread);
 	}
 
 	@Override
+	@Deprecated
 	public void stop(PageContext pc, Throwable t, Log log) {
-		// FUTURE remove argument Throwable t
 		lucee.commons.io.SystemUtil.stop(pc, true);
 	}
 

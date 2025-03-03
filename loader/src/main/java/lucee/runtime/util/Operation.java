@@ -141,7 +141,7 @@ public interface Operation {
 	 * @param right Right Object
 	 * @return difference as int
 	 */
-	public int compare(double left, String right);
+	public int compare(double left, String right) throws PageException;
 
 	/**
 	 * compares a double with a double

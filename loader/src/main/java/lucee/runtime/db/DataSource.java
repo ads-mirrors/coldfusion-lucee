@@ -185,11 +185,12 @@ public interface DataSource extends Cloneable {
 	/**
 	 * @return Returns the connection idle timeout.
 	 */
-	// FUTURE @Deprecated
+	@Deprecated
 	public abstract int getConnectionTimeout();
 
-	// FUTURE public abstract int getIdleTimeout();
-	// FUTURE public abstract int getLiveTimeout();
+	public abstract int getIdleTimeout();
+
+	public abstract int getLiveTimeout();
 
 	/**
 	 * network timeout in seconds
@@ -233,4 +234,31 @@ public interface DataSource extends Cloneable {
 	public abstract boolean validate();
 
 	public abstract Log getLog();
+
+	public abstract ParamSyntax getParamSyntax();
+
+	public abstract boolean getAlwaysSetTimeout();
+
+	/**
+	 * should connections produced from this datasource be exclusive to a request or not?
+	 * 
+	 * @return
+	 */
+	public boolean isRequestExclusive();
+
+	public boolean isAlwaysResetConnections();
+
+	public boolean getLiteralTimestampWithTSOffset();
+
+	public int getDefaultTransactionIsolation();
+
+	public int getMinIdle();
+
+	public int getMaxIdle();
+
+	public int getMaxTotal();
+
+	public Boolean isMSSQL();
+
+	public void setMSSQL(boolean ismssql);
 }

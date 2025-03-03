@@ -612,7 +612,7 @@ public class SpoolerEngineImpl implements SpoolerEngine {
 	public PageException execute(ConfigWeb config, SpoolerTask task) {
 		try {
 			log(config, task, null, true);
-			if (task instanceof SpoolerTaskSupport) // FUTURE this is bullshit, call the execute method directly, but you have to rewrite them for that
+			if (task instanceof SpoolerTaskSupport) // FUTURE this is bs, call the execute method directly, but you have to rewrite them for that
 				((SpoolerTaskSupport) task)._execute(config);
 			else task.execute(config);
 			unstore(config, task);

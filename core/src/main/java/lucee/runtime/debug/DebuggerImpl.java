@@ -236,7 +236,7 @@ public final class DebuggerImpl implements Debugger {
 			if (de != null) {
 				de.countPP();
 				return de;
-			} 
+			}
 		}
 		else {
 			partEntries = new HashMap<String, DebugEntryTemplatePartImpl>();
@@ -562,13 +562,15 @@ public final class DebuggerImpl implements Debugger {
 			java.util.Collection<DebugEntryTemplatePartImpl> col = partEntries.values();
 			List<DebugEntryTemplatePart> filteredPartEntries = new ArrayList<DebugEntryTemplatePart>();
 			DebugEntryTemplatePart[] parts = new DebugEntryTemplatePart[qrySize];
-			if (MAX_PARTS == 0 || col.size() < MAX_PARTS){
+			if (MAX_PARTS == 0 || col.size() < MAX_PARTS) {
 				qrySize = col.size();
 				parts = new DebugEntryTemplatePart[qrySize];
 				filteredPartEntries.addAll(col);
 				parts = filteredPartEntries.toArray(parts);
-			} else {
-				// TODO add slowest templates till we reach MAX_PARTS, currently just grabs only the slowest template's parts
+			}
+			else {
+				// TODO add slowest templates till we reach MAX_PARTS, currently just grabs only the slowest
+				// template's parts
 				String slowestTemplate = arrPages.get(0).getPath();
 				for (DebugEntryTemplatePart detp: col) {
 					if (detp.getPath().equals(slowestTemplate)) filteredPartEntries.add(detp);
@@ -580,7 +582,7 @@ public final class DebuggerImpl implements Debugger {
 
 				if (filteredPartEntries.size() > MAX_PARTS) parts = filteredPartEntries.subList(0, MAX_PARTS).toArray(parts);
 				else parts = filteredPartEntries.toArray(parts);
-			}	
+			}
 
 			qryPart = new QueryImpl(PAGE_PART_COLUMNS, qrySize, "query");
 			debugging.setEL(PAGE_PARTS, qryPart);
@@ -862,6 +864,13 @@ public final class DebuggerImpl implements Debugger {
 	}
 
 	@Override
+	public DebugTimer addTimer(String label, long time, String template, int line) {
+		DebugTimerImpl t;
+		timers.add(t = new DebugTimerImpl(label, time, template, line > 0 ? line : SystemUtil.getCurrentContext(null).line));
+		return t;
+	}
+
+	@Override
 	public DebugTrace addTrace(int type, String category, String text, PageSource ps, String varName, String varValue) {
 
 		long _lastTrace = (traces.isEmpty()) ? lastEntry : lastTrace;
@@ -928,7 +937,7 @@ public final class DebuggerImpl implements Debugger {
 		addImplicitAccess(null, scope, name);
 	}
 
-	// FUTURE add to interface
+	@Override
 	public void addImplicitAccess(PageContext pc, String scope, String name) {
 		if (implicitAccesses.size() > 1000) return;
 		try {

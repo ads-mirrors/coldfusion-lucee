@@ -27,7 +27,7 @@ import lucee.commons.lang.SerializableObject;
 import lucee.runtime.PageContext;
 import lucee.runtime.config.ConfigPro;
 
-public class ThreadQueueImpl implements ThreadQueuePro {
+public class ThreadQueueImpl implements ThreadQueue {
 	private final SerializableObject token = new SerializableObject();
 
 	public final List<PageContext> list = new ArrayList<PageContext>();

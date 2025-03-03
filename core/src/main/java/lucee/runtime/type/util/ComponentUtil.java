@@ -370,7 +370,6 @@ public final class ComponentUtil {
 		}
 	}
 
-	// FUTURE add this methid to loader, maybe make ASMProperty visible in loader
 	/*
 	 * does not include the application context javasettings
 	 * 
@@ -1008,7 +1007,7 @@ public final class ComponentUtil {
 			if (pc != null) {
 				ApplicationContext ac = pc.getApplicationContext();
 				if (ac instanceof ApplicationContextSupport) {
-					return UDFUtil.toReturnFormat(((ApplicationContextSupport) ac).getReturnFormat(), "wddx");
+					return UDFUtil.toReturnFormat(ac.getReturnFormat(), "wddx");
 				}
 			}
 			Config c = ThreadLocalPageContext.getConfig();

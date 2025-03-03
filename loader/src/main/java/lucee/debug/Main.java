@@ -1,16 +1,17 @@
 package lucee.debug;
 
-import lucee.loader.util.Util;
+import static lucee.loader.engine.CFMLEngineFactory.ARG_CLASSES_DIR;
+import static lucee.loader.engine.CFMLEngineFactory.ARG_PROJECT_DIR;
+
+import java.io.File;
+import java.nio.file.Paths;
+
 import org.apache.catalina.Context;
 import org.apache.catalina.Server;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
 
-import java.io.File;
-import java.nio.file.Paths;
-
-import static lucee.loader.engine.CFMLEngineFactory.ARG_PROJECT_DIR;
-import static lucee.loader.engine.CFMLEngineFactory.ARG_CLASSES_DIR;
+import lucee.loader.util.Util;
 
 public class Main {
 
@@ -28,7 +29,7 @@ public class Main {
 
 		System.setProperty("lucee.controller.disabled", "true");
 
-		s = Util._getSystemPropOrEnvVar(ARG_PROJECT_DIR, "");
+		s = Util.getSystemPropOrEnvVar(ARG_PROJECT_DIR, "");
 		if (s.isEmpty()) {
 			s = Paths.get("").toAbsolutePath().toString();
 			System.out.println(ARG_PROJECT_DIR + " is not set, using " + s);
@@ -38,7 +39,7 @@ public class Main {
 			System.out.println(ARG_PROJECT_DIR + " is set to " + s);
 		}
 
-		s = Util._getSystemPropOrEnvVar(ARG_CLASSES_DIR, "");
+		s = Util.getSystemPropOrEnvVar(ARG_CLASSES_DIR, "");
 		if (s.isEmpty()) {
 			s = Main.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 			s = Paths.get(s).getParent().toString();
@@ -49,7 +50,7 @@ public class Main {
 			System.out.println(ARG_CLASSES_DIR + " is set to " + s);
 		}
 
-		s = Util._getSystemPropOrEnvVar(ARG_BASE, "");
+		s = Util.getSystemPropOrEnvVar(ARG_BASE, "");
 		if (s.isEmpty()) {
 			s = Paths.get("", "dev/webapp").toAbsolutePath().toString();
 		}
@@ -57,7 +58,7 @@ public class Main {
 		String appBase = (new File(s)).getCanonicalPath().replace('\\', '/');
 		String docBase = appBase + "/webroot";
 
-		String webxml = Util._getSystemPropOrEnvVar(ARG_WEBXML, "");
+		String webxml = Util.getSystemPropOrEnvVar(ARG_WEBXML, "");
 		if (webxml.isEmpty()) {
 			s = docBase + "/WEB-INF/web.xml";
 			if (new File(s).exists()) {
@@ -83,10 +84,10 @@ public class Main {
 
 		tomcat.setBaseDir(appBase);
 
-		s = Util._getSystemPropOrEnvVar(ARG_HOST, DEF_HOST);
+		s = Util.getSystemPropOrEnvVar(ARG_HOST, DEF_HOST);
 		tomcat.setHostname(s);
 
-		s = Util._getSystemPropOrEnvVar(ARG_PORT, DEF_PORT);
+		s = Util.getSystemPropOrEnvVar(ARG_PORT, DEF_PORT);
 		tomcat.setPort(Integer.parseInt(s));
 
 		tomcat.setAddDefaultWebXmlToWebapp(false);

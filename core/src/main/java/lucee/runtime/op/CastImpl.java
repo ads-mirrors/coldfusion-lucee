@@ -1053,7 +1053,7 @@ public final class CastImpl implements Cast {
 		return StructUtil.toDumpTable(sct, title, pageContext, maxlevel, dp);
 	}
 
-	// FUTURE add to interface
+	@Override
 	public Credentials toCredentials(String username, String password) {
 		return CredentialsImpl.toCredentials(username, password);
 	}

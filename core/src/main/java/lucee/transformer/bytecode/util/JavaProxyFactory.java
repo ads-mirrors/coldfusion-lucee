@@ -123,8 +123,7 @@ public class JavaProxyFactory {
 	private static final org.objectweb.asm.commons.Method CREATE_PAGECONTEXT = new org.objectweb.asm.commons.Method("createPageContext", Types.PAGE_CONTEXT, new Type[] {
 			Types.FILE, Types.STRING, Types.STRING, Types.STRING, Types.COOKIE_ARRAY, Types.MAP, Types.MAP, Types.MAP, Types.OUTPUTSTREAM, Types.LONG_VALUE, Types.BOOLEAN_VALUE });
 
-	private static final org.objectweb.asm.commons.Method GET_JAVA_PROXY_UTIL = new org.objectweb.asm.commons.Method("getJavaProxyUtil", Types.OBJECT, // FUTURE change to JavaProxy
-			new Type[] {});
+	private static final org.objectweb.asm.commons.Method GET_JAVA_PROXY_UTIL = new org.objectweb.asm.commons.Method("getJavaProxyUtil", JAVA_PROXY_UTIL, new Type[] {});
 	private static final org.objectweb.asm.commons.Method GET_CONFIG = new org.objectweb.asm.commons.Method("getConfig", Types.CONFIG_WEB, new Type[] {});
 	private static final org.objectweb.asm.commons.Method GET = new org.objectweb.asm.commons.Method("get", Types.PAGE_CONTEXT, new Type[] {});
 	private static final org.objectweb.asm.commons.Method LOAD_COMPONENT = new org.objectweb.asm.commons.Method("loadComponent", Types.COMPONENT, new Type[] { Types.STRING });
@@ -646,7 +645,7 @@ public class JavaProxyFactory {
 
 		adapter.invokeStatic(CFML_ENGINE_FACTORY, GET_INSTANCE);
 		adapter.invokeInterface(CFML_ENGINE, GET_JAVA_PROXY_UTIL);
-		adapter.checkCast(type == TYPE_CFC ? JAVA_PROXY_UTIL : JAVA_PROXY_UTIL_IMPL); // FUTURE get rid of IMPL
+		// adapter.checkCast(type == TYPE_CFC ? JAVA_PROXY_UTIL : JAVA_PROXY_UTIL_IMPL);
 
 		// Java Proxy.call(cfc,"add",new Object[]{arg0})
 		// config (first argument)
@@ -669,7 +668,7 @@ public class JavaProxyFactory {
 
 			adapter.invokeStatic(CFML_ENGINE_FACTORY, GET_INSTANCE);
 			adapter.invokeInterface(CFML_ENGINE, GET_JAVA_PROXY_UTIL);
-			adapter.checkCast(JAVA_PROXY_UTIL); // FUTURE adapter.checkCast(JAVA_PROXY_UTIL);
+			// adapter.checkCast(JAVA_PROXY_UTIL);
 
 			adapter.loadArg(y);
 			if (classArgs[y] == boolean.class) adapter.invokeInterface(JAVA_PROXY_UTIL, _BOOLEAN);

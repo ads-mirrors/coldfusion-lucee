@@ -43,15 +43,16 @@ import lucee.runtime.orm.ORMSession;
 import lucee.runtime.security.Credential;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.Collection;
+import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.Iterator;
 import lucee.runtime.type.Query;
 import lucee.runtime.type.UDF;
+import lucee.runtime.type.dt.TimeSpan;
 import lucee.runtime.type.ref.Reference;
 import lucee.runtime.type.scope.Application;
 import lucee.runtime.type.scope.Argument;
 import lucee.runtime.type.scope.CGI;
 import lucee.runtime.type.scope.Client;
-import lucee.runtime.type.scope.Cluster;
 import lucee.runtime.type.scope.Cookie;
 import lucee.runtime.type.scope.Form;
 import lucee.runtime.type.scope.Local;
@@ -177,21 +178,6 @@ public abstract class PageContext extends /* JAVJAK */ javax.servlet.jsp.PageCon
 	public abstract Client clientScope() throws PageException;
 
 	public abstract Client clientScopeEL();
-
-	/**
-	 * @return cluster scope
-	 * @throws PageException Page Exception
-	 */
-	public abstract Cluster clusterScope() throws PageException;
-
-	/**
-	 * cluster scope
-	 * 
-	 * @param create return null when false and scope does not exist
-	 * @return cluster scope or null
-	 * @throws PageException Page Exception
-	 */
-	public abstract Cluster clusterScope(boolean create) throws PageException;
 
 	/**
 	 * set property at a collection object
@@ -688,6 +674,8 @@ public abstract class PageContext extends /* JAVJAK */ javax.servlet.jsp.PageCon
 	 */
 	public abstract PageSource getBasePageSource();
 
+	public abstract boolean isSilent();
+
 	/**
 	 * sets the pagecontext silent
 	 * 
@@ -895,6 +883,8 @@ public abstract class PageContext extends /* JAVJAK */ javax.servlet.jsp.PageCon
 	 */
 	public abstract Object getFunction(Object coll, Collection.Key key, Object[] args) throws PageException;
 
+	public abstract Object getFunction(Object coll, Collection.Key key, Object[] args, Object defaultValue);
+
 	/**
 	 * call a UDF Function and return "return value" of the function
 	 * 
@@ -916,6 +906,8 @@ public abstract class PageContext extends /* JAVJAK */ javax.servlet.jsp.PageCon
 	 * @throws PageException Page Exception
 	 */
 	public abstract Object getFunctionWithNamedValues(Object coll, Collection.Key key, Object[] args) throws PageException;
+
+	public abstract Object getFunctionWithNamedValues(Object coll, Key key, Object[] args, Object defaultValue);
 
 	/**
 	 * get variable from string definition and cast it to an Iterator Object
@@ -1096,6 +1088,8 @@ public abstract class PageContext extends /* JAVJAK */ javax.servlet.jsp.PageCon
 	 */
 	public abstract void param(String type, String name, Object defaultValue, double min, double max) throws PageException;
 
+	public abstract void subparam(String type, String name, final Object value, double min, double max, String strPattern, int maxLength, final boolean isNew) throws PageException;
+
 	// public abstract PageContext clonePageContext();
 
 	// public abstract boolean isCFCRequest();
@@ -1162,16 +1156,14 @@ public abstract class PageContext extends /* JAVJAK */ javax.servlet.jsp.PageCon
 
 	public abstract Object getCachedWithin(int type);
 
-	/**
-	 * 
-	 * @return get the dialect for the current template
-	 */
+	public abstract lucee.runtime.net.mail.Server[] getMailServers();
+
+	public abstract boolean getFullNullSupport();
+
+	@Deprecated
 	public abstract int getCurrentTemplateDialect();
 
-	/**
-	 * 
-	 * @return get the dialect for the current template
-	 */
+	@Deprecated
 	public abstract int getRequestDialect();
 
 	/**
@@ -1181,7 +1173,10 @@ public abstract class PageContext extends /* JAVJAK */ javax.servlet.jsp.PageCon
 	 */
 	public abstract ORMSession getORMSession(boolean create) throws PageException;
 
-	public abstract Throwable getRequestTimeoutException(); // FUTURE deprecate
+	@Deprecated
+	public abstract Throwable getRequestTimeoutException();
+
+	public abstract TimeSpan getCachedAfterTimeRange();
 
 	/**
 	 * if set to true Lucee ignores all scope names and handles them as regular keys for the undefined
@@ -1190,4 +1185,6 @@ public abstract class PageContext extends /* JAVJAK */ javax.servlet.jsp.PageCon
 	 * @return Ignore Scopes
 	 */
 	public abstract boolean ignoreScopes();
+
+	public abstract void writeEncodeFor(String value, String encodeType) throws IOException, PageException;
 }

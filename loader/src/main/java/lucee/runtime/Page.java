@@ -163,4 +163,16 @@ public abstract class Page implements Serializable {
 	public transient SoftReference<Struct> metaData;
 
 	public UDFProperties[] udfs;
+
+	public int getHash() {
+		return 0;
+	}
+
+	public long getSourceLength() {
+		return 0;
+	}
+
+	public String getSubname() {
+		return null;
+	}
 }

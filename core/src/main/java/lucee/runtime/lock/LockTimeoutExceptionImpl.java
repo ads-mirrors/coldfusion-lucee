@@ -21,7 +21,7 @@ package lucee.runtime.lock;
 import lucee.commons.lang.StringUtil;
 
 /**
- * Lock Timeout // FUTURE replace LockTimeoutException with this implementation
+ * Lock Timeout
  */
 public final class LockTimeoutExceptionImpl extends Exception {
 

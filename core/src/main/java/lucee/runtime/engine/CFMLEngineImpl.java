@@ -162,6 +162,7 @@ import lucee.runtime.util.HTMLUtil;
 import lucee.runtime.util.HTMLUtilImpl;
 import lucee.runtime.util.HTTPUtilImpl;
 import lucee.runtime.util.IO;
+import lucee.runtime.util.JavaProxyUtil;
 import lucee.runtime.util.ListUtil;
 import lucee.runtime.util.ListUtilImpl;
 import lucee.runtime.util.ORMUtil;
@@ -1414,13 +1415,9 @@ public final class CFMLEngineImpl implements CFMLEngine {
 	 */
 
 	private void shutdownFelix() {
-		CFMLEngineFactory f = getCFMLEngineFactory();
 		try {
-			Method m = f.getClass().getMethod("shutdownFelix", new Class[0]);
-			m.invoke(f, new Object[0]);
+			getCFMLEngineFactory().shutdownFelix();
 		}
-		// FUTURE do not use reflection
-		// this will for sure fail if CFMLEngineFactory does not have this method
 		catch (Exception e) {
 			LogUtil.log(configServer, "controller", e);
 		}
@@ -1437,7 +1434,13 @@ public final class CFMLEngineImpl implements CFMLEngine {
 	}
 
 	@Override
-	public Operation getOperatonUtil() { // FUTURE rename to getOperationUtil()
+	@Deprecated
+	public Operation getOperatonUtil() {
+		return OperationImpl.getInstance();
+	}
+
+	@Override
+	public Operation getOperationUtil() {
 		return OperationImpl.getInstance();
 	}
 
@@ -1452,7 +1455,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 	}
 
 	@Override
-	public Object getJavaProxyUtil() { // FUTURE return JavaProxyUtil
+	public JavaProxyUtil getJavaProxyUtil() {
 		return new JavaProxyUtilImpl();
 	}
 
@@ -1466,6 +1469,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 		return IOImpl.getInstance();
 	}
 
+	@Override
 	public AI getAIUtil() {
 		return AIUtil.INSTANCE;
 	}
@@ -1501,7 +1505,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 		return ThreadLocalPageContext.get();
 	}
 
-	// FUTURE add to interface
+	@Override
 	public PageContext getThreadPageContext(boolean cloneParentIfNotExist) {
 		return ThreadLocalPageContext.get(cloneParentIfNotExist);
 	}
@@ -1683,13 +1687,27 @@ public final class CFMLEngineImpl implements CFMLEngine {
 	}
 
 	@Override
-	public ScriptEngineFactory getScriptEngineFactory(int dialect) {// FUTURE remove
+	public ScriptEngineFactory getScriptEngineFactory() {
 		if (scriptEngine == null) scriptEngine = new ScriptEngineFactoryImpl(this, false);
 		return scriptEngine;
 	}
 
 	@Override
-	public ScriptEngineFactory getTagEngineFactory(int dialect) {// FUTURE remove
+	@Deprecated
+	public ScriptEngineFactory getScriptEngineFactory(int dialect) {
+		if (scriptEngine == null) scriptEngine = new ScriptEngineFactoryImpl(this, false);
+		return scriptEngine;
+	}
+
+	@Override
+	public ScriptEngineFactory getTagEngineFactory() {
+		if (tagEngine == null) tagEngine = new ScriptEngineFactoryImpl(this, true);
+		return tagEngine;
+	}
+
+	@Override
+	@Deprecated
+	public ScriptEngineFactory getTagEngineFactory(int dialect) {
 		if (tagEngine == null) tagEngine = new ScriptEngineFactoryImpl(this, true);
 		return tagEngine;
 	}

@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.Map;
 
+import javax.servlet.ServletConfig;
 import /* JAVJAK */ javax.servlet.http.Cookie;
 import /* JAVJAK */ javax.servlet.http.HttpServletRequest;
 import /* JAVJAK */ javax.servlet.http.HttpServletResponse;
@@ -261,8 +262,7 @@ public interface Creation {
 
 	public abstract PageContext createPageContext(HttpServletRequest req, HttpServletResponse rsp, OutputStream out);
 
-	// FUTURE public ServletConfig createServletConfig(File root, Map<String, Object> attributes,
-	// Map<String, String> params)
+	public ServletConfig createServletConfig(File root, Map<String, Object> attributes, Map<String, String> params);
 
 	/**
 	 * creates a component object from (Full)Name, for example lucee.extensions.net.HTTPUtil
@@ -289,6 +289,8 @@ public interface Creation {
 	public abstract RefBoolean createRefBoolean(boolean b);
 
 	public abstract RefInteger createRefInteger(int i);
+
+	public abstract RefInteger createRefInteger(int i, boolean _syncronized);
 
 	public abstract RefLong createRefLong(long l);
 

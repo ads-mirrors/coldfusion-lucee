@@ -92,7 +92,7 @@ import lucee.runtime.util.PageContextUtil;
 /**
  * A Page that can produce Components
  */
-public abstract class ComponentPageImpl extends ComponentPage implements PagePro {
+public abstract class ComponentPageImpl extends ComponentPage {
 
 	public static final Collection.Key ACCEPT_ARG_COLL_FORMATS = KeyConstants._acceptedArgumentCollectionFormats;
 

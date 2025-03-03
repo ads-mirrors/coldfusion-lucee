@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import lucee.commons.io.res.Resource;
+import lucee.commons.security.Credentials;
 import lucee.runtime.Component;
 import lucee.runtime.PageContext;
 import lucee.runtime.dump.DumpData;
@@ -1640,7 +1641,6 @@ public interface Cast {
 
 	public DumpData toDumpTable(Struct sct, String title, PageContext pageContext, int maxlevel, DumpProperties dp);
 
-	// FUTURE
-	// public Credentials toCredentials(String username, String password);
+	public Credentials toCredentials(String username, String password);
 
 }

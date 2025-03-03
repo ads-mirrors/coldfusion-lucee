@@ -39,16 +39,16 @@ import lucee.runtime.PageContextImpl;
 import lucee.runtime.PageSource;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
+import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.config.ConfigWebPro;
-import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.db.ApplicationDataSource;
 import lucee.runtime.db.ClassDefinition;
 import lucee.runtime.db.DBUtil;
 import lucee.runtime.db.DBUtil.DataSourceDefintion;
 import lucee.runtime.db.DataSource;
 import lucee.runtime.db.DataSourceImpl;
-import lucee.runtime.db.ParamSyntax;
+import lucee.runtime.db.ParamSyntaxImpl;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
@@ -257,8 +257,9 @@ public final class AppListenerUtil {
 					Caster.toLongValue(data.get(META_CACHE_TIMEOUT, null), 60000L), Caster.toBooleanValue(data.get(KeyConstants._blob, null), false),
 					Caster.toBooleanValue(data.get(KeyConstants._clob, null), false), DataSource.ALLOW_ALL, Caster.toStruct(data.get(KeyConstants._custom, null), null, false),
 					Caster.toBooleanValue(data.get(KeyConstants._readonly, null), false), true, Caster.toBooleanValue(data.get(KeyConstants._storage, null), false), timezone, "",
-					ParamSyntax.toParamSyntax(data, ParamSyntax.DEFAULT), readliteralTimestampWithTSOffset(data), Caster.toBooleanValue(data.get("alwaysSetTimeout", null), false),
-					Caster.toBooleanValue(data.get("requestExclusive", null), false), Caster.toBooleanValue(data.get("alwaysResetConnections", null), false), log);
+					ParamSyntaxImpl.toParamSyntax(data, ParamSyntaxImpl.DEFAULT), readliteralTimestampWithTSOffset(data),
+					Caster.toBooleanValue(data.get("alwaysSetTimeout", null), false), Caster.toBooleanValue(data.get("requestExclusive", null), false),
+					Caster.toBooleanValue(data.get("alwaysResetConnections", null), false), log);
 		}
 		catch (Exception cnfe) {
 			throw Caster.toPageException(cnfe);

@@ -54,7 +54,7 @@ public class ClassUtilImpl implements ClassUtil {
 		return lucee.commons.lang.ClassUtil.loadClass(className);
 	}
 
-	// FUTURE add to interface
+	@Override
 	public Class<?> loadClass(PageContext pc, String className) throws ClassException {
 		return lucee.commons.lang.ClassUtil.loadClass(pc, className);
 	}
@@ -87,7 +87,7 @@ public class ClassUtilImpl implements ClassUtil {
 		return null;
 	}
 
-	// FUTURE add to loader
+	@Override
 	public BIF loadBIF(PageContext pc, String name, String bundleName, Version bundleVersion) throws InstantiationException, IllegalAccessException, BundleException,
 			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, PageException, IOException {
 		// first of all we chek if itis a class
@@ -127,7 +127,8 @@ public class ClassUtilImpl implements ClassUtil {
 		return Reflector.isInstaneOf(src, trg, true);
 	}
 
-	public boolean isInstaneOf(Class<?> src, Class<?> trg, boolean exatctMatch) { // FUTURE
+	@Override
+	public boolean isInstaneOf(Class<?> src, Class<?> trg, boolean exatctMatch) {
 		return Reflector.isInstaneOf(src, trg, exatctMatch);
 	}
 

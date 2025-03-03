@@ -130,7 +130,6 @@ import lucee.runtime.ext.tag.TagImpl;
 import lucee.runtime.functions.dynamicEvaluation.Serialize;
 import lucee.runtime.interpreter.CFMLExpressionInterpreter;
 import lucee.runtime.interpreter.VariableInterpreter;
-import lucee.runtime.listener.AppListenerSupport;
 import lucee.runtime.listener.ApplicationContext;
 import lucee.runtime.listener.ApplicationContextSupport;
 import lucee.runtime.listener.ApplicationListener;
@@ -849,16 +848,10 @@ public final class PageContextImpl extends PageContext {
 		}
 	}
 
-	// FUTURE add both method to interface
-	public void writeEncodeFor(String value, String encodeType) throws IOException, PageException { // FUTURE keyword:encodefore add to interface
+	@Override
+	public void writeEncodeFor(String value, String encodeType) throws IOException, PageException {
 		write(ESAPIUtil.esapiEncode(this, encodeType, value));
 	}
-
-	/*
-	 * public void writeEncodeFor(String value, short encodeType) throws IOException, PageException { //
-	 * FUTURE keyword:encodefore add to interface write(ESAPIUtil.esapiEncode(this,value, encodeType));
-	 * }
-	 */
 
 	@Override
 	public void flush() {
@@ -952,10 +945,6 @@ public final class PageContextImpl extends PageContext {
 
 	public boolean useSpecialMappings() {
 		return useSpecialMappings;
-	}
-
-	public Resource getPhysical(String realPath, boolean alsoDefaultMapping) {
-		return config.getPhysical(applicationContext == null ? config.getMappings() : getApplicationContext().getMappings(), realPath, alsoDefaultMapping);
 	}
 
 	@Override
@@ -1260,7 +1249,6 @@ public final class PageContextImpl extends PageContext {
 		if ("cookie".equals(strScope)) return cookieScope();
 		if ("client".equals(strScope)) return clientScope();
 		if ("local".equals(strScope)) return localScope();
-		if ("cluster".equals(strScope)) return clusterScope();
 
 		return defaultValue;
 	}
@@ -1723,16 +1711,6 @@ public final class PageContextImpl extends PageContext {
 		server = ScopeContext.getServerScope(this, ignoreScopes());
 	}
 
-	@Override
-	public Cluster clusterScope() throws PageException {// FUTURE remove
-		throw new RuntimeException("cluster scope is no longer supported");
-	}
-
-	@Override
-	public Cluster clusterScope(boolean create) throws PageException {// FUTURE remove
-		throw new RuntimeException("cluster scope is no longer supported");
-	}
-
 	public Object threadGet() throws PageException {
 		if (hasFamily && currentThread != null) {
 			return currentThread;
@@ -1888,7 +1866,7 @@ public final class PageContextImpl extends PageContext {
 		_param(type, name, defaultValue, Double.NaN, Double.NaN, null, -1);
 	}
 
-	// used by generated code FUTURE add to interface
+	@Override
 	public void subparam(String type, String name, final Object value, double min, double max, String strPattern, int maxLength, final boolean isNew) throws PageException {
 
 		// check attributes type
@@ -2055,7 +2033,7 @@ public final class PageContextImpl extends PageContext {
 		return variableUtil.callFunctionWithoutNamedValues(this, coll, key, args);
 	}
 
-	// FUTURE add to interface
+	@Override
 	public Object getFunction(Object coll, Key key, Object[] args, Object defaultValue) {
 		return variableUtil.callFunctionWithoutNamedValues(this, coll, key, args, false, defaultValue);
 	}
@@ -2087,7 +2065,7 @@ public final class PageContextImpl extends PageContext {
 		return variableUtil.callFunctionWithNamedValues(this, coll, key, args);
 	}
 
-	// FUTURE add to interface
+	@Override
 	public Object getFunctionWithNamedValues(Object coll, Key key, Object[] args, Object defaultValue) {
 		return variableUtil.callFunctionWithNamedValues(this, coll, key, args, false, defaultValue);
 	}
@@ -2512,10 +2490,9 @@ public final class PageContextImpl extends PageContext {
 	}
 
 	/**
-	 * FUTURE - add to interface
-	 *
 	 * @return true if the Request is in silent mode via cfslient
 	 */
+	@Override
 	public boolean isSilent() {
 		return bodyContentStack.getDevNull();
 	}
@@ -3529,7 +3506,7 @@ public final class PageContextImpl extends PageContext {
 				if (isNew.toBooleanValue()) {
 
 					try {
-						if (!((AppListenerSupport) listener).onApplicationStart(this, application)) {
+						if (!listener.onApplicationStart(this, application)) {
 							scopeContext.removeApplicationScope(this);
 							return false;
 						}
@@ -3561,7 +3538,7 @@ public final class PageContextImpl extends PageContext {
 				// init session
 				if (initSession) {
 					// session must be initlaized here
-					((AppListenerSupport) listener).onSessionStart(this, scopeContext.getSessionScope(this, DUMMY_BOOL));
+					listener.onSessionStart(this, scopeContext.getSessionScope(this, DUMMY_BOOL));
 				}
 			}
 			finally {
@@ -4059,7 +4036,7 @@ public final class PageContextImpl extends PageContext {
 		return applicationContext == null ? config.getCachedWithin(type) : getApplicationContext().getCachedWithin(type);
 	}
 
-	// FUTURE add to interface
+	@Override
 	public lucee.runtime.net.mail.Server[] getMailServers() {
 		lucee.runtime.net.mail.Server[] appms = applicationContext == null ? null : getApplicationContext().getMailServers();
 		if (ArrayUtil.isEmpty(appms)) return config.getMailServers();
@@ -4071,7 +4048,7 @@ public final class PageContextImpl extends PageContext {
 		return arr;
 	}
 
-	// FUTURE add to interface
+	@Override
 	public boolean getFullNullSupport() {
 		if (applicationContext == null) return config.getFullNullSupport();
 		return getApplicationContext().getFullNullSupport();
@@ -4083,12 +4060,12 @@ public final class PageContextImpl extends PageContext {
 	}
 
 	@Override
-	public int getCurrentTemplateDialect() {// FUTURE remove
+	public int getCurrentTemplateDialect() {
 		return CFMLEngine.DIALECT_CFML;
 	}
 
 	@Override
-	public int getRequestDialect() {// FUTURE remove
+	public int getRequestDialect() {
 		return CFMLEngine.DIALECT_CFML;
 	}
 
@@ -4211,7 +4188,8 @@ public final class PageContextImpl extends PageContext {
 		return this;
 	}
 
-	public TimeSpan getCachedAfterTimeRange() { // FUTURE add to interface
+	@Override
+	public TimeSpan getCachedAfterTimeRange() {
 		return getApplicationContext().getQueryCachedAfter();
 	}
 

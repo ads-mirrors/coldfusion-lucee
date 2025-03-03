@@ -42,7 +42,7 @@ public class CLIInvokerImpl implements CLIInvoker {
 		final Map<String, Object> attributes = new HashMap<String, Object>();
 		final Map<String, String> initParams = new HashMap<String, String>();
 
-		final String param = Util._getSystemPropOrEnvVar("lucee.cli.config", null);
+		final String param = Util.getSystemPropOrEnvVar("lucee.cli.config", null);
 
 		if (param != null && !param.isEmpty()) {
 

@@ -108,13 +108,8 @@ public final class OperationImpl implements Operation {
 	}
 
 	@Override
-	public int compare(double left, String right) { // FUTURE add throws PageException also to other below
-		try {
-			return OpUtil.compare(ThreadLocalPageContext.get(), Double.valueOf(left), right);
-		}
-		catch (PageException e) {
-			throw new PageRuntimeException(e);
-		}
+	public int compare(double left, String right) throws PageException {
+		return OpUtil.compare(ThreadLocalPageContext.get(), Double.valueOf(left), right);
 	}
 
 	@Override

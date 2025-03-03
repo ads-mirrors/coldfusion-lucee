@@ -34,8 +34,8 @@ import lucee.runtime.PageContextImpl;
 import lucee.runtime.cache.CacheConnection;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
-import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.config.ConfigUtil;
+import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.db.ClassDefinition;
 import lucee.runtime.db.DataSource;
 import lucee.runtime.db.DataSourceImpl;
@@ -195,8 +195,8 @@ public class GetApplicationSettings extends BIF {
 		sct.setEL("bufferOutput", Caster.toBoolean(ac.getBufferOutput()));
 		sct.setEL("suppressContent", Caster.toBoolean(ac.getSuppressContent()));
 
-		sct.setEL("nullSupport", ((ApplicationContextSupport) ac).getFullNullSupport());
-		sct.setEL("enableNullSupport", ((ApplicationContextSupport) ac).getFullNullSupport());
+		sct.setEL("nullSupport", ac.getFullNullSupport());
+		sct.setEL("enableNullSupport", ac.getFullNullSupport());
 
 		// scope cascading
 		sct.setEL("scopeCascading", ConfigUtil.toScopeCascading(ac.getScopeCascading(), null));

@@ -162,4 +162,5 @@ public interface Array extends Collection, Cloneable, Objects {
 	 * @return returns if collection has a key with given name
 	 */
 	public boolean containsKey(int key);
+
 }

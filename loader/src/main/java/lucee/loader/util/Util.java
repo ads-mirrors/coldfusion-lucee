@@ -24,6 +24,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -582,7 +583,7 @@ public class Util {
 	 *            found
 	 * @return - the value of the property referenced by propOrEnv or the defaultValue if not found
 	 */
-	public static String _getSystemPropOrEnvVar(String name, String defaultValue) { // FUTURE remove _ or move to CFMLEngineFactory.getSystemPropOrEnvVar()
+	public static String getSystemPropOrEnvVar(String name, String defaultValue) {
 
 		if (isEmpty(name)) return defaultValue;
 
@@ -605,6 +606,11 @@ public class Util {
 		if (!Util.isEmpty(value)) return value;
 
 		return defaultValue;
+	}
+
+	@Deprecated
+	public static String _getSystemPropOrEnvVar(String name, String defaultValue) {
+		return getSystemPropOrEnvVar(name, defaultValue);
 	}
 
 	public static boolean isThreadDeath(Throwable t) {
@@ -652,6 +658,22 @@ public class Util {
 			e.initCause(cause);
 		}
 		catch (Exception ex) {
+		}
+	}
+
+	public final static void fileMove(File src, File dest) throws IOException {
+		boolean moved = src.renameTo(dest);
+		if (!moved) {
+			BufferedInputStream is = new BufferedInputStream(new FileInputStream(src));
+			BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(dest));
+			try {
+				Util.copy(is, os, false, false); // is set false here, because copy does not close in case of an exception
+			}
+			finally {
+				closeEL(is);
+				closeEL(os);
+			}
+			if (!src.delete()) src.deleteOnExit();
 		}
 	}
 }

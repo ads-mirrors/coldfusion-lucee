@@ -296,8 +296,6 @@ public class JavaFunctionDef implements FunctionDef {
 		else if (TimeSpan.class == clazz) sb.append("engine.getCastUtil().toTimeSpan(");
 		else if (TimeZone.class == clazz) sb.append("engine.getCastUtil().toTimeZone(");
 		else if (Object.class == clazz) sb.append("(");
-
-		// FUTURE add this methods to cast interface
 		else if (BigInteger.class == clazz) sb.append("lucee.runtime.op.Caster.toBigInteger(");
 		else if (CharSequence.class == clazz) sb.append("lucee.runtime.op.Caster.toCharSequence(");
 		else if (UDF.class == clazz) sb.append("lucee.runtime.op.Caster.toFunction(");

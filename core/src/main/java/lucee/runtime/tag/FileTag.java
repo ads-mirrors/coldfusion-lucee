@@ -64,7 +64,6 @@ import lucee.runtime.ext.tag.BodyTagImpl;
 import lucee.runtime.functions.list.ListFirst;
 import lucee.runtime.functions.list.ListLast;
 import lucee.runtime.listener.ApplicationContext;
-import lucee.runtime.listener.ApplicationContextSupport;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
 import lucee.runtime.security.SecurityManager;
@@ -1112,7 +1111,7 @@ public final class FileTag extends BodyTagImpl {
 					extensionAccepted = Boolean.TRUE;
 				}
 				else {
-					String blocklistedTypes = ((ApplicationContextSupport) appContext).getBlockedExtForFileUpload();
+					String blocklistedTypes = appContext.getBlockedExtForFileUpload();
 					if (StringUtil.isEmpty(blocklistedTypes))
 						blocklistedTypes = SystemUtil.getSystemPropOrEnvVar(SystemUtil.SETTING_UPLOAD_EXT_BLACKLIST, SystemUtil.DEFAULT_UPLOAD_EXT_BLOCKLIST);
 					if (StringUtil.isEmpty(blocklistedTypes))

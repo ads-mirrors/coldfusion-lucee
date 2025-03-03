@@ -169,6 +169,11 @@ public class SuperComponent extends MemberSupport implements Component, Member {
 	}
 
 	@Override
+	public boolean containsKey(PageContext pc, Key key) {
+		return comp.contains(pc, getAccess(), key);
+	}
+
+	@Override
 	public Collection duplicate(boolean deepCopy) {
 		return new SuperComponent((ComponentImpl) Duplicator.duplicate(comp, deepCopy));
 	}

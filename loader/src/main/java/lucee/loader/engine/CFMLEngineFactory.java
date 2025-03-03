@@ -107,7 +107,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 	private static final long MB100 = 1024 * 1024 * 100;
 	private static final int MAX_REDIRECTS = 5;
 
-	private static final Version MIN_VERSION = toVersion("7.0.0.114", null);
+	private static final Version MIN_VERSION = toVersion("7.0.0.115", null);
 
 	private static CFMLEngineFactory factory;
 	// private static CFMLEngineWrapper engineListener;
@@ -246,7 +246,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 		if (Util.isEmpty(initParam)) initParam = config.getInitParameter("lucee-server-root");
 		if (Util.isEmpty(initParam)) initParam = config.getInitParameter("lucee-server-dir");
 		if (Util.isEmpty(initParam)) initParam = config.getInitParameter("lucee-server");
-		if (Util.isEmpty(initParam)) initParam = Util._getSystemPropOrEnvVar("lucee.server.dir", null);
+		if (Util.isEmpty(initParam)) initParam = getSystemPropOrEnvVar("lucee.server.dir", null);
 
 		initParam = parsePlaceHolder(removeQuotes(initParam, true));
 		try {
@@ -307,13 +307,13 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 		String pathJava = "../core/src/main/java/";
 		String pathLpom = "./pom.xml";
 
-		String s = Util._getSystemPropOrEnvVar(ARG_PROJECT_DIR, "");
+		String s = getSystemPropOrEnvVar(ARG_PROJECT_DIR, "");
 		if (!s.isEmpty()) {
 			pathCfml = Paths.get(s, "/core/src/main/cfml/").toString();
 			pathJava = Paths.get(s, "/core/src/main/java/").toString();
 			pathLpom = Paths.get(s, "/loader/pom.xml").toString();
 			pathClas = Paths.get(s, "/core/target/classes/").toString();
-			s = Util._getSystemPropOrEnvVar(ARG_CLASSES_DIR, "");
+			s = getSystemPropOrEnvVar(ARG_CLASSES_DIR, "");
 			if (!s.isEmpty()) {
 				// Lucee core classes should be in $ARG_CLASSES_DIR/core
 				pathClas = Paths.get(s, "core").toString();
@@ -414,7 +414,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 	}
 
 	private static File load(String subject, String desc, String envVarName, String relpath, String relResource, boolean dir) throws IOException {
-		String env = Util._getSystemPropOrEnvVar(envVarName, "");
+		String env = getSystemPropOrEnvVar(envVarName, "");
 		File file;
 		if (!Util.isEmpty(env)) {
 			file = new File(env.trim());
@@ -530,7 +530,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 				throw new ServletException(e);
 			}
 		}
-		String tmp = Util._getSystemPropOrEnvVar("lucee.version", null);
+		String tmp = getSystemPropOrEnvVar("lucee.version", null);
 		Version specificVersion = (!Util.isEmpty(tmp, true)) ? toVersion(tmp, null) : null;
 		// a specific version cannot be older than the core version
 		if (specificVersion != null) {
@@ -829,11 +829,11 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 	}
 
 	protected static String getSystemPropOrEnvVar(String name, String defaultValue) {
-		return Util._getSystemPropOrEnvVar(name, defaultValue);
+		return Util.getSystemPropOrEnvVar(name, defaultValue);
 	}
 
 	public boolean isEmbeddedMode() {
-		String s = Util._getSystemPropOrEnvVar(ARG_PROJECT_DIR, null);
+		String s = getSystemPropOrEnvVar(ARG_PROJECT_DIR, null);
 		if (s == null) return false;
 		boolean result = (new File(s)).isDirectory();
 		if (!result) System.out.println(ARG_PROJECT_DIR + " is set but is not pointing to a valid directory (" + s + ")");
@@ -970,7 +970,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 			log(org.apache.felix.resolver.Logger.LOG_INFO, jar + " should exist but does not (exist?" + jar.exists() + ";file?" + jar.isFile() + ";hidden?" + jar.isHidden() + ")");
 		}
 
-		String str = Util._getSystemPropOrEnvVar("lucee.enable.bundle.download", null);
+		String str = getSystemPropOrEnvVar("lucee.enable.bundle.download", null);
 		if (str != null && ("false".equalsIgnoreCase(str) || "no".equalsIgnoreCase(str))) { // we do not use CFMLEngine to cast, because the engine may not exist yet and it also
 																							// could be "always"
 			throw (new RuntimeException("Lucee is missing the Bundle jar, " + symbolicName + ":" + symbolicVersion
@@ -1073,7 +1073,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 
 				// adding bundle
 				File trg = new File(bundleDirectory, osgiFileName);
-				fileMove(temp, trg);
+				Util.fileMove(temp, trg);
 				log(org.apache.felix.resolver.Logger.LOG_DEBUG, "Adding bundle [" + symbolicName + "] in version [" + symbolicVersion + "] to [" + trg + "]");
 				return trg;
 			}
@@ -1135,23 +1135,6 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 			Util.closeEL(zis);
 		}
 		return null;
-	}
-
-	// FUTURE move to Util class
-	private final static void fileMove(File src, File dest) throws IOException {
-		boolean moved = src.renameTo(dest);
-		if (!moved) {
-			BufferedInputStream is = new BufferedInputStream(new FileInputStream(src));
-			BufferedOutputStream os = new BufferedOutputStream(new FileOutputStream(dest));
-			try {
-				Util.copy(is, os, false, false); // is set false here, because copy does not close in case of an exception
-			}
-			finally {
-				closeEL(is);
-				closeEL(os);
-			}
-			if (!src.delete()) src.deleteOnExit();
-		}
 	}
 
 	private boolean isWindows() {

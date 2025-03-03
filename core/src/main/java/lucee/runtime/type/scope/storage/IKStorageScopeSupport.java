@@ -59,7 +59,7 @@ import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.StructSupport;
 import lucee.runtime.type.util.StructUtil;
 
-public abstract class IKStorageScopeSupport extends StructSupport implements StorageScopePro, CSRFTokenSupport {
+public abstract class IKStorageScopeSupport extends StructSupport implements StorageScope, CSRFTokenSupport {
 
 	protected static final IKStorageScopeItem ONE = new IKStorageScopeItem("1");
 
@@ -453,10 +453,12 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 		return size;
 	}
 
-	public void store(PageContext pc) { // FUTURE add to interface
+	@Override
+	public void store(PageContext pc) {
 		handler.store(this, pc, appName, name, data0, ThreadLocalPageContext.getLog(pc, "scope"));
 	}
 
+	@Override
 	public void unstore(PageContext pc) {
 		handler.unstore(this, pc, appName, name, ThreadLocalPageContext.getLog(pc, "scope"));
 	}
@@ -606,11 +608,13 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 		return ScopeUtil.verifyCsrfToken(tokens, token, key, remove);
 	}
 
-	public Struct getTokens(){
+	@Override
+	public Struct getTokens() {
 		return tokens;
 	};
 
-	public void setTokens(Map<Collection.Key, String> tokens){
+	@Override
+	public void setTokens(Map<Collection.Key, String> tokens) {
 		tokens.clear();
 		Iterator<Entry<Key, String>> it = tokens.entrySet().iterator();
 		Entry<Key, String> e;

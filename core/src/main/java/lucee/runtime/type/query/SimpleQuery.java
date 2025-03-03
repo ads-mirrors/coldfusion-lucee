@@ -438,7 +438,7 @@ public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 
 	@Override
 	public boolean next() {
-		synchronized (this){
+		synchronized (this) {
 			try {
 				return next(getPid());
 			}
@@ -450,7 +450,7 @@ public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 
 	@Override
 	public boolean next(int pid) throws DatabaseException {
-		synchronized (this){
+		synchronized (this) {
 			throwIfClosed();
 			if (recordcount >= (arrCurrentRow.set(pid, arrCurrentRow.get(pid, 0) + 1))) {
 				return true;
@@ -462,14 +462,14 @@ public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 
 	@Override
 	public void reset() {
-		synchronized (this){
+		synchronized (this) {
 			reset(getPid());
 		}
 	}
 
 	@Override
 	public void reset(int pid) {
-		synchronized (this){
+		synchronized (this) {
 			arrCurrentRow.set(pid, 0);
 		}
 	}
@@ -492,7 +492,7 @@ public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 	@Override
 
 	public int getCurrentrow(int pid) {
-		synchronized (this){
+		synchronized (this) {
 			return arrCurrentRow.get(pid, 1);
 		}
 	}
@@ -611,7 +611,7 @@ public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 	@Override
 
 	public int[] getTypes() {
-		synchronized (this){
+		synchronized (this) {
 			if (_types == null) {
 				_types = new int[columns.size()];
 				int i = 0;
@@ -627,7 +627,7 @@ public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 	@Override
 
 	public Map<Collection.Key, String> getTypesAsMap() {
-		synchronized (this){
+		synchronized (this) {
 			Map<Collection.Key, String> map = new HashMap<Collection.Key, String>();
 			Iterator<SimpleQueryColumn> it = columns.values().iterator();
 			SimpleQueryColumn c;
@@ -767,7 +767,7 @@ public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 	@Override
 
 	public String getData(int row, int col) throws IndexOutOfBoundsException {
-		synchronized (this){
+		synchronized (this) {
 			try {
 				int rowBefore = res.getRow();
 				try {
@@ -814,8 +814,12 @@ public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 	}
 
 	@Override
-
 	public boolean containsKey(Key key) {
+		return containsKey(key.getString());
+	}
+
+	@Override
+	public boolean containsKey(PageContext pc, Key key) {
 		return containsKey(key.getString());
 	}
 
@@ -893,7 +897,7 @@ public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 
 	@Override
 	public lucee.runtime.type.Array getMetaDataSimple() {
-		synchronized (this){
+		synchronized (this) {
 			lucee.runtime.type.Array cols = new ArrayImpl();
 			SimpleQueryColumn sqc;
 			Struct column;
@@ -996,7 +1000,7 @@ public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 	@Override
 
 	public boolean absolute(int row) throws SQLException {
-		synchronized (this){
+		synchronized (this) {
 			return res.absolute(row);
 		}
 	}
@@ -1004,7 +1008,7 @@ public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 	@Override
 
 	public void afterLast() throws SQLException {
-		synchronized (this){
+		synchronized (this) {
 			res.afterLast();
 		}
 	}
@@ -1012,7 +1016,7 @@ public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 	@Override
 
 	public void beforeFirst() throws SQLException {
-		synchronized (this){
+		synchronized (this) {
 			res.beforeFirst();
 		}
 	}
@@ -1020,7 +1024,7 @@ public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 	@Override
 
 	public void cancelRowUpdates() throws SQLException {
-		synchronized (this){
+		synchronized (this) {
 			res.cancelRowUpdates();
 		}
 	}
@@ -1028,7 +1032,7 @@ public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 	@Override
 
 	public void clearWarnings() throws SQLException {
-		synchronized (this){
+		synchronized (this) {
 			res.clearWarnings();
 		}
 	}
@@ -1036,7 +1040,7 @@ public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 	@Override
 
 	public void close() throws SQLException {
-		synchronized (this){
+		synchronized (this) {
 			if (res != null && !res.isClosed()) {
 				res.close();
 			}
@@ -1049,7 +1053,7 @@ public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 	@Override
 
 	public void deleteRow() throws SQLException {
-		synchronized (this){
+		synchronized (this) {
 			res.deleteRow();
 		}
 	}
@@ -1063,7 +1067,7 @@ public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 	@Override
 
 	public boolean first() throws SQLException {
-		synchronized (this){
+		synchronized (this) {
 			return res.first();
 		}
 	}

@@ -206,6 +206,7 @@ public interface ConfigPro extends Config {
 
 	public Cluster createClusterScope() throws PageException;
 
+	@Override
 	public ClassLoader getClassLoaderCore();
 
 	public Resource getLogDirectory();
@@ -292,10 +293,8 @@ public interface ConfigPro extends Config {
 
 	public ORMEngine resetORMEngine(PageContext pc, boolean force) throws PageException;
 
-	// FUTURE add to interface
 	public boolean isMailSendPartial();
 
-	// FUTURE add to interface and impl
 	public boolean isUserset();
 
 	public CharSet getResourceCharSet();

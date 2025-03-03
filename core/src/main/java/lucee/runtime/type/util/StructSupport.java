@@ -143,8 +143,6 @@ public abstract class StructSupport implements Map, Struct {
 		return containsKey(KeyImpl.init(key));
 	}
 
-	public abstract boolean containsKey(PageContext pc, Key key); // FUTURE add to Struct
-
 	@Override
 	public final Object get(String key, Object defaultValue) {
 		return get(KeyImpl.init(key), defaultValue);
@@ -300,9 +298,6 @@ public abstract class StructSupport implements Map, Struct {
 		return CollectionUtil.equals(this, (Collection) obj);
 	}
 
-	public abstract int getType(); // FUTURE add to loader
+	public abstract int getType();
 
-	/*
-	 * @Override public int hashCode() { return CollectionUtil.hashCode(this); }
-	 */
 }

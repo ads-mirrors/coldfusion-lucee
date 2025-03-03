@@ -28,6 +28,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
+import lucee.commons.lang.ClassException;
 import lucee.commons.lang.types.RefInteger;
 import lucee.runtime.PageContext;
 import lucee.runtime.config.Identification;
@@ -46,6 +47,8 @@ public interface ClassUtil {
 	 */
 	public Class<?> loadClass(String className) throws IOException;
 
+	public Class<?> loadClass(PageContext pc, String className) throws ClassException;
+
 	/**
 	 * loads Class that match given classname and the given bundle name and version, this Class can be
 	 * from the Lucee core as well
@@ -61,6 +64,9 @@ public interface ClassUtil {
 	public Class<?> loadClass(PageContext pc, String className, String bundleName, String bundleVersion) throws BundleException, IOException;
 
 	public BIF loadBIF(PageContext pc, String name) throws InstantiationException, IllegalAccessException;
+
+	public BIF loadBIF(PageContext pc, String name, String bundleName, Version bundleVersion) throws InstantiationException, IllegalAccessException, BundleException,
+			IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, PageException, IOException;
 
 	/**
 	 * check if Class is instanceof another Class
@@ -97,6 +103,8 @@ public interface ClassUtil {
 	 * @return is Class Class of...
 	 */
 	public boolean isInstaneOf(Class<?> src, Class<?> trg);
+
+	public boolean isInstaneOf(Class<?> src, Class<?> trg, boolean exatctMatch);
 
 	/**
 	 * get all Classes from an Object Array

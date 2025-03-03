@@ -163,17 +163,32 @@ public class ResourceUtilImpl implements lucee.runtime.util.ResourceUtil {
 
 	@Override
 	public void removeChildren(Resource res) throws IOException {
-		ResourceUtil.removeChildren(res, false); // FUTURE add argument async to interface
+		ResourceUtil.removeChildren(res, false);
+	}
+
+	@Override
+	public void removeChildren(Resource res, boolean async) throws IOException {
+		ResourceUtil.removeChildren(res, async);
 	}
 
 	@Override
 	public void removeChildren(Resource res, ResourceNameFilter filter) throws IOException {
-		ResourceUtil.removeChildren(res, filter, false); // FUTURE add argument async to interface
+		ResourceUtil.removeChildren(res, filter, false);
+	}
+
+	@Override
+	public void removeChildren(Resource res, ResourceNameFilter filter, boolean async) throws IOException {
+		ResourceUtil.removeChildren(res, filter, async);
 	}
 
 	@Override
 	public void removeChildren(Resource res, ResourceFilter filter) throws IOException {
-		ResourceUtil.removeChildren(res, filter, false); // FUTURE add argument async to interface
+		ResourceUtil.removeChildren(res, filter, false);
+	}
+
+	@Override
+	public void removeChildren(Resource res, ResourceFilter filter, boolean async) throws IOException {
+		ResourceUtil.removeChildren(res, filter, async);
 	}
 
 	@Override
@@ -186,7 +201,6 @@ public class ResourceUtilImpl implements lucee.runtime.util.ResourceUtil {
 		ResourceUtil.setAttribute(res, attributes);
 	}
 
-	// FUTURE public Resource toResourceExisting(PageContext pc, String path, Resource defaultValue)
 	@Override
 	public Resource toResourceExisting(PageContext pc, String path) throws PageException {
 		return ResourceUtil.toResourceExisting(pc, path);

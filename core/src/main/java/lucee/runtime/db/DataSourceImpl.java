@@ -103,7 +103,7 @@ public final class DataSourceImpl extends DataSourceSupport {
 		this.custom = custom;
 
 		this.connStrTranslated = connStr;
-		this.paramSyntax = (paramSyntax == null) ? ParamSyntax.DEFAULT : paramSyntax;
+		this.paramSyntax = (paramSyntax == null) ? ParamSyntaxImpl.DEFAULT : paramSyntax;
 		this.alwaysSetTimeout = alwaysSetTimeout;
 		translateConnStr();
 
@@ -137,9 +137,10 @@ public final class DataSourceImpl extends DataSourceSupport {
 		if (!doQueryString) return src;
 
 		// FUTURE remove; this is for backward compatibility to old MSSQL driver
-		if (ParamSyntax.DEFAULT.equals(paramSyntax) && getClassDefinition().getClassName().indexOf("microsoft") != -1 || getClassDefinition().getClassName().indexOf("jtds") != -1)
+		if (ParamSyntaxImpl.DEFAULT.equals(paramSyntax) && getClassDefinition().getClassName().indexOf("microsoft") != -1
+				|| getClassDefinition().getClassName().indexOf("jtds") != -1)
 			return src += ';' + name + '=' + value;
-		return src += (leading ? paramSyntax.leadingDelimiter : paramSyntax.delimiter) + name + paramSyntax.separator + value;
+		return src += (leading ? paramSyntax.getLeadingDelimiter() : paramSyntax.getDelimiter()) + name + paramSyntax.getSeparator() + value;
 		// return src+=((src.indexOf('?')!=-1)?'&':'?')+name+'='+value;
 	}
 
@@ -178,12 +179,12 @@ public final class DataSourceImpl extends DataSourceSupport {
 		return host;
 	}
 
-	// FUTURE add to interface
+	@Override
 	public ParamSyntax getParamSyntax() {
 		return paramSyntax;
 	}
 
-	// FUTURE add to interface
+	@Override
 	public boolean getAlwaysSetTimeout() {
 		return alwaysSetTimeout;
 	}

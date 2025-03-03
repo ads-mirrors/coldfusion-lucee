@@ -120,6 +120,7 @@ import lucee.runtime.db.DataSourcePro;
 import lucee.runtime.db.DatasourceConnectionImpl;
 import lucee.runtime.db.JDBCDriver;
 import lucee.runtime.db.ParamSyntax;
+import lucee.runtime.db.ParamSyntaxImpl;
 import lucee.runtime.debug.Debugger;
 import lucee.runtime.engine.CFMLEngineImpl;
 import lucee.runtime.engine.ExecutionLogFactory;
@@ -188,8 +189,6 @@ import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.dt.DateTimeImpl;
 import lucee.runtime.type.dt.TimeSpan;
 import lucee.runtime.type.dt.TimeSpanImpl;
-import lucee.runtime.type.scope.Cluster;
-import lucee.runtime.type.scope.ClusterEntryImpl;
 import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.type.util.ComponentUtil;
 import lucee.runtime.type.util.KeyConstants;
@@ -532,15 +531,6 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		// index
 		if (action.equals("index")) {
 			doTagIndex();
-			return;
-		}
-		// cluster
-		if (action.equals("setcluster")) {
-			doSetCluster();
-			return;
-		}
-		if (action.equals("getcluster")) {
-			doGetCluster();
 			return;
 		}
 
@@ -2656,7 +2646,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 
 		// customParameterSyntax
 		// Struct sct = getStruct("customParameterSyntax", null);
-		ParamSyntax ps = ParamSyntax.toParamSyntax(attributes, ParamSyntax.DEFAULT);
+		ParamSyntax ps = ParamSyntaxImpl.toParamSyntax(attributes, ParamSyntaxImpl.DEFAULT);
 
 		//
 		boolean literalTimestampWithTSOffset = getBoolV("literalTimestampWithTSOffset", false);
@@ -4045,34 +4035,6 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 
 		}
 		pageContext.setVariable(getString("admin", action, "returnVariable"), qry);
-	}
-
-	private void doSetCluster() {// MUST remove this
-		try {
-			_doSetCluster();
-		}
-		catch (Throwable t) {
-			ExceptionUtil.rethrowIfNecessary(t);
-		}
-	}
-
-	private void _doSetCluster() throws PageException {
-
-		Struct entries = Caster.toStruct(getObject("admin", action, "entries"));
-		Struct entry;
-		Iterator<Object> it = entries.valueIterator();
-		Cluster cluster = pageContext.clusterScope();
-		while (it.hasNext()) {
-			entry = Caster.toStruct(it.next());
-			cluster.setEntry(new ClusterEntryImpl(KeyImpl.init(Caster.toString(entry.get(KeyConstants._key))), Caster.toSerializable(entry.get(KeyConstants._value, null), null),
-					Caster.toLongValue(entry.get(KeyConstants._time))));
-		}
-
-		cluster.broadcast();
-	}
-
-	private void doGetCluster() throws PageException {
-		pageContext.setVariable(getString("admin", action, "returnVariable"), ((PageContextImpl) pageContext).clusterScope(false));
 	}
 
 	private void doGetToken() throws PageException {

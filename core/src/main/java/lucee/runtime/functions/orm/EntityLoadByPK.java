@@ -26,7 +26,6 @@ public class EntityLoadByPK {
 		 */
 		return session.load(pc, name, id);
 
-		// FUTURE call instead load(..,..,OBJECT);
 	}
 
 }

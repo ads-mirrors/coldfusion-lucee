@@ -238,12 +238,12 @@ public class JavaSettingsImpl implements JavaSettings {
 		return resourcesTranslated;
 	}
 
-	// FUTURE interface
+	@Override
 	public Resource[] getBundles() {
 		return bundles;
 	}
 
-	// FUTURE interface
+	@Override
 	public List<Resource> getBundlesTranslated() {
 		if (!hasBundlesTranslated) {
 			List<Resource> list = new ArrayList<Resource>();

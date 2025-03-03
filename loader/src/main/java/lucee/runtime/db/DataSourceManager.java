@@ -78,7 +78,11 @@ public interface DataSourceManager {
 	 */
 	public abstract void rollback() throws PageException;
 
+	public void rollback(String savePointName) throws PageException;
+
 	public abstract void savepoint() throws PageException;
+
+	public void savepoint(String savePointName) throws PageException;
 
 	/**
 	 * commit hanging transaction

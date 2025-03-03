@@ -34,7 +34,6 @@ import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.db.DataSource;
 import lucee.runtime.db.DataSourceUtil;
 import lucee.runtime.db.DatasourceConnection;
-import lucee.runtime.db.DatasourceConnectionPro;
 import lucee.runtime.db.DatasourceManagerImpl;
 import lucee.runtime.db.SQL;
 import lucee.runtime.db.SQLCaster;
@@ -121,10 +120,12 @@ public class DBUtilImpl implements DBUtil {
 		return new SQLImpl(sql, items);
 	}
 
+	@Override
 	public void releaseDatasourceConnection(Config config, DatasourceConnection dc) {
 		_releaseDatasourceConnection(ThreadLocalPageContext.get(config), dc, null);
 	}
 
+	@Override
 	public void releaseDatasourceConnection(PageContext pc, DatasourceConnection dc, boolean managed) {
 		_releaseDatasourceConnection(pc, dc, managed);
 	}
@@ -140,7 +141,7 @@ public class DBUtilImpl implements DBUtil {
 			manager.releaseConnection(pc, dc);
 			return;
 		}
-		if (dc != null) ((DatasourceConnectionPro) dc).release();
+		if (dc != null) dc.release();
 	}
 
 	@Override
@@ -153,6 +154,7 @@ public class DBUtilImpl implements DBUtil {
 		return _getDatasourceConnection(pc, datasource, user, pass, null);
 	}
 
+	@Override
 	public DatasourceConnection getDatasourceConnection(PageContext pc, DataSource datasource, String user, String pass, boolean managed) throws PageException {
 		return _getDatasourceConnection(pc, datasource, user, pass, managed);
 	}
@@ -170,6 +172,7 @@ public class DBUtilImpl implements DBUtil {
 		return getDatasourceConnection(ThreadLocalPageContext.getConfig(pc), datasource, user, pass);
 	}
 
+	@Override
 	public DatasourceConnection getDatasourceConnection(Config config, DataSource datasource, String user, String pass) throws PageException {
 		ConfigWebPro ci = (ConfigWebPro) ThreadLocalPageContext.getConfig(config);
 		return ci.getDatasourceConnectionPool().getDatasourceConnection(config, datasource, user, pass);

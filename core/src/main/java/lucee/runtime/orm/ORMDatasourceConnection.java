@@ -41,16 +41,14 @@ import lucee.commons.io.IOUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.db.DataSource;
-import lucee.runtime.db.DataSourcePro;
 import lucee.runtime.db.DatasourceConnection;
 import lucee.runtime.db.DatasourceConnectionImpl;
-import lucee.runtime.db.DatasourceConnectionPro;
 import lucee.runtime.db.SQL;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.op.Caster;
 
-public class ORMDatasourceConnection implements DatasourceConnectionPro {
+public class ORMDatasourceConnection implements DatasourceConnection {
 
 	@Override
 	public DatasourceConnection using() throws PageException {
@@ -416,7 +414,7 @@ public class ORMDatasourceConnection implements DatasourceConnectionPro {
 
 	@Override
 	public int getDefaultTransactionIsolation() {
-		return ((DataSourcePro) datasource).getDefaultTransactionIsolation();
+		return (datasource).getDefaultTransactionIsolation();
 	}
 
 	@Override

@@ -190,6 +190,11 @@ public class SimpleQueryColumn implements QueryColumn {
 	}
 
 	@Override
+	public boolean containsKey(PageContext pc, Key key) {
+		throw SimpleQuery.notSupported();
+	}
+
+	@Override
 	public DumpData toDumpData(PageContext pageContext, int maxlevel, DumpProperties properties) {
 		throw SimpleQuery.notSupported();
 	}

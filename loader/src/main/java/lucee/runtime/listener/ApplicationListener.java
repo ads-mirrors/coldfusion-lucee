@@ -22,6 +22,8 @@ import lucee.runtime.CFMLFactory;
 import lucee.runtime.PageContext;
 import lucee.runtime.PageSource;
 import lucee.runtime.exp.PageException;
+import lucee.runtime.type.scope.Application;
+import lucee.runtime.type.scope.Session;
 
 /**
  * interface for PageContext to interact with CFML
@@ -137,4 +139,12 @@ public interface ApplicationListener {
 	public boolean hasOnApplicationStart();
 
 	public boolean hasOnSessionStart(PageContext pc);
+
+	public abstract void onSessionStart(PageContext pc, Session session) throws PageException;
+
+	public abstract boolean onApplicationStart(PageContext pc, Application application) throws PageException;
+
+	public abstract boolean isSingelton();
+
+	public abstract void setSingelton(boolean singelton);
 }

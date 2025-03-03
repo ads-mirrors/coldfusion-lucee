@@ -663,6 +663,12 @@ public class QueryColumnImpl implements QueryColumnPro, Objects {
 		return get(key, _null) != _null;
 	}
 
+	@Override
+	public boolean containsKey(PageContext pc, Collection.Key key) {
+		Object _null = NullSupportHelper.NULL();
+		return get(pc, key, _null) != _null;
+	}
+
 	public Iterator iterator() {
 		return keyIterator();
 	}

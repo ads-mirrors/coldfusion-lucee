@@ -57,6 +57,7 @@ import lucee.runtime.util.Excepton;
 import lucee.runtime.util.HTMLUtil;
 import lucee.runtime.util.HTTPUtil;
 import lucee.runtime.util.IO;
+import lucee.runtime.util.JavaProxyUtil;
 import lucee.runtime.util.ListUtil;
 import lucee.runtime.util.ORMUtil;
 import lucee.runtime.util.Operation;
@@ -156,12 +157,15 @@ public interface CFMLEngine {
 	 */
 	public Cast getCastUtil();
 
+	@Deprecated
+	public Operation getOperatonUtil();
+
 	/**
 	 * return the operation util
 	 * 
 	 * @return operaton util
 	 */
-	public Operation getOperatonUtil();// FUTURE rename to getOperationUtil()
+	public Operation getOperationUtil();
 
 	/**
 	 * returns the decision util
@@ -184,7 +188,7 @@ public interface CFMLEngine {
 	 */
 	public Creation getCreationUtil();
 
-	public Object getJavaProxyUtil();// FUTURE return JavaProxyUtil
+	public JavaProxyUtil getJavaProxyUtil();
 
 	/**
 	 * returns the IO util
@@ -248,6 +252,8 @@ public interface CFMLEngine {
 	 */
 	public PageContext getThreadPageContext();
 
+	public PageContext getThreadPageContext(boolean cloneParentIfNotExist);
+
 	public Config getThreadConfig();
 
 	public TimeZone getThreadTimeZone();
@@ -302,8 +308,14 @@ public interface CFMLEngine {
 
 	public BundleContext getBundleContext();
 
+	public ScriptEngineFactory getScriptEngineFactory();
+
+	@Deprecated
 	public ScriptEngineFactory getScriptEngineFactory(int dialect);
 
+	public ScriptEngineFactory getTagEngineFactory();
+
+	@Deprecated
 	public ScriptEngineFactory getTagEngineFactory(int dialect);
 
 	public abstract TemplateUtil getTemplateUtil();

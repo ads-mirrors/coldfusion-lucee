@@ -358,7 +358,6 @@ public abstract class DataSourceSupport implements DataSourcePro, Cloneable, Ser
 		return alwaysResetConnections;
 	}
 
-	// FUTURE add to interface
 	public final boolean getLiteralTimestampWithTSOffset() {
 		return literalTimestampWithTSOffset;
 	}

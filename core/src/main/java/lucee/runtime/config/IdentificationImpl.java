@@ -65,7 +65,7 @@ public abstract class IdentificationImpl implements Identification, Serializable
 	static String createId(String key, String token, boolean addMacAddress, String defaultValue) {
 
 		try {
-			if (addMacAddress) {// because this was new we could swutch to a new ecryption // FUTURE cold we get rid of the old one?
+			if (addMacAddress) {
 				return Hash.sha256(key + ";" + token + ":" + SystemUtil.getMacAddress(""));
 			}
 			return Md5.getDigestAsString(key + token);

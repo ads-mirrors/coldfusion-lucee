@@ -106,7 +106,7 @@ public class BundleLoader {
 			// deploys bundled bundles to bundle directory
 			// deployBundledBundles(jarDirectory, availableBundles);
 
-			String doDownload = Util._getSystemPropOrEnvVar("lucee.enable.bundle.download", null);
+			String doDownload = Util.getSystemPropOrEnvVar("lucee.enable.bundle.download", null);
 			boolean always = "always".equalsIgnoreCase(doDownload);
 
 			// Add Required Bundles

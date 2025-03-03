@@ -13,7 +13,7 @@ public class JavaProxyUtilImpl implements JavaProxyUtil {
 		return JavaProxy.call(config, cfc, methodName, arguments);
 	}
 
-	// FUTURE add to interface
+	@Override
 	public Object call(ConfigWeb config, UDF udf, String methodName, Object... arguments) {
 		return JavaProxy.call(config, udf, methodName, arguments);
 	}

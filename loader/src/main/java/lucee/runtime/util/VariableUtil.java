@@ -217,6 +217,8 @@ public interface VariableUtil {
 	 */
 	public Object callFunctionWithoutNamedValues(PageContext pc, Object coll, Collection.Key key, Object[] args) throws PageException;
 
+	public Object callFunctionWithoutNamedValues(PageContext pc, Object coll, Collection.Key key, Object[] args, boolean noNull, Object defaultValue);
+
 	/**
 	 * call a Function (UDF, Method) with Named Values
 	 * 
@@ -243,6 +245,8 @@ public interface VariableUtil {
 	 * @throws PageException Page Context
 	 */
 	public Object callFunctionWithNamedValues(PageContext pc, Object coll, Collection.Key key, Object[] args) throws PageException;
+
+	public Object callFunctionWithNamedValues(PageContext pc, Object coll, Collection.Key key, Object[] args, boolean noNull, Object defaultValue);
 
 	public Object callFunctionWithNamedValues(PageContext pc, Object coll, Collection.Key key, Struct args) throws PageException;
 

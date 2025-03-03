@@ -216,11 +216,20 @@ public interface ResourceUtil {
 	 */
 	public void copyRecursive(Resource src, Resource trg, ResourceFilter filter) throws IOException;
 
+	@Deprecated
 	public void removeChildren(Resource res) throws IOException;
 
+	public void removeChildren(Resource res, boolean async) throws IOException;
+
+	@Deprecated
 	public void removeChildren(Resource res, ResourceNameFilter filter) throws IOException;
 
+	public void removeChildren(Resource res, ResourceNameFilter filter, boolean async) throws IOException;
+
+	@Deprecated
 	public void removeChildren(Resource res, ResourceFilter filter) throws IOException;
+
+	public void removeChildren(Resource res, ResourceFilter filter, boolean async) throws IOException;
 
 	public void moveTo(Resource src, Resource dest) throws IOException;
 

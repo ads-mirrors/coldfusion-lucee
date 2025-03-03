@@ -145,9 +145,10 @@ public interface ORMSession {
 	 * @return Returns an object
 	 * @throws PageException Page Exception
 	 */
-	public Component load(PageContext pc, String name, String id) throws PageException; // FUTURE deprecate
+	@Deprecated
+	public Component load(PageContext pc, String name, String id) throws PageException;
 
-	// public Component load(PageContext pc, String name, Object id) throws PageException; // FUTURE ADD
+	public Component load(PageContext pc, String name, Object id) throws PageException;
 
 	/**
 	 * load and return an Array of Objects matching given filter

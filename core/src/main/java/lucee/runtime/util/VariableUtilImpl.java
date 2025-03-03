@@ -848,7 +848,7 @@ public final class VariableUtilImpl implements VariableUtil {
 
 	}
 
-	// FUTURE add to interface
+	@Override
 	public Object callFunctionWithoutNamedValues(PageContext pc, Object coll, Collection.Key key, Object[] args, boolean noNull, Object defaultValue) {
 		// MUST make an independent impl for performance reasons
 		try {
@@ -893,7 +893,7 @@ public final class VariableUtilImpl implements VariableUtil {
 		throw new ExpressionException("No matching Method/Function [" + key + "] for call with named arguments found ");
 	}
 
-	// FUTURE add to interface
+	@Override
 	public Object callFunctionWithNamedValues(PageContext pc, Object coll, Collection.Key key, Object[] args, boolean noNull, Object defaultValue) {
 		// MUST make an independent impl for performance reasons
 		try {

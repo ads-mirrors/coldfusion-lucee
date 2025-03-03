@@ -20,6 +20,7 @@ package lucee.runtime.type;
 
 import java.io.Serializable;
 
+import lucee.runtime.PageContext;
 import lucee.runtime.dump.Dumpable;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Castable;
@@ -179,6 +180,8 @@ public interface Collection extends Dumpable, Iteratorable, Cloneable, Serializa
 	 * @return returns if collection has a key with given name
 	 */
 	public boolean containsKey(Collection.Key key);
+
+	public abstract boolean containsKey(PageContext pc, Key key);
 
 	interface Key extends Serializable {
 

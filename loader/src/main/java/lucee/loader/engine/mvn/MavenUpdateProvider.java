@@ -41,7 +41,7 @@ public class MavenUpdateProvider {
 
 	public static String getDefaultRepositoryReleases() {
 		if (defaultRepositoryReleases == null) {
-			String str = Util._getSystemPropOrEnvVar("lucee.mvn.repo.releases", null);
+			String str = Util.getSystemPropOrEnvVar("lucee.mvn.repo.releases", null);
 			if (!Util.isEmpty(str, true)) {
 				try {
 					new URL(str.trim());
@@ -57,7 +57,7 @@ public class MavenUpdateProvider {
 
 	public static String getDefaultRepositorySnapshots() {
 		if (defaultRepositorySnapshots == null) {
-			String str = Util._getSystemPropOrEnvVar("lucee.mvn.repo.snapshots", null);
+			String str = Util.getSystemPropOrEnvVar("lucee.mvn.repo.snapshots", null);
 			if (!Util.isEmpty(str, true)) {
 				try {
 					new URL(str.trim());

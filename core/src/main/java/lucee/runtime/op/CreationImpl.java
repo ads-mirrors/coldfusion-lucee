@@ -282,7 +282,7 @@ public final class CreationImpl implements Creation, Serializable {
 		return new HttpServletResponseDummy(io); // do not change, flex extension is depending on this
 	}
 
-	// FUTURE add to interface
+	@Override
 	public ServletConfig createServletConfig(File root, Map<String, Object> attributes, Map<String, String> params) {
 		final String servletName = "";
 		if (attributes == null) attributes = new HashMap<String, Object>();
@@ -333,7 +333,7 @@ public final class CreationImpl implements Creation, Serializable {
 		return new RefIntegerImpl(i);
 	}
 
-	// FUTURE add this and more to interface
+	@Override
 	public RefInteger createRefInteger(int i, boolean _syncronized) {
 		return _syncronized ? new RefIntegerSync(i) : new RefIntegerImpl(i);
 	}

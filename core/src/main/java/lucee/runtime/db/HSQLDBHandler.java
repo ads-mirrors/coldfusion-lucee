@@ -649,7 +649,7 @@ public final class HSQLDBHandler {
 					// executeStatement(conn, "DISCONNECT"); // close HSQLDB session with temp tables
 					DBUtil.setAutoCommitEL(conn, true);
 				}
-				if (dc != null) ((DatasourceConnectionPro) dc).release();
+				if (dc != null) dc.release();
 
 				// manager.releaseConnection(dc);
 			}

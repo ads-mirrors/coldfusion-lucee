@@ -670,7 +670,7 @@ public final class CFMLFactoryImpl extends CFMLFactory {
 
 	@Override
 	@Deprecated
-	public int toDialect(String ext) { // FUTURE remove
+	public int toDialect(String ext) {
 		return CFMLEngine.DIALECT_CFML;
 	}
 

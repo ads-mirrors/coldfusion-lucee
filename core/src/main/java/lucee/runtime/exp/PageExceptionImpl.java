@@ -355,7 +355,6 @@ public abstract class PageExceptionImpl extends PageException {
 				item.setEL(KeyConstants._codePrintHTML, "");
 				item.setEL(KeyConstants._codePrintPlain, "");
 			}
-			// FUTURE id
 			tagContext.appendEL(item);
 		}
 	}

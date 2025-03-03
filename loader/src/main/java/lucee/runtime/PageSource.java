@@ -173,6 +173,7 @@ public interface PageSource extends Serializable {
 	 */
 	public String getDisplayPath();
 
+	@Deprecated
 	public int getDialect();
 
 	/**

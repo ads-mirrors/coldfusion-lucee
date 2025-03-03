@@ -22,6 +22,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import lucee.runtime.exp.PageException;
+
 /**
  * a datasource and connection pair
  */
@@ -53,9 +55,6 @@ public interface DatasourceConnection extends Connection {
 
 	public PreparedStatement getPreparedStatement(SQL sql, int resultSetType, int resultSetConcurrency) throws SQLException;
 
-	@Override
-	public void close() throws SQLException;
-
 	/**
 	 * @return is timeout or not
 	 */
@@ -68,8 +67,17 @@ public interface DatasourceConnection extends Connection {
 	 */
 	public abstract boolean isLifecycleTimeout();
 
-	// FUTURE public boolean isAutoCommit() throws SQLException;
+	public boolean isAutoCommit() throws SQLException;
 
-	// FUTURE public void setAutoCommit(boolean setting) throws SQLException;
+	public int getDefaultTransactionIsolation();
 
+	public DatasourceConnection using() throws PageException;
+
+	public void release();
+
+	public boolean validate();
+
+	public void setManaged(boolean managed);
+
+	public boolean isManaged();
 }

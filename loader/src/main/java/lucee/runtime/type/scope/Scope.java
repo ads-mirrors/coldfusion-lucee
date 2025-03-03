@@ -85,7 +85,9 @@ public interface Scope extends Struct {
 	 */
 	public static final int SCOPE_CALLER = 13;
 
-	public static final int SCOPE_CLUSTER = 14; // FUTURE rename to THREAD
+	@Deprecated
+	public static final int SCOPE_CLUSTER = 14;
+	public static final int SCOPE_THREAD = 14;
 
 	public static final int SCOPE_VAR = 15;
 

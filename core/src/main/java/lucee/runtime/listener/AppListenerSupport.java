@@ -20,8 +20,6 @@ package lucee.runtime.listener;
 
 import lucee.runtime.PageContext;
 import lucee.runtime.exp.PageException;
-import lucee.runtime.type.scope.Application;
-import lucee.runtime.type.scope.Session;
 
 public abstract class AppListenerSupport implements ApplicationListener {
 
@@ -46,13 +44,4 @@ public abstract class AppListenerSupport implements ApplicationListener {
 	@Override
 	public void onTimeout(PageContext pc) {
 	}
-
-	// FUTURE add to interface
-	public abstract void onSessionStart(PageContext pc, Session session) throws PageException;
-
-	public abstract boolean onApplicationStart(PageContext pc, Application application) throws PageException;
-
-	public abstract boolean isSingelton();
-
-	public abstract void setSingelton(boolean singelton);
 }

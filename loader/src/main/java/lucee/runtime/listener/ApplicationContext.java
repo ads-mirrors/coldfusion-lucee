@@ -18,21 +18,28 @@
  **/
 package lucee.runtime.listener;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import lucee.commons.io.log.Log;
 import lucee.commons.io.res.Resource;
 import lucee.runtime.Mapping;
 import lucee.runtime.PageContext;
+import lucee.runtime.ai.AIEngine;
+import lucee.runtime.cache.CacheConnection;
 import lucee.runtime.db.DataSource;
 import lucee.runtime.exp.PageException;
+import lucee.runtime.net.proxy.ProxyData;
 import lucee.runtime.net.s3.Properties;
 import lucee.runtime.orm.ORMConfiguration;
 import lucee.runtime.rest.RestSettings;
 import lucee.runtime.type.Collection;
+import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.CustomType;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.dt.TimeSpan;
@@ -328,4 +335,112 @@ public interface ApplicationContext extends Serializable {
 	public abstract boolean getCGIScopeReadonly();
 
 	public void setCGIScopeReadonly(boolean cgiScopeReadonly);
+
+	public abstract Resource getAntiSamyPolicyResource(PageContext pc);
+
+	public abstract void setAntiSamyPolicyResource(Resource res);
+
+	public abstract CacheConnection getCacheConnection(String cacheName, CacheConnection defaultValue);
+
+	public abstract Key[] getCacheConnectionNames();
+
+	public abstract void setCacheConnection(String cacheName, CacheConnection value);
+
+	public abstract lucee.runtime.net.mail.Server[] getMailServers();
+
+	public abstract void setMailServers(lucee.runtime.net.mail.Server[] servers);
+
+	public abstract java.util.Collection<Collection.Key> getLogNames() throws PageException;
+
+	public abstract Log getLog(String name) throws PageException;
+
+	public abstract Struct getLogMetaData(String string) throws PageException;
+
+	public abstract Object getMailListener();
+
+	public abstract void setMailListener(Object mailListener);
+
+	public abstract boolean getWSMaintainSession(); // used in extension Axis1
+
+	public abstract void setWSMaintainSession(boolean maintainSession);
+
+	public abstract boolean getFullNullSupport();
+
+	public abstract void setFullNullSupport(boolean fullNullSupport);
+
+	public abstract List<Resource> getFunctionDirectories();
+
+	public abstract void setFunctionDirectories(List<Resource> resources);
+
+	public abstract boolean getQueryPSQ();
+
+	public abstract void setQueryPSQ(boolean psq);
+
+	public abstract int getQueryVarUsage();
+
+	public abstract void setQueryVarUsage(int varUsage);
+
+	public abstract TimeSpan getQueryCachedAfter();
+
+	public abstract void setQueryCachedAfter(TimeSpan ts);
+
+	public abstract ProxyData getProxyData();
+
+	public abstract void setProxyData(ProxyData data);
+
+	public abstract String getBlockedExtForFileUpload();
+
+	public abstract void setJavaSettings(JavaSettings javaSettings);
+
+	public abstract ClassLoader getRPCClassLoader() throws IOException;
+
+	public abstract Struct getXmlFeatures();
+
+	public abstract void setXmlFeatures(Struct xmlFeatures);
+
+	public abstract boolean getAllowImplicidQueryCall();
+
+	public abstract void setAllowImplicidQueryCall(boolean allowImplicidQueryCall);
+
+	public abstract boolean getPreciseMath();
+
+	public abstract void setPreciseMath(boolean preciseMath);
+
+	public abstract boolean getLimitEvaluation();
+
+	public abstract void setLimitEvaluation(boolean limitEvaluation);
+
+	public abstract boolean getFormUrlAsStruct();
+
+	public abstract int getReturnFormat();
+
+	public abstract void setReturnFormat(int rf);
+
+	public abstract boolean getShowDebug();
+
+	public abstract boolean getShowDoc();
+
+	public abstract boolean getShowMetric();
+
+	public abstract boolean getShowTest();
+
+	public abstract void setShowDebug(boolean b);
+
+	public abstract void setShowDoc(boolean b);
+
+	public abstract void setShowMetric(boolean b);
+
+	public abstract void setShowTest(boolean b);
+
+	public abstract int getDebugOptions();
+
+	public abstract boolean hasDebugOptions(int option);
+
+	public abstract void setDebugOptions(int option);
+
+	public abstract void remDebugOptions(int option);
+
+	public abstract AIEngine getAIEngine(String name) throws PageException;
+
+	public abstract String getAIEngineNameForDefault(String defaultName);
 }

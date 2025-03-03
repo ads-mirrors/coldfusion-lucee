@@ -38,14 +38,14 @@ public class Logging {
 	}
 
 	public static void startupLog() {
-		String dumpPath = Util._getSystemPropOrEnvVar("lucee.dump.threads", null);
+		String dumpPath = Util.getSystemPropOrEnvVar("lucee.dump.threads", null);
 		if (!Util.isEmpty(dumpPath, true)) {
 
 			long start = System.currentTimeMillis();
 
 			int tmp = 100;
 			try {
-				tmp = Integer.parseInt(Util._getSystemPropOrEnvVar("lucee.dump.threads.interval", null));
+				tmp = Integer.parseInt(Util.getSystemPropOrEnvVar("lucee.dump.threads.interval", null));
 			}
 			catch (Throwable e) {
 			}
@@ -53,7 +53,7 @@ public class Logging {
 
 			tmp = 10000;
 			try {
-				tmp = Integer.parseInt(Util._getSystemPropOrEnvVar("lucee.dump.threads.max", null));
+				tmp = Integer.parseInt(Util.getSystemPropOrEnvVar("lucee.dump.threads.max", null));
 			}
 			catch (Throwable e) {
 			}

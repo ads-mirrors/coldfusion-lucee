@@ -59,7 +59,8 @@ public final class QueryResultEntryImpl implements QueryEntry {
 	}
 
 	@Override
-	public Query getQry() { // FUTURE deprecate
+	@Deprecated
+	public Query getQry() {
 		if (qr instanceof Query) return (Query) qr;
 		return null;
 	}

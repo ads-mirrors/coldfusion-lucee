@@ -48,7 +48,7 @@ import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.StructSupport;
 import lucee.runtime.type.util.StructUtil;
 
-public abstract class StorageScopeImpl extends StructSupport implements StorageScopePro, CSRFTokenSupport {
+public abstract class StorageScopeImpl extends StructSupport implements StorageScope, CSRFTokenSupport {
 
 	public static Collection.Key CFID = KeyConstants._cfid;
 	public static Collection.Key CFTOKEN = KeyConstants._cftoken;
@@ -240,7 +240,7 @@ public abstract class StorageScopeImpl extends StructSupport implements StorageS
 
 	@Override
 	public final boolean containsKey(PageContext pc, Key key) {
-		return sct instanceof StructSupport ? ((StructSupport) sct).containsKey(pc, key) : sct.containsKey(key);
+		return sct instanceof StructSupport ? sct.containsKey(pc, key) : sct.containsKey(key);
 	}
 
 	@Override
@@ -403,9 +403,11 @@ public abstract class StorageScopeImpl extends StructSupport implements StorageS
 		unstore(ThreadLocalPageContext.get(config));
 	}
 
+	@Override
 	public void store(PageContext pc) {
 	}
 
+	@Override
 	public void unstore(PageContext pc) {
 	}
 
@@ -533,11 +535,13 @@ public abstract class StorageScopeImpl extends StructSupport implements StorageS
 		return ScopeUtil.verifyCsrfToken(tokens, token, key, remove);
 	}
 
-	public Map<Collection.Key, String> getTokens(){
+	@Override
+	public Map<Collection.Key, String> getTokens() {
 		return tokens;
 	};
 
-	public void setTokens(Map<Collection.Key, String> newTokens){
+	@Override
+	public void setTokens(Map<Collection.Key, String> newTokens) {
 		tokens.clear();
 		Iterator<Entry<Key, String>> it = newTokens.entrySet().iterator();
 		Entry<Key, String> e;

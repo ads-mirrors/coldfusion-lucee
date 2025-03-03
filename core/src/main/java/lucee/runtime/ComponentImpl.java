@@ -2166,6 +2166,11 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 		return get(access, name, _null) != _null;
 	}
 
+	public boolean contains(PageContext pc, int access, Key name) {
+		Object _null = NullSupportHelper.NULL(pc);
+		return get(access, name, _null) != _null;
+	}
+
 	@Override
 	public Iterator<Collection.Key> keyIterator() {
 		return keyIterator(getAccess(ThreadLocalPageContext.get()));

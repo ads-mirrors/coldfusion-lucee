@@ -106,7 +106,10 @@ public interface Debugger {
 	 * @param template Template
 	 * @return debug timer object
 	 */
+	@Deprecated
 	public DebugTimer addTimer(String label, long exe, String template);
+
+	public DebugTimer addTimer(String label, long exe, String template, int line);
 
 	/**
 	 * add new Trace to debug
@@ -129,7 +132,10 @@ public interface Debugger {
 
 	public CatchBlock[] getExceptions();
 
+	@Deprecated
 	public void addImplicitAccess(String scope, String name);
+
+	public void addImplicitAccess(PageContext pc, String scope, String name);
 
 	public ImplicitAccess[] getImplicitAccesses(int scope, String name);
 
@@ -182,4 +188,5 @@ public interface Debugger {
 	public DebugDump addDump(PageSource ps, String dump);
 
 	public void setOutputLog(DebugOutputLog outputLog);
+
 }

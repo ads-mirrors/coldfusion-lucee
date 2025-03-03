@@ -31,7 +31,7 @@ import lucee.runtime.util.PageContextUtil;
 /**
  * A Page that can produce Components
  */
-public abstract class InterfacePageImpl extends InterfacePage implements PagePro {
+public abstract class InterfacePageImpl extends InterfacePage {
 
 	@Override
 	public int getHash() {

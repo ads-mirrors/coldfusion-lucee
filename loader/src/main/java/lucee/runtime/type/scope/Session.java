@@ -20,7 +20,7 @@ package lucee.runtime.type.scope;
 
 import lucee.runtime.type.Collection;
 
-public interface Session extends Scope, UserScope {// FUTURE add StorageScope
+public interface Session extends Scope, UserScope {
 	/**
 	 * @return returns the last access to this session scope
 	 * @deprecated

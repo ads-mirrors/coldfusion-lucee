@@ -1606,9 +1606,9 @@ public final class ConfigAdmin {
 				if (!StringUtil.isEmpty(dbdriver)) el.setEL("dbdriver", Caster.toString(dbdriver));
 
 				// Param Syntax
-				el.setEL("paramDelimiter", (paramSyntax.delimiter));
-				el.setEL("paramLeadingDelimiter", (paramSyntax.leadingDelimiter));
-				el.setEL("paramSeparator", (paramSyntax.separator));
+				el.setEL("paramDelimiter", (paramSyntax.getDelimiter()));
+				el.setEL("paramLeadingDelimiter", (paramSyntax.getLeadingDelimiter()));
+				el.setEL("paramSeparator", (paramSyntax.getSeparator()));
 
 				if (literalTimestampWithTSOffset) el.setEL("literalTimestampWithTSOffset", "true");
 				else if (el.containsKey("literalTimestampWithTSOffset")) el.removeEL(KeyImpl.init("literalTimestampWithTSOffset"));
@@ -1666,9 +1666,9 @@ public final class ConfigAdmin {
 		if (!StringUtil.isEmpty(dbdriver)) el.setEL("dbdriver", Caster.toString(dbdriver));
 
 		// Param Syntax
-		el.setEL("paramDelimiter", (paramSyntax.delimiter));
-		el.setEL("paramLeadingDelimiter", (paramSyntax.leadingDelimiter));
-		el.setEL("paramSeparator", (paramSyntax.separator));
+		el.setEL("paramDelimiter", (paramSyntax.getDelimiter()));
+		el.setEL("paramLeadingDelimiter", (paramSyntax.getLeadingDelimiter()));
+		el.setEL("paramSeparator", (paramSyntax.getSeparator()));
 
 		if (literalTimestampWithTSOffset) el.setEL("literalTimestampWithTSOffset", "true");
 		if (alwaysSetTimeout) el.setEL("alwaysSetTimeout", "true");

@@ -216,6 +216,11 @@ public abstract class ArraySupport extends AbstractList implements ArrayPro, Lis
 	}
 
 	@Override
+	public boolean containsKey(PageContext pc, Collection.Key key) {
+		return get(pc, key, null) != null;
+	}
+
+	@Override
 	public boolean containsKey(int key) {
 		return get(key, null) != null;
 	}

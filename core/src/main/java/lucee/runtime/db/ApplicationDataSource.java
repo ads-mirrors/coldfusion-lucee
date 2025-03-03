@@ -117,4 +117,14 @@ public class ApplicationDataSource extends DataSourceSupport {
 		// return new MethodNotSupportedException();
 		throw new PageRuntimeException(new ApplicationException("method not supported"));
 	}
+
+	@Override
+	public boolean getAlwaysSetTimeout() {
+		throw exp();
+	}
+
+	@Override
+	public ParamSyntax getParamSyntax() {
+		throw exp();
+	}
 }

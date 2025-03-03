@@ -18,6 +18,8 @@
  **/
 package lucee.runtime.listener;
 
+import java.util.List;
+
 import lucee.commons.io.res.Resource;
 
 public interface JavaSettings {
@@ -30,6 +32,10 @@ public interface JavaSettings {
 	public Resource[] getResources();
 
 	public Resource[] getResourcesTranslated();
+
+	public Resource[] getBundles();
+
+	public List<Resource> getBundlesTranslated();
 
 	/**
 	 * Indicates whether to load the classes from the default lib directory. The default value is false
