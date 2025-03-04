@@ -42,7 +42,7 @@ public class LSPEndpointFactory implements MessageProcessor {
 	public static final int DEFAULT_LSP_PORT = 2089;
 	public static final String DEFAULT_COMPONENT = "org.lucee.cfml.lsp.LSPEndpoint";
 	public static final long TIMEOUT = 3000;
-	public static final String DEFAULT_LOG = "debug";
+	public static final String DEFAULT_LOG = "application";
 	public static final Key JSONRPC;
 
 	private ServerSocket serverSocket;
