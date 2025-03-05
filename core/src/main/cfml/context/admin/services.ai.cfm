@@ -20,13 +20,16 @@
 	stText.Settings.ai.defaultTypeDocumentation="Documentation";
 	stText.Settings.ai.defaultTypeDocumentationDesc="Use this connection to provide additional documentation context in the Monitor section of the requests.";
 
+	stText.Settings.ai.defaultTypeAdministrator="Administrator";
+	stText.Settings.ai.defaultTypeAdministratorDesc="Use this connection to for AI related actions in the Lucee Administrator.";
+
 	stText.Settings.ai.NameDesc="you can use this name to reference this connection in our code.";
 	error.message="";
 	error.detail="";
 	param name="url.action2" default="list";
 	param name="form.mainAction" default="none";
 	param name="form.subAction" default="none";
-	defaults=["exception","documentation"];
+	defaults=["administrator","documentation","exception"];
 
 
 
