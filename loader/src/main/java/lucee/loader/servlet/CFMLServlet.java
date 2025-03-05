@@ -18,8 +18,28 @@
  **/
 package lucee.loader.servlet;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+
+import lucee.loader.util.Util;
+
+@Deprecated
 public class CFMLServlet extends lucee.loader.servlet.javax.CFMLServlet {
 
 	private static final long serialVersionUID = 1389465039826124601L;
+
+	static final String ERROR_MESSAGE = "The Servlet [lucee.loader.servlet.CFMLServlet] is deprecated. "
+			+ "Please use [lucee.loader.servlet.javax.CFMLServlet] for Java EE/javax environments (Tomcat 9, Jetty 9, Undertow 2.0, JBoss 7, WebSphere Liberty 19) "
+			+ "or [lucee.loader.servlet.jakarta.CFMLServlet] for Jakarta EE environments (Tomcat 10, Jetty 11, Undertow 3.0, Payara 6, WildFly 30).";
+
+	@Override
+	@Deprecated
+	public void init(final ServletConfig sg) throws ServletException {
+		super.init(sg);
+		if (!engine.getCastUtil().toBooleanValue(Util.getSystemPropOrEnvVar("lucee.suppress.servlet.warning", null), false)) {
+			engine.getCFMLEngineFactory().log(org.apache.felix.resolver.Logger.LOG_WARNING, ERROR_MESSAGE);
+			System.err.println(ERROR_MESSAGE);
+		}
+	}
 
 }

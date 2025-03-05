@@ -49,14 +49,31 @@ Redirect to entry --->
 <cfif cgi.request_method EQ "POST" and error.message EQ "" and form.mainAction NEQ "none">
 	<cflocation url="#request.self#" addtoken="no">
 </cfif>
-
+<cfscript>
+function checkServletEnv() {
+	var pc=getPageContext();
+	var factory=pc.getCFMLFactory();
+	var servlet=factory.getServlet();
+	var servletName=servlet.getClass().getName();
+	
+	if("lucee.loader.servlet.javax.HttpServletJakarta" == servletName) {
+		return "Lucee is running in Java EE/javax compatibility mode. For optimal performance, consider upgrading your server to a Jakarta EE environment (Tomcat 10, Jetty 11, Undertow 3.0, Payara 6, WildFly 30). While compatibility mode works, native Jakarta EE support offers better performance and future compatibility.";
+	}
+	
+	if("lucee.loader.servlet.CFMLServlet" == servletName) {
+		return "The deprecated [lucee.loader.servlet.CFMLServlet] is being used. Please configure your web server to use [lucee.loader.servlet.javax.CFMLServlet] for Java EE/javax environments or [lucee.loader.servlet.jakarta.CFMLServlet] for Jakarta EE environments instead.";
+	}
+}
+msg=checkServletEnv();
+</cfscript>
+<cfif not isNull(msg)>
+<div class="warning nofocus">
+	<cfoutput>#msg#</cfoutput>
+</div>
+</cfif>
 <cfset lucee_version = "UNKNOWN">
 <cfinclude template="version.cfm">
-<!--- <cfif lucee_version neq server.lucee.version && lucee_version neq "UNKNOWN">
-	<cfoutput>
-		<div class="error">Warning Lucee Admin was compiled with version #lucee_version#?</div>
-	</cfoutput>
-</cfif>--->
+
 
 <!---
 Error Output --->

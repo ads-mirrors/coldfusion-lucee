@@ -18,6 +18,7 @@
  **/
 package lucee.loader.servlet;
 
+@Deprecated
 public class RestServlet extends lucee.loader.servlet.javax.RestServlet {
 
 	private static final long serialVersionUID = 6675880638570226829L;

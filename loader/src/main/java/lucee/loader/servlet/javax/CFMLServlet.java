@@ -24,12 +24,18 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import lucee.loader.engine.CFMLEngineFactory;
+import lucee.loader.util.Util;
 
 public class CFMLServlet extends AbsServlet {
 
 	private static final long serialVersionUID = -1878214660283329587L;
 	private HttpServletJakarta myself;
+
+	private static final String EMULATION_MESSAGE = "Lucee is running in Java EE/javax compatibility mode. "
+			+ "For optimal performance, consider upgrading your server to a Jakarta EE environment (Tomcat 10, Jetty 11, Undertow 3.0, Payara 6, WildFly 30). "
+			+ "While compatibility mode works, native Jakarta EE support offers better performance and future compatibility.";
 
 	@Override
 	public void init(final ServletConfig sg) throws ServletException {
@@ -43,6 +49,10 @@ public class CFMLServlet extends AbsServlet {
 		}
 		catch (jakarta.servlet.ServletException e) {
 			throw new ServletException(e);
+		}
+		if (!engine.getCastUtil().toBooleanValue(Util.getSystemPropOrEnvVar("lucee.suppress.servlet.warning", null), false)) {
+			engine.getCFMLEngineFactory().log(org.apache.felix.resolver.Logger.LOG_WARNING, EMULATION_MESSAGE);
+			System.err.println(EMULATION_MESSAGE);
 		}
 	}
 
