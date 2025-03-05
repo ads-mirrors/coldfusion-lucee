@@ -2,8 +2,7 @@ package lucee.runtime.lsp;
 
 import java.io.File;
 
-import javax.servlet.ServletException;
-
+import jakarta.servlet.ServletException;
 import lucee.commons.io.DevNullOutputStream;
 import lucee.commons.io.log.Log;
 import lucee.loader.engine.CFMLEngineFactory;

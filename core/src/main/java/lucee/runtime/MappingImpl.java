@@ -27,11 +27,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.ServletContext;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
+import jakarta.servlet.ServletContext;
 import lucee.commons.io.FileUtil;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
@@ -691,6 +690,7 @@ public final class MappingImpl implements Mapping {
 		return listenerType;
 	}
 
+	@Override
 	public void flush() {
 		pageSourcePool.clear();
 	}

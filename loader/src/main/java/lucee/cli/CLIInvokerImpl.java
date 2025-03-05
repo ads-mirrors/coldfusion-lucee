@@ -23,8 +23,7 @@ import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.Map;
 
-import /* JAVJAK */ javax.servlet.ServletException;
-
+import jakarta.servlet.ServletException;
 import lucee.cli.servlet.ServletConfigImpl;
 import lucee.cli.servlet.ServletContextImpl;
 import lucee.loader.engine.CFMLEngine;

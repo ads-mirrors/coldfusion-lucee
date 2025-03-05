@@ -1,16 +1,16 @@
-package lucee.loader.servlet.jakarta;
+package lucee.loader.servlet.javax;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 
-import javax.servlet.http.Part;
+import jakarta.servlet.http.Part;
 
-public class PartJavax implements Part {
+public class PartJakarta implements Part {
 
-	private jakarta.servlet.http.Part part;
+	private javax.servlet.http.Part part;
 
-	public PartJavax(jakarta.servlet.http.Part part) {
+	public PartJakarta(javax.servlet.http.Part part) {
 		this.part = part;
 	}
 

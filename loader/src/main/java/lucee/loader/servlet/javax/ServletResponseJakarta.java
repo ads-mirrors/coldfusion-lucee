@@ -1,17 +1,17 @@
-package lucee.loader.servlet.jakarta;
+package lucee.loader.servlet.javax;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Locale;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.ServletResponse;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.ServletResponse;
 
-public class ServletResponseJavax implements ServletResponse, Jakarta {
+public class ServletResponseJakarta implements ServletResponse, Javax {
 
-	private jakarta.servlet.ServletResponse rsp;
+	private javax.servlet.ServletResponse rsp;
 
-	public ServletResponseJavax(jakarta.servlet.ServletResponse rsp) {
+	public ServletResponseJakarta(javax.servlet.ServletResponse rsp) {
 		if (rsp == null) throw new NullPointerException();
 		this.rsp = rsp;
 	}
@@ -28,7 +28,7 @@ public class ServletResponseJavax implements ServletResponse, Jakarta {
 
 	@Override
 	public ServletOutputStream getOutputStream() throws IOException {
-		return new ServletOutputStreamJavax(rsp.getOutputStream());
+		return new ServletOutputStreamJakarta(rsp.getOutputStream());
 	}
 
 	@Override
@@ -97,7 +97,7 @@ public class ServletResponseJavax implements ServletResponse, Jakarta {
 	}
 
 	@Override
-	public Object getJakartaInstance() {
+	public Object getJavaxInstance() {
 		return rsp;
 	}
 }

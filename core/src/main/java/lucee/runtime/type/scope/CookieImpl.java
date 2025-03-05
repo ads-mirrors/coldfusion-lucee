@@ -24,9 +24,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lucee.commons.date.DateTimeUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
@@ -123,7 +122,7 @@ public final class CookieImpl extends ScopeSupport implements Cookie, ScriptProt
 		return value;
 	}
 
-	private void set(Config config, javax.servlet.http.Cookie cookie) {/* JAVJAK */
+	private void set(Config config, jakarta.servlet.http.Cookie cookie) {/* JAVJAK */
 
 		String name = StringUtil.toLowerCase(ReqRspUtil.decode(cookie.getName(), charset, false));
 		if (!raw.containsKey(name) || !StringUtil.isEmpty(cookie.getPath())) {
@@ -356,7 +355,7 @@ public final class CookieImpl extends ScopeSupport implements Cookie, ScriptProt
 
 		HttpServletRequest req = pc.getHttpServletRequest();
 		this.rsp = pc.getHttpServletResponse();
-		javax.servlet.http.Cookie[] cookies = ReqRspUtil.getCookies(req, pc.getWebCharset());
+		jakarta.servlet.http.Cookie[] cookies = ReqRspUtil.getCookies(req, pc.getWebCharset());
 		for (int i = 0; i < cookies.length; i++) {
 			set(config, cookies[i]);
 		}
@@ -418,7 +417,7 @@ public final class CookieImpl extends ScopeSupport implements Cookie, ScriptProt
 	public void touchAfterRequest(PageContext pc) {
 	}
 
-	public static void setHTTPOnly(javax.servlet.http.Cookie cookie) {/* JAVJAK */
+	public static void setHTTPOnly(jakarta.servlet.http.Cookie cookie) {/* JAVJAK */
 		try {
 			if (setHttpOnly == null) {
 				setHttpOnly = cookie.getClass().getMethod("setHttpOnly", SET_HTTP_ONLY_ARGS_CLASSES);
@@ -430,7 +429,7 @@ public final class CookieImpl extends ScopeSupport implements Cookie, ScriptProt
 		}
 	}
 
-	public static boolean isHTTPOnly(javax.servlet.http.Cookie cookie) {/* JAVJAK */
+	public static boolean isHTTPOnly(jakarta.servlet.http.Cookie cookie) {/* JAVJAK */
 		try {
 			if (isHttpOnly == null) {
 				isHttpOnly = cookie.getClass().getMethod("isHttpOnly", IS_HTTP_ONLY_ARGS_CLASSES);
@@ -443,7 +442,7 @@ public final class CookieImpl extends ScopeSupport implements Cookie, ScriptProt
 		}
 	}
 
-	public static void setPartitioned(javax.servlet.http.Cookie cookie) {/* JAVJAK */
+	public static void setPartitioned(jakarta.servlet.http.Cookie cookie) {/* JAVJAK */
 		try {
 			if (setPartitioned == null) {
 				setPartitioned = cookie.getClass().getMethod("setPartitioned", SET_PARTITIONED_ARGS_CLASSES);
@@ -455,7 +454,7 @@ public final class CookieImpl extends ScopeSupport implements Cookie, ScriptProt
 		}
 	}
 
-	public static boolean isPartitioned(javax.servlet.http.Cookie cookie) {/* JAVJAK */
+	public static boolean isPartitioned(jakarta.servlet.http.Cookie cookie) {/* JAVJAK */
 		try {
 			if (isPartitioned == null) {
 				isPartitioned = cookie.getClass().getMethod("isPartitioned", IS_PARTITIONED_ARGS_CLASSES);

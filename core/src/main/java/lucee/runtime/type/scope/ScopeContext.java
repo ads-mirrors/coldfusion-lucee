@@ -23,8 +23,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
-import javax.servlet.http.HttpSession;
-
+import jakarta.servlet.http.HttpSession;
 import lucee.commons.collection.MapFactory;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;

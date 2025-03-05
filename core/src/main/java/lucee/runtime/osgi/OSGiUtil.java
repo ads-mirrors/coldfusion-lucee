@@ -40,9 +40,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.servlet.Servlet;
-import javax.servlet.jsp.JspException;
-
 import org.apache.felix.framework.BundleWiringImpl.BundleClassLoader;
 import org.apache.felix.framework.Logger;
 import org.osgi.framework.Bundle;
@@ -52,6 +49,8 @@ import org.osgi.framework.Version;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.resource.Requirement;
 
+import jakarta.servlet.Servlet;
+import jakarta.servlet.jsp.JspException;
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.FileUtil;
 import lucee.commons.io.IOUtil;

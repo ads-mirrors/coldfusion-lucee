@@ -18,9 +18,8 @@
  **/
 package lucee.runtime.ext.tag;
 
-import javax.servlet.jsp.tagext.BodyContent;
-import javax.servlet.jsp.tagext.BodyTag;
-
+import jakarta.servlet.jsp.tagext.BodyContent;
+import jakarta.servlet.jsp.tagext.BodyTag;
 import lucee.runtime.exp.PageException;
 
 /**

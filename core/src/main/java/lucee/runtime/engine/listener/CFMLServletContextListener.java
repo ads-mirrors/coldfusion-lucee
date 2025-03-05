@@ -1,8 +1,7 @@
 package lucee.runtime.engine.listener;
 
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
 import lucee.runtime.engine.CFMLEngineImpl;
 
 public class CFMLServletContextListener implements ServletContextListener {

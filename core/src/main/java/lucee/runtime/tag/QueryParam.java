@@ -41,8 +41,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.servlet.jsp.tagext.Tag;
-
+import jakarta.servlet.jsp.tagext.Tag;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.db.SQLCaster;

@@ -29,33 +29,15 @@ import lucee.loader.engine.CFMLEngineFactory;
 public class CFMLServlet extends AbsServlet {
 
 	private static final long serialVersionUID = -1878214660283329587L;
-	private HttpServletJavax myself;
 
 	@Override
 	public void init(final ServletConfig sg) throws ServletException {
 		super.init(sg);
-		myself = new HttpServletJavax(this);
-		try {
-			engine = CFMLEngineFactory.getInstance(ServletConfigJavax.getInstance(sg), this);
-		}
-		catch (ServletExceptionJavax e) {
-			throw (ServletException) e.getJakartaInstance();
-		}
-		catch (javax.servlet.ServletException e) {
-			throw new ServletException(e);
-		}
+		engine = CFMLEngineFactory.getInstance(sg, this);
 	}
 
 	@Override
 	protected void service(final HttpServletRequest req, final HttpServletResponse rsp) throws ServletException, IOException {
-		try {
-			engine.serviceCFML(myself, new HttpServletRequestJavax(req), new HttpServletResponseJavax(rsp));
-		}
-		catch (ServletExceptionJavax e) {
-			throw (ServletException) e.getJakartaInstance();
-		}
-		catch (javax.servlet.ServletException e) {
-			throw new ServletException(e);
-		}
+		engine.serviceCFML(this, req, rsp);
 	}
 }

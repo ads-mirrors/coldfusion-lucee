@@ -1,4 +1,4 @@
-package lucee.loader.servlet.jakarta;
+package lucee.loader.servlet.javax;
 
 import java.io.IOException;
 import java.security.Principal;
@@ -6,19 +6,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpUpgradeHandler;
-import javax.servlet.http.Part;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpUpgradeHandler;
+import jakarta.servlet.http.Part;
 
-public class HttpServletRequestJavax extends ServletRequestJavax implements HttpServletRequest {
+public class HttpServletRequestJakarta extends ServletRequestJakarta implements HttpServletRequest {
 
-	private jakarta.servlet.http.HttpServletRequest req;
+	private javax.servlet.http.HttpServletRequest req;
 
-	public HttpServletRequestJavax(jakarta.servlet.http.HttpServletRequest req) {
+	public HttpServletRequestJakarta(javax.servlet.http.HttpServletRequest req) {
 		super(req);
 		this.req = req;
 	}
@@ -30,21 +30,21 @@ public class HttpServletRequestJavax extends ServletRequestJavax implements Http
 
 	@Override
 	public Cookie[] getCookies() {
-		jakarta.servlet.http.Cookie[] cookies = req.getCookies();
+		javax.servlet.http.Cookie[] cookies = req.getCookies();
 		if (cookies == null) return null;
-		Cookie[] javaxCookies = new Cookie[cookies.length];
+		Cookie[] jakartaCookies = new Cookie[cookies.length];
 		for (int i = 0; i < cookies.length; i++) {
-			jakarta.servlet.http.Cookie c = cookies[i];
-			javaxCookies[i] = new Cookie(c.getName(), c.getValue());
-			if (c.getComment() != null) javaxCookies[i].setComment(c.getComment());
-			if (c.getDomain() != null) javaxCookies[i].setDomain(c.getDomain());
-			javaxCookies[i].setHttpOnly(c.isHttpOnly());
-			javaxCookies[i].setMaxAge(c.getMaxAge());
-			if (c.getPath() != null) javaxCookies[i].setPath(c.getPath());
-			javaxCookies[i].setSecure(c.getSecure());
-			javaxCookies[i].setVersion(c.getVersion());
+			javax.servlet.http.Cookie c = cookies[i];
+			jakartaCookies[i] = new Cookie(c.getName(), c.getValue());
+			if (c.getComment() != null) jakartaCookies[i].setComment(c.getComment());
+			if (c.getDomain() != null) jakartaCookies[i].setDomain(c.getDomain());
+			jakartaCookies[i].setHttpOnly(c.isHttpOnly());
+			jakartaCookies[i].setMaxAge(c.getMaxAge());
+			if (c.getPath() != null) jakartaCookies[i].setPath(c.getPath());
+			jakartaCookies[i].setSecure(c.getSecure());
+			jakartaCookies[i].setVersion(c.getVersion());
 		}
-		return javaxCookies;
+		return jakartaCookies;
 	}
 
 	@Override
@@ -134,11 +134,11 @@ public class HttpServletRequestJavax extends ServletRequestJavax implements Http
 
 	@Override
 	public HttpSession getSession(boolean create) {
-		jakarta.servlet.http.HttpSession sess = req.getSession(create);
+		javax.servlet.http.HttpSession sess = req.getSession(create);
 		if (sess == null && !create) {
 			return null; // can be null, what is okay
 		}
-		return new HttpSessionJavax(sess);
+		return new HttpSessionJakarta(sess);
 	}
 
 	@Override
@@ -167,11 +167,6 @@ public class HttpServletRequestJavax extends ServletRequestJavax implements Http
 	}
 
 	@Override
-	public boolean isRequestedSessionIdFromUrl() {
-		return req.isRequestedSessionIdFromURL();
-	}
-
-	@Override
 	public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
 		throw new RuntimeException("the method [authenticate] is not supported");
 	}
@@ -181,8 +176,8 @@ public class HttpServletRequestJavax extends ServletRequestJavax implements Http
 		try {
 			req.login(username, password);
 		}
-		catch (jakarta.servlet.ServletException e) {
-			throw new ServletExceptionJavax(e);
+		catch (javax.servlet.ServletException e) {
+			throw new ServletExceptionJakarta(e);
 		}
 	}
 
@@ -191,33 +186,33 @@ public class HttpServletRequestJavax extends ServletRequestJavax implements Http
 		try {
 			req.logout();
 		}
-		catch (jakarta.servlet.ServletException e) {
-			throw new ServletExceptionJavax(e);
+		catch (javax.servlet.ServletException e) {
+			throw new ServletExceptionJakarta(e);
 		}
 	}
 
 	@Override
 	public Collection<Part> getParts() throws IOException, ServletException {
 		try {
-			Collection<jakarta.servlet.http.Part> jakartaParts = req.getParts();
-			Collection<Part> javaxParts = new ArrayList<>();
-			for (jakarta.servlet.http.Part jakartaPart: jakartaParts) {
-				javaxParts.add(new PartJavax(jakartaPart));
+			Collection<javax.servlet.http.Part> javaxParts = req.getParts();
+			Collection<Part> jakartaParts = new ArrayList<>();
+			for (javax.servlet.http.Part javaxPart: javaxParts) {
+				jakartaParts.add(new PartJakarta(javaxPart));
 			}
-			return javaxParts;
+			return jakartaParts;
 		}
-		catch (jakarta.servlet.ServletException e) {
-			throw new ServletExceptionJavax(e);
+		catch (javax.servlet.ServletException e) {
+			throw new ServletExceptionJakarta(e);
 		}
 	}
 
 	@Override
 	public Part getPart(String name) throws IOException, ServletException {
 		try {
-			return new PartJavax(req.getPart(name));
+			return new PartJakarta(req.getPart(name));
 		}
-		catch (jakarta.servlet.ServletException e) {
-			throw new ServletExceptionJavax(e);
+		catch (javax.servlet.ServletException e) {
+			throw new ServletExceptionJakarta(e);
 		}
 	}
 

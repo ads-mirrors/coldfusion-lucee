@@ -1,8 +1,7 @@
 
 package lucee.runtime.tag;
 
-import javax.servlet.jsp.tagext.Tag;
-
+import jakarta.servlet.jsp.tagext.Tag;
 import lucee.runtime.PageContextImpl;
 import lucee.runtime.ai.AIUtil;
 import lucee.runtime.ai.Response;

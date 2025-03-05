@@ -18,10 +18,11 @@
  */
 package lucee.runtime.engine;
 
-import javax.servlet.jsp.JspEngineInfo;
+import jakarta.servlet.jsp.JspEngineInfo;
 
 /**
- * implementation of the javax.servlet.jsp.JspEngineInfo interface, return information to JSP Engine
+ * implementation of the jakarta.servlet.jsp.JspEngineInfo interface, return information to JSP
+ * Engine
  */
 public final class JspEngineInfoImpl extends JspEngineInfo {
 

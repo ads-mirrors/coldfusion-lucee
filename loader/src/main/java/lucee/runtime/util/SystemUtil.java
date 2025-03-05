@@ -22,10 +22,9 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.nio.charset.Charset;
 
-import /* JAVJAK */ javax.servlet.ServletContext;
-
 import org.osgi.framework.Bundle;
 
+import jakarta.servlet.ServletContext;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.res.Resource;
 import lucee.runtime.PageContext;

@@ -1,14 +1,14 @@
-package lucee.loader.servlet.jakarta;
+package lucee.loader.servlet.javax;
 
 import java.io.IOException;
 
-import javax.servlet.ServletOutputStream;
+import jakarta.servlet.ServletOutputStream;
 
-public class ServletOutputStreamJavax extends ServletOutputStream {
+public class ServletOutputStreamJakarta extends ServletOutputStream {
 
-	private jakarta.servlet.ServletOutputStream outputStream;
+	private javax.servlet.ServletOutputStream outputStream;
 
-	public ServletOutputStreamJavax(jakarta.servlet.ServletOutputStream outputStream) {
+	public ServletOutputStreamJakarta(javax.servlet.ServletOutputStream outputStream) {
 		if (outputStream == null) throw new NullPointerException();
 		this.outputStream = outputStream;
 	}
@@ -24,8 +24,8 @@ public class ServletOutputStreamJavax extends ServletOutputStream {
 	}
 
 	@Override
-	public void setWriteListener(javax.servlet.WriteListener writeListener) {
-		outputStream.setWriteListener(new jakarta.servlet.WriteListener() {
+	public void setWriteListener(jakarta.servlet.WriteListener writeListener) {
+		outputStream.setWriteListener(new javax.servlet.WriteListener() {
 			@Override
 			public void onWritePossible() throws IOException {
 				writeListener.onWritePossible();

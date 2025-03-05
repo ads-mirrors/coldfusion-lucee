@@ -36,8 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import lucee.commons.collection.MapFactory;
 import lucee.commons.digest.Hash;
 import lucee.commons.io.DevNullOutputStream;

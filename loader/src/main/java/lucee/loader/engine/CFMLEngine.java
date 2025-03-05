@@ -27,16 +27,16 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import javax.script.ScriptEngineFactory;
-import /* JAVJAK */ javax.servlet.ServletConfig;
-import /* JAVJAK */ javax.servlet.ServletException;
-import /* JAVJAK */ javax.servlet.http.Cookie;
-import /* JAVJAK */ javax.servlet.http.HttpServlet;
-import /* JAVJAK */ javax.servlet.http.HttpServletRequest;
-import /* JAVJAK */ javax.servlet.http.HttpServletResponse;
-import /* JAVJAK */ javax.servlet.jsp.JspException;
 
 import org.osgi.framework.BundleContext;
 
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.jsp.JspException;
 import lucee.Info;
 import lucee.loader.osgi.BundleCollection;
 import lucee.runtime.CFMLFactory;
@@ -188,7 +188,9 @@ public interface CFMLEngine {
 	 */
 	public Creation getCreationUtil();
 
-	public JavaProxyUtil getJavaProxyUtil();
+	public Object getJavaProxyUtil();
+
+	public JavaProxyUtil getJavaProxy();
 
 	/**
 	 * returns the IO util

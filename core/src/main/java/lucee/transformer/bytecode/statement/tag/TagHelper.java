@@ -21,15 +21,14 @@ package lucee.transformer.bytecode.statement.tag;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.servlet.jsp.tagext.BodyTag;
-import javax.servlet.jsp.tagext.IterationTag;
-
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
+import jakarta.servlet.jsp.tagext.BodyTag;
+import jakarta.servlet.jsp.tagext.IterationTag;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.runtime.db.ClassDefinition;
 import lucee.runtime.exp.Abort;
@@ -58,8 +57,8 @@ public final class TagHelper {
 	private static final Type MISSING_ATTRIBUTE = Type.getType(MissingAttribute.class);
 	private static final Type MISSING_ATTRIBUTE_ARRAY = Type.getType(MissingAttribute[].class);
 	private static final Type BODY_TAG = Type.getType(BodyTag.class);
-	private static final Type TAG = Type.getType(javax.servlet.jsp.tagext.Tag.class);/* JAVJAK */
-	private static final Type TRY_CATCH_FINALLY_TAG = Type.getType(javax.servlet.jsp.tagext.TryCatchFinally.class);/* JAVJAK */
+	private static final Type TAG = Type.getType(jakarta.servlet.jsp.tagext.Tag.class);/* JAVJAK */
+	private static final Type TRY_CATCH_FINALLY_TAG = Type.getType(jakarta.servlet.jsp.tagext.TryCatchFinally.class);/* JAVJAK */
 	private static final Type TAG_UTIL = Type.getType(lucee.runtime.tag.TagUtil.class);
 
 	// TagUtil.setAttributeCollection(Tag, Struct)
@@ -304,7 +303,7 @@ public final class TagHelper {
 			// if (state!=Tag.SKIP_BODY)
 			Label endBody = new Label();
 			adapter.loadLocal(state);
-			adapter.push(javax.servlet.jsp.tagext.Tag.SKIP_BODY);/* JAVJAK */
+			adapter.push(jakarta.servlet.jsp.tagext.Tag.SKIP_BODY);/* JAVJAK */
 			adapter.visitJumpInsn(Opcodes.IF_ICMPEQ, endBody);
 			// pc.initBody(tag, state);
 			adapter.loadArg(0);
@@ -322,7 +321,7 @@ public final class TagHelper {
 					 * ASMUtil.visitLabel(adapter, fcf.getFinalEntryLabel()); }
 					 */
 					adapter.loadLocal(state);
-					adapter.push(javax.servlet.jsp.tagext.Tag.EVAL_BODY_INCLUDE);/* JAVJAK */
+					adapter.push(jakarta.servlet.jsp.tagext.Tag.EVAL_BODY_INCLUDE);/* JAVJAK */
 					adapter.visitJumpInsn(Opcodes.IF_ICMPEQ, endIf);
 					// ... pc.popBody();
 					adapter.loadArg(0);
@@ -381,7 +380,7 @@ public final class TagHelper {
 		adapter.loadLocal(currLocal);
 		ASMUtil.invoke(fromBundle ? ASMUtil.INTERFACE : ASMUtil.VIRTUAL, adapter, currType, DO_END_TAG);
 		// adapter.invokeVirtual(currType, DO_END_TAG);
-		adapter.push(javax.servlet.jsp.tagext.Tag.SKIP_PAGE);/* JAVJAK */
+		adapter.push(jakarta.servlet.jsp.tagext.Tag.SKIP_PAGE);/* JAVJAK */
 		adapter.visitJumpInsn(Opcodes.IF_ICMPNE, endDoEndTag);
 		adapter.push(Abort.SCOPE_PAGE);
 		adapter.invokeStatic(ABORT, NEW_INSTANCE);

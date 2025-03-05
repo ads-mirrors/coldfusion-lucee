@@ -1,23 +1,23 @@
-package lucee.loader.servlet.jakarta;
+package lucee.loader.servlet.javax;
 
 import java.io.IOException;
 import java.util.Collection;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 
-public class HttpServletResponseJavax extends ServletResponseJavax implements HttpServletResponse {
+public class HttpServletResponseJakarta extends ServletResponseJakarta implements HttpServletResponse {
 
-	private jakarta.servlet.http.HttpServletResponse rsp;
+	private javax.servlet.http.HttpServletResponse rsp;
 
-	public HttpServletResponseJavax(jakarta.servlet.http.HttpServletResponse rsp) {
+	public HttpServletResponseJakarta(javax.servlet.http.HttpServletResponse rsp) {
 		super(rsp);
 		this.rsp = rsp;
 	}
 
 	@Override
 	public void addCookie(Cookie cookie) {
-		rsp.addCookie(Jakarta.toCookie(cookie));
+		rsp.addCookie(Javax.toCookie(cookie));
 	}
 
 	@Override
@@ -32,16 +32,6 @@ public class HttpServletResponseJavax extends ServletResponseJavax implements Ht
 
 	@Override
 	public String encodeRedirectURL(String url) {
-		return rsp.encodeRedirectURL(url);
-	}
-
-	@Override
-	public String encodeUrl(String url) {
-		return rsp.encodeURL(url);
-	}
-
-	@Override
-	public String encodeRedirectUrl(String url) {
 		return rsp.encodeRedirectURL(url);
 	}
 
@@ -92,11 +82,6 @@ public class HttpServletResponseJavax extends ServletResponseJavax implements Ht
 
 	@Override
 	public void setStatus(int sc) {
-		rsp.setStatus(sc);
-	}
-
-	@Override
-	public void setStatus(int sc, String sm) {
 		rsp.setStatus(sc);
 	}
 

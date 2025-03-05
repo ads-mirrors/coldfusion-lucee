@@ -34,20 +34,20 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.DispatcherType;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletInputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpUpgradeHandler;
-import javax.servlet.http.Part;
-
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletConnection;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpUpgradeHandler;
+import jakarta.servlet.http.Part;
 import lucee.commons.collection.MapFactory;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.IOUtil;
@@ -138,11 +138,11 @@ public final class HTTPServletRequestWrap implements HttpServletRequest, Seriali
 	 */
 	public HTTPServletRequestWrap(HttpServletRequest req) {
 		this.req = pure(req);/* JAVJAK */
-		if ((servlet_path = attrAsString("javax.servlet.include.servlet_path")) != null) {
-			request_uri = attrAsString("javax.servlet.include.request_uri");
-			context_path = attrAsString("javax.servlet.include.context_path");
-			path_info = attrAsString("javax.servlet.include.path_info");
-			query_string = attrAsString("javax.servlet.include.query_string");
+		if ((servlet_path = attrAsString("jakarta.servlet.include.servlet_path")) != null) {
+			request_uri = attrAsString("jakarta.servlet.include.request_uri");
+			context_path = attrAsString("jakarta.servlet.include.context_path");
+			path_info = attrAsString("jakarta.servlet.include.path_info");
+			query_string = attrAsString("jakarta.servlet.include.query_string");
 		}
 		else {
 			servlet_path = req.getServletPath();
@@ -385,7 +385,7 @@ public final class HTTPServletRequestWrap implements HttpServletRequest, Seriali
 	}
 
 	public void disconnect(PageContextImpl pc) {
-		synchronized (this){
+		synchronized (this) {
 			if (disconnected) return;
 			disconnectData = new DisconnectData();
 
@@ -641,11 +641,6 @@ public final class HTTPServletRequestWrap implements HttpServletRequest, Seriali
 	}
 
 	@Override
-	public boolean isRequestedSessionIdFromUrl() {
-		return isRequestedSessionIdFromURL();
-	}
-
-	@Override
 	public boolean isRequestedSessionIdValid() {
 		if (!disconnected) return req.isRequestedSessionIdValid();
 		return disconnectData.requestedSessionIdValid;
@@ -695,20 +690,6 @@ public final class HTTPServletRequestWrap implements HttpServletRequest, Seriali
 		// try it anyway, in some servlet engine it is still working
 		try {
 			return req.getLocales();
-		}
-		catch (Throwable t) {
-			ExceptionUtil.rethrowIfNecessary(t);
-		}
-		// TODO add support for this
-		throw new RuntimeException("this method is not supported when root request is gone");
-	}
-
-	@Override
-	public String getRealPath(String path) {
-		if (!disconnected) return req.getRealPath(path);
-		// try it anyway, in some servlet engine it is still working
-		try {
-			return req.getRealPath(path);
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
@@ -939,5 +920,29 @@ public final class HTTPServletRequestWrap implements HttpServletRequest, Seriali
 			file = null;
 		}
 		bytes = null;
+	}
+
+	@Override
+	public String getRequestId() {
+		if (!disconnected) {
+			return req.getRequestId();
+		}
+		throw new RuntimeException("not supported!");
+	}
+
+	@Override
+	public String getProtocolRequestId() {
+		if (!disconnected) {
+			return req.getProtocolRequestId();
+		}
+		throw new RuntimeException("not supported!");
+	}
+
+	@Override
+	public ServletConnection getServletConnection() {
+		if (!disconnected) {
+			return req.getServletConnection();
+		}
+		throw new RuntimeException("not supported!");
 	}
 }

@@ -20,8 +20,7 @@ package lucee.runtime.tag;
 
 import java.nio.charset.Charset;
 
-import javax.servlet.jsp.tagext.Tag;
-
+import jakarta.servlet.jsp.tagext.Tag;
 import lucee.commons.io.CharsetUtil;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;

@@ -23,10 +23,9 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.NoSuchAlgorithmException;
 
-import javax.servlet.ServletContext;
-
 import org.osgi.framework.Bundle;
 
+import jakarta.servlet.ServletContext;
 import lucee.commons.digest.Hash;
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.log.Log;

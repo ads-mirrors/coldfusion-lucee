@@ -20,8 +20,7 @@ package lucee.runtime.tag;
 
 import java.io.IOException;
 
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletResponse;
 import lucee.commons.io.log.Log;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.net.HTTPUtil;

@@ -23,9 +23,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import /* JAVJAK */ javax.servlet.ServletException;
-import /* JAVJAK */ javax.servlet.jsp.JspException;
-
+import jakarta.servlet.ServletException;
+import jakarta.servlet.jsp.JspException;
 import lucee.loader.util.Util;
 
 public class CLI {

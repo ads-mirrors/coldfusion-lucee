@@ -1,4 +1,4 @@
-package lucee.loader.servlet.jakarta;
+package lucee.loader.servlet.javax;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,20 +7,21 @@ import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.DispatcherType;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletInputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletConnection;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 
-// Inner class for ServletRequestJavax
-public class ServletRequestJavax implements ServletRequest, Jakarta {
+// Inner class for ServletRequestJakarta
+public class ServletRequestJakarta implements ServletRequest, Javax {
 
-	private jakarta.servlet.ServletRequest req;
+	private javax.servlet.ServletRequest req;
 
-	public ServletRequestJavax(jakarta.servlet.ServletRequest req) {
+	public ServletRequestJakarta(javax.servlet.ServletRequest req) {
 		if (req == null) throw new NullPointerException();
 		this.req = req;
 	}
@@ -62,7 +63,7 @@ public class ServletRequestJavax implements ServletRequest, Jakarta {
 
 	@Override
 	public ServletInputStream getInputStream() throws IOException {
-		return new ServletInputStreamJavax(req.getInputStream());
+		return new ServletInputStreamJakarta(req.getInputStream());
 	}
 
 	@Override
@@ -147,12 +148,7 @@ public class ServletRequestJavax implements ServletRequest, Jakarta {
 
 	@Override
 	public RequestDispatcher getRequestDispatcher(String path) {
-		return new RequestDispatcherJavax(req.getRequestDispatcher(path));
-	}
-
-	@Override
-	public String getRealPath(String path) {
-		return req.getServletContext().getRealPath(path);
+		return new RequestDispatcherJakarta(req.getRequestDispatcher(path));
 	}
 
 	@Override
@@ -177,12 +173,12 @@ public class ServletRequestJavax implements ServletRequest, Jakarta {
 
 	@Override
 	public ServletContext getServletContext() {
-		return new ServletContextJavax(req.getServletContext());
+		return new ServletContextJakarta(req.getServletContext());
 	}
 
 	@Override
 	public AsyncContext startAsync() throws IllegalStateException {
-		return new AsyncContextJavax(req.startAsync());
+		return new AsyncContextJakarta(req.startAsync());
 	}
 
 	@Override
@@ -202,7 +198,7 @@ public class ServletRequestJavax implements ServletRequest, Jakarta {
 
 	@Override
 	public AsyncContext getAsyncContext() {
-		return new AsyncContextJavax(req.getAsyncContext());
+		return new AsyncContextJakarta(req.getAsyncContext());
 	}
 
 	@Override
@@ -211,7 +207,25 @@ public class ServletRequestJavax implements ServletRequest, Jakarta {
 	}
 
 	@Override
-	public Object getJakartaInstance() {
+	public Object getJavaxInstance() {
 		return req;
+	}
+
+	@Override
+	public String getRequestId() {
+		// Return a default value since this method doesn't exist in javax
+		return "";
+	}
+
+	@Override
+	public String getProtocolRequestId() {
+		// Return a default value since this method doesn't exist in javax
+		return "";
+	}
+
+	@Override
+	public ServletConnection getServletConnection() {
+		// Return null since this interface doesn't exist in javax
+		return null;
 	}
 }

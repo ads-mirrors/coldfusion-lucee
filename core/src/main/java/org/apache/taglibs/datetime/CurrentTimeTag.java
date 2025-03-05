@@ -20,8 +20,7 @@ package org.apache.taglibs.datetime;
 
 import java.util.Date;
 
-import javax.servlet.jsp.tagext.TagSupport;
-
+import jakarta.servlet.jsp.tagext.TagSupport;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 

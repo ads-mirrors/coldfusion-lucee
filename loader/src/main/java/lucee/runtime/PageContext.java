@@ -24,13 +24,12 @@ import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import /* JAVJAK */ javax.servlet.http.HttpServletRequest;
-import /* JAVJAK */ javax.servlet.http.HttpServletResponse;
-import /* JAVJAK */ javax.servlet.jsp.JspException;
-import /* JAVJAK */ javax.servlet.jsp.JspWriter;
-import /* JAVJAK */ javax.servlet.jsp.tagext.BodyTag;
-import /* JAVJAK */ javax.servlet.jsp.tagext.Tag;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.JspWriter;
+import jakarta.servlet.jsp.tagext.BodyTag;
+import jakarta.servlet.jsp.tagext.Tag;
 import lucee.commons.io.res.Resource;
 import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.db.DataSource;
@@ -72,7 +71,7 @@ import lucee.runtime.util.VariableUtil;
  * functionality. for example you have the method getSession to get jsp compatible session object
  * (HTTPSession) and with sessionScope() you get CFML compatible session object (Struct,Scope).
  */
-public abstract class PageContext extends /* JAVJAK */ javax.servlet.jsp.PageContext {
+public abstract class PageContext extends jakarta.servlet.jsp.PageContext {
 
 	/**
 	 * returns matching scope

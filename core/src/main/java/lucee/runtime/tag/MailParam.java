@@ -20,10 +20,9 @@ package lucee.runtime.tag;
 
 import java.io.IOException;
 
-import javax.servlet.jsp.tagext.Tag;
-
 import org.apache.commons.mail.EmailAttachment;
 
+import jakarta.servlet.jsp.tagext.Tag;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.res.Resource;

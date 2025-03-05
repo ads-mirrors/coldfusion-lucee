@@ -18,9 +18,9 @@
  **/
 package lucee.runtime.ext.tag;
 
-import /* JAVJAK */ javax.servlet.jsp.JspException;
-import /* JAVJAK */ javax.servlet.jsp.tagext.BodyContent;
-import /* JAVJAK */ javax.servlet.jsp.tagext.BodyTag;
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.BodyContent;
+import jakarta.servlet.jsp.tagext.BodyTag;
 
 /**
  * Implementation of the BodyTag

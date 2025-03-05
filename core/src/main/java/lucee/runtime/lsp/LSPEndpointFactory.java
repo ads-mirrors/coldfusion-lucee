@@ -13,8 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.servlet.ServletException;
-
+import jakarta.servlet.ServletException;
 import lucee.aprint;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.SystemUtil;

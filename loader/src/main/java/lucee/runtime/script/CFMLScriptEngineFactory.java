@@ -20,8 +20,8 @@ package lucee.runtime.script;
 import javax.naming.directory.InvalidAttributesException;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
-import javax.servlet.ServletException;
 
+import jakarta.servlet.ServletException;
 import lucee.loader.engine.CFMLEngine;
 
 public class CFMLScriptEngineFactory extends BaseScriptEngineFactory {

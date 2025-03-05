@@ -1,25 +1,25 @@
-package lucee.loader.servlet.jakarta;
+package lucee.loader.servlet.javax;
 
 import java.util.Enumeration;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
 
-public class ServletConfigJavax implements ServletConfig, Jakarta {
+public class ServletConfigJakarta implements ServletConfig, Javax {
 
-	private jakarta.servlet.ServletConfig config;
-	private ServletContextJavax context;
-	private static Map<jakarta.servlet.ServletConfig, ServletConfigJavax> configs = new IdentityHashMap<>();
+	private javax.servlet.ServletConfig config;
+	private ServletContextJakarta context;
+	private static Map<javax.servlet.ServletConfig, ServletConfigJakarta> configs = new IdentityHashMap<>();
 
-	public static ServletConfig getInstance(jakarta.servlet.ServletConfig servletConfig) {
-		ServletConfigJavax c = configs.get(servletConfig);
+	public static ServletConfig getInstance(javax.servlet.ServletConfig servletConfig) {
+		ServletConfigJakarta c = configs.get(servletConfig);
 		if (c == null) {
 			synchronized (configs) {
 				c = configs.get(servletConfig);
 				if (c == null) {
-					c = new ServletConfigJavax(servletConfig);
+					c = new ServletConfigJakarta(servletConfig);
 					configs.put(servletConfig, c);
 				}
 			}
@@ -27,7 +27,7 @@ public class ServletConfigJavax implements ServletConfig, Jakarta {
 		return c;
 	}
 
-	private ServletConfigJavax(jakarta.servlet.ServletConfig config) {
+	private ServletConfigJakarta(javax.servlet.ServletConfig config) {
 		this.config = config;
 	}
 
@@ -41,7 +41,7 @@ public class ServletConfigJavax implements ServletConfig, Jakarta {
 		if (context == null) {
 			synchronized (config) {
 				if (context == null) {
-					context = new ServletContextJavax(config.getServletContext());
+					context = new ServletContextJakarta(config.getServletContext());
 				}
 			}
 		}
@@ -59,7 +59,7 @@ public class ServletConfigJavax implements ServletConfig, Jakarta {
 	}
 
 	@Override
-	public Object getJakartaInstance() {
+	public Object getJavaxInstance() {
 		return config;
 	}
 

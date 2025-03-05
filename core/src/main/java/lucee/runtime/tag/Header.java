@@ -18,8 +18,7 @@
  **/
 package lucee.runtime.tag;
 
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServletResponse;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.lang.CharSet;
 import lucee.runtime.PageContextImpl;
@@ -142,18 +141,7 @@ public final class Header extends TagImpl {
 		}
 		// set status
 		if (hasStatucCode) {
-			if (statustext != null) {
-				// try {
-				/// rsp.sendError(statuscode, statustext);
-				rsp.setStatus(statuscode, statustext);
-				/*
-				 * } catch (IOException e) { throw new
-				 * TemplateException("can't assign value to header, header is already committed",e.getMessage()); }
-				 */
-			}
-			else {
-				rsp.setStatus(statuscode);
-			}
+			rsp.setStatus(statuscode);
 		}
 		return SKIP_BODY;
 	}

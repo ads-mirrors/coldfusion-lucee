@@ -1,14 +1,14 @@
-package lucee.loader.servlet.jakarta;
+package lucee.loader.servlet.javax;
 
 import java.io.IOException;
 
-import javax.servlet.ServletInputStream;
+import jakarta.servlet.ServletInputStream;
 
-public class ServletInputStreamJavax extends ServletInputStream {
+public class ServletInputStreamJakarta extends ServletInputStream {
 
-	private jakarta.servlet.ServletInputStream inputStream;
+	private javax.servlet.ServletInputStream inputStream;
 
-	public ServletInputStreamJavax(jakarta.servlet.ServletInputStream inputStream) {
+	public ServletInputStreamJakarta(javax.servlet.ServletInputStream inputStream) {
 		if (inputStream == null) throw new NullPointerException();
 		this.inputStream = inputStream;
 	}
@@ -29,8 +29,8 @@ public class ServletInputStreamJavax extends ServletInputStream {
 	}
 
 	@Override
-	public void setReadListener(javax.servlet.ReadListener readListener) {
-		inputStream.setReadListener(new jakarta.servlet.ReadListener() {
+	public void setReadListener(jakarta.servlet.ReadListener readListener) {
+		inputStream.setReadListener(new javax.servlet.ReadListener() {
 			@Override
 			public void onDataAvailable() throws IOException {
 				readListener.onDataAvailable();

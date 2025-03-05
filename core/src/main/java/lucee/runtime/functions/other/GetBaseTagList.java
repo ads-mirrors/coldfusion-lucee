@@ -24,8 +24,7 @@ package lucee.runtime.functions.other;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.servlet.jsp.tagext.Tag;
-
+import jakarta.servlet.jsp.tagext.Tag;
 import lucee.runtime.PageContext;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.ext.function.Function;

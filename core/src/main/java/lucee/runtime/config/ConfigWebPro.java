@@ -3,13 +3,12 @@ package lucee.runtime.config;
 import java.io.IOException;
 import java.util.Collection;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.osgi.framework.BundleException;
 import org.xml.sax.SAXException;
 
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lucee.commons.lock.KeyLock;
 import lucee.runtime.CIPage;
 import lucee.runtime.Mapping;

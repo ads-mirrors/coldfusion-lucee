@@ -24,9 +24,8 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import javax.servlet.jsp.tagext.BodyContent;
-import javax.servlet.jsp.tagext.BodyTagSupport;
-
+import jakarta.servlet.jsp.tagext.BodyContent;
+import jakarta.servlet.jsp.tagext.BodyTagSupport;
 import lucee.commons.i18n.FormatUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.exp.ApplicationException;

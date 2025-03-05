@@ -28,17 +28,16 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
+import org.apache.commons.fileupload.UploadContext;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
-import org.apache.commons.fileupload.servlet.ServletRequestContext;
 
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.http.HttpServletRequest;
 import lucee.commons.collection.MapFactory;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.log.Log;
@@ -155,6 +154,41 @@ public final class FormImpl extends ScopeSupport implements Form, ScriptProtecte
 		}
 	}
 
+	private static class UploadContextImpl implements UploadContext {
+		private HttpServletRequest req;
+		private String encoding;
+
+		private UploadContextImpl(HttpServletRequest req, String encoding) {
+			this.req = req;
+			this.encoding = encoding;
+		}
+
+		@Override
+		public InputStream getInputStream() throws IOException {
+			return req.getInputStream();
+		}
+
+		@Override
+		public String getContentType() {
+			return req.getContentType();
+		}
+
+		@Override
+		public int getContentLength() {
+			return req.getContentLength();
+		}
+
+		@Override
+		public String getCharacterEncoding() {
+			return encoding;
+		}
+
+		@Override
+		public long contentLength() {
+			return req.getContentLength();
+		}
+	}
+
 	private void initializeMultiPart(PageContext pc, boolean scriptProteced) {
 		// get temp directory
 		Resource tempDir = pc.getConfig().getTempDirectory();
@@ -169,16 +203,10 @@ public final class FormImpl extends ScopeSupport implements Form, ScriptProtecte
 		// ServletRequestContext c = new ServletRequestContext(pc.getHttpServletRequest());
 
 		HttpServletRequest req = pc.getHttpServletRequest();
-		ServletRequestContext context = new ServletRequestContext(req) {
-			@Override
-			public String getCharacterEncoding() {
-				return encoding;
-			}
-		};
 
 		// Parse the request
 		try {
-			FileItemIterator iter = upload.getItemIterator(context);
+			FileItemIterator iter = upload.getItemIterator(new UploadContextImpl(req, encoding));
 			// byte[] value;
 			InputStream is;
 			ArrayList<URLItem> list = new ArrayList<URLItem>();

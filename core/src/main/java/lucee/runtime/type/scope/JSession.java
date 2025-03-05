@@ -25,10 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionBindingEvent;
-import javax.servlet.http.HttpSessionBindingListener;
-
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSessionBindingEvent;
+import jakarta.servlet.http.HttpSessionBindingListener;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.runtime.Component;
 import lucee.runtime.PageContext;
@@ -183,17 +182,17 @@ public final class JSession extends ScopeSupport implements Session, HttpSession
 	public boolean verifyToken(String token, String key) {
 		return ScopeUtil.verifyCsrfToken(_tokens, token, key, false);
 	}
- 
+
 	@Override
 	public boolean verifyToken(String token, String key, boolean remove) {
 		return ScopeUtil.verifyCsrfToken(_tokens, token, key, remove);
 	}
 
-	public Struct getTokens(){
+	public Struct getTokens() {
 		return _tokens;
 	};
 
-	public void setTokens(Map<Collection.Key, String> newTokens){
+	public void setTokens(Map<Collection.Key, String> newTokens) {
 		_tokens.clear();
 		Iterator<Entry<Key, String>> it = newTokens.entrySet().iterator();
 		Entry<Key, String> e;

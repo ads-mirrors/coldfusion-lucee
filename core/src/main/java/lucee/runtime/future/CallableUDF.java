@@ -2,8 +2,7 @@ package lucee.runtime.future;
 
 import java.util.concurrent.Callable;
 
-import javax.servlet.http.HttpServletRequest;
-
+import jakarta.servlet.http.HttpServletRequest;
 import lucee.commons.io.DevNullOutputStream;
 import lucee.commons.lang.Pair;
 import lucee.runtime.PageContext;

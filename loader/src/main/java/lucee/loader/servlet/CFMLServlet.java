@@ -18,27 +18,8 @@
  **/
 package lucee.loader.servlet;
 
-import java.io.IOException;
+public class CFMLServlet extends lucee.loader.servlet.javax.CFMLServlet {
 
-import /* JAVJAK */ javax.servlet.ServletConfig;
-import /* JAVJAK */ javax.servlet.ServletException;
-import /* JAVJAK */ javax.servlet.http.HttpServletRequest;
-import /* JAVJAK */ javax.servlet.http.HttpServletResponse;
+	private static final long serialVersionUID = 1389465039826124601L;
 
-import lucee.loader.engine.CFMLEngineFactory;
-
-public class CFMLServlet extends AbsServlet {
-
-	private static final long serialVersionUID = -1878214660283329587L;
-
-	@Override
-	public void init(final ServletConfig sg) throws ServletException {
-		super.init(sg);
-		engine = CFMLEngineFactory.getInstance(sg, this);
-	}
-
-	@Override
-	protected void service(final HttpServletRequest req, final HttpServletResponse rsp) throws ServletException, IOException {
-		engine.serviceCFML(this, req, rsp);
-	}
 }

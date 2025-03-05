@@ -18,8 +18,7 @@
  */
 package lucee.runtime.component;
 
-import javax.servlet.jsp.tagext.BodyContent;
-
+import jakarta.servlet.jsp.tagext.BodyContent;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.filter.DirectoryResourceFilter;

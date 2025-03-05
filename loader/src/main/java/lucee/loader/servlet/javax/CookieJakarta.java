@@ -1,13 +1,13 @@
-package lucee.loader.servlet.jakarta;
+package lucee.loader.servlet.javax;
 
-import javax.servlet.http.Cookie;
+import jakarta.servlet.http.Cookie;
 
-public class CookieJavax extends Cookie implements Jakarta {
+public class CookieJakarta extends Cookie implements Javax {
 
 	private static final long serialVersionUID = 8505225995912632019L;
-	private jakarta.servlet.http.Cookie cookie;
+	private javax.servlet.http.Cookie cookie;
 
-	public CookieJavax(jakarta.servlet.http.Cookie cookie) {
+	public CookieJakarta(javax.servlet.http.Cookie cookie) {
 		super(cookie.getName(), cookie.getValue());
 		this.cookie = cookie;
 	}
@@ -98,7 +98,7 @@ public class CookieJavax extends Cookie implements Jakarta {
 	}
 
 	@Override
-	public Object getJakartaInstance() {
+	public Object getJavaxInstance() {
 		return cookie;
 	}
 }

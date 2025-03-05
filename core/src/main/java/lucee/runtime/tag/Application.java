@@ -25,8 +25,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
 
-import javax.servlet.jsp.tagext.DynamicAttributes;
-
+import jakarta.servlet.jsp.tagext.DynamicAttributes;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.util.ResourceUtil;

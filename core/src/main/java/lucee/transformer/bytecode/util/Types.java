@@ -27,15 +27,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.jsp.JspWriter;
-import javax.servlet.jsp.tagext.BodyContent;
-import javax.servlet.jsp.tagext.BodyTag;
-import javax.servlet.jsp.tagext.Tag;
-
 import org.objectweb.asm.Type;
 import org.w3c.dom.Node;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.jsp.JspWriter;
+import jakarta.servlet.jsp.tagext.BodyContent;
+import jakarta.servlet.jsp.tagext.BodyTag;
+import jakarta.servlet.jsp.tagext.Tag;
 import lucee.commons.color.ConstantsDouble;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.res.Resource;

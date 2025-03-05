@@ -24,9 +24,8 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lucee.commons.io.DevNullOutputStream;
 import lucee.commons.io.log.Log;
 import lucee.commons.lang.ExceptionUtil;
@@ -288,7 +287,7 @@ public class ChildThreadImpl extends ChildThread implements Serializable {
 		return null;
 	}
 
-	private HttpSession getExistingSession(PageContext oldPc){
+	private HttpSession getExistingSession(PageContext oldPc) {
 		if (oldPc == null) return null;
 		if (oldPc.getSessionType() == Config.SESSION_TYPE_JEE || ((PageContextImpl) oldPc).hasCFSession()) {
 			return oldPc.getSession();

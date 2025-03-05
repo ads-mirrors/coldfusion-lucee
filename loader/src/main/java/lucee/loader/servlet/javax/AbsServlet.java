@@ -15,11 +15,9 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
-package lucee.loader.servlet;
+package lucee.loader.servlet.javax;
 
-import /* JAVJAK */ javax.servlet.ServletException;
-import /* JAVJAK */ javax.servlet.http.HttpServlet;
-
+import javax.servlet.http.HttpServlet;
 import lucee.loader.engine.CFMLEngine;
 import lucee.loader.engine.CFMLEngineFactory;
 import lucee.loader.engine.EngineChangeListener;
@@ -34,10 +32,11 @@ public abstract class AbsServlet extends HttpServlet implements EngineChangeList
 	public void onUpdate() {
 		try {
 			// make sure that config is registered
-			engine = CFMLEngineFactory.getInstance(getServletConfig(), this);
+			engine = CFMLEngineFactory.getInstance(ServletConfigJakarta.getInstance(getServletConfig()), this);
 		}
-		catch (final ServletException e) {
-
+		catch (jakarta.servlet.ServletException e) {
+			// TODO log
 		}
 	}
+
 }

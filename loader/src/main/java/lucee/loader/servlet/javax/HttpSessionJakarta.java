@@ -1,18 +1,15 @@
-package lucee.loader.servlet.jakarta;
+package lucee.loader.servlet.javax;
 
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpSessionContext;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpSession;
 
-public class HttpSessionJavax implements HttpSession {
+public class HttpSessionJakarta implements HttpSession {
 
-	private jakarta.servlet.http.HttpSession session;
+	private javax.servlet.http.HttpSession session;
 
-	public HttpSessionJavax(jakarta.servlet.http.HttpSession session) {
+	public HttpSessionJakarta(javax.servlet.http.HttpSession session) {
 		if (session == null) throw new NullPointerException();
 		this.session = session;
 	}
@@ -34,7 +31,7 @@ public class HttpSessionJavax implements HttpSession {
 
 	@Override
 	public ServletContext getServletContext() {
-		return new ServletContextJavax(session.getServletContext());
+		return new ServletContextJakarta(session.getServletContext());
 	}
 
 	@Override
@@ -48,17 +45,7 @@ public class HttpSessionJavax implements HttpSession {
 	}
 
 	@Override
-	public HttpSessionContext getSessionContext() {
-		throw new RuntimeException("method [getSessionContext] is not supported");
-	}
-
-	@Override
 	public Object getAttribute(String name) {
-		return session.getAttribute(name);
-	}
-
-	@Override
-	public Object getValue(String name) {
 		return session.getAttribute(name);
 	}
 
@@ -68,33 +55,12 @@ public class HttpSessionJavax implements HttpSession {
 	}
 
 	@Override
-	public String[] getValueNames() {
-		Enumeration<String> en = session.getAttributeNames();
-		List<String> namesList = new ArrayList<>();
-
-		while (en.hasMoreElements()) {
-			namesList.add(en.nextElement());
-		}
-		return namesList.toArray(new String[namesList.size()]);
-	}
-
-	@Override
 	public void setAttribute(String name, Object value) {
 		session.setAttribute(name, value);
 	}
 
 	@Override
-	public void putValue(String name, Object value) {
-		session.setAttribute(name, value);
-	}
-
-	@Override
 	public void removeAttribute(String name) {
-		session.removeAttribute(name);
-	}
-
-	@Override
-	public void removeValue(String name) {
 		session.removeAttribute(name);
 	}
 

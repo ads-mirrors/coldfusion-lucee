@@ -18,8 +18,7 @@
  **/
 package lucee.runtime.ext.tag;
 
-import javax.servlet.jsp.tagext.TryCatchFinally;
-
+import jakarta.servlet.jsp.tagext.TryCatchFinally;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.runtime.exp.AbortException;
 import lucee.runtime.exp.PageServletException;

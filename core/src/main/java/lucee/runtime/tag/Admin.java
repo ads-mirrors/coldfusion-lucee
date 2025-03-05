@@ -42,13 +42,12 @@ import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.jsp.tagext.Tag;
-
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.jsp.tagext.Tag;
 import lucee.VersionInfo;
 import lucee.commons.collection.MapFactory;
 import lucee.commons.digest.Base64Encoder;

@@ -27,10 +27,9 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lucee.commons.io.DevNullOutputStream;
 import lucee.commons.lang.Pair;
 import lucee.commons.net.URLEncoder;
@@ -91,16 +90,6 @@ public final class HttpServletResponseDummy implements HttpServletResponse, Seri
 	}
 
 	@Override
-	public String encodeUrl(String value) {
-		return URLEncoder.encode(value);
-	}
-
-	@Override
-	public String encodeRedirectUrl(String value) {
-		return URLEncoder.encode(value);
-	}
-
-	@Override
 	public void sendError(int code, String codeText) throws IOException {
 		// TODO impl
 	}
@@ -148,12 +137,6 @@ public final class HttpServletResponseDummy implements HttpServletResponse, Seri
 	@Override
 	public void setStatus(int status) {
 		this.status = status;
-	}
-
-	@Override
-	public void setStatus(int status, String statusCode) {
-		setStatus(status);
-		this.statusCode = statusCode;
 	}
 
 	@Override

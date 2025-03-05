@@ -25,8 +25,7 @@ import java.io.ObjectOutput;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
-import javax.servlet.jsp.tagext.BodyContent;
-
+import jakarta.servlet.jsp.tagext.BodyContent;
 import lucee.commons.lang.CFTypes;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.runtime.Component;

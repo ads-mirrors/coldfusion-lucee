@@ -57,8 +57,6 @@ import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
-import javax.servlet.ServletContext;
-
 import org.apache.felix.framework.BundleWiringImpl.BundleClassLoader;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleReference;
@@ -67,6 +65,7 @@ import com.jezhumble.javasysmon.CpuTimes;
 import com.jezhumble.javasysmon.JavaSysMon;
 import com.jezhumble.javasysmon.MemoryStats;
 
+import jakarta.servlet.ServletContext;
 import lucee.commons.collection.AccessOrderLimitedSizeMap;
 import lucee.commons.digest.MD5;
 import lucee.commons.io.log.Log;

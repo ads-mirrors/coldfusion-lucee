@@ -6,10 +6,9 @@ import static org.apache.commons.collections4.map.AbstractReferenceMap.Reference
 import java.util.Map;
 import java.util.UUID;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.collections4.map.ReferenceMap;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.lang.StringUtil;

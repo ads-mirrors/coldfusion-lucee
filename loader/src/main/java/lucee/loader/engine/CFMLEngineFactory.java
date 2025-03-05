@@ -54,8 +54,6 @@ import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import /* JAVJAK */ javax.servlet.ServletConfig;
-import /* JAVJAK */ javax.servlet.ServletException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -71,6 +69,8 @@ import org.w3c.dom.NodeList;
 
 import com.intergral.fusiondebug.server.FDControllerFactory;
 
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletException;
 import lucee.VersionInfo;
 import lucee.commons.io.log.Log;
 import lucee.commons.lang.ConcurrentHashMapAsHashtable;

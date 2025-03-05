@@ -29,20 +29,19 @@ import java.util.EventListener;
 import java.util.Map;
 import java.util.Set;
 
-import /* JAVJAK */ javax.servlet.Filter;
-import /* JAVJAK */ javax.servlet.FilterRegistration;
-import /* JAVJAK */ javax.servlet.FilterRegistration.Dynamic;
-import /* JAVJAK */ javax.servlet.RequestDispatcher;
-import /* JAVJAK */ javax.servlet.Servlet;
-import /* JAVJAK */ javax.servlet.ServletContext;
-import /* JAVJAK */ javax.servlet.ServletException;
-import /* JAVJAK */ javax.servlet.ServletRegistration;
-import /* JAVJAK */ javax.servlet.SessionCookieConfig;
-import /* JAVJAK */ javax.servlet.SessionTrackingMode;
-import /* JAVJAK */ javax.servlet.descriptor.JspConfigDescriptor;
-
 import org.apache.felix.framework.Logger;
 
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterRegistration;
+import jakarta.servlet.FilterRegistration.Dynamic;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRegistration;
+import jakarta.servlet.SessionCookieConfig;
+import jakarta.servlet.SessionTrackingMode;
+import jakarta.servlet.descriptor.JspConfigDescriptor;
 import lucee.cli.util.EnumerationWrapper;
 
 public class ServletContextImpl implements ServletContext {
@@ -155,11 +154,6 @@ public class ServletContextImpl implements ServletContext {
 	}
 
 	@Override
-	public void log(final Exception e, final String msg) {
-		log(msg, e);
-	}
-
-	@Override
 	public void log(final String msg) {
 		log(msg, null);
 	}
@@ -182,24 +176,6 @@ public class ServletContextImpl implements ServletContext {
 
 	@Override
 	public String getServerInfo() {
-		// deprecated
-		throw notSupported("getServlet()");
-	}
-
-	@Override
-	public Servlet getServlet(final String arg0) throws ServletException {
-		// deprecated
-		throw notSupported("getServlet()");
-	}
-
-	@Override
-	public Enumeration<String> getServletNames() {
-		// deprecated
-		throw notSupported("getServlet()");
-	}
-
-	@Override
-	public Enumeration<Servlet> getServlets() {
 		// deprecated
 		throw notSupported("getServlet()");
 	}
@@ -359,30 +335,37 @@ public class ServletContextImpl implements ServletContext {
 	}
 
 	/* noop impl for abstract methods added in Servlet 4.0 */
+	@Override
 	public ServletRegistration.Dynamic addJspFile(String s, String s1) {
 		return null;
 	}
 
+	@Override
 	public int getSessionTimeout() {
 		return 0;
 	}
 
+	@Override
 	public void setSessionTimeout(int i) {
 
 	}
 
+	@Override
 	public String getRequestCharacterEncoding() {
 		return null;
 	}
 
+	@Override
 	public void setRequestCharacterEncoding(String s) {
 
 	}
 
+	@Override
 	public String getResponseCharacterEncoding() {
 		return null;
 	}
 
+	@Override
 	public void setResponseCharacterEncoding(String s) {
 
 	}

@@ -21,11 +21,10 @@ package lucee.runtime;
 import java.net.URL;
 import java.util.Iterator;
 
-import /* JAVJAK */ javax.servlet.http.HttpServlet;
-import /* JAVJAK */ javax.servlet.http.HttpServletRequest;
-import /* JAVJAK */ javax.servlet.http.HttpServletResponse;
-import /* JAVJAK */ javax.servlet.jsp.JspFactory;
-
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.jsp.JspFactory;
 import lucee.loader.engine.CFMLEngine;
 import lucee.runtime.config.ConfigWeb;
 

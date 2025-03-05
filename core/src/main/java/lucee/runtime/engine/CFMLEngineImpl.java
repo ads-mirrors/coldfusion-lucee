@@ -47,18 +47,18 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import javax.script.ScriptEngineFactory;
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.felix.framework.Felix;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Version;
 
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lucee.Info;
 import lucee.cli.servlet.ServletContextImpl;
 import lucee.commons.collection.MapFactory;
@@ -1455,7 +1455,12 @@ public final class CFMLEngineImpl implements CFMLEngine {
 	}
 
 	@Override
-	public JavaProxyUtil getJavaProxyUtil() {
+	public Object getJavaProxyUtil() {
+		return new JavaProxyUtilImpl();
+	}
+
+	@Override
+	public JavaProxyUtil getJavaProxy() {
 		return new JavaProxyUtilImpl();
 	}
 

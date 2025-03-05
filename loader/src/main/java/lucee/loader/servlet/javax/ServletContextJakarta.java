@@ -1,4 +1,4 @@
-package lucee.loader.servlet.jakarta;
+package lucee.loader.servlet.javax;
 
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -8,20 +8,20 @@ import java.util.EventListener;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.RequestDispatcher;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRegistration;
-import javax.servlet.ServletRegistration.Dynamic;
-import javax.servlet.SessionTrackingMode;
-import javax.servlet.descriptor.JspConfigDescriptor;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.Servlet;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRegistration;
+import jakarta.servlet.ServletRegistration.Dynamic;
+import jakarta.servlet.SessionTrackingMode;
+import jakarta.servlet.descriptor.JspConfigDescriptor;
 
-public class ServletContextJavax implements ServletContext {
+public class ServletContextJakarta implements ServletContext {
 
-	private jakarta.servlet.ServletContext context;
+	private javax.servlet.ServletContext context;
 
-	public ServletContextJavax(jakarta.servlet.ServletContext context) {
+	public ServletContextJakarta(javax.servlet.ServletContext context) {
 		if (context == null) throw new NullPointerException();
 		this.context = context;
 	}
@@ -33,7 +33,7 @@ public class ServletContextJavax implements ServletContext {
 
 	@Override
 	public ServletContext getContext(String uripath) {
-		return new ServletContextJavax(context.getContext(uripath));
+		return new ServletContextJakarta(context.getContext(uripath));
 	}
 
 	@Override
@@ -78,37 +78,17 @@ public class ServletContextJavax implements ServletContext {
 
 	@Override
 	public RequestDispatcher getRequestDispatcher(String path) {
-		return new RequestDispatcherJavax(context.getRequestDispatcher(path));
+		return new RequestDispatcherJakarta(context.getRequestDispatcher(path));
 	}
 
 	@Override
 	public RequestDispatcher getNamedDispatcher(String name) {
-		return new RequestDispatcherJavax(context.getNamedDispatcher(name));
-	}
-
-	@Override
-	public Servlet getServlet(String name) throws ServletException {
-		throw new RuntimeException("the method [getServlets] is not supported");
-	}
-
-	@Override
-	public Enumeration<Servlet> getServlets() {
-		throw new RuntimeException("the method [getServlets] is not supported");
-	}
-
-	@Override
-	public Enumeration<String> getServletNames() {
-		throw new RuntimeException("the method [getServletNames] is not supported");
+		return new RequestDispatcherJakarta(context.getNamedDispatcher(name));
 	}
 
 	@Override
 	public void log(String msg) {
 		context.log(msg);
-	}
-
-	@Override
-	public void log(Exception exception, String msg) {
-		context.log(msg, exception);
 	}
 
 	@Override
@@ -197,37 +177,37 @@ public class ServletContextJavax implements ServletContext {
 	}
 
 	@Override
-	public javax.servlet.FilterRegistration.Dynamic addFilter(String filterName, String className) {
+	public jakarta.servlet.FilterRegistration.Dynamic addFilter(String filterName, String className) {
 		throw new RuntimeException("the method is not supported");
 	}
 
 	@Override
-	public javax.servlet.FilterRegistration.Dynamic addFilter(String filterName, javax.servlet.Filter filter) {
+	public jakarta.servlet.FilterRegistration.Dynamic addFilter(String filterName, jakarta.servlet.Filter filter) {
 		throw new RuntimeException("the method is not supported");
 	}
 
 	@Override
-	public javax.servlet.FilterRegistration.Dynamic addFilter(String filterName, Class<? extends javax.servlet.Filter> filterClass) {
+	public jakarta.servlet.FilterRegistration.Dynamic addFilter(String filterName, Class<? extends jakarta.servlet.Filter> filterClass) {
 		throw new RuntimeException("the method is not supported");
 	}
 
 	@Override
-	public <T extends javax.servlet.Filter> T createFilter(Class<T> clazz) throws ServletException {
+	public <T extends jakarta.servlet.Filter> T createFilter(Class<T> clazz) throws ServletException {
 		throw new RuntimeException("the method is not supported");
 	}
 
 	@Override
-	public javax.servlet.FilterRegistration getFilterRegistration(String filterName) {
+	public jakarta.servlet.FilterRegistration getFilterRegistration(String filterName) {
 		throw new RuntimeException("the method is not supported");
 	}
 
 	@Override
-	public Map<String, ? extends javax.servlet.FilterRegistration> getFilterRegistrations() {
+	public Map<String, ? extends jakarta.servlet.FilterRegistration> getFilterRegistrations() {
 		throw new RuntimeException("the method is not supported");
 	}
 
 	@Override
-	public javax.servlet.SessionCookieConfig getSessionCookieConfig() {
+	public jakarta.servlet.SessionCookieConfig getSessionCookieConfig() {
 		throw new RuntimeException("the method is not supported");
 	}
 
@@ -253,7 +233,7 @@ public class ServletContextJavax implements ServletContext {
 
 	@Override
 	public <T extends EventListener> void addListener(T t) {
-		context.addListener(ServletContextListenerJakarta.getinstance(this, t));
+		context.addListener(ServletContextListenerJavax.getinstance(this, t));
 	}
 
 	@Override
@@ -301,7 +281,7 @@ public class ServletContextJavax implements ServletContext {
 		return context.getResponseCharacterEncoding();
 	}
 
-	public jakarta.servlet.ServletContext getJakartaContext() {
+	public javax.servlet.ServletContext getJavaxContext() {
 		return context;
 	}
 

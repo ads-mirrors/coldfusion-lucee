@@ -17,8 +17,7 @@
  */
 package lucee.runtime.script;
 
-import /* JAVJAK */ javax.servlet.ServletException;
-
+import jakarta.servlet.ServletException;
 import lucee.loader.engine.CFMLEngine;
 
 public class CFMLTagEngineFactoryImpl extends BaseScriptEngineFactory {

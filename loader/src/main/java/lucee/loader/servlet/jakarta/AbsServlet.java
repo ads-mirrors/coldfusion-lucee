@@ -17,6 +17,7 @@
  */
 package lucee.loader.servlet.jakarta;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import lucee.loader.engine.CFMLEngine;
 import lucee.loader.engine.CFMLEngineFactory;
@@ -32,11 +33,10 @@ public abstract class AbsServlet extends HttpServlet implements EngineChangeList
 	public void onUpdate() {
 		try {
 			// make sure that config is registered
-			engine = CFMLEngineFactory.getInstance(ServletConfigJavax.getInstance(getServletConfig()), this);
+			engine = CFMLEngineFactory.getInstance(getServletConfig(), this);
 		}
-		catch (javax.servlet.ServletException e) {
-			// TODO log
+		catch (final ServletException e) {
+
 		}
 	}
-
 }

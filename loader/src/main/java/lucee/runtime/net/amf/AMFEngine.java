@@ -20,10 +20,9 @@ package lucee.runtime.net.amf;
 import java.io.IOException;
 import java.util.Map;
 
-import /* JAVJAK */ javax.servlet.http.HttpServlet;
-import /* JAVJAK */ javax.servlet.http.HttpServletRequest;
-import /* JAVJAK */ javax.servlet.http.HttpServletResponse;
-
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lucee.runtime.config.ConfigWeb;
 
 /**

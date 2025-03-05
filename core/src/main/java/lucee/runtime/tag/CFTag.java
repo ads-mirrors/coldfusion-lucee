@@ -23,8 +23,7 @@ import java.io.Writer;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
-import javax.servlet.jsp.tagext.Tag;
-
+import jakarta.servlet.jsp.tagext.Tag;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.ExceptionUtil;

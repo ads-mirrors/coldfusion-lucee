@@ -1,14 +1,13 @@
-package lucee.loader.servlet;
+package lucee.loader.servlet.jakarta;
 
 import java.util.Enumeration;
 import java.util.HashSet;
 
-import /* JAVJAK */ javax.servlet.ServletConfig;
-import /* JAVJAK */ javax.servlet.ServletContext;
-import /* JAVJAK */ javax.servlet.ServletContextEvent;
-import /* JAVJAK */ javax.servlet.ServletContextListener;
-import /* JAVJAK */ javax.servlet.annotation.WebListener;
-
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.annotation.WebListener;
 import lucee.cli.util.EnumerationWrapper;
 import lucee.loader.engine.CFMLEngine;
 import lucee.loader.engine.CFMLEngineFactory;

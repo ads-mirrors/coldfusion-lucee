@@ -1,24 +1,24 @@
-package lucee.loader.servlet.jakarta;
+package lucee.loader.servlet.javax;
 
 import java.util.EventListener;
 
-import javax.servlet.ServletContext;
+import jakarta.servlet.ServletContext;
 
-import jakarta.servlet.ServletContextEvent;
-import jakarta.servlet.ServletContextListener;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 
-public class ServletContextListenerJakarta implements ServletContextListener {
+public class ServletContextListenerJavax implements ServletContextListener {
 
 	private ServletContext sc;
-	private javax.servlet.ServletContextListener listener;
+	private jakarta.servlet.ServletContextListener listener;
 
-	public static <T extends EventListener> jakarta.servlet.ServletContextListener getinstance(javax.servlet.ServletContext sc, T t) {
-		if (t instanceof jakarta.servlet.ServletContextListener) return (jakarta.servlet.ServletContextListener) t;
+	public static <T extends EventListener> javax.servlet.ServletContextListener getinstance(jakarta.servlet.ServletContext sc, T t) {
+		if (t instanceof javax.servlet.ServletContextListener) return (javax.servlet.ServletContextListener) t;
 
-		return new ServletContextListenerJakarta(sc, (javax.servlet.ServletContextListener) t);
+		return new ServletContextListenerJavax(sc, (jakarta.servlet.ServletContextListener) t);
 	}
 
-	public ServletContextListenerJakarta(javax.servlet.ServletContext sc, javax.servlet.ServletContextListener listener) {
+	public ServletContextListenerJavax(jakarta.servlet.ServletContext sc, jakarta.servlet.ServletContextListener listener) {
 		this.sc = sc;
 		this.listener = listener;
 	}
@@ -33,7 +33,7 @@ public class ServletContextListenerJakarta implements ServletContextListener {
 		listener.contextDestroyed(new ServletContextEventImpl(sc, sce));
 	}
 
-	private static class ServletContextEventImpl extends javax.servlet.ServletContextEvent {
+	private static class ServletContextEventImpl extends jakarta.servlet.ServletContextEvent {
 
 		private static final long serialVersionUID = -6301294044223510600L;
 		private ServletContext src;

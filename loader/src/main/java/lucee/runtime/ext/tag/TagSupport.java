@@ -18,9 +18,8 @@
  **/
 package lucee.runtime.ext.tag;
 
-import /* JAVJAK */ javax.servlet.jsp.JspException;
-import /* JAVJAK */ javax.servlet.jsp.tagext.Tag;
-
+import jakarta.servlet.jsp.JspException;
+import jakarta.servlet.jsp.tagext.Tag;
 import lucee.loader.engine.CFMLEngineFactory;
 import lucee.runtime.PageContext;
 import lucee.runtime.exp.PageException;
@@ -48,7 +47,7 @@ public abstract class TagSupport implements Tag {
 	}
 
 	@Override
-	public void setPageContext(final /* JAVJAK */ javax.servlet.jsp.PageContext pageContext) {
+	public void setPageContext(final jakarta.servlet.jsp.PageContext pageContext) {
 		this.pageContext = (PageContext) pageContext;
 	}
 

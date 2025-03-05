@@ -1,23 +1,23 @@
-package lucee.loader.servlet.jakarta;
+package lucee.loader.servlet.javax;
 
 import java.io.IOException;
 import java.util.Enumeration;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-public class HttpServletJavax extends HttpServlet implements Jakarta {
+public class HttpServletJakarta extends HttpServlet implements Javax {
 
 	private static final long serialVersionUID = -7101834437952117424L;
-	private jakarta.servlet.http.HttpServlet servlet;
+	private javax.servlet.http.HttpServlet servlet;
 
-	public HttpServletJavax(jakarta.servlet.http.HttpServlet servlet) {
+	public HttpServletJakarta(javax.servlet.http.HttpServlet servlet) {
 		if (servlet == null) throw new NullPointerException();
 		this.servlet = servlet;
 	}
@@ -124,7 +124,7 @@ public class HttpServletJavax extends HttpServlet implements Jakarta {
 
 	@Override
 	public ServletConfig getServletConfig() {
-		return ServletConfigJavax.getInstance(servlet.getServletConfig());
+		return ServletConfigJakarta.getInstance(servlet.getServletConfig());
 	}
 
 	@Override
@@ -141,10 +141,10 @@ public class HttpServletJavax extends HttpServlet implements Jakarta {
 	public void init(ServletConfig config) throws ServletException {
 		try {
 
-			servlet.init((jakarta.servlet.ServletConfig) ((ServletConfigJavax) config).getJakartaInstance());
+			servlet.init((javax.servlet.ServletConfig) ((ServletConfigJakarta) config).getJavaxInstance());
 		}
-		catch (jakarta.servlet.ServletException e) {
-			throw new ServletExceptionJavax(e);
+		catch (javax.servlet.ServletException e) {
+			throw new ServletExceptionJakarta(e);
 		}
 	}
 
@@ -153,8 +153,8 @@ public class HttpServletJavax extends HttpServlet implements Jakarta {
 		try {
 			servlet.init();
 		}
-		catch (jakarta.servlet.ServletException e) {
-			throw new ServletExceptionJavax(e);
+		catch (javax.servlet.ServletException e) {
+			throw new ServletExceptionJakarta(e);
 		}
 	}
 
@@ -174,7 +174,7 @@ public class HttpServletJavax extends HttpServlet implements Jakarta {
 	}
 
 	@Override
-	public Object getJakartaInstance() {
+	public Object getJavaxInstance() {
 		return servlet;
 	}
 

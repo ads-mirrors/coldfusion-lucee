@@ -22,8 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
-import javax.servlet.ServletContext;
-
+import jakarta.servlet.ServletContext;
 import lucee.runtime.type.scope.Scope;
 
 public interface RuntimeService extends Service {

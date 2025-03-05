@@ -26,8 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.servlet.jsp.tagext.Tag;
-
+import jakarta.servlet.jsp.tagext.Tag;
 import lucee.commons.io.DevNullOutputStream;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.ClassUtil;

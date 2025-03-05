@@ -22,8 +22,7 @@ import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.jsp.tagext.BodyContent;
-
+import jakarta.servlet.jsp.tagext.BodyContent;
 import lucee.commons.digest.HashUtil;
 import lucee.commons.lang.ClassUtil;
 import lucee.commons.lang.ExceptionUtil;
