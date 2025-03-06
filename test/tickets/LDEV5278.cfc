@@ -1,11 +1,63 @@
-component extends="org.lucee.cfml.test.LuceeTestCase" skip="true" {
+component extends="org.lucee.cfml.test.LuceeTestCase" {
+
+	function beforeAll(){
+		variables.startingTZ=getTimeZone();
+	};
+
+	function afterAll(){
+		setTimeZone(variables.startingTZ?:"UTC");
+	};
 
 	function run( testResults, testBox ){
-		describe( "LDEV-5278 isDate fails with java 21", function(){
+
+		describe( "LDEV-5278 serializeJson fails on dates", function(){
+
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+			});
+			afterEach( function(){
+				setTimeZone(variables.startingTZ?:"UTC");
+			});
+
+			it( "round trip (UTC)", function(){
+				var st = {
+					now: now()
+				};
+				var json = serializeJson( st );
+				var result = deserializeJson( json );
+				expect( result.now ).toBe( st.now );
+				expect( isDate( result.now ) ).toBeTrue();
+				expect( isDate( st.now ) ).toBeTrue();
+				expect( dateCompare( st.now, result.now, 's' ) ).toBe( 0 );
+			});
+
+			xit( "round trip (America/Los_Angeles) negative offset", function(){
+				setTimeZone("America/Los_Angeles");
+				var st = {
+					now: now()
+				};
+				var json = serializeJson( st );
+				var result = deserializeJson( json );
+				expect( result.now ).toBe( st.now );
+				expect( isDate( result.now ) ).toBeTrue();
+				expect( isDate( st.now ) ).toBeTrue();
+				expect( dateCompare( st.now, result.now, 's' ) ).toBe( 0 );
+			});
+			
+
+		});
+
+		xdescribe( "LDEV-5278 isDate fails with java 21", function(){
 
 			it( "isDate fails on Jan 4, 2018 12:00 AM", function(){
 				expect( IsDate( "Jan 4, 2018 12:00 AM" ) ).toBeTrue();
 			});
+
+			it( "isDate fails on March, 04 2025 09:20:38 -0800", function(){
+				expect( IsDate( "March, 04 2025 09:20:38 -0800" ) ).toBeTrue();
+			});
+		
 
 			it( "dateAdd fails on Jan 4, 2018 12:00 AM", function(){
 				expect( DateAdd("d", 1, "Jan 4, 2018 12:00 AM" ) ).toBe( createDate( 2018,1, 4 ) );
