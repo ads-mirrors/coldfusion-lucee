@@ -1635,7 +1635,10 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 
 	private void doUpdateDefaultSecurityManager() throws PageException {
 		if (singleMode) {
-			admin.updateDefaultSecurity(fb2("access_read"), fb2("access_write"));
+			admin.updateDefaultSecurity( SecurityManagerImpl.toShortAccessValue(getString("admin", action, "file")),
+				getFileAcces(), fb("direct_java_access"),fb("cfx_usage"), 
+				fb("tag_execute"), fb("tag_import"), fb("tag_object"), fb("tag_registry"),  
+				fb2("access_read"), fb2("access_write"));
 		}
 		else {
 			admin.updateDefaultSecurity(fb("setting"), SecurityManagerImpl.toShortAccessValue(getString("admin", action, "file")), getFileAcces(), fb("direct_java_access"),

@@ -197,7 +197,7 @@
 		</table>
 
 		<input type="hidden" name="#prefix#ScheduledTask" value="yes">
-		
+</cfif>
 		<h2>#stText.Security.CFMLEnvironment#</h2>
 		<div class="itemintro">#stText.Security.CFMLEnvironmentDescription#</div>
 		<table class="maintbl">
@@ -339,7 +339,6 @@
 			
 			</tbody>
 		</table>
-</cfif>
 
 	<table class="maintbl">
 		<tfoot>

@@ -3382,6 +3382,25 @@ public final class ConfigAdmin {
 
 	}
 
+	public void updateDefaultSecurity(short file, Resource[] fileAccess, short directJavaAccess, 
+			short cfxUsage, short tagExecute, short tagImport, short tagObject,
+			short tagRegistry, short accessRead, short accessWrite) throws SecurityException {
+		checkWriteAccess();
+		if (!(config instanceof ConfigServer)) throw new SecurityException("can't change security settings from this context");
+
+		Struct security = _getRootElement("security");
+		updateSecurityFileAccess(security, fileAccess, file);
+		security.setEL("file", SecurityManagerImpl.toStringAccessValue(file));
+		security.setEL("direct_java_access", SecurityManagerImpl.toStringAccessValue(directJavaAccess));
+		security.setEL("cfx_usage", SecurityManagerImpl.toStringAccessValue(cfxUsage));
+		security.setEL("tag_execute", SecurityManagerImpl.toStringAccessValue(tagExecute));
+		security.setEL("tag_import", SecurityManagerImpl.toStringAccessValue(tagImport));
+		security.setEL("tag_object", SecurityManagerImpl.toStringAccessValue(tagObject));
+		security.setEL("tag_registry", SecurityManagerImpl.toStringAccessValue(tagRegistry));
+		security.setEL("access_read", SecurityManagerImpl.toStringAccessRWValue(accessRead));
+		security.setEL("access_write", SecurityManagerImpl.toStringAccessRWValue(accessWrite));
+	}
+
 	public void updateDefaultSecurity(short accessRead, short accessWrite) throws SecurityException {
 		checkWriteAccess();
 		if (!(config instanceof ConfigServer)) throw new SecurityException("can't change security settings from this context");
