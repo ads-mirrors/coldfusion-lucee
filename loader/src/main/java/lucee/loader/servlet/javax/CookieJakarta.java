@@ -28,16 +28,6 @@ public class CookieJakarta extends Cookie implements Javax {
 	}
 
 	@Override
-	public String getComment() {
-		return cookie.getComment();
-	}
-
-	@Override
-	public void setComment(String purpose) {
-		cookie.setComment(purpose);
-	}
-
-	@Override
 	public String getDomain() {
 		return cookie.getDomain();
 	}
@@ -75,16 +65,6 @@ public class CookieJakarta extends Cookie implements Javax {
 	@Override
 	public void setSecure(boolean flag) {
 		cookie.setSecure(flag);
-	}
-
-	@Override
-	public int getVersion() {
-		return cookie.getVersion();
-	}
-
-	@Override
-	public void setVersion(int v) {
-		cookie.setVersion(v);
 	}
 
 	@Override

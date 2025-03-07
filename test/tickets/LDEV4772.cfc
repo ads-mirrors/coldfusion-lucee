@@ -10,7 +10,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip="false" {
 
 	function run( testResults , testBox ) {
 		describe( title="Test suite for LDEV-4772", body=function() {
-			it(title = "checking if we can load a component from an old lar file", body = function( currentSpec ) {
+			// this library does not work with Lucee 7, because Lucee 7 is not compatible with lucee archive (.lar) files compiled wfor Lucee 6 or lower, because Lucee 7 uses jakarta.servlet instead of javax.servlet
+			it(title = "checking if we can load a component from an old lar file", skip=isNotSupported(), body = function( currentSpec ) {
 				
 				// set old archive as mapping
 				var curr=getDirectoryFromPath(getCurrentTemplatePath());
@@ -30,8 +31,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip="false" {
 				var test=new org.lucee.test.Test();
 				expect( test.foo() ).toBe("bar");	
 			});
-
-			it(title = "LDEV-4975 checking if we can load a component from an old lex file", skip=false, body = function( currentSpec ) {
+			// this library does not work with Lucee 7, because Lucee 7 is not compatible with lucee archive (.lar) files compiled wfor Lucee 6 or lower, because Lucee 7 uses jakarta.servlet instead of javax.servlet
+			it(title = "LDEV-4975 checking if we can load a component from an old lex file", skip=isNotSupported(), body = function( currentSpec ) {
 				
 				var lex = "https://github.com/Leftbower/cfspreadsheet-lucee-5/releases/download/v3.0.3/cfspreadsheet-lucee-5.lex";
 				var lexObj = fileReadBinary(lex);
@@ -57,5 +58,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip="false" {
 			});
 
 		});
+	}
+
+	function isNotSupported() {
+		return listFirst(server.lucee.version,".") >= 7;
 	}
 } 

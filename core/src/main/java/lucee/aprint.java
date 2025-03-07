@@ -313,7 +313,7 @@ public class aprint {
 
 			ps.println("Cookie(name:" + SerializableCookie.toCookie(o).getName() + ";domain:" + SerializableCookie.toCookie(o).getDomain() + ";maxage:"
 					+ SerializableCookie.toCookie(o).getMaxAge() + ";path:" + SerializableCookie.toCookie(o).getPath() + ";value:" + SerializableCookie.toCookie(o).getValue()
-					+ ";version:" + SerializableCookie.toCookie(o).getVersion() + ";secure:" + SerializableCookie.toCookie(o).getSecure() + ")");
+					+ ";secure:" + SerializableCookie.toCookie(o).getSecure() + ")");
 		}
 		else if (o instanceof InputSource) {
 			InputSource is = (InputSource) o;

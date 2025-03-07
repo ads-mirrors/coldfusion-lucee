@@ -25,23 +25,24 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.apache.commons.fileupload.FileItemFactory;
-import org.apache.commons.fileupload.FileItemIterator;
-import org.apache.commons.fileupload.FileItemStream;
-import org.apache.commons.fileupload.UploadContext;
-import org.apache.commons.fileupload.disk.DiskFileItem;
-import org.apache.commons.fileupload.disk.DiskFileItemFactory;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload2.core.DiskFileItem;
+import org.apache.commons.fileupload2.core.DiskFileItemFactory;
+import org.apache.commons.io.FileCleaningTracker;
 
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
+import lucee.print;
 import lucee.commons.collection.MapFactory;
+import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.res.Resource;
+import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.ByteNameValuePair;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.net.URLItem;
@@ -53,6 +54,8 @@ import lucee.runtime.net.http.ServletInputStreamDummy;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.Struct;
+import lucee.runtime.type.scope.jakarta.JakartaFileCleaner;
+import lucee.runtime.type.scope.jakarta.JakartaServletDiskFileUpload;
 import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
@@ -154,39 +157,17 @@ public final class FormImpl extends ScopeSupport implements Form, ScriptProtecte
 		}
 	}
 
-	private static class UploadContextImpl implements UploadContext {
-		private HttpServletRequest req;
-		private String encoding;
-
-		private UploadContextImpl(HttpServletRequest req, String encoding) {
-			this.req = req;
-			this.encoding = encoding;
+	private static DiskFileItemFactory getDiskFileItemFactory(PageContext pc) throws IOException {
+		ServletContext servletContext = pc.getServletConfig().getServletContext();
+		FileCleaningTracker fileCleaningTracker = JakartaFileCleaner.getFileCleaningTracker(servletContext);
+		File tempDir = ResourceUtil.toFile(pc.getConfig().getTempDirectory());
+		Object o = servletContext.getAttribute("jakarta.servlet.context.tempdir");
+		if (o instanceof File) {
+			tempDir = (File) o;
 		}
+		print.e("newDiskFileItemFactory->tempDir:" + tempDir);
+		return DiskFileItemFactory.builder().setPath(tempDir.toPath()).setFileCleaningTracker(fileCleaningTracker).get();
 
-		@Override
-		public InputStream getInputStream() throws IOException {
-			return req.getInputStream();
-		}
-
-		@Override
-		public String getContentType() {
-			return req.getContentType();
-		}
-
-		@Override
-		public int getContentLength() {
-			return req.getContentLength();
-		}
-
-		@Override
-		public String getCharacterEncoding() {
-			return encoding;
-		}
-
-		@Override
-		public long contentLength() {
-			return req.getContentLength();
-		}
 	}
 
 	private void initializeMultiPart(PageContext pc, boolean scriptProteced) {
@@ -196,32 +177,33 @@ public final class FormImpl extends ScopeSupport implements Form, ScriptProtecte
 
 		// Create a new file upload handler
 		final String encoding = getEncoding();
-		FileItemFactory factory = tempDir instanceof File ? new DiskFileItemFactory(DiskFileItemFactory.DEFAULT_SIZE_THRESHOLD, (File) tempDir) : new DiskFileItemFactory();
-
-		ServletFileUpload upload = new ServletFileUpload(factory);
-		upload.setHeaderEncoding(encoding);
-		// ServletRequestContext c = new ServletRequestContext(pc.getHttpServletRequest());
-
-		HttpServletRequest req = pc.getHttpServletRequest();
-
-		// Parse the request
 		try {
-			FileItemIterator iter = upload.getItemIterator(new UploadContextImpl(req, encoding));
+			DiskFileItemFactory factory = getDiskFileItemFactory(pc);
+
+			JakartaServletDiskFileUpload upload = new JakartaServletDiskFileUpload(factory);
+			if (!StringUtil.isEmpty(encoding, true)) upload.setHeaderCharset(CharsetUtil.toCharset(encoding.trim()));
+
+			HttpServletRequest req = pc.getHttpServletRequest();
+
+			// Parse the request
+
+			List<DiskFileItem> items = upload.parseRequest(req);
+
 			// byte[] value;
 			InputStream is;
 			ArrayList<URLItem> list = new ArrayList<URLItem>();
 			String fileName;
-			while (iter.hasNext()) {
-				FileItemStream item = iter.next();
+			for (DiskFileItem item: items) {
 
-				is = IOUtil.toBufferedInputStream(item.openStream());
+				// process Form Field
 				if (item.isFormField() || StringUtil.isEmpty(item.getName())) {
-					list.add(new URLItem(item.getFieldName(), new String(IOUtil.toBytes(is), encoding), false));
+					list.add(new URLItem(item.getFieldName(), item.getString(), false));
 				}
+				// Process Uploaded File
 				else {
 					fileName = getFileName();
 					tempFile = tempDir.getRealResource(fileName);
-					IOUtil.copy(is, tempFile, true);
+					item.write(ResourceUtil.toPath(tempFile));
 					String ct = item.getContentType();
 					if (StringUtil.isEmpty(ct) && tempFile.length() > 0) {
 						ct = IOUtil.getMimeType(tempFile, null);

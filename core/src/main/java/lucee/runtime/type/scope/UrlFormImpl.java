@@ -21,7 +21,7 @@ package lucee.runtime.type.scope;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 
-import org.apache.commons.fileupload.disk.DiskFileItem;
+import org.apache.commons.fileupload2.core.DiskFileItem;
 
 import jakarta.servlet.ServletInputStream;
 import lucee.runtime.PageContext;

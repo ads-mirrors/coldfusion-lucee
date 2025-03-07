@@ -21,6 +21,7 @@
 		<attribute name="target" />
 		<attribute name="coremanifest" />
 		<![CDATA[
+		var debug=false;
 		var bundles = attributes.get("bundles").split( java.io.File.pathSeparator );
 		var target = attributes.get( "target" );
 		var coreManifestPath = attributes.get( "coremanifest" );
@@ -59,7 +60,7 @@
 			};
 		}
 
-		if (false) { // debug
+		if (debug) { 
 			echo( "---------- Bundles -------------------" );
 			echo( bundles.join(",\n"), true );
 
@@ -69,9 +70,11 @@
 			echo( "---------- Require-Bundle-Fragment-----" );
 			echo( reqBundleFrag.join( ",\n" ), true );
 
-			echo( "---------- Bundles -------------------" );
+			echo( "---------- Available Bundles -------------------" );
 			for (var b in availableBundles)
 				echo( JSON.stringify(b), true );
+
+			echo( "---------------------------------------" );
 		}
 
 		// treat Require-Bundle-Fragment as Require-Bundle

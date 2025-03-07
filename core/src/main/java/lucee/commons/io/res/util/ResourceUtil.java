@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -1802,6 +1803,10 @@ public final class ResourceUtil {
 		ExpressionException ee = new ExpressionException("Unable to create temporary file", "Temp directory [" + dir + "] after " + MAX_RETRY_TEMP + " attempts");
 		ExceptionUtil.initCauseEL(ee, ioe);
 		throw ee;
+	}
+
+	public static Path toPath(Resource res) throws IOException {
+		return toFile(res).toPath();
 	}
 
 }

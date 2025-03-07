@@ -16,7 +16,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="mssql" {
 
 	function run( testResults , testBox ) {
 		describe( title = "Test suite for LDEV-4753 with mssql", body = function() {
-			it( title = "checking CFINSERT for LDEV-4753 with empty numeric cols", body = function( currentSpec ) {
+			it( title = "checking CFINSERT for LDEV-4753 with empty numeric cols", skip=isNotSupported(),body = function( currentSpec ) {
 				param name="form.id" default="1";
 				param name="form.myValue" default="LuceeTestCase";
 				param name="form.seqno" default="";
@@ -24,7 +24,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="mssql" {
 				checkTable( 1 );
 			});
 
-			it( title = "checking CFUPDATE for LDEV-4753 with empty numeric cols", body = function( currentSpec ) {
+			it( title = "checking CFUPDATE for LDEV-4753 with empty numeric cols", skip=isNotSupported(),body = function( currentSpec ) {
 				param name="form.id" default="1";
 				param name="form.myValue" default="LDEV-4753";
 				param name="form.seqno" default="";

@@ -449,6 +449,9 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 							if (baseChanged) ss.clear();
 							componentPage.staticConstructor(pageContext, this);
 						}
+						catch (NoSuchMethodError nsme) {
+							checkJavax(componentPage, nsme);
+						}
 						catch (Throwable t) {
 							ss.setInit(false);
 							ExceptionUtil.rethrowIfNecessary(t);
@@ -460,6 +463,21 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 				}
 			}
 		}
+	}
+
+	private static void checkJavax(CIPage page, NoSuchMethodError nsme) throws ApplicationException {
+
+		if (PageSourceImpl.LOAD_ARCHIVE == page.getLoadType() && nsme.getMessage().indexOf("javax/servlet") != -1) {
+
+			ApplicationException ae = new ApplicationException("Incompatible Lucee Archive Error. The archive [" + page.getPageSource().getMapping().getStrArchive()
+					+ "] was compiled with Lucee 6 or earlier which uses javax.servlet packages. "
+					+ "Lucee has migrated to the Jakarta EE standard and uses jakarta.servlet packages instead. "
+					+ "You need to recompile this archive with Lucee 7 to resolve this compatibility issue. "
+					+ "Any tags in this archive referencing javax.* packages will need to be updated to use jakarta.* equivalents.");
+			ExceptionUtil.initCauseEL(ae, nsme);
+			throw ae;
+		}
+		throw nsme;
 	}
 
 	public void checkInterface(PageContext pc, ComponentPageImpl componentPage) throws PageException {

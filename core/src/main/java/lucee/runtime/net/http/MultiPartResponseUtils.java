@@ -24,7 +24,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
-import org.apache.commons.fileupload.MultipartStream;
+import org.apache.commons.fileupload2.core.MultipartInput;
+//import org.apache.commons.fileupload.MultipartStream;
 import org.apache.commons.lang3.StringUtils;
 
 import lucee.commons.io.IOUtil;
@@ -46,14 +47,14 @@ public class MultiPartResponseUtils {
 	public static Array getParts(byte[] barr, String contentTypeHeader) throws IOException, PageException {
 		String boundary = extractBoundary(contentTypeHeader, "");
 		ByteArrayInputStream bis = new ByteArrayInputStream(barr);
-		MultipartStream stream;
-		Array result = new ArrayImpl();
-		stream = new MultipartStream(bis, getBytes(boundary, "UTF-8"));//
 
-		boolean hasNextPart = stream.skipPreamble();
+		Array result = new ArrayImpl();
+		MultipartInput mpi = MultipartInput.builder().setInputStream(bis).setBoundary(getBytes(boundary, "UTF-8")).get();
+
+		boolean hasNextPart = mpi.skipPreamble();
 		while (hasNextPart) {
-			result.append(getPartData(stream));
-			hasNextPart = stream.readBoundary();
+			result.append(getPartData(mpi));
+			hasNextPart = mpi.readBoundary();
 		}
 		return result;
 	}
@@ -72,10 +73,10 @@ public class MultiPartResponseUtils {
 		return defaultValue;
 	}
 
-	private static Struct getPartData(MultipartStream stream) throws IOException, PageException {
-		Struct headers = extractHeaders(stream.readHeaders());
+	private static Struct getPartData(MultipartInput mpi) throws IOException, PageException {
+		Struct headers = extractHeaders(mpi.readHeaders());
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		stream.readBodyData(baos);
+		mpi.readBodyData(baos);
 		Struct fileStruct = new StructImpl();
 		fileStruct.set(KeyConstants._content, baos.toByteArray());
 		fileStruct.set(KeyConstants._headers, headers);

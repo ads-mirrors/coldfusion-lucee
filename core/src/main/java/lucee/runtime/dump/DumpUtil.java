@@ -225,11 +225,16 @@ public class DumpUtil {
 			table.appendRow(1, new SimpleDumpData("path"), new SimpleDumpData(c.getPath()));
 			table.appendRow(1, new SimpleDumpData("secure"), new SimpleDumpData(c.getSecure()));
 			table.appendRow(1, new SimpleDumpData("maxAge"), new SimpleDumpData(c.getMaxAge()));
-			table.appendRow(1, new SimpleDumpData("version"), new SimpleDumpData(c.getVersion()));
 			table.appendRow(1, new SimpleDumpData("domain"), new SimpleDumpData(c.getDomain()));
 			table.appendRow(1, new SimpleDumpData("httpOnly"), new SimpleDumpData(CookieImpl.isHTTPOnly(c)));
-			table.appendRow(1, new SimpleDumpData("comment"), new SimpleDumpData(c.getComment()));
 			table.appendRow(1, new SimpleDumpData("partitioned"), new SimpleDumpData(CookieImpl.isPartitioned(c)));
+			@SuppressWarnings("removal")
+			String comment = c.getComment();
+			table.appendRow(1, new SimpleDumpData("comment"), new SimpleDumpData(comment));
+			@SuppressWarnings("removal")
+			int version = c.getVersion();
+			table.appendRow(1, new SimpleDumpData("version"), new SimpleDumpData(version));
+
 			return table;
 		}
 		// Resource

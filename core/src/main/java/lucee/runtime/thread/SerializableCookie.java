@@ -28,47 +28,36 @@ public class SerializableCookie implements Serializable {
 	public static final Cookie[] COOKIES0 = new Cookie[0];
 
 	private static final long serialVersionUID = -7167614871212402517L;
-
-	private String comment;
 	private String domain;
 	private int maxAge;
 	private String name;
 	private String path;
 	private boolean secure;
 	private String value;
-	private int version;
 	private boolean httpOnly;
 	private boolean partitioned;
 
 	public SerializableCookie(String comment, String domain, int maxAge, String name, String path, boolean secure, String value, int version, boolean httpOnly,
 			boolean partitioned) {
-		this.comment = comment;
 		this.domain = domain;
 		this.maxAge = maxAge;
 		this.name = name;
 		this.path = path;
 		this.secure = secure;
 		this.value = value;
-		this.version = version;
 		this.httpOnly = httpOnly;
 		this.partitioned = partitioned;
 	}
 
 	public SerializableCookie(Cookie cookie) {
-		this.comment = cookie.getComment();
 		this.domain = cookie.getDomain();
 		this.maxAge = cookie.getMaxAge();
 		this.name = cookie.getName();
 		this.path = cookie.getPath();
 		this.secure = cookie.getSecure();
 		this.value = cookie.getValue();
-		this.version = cookie.getVersion();
 		this.httpOnly = CookieImpl.isHTTPOnly(cookie);
 		this.partitioned = CookieImpl.isPartitioned(cookie);
-	}
-
-	public String getComment() {
-		return comment;
 	}
 
 	public String getDomain() {
@@ -95,20 +84,12 @@ public class SerializableCookie implements Serializable {
 		return value;
 	}
 
-	public int getVersion() {
-		return version;
-	}
-
 	public boolean isHttpOnly() {
 		return httpOnly;
 	}
 
 	public boolean isPartitioned() {
 		return partitioned;
-	}
-
-	public void setComment(String purpose) {
-		this.comment = purpose;
 	}
 
 	public void setDomain(String pattern) {
@@ -131,10 +112,6 @@ public class SerializableCookie implements Serializable {
 		this.value = value;
 	}
 
-	public void setVersion(int version) {
-		this.version = version;
-	}
-
 	public void setHttpOnly(boolean httpOnly) {
 		this.httpOnly = httpOnly;
 	}
@@ -145,12 +122,10 @@ public class SerializableCookie implements Serializable {
 
 	public Cookie toCookie() {
 		Cookie c = new Cookie(name, value);
-		if (comment != null) c.setComment(comment);
 		if (domain != null) c.setDomain(domain);
 		c.setMaxAge(maxAge);
 		if (path != null) c.setPath(path);
 		c.setSecure(secure);
-		c.setVersion(version);
 		if (httpOnly) CookieImpl.setHTTPOnly(c);
 		if (partitioned) CookieImpl.setPartitioned(c);
 		return c;
