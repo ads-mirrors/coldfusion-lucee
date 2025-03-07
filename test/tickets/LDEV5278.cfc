@@ -32,7 +32,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect( dateCompare( st.now, result.now, 's' ) ).toBe( 0 );
 			});
 
-			xit( "round trip (America/Los_Angeles) negative offset", function(){
+			it( "round trip (America/Los_Angeles) negative offset", function(){
 				setTimeZone("America/Los_Angeles");
 				var st = {
 					now: now()
@@ -48,7 +48,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 		});
 
-		xdescribe( "LDEV-5278 isDate fails with java 21", function(){
+		describe( "LDEV-5278 isDate fails with java 21", function(){
 
 			it( "isDate fails on Jan 4, 2018 12:00 AM", function(){
 				expect( IsDate( "Jan 4, 2018 12:00 AM" ) ).toBeTrue();
