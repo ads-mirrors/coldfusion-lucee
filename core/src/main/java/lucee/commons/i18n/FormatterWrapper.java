@@ -16,6 +16,7 @@ public class FormatterWrapper {
 	private final boolean hasColon;
 	private final boolean hasWhitespace;
 	private final boolean hasHyphen;
+	private final boolean hasTimeZone;
 
 	FormatterWrapper(DateTimeFormatter formatter, String pattern, short type, ZoneId zone) {
 		this.formatter = formatter;
@@ -29,6 +30,7 @@ public class FormatterWrapper {
 		this.hasSlash = pattern.indexOf('/') != -1;
 		this.hasHyphen = pattern.indexOf('-') != -1;
 		this.hasColon = pattern.indexOf(':') != -1;
+		this.hasTimeZone = pattern.indexOf('z') != -1 || pattern.indexOf('Z') != -1;
 		this.hasWhitespace = pattern.chars().anyMatch(Character::isWhitespace);
 	}
 
@@ -44,6 +46,7 @@ public class FormatterWrapper {
 		this.hasSlash = pattern.indexOf('/') != -1;
 		this.hasHyphen = pattern.indexOf('-') != -1;
 		this.hasColon = pattern.indexOf(':') != -1;
+		this.hasTimeZone = pattern.indexOf('z') != -1 || pattern.indexOf('Z') != -1;
 		this.hasWhitespace = pattern.chars().anyMatch(Character::isWhitespace);
 	}
 
@@ -56,12 +59,12 @@ public class FormatterWrapper {
 		else {
 			if (str.indexOf(',') != -1) return false;
 		}
-
 		if (hasHyphen) {
 			if (str.indexOf('-') == -1) return false;
 		}
 		else {
-			if (str.indexOf('-') != -1) return false;
+			// timezone also can have a hyphen like "-0800"
+			if (str.indexOf('-') != -1 && !hasTimeZone) return false;
 		}
 
 		if (hasSlash) {
