@@ -11,7 +11,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect( bar[ 1 ] ).toBe( "first" );
 			});
 
-			it( title='java clone() method on cfml array should work', skip=true, body=function() {
+			it( title='java clone() method on cfml array should work', body=function() {
 				var foo = ArrayNew(1);
 				ArrayAppend( foo, "first" );
 				var bar = foo.clone();

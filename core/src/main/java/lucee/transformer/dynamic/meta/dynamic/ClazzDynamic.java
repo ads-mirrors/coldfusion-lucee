@@ -474,10 +474,11 @@ public class ClazzDynamic extends Clazz {
 	}
 
 	private static Map<String, FunctionMember> getFunctionMembers(final Class clazz, Log log) throws IOException {
-		return _getFunctionMembers(clazz, log);
+		final Map<String, String> classes = new ConcurrentHashMap<>();
+		return _getFunctionMembers(classes, clazz, log);
 	}
 
-	private static Map<String, FunctionMember> _getFunctionMembers(Class clazz_, Log log) throws IOException {
+	private static Map<String, FunctionMember> _getFunctionMembers(Map<String, String> classes, Class clazz_, Log log) throws IOException {
 		final Class clazz = clazz_.isArray() ? Object.class : clazz_;
 		final Map<String, FunctionMember> members = new LinkedHashMap<>();
 		Map<String, FunctionMember> existing = membersCollection.get(clazz);
@@ -526,7 +527,12 @@ public class ClazzDynamic extends Clazz {
 					try {
 						// add(members, _getFunctionMembers(clid,
 						// cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), log));
-						add(members, _getFunctionMembers(cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), log));
+						if (!classes.containsKey(superName)) {
+							// print.e("->" + superName);
+							classes.put(superName, "");
+
+							add(members, _getFunctionMembers(classes, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), log));
+						}
 					}
 					catch (IllegalArgumentException iae) {
 						String v = ASMUtil.getJavaVersionFromException(iae, null);
@@ -548,9 +554,14 @@ public class ClazzDynamic extends Clazz {
 				if (interfaces != null && interfaces.length > 0) {
 					for (String interf: interfaces) {
 						try {
-							// add(members, _getFunctionMembers(clid,
-							// cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), log));
-							add(members, _getFunctionMembers(cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), log));
+							if (!classes.containsKey(interf)) {
+								// print.e("=>" + interf);
+								classes.put(interf, "");
+								// add(members, _getFunctionMembers(clid,
+								// cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), log));
+
+								add(members, _getFunctionMembers(classes, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), log));
+							}
 						}
 						catch (Exception e) {
 							if (log != null) log.error("dynamic", e);
