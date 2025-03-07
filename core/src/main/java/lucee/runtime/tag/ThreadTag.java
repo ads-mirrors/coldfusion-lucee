@@ -75,6 +75,7 @@ public final class ThreadTag extends BodyTagImpl implements DynamicAttributes {
 	private static final int ACTION_RUN = 1;
 	private static final int ACTION_SLEEP = 2;
 	private static final int ACTION_TERMINATE = 3;
+	private static final int ACTION_INTERRUPT = 4;
 
 	private static final int TYPE_DAEMON = 0;
 	private static final int TYPE_TASK = 1;
@@ -125,7 +126,9 @@ public final class ThreadTag extends BodyTagImpl implements DynamicAttributes {
 		else if ("run".equals(lcAction)) this.action = ACTION_RUN;
 		else if ("sleep".equals(lcAction)) this.action = ACTION_SLEEP;
 		else if ("terminate".equals(lcAction)) this.action = ACTION_TERMINATE;
-		else throw new ApplicationException("Invalid value [" + strAction + "] for attribute [action]", "values for attribute action are: [join, run, sleep, terminate]");
+		else if ("interrupt".equals(lcAction)) this.action = ACTION_INTERRUPT;
+		else throw new ApplicationException("Invalid value [" + strAction + "] for attribute [action]",
+				"values for attribute action are: [interrupt, join, run, sleep, terminate]");
 	}
 
 	/**
@@ -280,6 +283,9 @@ public final class ThreadTag extends BodyTagImpl implements DynamicAttributes {
 	public int doStartTag() throws PageException {
 		pc = pageContext;
 		switch (action) {
+		case ACTION_INTERRUPT:
+			doInterrupt();
+			break;
 		case ACTION_JOIN:
 			doJoin();
 			break;
@@ -469,8 +475,6 @@ public final class ThreadTag extends BodyTagImpl implements DynamicAttributes {
 	}
 
 	private void doTerminate() throws ApplicationException {
-		// PageContextImpl mpc=(PageContextImpl)getMainPageContext(pc);
-
 		Threads ts = ThreadTag.getThreadScope(pc, KeyImpl.init(nameAsString(false))); // , ThreadTag.LEVEL_CURRENT + ThreadTag.LEVEL_KIDS
 
 		if (ts == null) throw new ApplicationException("There is no thread running with the name [" + nameAsString(false) + "]");
@@ -481,6 +485,23 @@ public final class ThreadTag extends BodyTagImpl implements DynamicAttributes {
 			SystemUtil.stop(ct);
 		}
 
+	}
+
+	private void doInterrupt() throws ApplicationException {
+
+		// interrupt current thread
+		if (name == null) {
+			Thread.currentThread().interrupt();
+			return;
+		}
+
+		// interrupt thread by name
+		Threads ts = ThreadTag.getThreadScope(pc, name);
+		if (ts == null) throw new ApplicationException("There is no thread running with the name [" + nameAsString(false) + "]");
+		ChildThread ct = ts.getChildThread();
+		if (ct.isAlive()) {
+			ct.interrupt();
+		}
 	}
 
 	@Override
