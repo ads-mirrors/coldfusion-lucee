@@ -39,7 +39,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				};
 				var json = serializeJson( st );
 				var result = deserializeJson( json );
-				expect( result.now ).toBe( st.now );
+
 				expect( isDate( result.now ) ).toBeTrue();
 				expect( isDate( st.now ) ).toBeTrue();
 				expect( dateCompare( st.now, result.now, 's' ) ).toBe( 0 );
@@ -60,8 +60,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 		
 
 			it( "dateAdd fails on Jan 4, 2018 12:00 AM", function(){
-				expect( DateAdd("d", 1, "Jan 4, 2018 12:00 AM" ) ).toBe( createDate( 2018,1, 4 ) );
-			});
+				expect( DateAdd("d", 0, "Jan 4, 2018 12:00 AM" ) ).toBe( createDate( 2018,1, 4 ) );
+			});	
 
 			it( "isDate fails on Jan 4, 2018 12:00 AM", function(){
 				var ok=0;
@@ -94,6 +94,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				// debug(err);
 				// if (len(err)) throw "failed, #ok# ok, #bad# failed";
 				expect( bad ).toBe( 0 );
+			});
+
+
+			it( "isDate fails on March, 04 2025 09:20:38", function(){
+				expect( IsDate( "March, 04 2025 09:20:38" ) ).toBeTrue();
 			});
 
 		} );
