@@ -411,6 +411,12 @@ public final class Caster {
 
 	}
 
+	public static Double toDouble(String str, Double defaultValue) {
+		double dbl = toDoubleValue(str, true, Double.NaN);
+		if (Double.isNaN(dbl)) return defaultValue;
+		return Double.valueOf(dbl);
+	}
+
 	/**
 	 * cast an Object to a Double Object (reference Type)
 	 * 
@@ -511,7 +517,7 @@ public final class Caster {
 	}
 
 	public static double toDoubleValue(String strNumber, int radix, boolean alsoFromDate, double defaultValue) {
-		strNumber = strNumber.trim();
+		strNumber = StringUtil.trimAllWS(strNumber);
 
 		if (StringUtil.startsWithIgnoreCase(strNumber, "0x")) {
 			radix = 16;
@@ -526,10 +532,9 @@ public final class Caster {
 
 	public static double toDoubleValue(String str, boolean alsoFromDate) throws CasterException {
 		if (str == null) return 0;// throw new CasterException("can't cast empty string to a number value");
-		str = str.trim();
+		str = StringUtil.trimAllWS(str);
+
 		double rtn = 0;
-		// double rtn_=0;
-		// double _rtn=0;
 		int eCount = 0;
 		double deep = 1;
 		int pos = 0;
@@ -602,7 +607,6 @@ public final class Caster {
 		if (isMinus) rtn = -rtn;
 		if (eCount > 0) for (int i = 0; i < eCount; i++)
 			rtn *= 10;
-		// print.e("here:"+rtn_);
 		return rtn;
 	}
 
@@ -663,7 +667,7 @@ public final class Caster {
 
 	public static double toDoubleValue(String str, boolean alsoFromDate, double defaultValue) {
 		if (str == null) return defaultValue;
-		str = str.trim();
+		str = StringUtil.trimAllWS(str);
 
 		int len = str.length();
 		if (len == 0) return defaultValue;
@@ -809,7 +813,7 @@ public final class Caster {
 
 		if (o instanceof Number) return ((Number) o).intValue();
 		else if (o instanceof Boolean) return ((Boolean) o).booleanValue() ? 1 : 0;
-		else if (o instanceof CharSequence) return toIntValue(o.toString().trim());
+		else if (o instanceof CharSequence) return toIntValue(o.toString());
 		else if (o instanceof Character) return (((Character) o).charValue());
 		// else if(o instanceof Clob) return toIntValue(toString(o));
 		else if (o instanceof Castable) return (int) ((Castable) o).castToDoubleValue();
@@ -2085,7 +2089,7 @@ public final class Caster {
 	 * @throws ExpressionException
 	 */
 	public static boolean stringToBooleanValue(String str) throws ExpressionException {
-		str = StringUtil.toLowerCase(str.trim());
+		str = StringUtil.toLowerCase(StringUtil.trimAllWS(str));
 		if (str.equals("yes") || str.equals("true")) return true;
 		else if (str.equals("no") || str.equals("false")) return false;
 		throw new CasterException("Can't cast String [" + CasterException.crop(str) + "] to boolean");
@@ -4861,7 +4865,7 @@ public final class Caster {
 
 		if (o instanceof Number) return Integer.valueOf(((Number) o).intValue());
 		else if (o instanceof Boolean) return Integer.valueOf(((Boolean) o).booleanValue() ? 1 : 0);
-		else if (o instanceof CharSequence) return toInteger(o.toString().trim(), defaultValue);
+		else if (o instanceof CharSequence) return toInteger(o.toString(), defaultValue);
 		// else if(o instanceof Clob) return toIntValue(toString(o));
 		else if (o instanceof Character) return Integer.valueOf(((Character) o).charValue());
 		else if (o instanceof Castable) {
@@ -5167,7 +5171,7 @@ public final class Caster {
 			// is done in the error
 			// so the average case is faster
 			try {
-				return new BigDecimal(StringUtil.trim(str, false, true, str), MathContext.DECIMAL128);
+				return new BigDecimal(StringUtil.trimAllWS(str), MathContext.DECIMAL128);
 			}
 			catch (NumberFormatException nfe2) {
 				CasterException ce = new CasterException("cannot convert string [" + str + "] to a number; " + nfe.getMessage());

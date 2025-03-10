@@ -45,6 +45,8 @@ public final class StringUtil {
 
 	private static final char[] SPECIAL_WHITE_SPACE_CHARS = new char[] { 0x0009, // HORIZONTAL TAB
 			0x000A, // LINE FEED
+			0x000B, // VERTICAL TAB
+			0x000C, // FORM FEED
 			0x000D, // CARRIAGE RETURN
 			0x0020, // SPACE
 			0x0085, // NEL, Next line
@@ -589,12 +591,9 @@ public final class StringUtil {
 	 * @return
 	 */
 	public static boolean isWhiteSpace(char c, boolean checkSpecialWhiteSpace) {
-		if (Character.isWhitespace(c)) return true;
-		if (checkSpecialWhiteSpace) {
-			for (int i = 0; i < SPECIAL_WHITE_SPACE_CHARS.length; i++) {
-				if (c == SPECIAL_WHITE_SPACE_CHARS[i]) return true;
-			}
-		}
+		// if (Character.isWhitespace(c)) return true;
+
+		if (c < WHITESPACES.length && WHITESPACES[c]) return true;
 		return false;
 	}
 
@@ -665,6 +664,22 @@ public final class StringUtil {
 		}
 
 		return str.trim();
+	}
+
+	public static String trimAllWS(String str) {
+		if (str == null) return null;
+
+		int len = str.length();
+		int startIndex = 0, endIndex = len - 1;
+		// left
+		while ((startIndex < len) && isWhiteSpace(str.charAt(startIndex), true)) {
+			startIndex++;
+		}
+		// right
+		while ((startIndex < endIndex) && isWhiteSpace(str.charAt(endIndex), true)) {
+			endIndex--;
+		}
+		return ((startIndex > 0) || (endIndex + 1 < len)) ? str.substring(startIndex, endIndex + 1) : str;
 	}
 
 	/**
