@@ -211,7 +211,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 	private static String forceLogAppender = SystemUtil.getSystemPropOrEnvVar("lucee.logging.force.appender", null);
 	private static String forceLogLevel = SystemUtil.getSystemPropOrEnvVar("lucee.logging.force.level", null);
 
-
 	/**
 	 * creates a new ServletConfig Impl Object
 	 * 
@@ -2154,7 +2153,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 					// appender
 					if (forceLogAppender != null) cdAppender = config.getLogEngine().appenderClassDefintion(forceLogAppender);
 					else cdAppender = getClassDefinition(child, "appender", config.getIdentification());
-					
+
 					if (!cdAppender.hasClass()) {
 						tmp = StringUtil.trim(getAttr(child, "appender"), "");
 						cdAppender = config.getLogEngine().appenderClassDefintion(tmp);
@@ -2176,7 +2175,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 					layoutArgs = toArguments(child, "layoutArguments", true, false);
 
 					String strLevel = getAttr(child, "level");
-					if (forceLogLevel !=null) strLevel = forceLogLevel;
+					if (forceLogLevel != null) strLevel = forceLogLevel;
 					if (StringUtil.isEmpty(strLevel, true)) strLevel = getAttr(child, "logLevel");
 					level = LogUtil.toLevel(StringUtil.trim(strLevel, ""), Log.LEVEL_ERROR);
 					readOnly = Caster.toBooleanValue(getAttr(child, "readOnly"), false);
@@ -4360,14 +4359,12 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 				Resource lib = config.getLibraryDirectory();
 				Resource[] libs = lib.listResources(ExtensionResourceFilter.EXTENSION_JAR_NO_DIR);
-
 				ConfigServerImpl csi = (ConfigServerImpl) config;
 				Struct javasettings = ConfigWebUtil.getAsStruct(root, false, "javasettings");
 
-				if (javasettings != null && javasettings.size() > 0) {
-					JavaSettings js = JavaSettingsImpl.getInstance(config, javasettings, libs);
-					csi.setJavaSettings(js);
-				}
+				JavaSettings js = JavaSettingsImpl.getInstance(config, javasettings, libs);
+				csi.setJavaSettings(js);
+
 			}
 		}
 		catch (Throwable t) {

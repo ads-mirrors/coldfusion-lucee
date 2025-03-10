@@ -33,6 +33,7 @@ import lucee.commons.digest.HashUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
+import lucee.commons.io.res.filter.ExtensionResourceFilter;
 import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
@@ -269,7 +270,7 @@ public class JavaSettingsImpl implements JavaSettings {
 			}
 			else if (deep && resource.isDirectory()) {
 				list.add(resource); // add as possible classes dir
-				_getResourcesTranslated(list, resource.listResources(), false);
+				_getResourcesTranslated(list, resource.listResources(ExtensionResourceFilter.EXTENSION_JAR_NO_DIR), false);
 			}
 		}
 	}

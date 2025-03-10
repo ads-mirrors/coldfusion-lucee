@@ -35,6 +35,7 @@ public final class ExtensionResourceFilter implements ResourceFilter {
 	// private int extLen;
 
 	public static final ExtensionResourceFilter EXTENSION_JAR_NO_DIR = new ExtensionResourceFilter(".jar");
+	public static final ExtensionResourceFilter EXTENSION_JAR_OR_DIR = new ExtensionResourceFilter(true, true, false, ".jar");
 	public static final ExtensionResourceFilter EXTENSION_CLASS_DIR = new ExtensionResourceFilter(true, ".class");
 
 	public ExtensionResourceFilter(String... extension) {
