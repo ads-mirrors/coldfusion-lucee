@@ -1025,6 +1025,7 @@ public final class ArrayUtil {
 		sct.set(KeyConstants._type, arr instanceof ArrayImpl && ((ArrayImpl) arr).sync() ? "synchronized" : "unsynchronized");
 		sct.set("dimensions", arr.getDimension());
 		sct.set("datatype", arr instanceof ArrayTyped ? ((ArrayTyped) arr).getTypeAsString() : "any");
+		sct.set(KeyConstants._class, arr.getClass());
 		return sct;
 	}
 }

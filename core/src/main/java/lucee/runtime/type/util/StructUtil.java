@@ -301,6 +301,7 @@ public final class StructUtil {
 			int type = ((StructImpl) sct).getType();
 			res.set(KeyConstants._type, toType(type, "unsynchronized"));
 			res.set("ordered", type == Struct.TYPE_LINKED ? "ordered" : "unordered");
+			res.set(KeyConstants._class, sct.getClass());
 		}
 		return res;
 	}
