@@ -9,9 +9,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					
 					// Get the HTTP time string
 					var httpTimeStr = getHTTPTimeString(testDate);
-	
-					// Assert no hyphens in the date portion
-					expect(dayPart).toBe("Sun, 15-Oct-2023 14:30:45 GMT");
+					
+					expect(httpTimeStr).toBe("Sun, 15 Oct 2023 14:30:45 GMT");
+
+					expect(testDate).toBe(httpTimeStr);
 				
 				});
 			});
