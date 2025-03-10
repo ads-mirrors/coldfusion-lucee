@@ -423,11 +423,11 @@ public class ThreadsImpl extends StructSupport implements lucee.runtime.type.sco
 	}
 
 	private ApplicationException errorOutside() {
-		return new ApplicationException("the thread scope cannot be modified from outside the owner thread");
+		return new ApplicationException("The thread scope cannot be modified from outside the owner thread");
 	}
 
 	private ApplicationException errorMeta(Key key) {
-		return new ApplicationException("the metadata " + key.getString() + " of the thread scope are readonly");
+		return new ApplicationException("The metadata [" + key.getString() + "] of the thread scope is readonly");
 	}
 
 }
