@@ -45,6 +45,14 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="thread" {
 				expect( cfthread.ldev3116_without.testing ).toBe( "blah" );
 			} );
 
+			it( title="no thread - arrayEach parallel=true", body=function(){
+				var threadBefore = getPageContext().getThread().getName();
+				[1].each(function(key){
+					var test = key;
+				}, true);
+				expect( getPageContext().getThread().getName() ).toBe( threadBefore );
+			} );
+
 		} );
 	}
 
