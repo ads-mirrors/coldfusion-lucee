@@ -86,6 +86,7 @@ import lucee.transformer.bytecode.statement.TryCatchFinally;
 import lucee.transformer.bytecode.statement.tag.Attribute;
 import lucee.transformer.bytecode.statement.tag.Tag;
 import lucee.transformer.bytecode.statement.tag.TagComponent;
+import lucee.transformer.bytecode.statement.tag.TagScript;
 import lucee.transformer.bytecode.statement.tag.TagTry;
 import lucee.transformer.bytecode.util.SourceNameClassVisitor.SourceInfo;
 import lucee.transformer.cast.Cast;
@@ -1330,5 +1331,19 @@ public final class ASMUtil {
 		catch (Exception e) {
 			return false;
 		}
+	}
+
+	public static boolean inRoot(Tag tag) {
+		if (tag == null) return false;
+		Statement p = tag.getParent();
+		if (p instanceof Page) return true;
+		if (p instanceof ScriptBody) {
+			p = p.getParent();
+			if (p == null) throw new RuntimeException("you are using this method to early, body parent is not set yet! best only use it in the evaluate method of the evaluator.");
+			if (p instanceof TagScript) {
+				return p.getParent() instanceof Page;
+			}
+		}
+		return false;
 	}
 }

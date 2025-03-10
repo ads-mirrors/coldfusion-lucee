@@ -99,7 +99,8 @@ public final class CFMLCompilerImpl implements CFMLCompiler {
 		Factory factory = BytecodeFactory.getInstance(config);
 		try {
 			page = sc == null ? cfmlTransformer.transform(factory, config, ps, tld, fld, returnValue, ignoreScopes)
-					: cfmlTransformer.transform(factory, config, sc, tld, fld, System.currentTimeMillis(), config.getDotNotationUpperCase(), returnValue, ignoreScopes);
+					: cfmlTransformer.transform(factory, config, sc, tld, fld, System.currentTimeMillis(), config.getDotNotationUpperCase(), returnValue, ignoreScopes, false,
+							false, false);
 			page.setSplitIfNecessary(false);
 			try {
 				byte[] barr = page.execute(className);

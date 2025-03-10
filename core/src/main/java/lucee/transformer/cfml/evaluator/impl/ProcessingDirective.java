@@ -27,6 +27,7 @@ import lucee.runtime.op.Caster;
 import lucee.transformer.bytecode.statement.tag.Tag;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.cfml.Data;
+import lucee.transformer.cfml.evaluator.EvaluatorException;
 import lucee.transformer.cfml.evaluator.EvaluatorSupport;
 import lucee.transformer.library.function.FunctionLib;
 import lucee.transformer.library.tag.TagLib;
@@ -39,13 +40,19 @@ import lucee.transformer.util.PageSourceCode;
  */
 public final class ProcessingDirective extends EvaluatorSupport {
 
+	private static final String GENERAL_EXPLANATIONX = " The [processingdirective] tag provides instructions to the CFML compiler and affects the entire template. ";
+
 	@Override
 	public TagLib execute(Config config, Tag tag, TagLibTag libTag, FunctionLib flibs, Data data) throws TemplateException {
+
 		// dot notation
 		Boolean dotNotationUpperCase = null;
 		if (tag.containsAttribute("preservecase")) {
 			Boolean preservecase = ASMUtil.getAttributeBoolean(tag, "preservecase", null);
-			if (preservecase == null) throw new TemplateException(data.srcCode, "attribute [preserveCase] of the tag [processingdirective] must be a constant boolean value");
+			if (preservecase == null) throw new TemplateException(data.srcCode,
+					"The attribute [preserveCase] from the tag [processingdirective] must be a constant boolean value (true or false). "
+							+ "Dynamic expressions like #variables# or function calls are not allowed. "
+							+ "Examples of valid usage: preserveCase=\"true\" or preserveCase=\"false\"." + GENERAL_EXPLANATIONX);
 			dotNotationUpperCase = preservecase.booleanValue() ? Boolean.FALSE : Boolean.TRUE;
 
 			if (dotNotationUpperCase == data.settings.dotNotationUpper) dotNotationUpperCase = null;
@@ -56,7 +63,10 @@ public final class ProcessingDirective extends EvaluatorSupport {
 		Charset cs = null;
 		if (tag.containsAttribute("pageencoding")) {
 			String str = ASMUtil.getAttributeString(tag, "pageencoding", null);
-			if (str == null) throw new TemplateException(data.srcCode, "attribute [pageencoding] of the tag [processingdirective] must be a constant value");
+			if (str == null) throw new TemplateException(data.srcCode,
+					"The attribute [pageEncoding] from the tag [processingdirective] must be a constant string value. "
+							+ "Dynamic expressions like #variables# or function calls are not allowed. "
+							+ "Examples of valid usage: pageEncoding=\"UTF-8\" or pageEncoding=\"ISO-8859-1\"." + GENERAL_EXPLANATIONX);
 
 			cs = CharsetUtil.toCharset(str);
 
@@ -71,20 +81,44 @@ public final class ProcessingDirective extends EvaluatorSupport {
 		if (tag.containsAttribute("executionlog")) {
 			String strExeLog = ASMUtil.getAttributeString(tag, "executionlog", null);
 			exeLog = Caster.toBoolean(strExeLog, null);
-			if (exeLog == null) throw new TemplateException(data.srcCode, "attribute [executionlog] of the tag [processingdirective] must be a constant boolean value");
+			if (exeLog == null) throw new TemplateException(data.srcCode,
+					"The attribute [executionlog] from the tag [processingdirective] must be a constant boolean value (true or false). "
+							+ "Dynamic expressions like #variables# or function calls are not allowed. "
+							+ "Examples of valid usage: executionLog=\"true\" or executionLog=\"false\"." + GENERAL_EXPLANATIONX);
 			if (exeLog.booleanValue() == data.srcCode.getWriteLog()) exeLog = null;
 		}
 
 		if (cs != null || exeLog != null || dotNotationUpperCase != null) {
-			if (cs == null) {
-				if (data.srcCode instanceof PageSourceCode) cs = ((PageSourceCode) data.srcCode).getCharset();
-				else cs = CharsetUtil.UTF8;
+			Charset currCS = data.srcCode instanceof PageSourceCode ? ((PageSourceCode) data.srcCode).getCharset() : CharsetUtil.UTF8;
+
+			// throw an exception when already done
+			if (data.hasCharset && cs != null) throw new TemplateException(data.srcCode,
+					"The attribute [pageEncoding] from the tag [processingdirective] was already set with a previous tag and cannot be set again." + GENERAL_EXPLANATIONX);
+			if (data.hasUpper && dotNotationUpperCase != null) throw new TemplateException(data.srcCode,
+					"The attribute [preserveCase] from the tag [processingdirective] was already set with a previous tag and cannot be set again." + GENERAL_EXPLANATIONX);
+			if (data.hasWriteLog && exeLog != null) throw new TemplateException(data.srcCode,
+					"The attribute [executionlog] from the tag [processingdirective] was already set with a previous tag and cannot be set again." + GENERAL_EXPLANATIONX);
+
+			// ignore in case they are the same
+			if (cs != null && cs.equals(currCS)) cs = null;
+			if (dotNotationUpperCase != null && dotNotationUpperCase.equals(data.settings.dotNotationUpper)) dotNotationUpperCase = null;
+			if (exeLog != null && exeLog.equals(data.srcCode.getWriteLog())) exeLog = null;
+
+			// do we have changes?
+			if (cs != null || exeLog != null || dotNotationUpperCase != null) {
+				throw new ProcessingDirectiveException(data.srcCode, tag.getStart(), tag.getEnd(), cs, dotNotationUpperCase, exeLog);
 			}
-			if (exeLog == null) exeLog = data.srcCode.getWriteLog() ? Boolean.TRUE : Boolean.FALSE;
-			if (dotNotationUpperCase == null) dotNotationUpperCase = data.settings.dotNotationUpper;
-			throw new ProcessingDirectiveException(data.srcCode, cs, dotNotationUpperCase, exeLog);
 		}
 
 		return null;
+	}
+
+	@Override
+	public void evaluate(Tag tag, TagLibTag libTag) throws EvaluatorException {
+		if (!ASMUtil.inRoot(tag)) {
+			throw new EvaluatorException("The tag [processingdirective] must be placed at the top level of your template (not nested within any other tags or statement blocks). "
+					+ "Since it applies compiler settings for the entire file, placing it within conditional blocks or other tags would create ambiguity." + GENERAL_EXPLANATIONX);
+		}
+
 	}
 }
