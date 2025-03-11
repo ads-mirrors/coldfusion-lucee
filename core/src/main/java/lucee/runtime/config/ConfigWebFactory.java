@@ -4142,7 +4142,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			}
 
 			// CGI readonly
-			String strCGIReadonly = getAttr(root, "cgiReadonly");
+			String strCGIReadonly = getAttr(root, "cgiScopeReadonly");
 			if (hasAccess && !StringUtil.isEmpty(strCGIReadonly)) {
 				config.setCGIScopeReadonly(Caster.toBooleanValue(strCGIReadonly, true));
 			}
