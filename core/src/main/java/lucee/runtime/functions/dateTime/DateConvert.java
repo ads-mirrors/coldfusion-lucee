@@ -39,10 +39,10 @@ public final class DateConvert implements Function {
 		conversionType = conversionType.toLowerCase();
 
 		if (conversionType.equals("local2utc")) {
-			return new DateTimeImpl(pc, date.getTime() - offset, false);
+			return new DateTimeImpl(date.getTime() - offset);
 		}
 		else if (conversionType.equals("utc2local")) {
-			return new DateTimeImpl(pc, date.getTime() + offset, false);
+			return new DateTimeImpl(date.getTime() + offset);
 		}
 		throw new FunctionException(pc, "DateConvert", 1, "conversionType", "invalid conversion-type [" + conversionType + "] for function dateConvert");
 	}

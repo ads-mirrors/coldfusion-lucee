@@ -40,7 +40,7 @@ public class TimeCast implements Cast {
 		Time t = useTimeZone ? rst.getTime(columnIndex, JREDateTimeUtil.getThreadCalendar(tz)) : rst.getTime(columnIndex);
 		if (t == null) return null;
 
-		return new DateTimeImpl(t.getTime(), false);
+		return new DateTimeImpl(t.getTime());
 
 	}
 

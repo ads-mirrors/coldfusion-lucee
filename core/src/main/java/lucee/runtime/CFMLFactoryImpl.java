@@ -559,8 +559,8 @@ public final class CFMLFactoryImpl extends CFMLFactory {
 			thread = pc.getThread();
 			if (thread == null || !thread.isAlive() || thread == Thread.currentThread()) continue;
 
-			data.setEL("startTime", new DateTimeImpl(pc.getStartTime(), false));
-			data.setEL("endTime", new DateTimeImpl(pc.getStartTime() + pc.getRequestTimeout(), false));
+			data.setEL("startTime", new DateTimeImpl(pc.getStartTime()));
+			data.setEL("endTime", new DateTimeImpl(pc.getStartTime() + pc.getRequestTimeout()));
 			data.setEL(KeyConstants._timeout, Double.valueOf(pc.getRequestTimeout()));
 
 			// thread

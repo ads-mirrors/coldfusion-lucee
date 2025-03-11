@@ -220,7 +220,7 @@ public final class Trace extends BodyTagImpl {
 			sb.append("<font color=\"orange\">");
 			sb.append("<b>");
 			sb.append(DebugTraceImpl.toType(trace.getType(), "INFO") + " - ");
-			sb.append("[CFTRACE " + tf.format(new DateTimeImpl(pageContext.getConfig()), "hh:mm:ss:l") + "]");
+			sb.append("[CFTRACE " + tf.format(new DateTimeImpl(), "hh:mm:ss:l") + "]");
 			sb.append("[" + trace.getTime() + " ms " + total + "]");
 			sb.append("[" + trace.getTemplate() + " @ line: " + trace.getLine() + "]");
 			if (hasCat || hasText) sb.append(" -");

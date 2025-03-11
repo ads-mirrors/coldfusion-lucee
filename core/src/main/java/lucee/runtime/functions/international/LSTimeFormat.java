@@ -74,7 +74,7 @@ public final class LSTimeFormat implements Function {
 			String str = Caster.toString(object);
 			for (FormatterWrapper format: FormatUtil.getTimeFormats(locale, timeZone, true)) {
 				try {
-					return new DateTimeImpl(Date.from(ZonedDateTime.parse(str, format.formatter).toInstant()).getTime(), false);
+					return new DateTimeImpl(Date.from(ZonedDateTime.parse(str, format.formatter).toInstant()).getTime());
 				}
 				catch (Exception e) {
 				}

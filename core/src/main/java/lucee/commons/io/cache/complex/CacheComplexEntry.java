@@ -99,9 +99,9 @@ public class CacheComplexEntry implements CacheEntry {
 		if (d != null) return d;
 
 		CacheComplexData ccd = getData();
-		if (ccd != null && ccd.lastModified > 0) return new DateTimeImpl(ccd.lastModified, false);
+		if (ccd != null && ccd.lastModified > 0) return new DateTimeImpl(ccd.lastModified);
 
-		return new DateTimeImpl(0, false);
+		return new DateTimeImpl(0);
 	}
 
 	@Override

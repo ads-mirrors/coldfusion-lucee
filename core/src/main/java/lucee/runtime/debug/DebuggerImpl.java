@@ -820,7 +820,7 @@ public final class DebuggerImpl implements Debugger {
 		debugging.setEL(KeyConstants._contentType, pc.getHttpServletResponse().getContentType());
 		// TODO ContentLength ReqRspUtil?
 
-		debugging.setEL(KeyConstants._starttime, new DateTimeImpl(starttime, false));
+		debugging.setEL(KeyConstants._starttime, new DateTimeImpl(starttime));
 		debugging.setEL(KeyConstants._id, pci.getRequestId() + "-" + pci.getId());
 
 		return debugging;

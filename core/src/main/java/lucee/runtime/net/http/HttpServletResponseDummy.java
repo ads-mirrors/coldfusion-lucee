@@ -106,12 +106,12 @@ public final class HttpServletResponseDummy implements HttpServletResponse, Seri
 
 	@Override
 	public void setDateHeader(String key, long value) {
-		setHeader(key, new DateTimeImpl(value, false).castToString());
+		setHeader(key, new DateTimeImpl(value).castToString());
 	}
 
 	@Override
 	public void addDateHeader(String key, long value) {
-		addHeader(key, new DateTimeImpl(value, false).castToString());
+		addHeader(key, new DateTimeImpl(value).castToString());
 	}
 
 	@Override

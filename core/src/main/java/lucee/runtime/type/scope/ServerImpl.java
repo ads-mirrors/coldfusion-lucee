@@ -48,7 +48,7 @@ import lucee.transformer.bytecode.util.ASMUtil;
  */
 public final class ServerImpl extends ScopeSupport implements Server, SharedScope {
 
-	private static final DateTimeImpl expired = new DateTimeImpl(2145913200000L, false);
+	private static final DateTimeImpl expired = new DateTimeImpl(2145913200000L);
 
 	private static final Key PRODUCT_NAME = KeyConstants._productname;
 	private static final Key PRODUCT_LEVEL = KeyConstants._productlevel;
@@ -155,7 +155,7 @@ public final class ServerImpl extends ScopeSupport implements Server, SharedScop
 		lucee.setEL(VERSION_NAME, info.getVersionName());
 		lucee.setEL(VERSION_NAME_EXPLANATION, info.getVersionNameExplanation());
 		lucee.setEL(KeyConstants._state, getStateAsString(info.getVersion()));
-		lucee.setEL(RELEASE_DATE, new DateTimeImpl(info.getRealeaseTime(), false));
+		lucee.setEL(RELEASE_DATE, new DateTimeImpl(info.getRealeaseTime()));
 		lucee.setEL(LOADER_VERSION, Caster.toDouble(SystemUtil.getLoaderVersion()));
 		lucee.setEL(LOADER_PATH, ClassUtil.getSourcePathForClass(pc, "lucee.loader.servlet.CFMLServlet", ""));
 		lucee.setEL(KeyConstants._environment, jsr223 != null && jsr223.booleanValue() ? "jsr223" : "servlet");

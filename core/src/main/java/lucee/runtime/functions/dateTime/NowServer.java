@@ -45,7 +45,7 @@ public final class NowServer implements Function {
 		int lucee = pc.getTimeZone().getOffset(now);
 		int server = TimeZone.getDefault().getOffset(now);
 
-		return new DateTimeImpl(pc, now - (lucee - server), false);
+		return new DateTimeImpl(now - (lucee - server));
 
 	}
 

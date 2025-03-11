@@ -47,10 +47,10 @@ public abstract class CFMLSpoolerTaskListener extends SpoolerTaskListener {
 			Struct args = new StructImpl();
 
 			long l = task.lastExecution();
-			if (l > 0) args.set("lastExecution", new DateTimeImpl(pc, l, true));
+			if (l > 0) args.set("lastExecution", new DateTimeImpl(l));
 			l = task.nextExecution();
-			if (l > 0) args.set("nextExecution", new DateTimeImpl(pc, l, true));
-			args.set("created", new DateTimeImpl(pc, task.getCreation(), true));
+			if (l > 0) args.set("nextExecution", new DateTimeImpl(l));
+			args.set("created", new DateTimeImpl(task.getCreation()));
 			args.set(KeyConstants._id, task.getId());
 			args.set(KeyConstants._type, task.getType());
 

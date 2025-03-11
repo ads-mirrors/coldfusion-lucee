@@ -274,7 +274,7 @@ public final class Cache extends BodyTagImpl {
 
 	@Override
 	public int doStartTag() throws PageException {
-		now = new DateTimeImpl(pageContext.getConfig());
+		now = new DateTimeImpl();
 		if (action == CACHE && hasBody) action = CONTENT;
 		try {
 			if (action == CACHE) {
@@ -442,7 +442,7 @@ public final class Cache extends BodyTagImpl {
 	}
 
 	private DateTime getExpiresDate() {
-		return new DateTimeImpl(pageContext, getExpiresTime(), false);
+		return new DateTimeImpl(getExpiresTime());
 	}
 
 	private long getExpiresTime() {

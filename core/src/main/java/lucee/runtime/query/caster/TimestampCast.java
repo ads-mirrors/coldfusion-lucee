@@ -39,6 +39,6 @@ public class TimestampCast implements Cast {
 	public Object toCFType(TimeZone tz, ResultSet rst, int columnIndex) throws SQLException, IOException {
 		Timestamp ts = useTimeZone ? rst.getTimestamp(columnIndex, JREDateTimeUtil.getThreadCalendar(tz)) : rst.getTimestamp(columnIndex);
 		if (ts == null) return null;
-		return new DateTimeImpl(ts.getTime(), false);
+		return new DateTimeImpl(ts.getTime());
 	}
 }

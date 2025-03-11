@@ -362,8 +362,8 @@ public class SpoolerEngineImpl implements SpoolerEngine {
 			qry.setAt(KeyConstants._detail, row, task.detail());
 			qry.setAt(KeyConstants._id, row, task.getId());
 
-			qry.setAt(LAST_EXECUTION, row, new DateTimeImpl(task.lastExecution(), true));
-			qry.setAt(NEXT_EXECUTION, row, new DateTimeImpl(task.nextExecution(), true));
+			qry.setAt(LAST_EXECUTION, row, new DateTimeImpl(task.lastExecution()));
+			qry.setAt(NEXT_EXECUTION, row, new DateTimeImpl(task.nextExecution()));
 			qry.setAt(CLOSED, row, Caster.toBoolean(task.closed()));
 			qry.setAt(TRIES, row, Caster.toDouble(task.tries()));
 			qry.setAt(TRIES_MAX, row, Caster.toDouble(task.tries()));
@@ -387,7 +387,7 @@ public class SpoolerEngineImpl implements SpoolerEngine {
 		Struct sct;
 		while (it.hasNext()) {
 			sct = (Struct) it.next();
-			sct.setEL(KeyConstants._time, new DateTimeImpl(Caster.toLongValue(sct.get(KeyConstants._time, null), 0), true));
+			sct.setEL(KeyConstants._time, new DateTimeImpl(Caster.toLongValue(sct.get(KeyConstants._time, null), 0)));
 		}
 		return exp;
 	}

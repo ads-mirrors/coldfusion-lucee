@@ -39,7 +39,7 @@ public final class Beat implements Function {
 	}
 
 	public static Number call(PageContext pc, Object obj) throws PageException {
-		if (obj == null) obj = new DateTimeImpl(pc);
+		if (obj == null) obj = new DateTimeImpl();
 
 		TimeZone tz = ThreadLocalPageContext.getTimeZone(pc);
 		DateTime date = DateCaster.toDateAdvanced(obj, tz);

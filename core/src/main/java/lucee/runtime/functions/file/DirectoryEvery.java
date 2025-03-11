@@ -187,7 +187,7 @@ public class DirectoryEvery extends BIF {
 		sct.set(KeyConstants._level, level);
 		sct.set(KeyConstants._size, Double.valueOf(res.isDirectory() ? 0 : res.length()));
 		sct.set(KeyConstants._type, res.isDirectory() ? "Dir" : "File");
-		sct.set(KeyConstants._dateLastModified, new DateTimeImpl(res.lastModified(), false));
+		sct.set(KeyConstants._dateLastModified, new DateTimeImpl(res.lastModified()));
 		if (modeSupported) sct.set(KeyConstants._mode, new ModeObjectWrap(res));
 		if (res instanceof ResourceMetaData) sct.set(KeyConstants._meta, ((ResourceMetaData) res).getMetaData());
 		sct.set(KeyConstants._attributes, Directory.getFileAttribute(res, true));
@@ -203,7 +203,7 @@ public class DirectoryEvery extends BIF {
 		sct.set(KeyConstants._level, level);
 		sct.set(KeyConstants._size, Double.valueOf(isDir ? 0 : Files.size(path)));
 		sct.set(KeyConstants._type, isDir ? "Dir" : "File");
-		sct.set(KeyConstants._dateLastModified, new DateTimeImpl(Files.getLastModifiedTime(path).toMillis(), false));
+		sct.set(KeyConstants._dateLastModified, new DateTimeImpl(Files.getLastModifiedTime(path).toMillis()));
 		if (modeSupported) sct.set(KeyConstants._mode, new ModeObjectWrap(path));
 		sct.set(KeyConstants._attributes, Directory.getFileAttribute(path, true));
 

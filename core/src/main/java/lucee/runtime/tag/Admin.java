@@ -2366,7 +2366,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 			configWeb.getIdentification().getId();
 			configWeb.getConfigDir();
 			qry.setAt("Id", row, Double.valueOf(pc.getId()));
-			qry.setAt("Start", row, new DateTimeImpl(pc.getStartTime(), false));
+			qry.setAt("Start", row, new DateTimeImpl(pc.getStartTime()));
 			qry.setAt("Timeout", row, Double.valueOf(pc.getRequestTimeout() / 1000));
 
 			PageContext root = pc.getRootPageContext();

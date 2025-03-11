@@ -59,13 +59,13 @@ public abstract class DateTimeUtil {
 	}
 
 	public DateTime toDateTime(TimeZone tz, int year, int month, int day, int hour, int minute, int second, int milliSecond) throws DateTimeException {
-		return new DateTimeImpl(toTime(tz, year, month, day, hour, minute, second, milliSecond), false);
+		return new DateTimeImpl(toTime(tz, year, month, day, hour, minute, second, milliSecond));
 	}
 
 	public DateTime toDateTime(TimeZone tz, int year, int month, int day, int hour, int minute, int second, int milliSecond, DateTime defaultValue) {
 		long time = toTime(tz, year, month, day, hour, minute, second, milliSecond, Long.MIN_VALUE);
 		if (time == Long.MIN_VALUE) return defaultValue;
-		return new DateTimeImpl(time, false);
+		return new DateTimeImpl(time);
 	}
 
 	/**
@@ -79,7 +79,7 @@ public abstract class DateTimeUtil {
 		long utc = Math.round(days * DAY_MILLIS);
 		utc -= CF_UNIX_OFFSET;
 		utc -= getLocalTimeZoneOffset(utc);
-		return new DateTimeImpl(utc, false);
+		return new DateTimeImpl(utc);
 	}
 
 	public long toTime(TimeZone tz, int year, int month, int day, int hour, int minute, int second, int milliSecond, long defaultValue) {
@@ -271,7 +271,7 @@ public abstract class DateTimeUtil {
 	}
 
 	public static String format(long time, Locale l, TimeZone tz) {
-		return DateTimeFormat.invoke(new DateTimeImpl(time, false), null, ThreadLocalPageContext.getLocale(l), ThreadLocalPageContext.getTimeZone(tz));
+		return DateTimeFormat.invoke(new DateTimeImpl(time), null, ThreadLocalPageContext.getLocale(l), ThreadLocalPageContext.getTimeZone(tz));
 	}
 
 }

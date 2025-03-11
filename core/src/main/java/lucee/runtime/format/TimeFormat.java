@@ -62,7 +62,7 @@ public final class TimeFormat extends BaseFormat implements Format {
 	 */
 	@Override
 	public String format(Date date, String mask) {
-		DateTime dt = (date instanceof DateTime) ? (DateTime) date : new DateTimeImpl(date.getTime(), false);
+		DateTime dt = (date instanceof DateTime) ? (DateTime) date : new DateTimeImpl(date.getTime());
 		return format(dt, mask, null);
 	}
 

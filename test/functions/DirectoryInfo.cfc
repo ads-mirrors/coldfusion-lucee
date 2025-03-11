@@ -4,6 +4,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 		if ( directoryExists( uri ) )
 			directorydelete( uri , true );
 		directoryCreate( uri );
+		//sleep(1000); only needed to test LDEV-5336
 		variables.DicFuncInfo = directoryinfo( uri );
 		directory action="info" directory="#uri#" name="variables.DicTagInfo";
 	}
@@ -13,15 +14,16 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 	}
 
 	function afterAll(){
-		directorydelete( uri , true );
+		directoryDelete( uri , true );
 	}
 
 	function run( testResults , testBox ) {
-		describe( "test case for directoryInfo", function() {
+		describe( "test case for directoryInfo()", function() {
 			it( title = "Checking with directoryInfo function", body = function( currentSpec ) {
 				expect( DicFuncInfo.directoryName).toBe( listLast( uri , "/\" ) );
 				expect( structKeyExists( DicFuncInfo , "directoryCreated") ).toBeTrue();
 				expect( structKeyExists( DicFuncInfo , "dateLastModified") ).toBeTrue();
+				expect( DicFuncInfo.directoryCreated ).toBe( DicFuncInfo.dateLastModified );
 				expect( DicFuncInfo.isReadable ).toBeTrue();
 			});
 			it( title = "Checking mode key on linux directoryInfo function", skip="#isLinux()#", body = function( currentSpec ) {
@@ -29,11 +31,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			});
 		});
 
-		describe( "test case for cfdirectory action=info", function() {
+		describe( "test case for tag cfdirectory action=info", function() {
 			it(title = "Checking with cfdirectory action=info", body = function( currentSpec ) {
 				expect( DicTagInfo.directoryName).toBe( listLast( uri , "/\" ) );
 				expect( structKeyExists( DicTagInfo , "directoryCreated") ).toBeTrue();
 				expect( structKeyExists( DicTagInfo , "dateLastModified") ).toBeTrue();
+				expect( DicTagInfo.directoryCreated ).toBe( DicTagInfo.dateLastModified );
 				expect( DicTagInfo.isReadable ).toBeTrue();
 			});
 			it( title = "Checking mode key on linux cfdirectory action=info", skip="#isLinux()#", body = function( currentSpec ) {
