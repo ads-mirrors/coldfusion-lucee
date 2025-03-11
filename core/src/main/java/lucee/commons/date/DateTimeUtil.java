@@ -33,6 +33,7 @@ import lucee.runtime.type.dt.DateTimeImpl;
 
 public abstract class DateTimeUtil {
 
+	private final static FormatterWrapper HTTP_TIME_STRING_FORMAT_OLD = FormatUtil.getDateTimeFormatter(Locale.ENGLISH, "EE, dd MMM yyyy HH:mm:ss zz");
 	private final static FormatterWrapper HTTP_TIME_STRING_FORMAT = FormatUtil.getDateTimeFormatter(Locale.ENGLISH, "EE, dd-MMM-yyyy HH:mm:ss zz");
 
 	private static final double DAY_MILLIS = 86400000D;
@@ -265,7 +266,7 @@ public abstract class DateTimeUtil {
 	 */
 	public static String toHTTPTimeString(Date date, boolean oldFormat) {
 		if (oldFormat) {
-			return StringUtil.replace(FormatUtil.format(HTTP_TIME_STRING_FORMAT.formatter, date, TimeZoneConstants.GMT), "+00:00", "", true);
+			return StringUtil.replace(FormatUtil.format(HTTP_TIME_STRING_FORMAT_OLD.formatter, date, TimeZoneConstants.GMT), "+00:00", "", true);
 		}
 		return StringUtil.replace(FormatUtil.format(HTTP_TIME_STRING_FORMAT.formatter, date, TimeZoneConstants.UTC), "+00:00", "", true);
 	}
