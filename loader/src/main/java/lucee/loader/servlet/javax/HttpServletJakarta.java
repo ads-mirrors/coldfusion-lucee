@@ -49,11 +49,6 @@ public class HttpServletJakarta extends HttpServlet implements Javax {
 	}
 
 	@Override
-	protected void finalize() throws Throwable {
-
-	}
-
-	@Override
 	protected long getLastModified(HttpServletRequest req) {
 		throw new RuntimeException("the method [getLastModified] is not supported");
 

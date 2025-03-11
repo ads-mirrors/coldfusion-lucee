@@ -273,7 +273,7 @@ public class BundleLoader {
 				return (ExecutorService) methodHandle.invoke();
 			}
 			catch (Throwable e) {
-				if (e instanceof ThreadDeath) throw (ThreadDeath) e;
+				Util.rethrowIfNecessary(e);
 			}
 		}
 

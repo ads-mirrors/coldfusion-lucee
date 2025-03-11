@@ -2781,7 +2781,7 @@ public final class PageContextImpl extends PageContext {
 			}
 			PageException pe;
 			if (ExceptionUtil.isThreadDeath(t) && getTimeoutStackTrace() != null) {
-				t = pe = new RequestTimeoutException(this, (ThreadDeath) t);
+				t = pe = new RequestTimeoutException(this, (Error) t);
 			}
 			else pe = Caster.toPageException(t, false);
 			_t = t;

@@ -36,13 +36,11 @@ public class HttpServletRequestJakarta extends ServletRequestJakarta implements 
 		for (int i = 0; i < cookies.length; i++) {
 			javax.servlet.http.Cookie c = cookies[i];
 			jakartaCookies[i] = new Cookie(c.getName(), c.getValue());
-			if (c.getComment() != null) jakartaCookies[i].setComment(c.getComment());
 			if (c.getDomain() != null) jakartaCookies[i].setDomain(c.getDomain());
 			jakartaCookies[i].setHttpOnly(c.isHttpOnly());
 			jakartaCookies[i].setMaxAge(c.getMaxAge());
 			if (c.getPath() != null) jakartaCookies[i].setPath(c.getPath());
 			jakartaCookies[i].setSecure(c.getSecure());
-			jakartaCookies[i].setVersion(c.getVersion());
 		}
 		return jakartaCookies;
 	}
