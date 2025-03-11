@@ -3,6 +3,7 @@ package lucee.runtime.type.query;
 import lucee.commons.io.SystemUtil.TemplateLine;
 import lucee.commons.lang.FormatUtil;
 import lucee.commons.lang.StringUtil;
+import lucee.commons.math.MathUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.db.SQL;
 import lucee.runtime.dump.DumpData;
@@ -183,10 +184,11 @@ public class QueryStruct extends StructImpl implements QueryResult {
 		int rows = q.getRecordcount();
 		if (rows == 0) return qs;
 		Key[] columns = q.getColumnNames();
+		int colCount = MathUtil.nextPowerOfTwo(columns.length, 0);
 
 		Struct tmp;
 		for (int r = 1; r <= rows; r++) {
-			tmp = new StructImpl(Struct.TYPE_LINKED);
+			tmp = new StructImpl(Struct.TYPE_LINKED, colCount);
 			qs.set(Caster.toKey(q.getAt(columnName, r)), tmp);
 			for (Key c: columns) {
 				tmp.setEL(c, q.getAt(c, r, null));
