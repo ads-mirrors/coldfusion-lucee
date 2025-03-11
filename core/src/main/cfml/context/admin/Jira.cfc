@@ -4,11 +4,7 @@
 component {
 	
 	variables.prefix="a2";
-	variables.maxInactiveInterval=getPageContext().getRequest().getSession(true).getMaxInactiveInterval();
-	/*static {
-		static.prefix="a2";
-		static.maxInactiveInterval=getPageContext().getRequest().getSession(true).getMaxInactiveInterval();
-	}*/
+	
 // STATIC
 
 	/* this function creates a singleton for the give set of arguments
@@ -800,7 +796,10 @@ component {
 	}
 
 	private function _http(required string path, required string method="get",struct body, boolean auth=true) {
-		if(auth && !isNull(variables.lastAccess) && dateAdd("s", variables.maxInactiveInterval, variables.lastAccess)<=now()) {
+		var jsess=getPageContext().getRequest().getSession(true);
+		var maxInactiveInterval=isNull(jsess)?1800:jsess.getMaxInactiveInterval();
+
+		if(auth && !isNull(variables.lastAccess) && dateAdd("s", local.maxInactiveInterval, variables.lastAccess)<=now()) {
 			authIfNecessary();
 		}
 
