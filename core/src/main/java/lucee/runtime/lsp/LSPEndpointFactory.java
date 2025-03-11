@@ -18,6 +18,7 @@ import lucee.aprint;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
+import lucee.commons.io.log.LogUtil;
 import lucee.loader.engine.CFMLEngine;
 import lucee.loader.engine.CFMLEngineFactory;
 import lucee.loader.util.Util;
@@ -312,6 +313,11 @@ public class LSPEndpointFactory implements MessageProcessor {
 			}
 
 			String formattedMessage = LSPUtil.formatLSPMessage(SerializeJSON.call(pc, data));
+			if (LogUtil.doesDebug(log)) {
+				log.debug("lsp", formattedMessage);
+
+			}
+
 			byte[] formattedMessageBytes = formattedMessage.getBytes();
 			for (OutputStream out: clientOutputStreams.values()) {
 				try {

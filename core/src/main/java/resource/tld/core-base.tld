@@ -5302,6 +5302,7 @@ To use cached data, the current query must use the same SQL statement, data sour
 	<tag>
 		<name>LuceeAI</name>
 		<tag-class>lucee.runtime.tag.LuceeAI</tag-class>
+		<introduced>6.2.0.30</introduced>
 		<handle-exception>false</handle-exception>
 		<body-content>must</body-content>
 		<body-rtexprvalue>false</body-rtexprvalue>
@@ -5364,6 +5365,7 @@ To use cached data, the current query must use the same SQL statement, data sour
 	<tag>
 		<name>LuceeAIInquiry</name>
 		<tag-class>lucee.runtime.tag.LuceeAIInquiry</tag-class>
+		<introduced>6.2.0.30</introduced>
 		<handle-exception>false</handle-exception>
 		<body-content>empty</body-content>
 		<body-rtexprvalue>false</body-rtexprvalue>
