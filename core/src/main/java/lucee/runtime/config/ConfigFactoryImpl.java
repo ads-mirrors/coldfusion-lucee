@@ -2317,6 +2317,9 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 			f = dir.getRealResource("threadTerminate." + TEMPLATE_EXTENSION);
 			if (!f.exists() || doNew) createFileFromResourceEL("/resource/library/function/threadTerminate." + TEMPLATE_EXTENSION, f);
 
+			f = dir.getRealResource("threadInterrupt." + TEMPLATE_EXTENSION);
+			if (!f.exists() || doNew) createFileFromResourceEL("/resource/library/function/threadInterrupt." + TEMPLATE_EXTENSION, f);
+
 			f = dir.getRealResource("throw." + TEMPLATE_EXTENSION);
 			if (!f.exists() || doNew) createFileFromResourceEL("/resource/library/function/throw." + TEMPLATE_EXTENSION, f);
 

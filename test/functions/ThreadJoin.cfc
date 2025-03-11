@@ -1,0 +1,31 @@
+component extends="org.lucee.cfml.test.LuceeTestCase" {
+    
+    function beforeAll() {
+        variables.threadPrefix = "testThread_" & createUUID();
+    }
+    
+    function run( testResults , testBox ) {
+        describe("ThreadJoin Function", function() {
+            
+            itx("joins a single thread and verifies completion", function() {
+                // Create a thread
+                var threadName = variables.threadPrefix & "_single";
+                thread name=threadName action="run" {
+                    sleep(50); // Simulate work
+                    thread.output = "Thread completed successfully";
+                }
+                
+                // Join the thread
+                threadJoin(threadName);
+                var result = cfthread[threadName];
+
+                // Assert thread joined successfully
+                expect(!isNull(result)).toBeTrue();
+                expect(result).toBeStruct();
+                systemOutput(result,1,1);
+				expect(result.STATUS).toBe("COMPLETED");
+                expect(result.OUTPUT).toBe("Thread completed successfully");
+            });
+        });
+    }
+}
