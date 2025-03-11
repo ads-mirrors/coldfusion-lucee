@@ -406,7 +406,7 @@ public final class ScopeContext {
 	}
 
 	private boolean hasExistingJSessionScope(PageContext pc) {
-		HttpSession httpSession = pc.getSession();
+		HttpSession httpSession = ((PageContextImpl) pc).getHttpServletRequest().getSession(false);
 		if (httpSession == null) return false;
 
 		Session session = (Session) httpSession.getAttribute(pc.getApplicationContext().getName());
