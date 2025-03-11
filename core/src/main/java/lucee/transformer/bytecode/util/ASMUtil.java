@@ -1350,9 +1350,8 @@ public final class ASMUtil {
 	}
 
 	public static boolean inRoot(Statement stat) {
-		// if (dump) dumpParents(stat);
-
-		if (stat == null) return false;
+		// give it the benefit
+		if (stat == null) return true;
 
 		Statement p = stat.getParent();
 
