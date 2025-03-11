@@ -4810,7 +4810,7 @@ EntitySave(entity, [forceInsert])</description>
 		<name>render</name>
 		<class>lucee.runtime.functions.dynamicEvaluation.Render</class>
 		<introduced>5.0.0.0</introduced>
-		<description></description>
+		<description>Similar to the Evaluate() function, this function executes Lucee tag code that you provide as a string and returns any output as a string.</description>
 		<argument>
 			<name>code</name>
 			<alias>cfml</alias>
@@ -6205,7 +6205,7 @@ Example Values:
 	<function>
 		<name>GetFunctionCalledName</name>
 		<class>lucee.runtime.functions.system.GetFunctionCalledName</class>
-		<description></description>
+		<description>Returns the name of variable used to call the current function</description>
 		<return>
 			<type>string</type>
 		</return>
@@ -7476,7 +7476,7 @@ The following things are considered to be empty:
 			<alias>object</alias>
 			<type>any</type>
 			<required>Yes</required>
-			<description></description>
+			<description>The value to check. Can be either a string, array, struct or query object.</description>
     	</argument>
 		<return>
 			<type>boolean</type>
@@ -8508,7 +8508,7 @@ The following things are considered to be empty:
 		<class>lucee.runtime.functions.list.ListAvg</class>
 		<keywords>list,string</keywords>
 		<member-name>listAvg</member-name>
-		<description></description>
+		<description>Calculates average from all numeric values given in the list</description>
 		<argument>
 			<name>list</name>
 			<type>string</type>
@@ -10390,7 +10390,7 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<name>date</name>
 			<type>datetime</type>
 			<required>Yes</required>
-		<description></description>
+		<description>date object; for example, now()</description>
     </argument>
 		<argument>
 			<name>timezone</name>
@@ -11330,7 +11330,7 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<name>query</name>
 			<type>query</type>
 			<required>Yes</required>
-		<description></description>
+		<description>The query from which to return the current row index.</description>
     </argument>
 		<return>
 			<type>numeric</type>
@@ -11376,13 +11376,13 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<name>query</name>
 			<type>query</type>
 			<required>Yes</required>
-		<description></description>
+		<description>Name of an executed query.</description>
     </argument>
 		<argument>
 			<name>column</name>
 			<type>String</type>
 			<required>yes</required>
-		<description></description>
+		<description>Specify the column name to delete from query</description>
     </argument>	
 		<return>
 			<type>array</type>
@@ -11400,14 +11400,14 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<name>query</name>
 			<type>query</type>
 			<required>Yes</required>
-		<description></description>
+		<description>Name of an executed query.</description>
     </argument>
 		<argument>
 			<name>row</name>
 			<type>number</type>
 			<required>no</required>
 			<default>-9999</default>
-		<description></description>
+		<description>The query row number to be deleted.</description>
     </argument>	
 		<return>
 			<type>boolean</type>
@@ -11842,13 +11842,15 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<name>returnSubExpressions</name>
 			<type>boolean</type>
 			<required>No</required>
-		<description></description>
+			<description>Default: false, If set `true` means returns the result as a struct with keys `pos`, `match` and `len`.
+			Each are an array with elements for the position and length of the match (first element), and the position and length of any matched subexpressions in the subsequent elements.</description>
     	</argument>
     	<argument>
 			<name>scope</name>
 			<type>string</type>
 			<required>No</required>
-			<description></description>
+			<description>One: (Default)Returns the first value that matches the regex
+			All: Returns all values that match the regex</description>
     	</argument>
 		<argument>
 			<name>multiline</name>
@@ -11894,7 +11896,7 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<type>number</type>
 			<required>No</required>
 			<default>1</default>
-			<description></description>
+			<description>A positive integer. Position in the string at which to start search. The default value is 1.</description>
     	</argument>
 		<argument>
 			<name>returnSubExpressions</name>
@@ -11916,7 +11918,8 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<name>scope</name>
 			<type>string</type>
 			<required>No</required>
-			<description></description>
+			<description>One: (Default)Returns the first value that matches the regex
+			All: Returns all values that match the regex</description>
     	</argument>
 		<argument>
 			<name>multiline</name>
@@ -12055,7 +12058,7 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<name>count</name>
 			<type>number</type>
 			<required>Yes</required>
-			<description></description>
+			<description>The number of times to repeat the string.</description>
 		</argument>
 		<return>
 			<type>string</type>
@@ -12474,7 +12477,7 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<name>length</name>
 			<type>number</type>
 			<required>Yes</required>
-		<description></description>
+		<description>Length of field in which to justify string</description>
     </argument>
 		<return>
 			<type>string</type>
@@ -12512,7 +12515,14 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 		<name>RunAsync</name>
 		<class>lucee.runtime.functions.thread.RunAsync</class>
 		<keywords>async,thread,future</keywords>
-		<description></description>
+		<description>A function that returns a Future object, which is an eventual result of an asynchronous operation (like a promise in JavaScript)
+		The Future Object has the following functions:
+		cancel() returns Boolean
+		isCancelled() returns Boolean
+		isDone() returns Boolean
+		error() returns Future
+		get(closure, timezone) returns Future
+		then(closure, timezone) returns Future</description>
 		<argument>
 			<name>closure</name>
 			<alias>callback,udf,function</alias>
@@ -14652,7 +14662,7 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 		<class>lucee.runtime.functions.struct.StructKeyTranslate</class>
 		<member-name>keyTranslate</member-name>
 		<keywords>struct</keywords>
-		<description></description>
+		<description>Converts any struct keys with dot notation into nested structures</description>
 		<argument>
 			<name>struct</name>
 			<alias>structure,object</alias>
@@ -14883,13 +14893,13 @@ function(key1, key2)
 			<name>addNewLine</name>
 			<type>boolean</type>
 			<required>no</required>
-			<description></description>
+			<description>Whether or not to add a newline</description>
 		</argument>
 		<argument>
 			<name>doErrorStream</name>
 			<type>boolean</type>
 			<required>no</required>
-			<description></description>
+			<description>Which stream the output should go to: choose between 'Output stream' and 'Error stream.' If true, the output will go to the error stream.</description>
 		</argument>
 		<return>
 			<type>boolean</type>
@@ -15216,7 +15226,7 @@ function(key1, key2)
 			<name>string</name>
 			<type>string</type>
 			<required>Yes</required>
-		    <description></description>
+		    <description>String to encode</description>
         </argument>
 		<argument>
 			<name>charset</name>
@@ -17053,7 +17063,9 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<type>string</type>
 			<required>No</required>
 			<default>local</default>
-		<description></description>
+		<description>local: the currency format and currency symbol used in the locale.
+		international: the international standard currency format and currency symbol of the locale.
+		none: the currency format used in the locale without a currency symbol.</description>
     </argument>
 		<argument>
 			<name>locale</name>
@@ -17441,7 +17453,9 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<type>string</type>
 			<required>No</required>
 			<default>short</default>
-		<description></description>
+		<description>Mask that has to be used for formatting.
+		The function follows Java date time mask.
+		For details, see the Java documentation section Date and Time Patterns.</description>
     </argument>
 		<argument>
 			<name>locale</name>
@@ -17477,7 +17491,7 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<name>monthNumber</name>
 			<type>number</type>
 			<required>Yes</required>
-			<description></description>
+			<description>A number corresponding a given month; 1 (January)- 12 (December)</description>
     	</argument>
 		<argument>
 			<name>locale</name>
@@ -17547,7 +17561,7 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<name>mask</name>
 			<type>string</type>
 			<required>No</required>
-		<description></description>
+		<description>_ = optional digit . = decimal point 0 = mandatory digit</description>
     </argument>
 		<return>
 			<type>string</type>
@@ -18247,7 +18261,7 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<name>date</name>
 			<type>datetime</type>
 			<required>Yes</required>
-		<description></description>
+		<description>date object; for example, now()</description>
     </argument>
 		<argument>
 			<name>locale</name>
