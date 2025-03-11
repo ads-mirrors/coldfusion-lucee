@@ -5538,7 +5538,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public Map<Key, Map<Key, Object>> getTagDefaultAttributeValues() {
-		return tagDefaultAttributeValues == null ? null : Duplicator.duplicateMap(tagDefaultAttributeValues, new HashMap<Key, Map<Key, Object>>(), true);
+		return tagDefaultAttributeValues == null ? null : Duplicator.duplicateMap(tagDefaultAttributeValues, new ConcurrentHashMap<Key, Map<Key, Object>>(), true);
 	}
 
 	protected void setTagDefaultAttributeValues(Map<Key, Map<Key, Object>> values) {
