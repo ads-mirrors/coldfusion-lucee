@@ -1349,17 +1349,18 @@ public final class ASMUtil {
 		}
 	}
 
-	public static boolean inRoot(Statement stat) {
+	public static boolean inRoot(Statement stat, boolean debug) {
+		if (debug) dumpParents(stat);
 		// give it the benefit
 		if (stat == null) return true;
 
 		Statement p = stat.getParent();
 
 		if (p instanceof Page) return true;
-		if (p instanceof ScriptBody) return inRoot(p);
-		if (p instanceof BodyBase) return inRoot(p);
-		if (p instanceof TagScript) return inRoot(p);
-		if (p instanceof TagComponent) return inRoot(p);
+		if (p instanceof ScriptBody) return inRoot(p, false);
+		if (p instanceof BodyBase) return inRoot(p, false);
+		if (p instanceof TagScript) return inRoot(p, false);
+		if (p instanceof TagComponent) return inRoot(p, false);
 
 		return false;
 	}

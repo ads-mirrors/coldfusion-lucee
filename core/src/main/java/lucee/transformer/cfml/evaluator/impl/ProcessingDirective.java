@@ -27,7 +27,6 @@ import lucee.runtime.op.Caster;
 import lucee.transformer.bytecode.statement.tag.Tag;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.cfml.Data;
-import lucee.transformer.cfml.evaluator.EvaluatorException;
 import lucee.transformer.cfml.evaluator.EvaluatorSupport;
 import lucee.transformer.library.function.FunctionLib;
 import lucee.transformer.library.tag.TagLib;
@@ -112,13 +111,16 @@ public final class ProcessingDirective extends EvaluatorSupport {
 
 		return null;
 	}
-
-	@Override
-	public void evaluate(Tag tag, TagLibTag libTag) throws EvaluatorException {
-		if (!ASMUtil.inRoot(tag)) {
-			throw new EvaluatorException("The tag [processingdirective] must be placed at the top level of your template (not nested within any other tags or statement blocks). "
-					+ "Since it applies compiler settings for the entire file, placing it within conditional blocks or other tags would create ambiguity." + GENERAL_EXPLANATIONX);
-		}
-
-	}
+	/*
+	 * FUTURE add this restriction
+	 * 
+	 * @Override public void evaluate(Tag tag, TagLibTag libTag) throws EvaluatorException { if
+	 * (!ASMUtil.inRoot(tag, true)) { throw new
+	 * EvaluatorException("The tag [processingdirective] must be placed at the top level of your template (not nested within any other tags or statement blocks). "
+	 * +
+	 * "Since it applies compiler settings for the entire file, placing it within conditional blocks or other tags would create ambiguity."
+	 * + GENERAL_EXPLANATIONX); }
+	 * 
+	 * }
+	 */
 }
