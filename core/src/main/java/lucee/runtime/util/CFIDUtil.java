@@ -16,6 +16,7 @@ import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.op.Caster;
+import lucee.runtime.op.Decision;
 
 public class CFIDUtil {
 	public static Boolean IDENTIFY_CLIENT_DEFAULT = Boolean.FALSE;
@@ -24,35 +25,28 @@ public class CFIDUtil {
 	private static Map<String, String> clients = new ReferenceMap<String, String>(HARD, SOFT, 100, 0.75f);
 
 	public static boolean isCFID(PageContext pc, Object obj) {
-		String str = Caster.toString(obj, null);
-		if (str == null) return false;
+		return Decision.isGUIdSimple(obj);
+	}
 
-		if (str.length() != 36) return false;
-		if (str.charAt(8) != '-' || str.charAt(13) != '-' || str.charAt(18) != '-' || str.charAt(23) != '-') return false;
-
-		// client type id start with "z"
-		String last = str.substring(24);
-		if (last.length() != 12) return false;
-		if (last.charAt(0) != 'x') return true;
-		String cp = clientPart(pc);
-		if (cp == null) return true;
-
-		return cp.equals(last);
+	public static boolean isCFToken(PageContext pc, Object obj) {
+		if (obj == null) return false;
+		String str = obj.toString().trim();
+		return str.equals("0") || str.length() == 12;
 	}
 
 	public static String createCFID(PageContext pc) {
-
-		if (identifyClient == null) identifyClient = Caster.toBoolean(SystemUtil.getSystemPropOrEnvVar("lucee.identify.client", null), IDENTIFY_CLIENT_DEFAULT);
-
-		if (identifyClient.equals(Boolean.FALSE)) return UUID.randomUUID().toString();
-		String cp = clientPart(pc);
-		if (cp == null) return UUID.randomUUID().toString();
-
-		String cfid = UUID.randomUUID().toString();
-		return cfid.substring(0, cfid.length() - 12) + cp;
+		return UUID.randomUUID().toString();
 	}
 
-	private static String clientPart(PageContext pc) {
+	public static String createCFToken(PageContext pc) {
+
+		if (identifyClient == null) identifyClient = Caster.toBoolean(SystemUtil.getSystemPropOrEnvVar("lucee.identify.client", null), IDENTIFY_CLIENT_DEFAULT);
+		if (identifyClient.equals(Boolean.FALSE)) return "0";
+
+		return createClientBasedCFToken(pc);
+	}
+
+	private static String createClientBasedCFToken(PageContext pc) {
 		if (pc == null) pc = ThreadLocalPageContext.get();
 		String str = null;
 		if (pc != null) {
@@ -63,21 +57,19 @@ public class CFIDUtil {
 				if (str == null) str = req.getHeader("accept");
 			}
 		}
-		// str = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko)
-		// Chrome/123.0.0.0 Safari/537.36";
 
-		if (StringUtil.isEmpty(str, true)) return null;
+		if (StringUtil.isEmpty(str, true)) return "0";
 		String val = clients.get(str);
 		if (val != null) return val;
 
 		val = HashUtil.create64BitHashAsString(str, Character.MAX_RADIX);
-		if (val.length() > 11) {
-			val = val.substring(0, 11);
+		if (val.length() > 12) {
+			val = val.substring(0, 12);
 		}
-		while (val.length() < 11) {
+		while (val.length() < 12) {
 			val = val + "0";
 		}
-		clients.put(str, val = "x" + val);
+		clients.put(str, val);
 		return val;
 	}
 
