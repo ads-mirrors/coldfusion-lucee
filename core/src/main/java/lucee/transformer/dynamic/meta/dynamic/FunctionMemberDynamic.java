@@ -368,17 +368,20 @@ abstract class FunctionMemberDynamic implements FunctionMember {
 	@Override
 	public Class[] getArgumentClasses() {
 		if (argClasses == null) {
+			// FYI we decided against a locking here, worst thing that can happen that n threads do the same
+			// work, but a lock ALWAYS add overhead
 			ClassLoader cl = Clazz.getClassLoader(this.declaringClass);
-			argClasses = new Class[argTypes.length];
+			Class[] tmp = new Class[argTypes.length];
 			for (int i = 0; i < argTypes.length; i++) {
 				try {
-
-					argClasses[i] = Clazz.toClass(cl, argTypes[i]);
+					tmp[i] = Clazz.toClass(cl, argTypes[i]);
 				}
 				catch (ClassException e) {
 					throw new PageRuntimeException(e);
 				}
 			}
+			// we use a tmp variable to make sure all values of the array are se, see LDEV-5397
+			argClasses = tmp;
 		}
 		return argClasses;
 	}
