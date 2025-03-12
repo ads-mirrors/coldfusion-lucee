@@ -1069,7 +1069,12 @@ public final class CastImpl implements Cast {
 
 	@Override
 	public String fromStructToJsonString(Struct sct) throws PageException {
-		JSONConverter json = new JSONConverter(true, CharsetUtil.UTF8, JSONDateFormat.PATTERN_CF, false);
+		return fromStructToJsonString(sct, false);
+	}
+
+	@Override
+	public String fromStructToJsonString(Struct sct, boolean compact) throws PageException {
+		JSONConverter json = new JSONConverter(true, CharsetUtil.UTF8, JSONDateFormat.PATTERN_CF, compact);
 		try {
 			return json.serialize(null, sct, SerializationSettings.SERIALIZE_AS_COLUMN, null);
 		}

@@ -787,6 +787,8 @@ public interface Cast {
 
 	public String fromStructToJsonString(Struct sct) throws PageException;
 
+	public String fromStructToJsonString(Struct sct, boolean compact) throws PageException;
+
 	public Struct fromJsonStringToStruct(String str) throws PageException;
 
 	/**
