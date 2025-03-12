@@ -3119,7 +3119,7 @@ public final class PageContextImpl extends PageContext {
 		if (oCfid == null || oCftoken == null) {
 			setCookie = true;
 			cfid = CFIDUtil.createCFID(this);
-			cftoken = ScopeContext.getNewCFToken();
+			cftoken = CFIDUtil.createCFToken(this);
 		}
 		else {
 			cfid = Caster.toString(oCfid, null);
@@ -3131,7 +3131,7 @@ public final class PageContextImpl extends PageContext {
 
 	public void resetIdAndToken() {
 		cfid = CFIDUtil.createCFID(this);
-		cftoken = ScopeContext.getNewCFToken();
+		cftoken = CFIDUtil.createCFToken(this);
 
 		if (getApplicationContext().isSetClientCookies()) setClientCookies();
 	}
