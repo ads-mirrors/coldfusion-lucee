@@ -3018,6 +3018,7 @@ public final class PageContextImpl extends PageContext {
 		Object oCftoken = READ_CFID_FROM_URL ? urlScope().get(KeyConstants._cftoken, null) : null;
 		// if CFID comes from URL, we only accept if already exists
 		if (oCfid != null) {
+			if (oCftoken == null) oCftoken = "0";
 			if (Decision.isGUIdSimple(oCfid)) {
 				if (!scopeContext.hasExistingCFID(this, Caster.toString(oCfid, null))) {
 					oCfid = null;
@@ -3070,6 +3071,7 @@ public final class PageContextImpl extends PageContext {
 
 		// check cookie value
 		if (oCfid != null) {
+			if (oCftoken == null) oCftoken = "0";
 			// cookie value is invalid, maybe from ACF
 
 			if (!Decision.isGUIdSimple(oCfid)) {
@@ -3104,6 +3106,7 @@ public final class PageContextImpl extends PageContext {
 				}
 			}
 			if (oCfid != null && ROTATE_UNKNOWN_COOKIE) {
+				if (oCftoken == null) oCftoken = "0";
 				if (!scopeContext.hasExistingCFID(this, Caster.toString(oCfid, null))) {
 					LogUtil.log(this, Log.LEVEL_DEBUG, PageContextImpl.class.getName(), "Unknown Session cookie rejected");
 					oCfid = null;
