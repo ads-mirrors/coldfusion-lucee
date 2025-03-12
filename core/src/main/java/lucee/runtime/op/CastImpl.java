@@ -35,6 +35,7 @@ import org.w3c.dom.NodeList;
 
 import lucee.commons.color.ColorCaster;
 import lucee.commons.io.CharsetUtil;
+import lucee.commons.io.DevNullOutputStream;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.ExceptionUtil;
@@ -42,13 +43,20 @@ import lucee.commons.security.Credentials;
 import lucee.commons.security.CredentialsImpl;
 import lucee.runtime.Component;
 import lucee.runtime.PageContext;
+import lucee.runtime.converter.ConverterException;
+import lucee.runtime.converter.JSONConverter;
+import lucee.runtime.converter.JSONDateFormat;
 import lucee.runtime.dump.DumpData;
 import lucee.runtime.dump.DumpProperties;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.CasterException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.exp.PageRuntimeException;
+import lucee.runtime.exp.PageServletException;
+import lucee.runtime.interpreter.JSONExpressionInterpreter;
+import lucee.runtime.listener.SerializationSettings;
 import lucee.runtime.op.date.DateCaster;
+import lucee.runtime.thread.SerializableCookie;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.Collection;
 import lucee.runtime.type.KeyImpl;
@@ -59,6 +67,7 @@ import lucee.runtime.type.dt.TimeSpan;
 import lucee.runtime.type.dt.TimeSpanImpl;
 import lucee.runtime.type.util.StructUtil;
 import lucee.runtime.util.Cast;
+import lucee.runtime.util.PageContextUtil;
 
 /**
  * Implementation of the cast interface
@@ -1057,4 +1066,32 @@ public final class CastImpl implements Cast {
 	public Credentials toCredentials(String username, String password) {
 		return CredentialsImpl.toCredentials(username, password);
 	}
+
+	@Override
+	public String fromStructToJsonString(Struct sct) throws PageException {
+		JSONConverter json = new JSONConverter(true, CharsetUtil.UTF8, JSONDateFormat.PATTERN_CF, false);
+		try {
+			return json.serialize(null, sct, SerializationSettings.SERIALIZE_AS_COLUMN, null);
+		}
+		catch (ConverterException e) {
+			throw Caster.toPageException(e);
+		}
+	}
+
+	@Override
+	public Struct fromJsonStringToStruct(String str) throws PageException {
+		PageContext pc = ThreadLocalPageContext.get(true);
+		if (pc == null) {
+			try {
+				pc = PageContextUtil.getPageContext(null, null, new File("."), "localhost", "/", "", SerializableCookie.COOKIES0, null, null, null,
+						DevNullOutputStream.DEV_NULL_OUTPUT_STREAM, false, 100000, false);
+			}
+			catch (PageServletException e) {
+				throw Caster.toPageException(e);
+			}
+		}
+
+		return Caster.toStruct(new JSONExpressionInterpreter(false, JSONExpressionInterpreter.FORMAT_JSON5).interpret(pc, str));
+	}
+
 }

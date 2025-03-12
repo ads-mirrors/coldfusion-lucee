@@ -785,6 +785,10 @@ public interface Cast {
 	 */
 	public String toString(boolean b);
 
+	public String fromStructToJsonString(Struct sct) throws PageException;
+
+	public Struct fromJsonStringToStruct(String str) throws PageException;
+
 	/**
 	 * cast an Object to an Array Object
 	 * 
