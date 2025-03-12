@@ -96,6 +96,8 @@ import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.config.Constants;
 import lucee.runtime.config.NullSupportHelper;
 import lucee.runtime.config.Password;
+import lucee.runtime.converter.JSONConverter;
+import lucee.runtime.converter.JSONDateFormat;
 import lucee.runtime.db.DataSource;
 import lucee.runtime.db.DataSourceManager;
 import lucee.runtime.db.DatasourceManagerImpl;
@@ -136,6 +138,7 @@ import lucee.runtime.listener.ClassicApplicationContext;
 import lucee.runtime.listener.JavaSettingsImpl;
 import lucee.runtime.listener.ModernAppListenerException;
 import lucee.runtime.listener.NoneAppListener;
+import lucee.runtime.listener.SerializationSettings;
 import lucee.runtime.listener.SessionCookieData;
 import lucee.runtime.listener.SessionCookieDataImpl;
 import lucee.runtime.monitor.RequestMonitor;
@@ -359,9 +362,25 @@ public final class PageContextImpl extends PageContext {
 
 	private StackTraceElement[] timeoutStacktrace;
 
-	private static final boolean READ_CFID_FROM_URL = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.read.cfid.from.url", "true"), true);
+	private static final boolean READ_CFID_FROM_URL;
+	private static final String READ_CFID_FROM_URL_LOG;
 	private static AtomicInteger _idCounter = new AtomicInteger(1);
 	private long lastTimeoutNoAction;
+
+	static {
+		{
+			Boolean tmp = Caster.toBoolean(SystemUtil.getSystemPropOrEnvVar("lucee.read.cfid.from.url", null), null);
+			if (tmp == null) tmp = Caster.toBoolean(SystemUtil.getSystemPropOrEnvVar("lucee.cfid.url.allow", null), null);
+			READ_CFID_FROM_URL = tmp == null ? true : tmp.booleanValue();
+		}
+
+		{
+			String tmp = Caster.toString(SystemUtil.getSystemPropOrEnvVar("lucee.cfid.url.log", null), null);
+			if (StringUtil.isEmpty(tmp, true)) tmp = null;
+			else tmp = tmp.trim();
+			READ_CFID_FROM_URL_LOG = tmp;
+		}
+	}
 
 	/**
 	 * default Constructor
@@ -2941,6 +2960,37 @@ public final class PageContextImpl extends PageContext {
 				if (!scopeContext.hasExistingCFID(this, Caster.toString(oCfid, null))) {
 					oCfid = null;
 					oCftoken = null;
+				}
+				// log in case CFID is used from URL
+				else if (READ_CFID_FROM_URL_LOG != null) {
+					Struct logData = new StructImpl();
+					logData.setEL(KeyConstants._message, "Lucee did detect and will use a CFID defined in the URL");
+					logData.setEL(KeyConstants._url, ReqRspUtil.getRequestURL(req, true));
+					logData.setEL("ip", req.getRemoteAddr());
+
+					String userAgent = req.getHeader("User-Agent");
+					if (userAgent != null) {
+						logData.setEL("userAgent", userAgent);
+					}
+
+					String referrer = req.getHeader("Referer");
+					if (referrer != null) {
+						logData.setEL("referrer", referrer);
+					}
+
+					logData.setEL(KeyConstants._stacktrace, ExceptionUtil.toString(Thread.currentThread().getStackTrace()));
+					// Convert to JSON string
+					String jsonMessage;
+					try {
+						JSONConverter json = new JSONConverter(true, CharsetUtil.UTF8, JSONDateFormat.PATTERN_CF, true);
+						jsonMessage = json.serialize(null, logData, SerializationSettings.SERIALIZE_AS_COLUMN, null);
+					}
+					catch (Exception e) {
+						jsonMessage = logData.toString();
+					}
+
+					LogUtil.log(Log.LEVEL_INFO, READ_CFID_FROM_URL_LOG, "create-token", jsonMessage);
+
 				}
 			}
 			else {
