@@ -22,11 +22,36 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 			});
 		});
 
+		describe("Testcase for LDEV-3841 - application.cfm / cgiReadOnly", function() {
+			it(title = "checking via application.cfc, cgiReadOnly=true", body = function( currentSpec ) {
+				expect(function(){
+					var result = _InternalRequest(
+						template : "#createURI("LDEV3841")#/cfm/index.cfm",
+						url: {
+							cgiReadonly: true
+						}
+					);
+				}).toThrow();
+			});
+
+			it(title = "checking via application.cfm, cgiReadOnly=false", body = function( currentSpec ) {
+				var result = _InternalRequest(
+					template : "#createURI("LDEV3841")#/cfm/index.cfm",
+					url: {
+						cgiReadonly: false
+					}
+				);
+				var _cgi = deserializeJson( result.filecontent );
+				expect( _cgi ).toHaveKey( "Readonly" );
+				expect( _cgi.readOnly ).toBe( "false" );
+			});
+		});
+
 		describe("Testcase for LDEV-3841 - application.cfc / cgiReadOnly", function() {
 			it(title = "checking via application.cfc, cgiReadOnly=true", body = function( currentSpec ) {
 				expect(function(){
 					var result = _InternalRequest(
-						template : "#createURI("LDEV3841")#/index.cfm",
+						template : "#createURI("LDEV3841")#/cfc/index.cfm",
 						url: {
 							cgiReadonly: true
 						}
@@ -36,20 +61,36 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 			it(title = "checking via application.cfc, cgiReadOnly=false", body = function( currentSpec ) {
 				var result = _InternalRequest(
-					template : "#createURI("LDEV3841")#/index.cfm",
+					template : "#createURI("LDEV3841")#/cfc/index.cfm",
 					url: {
 						cgiReadonly: false
 					}
 				);
-				var st = deserializeJson( result.filecontent );
-				expect( st ).toHaveKey( "Readonly" );
-				expect( st.readOnly ).toBe( "false" );
+				var _cgi = deserializeJson( result.filecontent );
+				expect( _cgi ).toHaveKey( "Readonly" );
+				expect( _cgi.readOnly ).toBe( "false" );
+			});
+
+			// only works when set in CFconfig.json
+			it(title = "checking via application.cfc, cgiReadOnly=false constructor", skip=true, body = function( currentSpec ) {
+				var result = _InternalRequest(
+					template : "#createURI("LDEV3841")#/cfc/index.cfm",
+					url: {
+						cgiReadonly: false,
+						constructor: true
+					}
+				);
+				var _cgi = deserializeJson( result.filecontent );
+				expect( _cgi ).toHaveKey( "constructor" );
+				expect( _cgi.constructor ).toBe( "true" );
+				expect( _cgi ).toHaveKey( "Readonly" );
+				expect( _cgi.readOnly ).toBe( "false" );
 			});
 
 			it(title = "checking via application.cfc, cgiReadOnly default / false", body = function( currentSpec ) {
 				expect(function(){
 					var result = _InternalRequest(
-						template : "#createURI("LDEV3841")#/index.cfm"
+						template : "#createURI("LDEV3841")#/cfc/index.cfm"
 					);
 				}).toThrow();
 			});
