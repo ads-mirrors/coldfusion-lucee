@@ -442,7 +442,10 @@ public class QueryColumnImpl implements QueryColumnPro, Objects {
 			}
 			// Copy data over to new array
 			Object[] newData = new Object[newSize];
-			System.arraycopy(data, 0, newData, 0, data.length);
+			// System.arraycopy(data, 0, newData, 0, data.length);
+			for (int i = 0; i < data.length; i++) {
+				newData[i] = data[i];
+			}
 			data = newData;
 		}
 	}
