@@ -2,21 +2,24 @@
 	// firstly, check are we even deploying to s3
 	DO_DEPLOY = server.system.environment.DO_DEPLOY ?: false;
 
+	_logger( "" );
+	_logger( " #### Publish Builds to S3" );
+
 	// secondly, do we have the s3 extension?
 	s3ExtVersion = extensionList().filter( function(row){ return row.name contains "s3"; }).version;
 	if ( s3Extversion eq "" ){
-		SystemOutput( "ERROR! The S3 Extension isn't installed!", true );
+		_logger( "ERROR! The S3 Extension isn't installed!" );
 		return;
 		//throw "The S3 Extension isn't installed!"; // fatal
 	} else {
-		SystemOutput( "Using S3 Extension: #s3ExtVersion#", true );
+		_logger( "Using S3 Extension: #s3ExtVersion#" );
 	}
 
 	// finally check for S3 credentials
 	if ( isNull( server.system.environment.S3_ACCESS_ID_DOWNLOAD )
 			|| isNull( server.system.environment.S3_SECRET_KEY_DOWNLOAD ) ) {
 		if ( DO_DEPLOY ){
-			SystemOutput( "no S3 credentials defined to upload to S3", 1, 1 );
+			_logger( "no S3 credentials defined to upload to S3");
 			return;
 		}
 		//throw "no S3 credentials defined to upload to S3";
@@ -34,56 +37,40 @@
 	src.version = mid( src.coreName,1,len( src.coreName )-4 );
 
 	if ( ! FileExists( src.jar ) || ! FileExists( src.core ) ){
-		SystemOutput( src.jar & " exists: " & FileExists( src.jar ), true );
-		SystemOutput( src.core & " exists: " & FileExists( src.core ), true );
+		_logger( src.jar & " exists: " & FileExists( src.jar ) );
+		_logger( src.core & " exists: " & FileExists( src.core ) );
 		throw "missing jar or .lco file";
 	}
+
+	trg = {};
 
 	// test s3 access
 	if ( DO_DEPLOY ) {
 		s3_bucket = "lucee-downloads";
 		trg.dir = "s3://#server.system.environment.S3_ACCESS_ID_DOWNLOAD#:#server.system.environment.S3_SECRET_KEY_DOWNLOAD#@/#s3_bucket#/";
-		SystemOutput( "Testing S3 Bucket Access", 1, 1 );
+		trg.jar = trg.dir & src.jarName;
+		trg.core = trg.dir & src.coreName;
+
+		_logger( "Testing S3 Bucket Access" );
+		// it usually will throw an error, rather than even reach this throw, if it fails
 		if (! DirectoryExists( trg.dir ) )
-			throw "DirectoryExists failed for s3 bucket [#s3_bucket#]"; // it usually will throw an error, rather than even reach this throw, if it fails
+			_logger( "DirectoryExists failed for s3 bucket [#s3_bucket#]", true );
+	} else {
+		_logger( "Not publishing to S3 as DO_DEPLOY is false, only building Light and Zero" );
 	}
 
 	// we only upload / publish artifacts once LDEV-3921
-	var buildExistsOnS3 = false;
-	if ( fileExists( trg.jar ) && fileExists( trg.core ) ){
-		SystemOutput( "Build artifacts have already been uploaded to s3 for this version", 1, 1 );
+	buildExistsOnS3 = false;
+	if ( DO_DEPLOY && fileExists( trg.jar ) && fileExists( trg.core ) ){
+		_logger( "Build artifacts have already been uploaded to s3 for this version" );
 		buildExistsOnS3 = true;
 	}
 
 	if ( DO_DEPLOY && !buildExistsOnS3 ){
-		trg.jar = trg.dir & src.jarName;
-		trg.core = trg.dir & src.coreName;
-
 		// copy jar
-		SystemOutput( "Publishing [#src.jar#] to S3",1,1 );
-		copyIt=true;
-		if (fileExists( trg.jar ) ) {
-			try {
-				fileDelete( trg.jar );
-			}
-			catch(e){
-				copyIt=false;
-			}
-		}
-		if(copyIt) fileCopy( src.jar, trg.jar );
-
+		publishToS3( src.jar, trg.jar, "Publish [#src.jar#] to S3: ");
 		// copy core
-		SystemOutput( "Publishing [#src.core#] to S3",1,1 );
-		copyIt=true;
-		if ( fileExists( trg.core ) ) {
-			try {
-				fileDelete( trg.core );
-			}
-			catch(e){
-				copyIt=false;
-			}
-		}
-		if(copyIt) fileCopy( src.core, trg.core );
+		publishToS3( src.core, trg.core, "Publish [#src.core#] to S3: ");
 	}
 
 	// Lucee light build (no extensions)
@@ -91,30 +78,18 @@
 	src.light = src.dir & src.lightName;
 	if ( DO_DEPLOY ){
 		if ( !buildExistsOnS3 ){
-			SystemOutput( "Build and upload [#src.light#] to S3 / maven",1,1 );
+			_logger( "Build and upload [#src.light#] to S3 / maven" );
 		} else {
-			SystemOutput( "Build and upload [#src.light#] to maven (already published to s3)",1,1 );
+			_logger( "Build and upload [#src.light#] to maven (already published to s3)" );
 		}
 	} else {
-		SystemOutput( "Build #src.light#",1,1 );
+		_logger( "Build #src.light#" );
 	}
 
 	createLight( src.jar,src.light,src.version, false );
-	if ( DO_DEPLOY && !buildExistsOnS3){
+	if ( DO_DEPLOY && !buildExistsOnS3 ){
 		trg.light = trg.dir & src.lightName;
-		copyIt=true;
-		if ( fileExists( trg.light ) ) {
-			try {
-				fileDelete( trg.light );
-			}
-			catch(e){
-				copyIt=false;
-			}
-		}
-		if(copyIt) {
-			fileCopy( src.light, trg.light );
-			SystemOutput( "Published Light build to s3",1,1 );
-		}
+		publishToS3( src.light, trg.light, "Publish Light build to s3: ");
 	}
 
 	// Lucee zero build, built from light but also no admin or docs
@@ -122,55 +97,42 @@
 	src.zero = src.dir & src.zeroName;
 	if ( DO_DEPLOY ){
 		if ( !buildExistsOnS3 ){
-			SystemOutput( "Build and upload [#src.zero#] to S3 / maven",1,1 );
+			_logger( "Build and upload [#src.zero#] to S3 / maven" );
 		} else{
-			SystemOutput( "Build and upload [#src.zero#] to maven (already published to s3)",1,1 );
+			_logger( "Build and upload [#src.zero#] to maven (already published to s3)" );
 		}
 	} else {
-		SystemOutput( "Build #src.zero#",1,1 );
+		_logger( "Build #src.zero#"  );
 	}
 
 	createLight( src.light, src.zero, src.version, false );
 
 	if ( DO_DEPLOY && !buildExistsOnS3 ) {
 		trg.zero = trg.dir & src.zeroName;
-
-		copyIt=true;
-		if ( fileExists( trg.zero ) ) {
-			try {
-				fileDelete( trg.zero );
-			}
-			catch(e){
-				copyIt=false;
-			}
-		}
-		if( copyIt ){
-			fileCopy( src.zero, trg.zero );
-			SystemOutput( "Published Zero build to s3",1,1 );
-		}
+		publishToS3( src.zero, trg.zero, "Publish Zero build to s3: " );
 	}
 
 	if ( !DO_DEPLOY ){
-		SystemOutput( "Skipping build triggers, DO_DEPLOY is false", 1 ,1 );
+		_logger( "Skipping build triggers, DO_DEPLOY is false" );
 		return;
 	}
+
 	// update provider
-
-	systemOutput("Trigger builds", true);
+	_logger("Trigger builds" );
 	http url="https://update.lucee.org/rest/update/provider/buildLatest" method="GET" timeout=90 result="buildLatest";
-	systemOutput(buildLatest.fileContent, true);
+	_logger(buildLatest.fileContent );
 
-	systemOutput("Update Extension Provider", true);
+	_logger("Update Extension Provider" );
 	http url="https://extension.lucee.org/rest/extension/provider/reset" method="GET" timeout=90 result="extensionReset";
-	systemOutput(extensionReset.fileContent, true);
+	_logger(extensionReset.fileContent );
 
-	systemOutput("Update Downloads Page", true);
+	_logger("Update Downloads Page" );
 	http url="https://download.lucee.org/?type=snapshots&reset=force" method="GET" timeout=90 result="downloadUpdate";
-	systemOutput("Server response status code: " & downloadUpdate.statusCode, true);
+	_logger("Server response status code: " & downloadUpdate.statusCode );
 
 	// forgebox
 
-	systemOutput("Trigger forgebox builds", true);
+	_logger("Trigger forgebox builds" );
 
 	gha_pat_token = server.system.environment.LUCEE_DOCKER_FILES_PAT_TOKEN; // github person action token
 	body = {
@@ -182,17 +144,17 @@
 			httpparam type="body" value='#body.toJson()#';
 
 		}
-		systemOutput("Forgebox build triggered, #result.statuscode# (always returns a 204 no content, see https://github.com/Ortus-Lucee/forgebox-cfengine-publisher/actions for output)", true);
+		_logger("Forgebox build triggered, #result.statuscode# (always returns a 204 no content, see https://github.com/Ortus-Lucee/forgebox-cfengine-publisher/actions for output)" );
 	} catch (e){
-		systemOutput("Forgebox build ERRORED?", true);
+		_logger("Forgebox build ERRORED?" );
 		echo(e);
 	}
 
 	// Lucee Docker builds
 	if ( buildExistsOnS3 ){
-		systemOutput("Skip Triggering Lucee Docker builds as build was already published to s3", true);
+		_logger("Skip Triggering Lucee Docker builds as build was already published to s3" );
 	} else {
-		systemOutput("Triggering Lucee Docker builds [#server.system.properties.luceeVersion#]", true);
+		_logger("Triggering Lucee Docker builds [#server.system.properties.luceeVersion#]" );
 
 		gha_pat_token = server.system.environment.LUCEE_DOCKER_FILES_PAT_TOKEN; // github person action token
 		body = {
@@ -206,9 +168,9 @@
 				httpparam type="header" name='authorization' value='Bearer #gha_pat_token#';
 				httpparam type="body" value='#body.toJson()#';
 			}
-			systemOutput("Lucee Docker builds triggered, #result.statuscode# (always returns a 204 no content, see https://github.com/lucee/lucee-dockerfiles/actions for output)", true);
+			_logger("Lucee Docker builds triggered, #result.statuscode# (always returns a 204 no content, see https://github.com/lucee/lucee-dockerfiles/actions for output)" );
 		} catch (e){
-			systemOutput("Lucee Docker build ERRORED?", true);
+			_logger("Lucee Docker build ERRORED?" );
 			echo(e);
 		}
 	}
@@ -266,6 +228,46 @@
 
 	}
 
+	function _logger( string message="", boolean throw=false ){
+		systemOutput( arguments.message, true );
+		if ( !len( server.system.environment.GITHUB_STEP_SUMMARY?:"" ))
+			return;
+		if ( !FileExists( server.system.environment.GITHUB_STEP_SUMMARY  ) ){
+			fileWrite( server.system.environment.GITHUB_STEP_SUMMARY, "#### #server.lucee.version# ");
+		}
+
+		if ( arguments.throw ) {
+			fileAppend( server.system.environment.GITHUB_STEP_SUMMARY, "> [!WARNING]" & chr(10) );
+			fileAppend( server.system.environment.GITHUB_STEP_SUMMARY, "> #arguments.message##chr(10)#");
+			throw arguments.message;
+		} else {
+			fileAppend( server.system.environment.GITHUB_STEP_SUMMARY, " #arguments.message##chr(10)#");
+		}
+	}
+
+	function publishToS3( src, trg, mess ){
+		var copyIt=true;
+		if ( fileExists( trg ) ) {
+			try {
+				fileDelete( trg );
+			}
+			catch(e){
+				_logger( message=mess & " file deleted failed" );
+				copyIt=false;
+			}
+		}
+		if( copyIt ){
+			try {
+				fileCopy( src, trg );
+			} catch (e){
+				// censored error message due to s3 creds!
+				 _logger( message=mess & " file copy failed", throw=true );
+			}
+			_logger( mess & " SUCCESS");
+		}
+	}
+
+
 	// not used
 	private function createWAR( string loader, string trg, version, boolean noArchives=false ) {
 		/*
@@ -275,7 +277,7 @@
 		trg.war = trg.dir & src.warName;
 
 
-		SystemOutput( "upload #src.warName# to S3",1,1 );
+		_logger( "upload #src.warName# to S3" );
 		zip action = "zip" file = src.war overwrite = true {
 
 			// loader
