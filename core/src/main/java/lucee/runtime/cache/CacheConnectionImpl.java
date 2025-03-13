@@ -24,6 +24,7 @@ import java.util.Arrays;
 import org.osgi.framework.BundleException;
 
 import lucee.commons.digest.HashUtil;
+import lucee.commons.io.SystemUtil;
 import lucee.commons.io.cache.Cache;
 import lucee.commons.io.cache.exp.CacheException;
 import lucee.commons.lang.ClassUtil;
@@ -59,31 +60,31 @@ public class CacheConnectionImpl implements CacheConnectionPlus {
 	@Override
 	public Cache getInstance(Config config) throws IOException {
 		if (cache == null) {
-			try {
-				Class<Cache> clazz = classDefinition.getClazz();
-				if (!Reflector.isInstaneOf(clazz, Cache.class, false))
-					throw new CacheException("class [" + clazz.getName() + "] does not implement interface [" + Cache.class.getName() + "]");
-				Object obj = ClassUtil.loadInstance(clazz);
+			synchronized (SystemUtil.createToken("CacheConnectionImpl", classDefinition.toString())) {
+				if (cache == null) {
+					Cache tmp;
+					try {
+						Class<Cache> clazz = classDefinition.getClazz();
+						if (!Reflector.isInstaneOf(clazz, Cache.class, false))
+							throw new CacheException("class [" + clazz.getName() + "] does not implement interface [" + Cache.class.getName() + "]");
+						Object obj = ClassUtil.loadInstance(clazz);
 
-				if (obj instanceof Exception) {
-					throw ExceptionUtil.toIOException((Exception) obj);
-				}
-				if (!(obj instanceof Cache)) {
-					clazz = ((ClassDefinitionImpl) classDefinition).getClazz(true);
-					obj = ClassUtil.loadInstance(clazz);
-				}
-				cache = (Cache) obj;
+						if (obj instanceof Exception) {
+							throw ExceptionUtil.toIOException((Exception) obj);
+						}
+						if (!(obj instanceof Cache)) {
+							clazz = ((ClassDefinitionImpl) classDefinition).getClazz(true);
+							obj = ClassUtil.loadInstance(clazz);
+						}
+						tmp = (Cache) obj;
 
-			}
-			catch (BundleException be) {
-				throw new PageRuntimeException(be);
-			}
-			try {
-				cache.init(config, getName(), getCustom());
-			}
-			catch (IOException ioe) {
-				cache = null;
-				throw ioe;
+					}
+					catch (BundleException be) {
+						throw new PageRuntimeException(be);
+					}
+					tmp.init(config, getName(), getCustom());
+					cache = tmp;
+				}
 			}
 		}
 		return cache;
