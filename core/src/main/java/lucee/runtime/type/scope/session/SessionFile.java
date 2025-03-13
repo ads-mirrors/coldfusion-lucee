@@ -59,10 +59,11 @@ public class SessionFile extends StorageScopeFile implements Session {
 	 * @param log
 	 * @return
 	 */
-	public static Session getInstance(String name, PageContext pc, Log log) {
+	public static Session getInstance(String name, PageContext pc, boolean createIfNeeded, Log log) {
 
 		Resource res = _loadResource(pc.getConfig(), SCOPE_SESSION, name, pc.getCFID());
 		Struct data = _loadData(pc, res, log);
+		if (!createIfNeeded && data == null) return null;
 		return new SessionFile(pc, res, data);
 	}
 

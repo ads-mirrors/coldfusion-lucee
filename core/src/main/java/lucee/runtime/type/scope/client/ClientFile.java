@@ -56,10 +56,11 @@ public class ClientFile extends StorageScopeFile implements Client {
 	 * @param log
 	 * @return
 	 */
-	public static Client getInstance(String name, PageContext pc, Log log) {
+	public static Client getInstance(String name, PageContext pc, boolean createIfNeeded, Log log) {
 
 		Resource res = _loadResource(pc.getConfig(), SCOPE_CLIENT, name, pc.getCFID());
 		Struct data = _loadData(pc, res, log);
+		if (!createIfNeeded && data == null) return null;
 		return new ClientFile(pc, res, data);
 	}
 

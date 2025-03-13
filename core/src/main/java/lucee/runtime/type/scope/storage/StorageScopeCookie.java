@@ -148,7 +148,7 @@ public abstract class StorageScopeCookie extends StorageScopeImpl {
 		return "Cookie";
 	}
 
-	protected static Struct _loadData(PageContext pc, String cookieName, int type, String strType, Log log) {
+	protected static Struct _loadData(PageContext pc, String cookieName, int type, String strType, boolean createIfNeeded, Log log) {
 		String data = (String) pc.cookieScope().get(cookieName, null);
 		if (data != null) {
 			try {
@@ -184,7 +184,7 @@ public abstract class StorageScopeCookie extends StorageScopeImpl {
 			}
 		}
 		ScopeContext.debug(log, "create new " + strType + " scope for " + pc.getApplicationContext().getName() + "/" + pc.getCFID());
-
+		if (!createIfNeeded) return null;
 		return new StructImpl(Struct.TYPE_SYNC);
 	}
 

@@ -19,7 +19,6 @@
 package lucee.runtime.type.scope.session;
 
 import lucee.commons.io.log.Log;
-import lucee.commons.lang.types.RefBoolean;
 import lucee.runtime.Component;
 import lucee.runtime.PageContext;
 import lucee.runtime.type.Collection;
@@ -60,8 +59,7 @@ public class SessionMemory extends StorageScopeMemory implements Session, Memory
 	 * @param log
 	 * @return
 	 */
-	public static Session getInstance(PageContext pc, RefBoolean isNew, Log log) {
-		isNew.setValue(true);
+	public static Session getInstance(PageContext pc, Log log) {
 		return new SessionMemory(pc, log);
 	}
 

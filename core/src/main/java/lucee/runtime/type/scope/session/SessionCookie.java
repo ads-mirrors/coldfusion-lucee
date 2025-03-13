@@ -57,15 +57,15 @@ public final class SessionCookie extends StorageScopeCookie implements Session {
 	 * @param pc
 	 * @return
 	 */
-	public static Session getInstance(String name, PageContext pc, Log log) {
+	public static Session getInstance(String name, PageContext pc, boolean createIfNeeded, Log log) {
 		if (!StringUtil.isEmpty(name)) name = StringUtil.toUpperCase(StringUtil.toVariableName(name));
 		String cookieName = "CF_" + TYPE + "_" + name;
-		return new SessionCookie(pc, cookieName, _loadData(pc, cookieName, SCOPE_SESSION, "session", log));
+		Struct data = _loadData(pc, cookieName, SCOPE_SESSION, "session", createIfNeeded, log);
+		if (!createIfNeeded && data == null) return null;
+		return new SessionCookie(pc, cookieName, data);
 	}
 
-	public static boolean hasInstance(String name, PageContext pc) {
-		if (!StringUtil.isEmpty(name)) name = StringUtil.toUpperCase(StringUtil.toVariableName(name));
-		String cookieName = "CF_" + TYPE + "_" + name;
-		return has(pc, cookieName, SCOPE_SESSION, "session");
+	public static boolean hasInstance(String name, PageContext pc, Log log) {
+		return getInstance(name, pc, false, log) != null;
 	}
 }
