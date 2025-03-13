@@ -49,15 +49,21 @@
 	}
 
 	// we only upload / publish artifacts once LDEV-3921
-	if ( DO_DEPLOY ){
+	var buildExistsOnS3 = false;
+	if ( fileExists( trg.jar ) && fileExists( trg.core ) ){
+		SystemOutput( "Build artifacts have already been uploaded to s3 for this version", 1, 1 );
+		buildExistsOnS3 = true;
+	}
+
+	if ( DO_DEPLOY && !buildExistsOnS3 ){
 		trg.jar = trg.dir & src.jarName;
 		trg.core = trg.dir & src.coreName;
 
 		// copy jar
-		SystemOutput( "upload #src.jar# to S3",1,1 );
+		SystemOutput( "Publishing [#src.jar#] to S3",1,1 );
 		copyIt=true;
 		if (fileExists( trg.jar ) ) {
-			try { 
+			try {
 				fileDelete( trg.jar );
 			}
 			catch(e){
@@ -67,10 +73,10 @@
 		if(copyIt) fileCopy( src.jar, trg.jar );
 
 		// copy core
-		SystemOutput( "upload #src.core# to S3",1,1 );
+		SystemOutput( "Publishing [#src.core#] to S3",1,1 );
 		copyIt=true;
 		if ( fileExists( trg.core ) ) {
-			try { 
+			try {
 				fileDelete( trg.core );
 			}
 			catch(e){
@@ -80,83 +86,72 @@
 		if(copyIt) fileCopy( src.core, trg.core );
 	}
 
-	/*
-	// create war
-	src.warName = "lucee-" & src.version & ".war";
-	src.war = src.dir & src.warName;
-	trg.war = trg.dir & src.warName;
-
-
-	SystemOutput( "upload #src.warName# to S3",1,1 );
-	zip action = "zip" file = src.war overwrite = true {
-
-		// loader
-		zipparam source = src.jar entrypath = "WEB-INF/lib/lucee.jar";
-
-		// common files
-		// zipparam source = commonDir;
-
-		// website files
-		// zipparam source = webDir;
-
-		// war files
-		// zipparam source = warDir;
-	}
-	fileCopy( src.war,trg.war );
-	*/
-
 	// Lucee light build (no extensions)
 	src.lightName = "lucee-light-" & src.version & ".jar";
 	src.light = src.dir & src.lightName;
-	if ( DO_DEPLOY )
-		SystemOutput( "build and upload #src.light# to S3",1,1 );
-	else
-		SystemOutput( "build #src.light#",1,1 );
-
+	if ( DO_DEPLOY ){
+		if ( !buildExistsOnS3 ){
+			SystemOutput( "Build and upload [#src.light#] to S3 / maven",1,1 );
+		} else {
+			SystemOutput( "Build and upload [#src.light#] to maven (already published to s3)",1,1 );
+		}
+	} else {
+		SystemOutput( "Build #src.light#",1,1 );
+	}
 
 	createLight( src.jar,src.light,src.version, false );
-	if ( DO_DEPLOY ){
+	if ( DO_DEPLOY && !buildExistsOnS3){
 		trg.light = trg.dir & src.lightName;
 		copyIt=true;
 		if ( fileExists( trg.light ) ) {
-			try { 
+			try {
 				fileDelete( trg.light );
 			}
 			catch(e){
 				copyIt=false;
 			}
 		}
-		if(copyIt) fileCopy( src.light, trg.light );
+		if(copyIt) {
+			fileCopy( src.light, trg.light );
+			SystemOutput( "Published Light build to s3",1,1 );
+		}
 	}
 
 	// Lucee zero build, built from light but also no admin or docs
 	src.zeroName = "lucee-zero-" & src.version & ".jar";
 	src.zero = src.dir & src.zeroName;
-	if ( DO_DEPLOY )
-		SystemOutput( "build and upload #src.zero# to S3",1,1 );
-	else
-		SystemOutput( "build #src.zero#",1,1 );
+	if ( DO_DEPLOY ){
+		if ( !buildExistsOnS3 ){
+			SystemOutput( "Build and upload [#src.zero#] to S3 / maven",1,1 );
+		} else{
+			SystemOutput( "Build and upload [#src.zero#] to maven (already published to s3)",1,1 );
+		}
+	} else {
+		SystemOutput( "Build #src.zero#",1,1 );
+	}
 
-	createLight( src.light, src.zero,src.version, false );
+	createLight( src.light, src.zero, src.version, false );
 
-	if ( DO_DEPLOY ) {
+	if ( DO_DEPLOY && !buildExistsOnS3 ) {
 		trg.zero = trg.dir & src.zeroName;
-		
+
 		copyIt=true;
 		if ( fileExists( trg.zero ) ) {
-			try { 
+			try {
 				fileDelete( trg.zero );
 			}
 			catch(e){
 				copyIt=false;
 			}
 		}
-		if(copyIt) fileCopy( src.zero, trg.zero );
+		if( copyIt ){
+			fileCopy( src.zero, trg.zero );
+			SystemOutput( "Published Zero build to s3",1,1 );
+		}
 	}
 
-
 	if ( !DO_DEPLOY ){
-		SystemOutput( "skipping build triggers, DO_DEPLOY is false", 1 ,1 );
+		SystemOutput( "Skipping build triggers, DO_DEPLOY is false", 1 ,1 );
 		return;
 	}
 	// update provider
@@ -194,25 +189,28 @@
 	}
 
 	// Lucee Docker builds
+	if ( buildExistsOnS3 ){
+		systemOutput("Skip Triggering Lucee Docker builds as build was already published to s3", true);
+	} else {
+		systemOutput("Triggering Lucee Docker builds [#server.system.properties.luceeVersion#]", true);
 
-	systemOutput("Trigger Lucee Docker builds", true);
-
-	gha_pat_token = server.system.environment.LUCEE_DOCKER_FILES_PAT_TOKEN; // github person action token
-	body = {
-		"event_type": "build-docker-images",
-		"client_payload": {
-			"LUCEE_VERSION": server.system.properties.luceeVersion
+		gha_pat_token = server.system.environment.LUCEE_DOCKER_FILES_PAT_TOKEN; // github person action token
+		body = {
+			"event_type": "build-docker-images",
+			"client_payload": {
+				"LUCEE_VERSION": server.system.properties.luceeVersion
+			}
+		};
+		try {
+			http url="https://api.github.com/repos/lucee/lucee-dockerfiles/dispatches" method="POST" result="result" timeout="90"{
+				httpparam type="header" name='authorization' value='Bearer #gha_pat_token#';
+				httpparam type="body" value='#body.toJson()#';
+			}
+			systemOutput("Lucee Docker builds triggered, #result.statuscode# (always returns a 204 no content, see https://github.com/lucee/lucee-dockerfiles/actions for output)", true);
+		} catch (e){
+			systemOutput("Lucee Docker build ERRORED?", true);
+			echo(e);
 		}
-	};
-	try {
-		http url="https://api.github.com/repos/lucee/lucee-dockerfiles/dispatches" method="POST" result="result" timeout="90"{
-			httpparam type="header" name='authorization' value='Bearer #gha_pat_token#';
-			httpparam type="body" value='#body.toJson()#';
-		}
-		systemOutput("Lucee Docker builds triggered, #result.statuscode# (always returns a 204 no content, see https://github.com/lucee/lucee-dockerfiles/actions for output)", true);
-	} catch (e){
-		systemOutput("Lucee Docker build ERRORED?", true);
-		echo(e);
 	}
 
 	// express
@@ -266,5 +264,33 @@
 			fileDelete( trg );
 		zip action = "zip" source = tmpLoader file = trg;
 
+	}
+
+	// not used
+	private function createWAR( string loader, string trg, version, boolean noArchives=false ) {
+		/*
+		// create war
+		src.warName = "lucee-" & src.version & ".war";
+		src.war = src.dir & src.warName;
+		trg.war = trg.dir & src.warName;
+
+
+		SystemOutput( "upload #src.warName# to S3",1,1 );
+		zip action = "zip" file = src.war overwrite = true {
+
+			// loader
+			zipparam source = src.jar entrypath = "WEB-INF/lib/lucee.jar";
+
+			// common files
+			// zipparam source = commonDir;
+
+			// website files
+			// zipparam source = webDir;
+
+			// war files
+			// zipparam source = warDir;
+		}
+		fileCopy( src.war,trg.war );
+		*/
 	}
 </cfscript>
