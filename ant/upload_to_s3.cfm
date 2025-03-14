@@ -105,7 +105,7 @@
 		_logger( "Build #src.zero#"  );
 	}
 
-	createLight( src.light, src.zero, src.version, false );
+	createLight( src.light, src.zero, src.version, true );
 
 	if ( DO_DEPLOY && !buildExistsOnS3 ) {
 		trg.zero = trg.dir & src.zeroName;
