@@ -17,55 +17,105 @@
  */
 package lucee.runtime.script;
 
-import javax.naming.directory.InvalidAttributesException;
+import java.lang.reflect.Constructor;
+import java.util.List;
+
 import javax.script.ScriptEngine;
-import javax.script.ScriptException;
+import javax.script.ScriptEngineFactory;
 
-import jakarta.servlet.ServletException;
-import lucee.loader.engine.CFMLEngine;
+public class CFMLScriptEngineFactory implements ScriptEngineFactory {
 
-public class CFMLScriptEngineFactory extends BaseScriptEngineFactory {
+	private ScriptEngineFactory instance;
 
-	public CFMLScriptEngineFactory() throws ServletException {
-		super(false, CFMLEngine.DIALECT_CFML);
+	public CFMLScriptEngineFactory() {
+		try {
+			// Load the class via reflection
+			Class<?> factoryClass = Class.forName("lucee.runtime.script.CFMLScriptEngineFactoryOld");
+
+			// Get the no-arg constructor
+			Constructor<?> constructor = factoryClass.getDeclaredConstructor();
+
+			// Ensure it's accessible (in case it's not public)
+			// constructor.setAccessible(true);
+
+			// Create a new instance
+			instance = (ScriptEngineFactory) constructor.newInstance();
+
+			System.out.println("Successfully loaded CFMLScriptEngineFactoryOld via reflection");
+		}
+		catch (Throwable e) {
+			System.err.println("ERROR in CFMLScriptEngineFactory constructor: " + e.getClass().getName());
+			System.err.println("Message: " + e.getMessage());
+			e.printStackTrace();
+
+			// Log the complete stack trace of the cause if there is one
+			Throwable cause = e.getCause();
+			if (cause != null) {
+				System.err.println("Caused by:");
+				cause.printStackTrace();
+			}
+			throw new RuntimeException(e);
+		}
+
 	}
 
-	public static void main(String[] args) throws ServletException, ScriptException, InvalidAttributesException {
-		try {
-			// no args
-			if (args.length < 2) {
-				System.err.println("you need to provide argumens following this pattern {String <method-name>,String <methodArguments>[,String <methodArguments>]}");
-				System.exit(1);
-			}
+	@Override
+	public String getEngineName() {
+		return instance.getEngineName();
+	}
 
-			String methodName = args[0].trim().toLowerCase();
-			String arg1 = args[1].trim();
+	@Override
+	public String getEngineVersion() {
+		return instance.getEngineVersion();
+	}
 
-			ScriptEngine eng = new CFMLScriptEngineFactory().getScriptEngine();
+	@Override
+	public List<String> getExtensions() {
+		return instance.getExtensions();
+	}
 
-			// get
-			if ("get".equals(methodName)) {
-				Object res = eng.get(arg1);
-				if (res != null) System.err.print(res.toString());
-			}
-			if ("eval".equals(methodName)) {
-				Object res = eng.eval(arg1);
-				if (res != null) System.err.print(res.toString());
-			}
-			if ("put".equals(methodName)) {
-				if (args.length < 3) {
-					System.err.println("you need to provide argumens following this pattern {\"put\",String key>,String <value>}");
-					System.exit(1);
-				}
-				String val = args[2].trim();
+	@Override
+	public List<String> getMimeTypes() {
+		return instance.getMimeTypes();
+	}
 
-				eng.put(arg1, val);
-				System.err.println();
-			}
+	@Override
+	public List<String> getNames() {
+		return instance.getNames();
+	}
 
-		}
-		finally {
-			System.exit(0);
-		}
+	@Override
+	public String getLanguageName() {
+		return instance.getLanguageName();
+	}
+
+	@Override
+	public String getLanguageVersion() {
+		return instance.getLanguageVersion();
+	}
+
+	@Override
+	public Object getParameter(String key) {
+		return instance.getParameter(key);
+	}
+
+	@Override
+	public String getMethodCallSyntax(String obj, String m, String... args) {
+		return instance.getMethodCallSyntax(obj, m, args);
+	}
+
+	@Override
+	public String getOutputStatement(String toDisplay) {
+		return instance.getOutputStatement(toDisplay);
+	}
+
+	@Override
+	public String getProgram(String... statements) {
+		return instance.getProgram(statements);
+	}
+
+	@Override
+	public ScriptEngine getScriptEngine() {
+		return instance.getScriptEngine();
 	}
 }
