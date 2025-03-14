@@ -3048,6 +3048,8 @@ public class KeyConstants {
 	public static final Key _delay = KeyImpl._const("delay");
 	public static final Key _ai = KeyImpl._const("ai");
 	public static final Key _INTERRUPTED = KeyImpl._const("INTERRUPTED");
+	public static final Key _warning = KeyImpl._const("warning");
+	public static final Key _ip = KeyImpl._const("ip");
 
 	private static Map<String, Key> _____keys;
 
