@@ -2690,10 +2690,9 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 
 			Struct javasettings = ConfigUtil.getAsStruct(root, false, "javasettings");
 
-			if (javasettings != null && javasettings.size() > 0) {
-				JavaSettings js = JavaSettingsImpl.getInstance(config, javasettings, libs);
-				return js;
-			}
+			JavaSettings js = JavaSettingsImpl.getInstance(config, javasettings, libs);
+			return js;
+
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
