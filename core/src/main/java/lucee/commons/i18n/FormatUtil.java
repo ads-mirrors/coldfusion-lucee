@@ -135,6 +135,7 @@ public class FormatUtil {
 
 	private static final Map<String, SoftReference<FormatterWrapper>> dateTimeFormatter = new ConcurrentHashMap<>();
 	public static final boolean debug = false;
+	private static final char NON_BREAKING_SPACE = '\u202F';
 
 	public static List<FormatterWrapper> getAllFormats(Locale locale, TimeZone timeZone, boolean lenient) {
 		String key = "all:" + locale.toString() + "-" + timeZone.getID() + ":" + lenient;
@@ -146,7 +147,6 @@ public class FormatUtil {
 				if (sr == null || (formatter = sr.get()) == null) {
 
 					formatter = new CopyOnWriteArrayList<>();
-
 					for (FormatterWrapper dtf: getCFMLFormats(locale, timeZone, lenient)) {
 						formatter.add(dtf);
 					}
@@ -263,7 +263,6 @@ public class FormatUtil {
 	}
 
 	public static void fromFormatToFormatter(final List<FormatterWrapper> df, DateFormat[] formats, short type, Locale locale, TimeZone tz, boolean lenient) {
-
 		ZoneId zone = tz.toZoneId();
 		DateTimeFormatterBuilder builder;
 		String p;
@@ -415,7 +414,6 @@ public class FormatUtil {
 
 	@Deprecated
 	private static void add24AndRemoveComma(List<DateFormat> list, Locale locale, boolean isDate, boolean isTime) {
-
 		DateFormat[] df = list.toArray(new DateFormat[list.size()]);
 		for (int i = 0; i < df.length; i++) {
 			if (df[i] instanceof SimpleDateFormat) {
@@ -426,10 +424,16 @@ public class FormatUtil {
 
 	@Deprecated
 	private static void add24AndRemoveComma(List<DateFormat> list, DateFormat sdf, Locale locale, boolean isDate, boolean isTime) {
-		String p;
+		String p = ((SimpleDateFormat) sdf).toPattern() + "";
+		add24AndRemoveComma(list, p, locale, isDate, isTime);
+		String pp = p.replace(NON_BREAKING_SPACE, ' ');
+		if (!p.equals(pp)) add24AndRemoveComma(list, pp, locale, isDate, isTime);
 
+	}
+
+	@Deprecated
+	private static void add24AndRemoveComma(List<DateFormat> list, String p, Locale locale, boolean isDate, boolean isTime) {
 		List<DateFormat> results = new ArrayList<>();
-		p = ((SimpleDateFormat) sdf).toPattern() + "";
 		// print.e("----- "+p);
 		if (isDate && isTime) {
 			if ((check(results, p, locale, " 'um' ", " "))) {

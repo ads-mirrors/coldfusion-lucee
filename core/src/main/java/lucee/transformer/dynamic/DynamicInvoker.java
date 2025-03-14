@@ -45,6 +45,7 @@ import lucee.commons.lang.SystemOut;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.op.Caster;
 import lucee.runtime.reflection.Reflector;
+import lucee.runtime.type.ArrayImpl;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.Struct;
@@ -423,6 +424,16 @@ public class DynamicInvoker {
 		Resource classes = ResourcesImpl.getFileResourceProvider().getResource("/Users/mic/tmp8/classes/");
 		ResourceUtil.deleteContent(classes, null);
 		DynamicInvoker e = new DynamicInvoker(classes);
+		{
+			ArrayImpl arr = new ArrayImpl();
+			arr.setE(1, "Susi");
+
+			aprint.e(arr);
+			aprint.e(arr.clone());
+
+			aprint.e(e.invokeInstanceMethod(arr, KeyImpl.init("clone"), new Object[] {}, true, true));
+
+		}
 
 		DynamicInvoker.getInstance(classes);
 		if (true) {
@@ -531,6 +542,7 @@ public class DynamicInvoker {
 		}
 
 		{
+
 			List<Method> methods;
 
 			DynamicInvoker.getInstance(classes);
