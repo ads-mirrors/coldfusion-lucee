@@ -34,7 +34,7 @@ import lucee.loader.util.Util;
 
 public abstract class BaseScriptEngineFactory implements ScriptEngineFactory {
 
-	private final ScriptEngineFactory factory;
+	private ScriptEngineFactory factory;
 
 	public BaseScriptEngineFactory(final boolean tag, final int dialect) throws ServletException {
 		try {
@@ -82,6 +82,7 @@ public abstract class BaseScriptEngineFactory implements ScriptEngineFactory {
 		} // TEMP
 		catch (Throwable t) {
 			t.printStackTrace();
+			factory = null;
 		}
 	}
 
