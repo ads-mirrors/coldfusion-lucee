@@ -91,7 +91,6 @@ public class DeployHandler {
 					for (int i = 0; i < children.length; i++) {
 						child = children[i];
 						try {
-							lucee.aprint.o(child.getName());
 							// Lucee archives
 							ext = ResourceUtil.getExtension(child, null);
 							if ("lar".equalsIgnoreCase(ext)) {
