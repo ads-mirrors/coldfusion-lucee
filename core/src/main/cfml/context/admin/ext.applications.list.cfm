@@ -250,15 +250,17 @@ Latest version: #latest.v#</cfif>"><cfif hasUpdates>
 				//systemOutput(version & " " & e.message, true);
 			};
 		}
-
-		rtn="";
-		loop array=arr index="i" item="v" {
-			if(len(v)<5)
-			 rtn&="."&repeatString("0",5-len(v))&v;
-			else
-				rtn&="."&v;
+		rtn = "";
+		for (i = 1; i <= arrayLen(arr); i++) {
+			v = REReplace(arr[i], "[a-zA-Z-]", "", "all");
+			paddingLength = (i == 4) ? 4 : 5;
+			v = (len(v) < paddingLength) ? repeatString("0", paddingLength - len(v)) & v : v;
+			rtn &= (i == 1 ? "" : ".") & v;
 		}
-		return 	rtn;
+		if (arrayLen(arr) <= 3) {
+			rtn &= ".0000";
+		}
+		return rtn;
 	}
 
 

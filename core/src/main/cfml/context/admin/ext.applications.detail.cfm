@@ -284,13 +284,24 @@ if(isInstalled) installedVersion=toVersionSortable(installed.version);
 								<optgroup class="td_#UcFirst(Lcase(key))#" label="#stText.services.update.short[key]#">
 									<cfset options="">
 										<cfscript>
+										arraySort(
+											versionStr[key],
+											function (e1, e2) {
+												e1=toVersionSortable(e1);
+												e2=toVersionSortable(e2);
+												e1 = toNumeric(REReplace(e1.replace(".", "", "all"), "[a-zA-Z-]", "", "all"));
+												e2 = toNumeric(REReplace(e2.replace(".", "", "all"), "[a-zA-Z-]", "", "all"));
+												if(e1 > e2) return 1;
+												else return -1;
+											}
+										);
 										loop array=versionStr[key] item="v"{
 											vs=toVersionSortable(v);
 											btn="";
 											if(isInstalled) {
-												comp=compare(installedVersion,vs);
-												if(comp GT 0) btn=stText.ext.downgradeTo;
-												else if(comp LT 0) btn=stText.ext.updateTo;
+												installedVersion = toNumeric(REReplace(installedVersion.replace(".", "", "all"), "[a-zA-Z-]", "", "all"));
+    											vs = toNumeric(REReplace(vs.replace(".", "", "all"), "[a-zA-Z-]", "", "all"));
+    											btn = (installedVersion > vs) ? stText.ext.downgradeTo : stText.ext.updateTo;
 											}
 											options='<option value="#v#" class="td_#UcFirst(Lcase(key))#" >#btn# #v#</option>'&options;
 										}

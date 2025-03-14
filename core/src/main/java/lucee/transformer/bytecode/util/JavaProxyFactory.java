@@ -41,6 +41,7 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.IOUtil;
+import lucee.commons.io.SystemUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.ExceptionUtil;
@@ -263,217 +264,187 @@ public class JavaProxyFactory {
 		String className = createClassName("cfc", cfc, pcl.getDirectory(), extendz, interfaces);
 		String classPath = className.replace('.', '/'); // Ensure classPath is using slashes
 		Resource classFile = pcl.getDirectory().getRealResource(classPath.concat(".class"));
-
-		// check if already exists, if yes return
 		if (classFile.exists()) {
+			// we already have it in store
 			try {
 				Object obj = newInstance(pcl, className, pc.getConfig(), cfc);
 				if (obj != null) return obj;
 			}
 			catch (Throwable t) {
 				ExceptionUtil.rethrowIfNecessary(t);
+				classFile.delete();
 			}
 		}
-		ClassWriter cw = ASMUtil.getClassWriter();
+		// when we get here, it not exist (anymore)
+		synchronized (SystemUtil.createToken("JavaProxyFactory.createProxy", className)) {
+			// we need to check again if it exist in the lock
+			if (!classFile.exists()) {
+				ClassWriter cw = ASMUtil.getClassWriter();
+				cw.visit(ASMUtil.getJavaVersionForBytecodeGeneration(), Opcodes.ACC_PUBLIC, classPath, null, typeExtends.getInternalName(), strInterfaces);
 
-		cw.visit(ASMUtil.getJavaVersionForBytecodeGeneration(), Opcodes.ACC_PUBLIC, classPath, null, typeExtends.getInternalName(), strInterfaces);
+				// field Component
+				FieldVisitor _fv = cw.visitField(Opcodes.ACC_PRIVATE, "cfc", COMPONENT_NAME, null, null);
+				_fv.visitEnd();
+				_fv = cw.visitField(Opcodes.ACC_PRIVATE, "config", CONFIG_WEB_NAME, null, null);
+				_fv.visitEnd();
 
-		// field Component
-		FieldVisitor _fv = cw.visitField(Opcodes.ACC_PRIVATE, "cfc", COMPONENT_NAME, null, null);
-		_fv.visitEnd();
-		_fv = cw.visitField(Opcodes.ACC_PRIVATE, "config", CONFIG_WEB_NAME, null, null);
-		_fv.visitEnd();
+				// Descriptor for local variables
+				String descriptor = 'L' + classPath + ';';
 
-		// Descriptor for local variables
-		String descriptor = 'L' + classPath + ';';
+				// CFMLEngineFactory.getInstance().createPageContext(null, null, null, null, null, null, null, null,
+				// null, -1, true);
 
-		// CFMLEngineFactory.getInstance().createPageContext(null, null, null, null, null, null, null, null,
-		// null, -1, true);
+				// Constructor with 0 arguments
+				{
+					GeneratorAdapter adapter = new GeneratorAdapter(Opcodes.ACC_PUBLIC, CONSTRUCTOR_CONFIG_CFC_0, null, null, cw);
+					Label begin = new Label();
+					Label end = new Label();
 
-		// Constructor with 0 arguments
-		{
-			GeneratorAdapter adapter = new GeneratorAdapter(Opcodes.ACC_PUBLIC, CONSTRUCTOR_CONFIG_CFC_0, null, null, cw);
-			Label begin = new Label();
-			Label end = new Label();
+					adapter.visitLabel(begin);
 
-			adapter.visitLabel(begin);
+					adapter.loadThis();
+					adapter.invokeConstructor(Types.OBJECT, SUPER_CONSTRUCTOR);
 
-			adapter.loadThis();
-			adapter.invokeConstructor(Types.OBJECT, SUPER_CONSTRUCTOR);
+					// PageContext pc=CFMLEngineFactory.getInstance().createPageContext((File)null,
+					// "getThreadPageContext:boolean", (String)null, (String)null, (Cookie[])null, (Map)null, (Map)null,
+					// (Map)null, (OutputStream)null, -1L, true);
+					adapter.invokeStatic(CFML_ENGINE_FACTORY, GET_INSTANCE);
+					adapter.visitInsn(Opcodes.ACONST_NULL); // File
+					adapter.push("getThreadPageContext:boolean"); // String
+					adapter.visitInsn(Opcodes.ACONST_NULL); // String
+					adapter.visitInsn(Opcodes.ACONST_NULL); // String
+					adapter.visitInsn(Opcodes.ACONST_NULL); // Cookie[]
+					adapter.visitInsn(Opcodes.ACONST_NULL); // Map
+					adapter.visitInsn(Opcodes.ACONST_NULL); // Map
+					adapter.visitInsn(Opcodes.ACONST_NULL); // Map
+					adapter.visitInsn(Opcodes.ACONST_NULL); // OutputStream
+					adapter.push(-1L); // long
+					adapter.push(true); // boolean
 
-			// PageContext pc=CFMLEngineFactory.getInstance().createPageContext((File)null,
-			// "getThreadPageContext:boolean", (String)null, (String)null, (Cookie[])null, (Map)null, (Map)null,
-			// (Map)null, (OutputStream)null, -1L, true);
-			adapter.invokeStatic(CFML_ENGINE_FACTORY, GET_INSTANCE);
-			adapter.visitInsn(Opcodes.ACONST_NULL); // File
-			adapter.push("getThreadPageContext:boolean"); // String
-			adapter.visitInsn(Opcodes.ACONST_NULL); // String
-			adapter.visitInsn(Opcodes.ACONST_NULL); // String
-			adapter.visitInsn(Opcodes.ACONST_NULL); // Cookie[]
-			adapter.visitInsn(Opcodes.ACONST_NULL); // Map
-			adapter.visitInsn(Opcodes.ACONST_NULL); // Map
-			adapter.visitInsn(Opcodes.ACONST_NULL); // Map
-			adapter.visitInsn(Opcodes.ACONST_NULL); // OutputStream
-			adapter.push(-1L); // long
-			adapter.push(true); // boolean
+					adapter.invokeInterface(CFML_ENGINE, CREATE_PAGECONTEXT);
+					adapter.visitVarInsn(Opcodes.ASTORE, 1); // Store the PageContext in a local variable (index 1)
 
-			adapter.invokeInterface(CFML_ENGINE, CREATE_PAGECONTEXT);
-			adapter.visitVarInsn(Opcodes.ASTORE, 1); // Store the PageContext in a local variable (index 1)
+					// this.config = pc.getConfig();
+					adapter.loadThis(); // Load 'this' onto the stack
+					adapter.visitVarInsn(Opcodes.ALOAD, 1); // Load the PageContext (local variable 1)
+					adapter.invokeVirtual(Types.PAGE_CONTEXT, GET_CONFIG); // Call getConfig() on PageContext
+					adapter.visitFieldInsn(Opcodes.PUTFIELD, classPath, "config", CONFIG_WEB_NAME); // this.config = <result>
 
-			// this.config = pc.getConfig();
-			adapter.loadThis(); // Load 'this' onto the stack
-			adapter.visitVarInsn(Opcodes.ALOAD, 1); // Load the PageContext (local variable 1)
-			adapter.invokeVirtual(Types.PAGE_CONTEXT, GET_CONFIG); // Call getConfig() on PageContext
-			adapter.visitFieldInsn(Opcodes.PUTFIELD, classPath, "config", CONFIG_WEB_NAME); // this.config = <result>
+					String name = cfc.getAbsName();
+					String sub = ((ComponentImpl) cfc).getSubName();
+					if (!StringUtil.isEmpty(sub)) {
+						name += "$" + sub;
+					}
 
-			String name = cfc.getAbsName();
-			String sub = ((ComponentImpl) cfc).getSubName();
-			if (!StringUtil.isEmpty(sub)) {
-				name += "$" + sub;
+					// this.cfc = pc.loadComponent("quartz.CFMJob");
+					adapter.loadThis(); // Load 'this' onto the stack
+					adapter.visitVarInsn(Opcodes.ALOAD, 1); // Load the PageContext (local variable 1)
+					adapter.push(name);
+					adapter.invokeVirtual(Types.PAGE_CONTEXT, LOAD_COMPONENT);
+					adapter.visitFieldInsn(Opcodes.PUTFIELD, classPath, "cfc", COMPONENT_NAME);
+
+					// End label
+					adapter.visitLabel(end);
+
+					adapter.visitInsn(Opcodes.RETURN);
+					adapter.visitLabel(end);
+					adapter.visitLocalVariable("this", descriptor, null, begin, end, 0); // Correctly define 'this' as local variable 0
+					adapter.visitLocalVariable("pc", ASMUtil.getDescriptor(Types.PAGE_CONTEXT), null, begin, end, 1); // Define 'pc' as local variable 1
+					adapter.visitLocalVariable("config", CONFIG_WEB_NAME, null, begin, end, 1); // Correctly define 'config' as local variable 1
+					adapter.visitLocalVariable("cfc", COMPONENT_NAME, null, begin, end, 2); // Correctly define 'cfc' as local variable 2
+
+					adapter.endMethod();
+				}
+
+				// Constructor with 2 arguments
+				{
+					GeneratorAdapter adapter = new GeneratorAdapter(Opcodes.ACC_PUBLIC, CONSTRUCTOR_CONFIG_CFC_2, null, null, cw);
+					Label begin = new Label();
+					adapter.visitLabel(begin);
+					adapter.loadThis();
+					adapter.invokeConstructor(Types.OBJECT, SUPER_CONSTRUCTOR);
+
+					adapter.visitVarInsn(Opcodes.ALOAD, 0);
+					adapter.visitVarInsn(Opcodes.ALOAD, 1);
+					adapter.visitFieldInsn(Opcodes.PUTFIELD, classPath, "config", CONFIG_WEB_NAME);
+
+					adapter.visitVarInsn(Opcodes.ALOAD, 0);
+					adapter.visitVarInsn(Opcodes.ALOAD, 2);
+					adapter.visitFieldInsn(Opcodes.PUTFIELD, classPath, "cfc", COMPONENT_NAME);
+
+					adapter.visitInsn(Opcodes.RETURN);
+					Label end = new Label();
+					adapter.visitLabel(end);
+					adapter.visitLocalVariable("this", descriptor, null, begin, end, 0); // Correctly define 'this' as local variable 0
+					adapter.visitLocalVariable("config", CONFIG_WEB_NAME, null, begin, end, 1); // Correctly define 'config' as local variable 1
+					adapter.visitLocalVariable("cfc", COMPONENT_NAME, null, begin, end, 2); // Correctly define 'cfc' as local variable 2
+
+					adapter.endMethod();
+				}
+
+				// create toComponent
+				{
+
+					// Create a GeneratorAdapter for the toComponent method
+					GeneratorAdapter adapter = new GeneratorAdapter(Opcodes.ACC_PUBLIC, TO_COMPONENT, null, null, cw);
+
+					Label begin = new Label();
+					adapter.visitLabel(begin);
+
+					// Load 'this' onto the stack (for accessing the instance field)
+					adapter.loadThis();
+
+					// Get the value of 'cfc' field (ALoad 0, then getField)
+					adapter.visitFieldInsn(Opcodes.GETFIELD, classPath, "cfc", Type.getDescriptor(Component.class));
+
+					// Return the value (which is of type Component)
+					adapter.returnValue();
+
+					// Define the labels and local variables for debugging purposes
+					Label end = new Label();
+					adapter.visitLabel(end);
+					adapter.visitLocalVariable("this", descriptor, null, begin, end, 0); // 'this' as local variable 0
+
+					// Complete the method definition
+					adapter.endMethod();
+				}
+
+				// create methods
+				Set<Class> cDone = new HashSet<Class>();
+				Map<String, Class> mDone = new HashMap<String, Class>();
+				for (int i = 0; i < interfaces.length; i++) {
+					_createProxy(cw, cDone, mDone, cfc, interfaces[i], classPath);
+				}
+				if (!hasTemplates) {
+					createProxyFromComponentInterface(cw, cDone, mDone, cfc, classPath);
+				}
+				cw.visitEnd();
+
+				// create class file
+				byte[] barr = ASMUtil.verify(cw.toByteArray());
+
+				try {
+					ResourceUtil.touch(classFile);
+					IOUtil.copy(new ByteArrayInputStream(barr), classFile, true);
+
+					Class<?> clazz = pcl.loadClass(className, barr);
+					return newInstance(clazz, pc.getConfig(), cfc);
+				}
+				catch (Exception e) {
+					throw Caster.toPageException(e);
+				}
 			}
 
-			// this.cfc = pc.loadComponent("quartz.CFMJob");
-			adapter.loadThis(); // Load 'this' onto the stack
-			adapter.visitVarInsn(Opcodes.ALOAD, 1); // Load the PageContext (local variable 1)
-			adapter.push(name);
-			adapter.invokeVirtual(Types.PAGE_CONTEXT, LOAD_COMPONENT);
-			adapter.visitFieldInsn(Opcodes.PUTFIELD, classPath, "cfc", COMPONENT_NAME);
+			try {
+				return newInstance(pcl, className, pc.getConfig(), cfc);
+			}
+			catch (Exception e) {
+				throw Caster.toPageException(e);
+			}
 
-			// End label
-			adapter.visitLabel(end);
-
-			adapter.visitInsn(Opcodes.RETURN);
-			adapter.visitLabel(end);
-			adapter.visitLocalVariable("this", descriptor, null, begin, end, 0); // Correctly define 'this' as local variable 0
-			adapter.visitLocalVariable("pc", ASMUtil.getDescriptor(Types.PAGE_CONTEXT), null, begin, end, 1); // Define 'pc' as local variable 1
-			adapter.visitLocalVariable("config", CONFIG_WEB_NAME, null, begin, end, 1); // Correctly define 'config' as local variable 1
-			adapter.visitLocalVariable("cfc", COMPONENT_NAME, null, begin, end, 2); // Correctly define 'cfc' as local variable 2
-
-			adapter.endMethod();
 		}
 
-		// Constructor with 2 arguments
-		{
-			GeneratorAdapter adapter = new GeneratorAdapter(Opcodes.ACC_PUBLIC, CONSTRUCTOR_CONFIG_CFC_2, null, null, cw);
-			Label begin = new Label();
-			adapter.visitLabel(begin);
-			adapter.loadThis();
-			adapter.invokeConstructor(Types.OBJECT, SUPER_CONSTRUCTOR);
-
-			adapter.visitVarInsn(Opcodes.ALOAD, 0);
-			adapter.visitVarInsn(Opcodes.ALOAD, 1);
-			adapter.visitFieldInsn(Opcodes.PUTFIELD, classPath, "config", CONFIG_WEB_NAME);
-
-			adapter.visitVarInsn(Opcodes.ALOAD, 0);
-			adapter.visitVarInsn(Opcodes.ALOAD, 2);
-			adapter.visitFieldInsn(Opcodes.PUTFIELD, classPath, "cfc", COMPONENT_NAME);
-
-			adapter.visitInsn(Opcodes.RETURN);
-			Label end = new Label();
-			adapter.visitLabel(end);
-			adapter.visitLocalVariable("this", descriptor, null, begin, end, 0); // Correctly define 'this' as local variable 0
-			adapter.visitLocalVariable("config", CONFIG_WEB_NAME, null, begin, end, 1); // Correctly define 'config' as local variable 1
-			adapter.visitLocalVariable("cfc", COMPONENT_NAME, null, begin, end, 2); // Correctly define 'cfc' as local variable 2
-
-			adapter.endMethod();
-		}
-
-		// create toComponent
-		{
-
-			// Create a GeneratorAdapter for the toComponent method
-			GeneratorAdapter adapter = new GeneratorAdapter(Opcodes.ACC_PUBLIC, TO_COMPONENT, null, null, cw);
-
-			Label begin = new Label();
-			adapter.visitLabel(begin);
-
-			// Load 'this' onto the stack (for accessing the instance field)
-			adapter.loadThis();
-
-			// Get the value of 'cfc' field (ALoad 0, then getField)
-			adapter.visitFieldInsn(Opcodes.GETFIELD, classPath, "cfc", Type.getDescriptor(Component.class));
-
-			// Return the value (which is of type Component)
-			adapter.returnValue();
-
-			// Define the labels and local variables for debugging purposes
-			Label end = new Label();
-			adapter.visitLabel(end);
-			adapter.visitLocalVariable("this", descriptor, null, begin, end, 0); // 'this' as local variable 0
-
-			// Complete the method definition
-			adapter.endMethod();
-		}
-
-		// create methods
-		Set<Class> cDone = new HashSet<Class>();
-		Map<String, Class> mDone = new HashMap<String, Class>();
-		for (int i = 0; i < interfaces.length; i++) {
-			_createProxy(cw, cDone, mDone, cfc, interfaces[i], classPath);
-		}
-		if (!hasTemplates) {
-			createProxyFromComponentInterface(cw, cDone, mDone, cfc, classPath);
-		}
-		cw.visitEnd();
-
-		// create class file
-		byte[] barr = ASMUtil.verify(cw.toByteArray());
-
-		try {
-			ResourceUtil.touch(classFile);
-			IOUtil.copy(new ByteArrayInputStream(barr), classFile, true);
-
-			Class<?> clazz = pcl.loadClass(className, barr);
-			return newInstance(clazz, pc.getConfig(), cfc);
-		}
-		catch (Throwable t) {
-			ExceptionUtil.rethrowIfNecessary(t);
-			throw Caster.toPageException(t);
-		}
 	}
-
-	// Constructor with 0 arguments
-	/*
-	 * if (!((ComponentImpl) cfc).isInline()) { // regular // pc.us(KeyConstants._A,
-	 * _CreateComponent.call(var1, new Object[] { "Tester" // })); // sub // pc.us(KeyConstants._B,
-	 * _CreateComponent.call(var1, new Object[] { // "Tester$Sub" })); // inline //
-	 * pc.us(KeyConstants._C, ComponentLoader.loadInline((CIPage) (new // cf(this.getPageSource())),
-	 * var1));
-	 * 
-	 * // /Users/mic/Test/test-cfconfig/lucee-server/context/cfclasses/RPC/1npx73yjz161r/
-	 * Vd4b77fbf5bf083bf7dbae6851cf82a8811468.class GeneratorAdapter adapter = new
-	 * GeneratorAdapter(Opcodes.ACC_PUBLIC, CONSTRUCTOR_CONFIG_CFC_0, null, null, cw); Label begin = new
-	 * Label(); adapter.visitLabel(begin); adapter.loadThis(); adapter.invokeConstructor(Types.OBJECT,
-	 * SUPER_CONSTRUCTOR);
-	 * 
-	 * // this.config = (ConfigWeb) ThreadLocalPageContext.getConfig(); adapter.loadThis();
-	 * adapter.invokeStatic(Types.THREAD_LOCAL_PAGE_CONTEXT, GET_CONFIG);
-	 * adapter.checkCast(Types.CONFIG_WEB); adapter.visitFieldInsn(Opcodes.PUTFIELD, className,
-	 * "config", CONFIG_WEB_NAME);
-	 * 
-	 * // regular/sub if (!((ComponentImpl) cfc).isInline()) { // this.cfc =
-	 * ThreadLocalPageContext.get().loadComponent("Susi"); adapter.loadThis();
-	 * adapter.invokeStatic(Types.THREAD_LOCAL_PAGE_CONTEXT, GET); print.e("----------------------");
-	 * print.e("getName: " + cfc.getName()); print.e("getAbsName: " + cfc.getAbsName());
-	 * print.e("getBaseAbsName: " + cfc.getBaseAbsName()); print.e("getCallName: " + cfc.getCallName());
-	 * print.e("getDisplayName: " + cfc.getDisplayName()); print.e("getClassName: " +
-	 * cfc.getPageSource().getClassName()); print.e("getJavaName: " +
-	 * cfc.getPageSource().getJavaName()); print.e("getComponentName: " +
-	 * cfc.getPageSource().getComponentName()); print.e("getFileName: " +
-	 * cfc.getPageSource().getFileName());
-	 * 
-	 * adapter.push("Query"); adapter.invokeVirtual(Types.PAGE_CONTEXT, LOAD_COMPONENT);
-	 * adapter.checkCast(Types.COMPONENT); adapter.visitFieldInsn(Opcodes.PUTFIELD, className, "cfc",
-	 * COMPONENT_NAME); } // inline else {
-	 * 
-	 * }
-	 * 
-	 * adapter.visitInsn(Opcodes.RETURN); Label end = new Label(); adapter.visitLabel(end);
-	 * adapter.visitLocalVariable("config", CONFIG_WEB_NAME, null, begin, end, 1);
-	 * adapter.visitLocalVariable("cfc", COMPONENT_NAME, null, begin, end, 2);
-	 * 
-	 * // adapter.returnValue(); adapter.endMethod(); }
-	 */
 
 	private static PhysicalClassLoader getRPCClassLoaderFromClasses(PageContext pc, Class extendz, Class... interfaces) throws IOException {
 		// extends and implement need to come from the same parent classloader
