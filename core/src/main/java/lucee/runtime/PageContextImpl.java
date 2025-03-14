@@ -125,6 +125,7 @@ import lucee.runtime.exp.MissingIncludeException;
 import lucee.runtime.exp.NoLongerSupported;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.exp.PageExceptionBox;
+import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.exp.PageServletException;
 import lucee.runtime.exp.RequestTimeoutException;
 import lucee.runtime.ext.tag.TagImpl;
@@ -1769,7 +1770,13 @@ public final class PageContextImpl extends PageContext {
 		if (client == null) {
 			if (!getApplicationContext().hasName()) return null;
 			if (!getApplicationContext().isSetClientManagement()) return null;
-			client = scopeContext.getClientScopeEL(this, true);
+
+			try {
+				return client = scopeContext.getClientScope(this, true);
+			}
+			catch (PageException pe) {
+				throw new PageRuntimeException(pe);
+			}
 		}
 		return client;
 	}
@@ -2953,17 +2960,24 @@ public final class PageContextImpl extends PageContext {
 
 	@Override
 	public String getCFID() {
-		if (cfid == null) initIdAndToken();
+		if (cfid == null) initIdAndToken(true);
 		return cfid;
 	}
 
+	/**
+	 * this method returns true if the client did provide a CFID, if no it returns false
+	 * 
+	 * @return
+	 */
 	public boolean hasCFID() {
-		return (cfid != null);
+		if (cfid != null) return true;
+		initIdAndToken(false);
+		return cfid != null;
 	}
 
 	@Override
 	public String getCFToken() {
-		if (cftoken == null) initIdAndToken();
+		if (cftoken == null) initIdAndToken(true);
 		return cftoken;
 	}
 
@@ -2987,7 +3001,7 @@ public final class PageContextImpl extends PageContext {
 	/**
 	 * initialize the cfid and the cftoken
 	 */
-	private void initIdAndToken() {
+	private void initIdAndToken(boolean createIfNeeded) {
 		boolean setCookie = true;
 		// From URL
 		Object oCfid = READ_CFID_FROM_URL ? urlScope().get(KeyConstants._cfid, null) : null;
@@ -3080,9 +3094,11 @@ public final class PageContextImpl extends PageContext {
 		}
 		// New One
 		if (oCfid == null || oCftoken == null) {
-			setCookie = true;
-			cfid = CFIDUtil.createCFID(this);
-			cftoken = CFIDUtil.createCFToken(this);
+			if (createIfNeeded) {
+				setCookie = true;
+				cfid = CFIDUtil.createCFID(this);
+				cftoken = CFIDUtil.createCFToken(this);
+			}
 		}
 		else {
 			cfid = Caster.toString(oCfid, null);

@@ -44,7 +44,6 @@ import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.ExceptionHandler;
 import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.PageException;
-import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.interpreter.VariableInterpreter;
 import lucee.runtime.listener.ApplicationContext;
 import lucee.runtime.listener.ApplicationListener;
@@ -178,17 +177,33 @@ public final class ScopeContext {
 	}
 
 	public Client getClientScope(PageContext pc, boolean createIfNeeded) throws PageException {
+		return (Client) getCFScope(pc, createIfNeeded, Scope.SCOPE_CLIENT);
+	}
+
+	private StorageScope getCFScope(PageContext pc, boolean createIfNeeded, int scopeType) throws PageException {
+		// if there is no CFID, there can be no existing session or client scope
+		if (!createIfNeeded && !((PageContextImpl) pc).hasCFID()) return null;
+
+		if (scopeType != Scope.SCOPE_SESSION && scopeType != Scope.SCOPE_CLIENT)
+			throw new ApplicationException("invalid scope defintion [" + scopeType + "], valid scopes are [Scope.SCOPE_CLIENT,Scope.SCOPE_SESSION]");
+		boolean isSession = scopeType == Scope.SCOPE_SESSION;
+
 		ApplicationContext appContext = pc.getApplicationContext();
 		// get Context
-		Map<String, Scope> context = getSubMap(cfClientContexts, appContext.getName());
+		Map<String, Scope> context = getSubMap(isSession ? cfSessionContexts : cfClientContexts, appContext.getName());
 
-		// get Client
+		// set default
 		boolean isMemory = false;
-		String storage = appContext.getClientstorage();
+		String storage = isSession ? appContext.getSessionstorage() : appContext.getClientstorage();
 		if (StringUtil.isEmpty(storage, true)) {
-			storage = ConfigPro.DEFAULT_STORAGE_CLIENT;
+			storage = isSession ? ConfigPro.DEFAULT_STORAGE_SESSION : ConfigPro.DEFAULT_STORAGE_CLIENT;
 		}
-		else if ("ram".equalsIgnoreCase(storage)) {
+		else {
+			storage = storage.trim();
+		}
+
+		// clean up storage type
+		if ("ram".equalsIgnoreCase(storage)) {
 			storage = "memory";
 			isMemory = true;
 		}
@@ -200,42 +215,59 @@ public final class ScopeContext {
 			if ("memory".equals(storage)) isMemory = true;
 		}
 
-		Client existing = (Client) context.get(pc.getCFID());
-		Client client = appContext.getClientCluster() ? null : existing;
-		// final boolean doMemory=isMemory || !appContext.getClientCluster();
-		// client=doMemory?(Client) context.get(pc.getCFID()):null;
-		if (client == null || client.isExpired() || !client.getStorage().equalsIgnoreCase(storage)) {
-			synchronized (SystemUtil.createToken("getClientScope", pc.getCFID())) {
-				if (client == null || client.isExpired() || !client.getStorage().equalsIgnoreCase(storage)) {
-					if ("file".equals(storage)) {
-						client = ClientFile.getInstance(appContext.getName(), pc, createIfNeeded, getLog());
+		StorageScope existing = (StorageScope) context.get(pc.getCFID());
+		if (existing != null && existing.isExpired()) {
+			existing = null;
+		}
+		boolean cluster = isSession ? appContext.getSessionCluster() : appContext.getClientCluster();
+		StorageScope scope = cluster ? null : existing;
+
+		if (scope == null || !scope.getStorage().equalsIgnoreCase(storage)) {
+			synchronized (SystemUtil.createToken("getCFScope", pc.getCFID())) {
+				if (scope == null || !scope.getStorage().equalsIgnoreCase(storage)) {
+					// memory
+					if (isMemory) {
+						if (existing != null) scope = existing;
+						else if (createIfNeeded) {
+							if (isSession) scope = (StorageScope) SessionMemory.getInstance(pc, getLog());
+							else scope = ClientMemory.getInstance(pc, getLog());
+						}
+						else {
+							scope = null;
+						}
 					}
+
+					// file
+					else if ("file".equals(storage)) {
+						if (isSession) scope = (StorageScope) SessionFile.getInstance(appContext.getName(), pc, createIfNeeded, getLog());
+						else scope = ClientFile.getInstance(appContext.getName(), pc, createIfNeeded, getLog());
+					}
+
+					// cookie
 					else if ("cookie".equals(storage)) {
-						client = ClientCookie.getInstance(appContext.getName(), pc, createIfNeeded, getLog());
+						if (isSession) scope = (StorageScope) SessionCookie.getInstance(appContext.getName(), pc, createIfNeeded, getLog());
+						else scope = ClientCookie.getInstance(appContext.getName(), pc, createIfNeeded, getLog());
 					}
-					else if ("memory".equals(storage)) {
-						if (existing != null) client = existing;
-						client = createIfNeeded ? ClientMemory.getInstance(pc, getLog()) : null;
-					}
+
+					// cache/datasource
 					else {
 						DataSource ds = pc.getDataSource(storage, null);
-						if (ds != null) {
-							client = (Client) IKStorageScopeSupport.getInstance(Scope.SCOPE_CLIENT, new IKHandlerDatasource(), appContext.getName(), storage, pc, existing,
+						if (ds != null && ds.isStorage()) {
+							scope = (StorageScope) IKStorageScopeSupport.getInstance(scopeType, new IKHandlerDatasource(), appContext.getName(), storage, pc, existing,
 									createIfNeeded, getLog());
 						}
 						else {
-							client = (Client) IKStorageScopeSupport.getInstance(Scope.SCOPE_CLIENT, new IKHandlerCache(), appContext.getName(), storage, pc, existing,
-									createIfNeeded, getLog());
-
+							scope = (StorageScope) IKStorageScopeSupport.getInstance(scopeType, new IKHandlerCache(), appContext.getName(), storage, pc, existing, createIfNeeded,
+									getLog());
 						}
 
-						if (createIfNeeded && client == null) {
+						if (createIfNeeded && scope == null) {
 							// datasource not enabled for storage
 							if (ds != null) {
-								if (!ds.isStorage()) throw new ApplicationException(
-										"datasource [" + storage + "] is not enabled to be used as client storage, you have to enable it in the Lucee administrator.");
+								if (!ds.isStorage()) throw new ApplicationException("datasource [" + storage + "] is not enabled to be used as client/session storage, "
+										+ "you have to enable it in the Lucee administrator or define key \"storage=true\" for datasources defined in the application event handler.");
 								throw new ApplicationException("datasource [" + storage
-										+ "] could not be reached for client storage. Please make sure the datasource settings are correct, and the datasource is available.");
+										+ "] could not be reached for client/session storage. Please make sure the datasource settings are correct, and the datasource is available.");
 							}
 							CacheConnection cc = CacheUtil.getCacheConnection(pc, storage, null);
 							if (cc != null) throw new ApplicationException(
@@ -243,26 +275,21 @@ public final class ScopeContext {
 
 							throw new ApplicationException("there is no cache or datasource with name [" + storage + "] defined.");
 						}
+
 					}
-					if (!createIfNeeded && client == null) return null;
-					client.setStorage(storage);
-					context.put(pc.getCFID(), client);
+					if (!createIfNeeded && scope == null) return null;
+					scope.setStorage(storage);
+					context.put(pc.getCFID(), scope);
+
 				}
 			}
 		}
-		else getLog().log(Log.LEVEL_INFO, "scope-context", "use existing client scope for " + appContext.getName() + "/" + pc.getCFID() + " from storage " + storage);
-
-		client.touchBeforeRequest(pc);
-		return client;
-	}
-
-	public Client getClientScopeEL(PageContext pc, boolean createIfNeeded) {
-		try {
-			return getClientScope(pc, createIfNeeded);
+		else {
+			getLog().log(Log.LEVEL_INFO, "scope-context",
+					"use existing " + (isSession ? "session" : "client") + " scope for " + appContext.getName() + "/" + pc.getCFID() + " from storage " + storage);
 		}
-		catch (PageException pe) {
-			throw new PageRuntimeException(pe);
-		}
+		scope.touchBeforeRequest(pc);
+		return scope;
 	}
 
 	/**
@@ -408,14 +435,14 @@ public final class ScopeContext {
 	 * @throws PageException
 	 */
 	public Session getSessionScope(PageContext pc) throws PageException {
-		if (pc.getSessionType() == Config.SESSION_TYPE_APPLICATION) return getCFSessionScope(pc, true);
+		if (pc.getSessionType() == Config.SESSION_TYPE_APPLICATION) return (Session) getCFScope(pc, true, Scope.SCOPE_SESSION);
 		return getJSessionScope(pc);
 	}
 
 	public boolean hasExistingSessionScope(PageContext pc) {
 		if (pc.getSessionType() == Config.SESSION_TYPE_APPLICATION) {
 			try {
-				return getCFSessionScope(pc, false) != null;
+				return getCFScope(pc, false, Scope.SCOPE_SESSION) != null;
 			}
 			catch (PageException e) {
 				return false;
@@ -440,103 +467,6 @@ public final class ScopeContext {
 		return null;
 	}
 
-	/**
-	 * return cf session scope
-	 *
-	 * @param pc PageContext
-	 * @param isNew
-	 * @return cf session matching the context
-	 * @throws PageException
-	 */
-	private Session getCFSessionScope(PageContext pc, boolean createSession) throws PageException {
-
-		ApplicationContext appContext = pc.getApplicationContext();
-		// get Context
-		Map<String, Scope> context = getSubMap(cfSessionContexts, appContext.getName());
-
-		// get Session
-		boolean isMemory = false;
-		String storage = appContext.getSessionstorage();
-		if (StringUtil.isEmpty(storage, true)) {
-			storage = ConfigPro.DEFAULT_STORAGE_SESSION;
-			isMemory = true;
-		}
-		else if ("ram".equalsIgnoreCase(storage)) {
-			storage = "memory";
-			isMemory = true;
-		}
-		else if ("registry".equalsIgnoreCase(storage)) {
-			storage = "file";
-		}
-		else {
-			storage = storage.toLowerCase();
-			if ("memory".equals(storage)) isMemory = true;
-		}
-
-		Session existing = (Session) context.get(pc.getCFID());
-		if (existing != null && (existing.isExpired() || !(existing instanceof StorageScope))) existing = null; // second should not happen
-
-		Session session = appContext.getSessionCluster() ? null : existing;
-
-		if (session == null || !(session instanceof StorageScope) || !((StorageScope) session).getStorage().equalsIgnoreCase(storage)) {
-			synchronized (SystemUtil.createToken("getCFSessionScope", pc.getCFID())) {
-				if (session == null || !(session instanceof StorageScope) || !((StorageScope) session).getStorage().equalsIgnoreCase(storage)) {
-					// memory
-					if (isMemory) {
-						if (existing != null) session = existing;
-						else session = createSession ? SessionMemory.getInstance(pc, getLog()) : null;
-					}
-					// file
-					else if ("file".equals(storage)) {
-						session = SessionFile.getInstance(appContext.getName(), pc, createSession, getLog());
-					}
-					// cookie
-					else if ("cookie".equals(storage)) {
-						session = SessionCookie.getInstance(appContext.getName(), pc, createSession, getLog());
-					}
-					// cache/datasource
-					else {
-						DataSource ds = pc.getDataSource(storage, null);
-						if (ds != null && ds.isStorage()) {
-							session = (Session) IKStorageScopeSupport.getInstance(Scope.SCOPE_SESSION, new IKHandlerDatasource(), appContext.getName(), storage, pc, existing,
-									createSession, getLog());
-
-						}
-						else {
-							session = (Session) IKStorageScopeSupport.getInstance(Scope.SCOPE_SESSION, new IKHandlerCache(), appContext.getName(), storage, pc, existing,
-									createSession, getLog());
-						}
-
-						if (createSession && session == null) {
-							// datasource not enabled for storage
-							if (ds != null) {
-								if (!ds.isStorage()) throw new ApplicationException("datasource [" + storage + "] is not enabled to be used as session storage, "
-										+ "you have to enable it in the Lucee administrator or define key \"storage=true\" for datasources defined in the application event handler.");
-								throw new ApplicationException("datasource [" + storage
-										+ "] could not be reached for session storage. Please make sure the datasource settings are correct, and the datasource is available.");
-							}
-							CacheConnection cc = CacheUtil.getCacheConnection(pc, storage, null);
-							if (cc != null) throw new ApplicationException(
-									"cache [" + storage + "] is not enabled to be used  as a session/client storage, you have to enable it in the Lucee administrator.");
-
-							throw new ApplicationException("there is no cache or datasource with name [" + storage + "] defined.");
-						}
-					}
-
-					if (!createSession && session == null) return null;
-					if (session instanceof StorageScope) ((StorageScope) session).setStorage(storage);
-					context.put(pc.getCFID(), session);
-
-				}
-			}
-		}
-		else {
-			getLog().log(Log.LEVEL_INFO, "scope-context", "use existing session scope for " + appContext.getName() + "/" + pc.getCFID() + " from storage " + storage);
-		}
-		session.touchBeforeRequest(pc);
-		return session;
-	}
-
 	public void removeSessionScope(PageContext pc) throws PageException {
 		removeCFSessionScope(pc);
 		removeJSessionScope(pc);
@@ -556,8 +486,8 @@ public final class ScopeContext {
 		Map<String, Scope> context = getSubMap(cfSessionContexts, appContext.getName());
 		if (context != null) {
 			context.remove(pc.getCFID());
-			Session sess = getCFSessionScope(pc, false);
-			if (sess instanceof StorageScope) ((StorageScope) sess).unstore(pc.getConfig());
+			StorageScope scope = getCFScope(pc, false, Scope.SCOPE_SESSION);
+			if (scope != null) scope.unstore(pc.getConfig());
 		}
 	}
 
@@ -566,8 +496,8 @@ public final class ScopeContext {
 		Map<String, Scope> context = getSubMap(cfClientContexts, appContext.getName());
 		if (context != null) {
 			context.remove(pc.getCFID());
-			Client cli = getClientScope(pc, false);
-			if (cli != null) cli.unstore(pc.getConfig());
+			StorageScope scope = getCFScope(pc, false, Scope.SCOPE_CLIENT);
+			if (scope != null) scope.unstore(pc.getConfig());
 		}
 	}
 
@@ -621,7 +551,7 @@ public final class ScopeContext {
 			catch (ClassCastException cce) {
 				error(getLog(), cce);
 				// if there is no HTTPSession
-				if (httpSession == null) return getCFSessionScope(pc, true);
+				if (httpSession == null) return (Session) getCFScope(pc, true, Scope.SCOPE_SESSION);
 
 				jSession = new JSession();
 				httpSession.setAttribute(appContext.getName(), jSession);
@@ -629,7 +559,7 @@ public final class ScopeContext {
 		}
 		else {
 			// if there is no HTTPSession
-			if (httpSession == null) return getCFSessionScope(pc, true);
+			if (httpSession == null) return (Session) getCFScope(pc, true, Scope.SCOPE_SESSION);
 			jSession = createNewJSession(pc, httpSession);
 		}
 		jSession.touchBeforeRequest(pc);
@@ -970,8 +900,8 @@ public final class ScopeContext {
 		pc.resetSession();
 		pc.resetClient();
 
-		if (oldSession != null) migrate(pc, oldSession, getCFSessionScope(pc, true), migrateSessionData);
-		if (oldClient != null) migrate(pc, oldClient, getClientScope(pc, true), migrateClientData);
+		if (oldSession != null) migrate(pc, oldSession, (UserScope) getCFScope(pc, true, Scope.SCOPE_SESSION), migrateSessionData);
+		if (oldClient != null) migrate(pc, oldClient, (UserScope) getCFScope(pc, true, Scope.SCOPE_CLIENT), migrateClientData);
 
 	}
 
