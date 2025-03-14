@@ -19,7 +19,9 @@
 package lucee.runtime.config;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -31,6 +33,7 @@ import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.filter.ExtensionResourceFilter;
+import lucee.commons.io.res.filter.NotResourceFilter;
 import lucee.commons.io.res.filter.ResourceFilter;
 import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.ExceptionUtil;
@@ -62,6 +65,7 @@ import lucee.runtime.type.util.ListUtil;
 public class DeployHandler {
 
 	private static final ResourceFilter ALL_EXT = new ExtensionResourceFilter(new String[] { ".lex", ".lar", ".lco", ".json" });
+	private static final ResourceFilter UNSUPPORTED_EXT = new NotResourceFilter(ALL_EXT);
 
 	/**
 	 * deploys all files found
@@ -100,16 +104,28 @@ public class DeployHandler {
 							// Lucee core
 							else if (config instanceof ConfigServer && "lco".equalsIgnoreCase(ext)) ConfigAdmin.updateCore((ConfigServerImpl) config, child, true);
 							// CFConfig
-							if ("json".equalsIgnoreCase(ext) && ConfigFactoryImpl.isConfigFileName(child.getName())) {
+							else if ("json".equalsIgnoreCase(ext)) {
 								try {
-									CFConfigImport ci = new CFConfigImport(config, child, config.getResourceCharset(), null, "server", null, false, false, false);
-									ci.execute(true);
-									child.delete();
+									if (ConfigFactoryImpl.isConfigFileName(child.getName())){
+										log.log(Log.LEVEL_INFO, "deploy handler", "Importing config file [" + child.getName() + "]");
+										CFConfigImport ci = new CFConfigImport(config, child, config.getResourceCharset(), null, "server", null, false, false, false);
+										ci.execute(true);
+										child.delete();	
+									}
+									else {
+										log.log(Log.LEVEL_ERROR, "deploy handler", "Deploy, unsupported json file [" + child.getName()
+											+ "], supported files are [" + Arrays.toString(ConfigFactoryImpl.CONFIG_FILE_NAMES) + "]");
+										DeployHandler.moveToFailedFolder(config.getDeployDirectory(), child);
+									}
 								}
 								catch (Exception e) {
 									DeployHandler.moveToFailedFolder(config.getDeployDirectory(), child);
 									throw Caster.toPageException(e);
 								}
+							}
+							else if (!child.isDirectory()) {
+								DeployHandler.moveToFailedFolder(config.getDeployDirectory(), child);
+								throw new IOException("Deploy, unsupported file [" + child.getName() + "]");
 							}
 
 						}
@@ -120,6 +136,22 @@ public class DeployHandler {
 				}
 				finally {
 					queue.setMode(prevMode);
+				}
+			}
+			// finally, reject unsupported file types
+			children = dir.listResources(UNSUPPORTED_EXT);
+			if (children.length > 0) {
+				for (int i = 0; i < children.length; i++) {
+					child = children[i];
+					if (!child.isDirectory()) {
+						try {
+							log.log(Log.LEVEL_ERROR, "deploy handler", "Deploy, unsupported file type [" + child.getName() + "]");
+							DeployHandler.moveToFailedFolder(config.getDeployDirectory(), child);
+						} 
+						catch (Exception e) {
+							log.log(Log.LEVEL_ERROR, "deploy handler", e);
+						}
+					}
 				}
 			}
 
