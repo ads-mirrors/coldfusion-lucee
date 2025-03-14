@@ -153,10 +153,15 @@ public final class ScopeContext {
 	private Map<String, Scope> getSubMap(Map<String, Map<String, Scope>> parent, String key) {
 
 		Map<String, Scope> context = parent.get(key);
-		if (context != null) return context;
-
-		context = MapFactory.<String, Scope>getConcurrentMap();
-		parent.put(key, context);
+		if (context == null) {
+			synchronized (SystemUtil.createToken("getSubMap", key)) {
+				context = parent.get(key);
+				if (context == null) {
+					context = MapFactory.<String, Scope>getConcurrentMap();
+					parent.put(key, context);
+				}
+			}
+		}
 		return context;
 
 	}
@@ -202,42 +207,46 @@ public final class ScopeContext {
 		// final boolean doMemory=isMemory || !appContext.getClientCluster();
 		// client=doMemory?(Client) context.get(pc.getCFID()):null;
 		if (client == null || client.isExpired() || !client.getStorage().equalsIgnoreCase(storage)) {
-			if ("file".equals(storage)) {
-				client = ClientFile.getInstance(appContext.getName(), pc, getLog());
-			}
-			else if ("cookie".equals(storage)) client = ClientCookie.getInstance(appContext.getName(), pc, getLog());
-			else if ("memory".equals(storage)) {
-				if (existing != null) client = existing;
-				client = ClientMemory.getInstance(pc, getLog());
-			}
-			else {
-				DataSource ds = pc.getDataSource(storage, null);
-				if (ds != null) {
-					client = (Client) IKStorageScopeSupport.getInstance(Scope.SCOPE_CLIENT, new IKHandlerDatasource(), appContext.getName(), storage, pc, existing, getLog());
-				}
-				else {
-					client = (Client) IKStorageScopeSupport.getInstance(Scope.SCOPE_CLIENT, new IKHandlerCache(), appContext.getName(), storage, pc, existing, getLog());
-
-				}
-
-				if (client == null) {
-					// datasource not enabled for storage
-					if (ds != null) {
-						if (!ds.isStorage()) throw new ApplicationException(
-								"datasource [" + storage + "] is not enabled to be used as client storage, you have to enable it in the Lucee administrator.");
-						throw new ApplicationException("datasource [" + storage
-								+ "] could not be reached for client storage. Please make sure the datasource settings are correct, and the datasource is available.");
+			synchronized (SystemUtil.createToken("getClientScope", pc.getCFID())) {
+				if (client == null || client.isExpired() || !client.getStorage().equalsIgnoreCase(storage)) {
+					if ("file".equals(storage)) {
+						client = ClientFile.getInstance(appContext.getName(), pc, getLog());
 					}
-					CacheConnection cc = CacheUtil.getCacheConnection(pc, storage, null);
-					if (cc != null) throw new ApplicationException(
-							"cache [" + storage + "] is not enabled to be used  as a session/client storage, you have to enable it in the Lucee administrator.");
+					else if ("cookie".equals(storage)) client = ClientCookie.getInstance(appContext.getName(), pc, getLog());
+					else if ("memory".equals(storage)) {
+						if (existing != null) client = existing;
+						client = ClientMemory.getInstance(pc, getLog());
+					}
+					else {
+						DataSource ds = pc.getDataSource(storage, null);
+						if (ds != null) {
+							client = (Client) IKStorageScopeSupport.getInstance(Scope.SCOPE_CLIENT, new IKHandlerDatasource(), appContext.getName(), storage, pc, existing,
+									getLog());
+						}
+						else {
+							client = (Client) IKStorageScopeSupport.getInstance(Scope.SCOPE_CLIENT, new IKHandlerCache(), appContext.getName(), storage, pc, existing, getLog());
 
-					throw new ApplicationException("there is no cache or datasource with name [" + storage + "] defined.");
+						}
+
+						if (client == null) {
+							// datasource not enabled for storage
+							if (ds != null) {
+								if (!ds.isStorage()) throw new ApplicationException(
+										"datasource [" + storage + "] is not enabled to be used as client storage, you have to enable it in the Lucee administrator.");
+								throw new ApplicationException("datasource [" + storage
+										+ "] could not be reached for client storage. Please make sure the datasource settings are correct, and the datasource is available.");
+							}
+							CacheConnection cc = CacheUtil.getCacheConnection(pc, storage, null);
+							if (cc != null) throw new ApplicationException(
+									"cache [" + storage + "] is not enabled to be used  as a session/client storage, you have to enable it in the Lucee administrator.");
+
+							throw new ApplicationException("there is no cache or datasource with name [" + storage + "] defined.");
+						}
+					}
+					client.setStorage(storage);
+					context.put(pc.getCFID(), client);
 				}
-
 			}
-			client.setStorage(storage);
-			context.put(pc.getCFID(), client);
 		}
 		else getLog().log(Log.LEVEL_INFO, "scope-context", "use existing client scope for " + appContext.getName() + "/" + pc.getCFID() + " from storage " + storage);
 
@@ -510,7 +519,7 @@ public final class ScopeContext {
 		Session session = appContext.getSessionCluster() ? null : existing;
 
 		if (session == null || !(session instanceof StorageScope) || !((StorageScope) session).getStorage().equalsIgnoreCase(storage)) {
-			synchronized (SystemUtil.createToken("session", pc.getCFID())) {
+			synchronized (SystemUtil.createToken("getCFSessionScope", pc.getCFID())) {
 				if (session == null || !(session instanceof StorageScope) || !((StorageScope) session).getStorage().equalsIgnoreCase(storage)) {
 					// not necessary to check session in the same way, because it is overwritten anyway
 					if (isMemory) {
