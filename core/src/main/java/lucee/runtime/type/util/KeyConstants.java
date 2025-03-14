@@ -3047,6 +3047,7 @@ public class KeyConstants {
 	public static final Key _captcha = KeyImpl._const("captcha");
 	public static final Key _delay = KeyImpl._const("delay");
 	public static final Key _ai = KeyImpl._const("ai");
+	public static final Key _INTERRUPTED = KeyImpl._const("INTERRUPTED");
 
 	private static Map<String, Key> _____keys;
 

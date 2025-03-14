@@ -61,7 +61,7 @@ public class ThreadsImpl extends StructSupport implements lucee.runtime.type.sco
 	private static final Key KEY_CHILD_THREADS = KeyConstants._childThreads;
 
 	private static final Key[] DEFAULT_KEYS = new Key[] { KEY_ELAPSEDTIME, KeyConstants._NAME, KEY_OUTPUT, KEY_PRIORITY, KEY_STARTTIME, KEY_STATUS, KEY_STACKTRACE,
-			KEY_CHILD_THREADS };
+			KEY_CHILD_THREADS, KeyConstants._INTERRUPTED };
 
 	private ChildThreadImpl ct;
 	private StructImpl uncoupled = null;
@@ -148,8 +148,9 @@ public class ThreadsImpl extends StructSupport implements lucee.runtime.type.sco
 	}
 
 	private Object getMeta(Key key, Object defaultValue) {
-		if (KEY_ELAPSEDTIME.equalsIgnoreCase(key)) return (String) getState() == "TERMINATED" ? 0 : Double.valueOf(ct.getEndTime() - ct.getStartTime());
+		if (KEY_ELAPSEDTIME.equalsIgnoreCase(key)) return getState().equals("TERMINATED") ? 0 : Double.valueOf(ct.getEndTime() - ct.getStartTime());
 		if (KeyConstants._NAME.equalsIgnoreCase(key)) return ct.getTagName();
+		if (KeyConstants._INTERRUPTED.equalsIgnoreCase(key)) return isInterrupted();
 		if (KEY_OUTPUT.equalsIgnoreCase(key)) return getOutput();
 		if (KEY_PRIORITY.equalsIgnoreCase(key)) return ThreadUtil.toStringPriority(ct.getPriority());
 		if (KEY_STARTTIME.equalsIgnoreCase(key)) return new DateTimeImpl(ct.getStartTime());
@@ -186,6 +187,11 @@ public class ThreadsImpl extends StructSupport implements lucee.runtime.type.sco
 		InputStream is = new ByteArrayInputStream(ct.output.toByteArray());
 		return Http.getOutput(is, ct.contentType, ct.contentEncoding, true);
 
+	}
+
+	private boolean isInterrupted() {
+		if (ct.output == null) return false;
+		return ct.isInterrupted();
 	}
 
 	private Object getState() {
