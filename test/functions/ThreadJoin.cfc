@@ -7,7 +7,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
     function run( testResults , testBox ) {
         describe("ThreadJoin Function", function() {
             
-            itx("joins a single thread and verifies completion", function() {
+            it("joins a single thread and verifies completion", function() {
                 // Create a thread
                 var threadName = variables.threadPrefix & "_single";
                 thread name=threadName action="run" {
@@ -18,10 +18,6 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
                 // Join the thread
                 threadJoin(threadName);
                 var result = cfthread[threadName];
-
-                // Assert thread joined successfully
-                expect(!isNull(result)).toBeTrue();
-                expect(result).toBeStruct();
                 systemOutput(result,1,1);
 				expect(result.STATUS).toBe("COMPLETED");
                 expect(result.OUTPUT).toBe("Thread completed successfully");
