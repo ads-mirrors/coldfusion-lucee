@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import jakarta.servlet.http.HttpSession;
 import lucee.commons.collection.MapFactory;
+import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.ExceptionUtil;
@@ -509,43 +510,48 @@ public final class ScopeContext {
 		Session session = appContext.getSessionCluster() ? null : existing;
 
 		if (session == null || !(session instanceof StorageScope) || !((StorageScope) session).getStorage().equalsIgnoreCase(storage)) {
-			// not necessary to check session in the same way, because it is overwritten anyway
-			if (isMemory) {
-				if (existing != null) session = existing;
-				else session = SessionMemory.getInstance(pc, isNew, getLog());
-			}
-			else if ("file".equals(storage)) {
-				session = SessionFile.getInstance(appContext.getName(), pc, getLog());
-			}
-			else if ("cookie".equals(storage)) session = SessionCookie.getInstance(appContext.getName(), pc, getLog());
-			else {
-				DataSource ds = pc.getDataSource(storage, null);
-				if (ds != null && ds.isStorage()) {
-					session = (Session) IKStorageScopeSupport.getInstance(Scope.SCOPE_SESSION, new IKHandlerDatasource(), appContext.getName(), storage, pc, existing, getLog());
-
-				}
-				else {
-					session = (Session) IKStorageScopeSupport.getInstance(Scope.SCOPE_SESSION, new IKHandlerCache(), appContext.getName(), storage, pc, existing, getLog());
-				}
-
-				if (session == null) {
-					// datasource not enabled for storage
-					if (ds != null) {
-						if (!ds.isStorage()) throw new ApplicationException("datasource [" + storage + "] is not enabled to be used as session storage, "
-								+ "you have to enable it in the Lucee administrator or define key \"storage=true\" for datasources defined in the application event handler.");
-						throw new ApplicationException("datasource [" + storage
-								+ "] could not be reached for session storage. Please make sure the datasource settings are correct, and the datasource is available.");
+			synchronized (SystemUtil.createToken("session", pc.getCFID())) {
+				if (session == null || !(session instanceof StorageScope) || !((StorageScope) session).getStorage().equalsIgnoreCase(storage)) {
+					// not necessary to check session in the same way, because it is overwritten anyway
+					if (isMemory) {
+						if (existing != null) session = existing;
+						else session = SessionMemory.getInstance(pc, isNew, getLog());
 					}
-					CacheConnection cc = CacheUtil.getCacheConnection(pc, storage, null);
-					if (cc != null) throw new ApplicationException(
-							"cache [" + storage + "] is not enabled to be used  as a session/client storage, you have to enable it in the Lucee administrator.");
+					else if ("file".equals(storage)) {
+						session = SessionFile.getInstance(appContext.getName(), pc, getLog());
+					}
+					else if ("cookie".equals(storage)) session = SessionCookie.getInstance(appContext.getName(), pc, getLog());
+					else {
+						DataSource ds = pc.getDataSource(storage, null);
+						if (ds != null && ds.isStorage()) {
+							session = (Session) IKStorageScopeSupport.getInstance(Scope.SCOPE_SESSION, new IKHandlerDatasource(), appContext.getName(), storage, pc, existing,
+									getLog());
 
-					throw new ApplicationException("there is no cache or datasource with name [" + storage + "] defined.");
+						}
+						else {
+							session = (Session) IKStorageScopeSupport.getInstance(Scope.SCOPE_SESSION, new IKHandlerCache(), appContext.getName(), storage, pc, existing, getLog());
+						}
+
+						if (session == null) {
+							// datasource not enabled for storage
+							if (ds != null) {
+								if (!ds.isStorage()) throw new ApplicationException("datasource [" + storage + "] is not enabled to be used as session storage, "
+										+ "you have to enable it in the Lucee administrator or define key \"storage=true\" for datasources defined in the application event handler.");
+								throw new ApplicationException("datasource [" + storage
+										+ "] could not be reached for session storage. Please make sure the datasource settings are correct, and the datasource is available.");
+							}
+							CacheConnection cc = CacheUtil.getCacheConnection(pc, storage, null);
+							if (cc != null) throw new ApplicationException(
+									"cache [" + storage + "] is not enabled to be used  as a session/client storage, you have to enable it in the Lucee administrator.");
+
+							throw new ApplicationException("there is no cache or datasource with name [" + storage + "] defined.");
+						}
+					}
+					if (session instanceof StorageScope) ((StorageScope) session).setStorage(storage);
+					context.put(pc.getCFID(), session);
+					isNew.setValue(true);
 				}
 			}
-			if (session instanceof StorageScope) ((StorageScope) session).setStorage(storage);
-			context.put(pc.getCFID(), session);
-			isNew.setValue(true);
 		}
 		else {
 			getLog().log(Log.LEVEL_INFO, "scope-context", "use existing session scope for " + appContext.getName() + "/" + pc.getCFID() + " from storage " + storage);
