@@ -50,7 +50,6 @@ import lucee.runtime.type.it.ValueIterator;
 import lucee.runtime.type.scope.CSRFTokenSupport;
 import lucee.runtime.type.scope.Scope;
 import lucee.runtime.type.scope.ScopeContext;
-import lucee.runtime.type.scope.Session;
 import lucee.runtime.type.scope.client.IKStorageScopeClient;
 import lucee.runtime.type.scope.session.IKStorageScopeSession;
 import lucee.runtime.type.scope.util.ScopeUtil;
@@ -135,7 +134,8 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 		this.timeSpan = timeSpan;
 	}
 
-	public static Scope getInstance(int scope, IKHandler handler, String appName, String name, PageContext pc, Scope existing, Log log) throws PageException {
+	public static Scope getInstance(int scope, IKHandler handler, String appName, String name, PageContext pc, Scope existing, boolean createIfNeeded, Log log)
+			throws PageException {
 		IKStorageValue sv = null;
 		if (Scope.SCOPE_SESSION == scope) sv = handler.loadData(pc, appName, name, "session", Scope.SCOPE_SESSION, log);
 		else if (Scope.SCOPE_CLIENT == scope) sv = handler.loadData(pc, appName, name, "client", Scope.SCOPE_CLIENT, log);
@@ -160,6 +160,8 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 			}
 		}
 
+		if (!createIfNeeded) return null;
+
 		IKStorageScopeSupport rtn = null;
 		Map<Key, IKStorageScopeItem> map = MapFactory.getConcurrentMap();
 		if (Scope.SCOPE_SESSION == scope) rtn = new IKStorageScopeSession(pc, handler, appName, name, map, 0, getSessionTimeout(pc));
@@ -181,15 +183,6 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 		ApplicationContext ac = pc == null ? null : pc.getApplicationContext();
 		TimeSpan timeout = ac == null ? null : ac.getSessionTimeout();
 		return timeout == null ? 0 : timeout.getMillis();
-	}
-
-	public static Scope getInstance(int scope, IKHandler handler, String appName, String name, PageContext pc, Session existing, Log log, Session defaultValue) {
-		try {
-			return getInstance(scope, handler, appName, name, pc, existing, log);
-		}
-		catch (PageException e) {
-		}
-		return defaultValue;
 	}
 
 	public static boolean hasInstance(int scope, IKHandler handler, String appName, String name, PageContext pc) {

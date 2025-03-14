@@ -235,7 +235,7 @@ public final class PageContextImpl extends PageContext {
 	private static final boolean JAVA_SETTING_CLASSIC_MODE = false;
 	private static int counter = 0;
 	private static final boolean LINKED_REQUEST = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.request.linked", null), true);
-	private static final boolean ROTATE_UNKNOWN_COOKIE = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.sessionCookie.rotate.unknown", null), false);
+
 	/**
 	 * Field <code>pathList</code>
 	 */
@@ -1695,7 +1695,7 @@ public final class PageContextImpl extends PageContext {
 	public Session sessionScope(boolean checkExpires) throws PageException {
 		if (session == null) {
 			checkSessionContext();
-			session = scopeContext.getSessionScope(this, DUMMY_BOOL);
+			session = scopeContext.getSessionScope(this);
 		}
 		return session;
 	}
@@ -1759,7 +1759,7 @@ public final class PageContextImpl extends PageContext {
 				throw new ExpressionException("there is no client context defined for this application", hintAplication("you can define a client context"));
 			if (!getApplicationContext().isSetClientManagement()) throw new ExpressionException("client scope is not enabled", hintAplication("you can enable client scope"));
 
-			client = scopeContext.getClientScope(this);
+			client = scopeContext.getClientScope(this, true);
 		}
 		return client;
 	}
@@ -1769,7 +1769,7 @@ public final class PageContextImpl extends PageContext {
 		if (client == null) {
 			if (!getApplicationContext().hasName()) return null;
 			if (!getApplicationContext().isSetClientManagement()) return null;
-			client = scopeContext.getClientScopeEL(this);
+			client = scopeContext.getClientScopeEL(this, true);
 		}
 		return client;
 	}
@@ -2505,9 +2505,6 @@ public final class PageContextImpl extends PageContext {
 		return enablecfoutputonly;
 	}
 
-	/**
-	 * @return true if the Request is in silent mode via cfslient
-	 */
 	@Override
 	public boolean isSilent() {
 		return bodyContentStack.getDevNull();
@@ -2999,12 +2996,8 @@ public final class PageContextImpl extends PageContext {
 		if (oCfid != null) {
 			if (oCftoken == null) oCftoken = "0";
 			if (CFIDUtil.isCFID(this, oCfid)) {
-				if (!scopeContext.hasExistingCFID(this, Caster.toString(oCfid, null))) {
-					oCfid = null;
-					oCftoken = null;
-				}
 				// log in case CFID is used from URL
-				else if (READ_CFID_FROM_URL_LOG != null) {
+				if (READ_CFID_FROM_URL_LOG != null) {
 					Struct logData = new StructImpl();
 					logData.setEL(KeyConstants._message, "Lucee did detect and will use a CFID defined in the URL");
 					logData.setEL(KeyConstants._url, ReqRspUtil.getRequestURL(req, true));
@@ -3032,7 +3025,6 @@ public final class PageContextImpl extends PageContext {
 					}
 
 					LogUtil.log(Log.LEVEL_INFO, READ_CFID_FROM_URL_LOG, "create-token", jsonMessage);
-
 				}
 			}
 			else {
@@ -3050,6 +3042,7 @@ public final class PageContextImpl extends PageContext {
 
 		// check cookie value
 		if (oCfid != null) {
+
 			if (oCftoken == null) oCftoken = "0";
 			// cookie value is invalid, maybe from ACF
 
@@ -3082,16 +3075,6 @@ public final class PageContextImpl extends PageContext {
 				if (oCfid != null) {
 					setCookie = true;
 					if (oCftoken == null) oCftoken = "0";
-				}
-			}
-			if (oCfid != null && ROTATE_UNKNOWN_COOKIE) {
-				if (oCftoken == null) oCftoken = "0";
-				if (!scopeContext.hasExistingCFID(this, Caster.toString(oCfid, null))) {
-					LogUtil.log(this, Log.LEVEL_DEBUG, PageContextImpl.class.getName(), "Unknown Session cookie rejected");
-					oCfid = null;
-					oCftoken = null;
-					ReqRspUtil.removeCookie(getHttpServletResponse(), "cfid");
-					ReqRspUtil.removeCookie(getHttpServletResponse(), "cftoken");
 				}
 			}
 		}
@@ -3578,7 +3561,8 @@ public final class PageContextImpl extends PageContext {
 				// init session
 				if (initSession) {
 					// session must be initlaized here
-					listener.onSessionStart(this, scopeContext.getSessionScope(this, DUMMY_BOOL));
+					listener.onSessionStart(this, scopeContext.getSessionScope(this));
+
 				}
 			}
 			finally {

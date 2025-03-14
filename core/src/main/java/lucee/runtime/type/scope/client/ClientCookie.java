@@ -57,9 +57,11 @@ public final class ClientCookie extends StorageScopeCookie implements Client {
 	 * @param log
 	 * @return
 	 */
-	public static Client getInstance(String name, PageContext pc, Log log) {
+	public static Client getInstance(String name, PageContext pc, boolean createIfNeeded, Log log) {
 		if (!StringUtil.isEmpty(name)) name = StringUtil.toUpperCase(StringUtil.toVariableName(name));
 		String cookieName = "CF_" + TYPE + "_" + name;
-		return new ClientCookie(pc, cookieName, _loadData(pc, cookieName, SCOPE_CLIENT, "client", log));
+		Struct data = _loadData(pc, cookieName, SCOPE_CLIENT, "client", createIfNeeded, log);
+		if (!createIfNeeded && data == null) return null;
+		return new ClientCookie(pc, cookieName, data);
 	}
 }
