@@ -150,7 +150,6 @@ import lucee.runtime.net.mail.ServerImpl;
 import lucee.runtime.net.proxy.ProxyData;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
-import lucee.runtime.op.OpUtil;
 import lucee.runtime.orm.ORMConfiguration;
 import lucee.runtime.orm.ORMEngine;
 import lucee.runtime.orm.ORMSession;
@@ -2999,7 +2998,7 @@ public final class PageContextImpl extends PageContext {
 		// if CFID comes from URL, we only accept if already exists
 		if (oCfid != null) {
 			if (oCftoken == null) oCftoken = "0";
-			if (Decision.isGUIdSimple(oCfid)) {
+			if (CFIDUtil.isCFID(this, oCfid)) {
 				if (!scopeContext.hasExistingCFID(this, Caster.toString(oCfid, null))) {
 					oCfid = null;
 					oCftoken = null;
@@ -3054,7 +3053,7 @@ public final class PageContextImpl extends PageContext {
 			if (oCftoken == null) oCftoken = "0";
 			// cookie value is invalid, maybe from ACF
 
-			if (!Decision.isGUIdSimple(oCfid)) {
+			if (!CFIDUtil.isCFID(this, oCfid)) {
 				oCfid = null;
 				oCftoken = null;
 				Charset charset = getWebCharset();
@@ -3074,7 +3073,7 @@ public final class PageContextImpl extends PageContext {
 						// CFToken
 						else if ("cftoken".equalsIgnoreCase(name)) {
 							value = ReqRspUtil.decode(cookies[i].getValue(), charset.name(), false);
-							if (isValidCfToken(value)) oCftoken = value;
+							if (CFIDUtil.isCFToken(this, value)) oCftoken = value;
 							ReqRspUtil.removeCookie(getHttpServletResponse(), name);
 						}
 					}
@@ -3100,7 +3099,7 @@ public final class PageContextImpl extends PageContext {
 		if (oCfid == null || oCftoken == null) {
 			setCookie = true;
 			cfid = CFIDUtil.createCFID(this);
-			cftoken = ScopeContext.getNewCFToken();
+			cftoken = CFIDUtil.createCFToken(this);
 		}
 		else {
 			cfid = Caster.toString(oCfid, null);
@@ -3110,18 +3109,9 @@ public final class PageContextImpl extends PageContext {
 		if (setCookie && getApplicationContext().isSetClientCookies()) setClientCookies();
 	}
 
-	private boolean isValidCfToken(String value) {
-		try {
-			return OpUtil.compare(this, value, "0") == 0;
-		}
-		catch (PageException e) {
-			return value.equals("0");
-		}
-	}
-
 	public void resetIdAndToken() {
 		cfid = CFIDUtil.createCFID(this);
-		cftoken = ScopeContext.getNewCFToken();
+		cftoken = CFIDUtil.createCFToken(this);
 
 		if (getApplicationContext().isSetClientCookies()) setClientCookies();
 	}

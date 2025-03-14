@@ -21,7 +21,6 @@ package lucee.runtime.type.scope;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 
 import jakarta.servlet.http.HttpSession;
 import lucee.commons.collection.MapFactory;
@@ -964,20 +963,6 @@ public final class ScopeContext {
 			applicationContexts.remove(name);
 			application.release(pc);
 		}
-	}
-
-	/**
-	 * @return returns a new CFIs
-	 */
-	public static String getNewCFId() {
-		return UUID.randomUUID().toString();
-	}
-
-	/**
-	 * @return returns a new CFToken
-	 */
-	public static String getNewCFToken() {
-		return "0";
 	}
 
 	public void invalidateUserScope(PageContextImpl pc, boolean migrateSessionData, boolean migrateClientData) throws PageException {
