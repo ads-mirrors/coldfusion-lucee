@@ -66,6 +66,7 @@ import lucee.runtime.type.util.ListUtil;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.Body;
+import lucee.transformer.bytecode.BodyBase;
 import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.Page;
 import lucee.transformer.bytecode.ScriptBody;
@@ -541,6 +542,21 @@ public final class ASMUtil {
 				return defaultValue;
 			}
 			if (parent instanceof Page) return (Page) parent;
+		}
+	}
+
+	public static void dumpParents(Statement stat) {
+		Statement parent = stat;
+		while (true) {
+			aprint.e("class:" + parent.getClass().getName());
+			parent = parent.getParent();
+			if (parent == null) {
+				return;
+			}
+			if (parent instanceof Page) {
+				aprint.e("class:" + parent.getClass().getName());
+				return;
+			}
 		}
 	}
 
@@ -1333,17 +1349,19 @@ public final class ASMUtil {
 		}
 	}
 
-	public static boolean inRoot(Tag tag) {
-		if (tag == null) return false;
-		Statement p = tag.getParent();
+	public static boolean inRoot(Statement stat, boolean debug) {
+		if (debug) dumpParents(stat);
+		// give it the benefit
+		if (stat == null) return true;
+
+		Statement p = stat.getParent();
+
 		if (p instanceof Page) return true;
-		if (p instanceof ScriptBody) {
-			p = p.getParent();
-			if (p == null) throw new RuntimeException("you are using this method to early, body parent is not set yet! best only use it in the evaluate method of the evaluator.");
-			if (p instanceof TagScript) {
-				return p.getParent() instanceof Page;
-			}
-		}
+		if (p instanceof ScriptBody) return inRoot(p, false);
+		if (p instanceof BodyBase) return inRoot(p, false);
+		if (p instanceof TagScript) return inRoot(p, false);
+		if (p instanceof TagComponent) return inRoot(p, false);
+
 		return false;
 	}
 }
