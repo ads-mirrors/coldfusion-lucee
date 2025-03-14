@@ -153,9 +153,15 @@ public final class CFMLTransformer {
 		boolean isCFMLCompExt = Constants.isCFMLComponentExtension(ResourceUtil.getExtension(ps.getResource(), ""));
 		boolean wrapped = false;
 		// parse regular
+
+		boolean hasWriteLog = false;
+		boolean hasCharset = false;
+		boolean hasUpper = false;
+
 		while (true) {
+			PageSourceCode psc = null;
 			try {
-				PageSourceCode psc = new PageSourceCode(ps, charset, writeLog);
+				psc = new PageSourceCode(ps, charset, writeLog);
 				sc = psc;
 				// script files (cfs)
 				if (Constants.isCFMLScriptExtension(ListUtil.last(ps.getRealpath(), '.'))) {
@@ -186,13 +192,22 @@ public final class CFMLTransformer {
 					}
 
 				}
-				p = transform(factory, config, sc, tlibs, flibs, ps.getResource().lastModified(), dotUpper, returnValue, ignoreScopes);
+				p = transform(factory, config, sc, tlibs, flibs, ps.getResource().lastModified(), dotUpper, returnValue, ignoreScopes, hasWriteLog, hasUpper, hasCharset);
 				break;
 			}
 			catch (ProcessingDirectiveException pde) {
-				if (pde.getWriteLog() != null) writeLog = pde.getWriteLog().booleanValue();
-				if (pde.getDotNotationUpperCase() != null) dotUpper = pde.getDotNotationUpperCase().booleanValue();
-				if (!StringUtil.isEmpty(pde.getCharset())) charset = pde.getCharset();
+				if (pde.getWriteLog() != null) {
+					hasWriteLog = true;
+					writeLog = pde.getWriteLog().booleanValue();
+				}
+				if (pde.getDotNotationUpperCase() != null) {
+					hasUpper = true;
+					dotUpper = pde.getDotNotationUpperCase().booleanValue();
+				}
+				if (pde.getCharset() != null) {
+					hasCharset = true;
+					charset = pde.getCharset();
+				}
 			}
 		}
 
@@ -226,13 +241,22 @@ public final class CFMLTransformer {
 						sc = new PageSourceCode(ps, text, charset, writeLog, sourceOffset);
 					}
 					try {
-						_p = transform(factory, config, sc, tlibs, flibs, ps.getResource().lastModified(), dotUpper, returnValue, ignoreScopes);
+						_p = transform(factory, config, sc, tlibs, flibs, ps.getResource().lastModified(), dotUpper, returnValue, ignoreScopes, hasWriteLog, hasUpper, hasCharset);
 						break;
 					}
 					catch (ProcessingDirectiveException pde) {
-						if (pde.getWriteLog() != null) writeLog = pde.getWriteLog().booleanValue();
-						if (pde.getDotNotationUpperCase() != null) dotUpper = pde.getDotNotationUpperCase().booleanValue();
-						if (!StringUtil.isEmpty(pde.getCharset())) charset = pde.getCharset();
+						if (pde.getWriteLog() != null) {
+							hasWriteLog = true;
+							writeLog = pde.getWriteLog().booleanValue();
+						}
+						if (pde.getDotNotationUpperCase() != null) {
+							hasUpper = true;
+							dotUpper = pde.getDotNotationUpperCase().booleanValue();
+						}
+						if (!StringUtil.isEmpty(pde.getCharset())) {
+							hasCharset = true;
+							charset = pde.getCharset();
+						}
 						sc = null;
 					}
 				}
@@ -292,7 +316,7 @@ public final class CFMLTransformer {
 	 * @throws TemplateException
 	 */
 	public Page transform(Factory factory, ConfigPro config, SourceCode sc, TagLib[] tlibs, FunctionLib flibs, long sourceLastModified, Boolean dotNotationUpperCase,
-			boolean returnValue, boolean ignoreScope) throws TemplateException {
+			boolean returnValue, boolean ignoreScope, boolean hasWriteLog, boolean hasUpper, boolean hasCharset) throws TemplateException {
 		boolean dnuc;
 		if (dotNotationUpperCase == null) {
 			if (sc instanceof PageSourceCode) dnuc = ((MappingImpl) ((PageSourceCode) sc).getPageSource().getMapping()).getDotNotationUpperCase();
@@ -311,7 +335,8 @@ public final class CFMLTransformer {
 				config.getSuppressWSBeforeArg(), config.getDefaultFunctionOutput(), returnValue, ignoreScope);
 
 		TransfomerSettings settings = new TransfomerSettings(dnuc, config.getHandleUnQuotedAttrValueAsString(), ignoreScope);
-		Data data = new Data(factory, config, page, sc, new EvaluatorPool(), settings, _tlibs, flibs, config.getCoreTagLib().getScriptTags(), false);
+		Data data = new Data(factory, config, page, sc, new EvaluatorPool(), settings, _tlibs, flibs, config.getCoreTagLib().getScriptTags(), false, hasWriteLog, hasUpper,
+				hasCharset);
 		transform(data, page);
 		return page;
 

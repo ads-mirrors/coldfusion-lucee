@@ -39,7 +39,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				var data={a:1};
 				var meta=data.getmetadata();
 
-				assertEquals("ordered,type", listSort( meta.keyList(), "text" ) );
+				assertEquals("class,ordered,type", listSort( meta.keyList(), "text" ) );
 				assertEquals("unordered",meta.ordered);
 				//assertEquals("regular",meta.type);
 			});
@@ -48,7 +48,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				var data=[a:1];
 				var meta=data.getmetadata();
 
-				assertEquals("ordered,type", listSort( meta.keyList(), "text" ) );
+				assertEquals("class,ordered,type", listSort( meta.keyList(), "text" ) );
 				assertEquals("ordered",meta.ordered);
 				assertEquals("ordered",meta.type);
 			});

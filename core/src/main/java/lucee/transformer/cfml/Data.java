@@ -59,9 +59,12 @@ public class Data {
 
 	public boolean insideTenaryMiddle = false;
 	public boolean insideCase = false;
+	public boolean hasWriteLog;
+	public boolean hasUpper;
+	public boolean hasCharset;
 
 	public Data(Factory factory, Config config, Page page, SourceCode srcCode, EvaluatorPool ep, TransfomerSettings settings, TagLib[][] tlibs, FunctionLib flibs,
-			TagLibTag[] scriptTags, boolean allowLowerThan) {
+			TagLibTag[] scriptTags, boolean allowLowerThan, boolean hasWriteLog, boolean hasUpper, boolean hasCharset) {
 		this.page = page;
 		this.srcCode = srcCode;
 		this.settings = settings;
@@ -72,6 +75,9 @@ public class Data {
 		this.factory = factory;
 		this.config = config;
 		this.allowLowerThan = allowLowerThan;
+		this.hasWriteLog = hasWriteLog;
+		this.hasUpper = hasUpper;
+		this.hasCharset = hasCharset;
 	}
 
 	public SimpleExprTransformer getSimpleExprTransformer() {
