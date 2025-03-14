@@ -12,7 +12,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
                 var threadName = variables.threadPrefix & "_single";
                 thread name=threadName action="run" {
                     sleep(50); // Simulate work
-                    thread.output = "Thread completed successfully";
+                    thread.res = "Thread completed successfully";
                 }
                 
                 // Join the thread
@@ -20,7 +20,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
                 var result = cfthread[threadName];
                 systemOutput(result,1,1);
 				expect(result.STATUS).toBe("COMPLETED");
-                expect(result.OUTPUT).toBe("Thread completed successfully");
+                expect(result.res).toBe("Thread completed successfully");
             });
         });
     }
