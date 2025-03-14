@@ -237,9 +237,6 @@ public final class PageContextImpl extends PageContext {
 	private static int counter = 0;
 	private static final boolean LINKED_REQUEST = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.request.linked", null), true);
 	private static final boolean ROTATE_UNKNOWN_COOKIE = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.sessionCookie.rotate.unknown", null), false);
-
-	private static final String CFTOKEN = "0";
-
 	/**
 	 * Field <code>pathList</code>
 	 */
@@ -297,6 +294,7 @@ public final class PageContextImpl extends PageContext {
 	private short enablecfoutputonly = 0;
 	private int outputState;
 	private String cfid;
+	private String cftoken;
 
 	private int id;
 	private int requestId;
@@ -582,6 +580,7 @@ public final class PageContextImpl extends PageContext {
 		if (clone) {
 			if (needsSession) tmplPC.getCFID();
 			this.cfid = tmplPC.cfid;
+			this.cftoken = tmplPC.cftoken;
 
 			this.requestTimeout = tmplPC.requestTimeout;
 			this.locale = tmplPC.locale;
@@ -726,6 +725,7 @@ public final class PageContextImpl extends PageContext {
 		requestTimeout = -1;
 		outputState = 0;
 		cfid = null;
+		cftoken = null;
 		locale = null;
 		timeZone = null;
 		url = null;
@@ -2967,7 +2967,8 @@ public final class PageContextImpl extends PageContext {
 
 	@Override
 	public String getCFToken() {
-		return CFTOKEN;
+		if (cftoken == null) initIdAndToken();
+		return cftoken;
 	}
 
 	@Override
@@ -2994,11 +2995,14 @@ public final class PageContextImpl extends PageContext {
 		boolean setCookie = true;
 		// From URL
 		Object oCfid = READ_CFID_FROM_URL ? urlScope().get(KeyConstants._cfid, null) : null;
+		Object oCftoken = READ_CFID_FROM_URL ? urlScope().get(KeyConstants._cftoken, null) : null;
 		// if CFID comes from URL, we only accept if already exists
 		if (oCfid != null) {
+			if (oCftoken == null) oCftoken = "0";
 			if (Decision.isGUIdSimple(oCfid)) {
 				if (!scopeContext.hasExistingCFID(this, Caster.toString(oCfid, null))) {
 					oCfid = null;
+					oCftoken = null;
 				}
 				// log in case CFID is used from URL
 				else if (READ_CFID_FROM_URL_LOG != null) {
@@ -3034,6 +3038,7 @@ public final class PageContextImpl extends PageContext {
 			}
 			else {
 				oCfid = null;
+				oCftoken = null;
 			}
 		}
 
@@ -3041,14 +3046,17 @@ public final class PageContextImpl extends PageContext {
 		if (oCfid == null) {
 			setCookie = false;
 			oCfid = cookieScope().get(KeyConstants._cfid, null);
+			oCftoken = cookieScope().get(KeyConstants._cftoken, null);
 		}
 
 		// check cookie value
 		if (oCfid != null) {
+			if (oCftoken == null) oCftoken = "0";
 			// cookie value is invalid, maybe from ACF
 
 			if (!Decision.isGUIdSimple(oCfid)) {
 				oCfid = null;
+				oCftoken = null;
 				Charset charset = getWebCharset();
 
 				// check if we have multiple cookies with the name "cfid" and another one is valid
@@ -3063,29 +3071,40 @@ public final class PageContextImpl extends PageContext {
 							if (CFIDUtil.isCFID(this, value)) oCfid = value;
 							ReqRspUtil.removeCookie(getHttpServletResponse(), name);
 						}
+						// CFToken
+						else if ("cftoken".equalsIgnoreCase(name)) {
+							value = ReqRspUtil.decode(cookies[i].getValue(), charset.name(), false);
+							if (isValidCfToken(value)) oCftoken = value;
+							ReqRspUtil.removeCookie(getHttpServletResponse(), name);
+						}
 					}
 				}
 
 				if (oCfid != null) {
 					setCookie = true;
+					if (oCftoken == null) oCftoken = "0";
 				}
 			}
 			if (oCfid != null && ROTATE_UNKNOWN_COOKIE) {
+				if (oCftoken == null) oCftoken = "0";
 				if (!scopeContext.hasExistingCFID(this, Caster.toString(oCfid, null))) {
 					LogUtil.log(this, Log.LEVEL_DEBUG, PageContextImpl.class.getName(), "Unknown Session cookie rejected");
 					oCfid = null;
+					oCftoken = null;
 					ReqRspUtil.removeCookie(getHttpServletResponse(), "cfid");
 					ReqRspUtil.removeCookie(getHttpServletResponse(), "cftoken");
 				}
 			}
 		}
 		// New One
-		if (oCfid == null) {
+		if (oCfid == null || oCftoken == null) {
 			setCookie = true;
 			cfid = CFIDUtil.createCFID(this);
+			cftoken = ScopeContext.getNewCFToken();
 		}
 		else {
 			cfid = Caster.toString(oCfid, null);
+			cftoken = Caster.toString(oCftoken, "0");
 		}
 
 		if (setCookie && getApplicationContext().isSetClientCookies()) setClientCookies();
@@ -3102,6 +3121,8 @@ public final class PageContextImpl extends PageContext {
 
 	public void resetIdAndToken() {
 		cfid = CFIDUtil.createCFID(this);
+		cftoken = ScopeContext.getNewCFToken();
+
 		if (getApplicationContext().isSetClientCookies()) setClientCookies();
 	}
 
@@ -3145,7 +3166,7 @@ public final class PageContextImpl extends PageContext {
 		else expires = (int) tmp;
 
 		((CookieImpl) cookieScope()).setCookieEL(KeyConstants._cfid, cfid, expires, secure, path, domain, httpOnly, true, false, samesite, partitioned);
-		((CookieImpl) cookieScope()).setCookieEL(KeyConstants._cftoken, CFTOKEN, expires, secure, path, domain, httpOnly, true, false, samesite, partitioned);
+		((CookieImpl) cookieScope()).setCookieEL(KeyConstants._cftoken, cftoken, expires, secure, path, domain, httpOnly, true, false, samesite, partitioned);
 
 	}
 
