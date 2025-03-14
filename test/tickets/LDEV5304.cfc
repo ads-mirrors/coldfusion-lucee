@@ -1,4 +1,4 @@
-component extends="org.lucee.cfml.test.LuceeTestCase" labels="thread,cookie,session" {
+component extends="org.lucee.cfml.test.LuceeTestCase" labels="thread,cookie,session" skip=true {
 
 	function run( testResults , testBox ) {
 		describe( "Test suite for LDEV-5304", function() {

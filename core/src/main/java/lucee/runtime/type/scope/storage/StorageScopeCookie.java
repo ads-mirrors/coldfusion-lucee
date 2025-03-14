@@ -183,8 +183,8 @@ public abstract class StorageScopeCookie extends StorageScopeImpl {
 
 			}
 		}
-		ScopeContext.debug(log, "create new " + strType + " scope for " + pc.getApplicationContext().getName() + "/" + pc.getCFID());
 		if (!createIfNeeded) return null;
+		ScopeContext.debug(log, "create new " + strType + " scope for " + pc.getApplicationContext().getName() + "/" + pc.getCFID());
 		return new StructImpl(Struct.TYPE_SYNC);
 	}
 
