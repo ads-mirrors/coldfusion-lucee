@@ -79,6 +79,9 @@ public abstract class BaseScriptEngineFactory implements ScriptEngineFactory {
 		catch (RuntimeException re) {
 			re.printStackTrace();
 			throw re;
+		} // TEMP
+		catch (Throwable t) {
+			t.printStackTrace();
 		}
 	}
 
