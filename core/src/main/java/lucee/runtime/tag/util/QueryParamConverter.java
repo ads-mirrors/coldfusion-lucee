@@ -262,7 +262,8 @@ public class QueryParamConverter {
 			// array item without data
 			else {
 				if (item.getName() != null && item.getName().equalsIgnoreCase(name)) {
-					return item.convertToSQLItems();
+					throw new ApplicationException("param [" + name + "] may not be empty", "SQL: " + sql + "");
+					// return item.convertToSQLItems();
 				}
 			}
 		}
