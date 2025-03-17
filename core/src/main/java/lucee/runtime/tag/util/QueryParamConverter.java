@@ -114,7 +114,7 @@ public class QueryParamConverter {
 			NamedSQLItem nsi = (NamedSQLItem) item;
 			sct.setEL(KeyConstants._name, nsi.getName());
 		}
-		if (fns || item.getValue() != null) sct.setEL(KeyConstants._value, item.getValue() );
+		if (fns || item.getValue() != null) sct.setEL(KeyConstants._value, item.getValue());
 		else sct.setEL(KeyConstants._value, "");
 		sct.setEL(KeyConstants._type, SQLCaster.toStringType(item.getType(), null));
 		sct.setEL(KeyConstants._scale, item.getScale());
@@ -255,14 +255,11 @@ public class QueryParamConverter {
 		SQLItems<NamedSQLItem> item;
 		while (it.hasNext()) {
 			item = it.next();
-			if (item.isEmpty()) {
-				throw new ApplicationException("param [" + name + "] may not be empty", "SQL: " + sql + "");
-			}
-			if (item.get(0).name.equalsIgnoreCase(name)) {
+			if (!item.isEmpty() && item.get(0).name.equalsIgnoreCase(name)) {
 				return item.convertToSQLItems();
 			}
 		}
-		throw new ApplicationException("param [" + name + "] not found", "SQL: " + sql + "");
+		throw new ApplicationException("param [" + name + "] not found or an empty list", "SQL: " + sql + "");
 	}
 
 	private static boolean isParamNull(Struct param) throws PageException {
