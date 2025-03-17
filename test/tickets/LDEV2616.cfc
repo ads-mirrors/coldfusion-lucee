@@ -17,7 +17,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				} catch ( e ) {
 					result = e.message;
 				}
-				expect(result).toInclude("param [id] may not be empty" );
+				expect(result).toInclude("not found or an empty list" );
 			});
 
 		});
