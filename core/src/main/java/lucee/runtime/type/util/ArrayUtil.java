@@ -1027,7 +1027,7 @@ public final class ArrayUtil {
 		sct.set("datatype", arr instanceof ArrayTyped ? ((ArrayTyped) arr).getTypeAsString() : "any");
 		sct.set(KeyConstants._class, arr.getClass());
 		// added for backward compat to code expecting simply the class instance is returned LDEV-5381
-		sct.set(KeyConstants._name, sct.getClass().getName());
+		sct.set(KeyConstants._name, arr.getClass().getName());
 		return sct;
 	}
 }
