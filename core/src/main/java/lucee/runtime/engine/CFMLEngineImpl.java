@@ -884,6 +884,11 @@ public final class CFMLEngineImpl implements CFMLEngine {
 		return null;
 	}
 
+	// used by older loaders with reflection, to not delete
+	private ConfigServerImpl getConfigServerImpl() {
+		return getExistingConfigServerImpl();
+	}
+
 	public static Resource getSeverContextConfigDirectory(CFMLEngineFactory factory) throws IOException {
 		ResourceProvider frp = ResourcesImpl.getFileResourceProvider();
 		return frp.getResource(factory.getResourceRoot().getAbsolutePath()).getRealResource("context");
