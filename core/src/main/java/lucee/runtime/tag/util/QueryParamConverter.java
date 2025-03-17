@@ -269,7 +269,7 @@ public class QueryParamConverter {
 		}
 
 		// general exception message
-		throw new ApplicationException("param [" + name + "] not found for SQL String: " + sql + "");
+		throw new ApplicationException("param [" + name + "] not found", "SQL: " + sql + "");
 	}
 
 	private static boolean isParamNull(Struct param) throws PageException {
