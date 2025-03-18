@@ -18,7 +18,7 @@
  **/
 package lucee.commons.digest;
 
-public class HashUtil {
+public final class HashUtil {
 	private static final long[] byteTable = createLookupTable();
 	private static final long HSTART = 0xBB40E64DA205B064L;
 	private static final long HMULT = 7664345821815920749L;

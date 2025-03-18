@@ -24,7 +24,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import lucee.runtime.exp.ExpressionException;
 
-public class NumberUtil {
+public final class NumberUtil {
 	public static int hexToInt(String s, int defaultValue) {
 		try {
 			return hexToInt(s);

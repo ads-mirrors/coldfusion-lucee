@@ -51,7 +51,7 @@ import lucee.commons.lang.StringUtil;
 import lucee.runtime.config.Config;
 import lucee.runtime.engine.ThreadLocalPageContext;
 
-public class FormatUtil {
+public final class FormatUtil {
 
 	public static final short FORMAT_TYPE_DATE = 1;
 	public static final short FORMAT_TYPE_TIME = 2;

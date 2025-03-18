@@ -82,7 +82,7 @@ import lucee.runtime.type.scope.CookieImpl;
 import lucee.runtime.type.util.UDFUtil;
 import lucee.transformer.dynamic.meta.Method;
 
-public class DumpUtil {
+public final class DumpUtil {
 
 	public static final DumpData MAX_LEVEL_REACHED;
 

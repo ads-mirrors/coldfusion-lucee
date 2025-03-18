@@ -18,7 +18,7 @@
  **/
 package lucee.intergral.fusiondebug.server.util;
 
-public class FDUtil {
+public final class FDUtil {
 
 	/**
 	 * replace the last occurrence of from with to

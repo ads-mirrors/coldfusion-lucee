@@ -39,7 +39,7 @@ import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.bytecode.util.SourceNameClassVisitor.SourceInfo;
 
-public class MappingUtil {
+public final class MappingUtil {
 
 	public static PageSource searchMappingRecursive(Mapping mapping, String name, boolean onlyCFC) {
 		if (name.indexOf('/') == -1) { // TODO handle this as well?

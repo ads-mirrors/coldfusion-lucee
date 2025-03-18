@@ -24,7 +24,7 @@ import lucee.runtime.config.ConfigPro;
 import lucee.runtime.osgi.OSGiUtil;
 import lucee.transformer.library.ClassDefinitionImpl;
 
-public class DBUtil {
+public final class DBUtil {
 
 	private static DataSourceDefintion DB2;
 	private static DataSourceDefintion FIREBIRD;

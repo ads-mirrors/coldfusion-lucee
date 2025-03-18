@@ -25,7 +25,7 @@ import java.sql.Statement;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 
-public class DataSourceUtil {
+public final class DataSourceUtil {
 
 	public static boolean isHSQLDB(DatasourceConnection dc) {
 		return is(dc, "HSQL", false, "org.hsqldb.jdbcDriver");

@@ -30,7 +30,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 
-public class DebuggerUtil {
+public final class DebuggerUtil {
 
 	public Struct pointOutClosuresInPersistentScopes(PageContext pc) {
 		Struct sct = new StructImpl();

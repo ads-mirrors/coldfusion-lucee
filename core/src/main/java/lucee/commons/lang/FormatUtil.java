@@ -18,7 +18,7 @@
  **/
 package lucee.commons.lang;
 
-public class FormatUtil {
+public final class FormatUtil {
 
 	/**
 	 * convert given time in nanoseconds to a flaoting point number in milliseconds reduced to max 3

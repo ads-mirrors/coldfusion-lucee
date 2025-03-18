@@ -31,7 +31,7 @@ import lucee.runtime.op.Duplicator;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.ArrayImpl;
 
-public class FontUtil {
+public final class FontUtil {
 
 	private static Array fonts;
 	private static Graphics2D graphics;

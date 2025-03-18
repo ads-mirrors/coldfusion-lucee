@@ -27,7 +27,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.PageContextImpl;
 import lucee.runtime.debug.ActiveQuery;
 
-public class StateUtil {
+public final class StateUtil {
 
 	public static boolean execute(PageContext pc, Statement stat, String sql) throws SQLException {
 		if (pc == null) return stat.execute(sql);

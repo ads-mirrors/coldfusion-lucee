@@ -30,7 +30,7 @@ import lucee.commons.lang.StringUtil;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.util.ListUtil;
 
-public class IPUtil {
+public final class IPUtil {
 
 	private static boolean isCacheEnabled = false;
 	private static boolean isCacheValid = false;

@@ -39,7 +39,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.sql.BlobImpl;
 import lucee.runtime.type.sql.ClobImpl;
 
-public class SQLUtil {
+public final class SQLUtil {
 
 	private static final String ESCAPE_CHARS = "\\{}[]^$*.?+";
 

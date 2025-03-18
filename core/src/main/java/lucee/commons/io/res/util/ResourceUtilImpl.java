@@ -35,7 +35,7 @@ import lucee.runtime.PageSource;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.functions.system.ContractPath;
 
-public class ResourceUtilImpl implements lucee.runtime.util.ResourceUtil {
+public final class ResourceUtilImpl implements lucee.runtime.util.ResourceUtil {
 
 	private ResourceUtilImpl() {
 	}

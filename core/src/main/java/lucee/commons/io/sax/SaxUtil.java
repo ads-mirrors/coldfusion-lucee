@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.xml.sax.Attributes;
 
-public class SaxUtil {
+public final class SaxUtil {
 	public static Map<String, String> toMap(Attributes atts) {
 		Map<String, String> rtn = new HashMap<>();
 		int len = atts.getLength();

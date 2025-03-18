@@ -24,7 +24,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class GatewayUtil {
+public final class GatewayUtil {
 
 	public static Object toCFML(Object obj) {
 		if (obj instanceof Map) return toCFML((Map) obj);

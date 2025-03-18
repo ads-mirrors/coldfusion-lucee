@@ -25,7 +25,7 @@ import java.util.Locale;
 import lucee.runtime.type.comparator.NumberComparator;
 import lucee.runtime.type.comparator.TextComparator;
 
-public class ComparatorUtil {
+public final class ComparatorUtil {
 
 	public static final int SORT_TYPE_TEXT = 1;
 	public static final int SORT_TYPE_TEXT_NO_CASE = 2;

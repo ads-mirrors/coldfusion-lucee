@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
-public class ExternalizableUtil {
+public final class ExternalizableUtil {
 
 	public static String readString(ObjectInput in) throws ClassNotFoundException, IOException {
 		return (String) in.readObject();

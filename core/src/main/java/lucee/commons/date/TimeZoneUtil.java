@@ -29,7 +29,7 @@ import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.util.ListUtil;
 
-public class TimeZoneUtil {
+public final class TimeZoneUtil {
 
 	private static final Map<String, Object> IDS = new HashMap<String, Object>();
 	private static Map<String, TimeZone> dn = new HashMap<String, TimeZone>();

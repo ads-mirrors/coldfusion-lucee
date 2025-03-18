@@ -29,7 +29,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.config.Config;
 import lucee.runtime.engine.ThreadLocalPageContext;
 
-public class CharsetUtil {
+public final class CharsetUtil {
 	public static final Charset UTF8;
 	public static final Charset ISO88591;
 	public static final Charset UTF16BE;

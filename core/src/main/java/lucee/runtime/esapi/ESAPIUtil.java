@@ -6,7 +6,7 @@ import lucee.runtime.ext.function.BIF;
 import lucee.runtime.op.Caster;
 import lucee.runtime.util.ClassUtilImpl;
 
-public class ESAPIUtil {
+public final class ESAPIUtil {
 
 	private static BIF esapi;
 

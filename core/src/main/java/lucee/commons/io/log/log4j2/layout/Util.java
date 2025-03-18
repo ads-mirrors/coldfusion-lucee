@@ -2,7 +2,7 @@ package lucee.commons.io.log.log4j2.layout;
 
 import org.apache.logging.log4j.core.LogEvent;
 
-public class Util {
+public final class Util {
 	public static Object getLoggerName(LogEvent event) {
 		String name = event.getLoggerName();
 		if (lucee.loader.util.Util.isEmpty(name)) {

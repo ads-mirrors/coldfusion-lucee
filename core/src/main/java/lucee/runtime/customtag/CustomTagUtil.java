@@ -36,7 +36,7 @@ import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.type.util.ListUtil;
 
-public class CustomTagUtil {
+public final class CustomTagUtil {
 
 	public static InitFile loadInitFile(PageContext pc, String name) throws PageException {
 

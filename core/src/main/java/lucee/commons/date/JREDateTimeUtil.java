@@ -32,7 +32,7 @@ import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.dt.DateTime;
 
-public class JREDateTimeUtil extends DateTimeUtil {
+public final class JREDateTimeUtil extends DateTimeUtil {
 
 	private static final long SEVEN_DAYS = 604800000L;
 	private static CalendarThreadLocal _calendar = new CalendarThreadLocal();

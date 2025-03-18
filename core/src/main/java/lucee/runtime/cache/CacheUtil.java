@@ -47,7 +47,7 @@ import lucee.runtime.type.dt.TimeSpan;
 import lucee.runtime.type.dt.TimeSpanImpl;
 import lucee.runtime.type.util.KeyConstants;
 
-public class CacheUtil {
+public final class CacheUtil {
 
 	/**
 	 * get the default cache for a certain type, also check definitions in application context

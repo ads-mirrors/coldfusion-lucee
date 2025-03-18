@@ -28,7 +28,7 @@ import lucee.runtime.exp.MissingIncludeException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.type.util.ArrayUtil;
 
-public class MetadataUtil {
+public final class MetadataUtil {
 
 	public static Page getPageWhenMetaDataStillValid(PageContext pc, ComponentImpl comp, boolean ignoreCache) throws PageException {
 		Page page = getPage(pc, comp._getPageSource());
