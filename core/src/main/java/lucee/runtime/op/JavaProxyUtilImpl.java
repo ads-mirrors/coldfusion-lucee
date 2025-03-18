@@ -6,7 +6,7 @@ import lucee.runtime.java.JavaProxy;
 import lucee.runtime.type.UDF;
 import lucee.runtime.util.JavaProxyUtil;
 
-public class JavaProxyUtilImpl implements JavaProxyUtil {
+public final class JavaProxyUtilImpl implements JavaProxyUtil {
 
 	@Override
 	public Object call(ConfigWeb config, Component cfc, String methodName, Object... arguments) {

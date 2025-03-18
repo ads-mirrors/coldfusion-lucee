@@ -36,7 +36,7 @@ import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.runtime.engine.ThreadLocalPageContext;
 
-public class JarUtil {
+public final class JarUtil {
 
 	public static final String[] DEFAULT_IGNORES = new String[] { "java.*"
 

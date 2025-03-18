@@ -29,7 +29,7 @@ import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 
-public class ORMExceptionUtil {
+public final class ORMExceptionUtil {
 
 	private static Method setAdditional;
 

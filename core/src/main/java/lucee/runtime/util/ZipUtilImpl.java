@@ -22,7 +22,7 @@ import java.io.IOException;
 
 import lucee.commons.io.res.Resource;
 
-public class ZipUtilImpl implements ZipUtil {
+public final class ZipUtilImpl implements ZipUtil {
 
 	private static ZipUtil instance = new ZipUtilImpl();
 

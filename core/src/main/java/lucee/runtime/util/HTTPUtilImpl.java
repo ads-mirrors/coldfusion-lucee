@@ -35,7 +35,7 @@ import lucee.commons.net.http.Header;
 import lucee.commons.net.http.httpclient.HTTPEngine4Impl;
 import lucee.runtime.net.proxy.ProxyDataImpl;
 
-public class HTTPUtilImpl implements lucee.runtime.util.HTTPUtil {
+public final class HTTPUtilImpl implements lucee.runtime.util.HTTPUtil {
 
 	private static lucee.runtime.util.HTTPUtil instance = new HTTPUtilImpl();
 

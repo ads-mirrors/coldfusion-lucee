@@ -39,7 +39,7 @@ import lucee.transformer.bytecode.visitor.WhileVisitor;
 import lucee.transformer.expression.Expression;
 import lucee.transformer.expression.literal.LitString;
 
-public class TagGroupUtil {
+public final class TagGroupUtil {
 
 	// Undefined us()
 	public static final Type UNDEFINED = Type.getType(Undefined.class);

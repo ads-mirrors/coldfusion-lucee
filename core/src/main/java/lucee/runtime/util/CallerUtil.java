@@ -22,7 +22,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.Null;
 
-public class CallerUtil {
+public final class CallerUtil {
 
 	public final static int TYPE_DATA = 1;
 	public final static int TYPE_UDF_ARGS = 2;

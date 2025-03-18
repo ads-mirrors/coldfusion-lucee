@@ -34,7 +34,7 @@ import lucee.runtime.type.Resetable;
 import lucee.runtime.type.it.EnumAsIt;
 import lucee.runtime.type.util.ListUtil;
 
-public class ForEachUtil {
+public final class ForEachUtil {
 
 	public static Iterator loopCollection(Object o) throws PageException {
 		// only components are handled with ForEachIteratorable, because of he magic functions

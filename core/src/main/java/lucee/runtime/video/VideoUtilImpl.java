@@ -36,7 +36,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.functions.string.Hash;
 import lucee.runtime.op.Caster;
 
-public class VideoUtilImpl implements VideoUtil {
+public final class VideoUtilImpl implements VideoUtil {
 
 	private static Map<String, SoftReference<int[]>> sizes = new ConcurrentHashMap<String, SoftReference<int[]>>();
 	private static VideoUtilImpl instance = new VideoUtilImpl();

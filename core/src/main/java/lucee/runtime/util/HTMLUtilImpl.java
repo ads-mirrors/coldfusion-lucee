@@ -22,7 +22,7 @@ import java.util.List;
 
 import lucee.commons.lang.HTMLEntities;
 
-public class HTMLUtilImpl implements HTMLUtil {
+public final class HTMLUtilImpl implements HTMLUtil {
 
 	@Override
 	public String escapeHTML(String str) {

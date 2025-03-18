@@ -23,7 +23,7 @@ import java.io.IOException;
 import jakarta.servlet.jsp.tagext.BodyContent;
 import lucee.runtime.PageContext;
 
-public class BodyContentUtil {
+public final class BodyContentUtil {
 
 	public static void clearAndPop(PageContext pc, BodyContent bc) {
 		if (bc != null) {

@@ -18,7 +18,7 @@
  **/
 package lucee.runtime.sql.exp.op;
 
-public class OperationUtil {
+public final class OperationUtil {
 	public static String toString(int operator) {
 		switch (operator) {
 		case Operation.OPERATION2_DIVIDE:

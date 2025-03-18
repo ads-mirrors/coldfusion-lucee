@@ -47,7 +47,7 @@ import lucee.runtime.type.KeyImpl;
 import lucee.transformer.library.function.FunctionLib;
 import lucee.transformer.library.function.FunctionLibFunction;
 
-public class ClassUtilImpl implements ClassUtil {
+public final class ClassUtilImpl implements ClassUtil {
 
 	@Override
 	public Class<?> loadClass(String className) throws ClassException {

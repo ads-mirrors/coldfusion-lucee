@@ -53,7 +53,7 @@ import lucee.transformer.library.function.FunctionLib;
 import lucee.transformer.library.function.FunctionLibFunction;
 import lucee.transformer.library.function.FunctionLibFunctionArg;
 
-public class MemberUtil {
+public final class MemberUtil {
 
 	private static final Object DEFAULT = new Object();
 	private static Map<Short, Map<Collection.Key, FunctionLibFunction>> matchesCFML = new HashMap<Short, Map<Collection.Key, FunctionLibFunction>>();

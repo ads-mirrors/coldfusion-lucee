@@ -32,7 +32,7 @@ import lucee.runtime.type.Collection;
 import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.Struct;
 
-public class ScopeUtil {
+public final class ScopeUtil {
 
 	public static Map<String, String[]> getParameterMap(URLItem[][] itemsArr, String[] encodings) {
 		String n, v;

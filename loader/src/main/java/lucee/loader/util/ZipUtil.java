@@ -27,7 +27,7 @@ import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-public class ZipUtil {
+public final class ZipUtil {
 
 	public static void zip(final File src, final File trgZipFile) throws IOException {
 		if (trgZipFile.isDirectory()) throw new IllegalArgumentException("argument trgZipFile is the name of an existing directory");

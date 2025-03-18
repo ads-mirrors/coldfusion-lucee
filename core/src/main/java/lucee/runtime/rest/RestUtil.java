@@ -30,7 +30,7 @@ import lucee.runtime.rest.path.Path;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.ListUtil;
 
-public class RestUtil {
+public final class RestUtil {
 
 	public static String[] splitPath(String path) {
 		return ListUtil.listToStringArray(path, '/');

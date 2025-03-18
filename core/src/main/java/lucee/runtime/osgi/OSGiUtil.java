@@ -82,7 +82,7 @@ import lucee.runtime.osgi.BundleRange.VersionRange;
 import lucee.runtime.type.util.ListUtil;
 import lucee.transformer.bytecode.util.SystemExitScanner;
 
-public class OSGiUtil {
+public final class OSGiUtil {
 	private static boolean[] checkBundleRanges = new boolean[] { true, false };
 	private static final int QUALIFIER_APPENDIX_SNAPSHOT = 1;
 	private static final int QUALIFIER_APPENDIX_BETA = 2;

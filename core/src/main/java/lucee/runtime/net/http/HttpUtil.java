@@ -31,7 +31,7 @@ import lucee.runtime.thread.SerializableCookie;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 
-public class HttpUtil {
+public final class HttpUtil {
 
 	/**
 	 * read all headers from request and return it
