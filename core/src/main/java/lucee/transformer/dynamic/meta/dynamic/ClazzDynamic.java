@@ -82,7 +82,7 @@ public class ClazzDynamic extends Clazz {
 			synchronized (clazz) {
 				sr = classes.get(clazz);
 				if (sr == null || (cd = sr.get()) == null) {
-					if (log != null) log.debug("dynamic", "extract metadata from [" + clazz.getName() + "]");
+					if (LogUtil.doesDebug(log)) log.debug("dynamic", "extract metadata from [" + clazz.getName() + "]");
 					cd = new ClazzDynamic(clazz, log);
 					classes.put(clazz, new SoftReference<ClazzDynamic>(cd));
 				}

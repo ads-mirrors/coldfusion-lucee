@@ -288,6 +288,10 @@ public final class LogUtil {
 		return (log != null && log.getLogLevel() >= Log.LEVEL_WARN);
 	}
 
+	public static boolean doesTrace(Log log) {
+		return (log != null && log.getLogLevel() >= Log.LEVEL_TRACE);
+	}
+
 	public static boolean doesError(Log log) {
 		return (log != null && log.getLogLevel() >= Log.LEVEL_ERROR);
 	}

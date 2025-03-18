@@ -19,6 +19,7 @@
 package lucee.runtime.tag;
 
 import lucee.commons.io.log.Log;
+import lucee.commons.io.log.LogUtil;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.AbortException;
 import lucee.runtime.exp.ApplicationException;
@@ -69,7 +70,7 @@ public final class Abort extends TagImpl {
 	@Override
 	public int doStartTag() throws PageException {
 		Log log = ThreadLocalPageContext.getLog(pageContext, "application");
-		if (log != null) log.log(Log.LEVEL_TRACE, "cfabort", "abort at " + CallStackGet.call(pageContext, "text"));
+		if (LogUtil.doesTrace(log)) log.log(Log.LEVEL_TRACE, "cfabort", "abort at " + CallStackGet.call(pageContext, "text"));
 		if (showerror != null) throw new AbortException(showerror);
 		throw new lucee.runtime.exp.Abort(type);
 	}
