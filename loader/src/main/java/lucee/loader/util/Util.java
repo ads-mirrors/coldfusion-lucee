@@ -50,7 +50,7 @@ import lucee.runtime.exp.PageException;
 /**
  * Util class for different little jobs
  */
-public class Util {
+public final class Util {
 	private static final int DEFAULT_BLOCK_SIZE = 0xffff;// 65535
 
 	private static File tempFile;

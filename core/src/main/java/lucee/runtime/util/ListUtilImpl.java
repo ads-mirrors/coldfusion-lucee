@@ -24,7 +24,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.Collection.Key;
 
-public class ListUtilImpl implements ListUtil {
+public final class ListUtilImpl implements ListUtil {
 
 	@Override
 	public Array listWithQuotesToArray(String list, String delimiter, String quotes) {

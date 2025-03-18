@@ -39,7 +39,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 
-public class MavenUtil {
+public final class MavenUtil {
 	private static Map<String, String> sysprops;
 	private static Object token = new SerializableObject();
 

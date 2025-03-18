@@ -34,7 +34,7 @@ import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.Struct;
 
-public class CollectionUtil {
+public final class CollectionUtil {
 
 	public static final Object NULL = new Object();
 

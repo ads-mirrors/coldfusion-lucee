@@ -23,7 +23,7 @@ import lucee.commons.io.log.LogUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.engine.ThreadLocalPageContext;
 
-public class DeprecatedUtil {
+public final class DeprecatedUtil {
 
 	public static void tagAttribute(String tagName, String attrName) {
 		tagAttribute(null, tagName, attrName);

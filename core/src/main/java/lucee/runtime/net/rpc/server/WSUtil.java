@@ -5,7 +5,7 @@ import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.PageException;
 
-public class WSUtil {
+public final class WSUtil {
 
 	// used by genertaed bytecode
 	public static Object invoke(String name, Object[] args) throws PageException {

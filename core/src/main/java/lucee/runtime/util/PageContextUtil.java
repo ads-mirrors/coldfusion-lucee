@@ -65,7 +65,7 @@ import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 import lucee.servlet.http.HTTPServletImpl;
 
-public class PageContextUtil {
+public final class PageContextUtil {
 
 	public static PageSource getPageSource(Mapping[] mappings, String realPath) {
 		PageSource ps;

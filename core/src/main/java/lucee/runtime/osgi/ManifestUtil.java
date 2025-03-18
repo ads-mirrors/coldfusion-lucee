@@ -33,7 +33,7 @@ import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.type.util.ListUtil;
 
-public class ManifestUtil {
+public final class ManifestUtil {
 
 	private static final int DEFAULT_MAX_LINE_SIZE = 100;
 	private static final Set<String> DEFAULT_MAIN_FILTER = new HashSet<String>();

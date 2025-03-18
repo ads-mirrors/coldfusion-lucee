@@ -90,7 +90,7 @@ import lucee.runtime.type.scope.ArgumentIntKey;
 import lucee.transformer.library.function.FunctionLibFunction;
 import lucee.transformer.library.function.FunctionLibFunctionArg;
 
-public class UDFUtil {
+public final class UDFUtil {
 
 	public static final short TYPE_UDF = 1;
 	public static final short TYPE_BIF = 2;

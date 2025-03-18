@@ -35,7 +35,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.type.Query;
 import lucee.runtime.type.Struct;
 
-public class SystemUtilImpl implements SystemUtil {
+public final class SystemUtilImpl implements SystemUtil {
 
 	@Override
 	public boolean isFSCaseSensitive() {

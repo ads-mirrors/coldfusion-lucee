@@ -29,7 +29,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
 import lucee.runtime.type.util.ListUtil;
 
-public class FileUtil {
+public final class FileUtil {
 
 	public static final int NAMECONFLICT_UNDEFINED = 1; // can't start at 0 because we need to be able to do a bitmask test
 	public static final int NAMECONFLICT_ERROR = 2;

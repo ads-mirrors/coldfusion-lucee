@@ -48,7 +48,7 @@ import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.Query;
 import lucee.runtime.type.util.QueryUtil;
 
-public class DBUtilImpl implements DBUtil {
+public final class DBUtilImpl implements DBUtil {
 
 	@Override
 	public Object toSqlType(SQLItem item) throws PageException {

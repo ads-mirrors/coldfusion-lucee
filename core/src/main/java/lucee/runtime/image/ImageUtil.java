@@ -15,7 +15,7 @@ import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 
-public class ImageUtil {
+public final class ImageUtil {
 
 	private static Class getImageClass() {
 		try {

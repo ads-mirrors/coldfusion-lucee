@@ -27,7 +27,7 @@ import lucee.runtime.component.ComponentLoader;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.type.util.ComponentUtil;
 
-public class TemplateUtilImpl implements TemplateUtil {
+public final class TemplateUtilImpl implements TemplateUtil {
 
 	@Override
 	public Class<?> getComponentJavaAccess(PageContext pc, Component component, RefBoolean isNew, boolean create, boolean writeLog, boolean suppressWSbeforeArg, boolean output,

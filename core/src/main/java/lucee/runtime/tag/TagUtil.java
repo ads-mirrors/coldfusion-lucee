@@ -66,7 +66,7 @@ import lucee.transformer.library.tag.TagLib;
 import lucee.transformer.library.tag.TagLibTag;
 import lucee.transformer.library.tag.TagLibTagAttr;
 
-public class TagUtil {
+public final class TagUtil {
 
 	public static final short ORIGINAL_CASE = 0;
 	public static final short UPPER_CASE = 1;

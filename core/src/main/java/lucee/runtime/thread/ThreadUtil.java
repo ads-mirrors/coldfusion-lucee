@@ -51,7 +51,7 @@ import lucee.runtime.net.http.HttpServletRequestDummy;
 import lucee.runtime.net.http.HttpServletResponseDummy;
 import lucee.runtime.type.Struct;
 
-public class ThreadUtil {
+public final class ThreadUtil {
 
 	private static final boolean ALLOW_FUTURE_THREADS = false;
 	// private static final Class<?> THREAD_CLASS = Thread.class;

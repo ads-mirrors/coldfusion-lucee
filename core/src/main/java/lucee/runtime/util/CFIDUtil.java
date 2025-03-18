@@ -17,7 +17,7 @@ import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
 
-public class CFIDUtil {
+public final class CFIDUtil {
 	public static Boolean IDENTIFY_CLIENT_DEFAULT = Boolean.FALSE;
 	private static Boolean identifyClient;
 

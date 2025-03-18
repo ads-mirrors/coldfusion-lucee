@@ -10,7 +10,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.config.Config;
 import lucee.runtime.thread.SerializableCookie;
 
-public class LSPUtil {
+public final class LSPUtil {
 
 	public static String formatLSPMessage(String message) {
 		return String.format("Content-Length: %d\r\n\r\n%s", message.length(), message);

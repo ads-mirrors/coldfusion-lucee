@@ -71,7 +71,7 @@ import lucee.runtime.type.QueryImpl;
 import lucee.runtime.type.query.QueryResult;
 import lucee.runtime.type.query.SimpleQuery;
 
-public class QueryUtil {
+public final class QueryUtil {
 
 	public static Cast toCast(ResultSet result, int type) {
 		if (type == Types.TIMESTAMP) {

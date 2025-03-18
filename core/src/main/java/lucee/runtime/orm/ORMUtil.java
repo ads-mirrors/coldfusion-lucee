@@ -49,7 +49,7 @@ import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 
-public class ORMUtil {
+public final class ORMUtil {
 
 	public static ORMSession getSession(PageContext pc) throws PageException {
 		return getSession(pc, true);

@@ -36,7 +36,7 @@ import lucee.loader.engine.CFMLEngineFactory;
 import lucee.loader.engine.CFMLEngineFactorySupport;
 import lucee.loader.util.Util;
 
-public class BundleUtil {
+public final class BundleUtil {
 	/*
 	 * public static Bundle addBundlex(BundleContext context,File bundle, boolean start) throws
 	 * IOException, BundleException { return addBundle(context,bundle.getAbsolutePath(),bundle,start); }

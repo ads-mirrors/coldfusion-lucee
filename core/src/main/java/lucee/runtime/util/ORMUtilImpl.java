@@ -26,7 +26,7 @@ import lucee.runtime.orm.ORMExceptionUtil;
 import lucee.runtime.orm.ORMSession;
 import lucee.runtime.type.Struct;
 
-public class ORMUtilImpl implements ORMUtil {
+public final class ORMUtilImpl implements ORMUtil {
 
 	@Override
 	public void resetEngine(PageContext pc, boolean force) throws PageException {
