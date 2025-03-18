@@ -423,5 +423,10 @@
         "sysprop": "lucee.sessionCookie.rotate.unknown",
         "envvar": "LUCEE_SESSIONCOOKIE_ROTATE_UNKNOWN",
         "desc": "Default true, when false, unknown cfml session cookies won't be automatically rotated"
+    },
+    {
+        "sysprop": "lucee.inspect.template",
+        "envvar": "LUCEE_INSPECT_TEMPLATE",
+        "desc": "Controls how often Lucee checks to see if a template has changed"
     }
 ]
