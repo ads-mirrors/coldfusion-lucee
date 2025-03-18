@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import lucee.commons.lang.ClassLoaderDefault;
-import lucee.commons.lang.ClassUtil;
 
 public class CombinedClassLoader extends ClassLoader implements ClassLoaderDefault {
 
@@ -54,14 +53,14 @@ public class CombinedClassLoader extends ClassLoader implements ClassLoaderDefau
 			if (c != null) return c;
 		}
 		else {
-			if (ClassUtil.isClassAvailable(core, name)) {
-				try {
-					return core.loadClass(name);
-				}
-				catch (ClassNotFoundException e) {
-
-				}
+			// if (ClassUtil.isClassAvailable(core, name)) {
+			try {
+				return core.loadClass(name);
 			}
+			catch (ClassNotFoundException e) {
+
+			}
+			// }
 		}
 
 		if (loader instanceof ClassLoaderDefault) {
@@ -69,14 +68,14 @@ public class CombinedClassLoader extends ClassLoader implements ClassLoaderDefau
 			if (c != null) return c;
 		}
 		else {
-			if (ClassUtil.isClassAvailable(loader, name)) {
-				try {
-					return loader.loadClass(name);
-				}
-				catch (ClassNotFoundException e) {
-
-				}
+			// if (ClassUtil.isClassAvailable(loader, name)) {
+			try {
+				return loader.loadClass(name);
 			}
+			catch (ClassNotFoundException e) {
+
+			}
+			// }
 		}
 		return defaultValue;
 	}

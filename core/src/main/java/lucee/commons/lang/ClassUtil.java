@@ -1029,8 +1029,9 @@ public final class ClassUtil {
 		return Reflector.getConstructorInstance(clazz, EMPTY_OBJ, true).invoke();
 	}
 
-	public static boolean isClassAvailable(ClassLoader loader, String className) {
-		String resourcePath = className.replace('.', '/').concat(".class");
-		return loader.getResource(resourcePath) != null;
-	}
+	/*
+	 * public static boolean isClassAvailableX(ClassLoader loader, String className) { String
+	 * resourcePath = className.replace('.', '/').concat(".class"); return
+	 * loader.getResource(resourcePath) != null; }
+	 */
 }
