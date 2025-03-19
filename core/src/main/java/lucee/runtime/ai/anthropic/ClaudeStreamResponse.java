@@ -7,7 +7,7 @@ import lucee.commons.lang.StringUtil;
 import lucee.runtime.ai.AIResponseListener;
 import lucee.runtime.ai.AIUtil;
 import lucee.runtime.ai.Response;
-import lucee.runtime.ai.ResponsePart;
+import lucee.runtime.ai.Part;
 import lucee.runtime.converter.ConverterException;
 import lucee.runtime.converter.JSONConverter;
 import lucee.runtime.converter.JSONDateFormat;
@@ -76,7 +76,7 @@ public final class ClaudeStreamResponse implements Response {
 	}
 
 	@Override
-	public List<ResponsePart> getAnswers() {
+	public List<Part> getAnswers() {
 		// TODO add support for multipart
 		return AIUtil.getAnswersFromAnswer(this);
 	}

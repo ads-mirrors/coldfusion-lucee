@@ -42,7 +42,7 @@ public interface Response {
 	 *
 	 * @return List of ResponsePart objects representing all content in the response
 	 */
-	public List<ResponsePart> getAnswers();
+	public List<Part> getAnswers();
 
 	/**
 	 * Indicates whether this response contains multiple parts with different content.

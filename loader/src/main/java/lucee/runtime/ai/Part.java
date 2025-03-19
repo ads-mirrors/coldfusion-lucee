@@ -3,11 +3,11 @@ package lucee.runtime.ai;
 import lucee.runtime.type.Struct;
 
 /**
- * The ResponsePart interface defines methods for accessing individual content parts within a
- * multipart AI response. Each part represents a distinct piece of content with its own content type
+ * The Part interface defines methods for accessing individual content parts within a multipart AI
+ * request or response. Each part represents a distinct piece of content with its own content type
  * and data.
  */
-public interface ResponsePart {
+public interface Part {
 
 	/**
 	 * Common content type constants

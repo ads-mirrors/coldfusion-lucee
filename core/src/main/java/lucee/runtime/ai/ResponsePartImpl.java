@@ -7,19 +7,7 @@ import lucee.runtime.type.StructImpl;
  * The ResponsePart class represents individual content parts within a multipart AI response. Each
  * part contains specific content with its own type and data, along with metadata.
  */
-public final class ResponsePartImpl implements ResponsePart {
-
-	/**
-	 * Common content type constants
-	 */
-	public static final String CONTENT_TYPE_TEXT = "text/plain";
-	public static final String CONTENT_TYPE_HTML = "text/html";
-	public static final String CONTENT_TYPE_MARKDOWN = "text/markdown";
-	public static final String CONTENT_TYPE_JSON = "application/json";
-	public static final String CONTENT_TYPE_IMAGE = "image/png";
-	public static final String CONTENT_TYPE_SVG = "image/svg+xml";
-	public static final String CONTENT_TYPE_AUDIO = "audio/mpeg";
-	public static final String CONTENT_TYPE_BINARY = "application/octet-stream";
+public final class ResponsePartImpl implements Part {
 
 	private final String contentType;
 	private final Object content;

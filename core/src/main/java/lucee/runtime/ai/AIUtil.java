@@ -182,7 +182,7 @@ public final class AIUtil {
 		if (rsp.isMultiPart()) {
 			StringBuilder sb = new StringBuilder();
 			String a;
-			for (ResponsePart rp: rsp.getAnswers()) {
+			for (Part rp: rsp.getAnswers()) {
 				a = rp.getAsString();
 				if (a != null) sb.append(a);
 			}
@@ -192,8 +192,8 @@ public final class AIUtil {
 
 	}
 
-	public static List<ResponsePart> getAnswersFromAnswer(Response rsp) {
-		List<ResponsePart> parts = new ArrayList<>();
+	public static List<Part> getAnswersFromAnswer(Response rsp) {
+		List<Part> parts = new ArrayList<>();
 		parts.add(new ResponsePartImpl(rsp.getAnswer()));
 		return parts;
 	}
@@ -231,7 +231,7 @@ public final class AIUtil {
 		}
 
 		@Override
-		public List<ResponsePart> getAnswersFromAnswer(Response rsp) {
+		public List<Part> getAnswersFromAnswer(Response rsp) {
 			return AIUtil.getAnswersFromAnswer(rsp);
 		}
 

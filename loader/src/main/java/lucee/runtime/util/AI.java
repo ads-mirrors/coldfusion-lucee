@@ -4,7 +4,7 @@ import java.util.List;
 
 import lucee.runtime.ai.AIEngine;
 import lucee.runtime.ai.Response;
-import lucee.runtime.ai.ResponsePart;
+import lucee.runtime.ai.Part;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.type.Struct;
 
@@ -22,5 +22,5 @@ public interface AI {
 
 	public String extractStringAnswer(Response rsp);
 
-	public List<ResponsePart> getAnswersFromAnswer(Response rsp);
+	public List<Part> getAnswersFromAnswer(Response rsp);
 }
