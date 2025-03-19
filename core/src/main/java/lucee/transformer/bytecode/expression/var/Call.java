@@ -15,7 +15,7 @@ import lucee.transformer.bytecode.util.ExpressionUtil;
 import lucee.transformer.bytecode.util.Types;
 import lucee.transformer.expression.Expression;
 
-public class Call extends ExpressionBase implements Func {
+public final class Call extends ExpressionBase implements Func {
 
 	// Object getFunction (PageContext,Object,Object[])
 	private final static Method GET_FUNCTION_KEY = new Method("getFunction", Types.OBJECT, new Type[] { Types.PAGE_CONTEXT, Types.OBJECT, Types.OBJECT_ARRAY });

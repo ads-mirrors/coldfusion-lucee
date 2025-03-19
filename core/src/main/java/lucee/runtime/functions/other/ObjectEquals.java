@@ -30,7 +30,7 @@ import lucee.runtime.type.Collection;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.UDF;
 
-public class ObjectEquals {
+public final class ObjectEquals {
 	public static boolean call(PageContext pc, Object left, Object right) {
 		return OpUtil.equalsComplexEL(pc, left, right, false, false);
 		// return _equals(new HashSet<Object>(), left, right);

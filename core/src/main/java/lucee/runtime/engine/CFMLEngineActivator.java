@@ -22,7 +22,7 @@ import org.osgi.framework.ServiceRegistration;
 
 import lucee.loader.engine.CFMLEngine;
 
-public class CFMLEngineActivator {
+public final class CFMLEngineActivator {
 
 	private ServiceRegistration<?> registration;
 

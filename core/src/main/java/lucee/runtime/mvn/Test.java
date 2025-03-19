@@ -5,7 +5,7 @@ import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.ResourcesImpl;
 import lucee.runtime.mvn.MavenUtil.GAVSO;
 
-public class Test {
+public final class Test {
 	public static void main(String[] args) throws Exception {
 		Resource dir = ResourcesImpl.getFileResourceProvider().getResource("/Users/mic/Tmp3/www");
 		GAVSO[] arr = new GAVSO[] {

@@ -20,7 +20,7 @@ package lucee.commons.collection;
 
 import java.util.LinkedHashMap;
 
-public class LinkedHashMapMaxSize<K, V> extends LinkedHashMap<K, V> {
+public final class LinkedHashMapMaxSize<K, V> extends LinkedHashMap<K, V> {
 
 	private int maxSize;
 

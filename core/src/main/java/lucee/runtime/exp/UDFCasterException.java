@@ -22,7 +22,7 @@ import lucee.runtime.type.FunctionArgument;
 import lucee.runtime.type.UDF;
 import lucee.runtime.type.util.Type;
 
-public class UDFCasterException extends CasterException {
+public final class UDFCasterException extends CasterException {
 
 	private static final long serialVersionUID = 4863042711433241644L;
 

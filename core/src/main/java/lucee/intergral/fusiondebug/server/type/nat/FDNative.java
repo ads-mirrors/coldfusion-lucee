@@ -32,7 +32,7 @@ import lucee.intergral.fusiondebug.server.type.simple.FDSimpleVariable;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.ObjectWrap;
 
-public class FDNative extends FDValueNotMutability {
+public final class FDNative extends FDValueNotMutability {
 
 	private ArrayList children = new ArrayList();
 

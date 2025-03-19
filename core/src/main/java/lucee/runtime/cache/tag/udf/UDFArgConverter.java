@@ -30,7 +30,7 @@ import lucee.runtime.type.Collection;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.Query;
 
-public class UDFArgConverter {
+public final class UDFArgConverter {
 
 	/**
 	 * 

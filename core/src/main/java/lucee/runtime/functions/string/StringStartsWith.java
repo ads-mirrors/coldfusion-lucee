@@ -27,7 +27,7 @@ import lucee.runtime.op.Caster;
 /**
  * implements the member method String.startWith(prefix, ignoreCase)
  */
-public class StringStartsWith extends BIF {
+public final class StringStartsWith extends BIF {
 
 	public static boolean call(PageContext pc, String input, String subs, boolean ignoreCase) {
 

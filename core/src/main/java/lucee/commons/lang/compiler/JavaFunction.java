@@ -2,7 +2,7 @@ package lucee.commons.lang.compiler;
 
 import lucee.runtime.PageSource;
 
-public class JavaFunction {
+public final class JavaFunction {
 
 	public final byte[] byteCode;
 	public final SourceCode sourceCode;

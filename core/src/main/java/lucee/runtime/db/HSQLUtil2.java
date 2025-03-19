@@ -26,7 +26,7 @@ import lucee.runtime.sql.SelectParser;
 import lucee.runtime.sql.Selects;
 import lucee.runtime.sql.exp.Column;
 
-public class HSQLUtil2 {
+public final class HSQLUtil2 {
 
 	private Selects selects;
 

@@ -5,7 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * A Java program that attaches a Java agent to an external process.
  */
-public class Attacher {
+public final class Attacher {
 
 	/**
 	 * Base for access to a reflective member to make the code more readable.

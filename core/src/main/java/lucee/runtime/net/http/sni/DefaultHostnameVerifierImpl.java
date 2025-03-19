@@ -5,7 +5,7 @@ import java.security.cert.X509Certificate;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLSession;
 
-public class DefaultHostnameVerifierImpl extends AbsDefaultHostnameVerifier {
+public final class DefaultHostnameVerifierImpl extends AbsDefaultHostnameVerifier {
 
 	@Override
 	public boolean verify(String host, SSLSession session) {

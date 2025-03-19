@@ -21,7 +21,7 @@ package lucee.transformer.bytecode.statement.tag;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 
-public class TagImport extends TagBaseNoFinal {
+public final class TagImport extends TagBaseNoFinal {
 
 	private String path;
 

@@ -46,7 +46,7 @@ import lucee.runtime.sql.exp.value.ValueNumber;
 import lucee.runtime.sql.exp.value.ValueString;
 import lucee.runtime.type.Collection.Key;
 
-public class SelectParser {
+public final class SelectParser {
 
 	/*
 	 * SELECT [{LIMIT <offset> <limit> | TOP <limit>}[1]][ALL | DISTINCT] { <selectExpression> | table.*

@@ -14,7 +14,7 @@ import lucee.runtime.type.StructImpl;
 /**
  * implements BIF QueryRowData
  */
-public class QueryRowDataByIndex extends BIF {
+public final class QueryRowDataByIndex extends BIF {
 
 	private static final long serialVersionUID = -3492163362858443357L;
 

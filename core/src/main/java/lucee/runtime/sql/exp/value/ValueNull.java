@@ -20,7 +20,7 @@ package lucee.runtime.sql.exp.value;
 
 import lucee.runtime.sql.exp.Literal;
 
-public class ValueNull extends ValueSupport implements Literal {
+public final class ValueNull extends ValueSupport implements Literal {
 
 	public ValueNull() {
 		super("NULL");

@@ -22,7 +22,7 @@ import java.util.List;
 
 import lucee.intergral.fusiondebug.server.type.FDValueNotMutability;
 
-public class FDSimpleValue extends FDValueNotMutability {
+public final class FDSimpleValue extends FDValueNotMutability {
 
 	private String str;
 	private List children;

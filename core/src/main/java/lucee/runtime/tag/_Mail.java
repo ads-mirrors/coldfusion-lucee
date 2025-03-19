@@ -35,7 +35,7 @@ import lucee.runtime.op.Caster;
  */
 public abstract class _Mail extends TagImpl {
 
-	public class Credential {
+	public final class Credential {
 
 	}
 

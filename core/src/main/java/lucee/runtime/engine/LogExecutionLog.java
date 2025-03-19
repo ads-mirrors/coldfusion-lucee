@@ -30,7 +30,7 @@ import lucee.runtime.PageContextImpl;
 import lucee.runtime.PageSource;
 import lucee.runtime.op.Caster;
 
-public class LogExecutionLog extends ExecutionLogSupport {
+public final class LogExecutionLog extends ExecutionLogSupport {
 
 	private PageContext pc;
 	private ResourceSnippetsMap snippetsMap = new ResourceSnippetsMap(767, 191);

@@ -36,7 +36,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.dt.DateTime;
 import lucee.runtime.type.dt.DateTimeImpl;
 
-public class CFMLResource extends ResourceSupport {
+public final class CFMLResource extends ResourceSupport {
 
 	private static final long serialVersionUID = 7693378761683536212L;
 

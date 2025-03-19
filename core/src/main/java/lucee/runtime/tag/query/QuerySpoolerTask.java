@@ -30,7 +30,7 @@ import lucee.runtime.thread.ThreadUtil;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.UDFPropertiesImpl;
 
-public class QuerySpoolerTask extends SpoolerTaskSupport {
+public final class QuerySpoolerTask extends SpoolerTaskSupport {
 
 	private static final long serialVersionUID = 2450199479366505177L;
 

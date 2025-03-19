@@ -6,7 +6,7 @@ import lucee.transformer.Position;
 import lucee.transformer.interpreter.InterpreterContext;
 import lucee.transformer.interpreter.expression.ExpressionBase;
 
-public class Empty extends ExpressionBase {
+public final class Empty extends ExpressionBase {
 
 	public Empty(Factory f, Position start, Position end) {
 		super(f, start, end);

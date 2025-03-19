@@ -25,7 +25,7 @@ import java.sql.Types;
 import java.util.TimeZone;
 import java.util.UUID;
 
-public class OtherCast implements Cast {
+public final class OtherCast implements Cast {
 
 	private final int type;
 

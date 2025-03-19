@@ -53,7 +53,7 @@ import lucee.transformer.library.function.FunctionLib;
 import lucee.transformer.library.function.FunctionLibFunction;
 import lucee.transformer.library.function.FunctionLibFunctionArg;
 
-public class BIF extends MemberSupport implements UDFPlus {
+public final class BIF extends MemberSupport implements UDFPlus {
 
 	private final FunctionLibFunction flf;
 	private short rtnType = CFTypes.TYPE_UNKNOW;

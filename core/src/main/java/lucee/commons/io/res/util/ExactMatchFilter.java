@@ -5,7 +5,7 @@ import lucee.commons.io.res.ResourceProvider;
 import lucee.commons.io.res.ResourceProviderPro;
 import lucee.commons.io.res.filter.ResourceNameFilter;
 
-public class ExactMatchFilter implements ResourceNameFilter {
+public final class ExactMatchFilter implements ResourceNameFilter {
 
 	private String name;
 

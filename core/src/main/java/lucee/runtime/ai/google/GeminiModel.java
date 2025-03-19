@@ -6,7 +6,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.KeyConstants;
 
-public class GeminiModel extends AIModelSupport {
+public final class GeminiModel extends AIModelSupport {
 
 	public GeminiModel(Struct raw, String charset) throws PageException {
 		// TODO make split better

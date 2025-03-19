@@ -7,7 +7,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.UDF;
 
-public class ComponentSpoolerTaskListener extends CFMLSpoolerTaskListener {
+public final class ComponentSpoolerTaskListener extends CFMLSpoolerTaskListener {
 
 	private static final long serialVersionUID = -4726393142628827635L;
 	private Component component;

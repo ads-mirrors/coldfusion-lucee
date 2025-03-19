@@ -24,7 +24,7 @@ import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.scope.ScopeContext;
 
-public class SessionTracker {
+public final class SessionTracker {
 
 	public static int getSessionCount() {
 		PageContext pc = ThreadLocalPageContext.get();

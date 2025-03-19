@@ -28,7 +28,7 @@ import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.util.ListUtil;
 
-public class FeedDeclaration {
+public final class FeedDeclaration {
 
 	private static Map<String, FeedDeclaration> declarations = new HashMap<String, FeedDeclaration>();
 	private static FeedDeclaration defaultDeclaration;

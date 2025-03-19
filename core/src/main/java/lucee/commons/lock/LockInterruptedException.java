@@ -20,7 +20,7 @@ package lucee.commons.lock;
 
 import lucee.runtime.exp.NativeException;
 
-public class LockInterruptedException extends NativeException {
+public final class LockInterruptedException extends NativeException {
 
 	private static final long serialVersionUID = -3450411938137674552L;
 	private InterruptedException e;

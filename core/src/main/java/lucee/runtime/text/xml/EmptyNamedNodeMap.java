@@ -22,7 +22,7 @@ import org.w3c.dom.DOMException;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-public class EmptyNamedNodeMap implements NamedNodeMap {
+public final class EmptyNamedNodeMap implements NamedNodeMap {
 
 	@Override
 	public int getLength() {

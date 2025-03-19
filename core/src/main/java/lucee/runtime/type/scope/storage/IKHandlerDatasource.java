@@ -31,7 +31,7 @@ import lucee.runtime.type.scope.storage.db.SQLExecutionFactory;
 import lucee.runtime.type.scope.storage.db.SQLExecutor;
 import lucee.runtime.type.util.KeyConstants;
 
-public class IKHandlerDatasource implements IKHandler {
+public final class IKHandlerDatasource implements IKHandler {
 
 	public static final String PREFIX = "cf";
 

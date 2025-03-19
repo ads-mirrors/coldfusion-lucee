@@ -18,7 +18,7 @@
  **/
 package lucee.transformer.bytecode.reflection;
 
-public class Test {
+public final class Test {
 	public void testVoid(int a, Integer b) {
 		Class x = Integer.class;
 		if (x == null) return;

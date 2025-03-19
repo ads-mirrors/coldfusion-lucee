@@ -24,7 +24,7 @@ import com.intergral.fusiondebug.server.IFDStackFrame;
 import com.intergral.fusiondebug.server.IFDValue;
 import com.intergral.fusiondebug.server.IFDVariable;
 
-public class FDSimpleVariable implements IFDVariable {
+public final class FDSimpleVariable implements IFDVariable {
 
 	private String name;
 	private IFDValue value;

@@ -21,7 +21,7 @@ import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.gateway.Gateway;
 
 // FUTURE remove this class
-public class GatewayFactory {
+public final class GatewayFactory {
 
 	public static Gateway toGateway(Object obj) throws ApplicationException {
 		if (obj instanceof Gateway) return (Gateway) obj;

@@ -31,7 +31,7 @@ import lucee.transformer.library.tag.TagLibTag;
 import lucee.transformer.library.tag.TagLibTagScript;
 import lucee.transformer.util.SourceCode;
 
-public class Data {
+public final class Data {
 
 	public final SourceCode srcCode;
 	public final TransfomerSettings settings;

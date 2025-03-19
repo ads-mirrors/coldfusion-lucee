@@ -1,6 +1,6 @@
 package lucee.runtime.ai;
 
-public class ConversationImpl implements Conversation {
+public final class ConversationImpl implements Conversation {
 
 	private Request req;
 	private Response rsp;

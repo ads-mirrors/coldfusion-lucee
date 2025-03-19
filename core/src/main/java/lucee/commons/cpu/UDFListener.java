@@ -7,7 +7,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.type.UDF;
 
-public class UDFListener extends CFMLListener {
+public final class UDFListener extends CFMLListener {
 
 	private UDF udf;
 

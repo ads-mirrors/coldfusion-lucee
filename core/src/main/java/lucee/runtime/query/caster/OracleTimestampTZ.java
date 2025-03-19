@@ -27,7 +27,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.reflection.Reflector;
 import lucee.runtime.type.dt.DateTimeImpl;
 
-public class OracleTimestampTZ implements Cast {
+public final class OracleTimestampTZ implements Cast {
 
 	@Override
 	public Object toCFType(TimeZone tz, ResultSet rst, int columnIndex) throws SQLException, IOException {

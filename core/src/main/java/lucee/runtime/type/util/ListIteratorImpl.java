@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
 
-public class ListIteratorImpl<T> implements ListIterator<T> {
+public final class ListIteratorImpl<T> implements ListIterator<T> {
 
 	private static final int UNDEFINED = Integer.MIN_VALUE;
 	private List<T> list;

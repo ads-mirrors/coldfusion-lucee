@@ -26,7 +26,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.BIF;
 import lucee.runtime.op.Caster;
 
-public class GetCanonicalPath extends BIF {
+public final class GetCanonicalPath extends BIF {
 
 	private static final long serialVersionUID = -7516439220584467382L;
 

@@ -32,7 +32,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.rest.Mapping;
 import lucee.runtime.rest.RestUtil;
 
-public class RestDeleteApplication {
+public final class RestDeleteApplication {
 	public static String call(PageContext pc, String dirPath) throws PageException {
 		return call(pc, dirPath, null);
 	}

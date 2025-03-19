@@ -23,7 +23,7 @@ import lucee.runtime.PageContextImpl;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.Function;
 
-public class SessionInvalidate implements Function {
+public final class SessionInvalidate implements Function {
 
 	private static final long serialVersionUID = -4219932267580490719L;
 

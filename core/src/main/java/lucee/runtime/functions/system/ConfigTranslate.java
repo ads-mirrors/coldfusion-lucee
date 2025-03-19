@@ -24,7 +24,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.text.xml.XMLUtil;
 import lucee.runtime.type.Struct;
 
-public class ConfigTranslate extends BIF {
+public final class ConfigTranslate extends BIF {
 
 	private static final long serialVersionUID = -7311113511064530439L;
 

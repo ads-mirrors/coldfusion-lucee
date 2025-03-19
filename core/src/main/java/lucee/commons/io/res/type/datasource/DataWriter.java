@@ -24,7 +24,7 @@ import java.sql.SQLException;
 import lucee.commons.io.res.type.datasource.core.Core;
 import lucee.runtime.db.DatasourceConnection;
 
-public class DataWriter extends Thread {
+public final class DataWriter extends Thread {
 
 	private Core core;
 	private DatasourceConnection dc;

@@ -6,7 +6,7 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 
-public class SelectivePrintStream extends PrintStream {
+public final class SelectivePrintStream extends PrintStream {
 
 	private final PrintStream originalPrintStream;
 	private final PrintStream interceptedOut;

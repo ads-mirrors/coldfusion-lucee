@@ -30,7 +30,7 @@ import lucee.runtime.db.driver.ConnectionProxy;
 import lucee.runtime.debug.ActiveQuery;
 import lucee.runtime.engine.ThreadLocalPageContext;
 
-public class StateCallableStatement extends CallableStatementProxy {
+public final class StateCallableStatement extends CallableStatementProxy {
 
 	public StateCallableStatement(ConnectionProxy conn, CallableStatement prepareCall, String sql) {
 		super(conn, prepareCall, sql);

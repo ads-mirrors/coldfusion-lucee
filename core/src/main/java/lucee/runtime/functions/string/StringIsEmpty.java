@@ -28,7 +28,7 @@ import lucee.runtime.op.Caster;
 /**
  * implements the String member method isEmpty()
  */
-public class StringIsEmpty extends BIF {
+public final class StringIsEmpty extends BIF {
 
 	private static final long serialVersionUID = -85767818984230151L;
 

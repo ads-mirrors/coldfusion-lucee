@@ -22,7 +22,7 @@ import lucee.runtime.config.Config;
 import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.type.Query;
 
-public class DummySearchEngine implements SearchEngine {
+public final class DummySearchEngine implements SearchEngine {
 
 	private static final String LUCENE = "EFDEB172-F52E-4D84-9CD1A1F561B3DFC8";
 	private static boolean tryToInstall = true;

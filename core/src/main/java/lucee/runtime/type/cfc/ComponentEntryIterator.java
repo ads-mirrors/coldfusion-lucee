@@ -25,7 +25,7 @@ import lucee.runtime.Component;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.it.EntryIterator;
 
-public class ComponentEntryIterator extends EntryIterator implements Iterator<Entry<Key, Object>> {
+public final class ComponentEntryIterator extends EntryIterator implements Iterator<Entry<Key, Object>> {
 
 	private Component cfc;
 	private int access;
@@ -43,7 +43,7 @@ public class ComponentEntryIterator extends EntryIterator implements Iterator<En
 		return new CAEntryImpl(cfc, key, access);
 	}
 
-	public class CAEntryImpl extends EntryImpl implements Entry<Key, Object> {
+	public final class CAEntryImpl extends EntryImpl implements Entry<Key, Object> {
 
 		private Component cfc;
 		private int access;

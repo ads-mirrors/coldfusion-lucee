@@ -8,7 +8,7 @@ import lucee.runtime.db.DatasourceConnection;
 import lucee.runtime.db.DatasourceManagerImpl;
 import lucee.runtime.exp.PageException;
 
-public class StatmentClose implements CloserJob {
+public final class StatmentClose implements CloserJob {
 
 	private DatasourceManagerImpl manager;
 	private DatasourceConnection dc;

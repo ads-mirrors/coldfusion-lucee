@@ -20,7 +20,7 @@ package lucee.runtime.debug;
 
 import lucee.commons.io.SystemUtil.TemplateLine;
 
-public class DebugTextFragmentImpl implements DebugTextFragment {
+public final class DebugTextFragmentImpl implements DebugTextFragment {
 	private final String text;
 	private final String template;
 	private final int line;

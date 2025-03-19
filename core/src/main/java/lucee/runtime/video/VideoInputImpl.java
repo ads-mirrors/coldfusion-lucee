@@ -24,7 +24,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.type.util.ListUtil;
 
-public class VideoInputImpl implements VideoInput {
+public final class VideoInputImpl implements VideoInput {
 
 	private Resource resource;
 	private String args = "";

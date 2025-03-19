@@ -2,7 +2,7 @@ package lucee.commons.lang.compiler;
 
 import javax.tools.Diagnostic.Kind;
 
-public class JavaCompilerException extends Exception {
+public final class JavaCompilerException extends Exception {
 
 	private static final long serialVersionUID = 7791408833450791923L;
 

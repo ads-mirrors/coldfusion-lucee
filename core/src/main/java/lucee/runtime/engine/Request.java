@@ -6,7 +6,7 @@ import lucee.commons.io.SystemUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.exp.PageException;
 
-public class Request extends Thread {
+public final class Request extends Thread {
 
 	public static final short TYPE_CFML = 1;
 	public static final short TYPE_REST = 3;

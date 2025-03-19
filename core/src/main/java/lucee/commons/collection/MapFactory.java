@@ -22,7 +22,7 @@ import java.util.Map;
 
 import lucee.commons.collection.concurrent.ConcurrentHashMapNullSupport;
 
-public class MapFactory {
+public final class MapFactory {
 	public static <K, V> Map<K, V> getConcurrentMap() {
 		return new ConcurrentHashMapNullSupport<K, V>();
 	}

@@ -22,7 +22,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.util.Cast;
 import lucee.transformer.dynamic.meta.Method;
 
-public class DataDogLayout extends AbstractStringLayout {
+public final class DataDogLayout extends AbstractStringLayout {
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 	private static final Class[] EMPTY_CLASS = new Class[0];
 	private static final Object[] EMPTY_OBJ = new Object[0];

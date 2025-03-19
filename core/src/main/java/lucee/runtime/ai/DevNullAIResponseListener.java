@@ -2,7 +2,7 @@ package lucee.runtime.ai;
 
 import lucee.runtime.exp.PageException;
 
-public class DevNullAIResponseListener implements AIResponseListener {
+public final class DevNullAIResponseListener implements AIResponseListener {
 
 	public static final AIResponseListener INSTANCE = new DevNullAIResponseListener();
 

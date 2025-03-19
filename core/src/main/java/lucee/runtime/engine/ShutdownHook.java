@@ -20,7 +20,7 @@ package lucee.runtime.engine;
 
 import lucee.runtime.config.ConfigServer;
 
-public class ShutdownHook extends Thread {
+public final class ShutdownHook extends Thread {
 
 	private ConfigServer cs;
 

@@ -83,7 +83,7 @@ import lucee.runtime.type.util.UDFUtil;
 /**
  * Client to implement http based webservice
  */
-public class HTTPClient implements Objects, Iteratorable {
+public final class HTTPClient implements Objects, Iteratorable {
 
 	private static final long serialVersionUID = -7920478535030737537L;
 

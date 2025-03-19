@@ -22,7 +22,7 @@ import lucee.commons.lang.ExceptionUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.exp.PageException;
 
-public class UDFCustomType implements CustomType {
+public final class UDFCustomType implements CustomType {
 
 	private UDF udf;
 

@@ -24,7 +24,7 @@ import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.ext.function.Function;
 import lucee.runtime.op.Caster;
 
-public class GetSystemFreeMemory implements Function {
+public final class GetSystemFreeMemory implements Function {
 
 	private static final long serialVersionUID = -2808311251929634506L;
 

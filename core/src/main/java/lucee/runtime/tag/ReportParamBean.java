@@ -18,7 +18,7 @@
  **/
 package lucee.runtime.tag;
 
-public class ReportParamBean {
+public final class ReportParamBean {
 
 	private String name;
 	private Object value;

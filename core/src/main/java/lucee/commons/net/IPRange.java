@@ -28,7 +28,7 @@ import java.net.UnknownHostException;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.type.util.ListUtil;
 
-public class IPRange implements Serializable {
+public final class IPRange implements Serializable {
 
 	/**
 	 * 

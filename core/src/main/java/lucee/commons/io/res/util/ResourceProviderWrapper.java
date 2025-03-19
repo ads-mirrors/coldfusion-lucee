@@ -26,7 +26,7 @@ import lucee.commons.io.res.ResourceProvider;
 import lucee.commons.io.res.ResourceProviderPro;
 import lucee.commons.io.res.Resources;
 
-public class ResourceProviderWrapper implements ResourceProviderPro {
+public final class ResourceProviderWrapper implements ResourceProviderPro {
 
 	private ResourceProvider provider;
 

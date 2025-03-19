@@ -26,7 +26,7 @@ import lucee.runtime.config.ConfigServerImpl;
 import lucee.runtime.db.ClassDefinition;
 import lucee.runtime.type.Struct;
 
-public class ServerCacheConnection implements CacheConnectionPlus {
+public final class ServerCacheConnection implements CacheConnectionPlus {
 
 	private CacheConnection cc;
 	private ConfigServerImpl cs;

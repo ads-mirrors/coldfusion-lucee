@@ -22,7 +22,7 @@ import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 
-public class MavenLoad implements Function {
+public final class MavenLoad implements Function {
 
 	private static final long serialVersionUID = -7512374040201658763L;
 

@@ -15,7 +15,7 @@ import javax.tools.JavaFileObject.Kind;
  * Created by trung on 5/3/15. Edited by turpid-monkey on 9/25/15, completed support for multiple
  * compile units.
  */
-public class ExtendedStandardJavaFileManager extends ForwardingJavaFileManager<JavaFileManager> {
+public final class ExtendedStandardJavaFileManager extends ForwardingJavaFileManager<JavaFileManager> {
 
 	private List<CompiledCode> compiledCode = new ArrayList<CompiledCode>();
 	private DynamicClassLoader cl;

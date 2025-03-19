@@ -15,7 +15,7 @@ import lucee.runtime.config.ConfigPro;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.osgi.OSGiUtil;
 
-public class JVMCompiler implements Compiler {
+public final class JVMCompiler implements Compiler {
 
 	@Override
 	public byte[] compile(ConfigPro config, SourceCode sc) throws ApplicationException, JavaCompilerException {

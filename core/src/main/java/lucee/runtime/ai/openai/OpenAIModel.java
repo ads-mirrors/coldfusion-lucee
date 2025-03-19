@@ -11,7 +11,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 
-public class OpenAIModel extends AIModelSupport {
+public final class OpenAIModel extends AIModelSupport {
 
 	private static Map<String, String> labels = new ConcurrentHashMap<>();
 

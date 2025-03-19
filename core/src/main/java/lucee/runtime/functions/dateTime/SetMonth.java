@@ -10,7 +10,7 @@ import lucee.runtime.ext.function.BIF;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.dt.DateTime;
 
-public class SetMonth extends BIF {
+public final class SetMonth extends BIF {
 
 	private static final long serialVersionUID = 4327734406273363858L;
 

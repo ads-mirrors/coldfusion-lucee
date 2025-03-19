@@ -39,7 +39,7 @@ import lucee.runtime.op.Caster;
 /**
  * Cryptor
  */
-public class Cryptor {
+public final class Cryptor {
 
 	public final static String DEFAULT_CHARSET = "UTF-8";
 	public final static String DEFAULT_ALGORITHM;

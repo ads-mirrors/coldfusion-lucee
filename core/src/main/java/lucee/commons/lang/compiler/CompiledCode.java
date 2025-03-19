@@ -7,7 +7,7 @@ import java.net.URI;
 
 import javax.tools.SimpleJavaFileObject;
 
-public class CompiledCode extends SimpleJavaFileObject {
+public final class CompiledCode extends SimpleJavaFileObject {
 	private ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	private String className;
 

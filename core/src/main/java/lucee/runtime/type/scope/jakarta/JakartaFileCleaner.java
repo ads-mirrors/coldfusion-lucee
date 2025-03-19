@@ -10,7 +10,7 @@ import jakarta.servlet.ServletContextListener;
  * A servlet context listener, which ensures that the {@link FileCleaningTracker}'s reaper thread is
  * terminated, when the web application is destroyed.
  */
-public class JakartaFileCleaner implements ServletContextListener {
+public final class JakartaFileCleaner implements ServletContextListener {
 
 	/**
 	 * Attribute name, which is used for storing an instance of {@link FileCleaningTracker} in the web

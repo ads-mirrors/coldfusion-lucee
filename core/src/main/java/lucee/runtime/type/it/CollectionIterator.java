@@ -23,7 +23,7 @@ import java.util.Iterator;
 import lucee.runtime.type.Collection;
 import lucee.runtime.type.Collection.Key;
 
-public class CollectionIterator implements Iterator<Object> {
+public final class CollectionIterator implements Iterator<Object> {
 
 	private Iterator<Collection.Key> keys;
 	private Collection coll;

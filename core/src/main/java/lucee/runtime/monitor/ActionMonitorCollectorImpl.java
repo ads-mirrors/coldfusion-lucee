@@ -28,7 +28,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.config.ConfigServer;
 import lucee.runtime.config.ConfigWeb;
 
-public class ActionMonitorCollectorImpl implements ActionMonitorCollector {
+public final class ActionMonitorCollectorImpl implements ActionMonitorCollector {
 
 	private List<ActionMonitor> monitors;
 

@@ -31,7 +31,7 @@ import lucee.runtime.sql.exp.Literal;
 import lucee.runtime.sql.exp.op.Operation;
 import lucee.runtime.sql.exp.value.ValueNumber;
 
-public class Selects {
+public final class Selects {
 
 	private List<Expression> orderbys = new ArrayList<Expression>();
 	private List<Select> selects = new ArrayList<Select>();

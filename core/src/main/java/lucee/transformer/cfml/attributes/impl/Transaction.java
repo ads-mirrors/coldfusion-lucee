@@ -25,7 +25,7 @@ import lucee.transformer.cfml.attributes.AttributeEvaluator;
 import lucee.transformer.cfml.attributes.AttributeEvaluatorException;
 import lucee.transformer.library.tag.TagLibTag;
 
-public class Transaction implements AttributeEvaluator {
+public final class Transaction implements AttributeEvaluator {
 
 	@Override
 	public TagLibTag evaluate(TagLibTag tagLibTag, Tag tag) throws AttributeEvaluatorException {

@@ -6,7 +6,7 @@ import java.util.List;
 import lucee.aprint;
 import lucee.commons.cpu.CPULogger.StaticData;
 
-public class ConsoleListener implements Listener {
+public final class ConsoleListener implements Listener {
 
 	private boolean showStacktrace;
 

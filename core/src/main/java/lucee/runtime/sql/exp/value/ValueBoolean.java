@@ -20,7 +20,7 @@ package lucee.runtime.sql.exp.value;
 
 import lucee.runtime.sql.exp.Literal;
 
-public class ValueBoolean extends ValueSupport implements Literal {
+public final class ValueBoolean extends ValueSupport implements Literal {
 
 	private boolean value;
 

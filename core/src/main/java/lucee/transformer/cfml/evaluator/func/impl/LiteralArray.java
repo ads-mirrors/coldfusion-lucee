@@ -8,7 +8,7 @@ import lucee.transformer.cfml.evaluator.EvaluatorException;
 import lucee.transformer.cfml.evaluator.FunctionEvaluator;
 import lucee.transformer.library.function.FunctionLibFunction;
 
-public class LiteralArray implements FunctionEvaluator {
+public final class LiteralArray implements FunctionEvaluator {
 
 	@Override
 	public FunctionLibFunction pre(BIF bif, FunctionLibFunction flf) throws TemplateException {

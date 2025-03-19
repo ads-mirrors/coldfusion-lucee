@@ -22,7 +22,7 @@ import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ConstantsDouble {
+public final class ConstantsDouble {
 
 	public static Double __10 = Double.valueOf(-10.0d);
 	public static Double __9_9 = Double.valueOf(-9.9d);

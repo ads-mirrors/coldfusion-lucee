@@ -9,7 +9,7 @@ import lucee.commons.lang.StringUtil;
 import lucee.runtime.config.Config;
 import lucee.runtime.engine.ThreadLocalPageContext;
 
-public class LogClassLoading {
+public final class LogClassLoading {
 	private static Log log;
 	private static String logName;
 

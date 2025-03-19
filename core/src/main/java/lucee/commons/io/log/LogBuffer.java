@@ -6,7 +6,7 @@ import java.util.List;
 import lucee.runtime.config.Config;
 import lucee.runtime.engine.ThreadLocalPageContext;
 
-public class LogBuffer implements Log {
+public final class LogBuffer implements Log {
 
 	private List<LogData> datas = new ArrayList<>();
 	private int level = Log.LEVEL_TRACE;

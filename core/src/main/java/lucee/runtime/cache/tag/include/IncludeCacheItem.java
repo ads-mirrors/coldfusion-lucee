@@ -32,7 +32,7 @@ import lucee.runtime.dump.Dumpable;
 import lucee.runtime.dump.SimpleDumpData;
 import lucee.runtime.type.Duplicable;
 
-public class IncludeCacheItem implements CacheItem, Serializable, Dumpable, Duplicable {
+public final class IncludeCacheItem implements CacheItem, Serializable, Dumpable, Duplicable {
 
 	private static final long serialVersionUID = -3616023500492159529L;
 

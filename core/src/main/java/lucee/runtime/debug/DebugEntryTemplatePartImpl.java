@@ -20,7 +20,7 @@ package lucee.runtime.debug;
 
 import lucee.runtime.PageSource;
 
-public class DebugEntryTemplatePartImpl extends DebugEntrySupport implements DebugEntryTemplatePart {
+public final class DebugEntryTemplatePartImpl extends DebugEntrySupport implements DebugEntryTemplatePart {
 
 	private int startPos, startLine;
 	private int endPos, endLine;

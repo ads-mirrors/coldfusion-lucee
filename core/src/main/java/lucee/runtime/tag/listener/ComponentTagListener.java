@@ -7,7 +7,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.UDF;
 
-public class ComponentTagListener extends TagListenerSupport {
+public final class ComponentTagListener extends TagListenerSupport {
 
 	private Component component;
 

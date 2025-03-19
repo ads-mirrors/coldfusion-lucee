@@ -34,7 +34,7 @@ import lucee.transformer.bytecode.util.Types;
 import lucee.transformer.expression.literal.Literal;
 import lucee.transformer.expression.var.Variable;
 
-public class Null extends ExpressionBase implements Literal {
+public final class Null extends ExpressionBase implements Literal {
 
 	private static Map<Factory, Null> instances = new ConcurrentHashMap<>();
 

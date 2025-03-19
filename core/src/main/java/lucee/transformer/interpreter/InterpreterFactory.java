@@ -47,7 +47,7 @@ import lucee.transformer.interpreter.op.OpNegateNumber;
 import lucee.transformer.interpreter.op.OpNumber;
 import lucee.transformer.interpreter.op.OpString;
 
-public class InterpreterFactory extends FactoryBase {
+public final class InterpreterFactory extends FactoryBase {
 
 	private final LitBoolean TRUE;
 	private final LitBoolean FALSE;

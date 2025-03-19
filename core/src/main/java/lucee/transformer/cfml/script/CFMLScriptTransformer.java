@@ -24,7 +24,7 @@ import lucee.transformer.cfml.Data;
 import lucee.transformer.cfml.tag.TagDependentBodyTransformer;
 import lucee.transformer.expression.Expression;
 
-public class CFMLScriptTransformer extends AbstrCFMLScriptTransformer implements TagDependentBodyTransformer {
+public final class CFMLScriptTransformer extends AbstrCFMLScriptTransformer implements TagDependentBodyTransformer {
 	@Override
 	public Body transform(Data data, String surroundingTagName) throws TemplateException {
 

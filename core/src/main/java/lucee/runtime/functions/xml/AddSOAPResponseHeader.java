@@ -24,7 +24,7 @@ import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 
-public class AddSOAPResponseHeader {
+public final class AddSOAPResponseHeader {
 	public static boolean call(PageContext pc, String nameSpace, String name, Object value) throws PageException {
 		return call(pc, nameSpace, name, value, false);
 	}

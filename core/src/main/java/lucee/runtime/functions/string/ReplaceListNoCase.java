@@ -7,7 +7,7 @@ import lucee.runtime.ext.function.BIF;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
 
-public class ReplaceListNoCase extends BIF {
+public final class ReplaceListNoCase extends BIF {
 
 	private static final long serialVersionUID = -8530160236310177587L;
 

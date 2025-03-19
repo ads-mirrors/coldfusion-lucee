@@ -30,7 +30,7 @@ import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.type.Query;
 
-public class AsyncRequestMonitor implements RequestMonitorPro {
+public final class AsyncRequestMonitor implements RequestMonitorPro {
 
 	private RequestMonitorPro monitor;
 	private boolean logEnabled;

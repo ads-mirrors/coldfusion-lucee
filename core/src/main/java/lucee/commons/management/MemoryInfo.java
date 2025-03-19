@@ -25,7 +25,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Stack;
 
-public class MemoryInfo {
+public final class MemoryInfo {
 
 	public static int ALL = 0;
 	public static int PRIVATE_ONLY = 1;

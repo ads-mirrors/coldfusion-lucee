@@ -10,7 +10,7 @@ import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.StructSupport;
 
-public class SystemPropStruct extends AbsSystemStruct {
+public final class SystemPropStruct extends AbsSystemStruct {
 
 	private static SystemPropStruct instance = new SystemPropStruct();
 

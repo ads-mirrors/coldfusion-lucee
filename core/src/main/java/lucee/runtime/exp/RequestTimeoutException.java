@@ -26,7 +26,7 @@ import lucee.runtime.lock.LockManager;
 import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.type.util.ListUtil;
 
-public class RequestTimeoutException extends Abort implements Stop {
+public final class RequestTimeoutException extends Abort implements Stop {
 
 	private static final long serialVersionUID = -37886162001453270L;
 

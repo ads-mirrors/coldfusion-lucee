@@ -34,7 +34,7 @@ import lucee.runtime.type.ArrayImpl;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.KeyConstants;
 
-public class ORMExecuteQuery {
+public final class ORMExecuteQuery {
 
 	public static Object call(PageContext pc, String hql) throws PageException {
 		return _call(pc, hql, null, false, null);

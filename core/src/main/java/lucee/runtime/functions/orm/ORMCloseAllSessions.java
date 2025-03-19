@@ -22,7 +22,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.orm.ORMUtil;
 
-public class ORMCloseAllSessions {
+public final class ORMCloseAllSessions {
 	public static String call(PageContext pc) throws PageException {
 		ORMUtil.getSession(pc).closeAll(pc);
 		return null;

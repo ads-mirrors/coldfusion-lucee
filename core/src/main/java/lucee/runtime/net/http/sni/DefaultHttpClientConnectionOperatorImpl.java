@@ -13,7 +13,7 @@ import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.impl.conn.DefaultHttpClientConnectionOperator;
 import org.apache.http.protocol.HttpContext;
 
-public class DefaultHttpClientConnectionOperatorImpl extends DefaultHttpClientConnectionOperator {
+public final class DefaultHttpClientConnectionOperatorImpl extends DefaultHttpClientConnectionOperator {
 
 	public DefaultHttpClientConnectionOperatorImpl(Lookup<ConnectionSocketFactory> socketFactoryRegistry) {
 		super(socketFactoryRegistry, null, null);

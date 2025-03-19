@@ -27,7 +27,7 @@ import lucee.transformer.expression.Expression;
 import lucee.transformer.expression.var.Variable;
 import lucee.transformer.library.function.FunctionLibFunction;
 
-public class IsNull implements FunctionEvaluator {
+public final class IsNull implements FunctionEvaluator {
 
 	@Override
 	public void execute(BIF bif, FunctionLibFunction flf) throws TemplateException {

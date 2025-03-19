@@ -1,7 +1,7 @@
 package lucee.runtime.net.proxy;
 
 // Proxy Auto Config
-public class PAC {
+public final class PAC {
 	private static String str = "function FindProxyForURL(url, host)\n" + "\n" + "    {\n" + "\n" + "        if (shExpMatch(host, \"192.168.*\") ||\n" + "\n"
 			+ "            shExpMatch(host, \"127.*\")     ||\n" + "\n" + "            shExpMatch(host, \"172.16.*\")  ||\n" + "\n"
 			+ "            shExpMatch(host, \"172.17.*\")  ||\n" + "\n" + "            shExpMatch(host, \"172.18.*\")  ||\n" + "\n"

@@ -14,7 +14,7 @@ import lucee.transformer.bytecode.util.ASMConstants;
 import lucee.transformer.bytecode.util.Types;
 import lucee.transformer.expression.Expression;
 
-public class TryCatch extends StatementBaseNoFinal {
+public final class TryCatch extends StatementBaseNoFinal {
 	final static Method TO_PAGEEXCEPTION = new Method("toPageException", Types.PAGE_EXCEPTION, new Type[] { Types.THROWABLE });
 
 	final static Method HANDLE_LISTENER = new Method("handleListener", Types.VOID, new Type[] { Types.PAGE_CONTEXT, Types.OBJECT, Types.PAGE_EXCEPTION, Types.OBJECT });

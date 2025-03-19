@@ -24,7 +24,7 @@ import java.sql.SQLException;
 
 import lucee.runtime.exp.AlwaysThrow;
 
-public class DatasourceResourceOutputStream extends OutputStream {
+public final class DatasourceResourceOutputStream extends OutputStream {
 
 	private final DataWriter dw;
 	private final OutputStream os;

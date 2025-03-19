@@ -10,7 +10,7 @@ import lucee.commons.io.SystemUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.runtime.PageContextImpl;
 
-public class MonitorState {
+public final class MonitorState {
 
 	public static List<BlockedThread> checkForBlockedThreads(Collection<PageContextImpl> values) {
 		List<BlockedThread> blockets = new ArrayList<MonitorState.BlockedThread>();

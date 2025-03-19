@@ -31,7 +31,7 @@ import lucee.runtime.cache.legacy.CacheItem;
 import lucee.runtime.op.Caster;
 import lucee.runtime.writer.CFMLWriter;
 
-public class DebugCFMLWriter extends CFMLWriter implements DebugOutputLog {
+public final class DebugCFMLWriter extends CFMLWriter implements DebugOutputLog {
 
 	private CFMLWriter writer;
 	private List<DebugTextFragment> fragments = new ArrayList<DebugTextFragment>();

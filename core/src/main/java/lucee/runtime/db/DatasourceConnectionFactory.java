@@ -18,7 +18,7 @@ import lucee.runtime.config.DatasourceConnPool;
 import lucee.runtime.exp.DatabaseException;
 import lucee.runtime.exp.PageException;
 
-public class DatasourceConnectionFactory extends BasePooledObjectFactory<DatasourceConnection> {
+public final class DatasourceConnectionFactory extends BasePooledObjectFactory<DatasourceConnection> {
 	private static final ConcurrentHashMap<String, String> tokens = new ConcurrentHashMap<String, String>();
 
 	private DatasourceConnPool pool;

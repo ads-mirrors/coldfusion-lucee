@@ -20,7 +20,7 @@ package lucee.runtime.video;
 
 import lucee.commons.io.res.Resource;
 
-public class VideoOutputImpl implements VideoOutput {
+public final class VideoOutputImpl implements VideoOutput {
 
 	private Resource resource;
 	private double offset = 0;

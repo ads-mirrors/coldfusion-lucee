@@ -8,7 +8,7 @@ import lucee.runtime.ext.function.Function;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.Query;
 
-public class QueryClear extends BIF implements Function {
+public final class QueryClear extends BIF implements Function {
 
 	private static final long serialVersionUID = 3755794610970965992L;
 

@@ -6,7 +6,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.UDF;
 
-public class UDFSpoolerTaskListener extends CFMLSpoolerTaskListener {
+public final class UDFSpoolerTaskListener extends CFMLSpoolerTaskListener {
 
 	private static final long serialVersionUID = 1262226524494987654L;
 	private UDF before;

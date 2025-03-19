@@ -27,7 +27,7 @@ import lucee.runtime.converter.JSONConverter;
 import lucee.runtime.extension.RHExtension;
 import lucee.runtime.functions.other.CreateUniqueId;
 
-public class ExportImportHandler {
+public final class ExportImportHandler {
 	public static final short TYPE_CONFIGURATION = 1;
 	public static final short TYPE_EXTENSION = 2;
 	public static final short TYPE_CORE = 4;

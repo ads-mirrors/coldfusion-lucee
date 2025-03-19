@@ -7,7 +7,7 @@ import lucee.runtime.dump.DumpTable;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.PageException;
 
-public class StructListenerImpl extends StructImpl {
+public final class StructListenerImpl extends StructImpl {
 
 	private static final long serialVersionUID = -2286369022408510584L;
 

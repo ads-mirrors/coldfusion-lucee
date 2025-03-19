@@ -50,7 +50,7 @@ import lucee.runtime.type.QueryColumn;
 import lucee.runtime.type.it.ForEachQueryIterator;
 import lucee.runtime.type.util.QueryUtil;
 
-public class TOQuery extends TOCollection implements Query, com.allaire.cfx.Query {
+public final class TOQuery extends TOCollection implements Query, com.allaire.cfx.Query {
 
 	private Query qry;
 

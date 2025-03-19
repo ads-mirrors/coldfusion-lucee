@@ -20,7 +20,7 @@ package lucee.transformer.bytecode.expression;
 
 import lucee.transformer.bytecode.statement.udf.Closure;
 
-public class ClosureAsExpression extends FunctionAsExpression {
+public final class ClosureAsExpression extends FunctionAsExpression {
 
 	public ClosureAsExpression(Closure closure) {
 		super(closure);

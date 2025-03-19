@@ -10,7 +10,7 @@ import lucee.runtime.exp.DatabaseException;
 import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.op.Caster;
 
-public class SQLXMLCast implements Cast {
+public final class SQLXMLCast implements Cast {
 
 	@Override
 	public Object toCFType(TimeZone tz, ResultSet rst, int columnIndex) throws SQLException {

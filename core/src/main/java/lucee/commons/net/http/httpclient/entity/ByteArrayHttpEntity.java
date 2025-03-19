@@ -24,7 +24,7 @@ import org.apache.http.entity.ContentType;
 
 import lucee.commons.net.HTTPUtil;
 
-public class ByteArrayHttpEntity extends ByteArrayEntity implements Entity4 {
+public final class ByteArrayHttpEntity extends ByteArrayEntity implements Entity4 {
 
 	private ContentType ct;
 	private int contentLength;

@@ -27,7 +27,7 @@ import lucee.runtime.type.Query;
 import lucee.runtime.type.QueryImpl;
 import lucee.runtime.type.dt.DateTime;
 
-public class TODateTime extends DateTime implements TraceObject {
+public final class TODateTime extends DateTime implements TraceObject {
 
 	private DateTime dt;
 	// private Debugger debugger;

@@ -21,7 +21,7 @@ package lucee.runtime.functions.other;
 import lucee.runtime.PageContext;
 import lucee.runtime.config.ConfigPro;
 
-public class CTCacheClear {
+public final class CTCacheClear {
 	public static String call(PageContext pc) {
 		ConfigPro config = (ConfigPro) pc.getConfig();
 		config.clearCTCache();

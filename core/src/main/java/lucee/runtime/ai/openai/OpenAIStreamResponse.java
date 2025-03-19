@@ -17,7 +17,7 @@ import lucee.runtime.type.Array;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.KeyConstants;
 
-public class OpenAIStreamResponse implements Response {
+public final class OpenAIStreamResponse implements Response {
 
 	private Struct raw = null;
 	private Array choices = null;

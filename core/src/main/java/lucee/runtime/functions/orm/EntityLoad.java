@@ -27,7 +27,7 @@ import lucee.runtime.orm.ORMUtil;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 
-public class EntityLoad {
+public final class EntityLoad {
 
 	public static Object call(PageContext pc, String name) throws PageException {
 

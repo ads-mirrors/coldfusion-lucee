@@ -7,7 +7,7 @@ import lucee.runtime.Component;
 import lucee.runtime.PageContext;
 import lucee.runtime.exp.PageException;
 
-public class ComponentListener extends CFMLListener {
+public final class ComponentListener extends CFMLListener {
 
 	private Component cfc;
 

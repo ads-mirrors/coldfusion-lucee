@@ -20,7 +20,7 @@ package lucee.runtime.db;
 
 import lucee.runtime.exp.PageException;
 
-public class LikeCompare {
+public final class LikeCompare {
 	public static boolean like(SQL sql, String haystack, String needle) throws PageException {
 		return LikeCompareJRE.like(sql, haystack, needle, null);
 	}

@@ -28,7 +28,7 @@ import lucee.runtime.db.driver.Factory;
 import lucee.runtime.db.driver.PreparedStatementProxy;
 import lucee.runtime.db.driver.StatementProxy;
 
-public class StateFactory implements Factory {
+public final class StateFactory implements Factory {
 
 	@Override
 	public StatementProxy createStatementProxy(ConnectionProxy conn, Statement stat) {

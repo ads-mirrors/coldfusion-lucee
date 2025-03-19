@@ -34,7 +34,7 @@ import lucee.transformer.expression.Expression;
 import lucee.transformer.expression.literal.LitString;
 import lucee.transformer.library.function.FunctionLibFunction;
 
-public class IsDefined implements FunctionEvaluator {
+public final class IsDefined implements FunctionEvaluator {
 
 	@Override
 	public void execute(BIF bif, FunctionLibFunction flf) throws TemplateException {

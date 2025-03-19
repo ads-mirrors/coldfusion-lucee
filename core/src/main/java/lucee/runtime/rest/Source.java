@@ -21,7 +21,7 @@ package lucee.runtime.rest;
 import lucee.runtime.PageSource;
 import lucee.runtime.rest.path.Path;
 
-public class Source {
+public final class Source {
 
 	private Mapping mapping;
 	private Path[] path;

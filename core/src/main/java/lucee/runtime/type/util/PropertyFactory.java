@@ -36,7 +36,7 @@ import lucee.runtime.type.UDFHasProperty;
 import lucee.runtime.type.UDFRemoveProperty;
 import lucee.runtime.type.UDFSetterProperty;
 
-public class PropertyFactory {
+public final class PropertyFactory {
 
 	public static final Collection.Key SINGULAR_NAME = KeyConstants._singularName;
 	public static final Key FIELD_TYPE = KeyConstants._fieldtype;

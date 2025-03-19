@@ -31,7 +31,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.rest.Mapping;
 import lucee.runtime.rest.RestUtil;
 
-public class RestInitApplication {
+public final class RestInitApplication {
 
 	public static String call(PageContext pc, String dirPath) throws PageException {
 		return _call(pc, dirPath, null, null, null);

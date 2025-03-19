@@ -42,7 +42,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.util.Cast;
 import lucee.runtime.util.Creation;
 
-public class SocketGateway implements GatewaySupport {
+public final class SocketGateway implements GatewaySupport {
 
 	private GatewayEngine engine;
 	private int port;

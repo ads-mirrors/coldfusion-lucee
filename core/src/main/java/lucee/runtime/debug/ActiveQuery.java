@@ -18,7 +18,7 @@
  **/
 package lucee.runtime.debug;
 
-public class ActiveQuery {
+public final class ActiveQuery {
 
 	public final String sql;
 	public final long startTime;

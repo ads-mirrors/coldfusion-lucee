@@ -22,7 +22,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.orm.ORMUtil;
 
-public class ORMEvictQueries {
+public final class ORMEvictQueries {
 	public static String call(PageContext pc) throws PageException {
 		return call(pc, null, null);
 	}

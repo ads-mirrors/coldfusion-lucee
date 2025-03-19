@@ -91,7 +91,7 @@ import lucee.runtime.type.util.StructSupport;
  * @param <K> the type of keys maintained by this map
  * @param <V> the type of mapped values
  */
-public class ConcurrentHashMapNullSupport<K, V> extends AbstractMap<K, V> implements Serializable {
+public final class ConcurrentHashMapNullSupport<K, V> extends AbstractMap<K, V> implements Serializable {
 	private static final long serialVersionUID = 7249069246763182397L;
 
 	/*

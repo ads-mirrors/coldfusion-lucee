@@ -31,7 +31,7 @@ import lucee.runtime.tag.FileTag;
 import lucee.runtime.tag.util.FileUtil;
 import lucee.runtime.type.Array;
 
-public class FileUploadAll extends BIF implements Function {
+public final class FileUploadAll extends BIF implements Function {
 
 	public static Array call(PageContext pc, String destination) throws PageException {
 		return call(pc, destination, null, null, true, null, null, null, null, null);

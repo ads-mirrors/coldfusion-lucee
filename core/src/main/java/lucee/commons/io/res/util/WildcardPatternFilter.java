@@ -21,7 +21,7 @@ package lucee.commons.io.res.util;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.res.Resource;
 
-public class WildcardPatternFilter implements ResourceAndResourceNameFilter {
+public final class WildcardPatternFilter implements ResourceAndResourceNameFilter {
 
 	private final WildcardPattern matcher;
 

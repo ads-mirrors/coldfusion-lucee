@@ -17,7 +17,7 @@ import lucee.runtime.op.Constants;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.util.UDFUtil;
 
-public class UDFPropertiesLight extends UDFPropertiesBase {
+public final class UDFPropertiesLight extends UDFPropertiesBase {
 
 	private final FunctionArgument[] arguments;
 	private final String functionName;

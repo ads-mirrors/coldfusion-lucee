@@ -27,7 +27,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.reflection.Reflector;
 import lucee.transformer.dynamic.meta.Method;
 
-public class OracleBlob {
+public final class OracleBlob {
 
 	private static Integer duration;
 	private static Integer mode;

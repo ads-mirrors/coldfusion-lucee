@@ -16,7 +16,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 
-public class BundleRange implements Serializable {
+public final class BundleRange implements Serializable {
 
 	private static final long serialVersionUID = 3461505360112113191L;
 	private final String name;

@@ -42,7 +42,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
 import lucee.runtime.type.dt.TimeSpan;
 
-public class TimespanCacheHandler implements CacheHandlerPro {
+public final class TimespanCacheHandler implements CacheHandlerPro {
 
 	private int cacheType;
 	private Cache defaultCache;

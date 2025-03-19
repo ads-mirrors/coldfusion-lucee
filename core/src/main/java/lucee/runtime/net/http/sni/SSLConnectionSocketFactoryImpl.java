@@ -13,7 +13,7 @@ import javax.net.ssl.SSLContext;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.protocol.HttpContext;
 
-public class SSLConnectionSocketFactoryImpl extends SSLConnectionSocketFactory {
+public final class SSLConnectionSocketFactoryImpl extends SSLConnectionSocketFactory {
 
 	public static final String ENABLE_SNI = "*.disable.sni";
 

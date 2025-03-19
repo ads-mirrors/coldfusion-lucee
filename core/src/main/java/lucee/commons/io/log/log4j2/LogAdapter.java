@@ -9,7 +9,7 @@ import lucee.commons.io.log.Log;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 
-public class LogAdapter implements Log {
+public final class LogAdapter implements Log {
 
 	private Logger logger;
 	private Level level;

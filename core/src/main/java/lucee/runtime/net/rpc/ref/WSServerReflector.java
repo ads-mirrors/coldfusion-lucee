@@ -12,7 +12,7 @@ import lucee.runtime.net.rpc.WSHandler;
 import lucee.runtime.net.rpc.server.WSServer;
 import lucee.runtime.op.Caster;
 
-public class WSServerReflector implements WSServer {
+public final class WSServerReflector implements WSServer {
 
 	private final Object obj;
 	private final Class<? extends Object> clazz;

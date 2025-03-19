@@ -18,7 +18,7 @@
  **/
 package lucee.runtime.exp;
 
-public class AlwaysThrow extends PageRuntimeException {
+public final class AlwaysThrow extends PageRuntimeException {
 
 	public AlwaysThrow(PageException pe) {
 		super(pe);

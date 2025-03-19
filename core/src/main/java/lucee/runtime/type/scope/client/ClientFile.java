@@ -26,7 +26,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.scope.Client;
 import lucee.runtime.type.scope.storage.StorageScopeFile;
 
-public class ClientFile extends StorageScopeFile implements Client {
+public final class ClientFile extends StorageScopeFile implements Client {
 
 	/**
 	 * Constructor of the class

@@ -21,7 +21,7 @@ package lucee.commons.io.res.type.cache;
 import lucee.commons.io.cache.CacheKeyFilter;
 import lucee.commons.lang.StringUtil;
 
-public class ChildrenFilter implements CacheKeyFilter {
+public final class ChildrenFilter implements CacheKeyFilter {
 
 	private String path;
 

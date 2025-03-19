@@ -24,7 +24,7 @@ import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.type.Struct;
 
-public class VideoExecuterNotSupported implements VideoExecuter {
+public final class VideoExecuterNotSupported implements VideoExecuter {
 
 	@Override
 	public VideoInfo[] convert(ConfigWeb config, VideoInput[] inputs, VideoOutput output, VideoProfile quality) throws IOException {

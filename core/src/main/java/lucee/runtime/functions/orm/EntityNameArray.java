@@ -25,7 +25,7 @@ import lucee.runtime.orm.ORMUtil;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.ArrayImpl;
 
-public class EntityNameArray {
+public final class EntityNameArray {
 
 	public static Array call(PageContext pc) throws PageException {
 		ORMSession sess = ORMUtil.getSession(pc);

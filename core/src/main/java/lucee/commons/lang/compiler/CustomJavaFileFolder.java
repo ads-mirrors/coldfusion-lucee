@@ -17,7 +17,7 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.wiring.BundleWiring;
 
-public class CustomJavaFileFolder {
+public final class CustomJavaFileFolder {
 	private final List<JavaFileObject> elements = new ArrayList<JavaFileObject>();
 	private final BundleContext context;
 	private String packageName;

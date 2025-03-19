@@ -27,7 +27,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.util.ArrayUtil;
 
-public class ArrayMedian extends BIF {
+public final class ArrayMedian extends BIF {
 
 	public static Number call(PageContext pc, Array array) throws ExpressionException {
 		return ArrayUtil.median(array);

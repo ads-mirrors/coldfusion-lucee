@@ -28,7 +28,7 @@ import lucee.commons.lang.StringUtil;
 /**
  * Wildcard Filter
  */
-public class WildCardFilter implements ResourceAndResourceNameFilter {
+public final class WildCardFilter implements ResourceAndResourceNameFilter {
 
 	private static final String specials = "{}[]().+\\^$";
 	private static final boolean IS_WIN = SystemUtil.isWindows();

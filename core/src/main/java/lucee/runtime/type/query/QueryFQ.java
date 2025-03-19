@@ -38,7 +38,7 @@ import lucee.runtime.type.QueryImpl;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.dt.DateTime;
 
-public class QueryFQ implements Query, Objects, QueryResult, Serializable {
+public final class QueryFQ implements Query, Objects, QueryResult, Serializable {
 
 	private Query qry;
 	private transient QueryResult qr;

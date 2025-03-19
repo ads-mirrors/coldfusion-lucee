@@ -16,7 +16,7 @@ import lucee.runtime.thread.ThreadUtil;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.UDF;
 
-public class CallableUDF implements Callable<Object> {
+public final class CallableUDF implements Callable<Object> {
 
 	private UDF udf;
 	private String serverName;

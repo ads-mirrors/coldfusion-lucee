@@ -1,6 +1,6 @@
 package lucee.commons.io.res.util;
 
-public class MavenClassLoader {// extends ResourceClassLoader {
+public final class MavenClassLoader {// extends ResourceClassLoader {
 	/*
 	 * private static Map<String, MavenClassLoader> instances = new ConcurrentHashMap<>(); private POM
 	 * pom;

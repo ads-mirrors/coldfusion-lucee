@@ -5,7 +5,7 @@ import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.BIF;
 
-public class IsWithinTransaction extends BIF {
+public final class IsWithinTransaction extends BIF {
 
 	private static final long serialVersionUID = 7490842489165167839L;
 

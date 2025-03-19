@@ -48,7 +48,7 @@ import lucee.runtime.op.Constants;
 import lucee.runtime.op.Duplicator;
 import lucee.runtime.type.Struct;
 
-public class RamCache extends CacheSupport {
+public final class RamCache extends CacheSupport {
 
 	public static final int DEFAULT_CONTROL_INTERVAL = 60;
 

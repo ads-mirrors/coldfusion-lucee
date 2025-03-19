@@ -10,7 +10,7 @@ import lucee.runtime.ext.function.Function;
 /**
  * Generates a 3DES key
  */
-public class Generate3DesKey implements Function {
+public final class Generate3DesKey implements Function {
 
 	private static final long serialVersionUID = 8540648635721649340L;
 

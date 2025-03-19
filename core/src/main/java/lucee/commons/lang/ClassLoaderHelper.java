@@ -20,6 +20,6 @@ package lucee.commons.lang;
 
 import lucee.loader.TP;
 
-public class ClassLoaderHelper extends TP {
+public final class ClassLoaderHelper extends TP {
 
 }

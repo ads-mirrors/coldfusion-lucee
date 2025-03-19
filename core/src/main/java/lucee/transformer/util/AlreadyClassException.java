@@ -23,7 +23,7 @@ import java.io.InputStream;
 
 import lucee.commons.io.res.Resource;
 
-public class AlreadyClassException extends IOException {
+public final class AlreadyClassException extends IOException {
 
 	private Resource res;
 	private boolean encrypted;

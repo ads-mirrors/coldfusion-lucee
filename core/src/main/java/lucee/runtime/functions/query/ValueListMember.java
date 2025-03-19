@@ -25,7 +25,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.Query;
 import lucee.runtime.type.util.ListUtil;
 
-public class ValueListMember extends BIF {
+public final class ValueListMember extends BIF {
 
 	public static String call(PageContext pc, Query query, String columnName) throws PageException {
 		return call(pc, query, columnName, ",");

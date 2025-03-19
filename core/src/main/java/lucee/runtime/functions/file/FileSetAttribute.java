@@ -26,7 +26,7 @@ import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 
-public class FileSetAttribute {
+public final class FileSetAttribute {
 
 	public static String call(PageContext pc, Object oSrc, String attr) throws PageException {
 		Resource src = Caster.toResource(pc, oSrc, false);

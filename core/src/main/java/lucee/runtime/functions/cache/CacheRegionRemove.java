@@ -32,7 +32,7 @@ import lucee.runtime.op.Caster;
  * Engines and should be avoided where possible. The preferred method to manipulate Cache
  * connections is via the Administrator interface or in Application.
  */
-public class CacheRegionRemove extends BIF {
+public final class CacheRegionRemove extends BIF {
 
 	public static String call(PageContext pc, String cacheName, String webAdminPassword) throws PageException {
 		return _call(pc, cacheName, webAdminPassword);

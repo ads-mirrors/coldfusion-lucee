@@ -8,7 +8,7 @@ import lucee.commons.lang.StringUtil;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.Struct;
 
-public class ParamSyntaxImpl implements ParamSyntax {
+public final class ParamSyntaxImpl implements ParamSyntax {
 
 	private static final long serialVersionUID = 2079359336722626915L;
 

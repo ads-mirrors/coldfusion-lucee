@@ -56,7 +56,7 @@ import lucee.runtime.type.util.QueryUtil;
 import lucee.runtime.util.threading.Closer;
 import lucee.runtime.util.threading.StatmentClose;
 
-public class QueryLazy extends BIF {
+public final class QueryLazy extends BIF {
 	private static final Object token = new SerializableObject();
 	private static Closer closer;
 	private static int RETURN_TYPE_QUERY = 1;

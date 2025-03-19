@@ -34,7 +34,7 @@ import lucee.transformer.library.function.FunctionLib;
 import lucee.transformer.library.function.FunctionLibFunction;
 import lucee.transformer.library.tag.TagLib;
 
-public class GetFunctionKeywords {
+public final class GetFunctionKeywords {
 	private final static Object token = new Object();
 	private static Array keywords = null;
 

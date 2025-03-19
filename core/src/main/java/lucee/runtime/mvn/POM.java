@@ -29,7 +29,7 @@ import lucee.runtime.mvn.POMReader.Dependency;
 import lucee.runtime.op.Caster;
 import lucee.runtime.thread.ThreadUtil;
 
-public class POM {
+public final class POM {
 
 	public static final Repository DEFAULT_REPOSITORY = new Repository("maven-central", "Maven Central", "https://repo1.maven.org/maven2/");
 

@@ -24,7 +24,7 @@ import lucee.runtime.ext.function.Function;
 import lucee.runtime.type.dt.DateTime;
 import lucee.runtime.type.dt.DateTimeImpl;
 
-public class SessionStartTime implements Function {
+public final class SessionStartTime implements Function {
 
 	private static final long serialVersionUID = -3620067950402419075L;
 

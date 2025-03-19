@@ -20,7 +20,7 @@ package lucee.runtime.config;
 
 import lucee.runtime.type.Struct;
 
-public class AdminSyncNotSupported implements AdminSync {
+public final class AdminSyncNotSupported implements AdminSync {
 
 	@Override
 	public void broadcast(Struct attributes, Config config) {

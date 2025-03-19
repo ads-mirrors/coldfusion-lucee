@@ -15,7 +15,7 @@ import lucee.runtime.type.Array;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.KeyConstants;
 
-public class OpenAIResponse implements Response {
+public final class OpenAIResponse implements Response {
 
 	private Struct raw;
 	private String charset;

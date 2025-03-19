@@ -9,7 +9,7 @@ import lucee.runtime.crypt.Cryptor;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.util.Excepton;
 
-public class Credential {
+public final class Credential {
 
 	private String key;
 	private byte[] username;

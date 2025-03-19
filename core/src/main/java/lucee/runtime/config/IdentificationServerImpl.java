@@ -17,7 +17,7 @@
  */
 package lucee.runtime.config;
 
-public class IdentificationServerImpl extends IdentificationImpl implements IdentificationServer {
+public final class IdentificationServerImpl extends IdentificationImpl implements IdentificationServer {
 
 	public IdentificationServerImpl(ConfigServerImpl c, String securityKey, String apiKey) {
 		super(c, securityKey, apiKey);

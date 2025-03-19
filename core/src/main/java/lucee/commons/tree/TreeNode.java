@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class TreeNode<T> {
+public final class TreeNode<T> {
 	private T value;
 	private List<TreeNode<T>> children;
 	private Set<T> all;

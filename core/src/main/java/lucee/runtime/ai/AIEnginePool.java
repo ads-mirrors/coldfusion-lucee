@@ -9,7 +9,7 @@ import lucee.runtime.config.ConfigPro;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 
-public class AIEnginePool {
+public final class AIEnginePool {
 
 	private Map<String, AIEngine> instances = new ConcurrentHashMap<>();
 

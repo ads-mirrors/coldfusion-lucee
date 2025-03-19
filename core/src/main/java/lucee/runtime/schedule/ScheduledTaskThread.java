@@ -37,7 +37,7 @@ import lucee.runtime.engine.ThreadLocalConfig;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.op.Caster;
 
-public class ScheduledTaskThread extends ParentThreasRefThread {
+public final class ScheduledTaskThread extends ParentThreasRefThread {
 
 	private static final long DAY = 24 * 3600000;
 	// private Calendar calendar;

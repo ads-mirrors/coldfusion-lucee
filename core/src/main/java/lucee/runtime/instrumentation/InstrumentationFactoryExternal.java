@@ -55,7 +55,7 @@ import java.util.jar.Manifest;
  * privileges.
  * </p>
  */
-public class InstrumentationFactoryExternal {
+public final class InstrumentationFactoryExternal {
 
 	/**
 	 * The manifest property specifying the agent class.

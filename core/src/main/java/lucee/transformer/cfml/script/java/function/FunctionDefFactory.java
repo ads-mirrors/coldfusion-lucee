@@ -63,7 +63,7 @@ import lucee.transformer.cfml.script.java.JavaSourceException;
 import lucee.transformer.expression.ExprString;
 import lucee.transformer.expression.literal.LitString;
 
-public class FunctionDefFactory {
+public final class FunctionDefFactory {
 	private static Map<Class<?>, JavaFunctionDef[]> map = new HashMap<>();
 
 	static {

@@ -21,7 +21,7 @@ package lucee.runtime.db;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ProcMetaCollection {
+public final class ProcMetaCollection {
 
 	public final String name;
 	public final List<ProcMeta> metas;

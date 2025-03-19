@@ -25,7 +25,7 @@ import lucee.runtime.db.SQLCaster;
 import lucee.runtime.db.SQLItem;
 import lucee.runtime.exp.PageException;
 
-public class ProcParamBean implements SQLItem {
+public final class ProcParamBean implements SQLItem {
 
 	public static final int DIRECTION_IN = 0;
 	public static final int DIRECTION_OUT = 1;

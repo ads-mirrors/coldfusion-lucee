@@ -18,7 +18,7 @@
  **/
 package lucee.runtime.spooler;
 
-public class ExecutionPlanImpl implements ExecutionPlan {
+public final class ExecutionPlanImpl implements ExecutionPlan {
 
 	private int tries;
 	private int interval;

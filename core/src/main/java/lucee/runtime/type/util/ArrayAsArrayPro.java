@@ -16,7 +16,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.dt.DateTime;
 import lucee.runtime.type.it.EntryArrayIterator;
 
-public class ArrayAsArrayPro implements ArrayPro {
+public final class ArrayAsArrayPro implements ArrayPro {
 
 	private Array array;
 

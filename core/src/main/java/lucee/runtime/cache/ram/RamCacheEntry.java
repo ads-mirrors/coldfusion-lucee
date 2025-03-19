@@ -28,7 +28,7 @@ import lucee.commons.lang.ExceptionUtil;
 import lucee.runtime.cache.CacheUtil;
 import lucee.runtime.type.Struct;
 
-public class RamCacheEntry implements CacheEntry {
+public final class RamCacheEntry implements CacheEntry {
 
 	private String key;
 	private Object value;

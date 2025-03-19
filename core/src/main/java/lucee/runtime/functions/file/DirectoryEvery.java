@@ -28,7 +28,7 @@ import lucee.runtime.type.UDF;
 import lucee.runtime.type.dt.DateTimeImpl;
 import lucee.runtime.type.util.KeyConstants;
 
-public class DirectoryEvery extends BIF {
+public final class DirectoryEvery extends BIF {
 	private static final long serialVersionUID = 636791970889913461L;
 
 	public static Object call(PageContext pc, String path, Component cfc, boolean recurse) throws PageException {

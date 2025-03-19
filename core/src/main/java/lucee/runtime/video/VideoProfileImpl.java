@@ -18,7 +18,7 @@
  */
 package lucee.runtime.video;
 
-public class VideoProfileImpl implements VideoProfile {
+public final class VideoProfileImpl implements VideoProfile {
 
 	private String type;
 	private String dimension;

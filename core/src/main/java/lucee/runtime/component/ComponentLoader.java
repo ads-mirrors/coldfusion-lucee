@@ -58,7 +58,7 @@ import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.util.PageContextUtil;
 import lucee.runtime.writer.BodyContentUtil;
 
-public class ComponentLoader {
+public final class ComponentLoader {
 
 	private static final short RETURN_TYPE_PAGE = 1;
 	private static final short RETURN_TYPE_INTERFACE = 2;

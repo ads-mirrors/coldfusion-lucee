@@ -26,7 +26,7 @@ import lucee.runtime.PageContextImpl;
 import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
 
-public class FileOpen {
+public final class FileOpen {
 
 	public static Object call(PageContext pc, String path) throws PageException {
 		return call(pc, path, "read", ((PageContextImpl) pc).getResourceCharset().name(), false);

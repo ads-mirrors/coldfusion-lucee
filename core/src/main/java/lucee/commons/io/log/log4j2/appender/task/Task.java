@@ -16,7 +16,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.util.Cast;
 import lucee.runtime.util.Creation;
 
-public class Task implements SpoolerTaskPro {
+public final class Task implements SpoolerTaskPro {
 
 	private static final long serialVersionUID = 5649820047520607442L;
 

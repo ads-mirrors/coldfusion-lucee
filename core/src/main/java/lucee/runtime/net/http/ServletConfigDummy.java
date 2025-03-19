@@ -23,7 +23,7 @@ import java.util.Enumeration;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
 
-public class ServletConfigDummy implements ServletConfig {
+public final class ServletConfigDummy implements ServletConfig {
 
 	private String servletName;
 	private ServletContext context;

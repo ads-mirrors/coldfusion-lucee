@@ -26,7 +26,7 @@ import java.io.OutputStream;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.entity.ContentType;
 
-public class EmptyHttpEntity extends AbstractHttpEntity implements Entity4 {
+public final class EmptyHttpEntity extends AbstractHttpEntity implements Entity4 {
 
 	private ContentType ct;
 

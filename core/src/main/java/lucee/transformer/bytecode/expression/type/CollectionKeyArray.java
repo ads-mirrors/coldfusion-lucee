@@ -29,7 +29,7 @@ import lucee.transformer.bytecode.expression.ExpressionBase;
 import lucee.transformer.bytecode.util.Types;
 import lucee.transformer.bytecode.visitor.ArrayVisitor;
 
-public class CollectionKeyArray extends ExpressionBase {
+public final class CollectionKeyArray extends ExpressionBase {
 
 	private String[] arr;
 

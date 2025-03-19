@@ -210,7 +210,7 @@ public abstract class AbstrCFMLExprTransformer {
 	 */
 
 	/*
-	 * public class Data extends Data {
+	 * public final class Data extends Data {
 	 * 
 	 * public short mode=0; public boolean insideFunction; public String tagName; public boolean isCFC;
 	 * public boolean isInterface; public short context=CTX_NONE; public DocComment docComment;

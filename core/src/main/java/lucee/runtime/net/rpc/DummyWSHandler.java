@@ -7,7 +7,7 @@ import lucee.runtime.net.proxy.ProxyData;
 import lucee.runtime.net.rpc.client.WSClient;
 import lucee.runtime.net.rpc.server.WSServer;
 
-public class DummyWSHandler implements WSHandler {
+public final class DummyWSHandler implements WSHandler {
 
 	@Override
 	public boolean isSOAPRequest() {

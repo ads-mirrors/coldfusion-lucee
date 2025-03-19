@@ -32,7 +32,7 @@ import lucee.commons.lock.LockInterruptedException;
 import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.op.Caster;
 
-public class RWKeyLock<K> {
+public final class RWKeyLock<K> {
 
 	private Map<K, RWLock<K>> locks = new ConcurrentHashMap<K, RWLock<K>>();
 

@@ -9,7 +9,7 @@ import lucee.transformer.Context;
 import lucee.transformer.Factory;
 import lucee.transformer.expression.Expression;
 
-public class InterpreterContext implements Context {
+public final class InterpreterContext implements Context {
 
 	private PageContext pc;
 

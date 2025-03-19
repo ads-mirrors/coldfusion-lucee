@@ -33,7 +33,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.UDF;
 import lucee.runtime.type.util.KeyConstants;
 
-public class EntityNew {
+public final class EntityNew {
 
 	public static Object call(PageContext pc, String name) throws PageException {
 		return call(pc, name, null);

@@ -26,7 +26,7 @@ import lucee.runtime.interpreter.ref.RefSupport;
 import lucee.runtime.interpreter.ref.literal.LFunctionValue;
 import lucee.runtime.interpreter.ref.var.Variable;
 
-public class Elvis extends RefSupport implements Ref {
+public final class Elvis extends RefSupport implements Ref {
 
 	private Ref left;
 	private Ref right;

@@ -21,7 +21,7 @@ package lucee.runtime.text.feed;
 import org.xml.sax.DTDHandler;
 import org.xml.sax.SAXException;
 
-public class DummyDTDHandler implements DTDHandler {
+public final class DummyDTDHandler implements DTDHandler {
 
 	@Override
 	public void notationDecl(String arg0, String arg1, String arg2) throws SAXException {

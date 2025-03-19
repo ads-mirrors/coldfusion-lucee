@@ -32,7 +32,7 @@ import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 
-public class Struct_ implements Function {
+public final class Struct_ implements Function {
 
 	private static final long serialVersionUID = 8708684598035273346L;
 

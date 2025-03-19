@@ -1,6 +1,6 @@
 package lucee.transformer.cfml.script.java;
 
-public class JavaSourceException extends Exception {
+public final class JavaSourceException extends Exception {
 
 	private static final long serialVersionUID = 9166325684772725065L;
 

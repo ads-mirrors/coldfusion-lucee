@@ -22,7 +22,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.util.ListUtil;
 
-public class BundleVersion {
+public final class BundleVersion {
 
 	private final int major;
 	private final int minor;

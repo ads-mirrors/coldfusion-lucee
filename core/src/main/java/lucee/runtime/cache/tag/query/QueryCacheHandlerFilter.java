@@ -22,7 +22,7 @@ import lucee.commons.io.res.util.WildCardFilter;
 import lucee.runtime.cache.tag.CacheHandlerFilter;
 import lucee.runtime.type.Query;
 
-public class QueryCacheHandlerFilter implements CacheHandlerFilter {
+public final class QueryCacheHandlerFilter implements CacheHandlerFilter {
 
 	private WildCardFilter filter;
 

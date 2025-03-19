@@ -42,7 +42,7 @@ import lucee.runtime.type.it.EntryIterator;
 import lucee.runtime.type.scope.Undefined;
 import lucee.runtime.type.util.QueryUtil;
 
-public class SimpleQueryColumn implements QueryColumn {
+public final class SimpleQueryColumn implements QueryColumn {
 
 	private static final long serialVersionUID = 288731277532671308L;
 

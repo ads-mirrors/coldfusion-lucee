@@ -46,7 +46,7 @@ import lucee.runtime.type.scope.Variables;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.StructSupport;
 
-public class StaticScope extends StructSupport implements Variables, Objects, AccessModifier {
+public final class StaticScope extends StructSupport implements Variables, Objects, AccessModifier {
 
 	private static final long serialVersionUID = -2692540782121852340L;
 

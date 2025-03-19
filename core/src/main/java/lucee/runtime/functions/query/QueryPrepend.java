@@ -9,7 +9,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.Query;
 
-public class QueryPrepend extends BIF implements Function {
+public final class QueryPrepend extends BIF implements Function {
 
 	private static final long serialVersionUID = -5241509284480974613L;
 

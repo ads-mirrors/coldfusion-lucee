@@ -33,7 +33,7 @@ import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.SimpleValue;
 import lucee.runtime.type.Struct;
 
-public class LazyConverter extends ConverterSupport {
+public final class LazyConverter extends ConverterSupport {
 
 	public static String serialize(Object o) {
 		return serialize(o, Collections.newSetFromMap(new IdentityHashMap<>()));

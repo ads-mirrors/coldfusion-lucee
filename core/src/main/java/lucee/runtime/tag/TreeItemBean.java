@@ -18,7 +18,7 @@
  **/
 package lucee.runtime.tag;
 
-public class TreeItemBean {
+public final class TreeItemBean {
 
 	public static final int QUERY_AS_ROOT_YES = 1;
 	public static final int QUERY_AS_ROOT_NO = 0;

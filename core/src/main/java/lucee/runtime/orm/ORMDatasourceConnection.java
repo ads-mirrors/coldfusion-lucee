@@ -48,7 +48,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.op.Caster;
 
-public class ORMDatasourceConnection implements DatasourceConnection {
+public final class ORMDatasourceConnection implements DatasourceConnection {
 
 	@Override
 	public DatasourceConnection using() throws PageException {

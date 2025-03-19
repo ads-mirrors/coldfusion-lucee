@@ -62,7 +62,7 @@ import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 
-public class DeployHandler {
+public final class DeployHandler {
 
 	private static final ResourceFilter ALL_EXT = new ExtensionResourceFilter(new String[] { ".lex", ".lar", ".lco", ".json" });
 	private static final ResourceFilter UNSUPPORTED_EXT = new NotResourceFilter(ALL_EXT);

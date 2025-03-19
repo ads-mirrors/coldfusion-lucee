@@ -10,7 +10,7 @@ import lucee.transformer.dynamic.meta.Clazz;
 import lucee.transformer.dynamic.meta.Constructor;
 import lucee.transformer.dynamic.meta.Method;
 
-public class ClazzReflection extends Clazz {
+public final class ClazzReflection extends Clazz {
 
 	private static final long serialVersionUID = -9046348146944695783L;
 	private Class clazz;

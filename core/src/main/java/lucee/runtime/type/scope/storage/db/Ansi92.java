@@ -54,7 +54,7 @@ import lucee.runtime.type.scope.storage.StorageScopeListener;
 import lucee.runtime.type.scope.storage.clean.DatasourceStorageScopeCleaner;
 import lucee.runtime.type.util.KeyConstants;
 
-public class Ansi92 extends SQLExecutorSupport {
+public final class Ansi92 extends SQLExecutorSupport {
 
 	public static final String PREFIX = "cf";
 

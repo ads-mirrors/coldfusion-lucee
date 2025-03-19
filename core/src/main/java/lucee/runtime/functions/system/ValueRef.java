@@ -19,7 +19,7 @@ import lucee.runtime.type.SimpleValue;
 import lucee.runtime.type.UDF;
 import lucee.runtime.type.dt.DateTime;
 
-public class ValueRef extends BIF {
+public final class ValueRef extends BIF {
 
 	private static final long serialVersionUID = 1195300110252570841L;
 

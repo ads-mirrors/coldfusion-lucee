@@ -25,7 +25,7 @@ import lucee.runtime.spooler.SpoolerTaskSupport;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 
-public class ChildSpoolerTask extends SpoolerTaskSupport {
+public final class ChildSpoolerTask extends SpoolerTaskSupport {
 
 	private ChildThreadImpl ct;
 

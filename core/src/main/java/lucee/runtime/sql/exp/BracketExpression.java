@@ -18,7 +18,7 @@
  **/
 package lucee.runtime.sql.exp;
 
-public class BracketExpression extends ExpressionSupport {
+public final class BracketExpression extends ExpressionSupport {
 
 	private Expression exp;
 

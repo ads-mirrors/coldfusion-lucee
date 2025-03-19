@@ -27,7 +27,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 
-public class ExecutionLogFactory {
+public final class ExecutionLogFactory {
 
 	private Class clazz;
 	private Map<String, String> arguments;

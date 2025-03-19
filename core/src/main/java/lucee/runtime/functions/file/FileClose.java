@@ -25,7 +25,7 @@ import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 
-public class FileClose {
+public final class FileClose {
 
 	public static String call(PageContext pc, Object fileObj) throws PageException {
 		if (!(fileObj instanceof FileStreamWrapper))

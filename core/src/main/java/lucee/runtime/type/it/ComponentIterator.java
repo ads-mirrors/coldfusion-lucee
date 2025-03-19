@@ -27,7 +27,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.Resetable;
 import lucee.runtime.type.util.KeyConstants;
 
-public class ComponentIterator implements Iterator, Resetable {
+public final class ComponentIterator implements Iterator, Resetable {
 
 	private static final Object[] EMPTY = new Object[0];
 

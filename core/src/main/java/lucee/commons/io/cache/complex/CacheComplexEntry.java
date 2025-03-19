@@ -9,7 +9,7 @@ import lucee.runtime.op.Decision;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.dt.DateTimeImpl;
 
-public class CacheComplexEntry implements CacheEntry {
+public final class CacheComplexEntry implements CacheEntry {
 
 	private CacheEntry entry;
 	private CacheComplex cache;

@@ -15,7 +15,7 @@ import lucee.runtime.type.Array;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.KeyConstants;
 
-public class GeminiResponse implements Response {
+public final class GeminiResponse implements Response {
 
 	private Struct raw;
 	private String charset;

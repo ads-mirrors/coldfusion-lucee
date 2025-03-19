@@ -24,7 +24,7 @@ import java.io.InputStream;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.StringUtil;
 
-public class FileRotation {
+public final class FileRotation {
 	public static void checkFile(Resource res, long maxFileSize, int maxFiles, byte[] header) throws IOException {
 		boolean writeHeader = false;
 		// create file

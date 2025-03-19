@@ -7,7 +7,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.BIF;
 import lucee.runtime.type.Struct;
 
-public class ThreadData extends BIF {
+public final class ThreadData extends BIF {
 
 	/**
 	 * Verify if in thread or not

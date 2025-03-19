@@ -26,7 +26,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.net.http.ReqRspUtil;
 import lucee.runtime.op.Caster;
 
-public class URLEncode {
+public final class URLEncode {
 
 	public static String call(PageContext pc, String str) throws PageException {
 

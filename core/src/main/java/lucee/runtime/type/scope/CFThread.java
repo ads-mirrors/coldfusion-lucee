@@ -11,7 +11,7 @@ import lucee.runtime.dump.DumpTable;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.StructImpl;
 
-public class CFThread extends StructImpl {
+public final class CFThread extends StructImpl {
 
 	private static final int MAX_THREADS_STORED_DEFAULT = 10000;
 	private static int maxThreadStored = -1;

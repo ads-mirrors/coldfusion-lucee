@@ -29,7 +29,7 @@ import lucee.intergral.fusiondebug.server.type.simple.FDSimpleVariable;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.Query;
 
-public class FDQuery extends FDValueNotMutability {
+public final class FDQuery extends FDValueNotMutability {
 
 	private static final int INTERVAL = 10;
 	private ArrayList children = new ArrayList();

@@ -4,7 +4,7 @@ import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import lucee.runtime.engine.CFMLEngineImpl;
 
-public class CFMLServletContextListener implements ServletContextListener {
+public final class CFMLServletContextListener implements ServletContextListener {
 
 	private CFMLEngineImpl engine;
 

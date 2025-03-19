@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 
 import lucee.runtime.type.Struct;
 
-public class ExpressionPath extends Path {
+public final class ExpressionPath extends Path {
 
 	private Pattern pattern;
 	private List<String> variables;

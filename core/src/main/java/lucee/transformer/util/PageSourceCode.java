@@ -27,7 +27,7 @@ import lucee.commons.lang.ClassUtil;
 import lucee.runtime.PageSource;
 import lucee.runtime.PageSourceImpl;
 
-public class PageSourceCode extends SourceCode {
+public final class PageSourceCode extends SourceCode {
 
 	private final Charset charset;
 	private final PageSource ps;

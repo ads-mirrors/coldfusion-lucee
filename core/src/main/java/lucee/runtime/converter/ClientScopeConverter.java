@@ -29,7 +29,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.dt.DateTime;
 
-public class ClientScopeConverter {
+public final class ClientScopeConverter {
 
 	public static Struct unserialize(String str) {
 		Struct sct = new StructImpl();

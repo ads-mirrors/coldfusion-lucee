@@ -33,7 +33,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 
-public class XMLValidator extends XMLEntityResolverDefaultHandler {
+public final class XMLValidator extends XMLEntityResolverDefaultHandler {
 
 	@Override
 	public InputSource resolveEntity(String publicID, String systemID) throws SAXException {

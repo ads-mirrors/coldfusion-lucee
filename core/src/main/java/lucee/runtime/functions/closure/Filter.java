@@ -56,7 +56,7 @@ import lucee.runtime.type.scope.ArgumentIntKey;
 import lucee.runtime.type.util.ListUtil;
 import lucee.runtime.type.util.StringListData;
 
-public class Filter extends BIF implements ClosureFunc {
+public final class Filter extends BIF implements ClosureFunc {
 
 	private static final long serialVersionUID = -5940580562772523622L;
 

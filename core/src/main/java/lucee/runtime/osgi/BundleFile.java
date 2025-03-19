@@ -31,7 +31,7 @@ import org.osgi.framework.BundleException;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.res.Resource;
 
-public class BundleFile extends BundleInfo {
+public final class BundleFile extends BundleInfo {
 
 	private static final long serialVersionUID = -7094382262249367193L;
 	private File file;

@@ -38,7 +38,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 
-public class ClaudeSession extends AISessionSupport {
+public final class ClaudeSession extends AISessionSupport {
 	private ClaudeEngine engine;
 	private String systemMessage;
 

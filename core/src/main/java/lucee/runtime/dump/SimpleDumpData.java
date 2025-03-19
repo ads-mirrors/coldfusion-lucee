@@ -28,7 +28,7 @@ import lucee.runtime.op.OpUtil;
 import lucee.runtime.op.date.DateCaster;
 import lucee.runtime.type.dt.DateTime;
 
-public class SimpleDumpData implements DumpData, Castable {
+public final class SimpleDumpData implements DumpData, Castable {
 
 	private String data;
 

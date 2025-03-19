@@ -29,7 +29,7 @@ import lucee.runtime.config.ConfigPro;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.text.xml.XMLUtil;
 
-public class EnvClassLoader extends URLClassLoader {
+public final class EnvClassLoader extends URLClassLoader {
 
 	private static float FROM_SYSTEM = 1;
 	private static float FROM_BOOTDELEGATION = 2;

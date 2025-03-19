@@ -20,7 +20,7 @@ package lucee.commons.io.res.filter;
 
 import lucee.commons.io.res.Resource;
 
-public class IgnoreSystemFiles implements ResourceNameFilter {
+public final class IgnoreSystemFiles implements ResourceNameFilter {
 
 	public static final ResourceNameFilter INSTANCE = new IgnoreSystemFiles();
 

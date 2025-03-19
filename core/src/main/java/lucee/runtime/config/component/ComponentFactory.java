@@ -22,7 +22,7 @@ import lucee.commons.io.res.Resource;
 import lucee.runtime.config.ConfigFactory;
 import lucee.runtime.config.Constants;
 
-public class ComponentFactory {
+public final class ComponentFactory {
 
 	/**
 	 * this method deploy all components for org.lucee.cfml

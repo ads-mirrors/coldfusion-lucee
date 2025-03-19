@@ -18,7 +18,7 @@
  **/
 package lucee.runtime.security;
 
-public class SerialNumber {
+public final class SerialNumber {
 
 	public SerialNumber(String serial) {
 	}

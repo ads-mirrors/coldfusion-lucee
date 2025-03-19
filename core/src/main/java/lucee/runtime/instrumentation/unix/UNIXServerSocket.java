@@ -9,7 +9,7 @@ import java.net.SocketException;
 /**
  * The server part of an AF_UNIX domain socket.
  */
-public class UNIXServerSocket extends ServerSocket {
+public final class UNIXServerSocket extends ServerSocket {
 	private final UNIXSocketImpl implementation;
 	private UNIXSocketAddress boundEndpoint = null;
 

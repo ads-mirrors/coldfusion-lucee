@@ -34,7 +34,7 @@ import lucee.runtime.type.Collection;
 import lucee.runtime.type.Query;
 import lucee.runtime.type.UDF;
 
-public class FDCaster {
+public final class FDCaster {
 
 	public static IFDValue toFDValue(IFDStackFrame frame, String name, Object value) {
 		if (value instanceof UDF) return new FDUDF(frame, name, (UDF) value);

@@ -1,6 +1,6 @@
 package lucee.runtime.engine;
 
-public class ControllerStateImpl implements ControllerState {
+public final class ControllerStateImpl implements ControllerState {
 
 	private boolean active;
 

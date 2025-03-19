@@ -29,7 +29,7 @@ import lucee.commons.io.SystemUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.type.file.FileResource;
 
-public class HeapDumper {
+public final class HeapDumper {
 
 	/**
 	 * Dumps the heap to the outputFile file in the same format as the hprof heap dump. If this method

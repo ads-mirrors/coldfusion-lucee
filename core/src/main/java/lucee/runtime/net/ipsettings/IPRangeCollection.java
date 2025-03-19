@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class IPRangeCollection {
+public final class IPRangeCollection {
 
 	private List<IPRangeNode> list = Collections.EMPTY_LIST;
 

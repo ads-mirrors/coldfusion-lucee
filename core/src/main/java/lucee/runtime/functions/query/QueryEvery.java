@@ -28,7 +28,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.Query;
 import lucee.runtime.type.UDF;
 
-public class QueryEvery extends BIF {
+public final class QueryEvery extends BIF {
 
 	private static final long serialVersionUID = -9206289776586881074L;
 

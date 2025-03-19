@@ -23,7 +23,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 
-public class FileExists {
+public final class FileExists {
 
 	public static boolean call(PageContext pc, Object obj) throws PageException {
 		return call(pc, obj, pc.getConfig().allowRealPath());

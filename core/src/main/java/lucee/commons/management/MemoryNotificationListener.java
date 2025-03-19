@@ -30,7 +30,7 @@ import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.runtime.config.Config;
 
-public class MemoryNotificationListener implements NotificationListener {
+public final class MemoryNotificationListener implements NotificationListener {
 
 	private Map<String, MemoryType> types;
 

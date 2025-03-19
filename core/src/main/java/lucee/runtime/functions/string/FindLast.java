@@ -6,7 +6,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.BIF;
 import lucee.runtime.op.Caster;
 
-public class FindLast extends BIF {
+public final class FindLast extends BIF {
 
 	private static final long serialVersionUID = -176191593295823013L;
 

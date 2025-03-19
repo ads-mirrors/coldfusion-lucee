@@ -24,7 +24,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.BIF;
 import lucee.runtime.op.Caster;
 
-public class CacheRemoveAll extends BIF {
+public final class CacheRemoveAll extends BIF {
 
 	private static final long serialVersionUID = -3444983104369826751L;
 

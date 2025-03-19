@@ -2,7 +2,7 @@ package lucee.runtime.config;
 
 import lucee.runtime.type.Struct;
 
-public class ComponentMetaData {
+public final class ComponentMetaData {
 
 	public final Struct meta;
 	public final long lastMod;

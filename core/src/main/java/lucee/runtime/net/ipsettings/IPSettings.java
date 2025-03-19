@@ -33,7 +33,7 @@ import lucee.commons.lang.ExceptionUtil;
 /**
  * an efficient data structure for IP-range based settings
  */
-public class IPSettings {
+public final class IPSettings {
 
 	public static final Map EMPTY = Collections.EMPTY_MAP;
 

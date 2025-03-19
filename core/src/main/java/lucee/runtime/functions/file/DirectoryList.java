@@ -25,7 +25,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.tag.Directory;
 
-public class DirectoryList {
+public final class DirectoryList {
 
 	public static Object call(PageContext pc, String path) throws PageException {
 		return _call(pc, path, false, Directory.LIST_INFO_ARRAY_PATH, null, null, Directory.TYPE_ALL);

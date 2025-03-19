@@ -31,7 +31,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
 
-public class ObjectLoad {
+public final class ObjectLoad {
 	public static Object call(PageContext pc, Object input) throws PageException {
 		InputStream is;
 		boolean closeStream = true;

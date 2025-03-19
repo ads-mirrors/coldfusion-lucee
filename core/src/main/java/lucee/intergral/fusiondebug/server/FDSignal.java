@@ -35,7 +35,7 @@ import lucee.runtime.exp.TemplateException;
 import lucee.runtime.op.Caster;
 import lucee.transformer.bytecode.util.ASMUtil;
 
-public class FDSignal {
+public final class FDSignal {
 	private static ThreadLocal hash = new ThreadLocal();
 
 	public static void signal(PageException pe, boolean caught) {

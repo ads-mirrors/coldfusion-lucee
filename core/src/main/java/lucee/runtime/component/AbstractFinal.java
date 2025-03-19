@@ -31,7 +31,7 @@ import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.UDF;
 import lucee.runtime.type.util.ArrayUtil;
 
-public class AbstractFinal {
+public final class AbstractFinal {
 
 	private final Map<String, InterfaceImpl> interfaces = new HashMap<>();
 	private Map<Collection.Key, UDFB> absUDFs = new HashMap<Collection.Key, UDFB>();

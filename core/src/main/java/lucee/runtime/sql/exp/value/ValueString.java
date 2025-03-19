@@ -21,7 +21,7 @@ package lucee.runtime.sql.exp.value;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.sql.exp.Literal;
 
-public class ValueString extends ValueSupport implements Literal {
+public final class ValueString extends ValueSupport implements Literal {
 
 	public ValueString(String value, String alias) {
 		super(value, alias);

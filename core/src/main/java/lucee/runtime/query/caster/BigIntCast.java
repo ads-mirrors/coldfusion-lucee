@@ -25,7 +25,7 @@ import java.util.TimeZone;
 
 import lucee.runtime.op.Caster;
 
-public class BigIntCast implements Cast {
+public final class BigIntCast implements Cast {
 
 	@Override
 	public Object toCFType(TimeZone tz, ResultSet rst, int columnIndex) throws SQLException, IOException {

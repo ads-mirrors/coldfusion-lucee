@@ -39,7 +39,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.transformer.library.ClassDefinitionImpl;
 
-public class CacheConnectionImpl implements CacheConnectionPlus {
+public final class CacheConnectionImpl implements CacheConnectionPlus {
 
 	private String name;
 	private ClassDefinition<Cache> classDefinition;

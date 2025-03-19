@@ -12,7 +12,7 @@ import lucee.runtime.type.Query;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 
-public class QueryRowSwap extends BIF implements Function {
+public final class QueryRowSwap extends BIF implements Function {
 
 	private static final long serialVersionUID = -812740090032092109L;
 

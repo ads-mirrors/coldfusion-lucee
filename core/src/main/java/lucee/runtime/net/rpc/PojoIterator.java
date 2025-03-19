@@ -31,7 +31,7 @@ import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.Pojo;
 import lucee.transformer.dynamic.meta.Method;
 
-public class PojoIterator implements Iterator<Pair<Collection.Key, Object>> {
+public final class PojoIterator implements Iterator<Pair<Collection.Key, Object>> {
 
 	private static final Object[] EMPTY_ARG = new Object[] {};
 

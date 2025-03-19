@@ -34,7 +34,7 @@ import lucee.runtime.type.scope.storage.StorageScopeListener;
 import lucee.runtime.type.scope.storage.db.SQLExecutionFactory;
 import lucee.runtime.type.scope.storage.db.SQLExecutor;
 
-public class DatasourceStorageScopeCleaner extends StorageScopeCleanerSupport {
+public final class DatasourceStorageScopeCleaner extends StorageScopeCleanerSupport {
 
 	// private String strType;
 

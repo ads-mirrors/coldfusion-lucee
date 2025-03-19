@@ -28,7 +28,7 @@ import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.engine.ThreadLocalPageContext;
 
-public class HTMLDumpWriter implements DumpWriter {
+public final class HTMLDumpWriter implements DumpWriter {
 
 	private static int count = 0;
 

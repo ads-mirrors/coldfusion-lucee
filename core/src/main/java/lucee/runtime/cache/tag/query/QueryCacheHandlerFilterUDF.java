@@ -28,7 +28,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.Query;
 import lucee.runtime.type.UDF;
 
-public class QueryCacheHandlerFilterUDF extends UDFFilterSupport implements CacheHandlerFilter {
+public final class QueryCacheHandlerFilterUDF extends UDFFilterSupport implements CacheHandlerFilter {
 
 	private UDF udf;
 

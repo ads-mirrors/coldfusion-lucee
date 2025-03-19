@@ -27,7 +27,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.Function;
 import lucee.runtime.tag.Directory;
 
-public class DirectoryCopy implements Function {
+public final class DirectoryCopy implements Function {
 
 	private static final long serialVersionUID = -8591512197642527401L;
 

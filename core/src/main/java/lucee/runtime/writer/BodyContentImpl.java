@@ -30,7 +30,7 @@ import lucee.commons.lang.CharBuffer;
 /**
  * implementation of the BodyContent
  */
-public class BodyContentImpl extends BodyContent {
+public final class BodyContentImpl extends BodyContent {
 
 	CharBuffer charBuffer = new CharBuffer(128);
 	JspWriter enclosingWriter;

@@ -26,7 +26,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 
-public class FileSetAccessMode {
+public final class FileSetAccessMode {
 
 	public static String call(PageContext pc, Object oSrc, String strMode) throws PageException {
 		Resource src = Caster.toResource(pc, oSrc, false);

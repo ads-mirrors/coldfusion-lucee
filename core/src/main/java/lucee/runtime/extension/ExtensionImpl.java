@@ -27,7 +27,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.dt.DateTime;
 
-public class ExtensionImpl implements Extension {
+public final class ExtensionImpl implements Extension {
 
 	private String provider;
 	private String id;

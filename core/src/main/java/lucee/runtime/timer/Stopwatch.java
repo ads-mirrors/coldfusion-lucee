@@ -21,7 +21,7 @@ package lucee.runtime.timer;
 /**
  * Implementation of a simple Stopwatch
  */
-public class Stopwatch {
+public final class Stopwatch {
 
 	public static final int UNIT_MILLI = 1;
 	public static final int UNIT_NANO = 2;

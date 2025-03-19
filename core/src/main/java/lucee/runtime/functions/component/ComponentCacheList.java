@@ -22,7 +22,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.type.Struct;
 
-public class ComponentCacheList {
+public final class ComponentCacheList {
 	public static Struct call(PageContext pc) {
 		ConfigPro config = (ConfigPro) pc.getConfig();
 		return config.listComponentCache();

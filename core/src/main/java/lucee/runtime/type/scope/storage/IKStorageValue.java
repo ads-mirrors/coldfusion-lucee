@@ -16,7 +16,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.Collection;
 
-public class IKStorageValue implements Serializable {
+public final class IKStorageValue implements Serializable {
 
 	private static final long serialVersionUID = 2728185742217909233L;
 	private static final byte[] EMPTY = new byte[0];

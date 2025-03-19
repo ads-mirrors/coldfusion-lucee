@@ -26,7 +26,7 @@ import lucee.runtime.exp.ExceptionHandler;
 import lucee.runtime.listener.ApplicationListener;
 import lucee.runtime.op.Caster;
 
-public class SessionEndListener implements StorageScopeListener, Serializable {
+public final class SessionEndListener implements StorageScopeListener, Serializable {
 
 	private static final long serialVersionUID = -3868545140988347285L;
 

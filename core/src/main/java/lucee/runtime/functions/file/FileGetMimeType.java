@@ -28,7 +28,7 @@ import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 
-public class FileGetMimeType {
+public final class FileGetMimeType {
 	public static String call(PageContext pc, Object oSrc) throws PageException {
 		return call(pc, oSrc, true);
 	}

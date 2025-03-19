@@ -30,7 +30,7 @@ import lucee.runtime.db.driver.PreparedStatementProxy;
 import lucee.runtime.debug.ActiveQuery;
 import lucee.runtime.engine.ThreadLocalPageContext;
 
-public class StatePreparedStatement extends PreparedStatementProxy {
+public final class StatePreparedStatement extends PreparedStatementProxy {
 
 	public StatePreparedStatement(ConnectionProxy conn, PreparedStatement stat, String sql) {
 		super(conn, stat, sql);

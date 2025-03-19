@@ -20,7 +20,7 @@ package lucee.runtime.component;
 
 import lucee.commons.lang.StringUtil;
 
-public class ImportDefintionImpl implements ImportDefintion {
+public final class ImportDefintionImpl implements ImportDefintion {
 
 	private String pack;
 	private String name;

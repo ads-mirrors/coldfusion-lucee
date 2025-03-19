@@ -41,7 +41,7 @@ import lucee.commons.net.http.Header;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.ArrayImpl;
 
-public class HTTPResponse4Impl extends HTTPResponseSupport implements HTTPResponse {
+public final class HTTPResponse4Impl extends HTTPResponseSupport implements HTTPResponse {
 
 	HttpResponse rsp;
 	HttpUriRequest req;

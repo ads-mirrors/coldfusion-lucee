@@ -24,7 +24,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.Function;
 import lucee.runtime.type.Struct;
 
-public class _GetSuperStaticScope implements Function {
+public final class _GetSuperStaticScope implements Function {
 
 	private static final long serialVersionUID = -2676531632543576056L;
 

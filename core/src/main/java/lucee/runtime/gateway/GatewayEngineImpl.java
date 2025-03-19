@@ -56,7 +56,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 
-public class GatewayEngineImpl implements GatewayEngine {
+public final class GatewayEngineImpl implements GatewayEngine {
 
 	private static final Object OBJ = new Object();
 

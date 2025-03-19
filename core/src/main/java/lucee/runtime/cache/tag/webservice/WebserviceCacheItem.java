@@ -32,7 +32,7 @@ import lucee.runtime.op.Duplicator;
 import lucee.runtime.type.Collection;
 import lucee.runtime.type.Duplicable;
 
-public class WebserviceCacheItem implements CacheItem, Serializable, Dumpable, Duplicable {
+public final class WebserviceCacheItem implements CacheItem, Serializable, Dumpable, Duplicable {
 
 	private static final long serialVersionUID = -8462614105941179140L;
 

@@ -16,7 +16,7 @@ import lucee.runtime.osgi.BundleInfo;
 import lucee.runtime.osgi.VersionRange;
 import lucee.runtime.type.util.ListUtil;
 
-public class ExtensionMetadata {
+public final class ExtensionMetadata {
 	private static final String[] EMPTY = new String[0];
 
 	private String id;

@@ -23,7 +23,7 @@ import java.util.List;
 
 import lucee.commons.lang.StringUtil;
 
-public class CSVString {
+public final class CSVString {
 
 	private static final char LF = 10;
 	private static final char CR = 13;

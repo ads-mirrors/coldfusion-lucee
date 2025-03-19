@@ -11,7 +11,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 
-public class GenerateRSAKeys extends BIF {
+public final class GenerateRSAKeys extends BIF {
 
 	private static final long serialVersionUID = 8436907807706520039L;
 

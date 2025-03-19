@@ -14,7 +14,7 @@ import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.osgi.OSGiUtil;
 
-public class ExtensionDefintion {
+public final class ExtensionDefintion {
 
 	private String id;
 	private Map<String, String> params = new HashMap<String, String>();

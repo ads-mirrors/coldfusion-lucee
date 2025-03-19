@@ -18,7 +18,7 @@
  **/
 package lucee.commons.cli;
 
-public class CommandResult {
+public final class CommandResult {
 
 	private final String out, err;
 

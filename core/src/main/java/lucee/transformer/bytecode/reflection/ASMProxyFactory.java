@@ -49,7 +49,7 @@ import lucee.transformer.bytecode.util.ASMConstants;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.bytecode.util.Types;
 
-public class ASMProxyFactory {
+public final class ASMProxyFactory {
 
 	public static final Type ASM_METHOD = Type.getType(ASMMethod.class);
 	public static final Type CLASS404 = Type.getType(ClassNotFoundException.class);

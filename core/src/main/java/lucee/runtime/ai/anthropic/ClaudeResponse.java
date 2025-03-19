@@ -17,7 +17,7 @@ import lucee.runtime.type.Array;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.KeyConstants;
 
-public class ClaudeResponse implements Response {
+public final class ClaudeResponse implements Response {
 	private Struct raw;
 	private String charset;
 	private long tokens = -1L;

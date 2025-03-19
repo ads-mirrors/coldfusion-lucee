@@ -20,7 +20,7 @@ package lucee.runtime.i18n;
 
 import java.util.Locale;
 
-public class LocaleConstant {
+public final class LocaleConstant {
 
 	public static final Locale ALBANIAN_ALBANIA = new Locale("sq", "AL");
 

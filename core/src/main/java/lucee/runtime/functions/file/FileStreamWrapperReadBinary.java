@@ -28,7 +28,7 @@ import lucee.commons.io.res.Resource;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 
-public class FileStreamWrapperReadBinary extends FileStreamWrapper {
+public final class FileStreamWrapperReadBinary extends FileStreamWrapper {
 
 	private BufferedInputStream bis;
 	private boolean isEOF;

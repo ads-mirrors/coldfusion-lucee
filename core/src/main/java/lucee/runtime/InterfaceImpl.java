@@ -57,7 +57,7 @@ import lucee.runtime.type.util.KeyConstants;
  * MUST add handling for new attributes (style, namespace, serviceportname, porttypename, wsdlfile,
  * bindingname, and output)
  */
-public class InterfaceImpl implements Interface {
+public final class InterfaceImpl implements Interface {
 
 	private static final long serialVersionUID = -2488865504508636253L;
 

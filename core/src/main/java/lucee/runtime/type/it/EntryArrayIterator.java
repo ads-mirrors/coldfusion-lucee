@@ -24,7 +24,7 @@ import java.util.Map.Entry;
 
 import lucee.runtime.type.Array;
 
-public class EntryArrayIterator implements Iterator<Entry<Integer, Object>>, Enumeration<Entry<Integer, Object>> {
+public final class EntryArrayIterator implements Iterator<Entry<Integer, Object>>, Enumeration<Entry<Integer, Object>> {
 
 	private Array coll;
 	protected int[] keys;
@@ -61,7 +61,7 @@ public class EntryArrayIterator implements Iterator<Entry<Integer, Object>>, Enu
 		throw new UnsupportedOperationException("this operation is not suppored");
 	}
 
-	public class EntryImpl implements Entry<Integer, Object> {
+	public final class EntryImpl implements Entry<Integer, Object> {
 
 		private Array arr;
 		private Integer index;

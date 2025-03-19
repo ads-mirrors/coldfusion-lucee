@@ -11,7 +11,7 @@ import lucee.runtime.net.rpc.client.WSClient;
 import lucee.runtime.net.rpc.server.WSServer;
 import lucee.runtime.op.Caster;
 
-public class WSHandlerReflector implements WSHandler {
+public final class WSHandlerReflector implements WSHandler {
 
 	public static final Class[] EMPTY_CLASS = new Class[0];
 	public static final Object[] EMPTY_OBJECT = new Object[0];

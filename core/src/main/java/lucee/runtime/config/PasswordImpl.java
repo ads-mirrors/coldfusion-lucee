@@ -32,7 +32,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.Struct;
 
-public class PasswordImpl implements Password {
+public final class PasswordImpl implements Password {
 
 	private final String rawPassword;
 	private final String password;

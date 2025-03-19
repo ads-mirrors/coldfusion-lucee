@@ -41,7 +41,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.db.DataSource;
 import lucee.runtime.exp.PageException;
 
-public class ORMConnection implements Connection {
+public final class ORMConnection implements Connection {
 
 	private ORMSession session;
 	private boolean autoCommit = false;

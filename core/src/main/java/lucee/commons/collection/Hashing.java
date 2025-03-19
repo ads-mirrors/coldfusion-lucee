@@ -34,7 +34,7 @@ import lucee.commons.io.SystemUtil;
  *
  * Little endian implementations of Murmur3 hashing.
  */
-public class Hashing {
+public final class Hashing {
 
 	/**
 	 * Static utility methods only.

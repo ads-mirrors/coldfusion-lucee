@@ -59,7 +59,7 @@ import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.type.util.CollectionUtil;
 import lucee.runtime.type.util.KeyConstants;
 
-public class SpoolerEngineImpl implements SpoolerEngine {
+public final class SpoolerEngineImpl implements SpoolerEngine {
 
 	private static final TaskFileFilter FILTER = new TaskFileFilter();
 

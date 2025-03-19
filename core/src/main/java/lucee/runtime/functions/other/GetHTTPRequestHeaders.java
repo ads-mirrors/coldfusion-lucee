@@ -31,7 +31,7 @@ import lucee.runtime.type.StructImpl;
 /**
  * Returns a Struct with the HTTP Request Headers
  */
-public class GetHTTPRequestHeaders extends BIF {
+public final class GetHTTPRequestHeaders extends BIF {
 
 	public static Struct call(PageContext pc) throws PageException {
 

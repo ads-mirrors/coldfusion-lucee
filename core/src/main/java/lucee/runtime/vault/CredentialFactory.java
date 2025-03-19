@@ -8,7 +8,7 @@ import lucee.commons.digest.RSA;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 
-public class CredentialFactory {
+public final class CredentialFactory {
 
 	private static KeyPair kp;
 

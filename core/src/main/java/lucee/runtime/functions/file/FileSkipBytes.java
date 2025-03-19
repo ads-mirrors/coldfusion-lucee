@@ -23,7 +23,7 @@ import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 
-public class FileSkipBytes {
+public final class FileSkipBytes {
 
 	public static String call(PageContext pc, Object fileObj, Number len) throws PageException {
 

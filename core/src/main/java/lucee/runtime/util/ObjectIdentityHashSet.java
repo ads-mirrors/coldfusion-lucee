@@ -7,7 +7,7 @@ import java.util.HashSet;
 // instead of the default virtually dispatched <object-impl>.hashCode; this avoids the problem
 // of "hashing arrays which contain themselves causing a stackoverflow" 
 
-public class ObjectIdentityHashSet {
+public final class ObjectIdentityHashSet {
 	private HashSet<Integer> elements = new HashSet<Integer>();
 
 	public boolean contains(Object object) {

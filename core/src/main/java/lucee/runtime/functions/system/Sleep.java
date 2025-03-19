@@ -23,7 +23,7 @@ import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 
-public class Sleep {
+public final class Sleep {
 
 	public static String call(PageContext pc, Number nduration) throws PageException {
 		long dur = Caster.toLongValue(nduration);

@@ -296,6 +296,7 @@ public class StatementProxy implements StatementPro {
 	}
 
 	// used only with java 7, do not set @Override
+	@Override
 	public void closeOnCompletion() throws SQLException {
 		// used reflection to make sure this work with Java 5 and 6
 		try {
@@ -310,6 +311,7 @@ public class StatementProxy implements StatementPro {
 	}
 
 	// used only with java 7, do not set @Override
+	@Override
 	public boolean isCloseOnCompletion() throws SQLException {
 		// used reflection to make sure this work with Java 5 and 6
 		try {

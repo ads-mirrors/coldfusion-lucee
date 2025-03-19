@@ -33,7 +33,7 @@ import lucee.runtime.type.Query;
 import lucee.runtime.type.QueryColumn;
 import lucee.runtime.type.UDF;
 
-public class QueryColumnData extends BIF {
+public final class QueryColumnData extends BIF {
 
 	private static final long serialVersionUID = 3915214686428831274L;
 

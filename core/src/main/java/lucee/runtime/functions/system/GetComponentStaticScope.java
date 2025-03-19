@@ -26,7 +26,7 @@ import lucee.runtime.ext.function.BIF;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.Struct;
 
-public class GetComponentStaticScope extends BIF {
+public final class GetComponentStaticScope extends BIF {
 
 	public static Struct call(PageContext pc, String componentPath) throws PageException {
 

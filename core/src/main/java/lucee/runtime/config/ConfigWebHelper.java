@@ -50,7 +50,7 @@ import lucee.runtime.writer.CFMLWriterImpl;
 import lucee.runtime.writer.CFMLWriterWS;
 import lucee.runtime.writer.CFMLWriterWSPref;
 
-public class ConfigWebHelper {
+public final class ConfigWebHelper {
 
 	private final ConfigServerImpl cs;
 	private ConfigWebPro cw;

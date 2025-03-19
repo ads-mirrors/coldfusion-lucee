@@ -23,7 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.TimeZone;
 
-public class OracleOpaqueCast implements Cast {
+public final class OracleOpaqueCast implements Cast {
 
 	@Override
 	public Object toCFType(TimeZone tz, ResultSet rst, int columnIndex) throws SQLException, IOException {

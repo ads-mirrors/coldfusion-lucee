@@ -9,7 +9,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 
-public class SSHManager {
+public final class SSHManager {
 	private JSch jschSSHChannel;
 	private String strUserName;
 	private String strConnectionIP;

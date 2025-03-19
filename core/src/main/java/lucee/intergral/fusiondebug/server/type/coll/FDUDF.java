@@ -31,7 +31,7 @@ import lucee.runtime.type.FunctionArgument;
 import lucee.runtime.type.UDF;
 import lucee.runtime.type.util.UDFUtil;
 
-public class FDUDF extends FDValueNotMutability {
+public final class FDUDF extends FDValueNotMutability {
 
 	private ArrayList children = new ArrayList();
 	private String name;

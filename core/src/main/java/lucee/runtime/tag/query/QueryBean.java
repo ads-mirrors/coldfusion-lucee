@@ -14,7 +14,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.dt.DateTime;
 import lucee.runtime.type.dt.TimeSpan;
 
-public class QueryBean implements Serializable {
+public final class QueryBean implements Serializable {
 
 	/** If specified, password overrides the password value specified in the data source setup. */
 	public String password;

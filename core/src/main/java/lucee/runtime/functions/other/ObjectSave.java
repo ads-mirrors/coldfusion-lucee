@@ -33,7 +33,7 @@ import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 
-public class ObjectSave {
+public final class ObjectSave {
 
 	public static Object call(PageContext pc, Object input) throws PageException {
 		return call(pc, input, null);

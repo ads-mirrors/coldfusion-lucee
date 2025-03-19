@@ -24,7 +24,7 @@ import lucee.runtime.orm.ORMConfiguration;
 import lucee.runtime.orm.ORMSession;
 import lucee.runtime.orm.ORMUtil;
 
-public class ORMReload {
+public final class ORMReload {
 	public static String call(PageContext pc) throws PageException {
 
 		// flush and close session

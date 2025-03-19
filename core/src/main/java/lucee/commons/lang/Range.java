@@ -1,6 +1,6 @@
 package lucee.commons.lang;
 
-public class Range {
+public final class Range {
 	private final int min;
 	private final int max;
 

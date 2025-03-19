@@ -7,7 +7,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.UDF;
 
-public class UDFTagListener extends TagListenerSupport {// UDF before, UDF after
+public final class UDFTagListener extends TagListenerSupport {// UDF before, UDF after
 
 	private UDF before;
 	private UDF after;

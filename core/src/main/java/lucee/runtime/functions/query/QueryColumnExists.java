@@ -26,7 +26,7 @@ import lucee.runtime.type.Collection;
 import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.Query;
 
-public class QueryColumnExists extends BIF {
+public final class QueryColumnExists extends BIF {
 
 	private static final long serialVersionUID = -661796711105724696L;
 

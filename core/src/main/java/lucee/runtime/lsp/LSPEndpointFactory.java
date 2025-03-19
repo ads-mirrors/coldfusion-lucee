@@ -37,7 +37,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 
-public class LSPEndpointFactory implements MessageProcessor {
+public final class LSPEndpointFactory implements MessageProcessor {
 	public static final int DEFAULT_LSP_PORT = 2089;
 	public static final String DEFAULT_COMPONENT = "org.lucee.cfml.lsp.LSPEndpoint";
 	public static final long TIMEOUT = 3000;

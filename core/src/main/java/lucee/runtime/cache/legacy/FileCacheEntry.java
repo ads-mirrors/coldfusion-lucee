@@ -25,7 +25,7 @@ import lucee.commons.io.IOUtil;
 import lucee.commons.io.res.Resource;
 import lucee.runtime.type.dt.TimeSpan;
 
-public class FileCacheEntry implements CacheEntry {
+public final class FileCacheEntry implements CacheEntry {
 
 	private static final String ENC = "utf-8";
 	private Resource res;

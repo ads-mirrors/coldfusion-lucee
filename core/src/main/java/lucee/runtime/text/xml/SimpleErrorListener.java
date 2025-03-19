@@ -21,7 +21,7 @@ package lucee.runtime.text.xml;
 import javax.xml.transform.ErrorListener;
 import javax.xml.transform.TransformerException;
 
-public class SimpleErrorListener implements ErrorListener {
+public final class SimpleErrorListener implements ErrorListener {
 
 	public static final ErrorListener THROW_FATAL = new SimpleErrorListener(false, true, true);
 	public static final ErrorListener THROW_ERROR = new SimpleErrorListener(false, false, true);

@@ -21,7 +21,7 @@ package lucee.runtime.text.feed;
 import lucee.runtime.type.Collection;
 import lucee.runtime.type.StructImpl;
 
-public class FeedStruct extends StructImpl {
+public final class FeedStruct extends StructImpl {
 
 	private boolean hasAttribute;
 	private String path;

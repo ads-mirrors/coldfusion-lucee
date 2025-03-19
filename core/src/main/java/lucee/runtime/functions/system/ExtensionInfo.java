@@ -18,7 +18,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 
-public class ExtensionInfo extends BIF implements Function {
+public final class ExtensionInfo extends BIF implements Function {
 
 	private static final long serialVersionUID = 2627423175121799118L;
 

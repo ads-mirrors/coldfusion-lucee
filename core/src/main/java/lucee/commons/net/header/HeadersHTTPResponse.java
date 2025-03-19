@@ -8,7 +8,7 @@ import org.apache.http.message.BasicHeader;
 
 import lucee.commons.net.http.HTTPResponse;
 
-public class HeadersHTTPResponse implements HeadersCollection {
+public final class HeadersHTTPResponse implements HeadersCollection {
 
 	private HTTPResponse response;
 

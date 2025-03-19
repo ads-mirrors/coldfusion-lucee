@@ -29,7 +29,7 @@ import lucee.runtime.exp.ExceptionHandler;
 import lucee.runtime.listener.ApplicationListener;
 import lucee.runtime.op.Caster;
 
-public class SessionEndCacheEvent implements CacheEventListener {
+public final class SessionEndCacheEvent implements CacheEventListener {
 
 	@Override
 	public void onExpires(CacheEntry entry) {

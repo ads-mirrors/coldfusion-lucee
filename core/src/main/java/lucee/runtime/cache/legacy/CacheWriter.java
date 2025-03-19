@@ -26,7 +26,7 @@ import lucee.commons.io.ForkWriter;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.res.Resource;
 
-public class CacheWriter extends ForkWriter {
+public final class CacheWriter extends ForkWriter {
 
 	private Writer out;
 	private Resource cacheFile;

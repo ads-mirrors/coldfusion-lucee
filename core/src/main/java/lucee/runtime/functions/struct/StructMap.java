@@ -28,7 +28,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.UDF;
 
-public class StructMap extends BIF {
+public final class StructMap extends BIF {
 
 	private static final long serialVersionUID = 5225631181634029456L;
 

@@ -27,7 +27,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 
-public class IsIPv6 {
+public final class IsIPv6 {
 	public static boolean call(PageContext pc) throws PageException {
 		try {
 			InetAddress ia = InetAddress.getLocalHost();

@@ -41,7 +41,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 
-public class ManifestRead {
+public final class ManifestRead {
 	public static Struct call(PageContext pc, String str) throws PageException {
 		Manifest manifest = null;
 		// is it a file?

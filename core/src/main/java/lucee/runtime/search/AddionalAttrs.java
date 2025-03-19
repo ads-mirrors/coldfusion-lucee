@@ -18,7 +18,7 @@
  **/
 package lucee.runtime.search;
 
-public class AddionalAttrs {
+public final class AddionalAttrs {
 
 	private static ThreadLocal addAttrs = new ThreadLocal();
 	private int contextBytes;

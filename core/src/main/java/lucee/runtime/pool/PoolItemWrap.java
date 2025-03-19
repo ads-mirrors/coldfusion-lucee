@@ -1,6 +1,6 @@
 package lucee.runtime.pool;
 
-public class PoolItemWrap {
+public final class PoolItemWrap {
 
 	private PoolItem value;
 	private long last;

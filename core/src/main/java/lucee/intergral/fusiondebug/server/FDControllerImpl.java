@@ -37,7 +37,7 @@ import lucee.runtime.engine.CFMLEngineImpl;
 import lucee.runtime.op.Caster;
 import lucee.runtime.security.SerialNumber;
 
-public class FDControllerImpl implements IFDController {
+public final class FDControllerImpl implements IFDController {
 
 	private List exceptionTypes;
 	private CFMLEngineImpl engine;

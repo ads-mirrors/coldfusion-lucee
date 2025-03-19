@@ -34,7 +34,7 @@ import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 
-public class SystemExitScanner {
+public final class SystemExitScanner {
 
 	private static final String MSG = "found a match";
 	private static Boolean validateSystemExit;

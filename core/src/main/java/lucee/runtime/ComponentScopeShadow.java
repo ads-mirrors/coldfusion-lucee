@@ -49,7 +49,7 @@ import lucee.runtime.type.util.MemberUtil;
 import lucee.runtime.type.util.StructSupport;
 import lucee.runtime.type.util.StructUtil;
 
-public class ComponentScopeShadow extends StructSupport implements ComponentScope {
+public final class ComponentScopeShadow extends StructSupport implements ComponentScope {
 
 	private static final long serialVersionUID = 4930100230796574243L;
 

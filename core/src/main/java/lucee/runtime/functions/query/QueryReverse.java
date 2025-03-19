@@ -10,7 +10,7 @@ import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.Query;
 import lucee.runtime.type.QueryImpl;
 
-public class QueryReverse extends BIF implements Function {
+public final class QueryReverse extends BIF implements Function {
 
 	private static final long serialVersionUID = -91336674628990980L;
 

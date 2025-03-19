@@ -20,7 +20,7 @@ package lucee.runtime.exp;
 
 import lucee.runtime.config.RemoteClient;
 
-public class RemoteAccessException extends ApplicationException {
+public final class RemoteAccessException extends ApplicationException {
 
 	public RemoteAccessException(String message) {
 		super(message);

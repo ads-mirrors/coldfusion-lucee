@@ -25,7 +25,7 @@ import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.Objects;
 
-public class ObjectsIterator implements Iterator<Object> {
+public final class ObjectsIterator implements Iterator<Object> {
 
 	private Iterator<Key> keys;
 	private Objects objs;

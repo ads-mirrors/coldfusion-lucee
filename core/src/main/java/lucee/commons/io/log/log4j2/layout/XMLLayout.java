@@ -25,7 +25,7 @@ import java.util.Map;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.layout.AbstractStringLayout;
 
-public class XMLLayout extends AbstractStringLayout { // TODO <Serializable>
+public final class XMLLayout extends AbstractStringLayout { // TODO <Serializable>
 
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 	private static final String ROOT_TAG = "Events";

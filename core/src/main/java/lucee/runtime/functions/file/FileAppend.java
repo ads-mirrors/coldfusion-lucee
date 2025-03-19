@@ -29,7 +29,7 @@ import lucee.runtime.PageSourcePool;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 
-public class FileAppend {
+public final class FileAppend {
 
 	public static String call(PageContext pc, Object file, Object data) throws PageException {
 		return call(pc, file, data, ((PageContextImpl) pc).getResourceCharset().name());

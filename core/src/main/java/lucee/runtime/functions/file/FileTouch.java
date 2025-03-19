@@ -23,7 +23,7 @@ import lucee.runtime.ext.function.BIF;
 import lucee.runtime.op.Caster;
 import lucee.runtime.tag.FileTag;
 
-public class FileTouch extends BIF {
+public final class FileTouch extends BIF {
 
 	private static final long serialVersionUID = -7478227658810128723L;
 

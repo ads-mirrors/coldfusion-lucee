@@ -56,7 +56,7 @@ import lucee.runtime.reflection.pairs.MethodInstance;
 import lucee.runtime.type.util.ListUtil;
 import lucee.transformer.library.ClassDefinitionImpl;
 
-public class Log4j2Engine extends LogEngine {
+public final class Log4j2Engine extends LogEngine {
 
 	public static final long DEFAULT_MAX_FILE_SIZE = 10 * 1024 * 1024;
 	public static final int DEFAULT_MAX_BACKUP_INDEX = 10;

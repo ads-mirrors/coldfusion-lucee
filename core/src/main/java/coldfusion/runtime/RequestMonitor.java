@@ -23,7 +23,7 @@ import lucee.runtime.engine.ThreadLocalPageContext;
 /**
  * this is just a wrapper class to simulate the ACF implementation
  */
-public class RequestMonitor {
+public final class RequestMonitor {
 	// public void beginRequestMonitor(String str){/* ignored */ }
 	// public void endRequestMonitor(){/* ignored */ }
 	// public void checkSlowRequest(Object obj){/* ignored */ }

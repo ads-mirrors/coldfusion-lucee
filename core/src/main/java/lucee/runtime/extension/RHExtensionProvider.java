@@ -22,7 +22,7 @@ import java.net.URL;
 
 import lucee.commons.net.HTTPUtil;
 
-public class RHExtensionProvider {
+public final class RHExtensionProvider {
 
 	private final URL url;
 	private final boolean readonly;

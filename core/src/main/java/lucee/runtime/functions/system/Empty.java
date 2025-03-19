@@ -26,7 +26,7 @@ import lucee.runtime.interpreter.SecurityInterpreterException;
 import lucee.runtime.interpreter.VariableInterpreter;
 import lucee.runtime.op.Caster;
 
-public class Empty implements Function {
+public final class Empty implements Function {
 
 	private static final long serialVersionUID = 3780957672985941192L;
 

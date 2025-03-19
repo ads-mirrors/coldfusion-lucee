@@ -31,7 +31,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.ListUtil;
 import lucee.runtime.util.PageContextUtil;
 
-public class RestRequestListener implements RequestListener {
+public final class RestRequestListener implements RequestListener {
 
 	private final Mapping mapping;
 	private final String path;

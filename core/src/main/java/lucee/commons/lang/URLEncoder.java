@@ -30,7 +30,7 @@ import lucee.commons.io.CharsetUtil;
  * 
  */
 @Deprecated
-public class URLEncoder {
+public final class URLEncoder {
 
 	private static final BitSet WWW_FORM_URL = new BitSet(256);
 

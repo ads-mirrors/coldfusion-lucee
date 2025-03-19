@@ -47,7 +47,7 @@ import lucee.runtime.type.util.ArrayUtil;
  * creates a Java Proxy for components, so you can use componets as java classes following a certain
  * interface or class
  */
-public class JavaProxy {
+public final class JavaProxy {
 
 	public static Object call(ConfigWeb config, Component cfc, String methodName, Object... arguments) {
 		boolean unregister = false;

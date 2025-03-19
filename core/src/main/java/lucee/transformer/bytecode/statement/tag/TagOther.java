@@ -25,7 +25,7 @@ import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.statement.FlowControlFinal;
 import lucee.transformer.bytecode.statement.FlowControlFinalImpl;
 
-public class TagOther extends TagBase {
+public final class TagOther extends TagBase {
 
 	private FlowControlFinalImpl fcf;
 

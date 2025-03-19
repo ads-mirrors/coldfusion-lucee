@@ -14,7 +14,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.Struct;
 
-public class DebugAdd extends BIF {
+public final class DebugAdd extends BIF {
 
 	private static final long serialVersionUID = 3480038887443615199L;
 

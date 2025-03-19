@@ -25,7 +25,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import lucee.commons.lock.LockException;
 import lucee.commons.lock.LockInterruptedException;
 
-public class RWLock<L> {
+public final class RWLock<L> {
 
 	private final ReentrantReadWriteLock rwl;
 	private final Lock rl;

@@ -26,7 +26,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.dt.DateTime;
 
-public class FileSetLastModified {
+public final class FileSetLastModified {
 
 	public static String call(PageContext pc, Object oSrc, DateTime date) throws PageException {
 		Resource src = Caster.toResource(pc, oSrc, false);

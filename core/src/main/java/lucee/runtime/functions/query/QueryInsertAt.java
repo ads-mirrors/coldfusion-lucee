@@ -14,7 +14,7 @@ import lucee.runtime.type.Query;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.ListUtil;
 
-public class QueryInsertAt extends BIF implements Function {
+public final class QueryInsertAt extends BIF implements Function {
 
 	private static final long serialVersionUID = -2549767593942513005L;
 

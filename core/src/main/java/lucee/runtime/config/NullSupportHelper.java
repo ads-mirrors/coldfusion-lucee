@@ -23,7 +23,7 @@ import lucee.runtime.PageContextImpl;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.type.Null;
 
-public class NullSupportHelper {
+public final class NullSupportHelper {
 
 	public static boolean full(PageContext pc) {
 

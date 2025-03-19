@@ -20,7 +20,7 @@ package lucee.commons.collection;
 
 import java.util.Set;
 
-public class SyncSet<E> extends SyncCollection<E> implements Set<E> {
+public final class SyncSet<E> extends SyncCollection<E> implements Set<E> {
 	private static final long serialVersionUID = 487447009682186044L;
 
 	public SyncSet(Set<E> s) {

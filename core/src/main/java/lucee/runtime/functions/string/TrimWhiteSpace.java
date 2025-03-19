@@ -6,7 +6,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.BIF;
 import lucee.runtime.op.Caster;
 
-public class TrimWhiteSpace extends BIF {
+public final class TrimWhiteSpace extends BIF {
 
 	public static final char CHAR_EMPTY = 0;
 	public static final char CHAR_NL = '\n';

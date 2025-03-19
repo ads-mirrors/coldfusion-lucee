@@ -28,7 +28,7 @@ import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 
-public class ParseNumber {
+public final class ParseNumber {
 	private static final int BIN = 2;
 	private static final int OCT = 8;
 	private static final int DEC = 10;

@@ -36,7 +36,7 @@ import lucee.runtime.PageSource;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.transformer.bytecode.util.ASMUtil;
 
-public class FDThreadImpl implements IFDThread {
+public final class FDThreadImpl implements IFDThread {
 
 	private PageContextImpl pc;
 	private String name;

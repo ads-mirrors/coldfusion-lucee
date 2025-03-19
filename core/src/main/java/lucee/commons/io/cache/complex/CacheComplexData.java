@@ -2,7 +2,7 @@ package lucee.commons.io.cache.complex;
 
 import java.io.Serializable;
 
-public class CacheComplexData implements Serializable {
+public final class CacheComplexData implements Serializable {
 
 	private static final long serialVersionUID = 6401384011421058561L;
 

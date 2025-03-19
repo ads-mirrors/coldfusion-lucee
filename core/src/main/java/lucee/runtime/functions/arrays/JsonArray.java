@@ -24,7 +24,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.BIF;
 import lucee.runtime.type.Array;
 
-public class JsonArray extends BIF {
+public final class JsonArray extends BIF {
 
 	private static final long serialVersionUID = -6612774374307676590L;
 

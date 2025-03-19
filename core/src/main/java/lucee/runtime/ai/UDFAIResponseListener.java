@@ -5,7 +5,7 @@ import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.type.UDF;
 
-public class UDFAIResponseListener implements AIResponseListener {
+public final class UDFAIResponseListener implements AIResponseListener {
 
 	private UDF listener;
 	private PageContext pc;

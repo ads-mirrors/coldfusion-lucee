@@ -24,7 +24,7 @@ import lucee.runtime.gateway.Gateway;
 import lucee.runtime.gateway.GatewayEngine;
 import lucee.runtime.gateway.GatewayEngineImpl;
 
-public class GatewayEngineProxy implements GatewayEngine {
+public final class GatewayEngineProxy implements GatewayEngine {
 
 	private GatewayEngineImpl engine;
 

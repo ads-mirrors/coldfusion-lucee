@@ -29,7 +29,7 @@ import lucee.runtime.config.Constants;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.type.util.ListUtil;
 
-public class ScriptEngineFactoryImpl implements ScriptEngineFactory {
+public final class ScriptEngineFactoryImpl implements ScriptEngineFactory {
 
 	final CFMLEngine engine;
 	final boolean tag;

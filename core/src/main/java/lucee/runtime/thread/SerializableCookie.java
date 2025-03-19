@@ -23,7 +23,7 @@ import java.io.Serializable;
 import jakarta.servlet.http.Cookie;
 import lucee.runtime.type.scope.CookieImpl;
 
-public class SerializableCookie implements Serializable {
+public final class SerializableCookie implements Serializable {
 
 	public static final Cookie[] COOKIES0 = new Cookie[0];
 

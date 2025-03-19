@@ -12,7 +12,7 @@ import lucee.commons.io.FileUtil;
  * The ability to specify a port number is not specified by AF_UNIX sockets, but we need it
  * sometimes, for example for RMI-over-AF_UNIX.
  */
-public class UNIXSocketAddress extends InetSocketAddress {
+public final class UNIXSocketAddress extends InetSocketAddress {
 
 	private static final long serialVersionUID = 1L;
 	private final String socketFile;

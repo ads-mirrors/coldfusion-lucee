@@ -14,7 +14,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.op.Caster;
 
-public class ArrayTyped extends ArrayImpl {
+public final class ArrayTyped extends ArrayImpl {
 
 	private static final long serialVersionUID = 2416933826309884176L;
 

@@ -20,7 +20,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.osgi.OSGiUtil;
 
-public class JaninoCompiler implements Compiler {
+public final class JaninoCompiler implements Compiler {
 
 	public static void main(String[] args) throws Exception {
 		File destinationDirectory = new File("/Users/mic/Tmp3/dest");
@@ -56,7 +56,7 @@ public class JaninoCompiler implements Compiler {
 		compiler.setClassFileCreator(resourceCreator);
 		// Compile source files.
 		compiler.compile(new Resource[] {
-				new StringResource("Example.java", "package org.lucee.test;\n import org.osgi.framework.BundleException; public class Example {\n" + "\n" + "}") });
+				new StringResource("Example.java", "package org.lucee.test;\n import org.osgi.framework.BundleException; public final class Example {\n" + "\n" + "}") });
 
 		// compiler.setTargetVersion(0)
 

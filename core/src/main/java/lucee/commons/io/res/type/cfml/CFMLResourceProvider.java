@@ -48,7 +48,7 @@ import lucee.runtime.thread.ThreadUtil;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.StructImpl;
 
-public class CFMLResourceProvider implements ResourceProviderPro {
+public final class CFMLResourceProvider implements ResourceProviderPro {
 
 	private static final Object[] ZERO_ARGS = new Object[0];
 

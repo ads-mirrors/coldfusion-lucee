@@ -28,7 +28,7 @@ import lucee.runtime.PageContextImpl;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 
-public class FileWriteLine {
+public final class FileWriteLine {
 
 	public static String call(PageContext pc, Object obj, String text) throws PageException {
 		FileStreamWrapper fsw = null;

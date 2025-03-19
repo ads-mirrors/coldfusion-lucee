@@ -35,7 +35,7 @@ import lucee.commons.io.res.type.datasource.Attr;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.db.DatasourceConnection;
 
-public class MSSQL extends CoreSupport {
+public final class MSSQL extends CoreSupport {
 
 	private static final int DEFAULT_MODE = 0777;
 	private static final int DEFAULT_ATTRS = 0;

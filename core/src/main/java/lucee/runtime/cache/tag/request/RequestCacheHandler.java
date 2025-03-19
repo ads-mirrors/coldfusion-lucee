@@ -10,7 +10,7 @@ import lucee.runtime.cache.tag.MapCacheHandler;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 
-public class RequestCacheHandler extends MapCacheHandler implements CacheHandlerPro {
+public final class RequestCacheHandler extends MapCacheHandler implements CacheHandlerPro {
 
 	private static ThreadLocal<Map<String, CacheItem>> data = new ThreadLocal<Map<String, CacheItem>>() {
 		@Override

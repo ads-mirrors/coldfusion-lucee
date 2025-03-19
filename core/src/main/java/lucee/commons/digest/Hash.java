@@ -31,7 +31,7 @@ import lucee.commons.io.IOUtil;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 
-public class Hash {
+public final class Hash {
 
 	public static final char[] ENCODING_HEX = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 	public static final char[] ENCODING_HEXUC = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };

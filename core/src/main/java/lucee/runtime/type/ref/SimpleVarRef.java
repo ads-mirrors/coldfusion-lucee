@@ -23,7 +23,7 @@ import lucee.runtime.PageContextImpl;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.type.Collection;
 
-public class SimpleVarRef implements Reference {
+public final class SimpleVarRef implements Reference {
 
 	// private PageContextImpl pc;
 

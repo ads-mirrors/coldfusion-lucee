@@ -13,7 +13,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.Function;
 import lucee.runtime.interpreter.JSONExpressionInterpreter;
 
-public class GetSystemPropOrEnvVar implements Function {
+public final class GetSystemPropOrEnvVar implements Function {
 
 	private static final long serialVersionUID = 3459096452887146460L;
 

@@ -6,7 +6,7 @@ import java.util.Map.Entry;
 import lucee.commons.digest.HashUtil;
 import lucee.runtime.gateway.GatewayEntry;
 
-public class GatewayMap extends LinkedHashMap<String, GatewayEntry> {
+public final class GatewayMap extends LinkedHashMap<String, GatewayEntry> {
 	private static final long serialVersionUID = -1357224833049360465L;
 	private String id;
 

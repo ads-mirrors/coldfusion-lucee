@@ -27,7 +27,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.Array;
 
-public class IsIPInRange {
+public final class IsIPInRange {
 	public static boolean call(PageContext pc, Object ips, String ip) throws PageException {
 		try {
 			if (ips instanceof String) return IPRange.getInstance((String) ips).inRange(ip);

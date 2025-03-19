@@ -27,7 +27,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.BIF;
 import lucee.runtime.op.Caster;
 
-public class Floor extends BIF {
+public final class Floor extends BIF {
 
 	private static final long serialVersionUID = 8816436870378089996L;
 

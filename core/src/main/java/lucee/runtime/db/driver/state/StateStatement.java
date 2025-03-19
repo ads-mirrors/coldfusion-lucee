@@ -27,7 +27,7 @@ import lucee.runtime.db.driver.ConnectionProxy;
 import lucee.runtime.db.driver.StatementProxy;
 import lucee.runtime.engine.ThreadLocalPageContext;
 
-public class StateStatement extends StatementProxy {
+public final class StateStatement extends StatementProxy {
 
 	public StateStatement(ConnectionProxy conn, Statement stat) {
 		super(conn, stat);

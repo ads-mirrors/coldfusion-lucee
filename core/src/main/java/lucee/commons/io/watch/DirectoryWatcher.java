@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class DirectoryWatcher {
+public final class DirectoryWatcher {
 
 	private File root;
 	private long lastModified;

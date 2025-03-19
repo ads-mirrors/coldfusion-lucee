@@ -31,7 +31,7 @@ import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.dt.DateTimeImpl;
 import lucee.runtime.type.util.KeyConstants;
 
-public class GetFileInfo {
+public final class GetFileInfo {
 
 	public static Struct call(PageContext pc, Object oSrc) throws PageException {
 		Resource src = Caster.toResource(pc, oSrc, true);

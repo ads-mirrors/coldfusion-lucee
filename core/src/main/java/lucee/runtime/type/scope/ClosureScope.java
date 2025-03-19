@@ -40,7 +40,7 @@ import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.CollectionUtil;
 import lucee.runtime.type.util.KeyConstants;
 
-public class ClosureScope extends ScopeSupport implements Variables, Externalizable {
+public final class ClosureScope extends ScopeSupport implements Variables, Externalizable {
 
 	private Argument arg;
 	private Local local;

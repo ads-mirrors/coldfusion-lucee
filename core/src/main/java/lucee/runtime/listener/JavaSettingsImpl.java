@@ -55,7 +55,7 @@ import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 
-public class JavaSettingsImpl implements JavaSettings {
+public final class JavaSettingsImpl implements JavaSettings {
 
 	private static final int DEFAULT_WATCH_INTERVAL = 60;
 

@@ -26,7 +26,7 @@ import java.util.TimeZone;
 
 import lucee.commons.io.IOUtil;
 
-public class ClobCast implements Cast {
+public final class ClobCast implements Cast {
 
 	@Override
 	public Object toCFType(TimeZone tz, ResultSet rst, int columnIndex) throws SQLException, IOException {

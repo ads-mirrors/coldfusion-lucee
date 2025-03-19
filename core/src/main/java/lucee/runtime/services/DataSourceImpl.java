@@ -30,7 +30,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.PageException;
 
-public class DataSourceImpl implements DataSource {
+public final class DataSourceImpl implements DataSource {
 
 	private lucee.runtime.db.DataSource ds;
 

@@ -252,7 +252,7 @@ public final class CFMLCompilerImpl implements CFMLCompiler {
 		return cfmlTransformer.transform(BytecodeFactory.getInstance(config), config, source, tld, funcLib, returnValue, ignoreScopes);
 	}
 
-	public class Result {
+	public final class Result {
 
 		public final Page page;
 		public final byte[] barr;

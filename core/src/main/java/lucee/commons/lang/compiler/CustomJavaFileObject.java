@@ -16,7 +16,7 @@ import javax.tools.JavaFileObject;
 
 import lucee.commons.io.IOUtil;
 
-public class CustomJavaFileObject implements JavaFileObject {
+public final class CustomJavaFileObject implements JavaFileObject {
 	private final String binaryName;
 	private final URI uri;
 	private String name;

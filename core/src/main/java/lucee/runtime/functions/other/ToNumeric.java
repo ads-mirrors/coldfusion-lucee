@@ -24,7 +24,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
 
-public class ToNumeric {
+public final class ToNumeric {
 	public static Number call(PageContext pc, Object value) throws PageException {
 		return Caster.toNumber(pc, value);
 	}

@@ -67,7 +67,7 @@ import lucee.transformer.library.function.FunctionLibFunction;
 import lucee.transformer.library.function.FunctionLibFunctionArg;
 import lucee.transformer.library.tag.TagLibTag;
 
-public class VariableImpl extends ExpressionBase implements Variable {
+public final class VariableImpl extends ExpressionBase implements Variable {
 
 	// java.lang.Object get(Key)
 	final static Method METHOD_SCOPE_GET_KEY = new Method("get", Types.OBJECT, new Type[] { Types.COLLECTION_KEY });

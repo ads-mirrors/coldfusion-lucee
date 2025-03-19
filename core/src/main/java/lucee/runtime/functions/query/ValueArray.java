@@ -31,7 +31,7 @@ import lucee.runtime.type.Array;
 import lucee.runtime.type.ArrayImpl;
 import lucee.runtime.type.QueryColumn;
 
-public class ValueArray extends BIF {
+public final class ValueArray extends BIF {
 
 	private static final long serialVersionUID = -1810991362001086246L;
 

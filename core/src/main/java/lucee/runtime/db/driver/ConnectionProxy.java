@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
-public class ConnectionProxy implements Connection {
+public final class ConnectionProxy implements Connection {
 
 	private Connection conn;
 	private Factory factory;

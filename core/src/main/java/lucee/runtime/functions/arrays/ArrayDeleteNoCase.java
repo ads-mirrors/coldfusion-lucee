@@ -7,7 +7,7 @@ import lucee.runtime.ext.function.BIF;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.Array;
 
-public class ArrayDeleteNoCase extends BIF {
+public final class ArrayDeleteNoCase extends BIF {
 
 	private static final long serialVersionUID = 1120923916196967210L;
 

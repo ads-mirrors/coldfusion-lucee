@@ -22,7 +22,7 @@ import java.util.Iterator;
 
 import lucee.commons.lang.StringUtil;
 
-public class UCKeyIterator implements Iterator {
+public final class UCKeyIterator implements Iterator {
 
 	private Iterator it;
 

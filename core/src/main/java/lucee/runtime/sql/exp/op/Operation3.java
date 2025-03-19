@@ -21,7 +21,7 @@ package lucee.runtime.sql.exp.op;
 import lucee.runtime.sql.exp.Expression;
 import lucee.runtime.sql.exp.ExpressionSupport;
 
-public class Operation3 extends ExpressionSupport implements Operation {
+public final class Operation3 extends ExpressionSupport implements Operation {
 
 	private Expression exp;
 	private Expression left;

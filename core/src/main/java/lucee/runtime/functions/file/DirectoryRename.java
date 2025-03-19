@@ -24,7 +24,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.tag.Directory;
 
-public class DirectoryRename {
+public final class DirectoryRename {
 
 	public static String call(PageContext pc, String oldPath, String newPath) throws PageException {
 		return call(pc, oldPath, newPath, true);

@@ -23,7 +23,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.orm.ORMSession;
 import lucee.runtime.orm.ORMUtil;
 
-public class EntitySave {
+public final class EntitySave {
 
 	public static String call(PageContext pc, Object obj) throws PageException {
 		return call(pc, obj, false);

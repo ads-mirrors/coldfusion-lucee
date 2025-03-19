@@ -16,7 +16,7 @@ import lucee.commons.lang.ParentThreasRefThread;
 import lucee.commons.lang.types.RefLong;
 import lucee.commons.lang.types.RefLongImpl;
 
-public class CPULogger {
+public final class CPULogger {
 
 	private Logger logger;
 	private long slotTime;

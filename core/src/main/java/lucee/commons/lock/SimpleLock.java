@@ -21,7 +21,7 @@ package lucee.commons.lock;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class SimpleLock<L> implements Lock {
+public final class SimpleLock<L> implements Lock {
 
 	private ReentrantLock lock;
 	private L label;

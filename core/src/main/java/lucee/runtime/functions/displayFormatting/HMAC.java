@@ -33,7 +33,7 @@ import lucee.runtime.ext.function.Function;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
 
-public class HMAC implements Function {
+public final class HMAC implements Function {
 
 	private static final long serialVersionUID = -1999122154087043893L;
 

@@ -474,7 +474,7 @@ public final class DatasourceResourceProvider implements ResourceProviderPro {
 		return attr;
 	}
 
-	public class ConnectionData {
+	public final class ConnectionData {
 		private String username;
 		private String password;
 		private String datasourceName;

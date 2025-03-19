@@ -22,7 +22,7 @@ import lucee.runtime.tag.MissingAttribute;
 import lucee.runtime.type.Collection;
 import lucee.runtime.type.KeyImpl;
 
-public class TagMetaDataAttrImpl extends MissingAttribute implements TagMetaDataAttr {
+public final class TagMetaDataAttrImpl extends MissingAttribute implements TagMetaDataAttr {
 	private String description;
 	private boolean required;
 	private boolean isRuntimeExpressionValue;

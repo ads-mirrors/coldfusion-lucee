@@ -20,7 +20,7 @@ package lucee.commons.security;
 
 import lucee.commons.lang.StringUtil;
 
-public class CredentialsImpl implements Credentials {
+public final class CredentialsImpl implements Credentials {
 
 	private String username;
 	private String password;

@@ -27,7 +27,7 @@ import lucee.runtime.type.Array;
 import lucee.runtime.type.Collection;
 import lucee.runtime.type.Collection.Key;
 
-public class FDCollectionNode extends FDNodeValueSupport {
+public final class FDCollectionNode extends FDNodeValueSupport {
 
 	private Collection coll;
 	private Key key;

@@ -75,7 +75,7 @@ import lucee.transformer.expression.literal.Literal;
 import lucee.transformer.expression.var.DataMember;
 import lucee.transformer.expression.var.Variable;
 
-public class BytecodeFactory extends FactoryBase {
+public final class BytecodeFactory extends FactoryBase {
 
 	private static final Type KEY_CONSTANTS = Type.getType(KeyConstants.class);
 

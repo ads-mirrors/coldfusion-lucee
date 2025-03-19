@@ -17,7 +17,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.KeyConstants;
 
-public class ClaudeStreamResponse implements Response {
+public final class ClaudeStreamResponse implements Response {
 	private Struct raw = null;
 	private String charset;
 	private StringBuilder answer = new StringBuilder();

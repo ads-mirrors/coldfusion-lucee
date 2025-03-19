@@ -1,6 +1,6 @@
 package lucee.runtime.ai;
 
-public class RequestSupport implements Request {
+public final class RequestSupport implements Request {
 
 	private String question;
 

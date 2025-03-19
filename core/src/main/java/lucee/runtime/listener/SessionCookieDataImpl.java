@@ -6,7 +6,7 @@ import lucee.runtime.type.dt.TimeSpan;
 import lucee.runtime.type.dt.TimeSpanImpl;
 import lucee.runtime.type.scope.CookieImpl;
 
-public class SessionCookieDataImpl implements SessionCookieData {
+public final class SessionCookieDataImpl implements SessionCookieData {
 
 	public static final SessionCookieData DEFAULT = new SessionCookieDataImpl(true, false, TimeSpanImpl.fromMillis(CookieImpl.NEVER * 1000L), null, false, CookieData.SAMESITE_LAX,
 			"/", false);

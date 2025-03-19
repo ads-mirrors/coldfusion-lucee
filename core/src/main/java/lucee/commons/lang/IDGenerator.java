@@ -18,7 +18,7 @@
  **/
 package lucee.commons.lang;
 
-public class IDGenerator {
+public final class IDGenerator {
 
 	private static int id;
 

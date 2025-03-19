@@ -11,7 +11,7 @@ import java.util.Map;
 import lucee.commons.lang.ClassLoaderDefault;
 import lucee.commons.lang.ClassUtil;
 
-public class CombinedClassLoader extends ClassLoader implements ClassLoaderDefault {
+public final class CombinedClassLoader extends ClassLoader implements ClassLoaderDefault {
 
 	private final ClassLoader loader;
 	private final ClassLoader core;

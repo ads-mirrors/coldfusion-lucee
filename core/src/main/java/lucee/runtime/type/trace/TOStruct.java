@@ -26,7 +26,7 @@ import lucee.runtime.op.Duplicator;
 import lucee.runtime.type.Collection;
 import lucee.runtime.type.Struct;
 
-public class TOStruct extends TOCollection implements Struct {
+public final class TOStruct extends TOCollection implements Struct {
 
 	private static final long serialVersionUID = 4868199372417392722L;
 	private Struct sct;

@@ -18,7 +18,7 @@
  **/
 package lucee.transformer.cfml;
 
-public class TransfomerSettings {
+public final class TransfomerSettings {
 	// private static final TransfomerSettings TRANS_SETTING_DOT_NOT_UPPER = new
 	// TransfomerSettings(true);
 	// private static final TransfomerSettings TRANS_SETTING_DOT_NOT_ORIGINAL = new

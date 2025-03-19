@@ -20,7 +20,7 @@ package lucee.commons.io.res.type.datasource;
 
 import lucee.commons.io.res.type.datasource.core.CoreSupport;
 
-public class Attr {
+public final class Attr {
 
 	public static final int TYPE_DIRECTORY = 0;
 	public static final int TYPE_FILE = 1;

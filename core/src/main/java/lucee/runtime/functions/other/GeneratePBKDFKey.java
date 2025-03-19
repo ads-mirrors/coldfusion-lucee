@@ -32,7 +32,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.BIF;
 import lucee.runtime.op.Caster;
 
-public class GeneratePBKDFKey extends BIF {
+public final class GeneratePBKDFKey extends BIF {
 
 	private static final long serialVersionUID = -2558116913822203235L;
 

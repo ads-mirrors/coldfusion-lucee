@@ -28,7 +28,7 @@ import org.apache.http.entity.ContentType;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.TemporaryStream;
 
-public class TemporaryStreamHttpEntity extends AbstractHttpEntity implements Entity4 {
+public final class TemporaryStreamHttpEntity extends AbstractHttpEntity implements Entity4 {
 
 	private final TemporaryStream ts;
 	private ContentType ct;

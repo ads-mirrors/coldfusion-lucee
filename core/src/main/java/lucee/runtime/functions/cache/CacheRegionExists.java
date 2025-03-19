@@ -31,7 +31,7 @@ import lucee.runtime.op.Caster;
  * Engines and should be avoided where possible. The preferred method to manipulate Cache
  * connections is via the Administrator interface or in Application.
  */
-public class CacheRegionExists extends BIF {
+public final class CacheRegionExists extends BIF {
 
 	private static final long serialVersionUID = 5966166102856736134L;
 

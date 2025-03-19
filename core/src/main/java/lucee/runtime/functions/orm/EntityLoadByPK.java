@@ -7,7 +7,7 @@ import lucee.runtime.op.Decision;
 import lucee.runtime.orm.ORMSession;
 import lucee.runtime.orm.ORMUtil;
 
-public class EntityLoadByPK {
+public final class EntityLoadByPK {
 
 	public static Object call(PageContext pc, String name, Object oID) throws PageException {
 		return call(pc, name, oID, false);

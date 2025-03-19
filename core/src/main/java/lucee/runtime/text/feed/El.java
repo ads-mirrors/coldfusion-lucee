@@ -18,7 +18,7 @@
  **/
 package lucee.runtime.text.feed;
 
-public class El {
+public final class El {
 
 	public static short QUANTITY_0_1 = 0;
 	public static short QUANTITY_0_N = 4;

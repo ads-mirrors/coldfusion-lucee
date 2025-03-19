@@ -20,7 +20,7 @@ import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.Struct;
 import lucee.runtime.util.Cast;
 
-public class CFConfigImport {
+public final class CFConfigImport {
 
 	private static Key FROM_CFCONFIG;
 	private static Key ACTION;

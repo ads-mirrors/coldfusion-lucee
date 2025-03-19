@@ -29,7 +29,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.config.ConfigServer;
 import lucee.runtime.config.ConfigWeb;
 
-public class ActionMonitorCollectorRefImpl implements ActionMonitorCollector {
+public final class ActionMonitorCollectorRefImpl implements ActionMonitorCollector {
 
 	private List<ActionMonitor> monitors = new ArrayList<ActionMonitor>();
 	private Method init;

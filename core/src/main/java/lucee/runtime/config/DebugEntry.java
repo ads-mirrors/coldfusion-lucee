@@ -28,7 +28,7 @@ import lucee.commons.net.IPRange;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.ListUtil;
 
-public class DebugEntry {
+public final class DebugEntry {
 
 	private final String id;
 	private final String type;

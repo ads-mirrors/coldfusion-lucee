@@ -23,7 +23,7 @@ import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.KeyConstants;
 
-public class AIEngineFactory {
+public final class AIEngineFactory {
 
 	private static final Map<String, SoftReference<AIEngine>> instances = new ConcurrentHashMap<>();
 

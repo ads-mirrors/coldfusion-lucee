@@ -14,7 +14,7 @@ import lucee.runtime.type.util.ComponentUtil;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.UDFUtil;
 
-public class Lambda extends EnvUDF {
+public final class Lambda extends EnvUDF {
 
 	public Lambda() {// used for externalize
 		super();

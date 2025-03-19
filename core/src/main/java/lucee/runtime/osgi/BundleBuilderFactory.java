@@ -52,7 +52,7 @@ import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.type.util.ListUtil;
 
-public class BundleBuilderFactory {
+public final class BundleBuilderFactory {
 
 	// Indicates the OSGi specification to use for reading this bundle.
 	public static final int MANIFEST_VERSION = 2;
@@ -508,7 +508,7 @@ public class BundleBuilderFactory {
 
 	}
 
-	public class MyZipOutputStream extends ZipOutputStream {
+	public final class MyZipOutputStream extends ZipOutputStream {
 
 		private Map<String, Resource> names = new HashMap<String, Resource>();
 
@@ -527,7 +527,7 @@ public class BundleBuilderFactory {
 
 	}
 
-	public class MyZipEntry extends ZipEntry {
+	public final class MyZipEntry extends ZipEntry {
 
 		private Resource file;
 

@@ -24,7 +24,7 @@ import java.util.Map;
 import lucee.runtime.gateway.Gateway;
 import lucee.runtime.gateway.GatewayEngine;
 
-public class GatewayProxy implements Gateway {
+public final class GatewayProxy implements Gateway {
 
 	private final Gateway gateway;
 

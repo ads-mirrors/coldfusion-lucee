@@ -62,7 +62,7 @@ import lucee.runtime.type.scope.UndefinedImpl;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.util.PageContextUtil;
 
-public class ChildThreadImpl extends ChildThread implements Serializable {
+public final class ChildThreadImpl extends ChildThread implements Serializable {
 
 	private static final long serialVersionUID = -8902836175312356628L;
 

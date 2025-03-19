@@ -34,7 +34,7 @@ import lucee.commons.lang.StringUtil;
  * 
  * @author Igal
  */
-public class WildcardPattern {
+public final class WildcardPattern {
 
 	private final String pattern;
 	private final boolean isInclude;

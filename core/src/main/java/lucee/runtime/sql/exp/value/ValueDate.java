@@ -23,7 +23,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.sql.exp.Literal;
 import lucee.runtime.type.dt.DateTime;
 
-public class ValueDate extends ValueSupport implements Literal {
+public final class ValueDate extends ValueSupport implements Literal {
 
 	private DateTime value;
 

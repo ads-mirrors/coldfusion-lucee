@@ -28,7 +28,7 @@ import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 
-public class Invoke implements Function {
+public final class Invoke implements Function {
 
 	private static final long serialVersionUID = 3451409617437302246L;
 	private static final Struct EMPTY = new StructImpl();

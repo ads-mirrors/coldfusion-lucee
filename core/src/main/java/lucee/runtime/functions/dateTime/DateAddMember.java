@@ -25,7 +25,7 @@ import lucee.runtime.ext.function.BIF;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.dt.DateTime;
 
-public class DateAddMember extends BIF {
+public final class DateAddMember extends BIF {
 
 	private static final long serialVersionUID = 2435230088985760512L;
 

@@ -26,7 +26,7 @@ import java.util.TimeZone;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Constants;
 
-public class BitCast implements Cast {
+public final class BitCast implements Cast {
 
 	@Override
 	public Object toCFType(TimeZone tz, ResultSet rst, int columnIndex) throws SQLException, IOException {

@@ -18,7 +18,7 @@
  **/
 package lucee.runtime.debug;
 
-public class DebugDumpImpl implements DebugDump {
+public final class DebugDumpImpl implements DebugDump {
 
 	private final String template;
 	private final int line;

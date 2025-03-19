@@ -21,7 +21,7 @@ package lucee.runtime.gateway;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.exp.PageExceptionBox;
 
-public class PageGatewayException extends GatewayException implements PageExceptionBox {
+public final class PageGatewayException extends GatewayException implements PageExceptionBox {
 
 	private static final long serialVersionUID = 752599325554487824L;
 	private PageException pe;

@@ -30,7 +30,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
 
-public class FileRead {
+public final class FileRead {
 
 	public static Object call(PageContext pc, Object path) throws PageException {
 		return _call(pc, Caster.toResource(pc, path, true), ((PageContextImpl) pc).getResourceCharset().name());

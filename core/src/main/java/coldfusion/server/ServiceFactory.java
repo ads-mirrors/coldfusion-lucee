@@ -20,7 +20,7 @@ package coldfusion.server;
 
 import lucee.runtime.services.DataSourceServiceImpl;
 
-public class ServiceFactory {
+public final class ServiceFactory {
 	public static final void clear() {
 
 	}

@@ -24,7 +24,7 @@ import lucee.runtime.ext.function.Function;
 import lucee.runtime.type.dt.DateTime;
 import lucee.runtime.type.dt.DateTimeImpl;
 
-public class ApplicationStartTime implements Function {
+public final class ApplicationStartTime implements Function {
 
 	private static final long serialVersionUID = -3051854049187102667L;
 

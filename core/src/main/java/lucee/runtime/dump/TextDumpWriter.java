@@ -26,7 +26,7 @@ import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.engine.ThreadLocalPageContext;
 
-public class TextDumpWriter implements DumpWriter {
+public final class TextDumpWriter implements DumpWriter {
 
 	// private static int count=0;
 

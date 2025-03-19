@@ -33,7 +33,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.UDF;
 import lucee.runtime.type.util.ListUtil;
 
-public class MimeType {
+public final class MimeType {
 
 	private static int DEFAULT_MXB = 100000;
 	private static double DEFAULT_MXT = 5;

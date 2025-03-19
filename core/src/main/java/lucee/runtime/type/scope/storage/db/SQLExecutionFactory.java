@@ -20,7 +20,7 @@ package lucee.runtime.type.scope.storage.db;
 
 import lucee.runtime.db.DatasourceConnection;
 
-public class SQLExecutionFactory {
+public final class SQLExecutionFactory {
 
 	private static final SQLExecutor ANSI92 = new Ansi92();
 

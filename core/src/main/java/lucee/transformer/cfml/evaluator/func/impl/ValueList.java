@@ -7,7 +7,7 @@ import lucee.transformer.cfml.evaluator.EvaluatorException;
 import lucee.transformer.cfml.evaluator.FunctionEvaluator;
 import lucee.transformer.library.function.FunctionLibFunction;
 
-public class ValueList implements FunctionEvaluator {
+public final class ValueList implements FunctionEvaluator {
 
 	@Override
 	public FunctionLibFunction pre(BIF bif, FunctionLibFunction flf) throws TemplateException {

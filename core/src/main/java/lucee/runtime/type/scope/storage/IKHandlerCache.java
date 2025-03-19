@@ -18,7 +18,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.Collection;
 import lucee.runtime.type.scope.ScopeContext;
 
-public class IKHandlerCache implements IKHandler {
+public final class IKHandlerCache implements IKHandler {
 
 	protected boolean storeEmpty = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.store.empty", null), true);
 

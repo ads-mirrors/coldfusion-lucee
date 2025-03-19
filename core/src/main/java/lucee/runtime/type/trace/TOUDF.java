@@ -31,7 +31,7 @@ import lucee.runtime.type.UDF;
 import lucee.runtime.type.UDFPlus;
 import lucee.runtime.type.util.ComponentUtil;
 
-public class TOUDF extends TOObjects implements UDF {
+public final class TOUDF extends TOObjects implements UDF {
 
 	private UDF udf;
 

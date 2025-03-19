@@ -21,7 +21,7 @@ package lucee.runtime.dump;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ThreadLocalDump {
+public final class ThreadLocalDump {
 
 	private static ThreadLocal<Map<Integer, String>> local = new ThreadLocal<Map<Integer, String>>();
 

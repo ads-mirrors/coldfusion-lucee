@@ -29,7 +29,7 @@ import lucee.transformer.expression.Expression;
 import lucee.transformer.expression.literal.LitString;
 import lucee.transformer.library.function.FunctionLibFunction;
 
-public class StructKeyExists implements FunctionEvaluator {
+public final class StructKeyExists implements FunctionEvaluator {
 
 	@Override
 	public void execute(BIF bif, FunctionLibFunction flf) throws TemplateException {

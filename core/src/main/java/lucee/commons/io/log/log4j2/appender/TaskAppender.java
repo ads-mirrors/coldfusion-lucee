@@ -11,7 +11,7 @@ import lucee.commons.io.log.log4j2.appender.task.Task;
 import lucee.runtime.config.Config;
 import lucee.runtime.spooler.SpoolerEngine;
 
-public class TaskAppender implements Appender {
+public final class TaskAppender implements Appender {
 
 	private Appender appender;
 	private SpoolerEngine spoolerEngine;

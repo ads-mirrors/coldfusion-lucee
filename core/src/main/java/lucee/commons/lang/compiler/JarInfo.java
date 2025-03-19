@@ -11,7 +11,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.op.Caster;
 
-public class JarInfo {
+public final class JarInfo {
 
 	private static final byte[] MAJOR_VERSIONS = new byte[100];
 

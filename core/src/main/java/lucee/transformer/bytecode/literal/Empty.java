@@ -10,7 +10,7 @@ import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.expression.ExpressionBase;
 import lucee.transformer.bytecode.util.Types;
 
-public class Empty extends ExpressionBase {
+public final class Empty extends ExpressionBase {
 
 	private static final Method EMPTY = new Method("empty", Types.OBJECT, new Type[] { Types.PAGE_CONTEXT });
 

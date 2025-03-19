@@ -5,7 +5,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 
-public class SerializationSettings {
+public final class SerializationSettings {
 
 	public static int SERIALIZE_AS_UNDEFINED = 0;
 	public static int SERIALIZE_AS_ROW = 1;

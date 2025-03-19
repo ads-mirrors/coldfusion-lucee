@@ -28,7 +28,7 @@ import lucee.commons.lang.ExceptionUtil;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.KeyImpl;
 
-public class KeyConstants {
+public final class KeyConstants {
 	public static final Key _A = KeyImpl._const("A");
 	public static final Key _G = KeyImpl._const("G");
 	public static final Key _H = KeyImpl._const("H");

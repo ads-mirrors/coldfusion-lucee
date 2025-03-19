@@ -22,7 +22,7 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-public class ThrowingErrorHandler implements ErrorHandler {
+public final class ThrowingErrorHandler implements ErrorHandler {
 
 	private boolean throwFatalError;
 	private boolean throwError;

@@ -11,7 +11,7 @@ import lucee.runtime.ext.function.BIF;
 import lucee.runtime.ext.function.Function;
 import lucee.runtime.op.Caster;
 
-public class MarkdownToHTML extends BIF implements Function {
+public final class MarkdownToHTML extends BIF implements Function {
 
 	private static final long serialVersionUID = 3775127934350736736L;
 

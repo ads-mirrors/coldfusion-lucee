@@ -29,7 +29,7 @@ import lucee.runtime.type.scope.storage.StorageScopeEngine;
 import lucee.runtime.type.scope.storage.StorageScopeListener;
 import lucee.runtime.type.scope.storage.clean.DatasourceStorageScopeCleaner;
 
-public class MSSQL extends SQLExecutorSupport {
+public final class MSSQL extends SQLExecutorSupport {
 
 	@Override
 	public Query select(Config config, String cfid, String applicationName, DatasourceConnection dc, int type, Log log, boolean createTableIfNotExist)

@@ -25,7 +25,7 @@ import lucee.runtime.ext.tag.TagImpl;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 
-public class NTAuthenticate extends TagImpl {
+public final class NTAuthenticate extends TagImpl {
 
 	private String username;
 	private String password;

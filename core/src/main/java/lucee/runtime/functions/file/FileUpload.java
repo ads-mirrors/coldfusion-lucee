@@ -31,7 +31,7 @@ import lucee.runtime.tag.FileTag;
 import lucee.runtime.tag.util.FileUtil;
 import lucee.runtime.type.Struct;
 
-public class FileUpload extends BIF implements Function {
+public final class FileUpload extends BIF implements Function {
 
 	private static final long serialVersionUID = 8289325119924649321L;
 

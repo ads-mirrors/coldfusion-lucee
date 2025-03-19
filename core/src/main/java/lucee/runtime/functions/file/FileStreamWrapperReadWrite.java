@@ -28,7 +28,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
 
-public class FileStreamWrapperReadWrite extends FileStreamWrapper {
+public final class FileStreamWrapperReadWrite extends FileStreamWrapper {
 
 	// private BufferedOutputStream bos;
 	private String charset;

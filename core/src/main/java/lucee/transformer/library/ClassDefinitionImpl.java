@@ -49,7 +49,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.wrap.MapAsStruct;
 
-public class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externalizable {
+public final class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externalizable {
 
 	/**
 	 * do not use to load class!!!

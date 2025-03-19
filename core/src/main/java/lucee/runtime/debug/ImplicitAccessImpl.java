@@ -18,7 +18,7 @@
  */
 package lucee.runtime.debug;
 
-public class ImplicitAccessImpl implements ImplicitAccess {
+public final class ImplicitAccessImpl implements ImplicitAccess {
 
 	private int count = 1;
 	private String scope;

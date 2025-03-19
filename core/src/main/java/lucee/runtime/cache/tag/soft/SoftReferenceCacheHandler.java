@@ -12,7 +12,7 @@ import lucee.runtime.cache.tag.CacheItem;
 import lucee.runtime.cache.tag.MapCacheHandler;
 import lucee.runtime.op.Caster;
 
-public class SoftReferenceCacheHandler extends MapCacheHandler {
+public final class SoftReferenceCacheHandler extends MapCacheHandler {
 
 	private static Map<String, CacheItem> map = Collections.synchronizedMap(new ReferenceMap<String, CacheItem>(HARD, SOFT, 32, 0.75f));
 

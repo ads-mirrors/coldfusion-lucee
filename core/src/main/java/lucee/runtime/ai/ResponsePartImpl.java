@@ -7,7 +7,7 @@ import lucee.runtime.type.StructImpl;
  * The ResponsePart class represents individual content parts within a multipart AI response. Each
  * part contains specific content with its own type and data, along with metadata.
  */
-public class ResponsePartImpl implements ResponsePart {
+public final class ResponsePartImpl implements ResponsePart {
 
 	/**
 	 * Common content type constants

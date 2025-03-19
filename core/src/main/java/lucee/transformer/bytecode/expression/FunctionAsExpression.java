@@ -47,6 +47,7 @@ public class FunctionAsExpression extends ExpressionBase implements AsExpression
 		return function;
 	}
 
+	@Override
 	public Statement getStatement() {
 		return function;
 	}

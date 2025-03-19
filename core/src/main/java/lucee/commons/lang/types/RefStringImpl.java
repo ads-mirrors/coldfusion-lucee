@@ -10,7 +10,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.op.OpUtil;
 import lucee.runtime.type.dt.DateTime;
 
-public class RefStringImpl implements RefString, Castable {
+public final class RefStringImpl implements RefString, Castable {
 
 	private String value;
 

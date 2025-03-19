@@ -25,7 +25,7 @@ import lucee.runtime.instrumentation.InstrumentationFactory;
 /**
  * Calculation of object size.
  */
-public class SizeOf {
+public final class SizeOf {
 
 	public static long size(Object object) {
 		if (object == null) return 0;

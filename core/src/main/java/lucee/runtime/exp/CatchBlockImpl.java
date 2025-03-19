@@ -54,7 +54,7 @@ import lucee.runtime.type.util.StructSupport;
 import lucee.runtime.type.util.StructUtil;
 import lucee.runtime.util.PageContextUtil;
 
-public class CatchBlockImpl extends StructImpl implements CatchBlock, Castable, Objects {
+public final class CatchBlockImpl extends StructImpl implements CatchBlock, Castable, Objects {
 
 	private static final long serialVersionUID = -3680961614605720352L;
 

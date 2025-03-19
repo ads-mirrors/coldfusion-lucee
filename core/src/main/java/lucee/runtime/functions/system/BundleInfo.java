@@ -43,7 +43,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 
-public class BundleInfo implements Function {
+public final class BundleInfo implements Function {
 
 	private static final long serialVersionUID = 3928190461638362170L;
 

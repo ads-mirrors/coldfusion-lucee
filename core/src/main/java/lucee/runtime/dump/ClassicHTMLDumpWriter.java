@@ -31,7 +31,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.ExpressionException;
 
-public class ClassicHTMLDumpWriter implements DumpWriter {
+public final class ClassicHTMLDumpWriter implements DumpWriter {
 
 	private static int count = 0;
 

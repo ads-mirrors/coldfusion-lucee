@@ -4,7 +4,7 @@ import java.io.FileDescriptor;
 import java.net.InetAddress;
 import java.security.Permission;
 
-public class SecurityManagerImpl extends SecurityManager {
+public final class SecurityManagerImpl extends SecurityManager {
 
 	@Override
 	protected Class<?>[] getClassContext() {

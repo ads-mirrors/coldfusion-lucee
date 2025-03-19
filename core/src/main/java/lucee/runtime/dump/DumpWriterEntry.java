@@ -22,7 +22,7 @@ package lucee.runtime.dump;
  * this class is to hold all information to a dumpwriter together in a single class, Dumpwriter,
  * name and if it is a default.
  */
-public class DumpWriterEntry {
+public final class DumpWriterEntry {
 	private String name;
 	private DumpWriter writer;
 	private int defaultType;

@@ -4,7 +4,7 @@ import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServlet;
 
-public class HTTPServletImpl extends HttpServlet {
+public final class HTTPServletImpl extends HttpServlet {
 	private static final long serialVersionUID = 3270816399105433603L;
 
 	private final ServletConfig config;

@@ -49,7 +49,7 @@ import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.type.util.ListUtil;
 import lucee.transformer.bytecode.util.ASMUtil;
 
-public class ComponentListPackage implements Function {
+public final class ComponentListPackage implements Function {
 
 	private static final long serialVersionUID = 6502632300879457687L;
 

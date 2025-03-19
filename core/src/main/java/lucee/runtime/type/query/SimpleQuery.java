@@ -91,7 +91,7 @@ import lucee.runtime.type.it.StringIterator;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.QueryUtil;
 
-public class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
+public final class SimpleQuery implements Query, ResultSet, Objects, QueryResult {
 
 	static final Object DEFAULT_VALUE = new Object();
 	private Statement stat;

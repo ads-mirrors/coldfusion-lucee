@@ -24,7 +24,7 @@ import lucee.runtime.ext.function.BIF;
 import lucee.runtime.op.Caster;
 import lucee.runtime.orm.ORMUtil;
 
-public class ORMGetSessionFactory extends BIF {
+public final class ORMGetSessionFactory extends BIF {
 
 	private static final long serialVersionUID = -8739815940242857106L;
 

@@ -23,7 +23,7 @@ import java.util.Iterator;
 
 import lucee.runtime.type.Collection;
 
-public class ItAsEnum implements Enumeration<String> {
+public final class ItAsEnum implements Enumeration<String> {
 
 	private Iterator<Collection.Key> it;
 

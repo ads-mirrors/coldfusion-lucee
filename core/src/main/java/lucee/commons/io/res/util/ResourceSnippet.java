@@ -27,7 +27,7 @@ import lucee.commons.io.res.Resource;
 /**
  * this class holds information about a snippet from text with its start and end line numbers
  */
-public class ResourceSnippet implements java.io.Serializable {
+public final class ResourceSnippet implements java.io.Serializable {
 
 	private String text = null;
 	private int startLine = 0, endLine = 0;

@@ -128,6 +128,7 @@ public class XMLElementStruct extends XMLNodeStruct implements Element {
 	}
 
 	// used only with java 7, do not set @Override
+	@Override
 	public void setIdAttribute(String name, boolean isId) throws DOMException {
 		// dynamic load to support jre 1.4 and 1.5
 		try {
@@ -140,6 +141,7 @@ public class XMLElementStruct extends XMLNodeStruct implements Element {
 	}
 
 	// used only with java 7, do not set @Override
+	@Override
 	public void setIdAttributeNS(String namespaceURI, String localName, boolean isId) throws DOMException {
 		// dynamic load to support jre 1.4 and 1.5
 		try {
@@ -152,6 +154,7 @@ public class XMLElementStruct extends XMLNodeStruct implements Element {
 	}
 
 	// used only with java 7, do not set @Override
+	@Override
 	public void setIdAttributeNode(Attr idAttr, boolean isId) throws DOMException {
 		// dynamic load to support jre 1.4 and 1.5
 		try {
@@ -164,6 +167,7 @@ public class XMLElementStruct extends XMLNodeStruct implements Element {
 	}
 
 	// used only with java 7, do not set @Override
+	@Override
 	public TypeInfo getSchemaTypeInfo() {
 		// dynamic load to support jre 1.4 and 1.5
 		try {

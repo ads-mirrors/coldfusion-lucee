@@ -18,7 +18,7 @@
  **/
 package lucee.commons.lang;
 
-public class CharSequenceImpl implements CharSequence {
+public final class CharSequenceImpl implements CharSequence {
 
 	private final char[] chars;
 	private final String str;

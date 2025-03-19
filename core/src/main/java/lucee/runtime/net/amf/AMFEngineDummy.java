@@ -11,7 +11,7 @@ import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.exp.PageRuntimeException;
 
-public class AMFEngineDummy implements AMFEngine {
+public final class AMFEngineDummy implements AMFEngine {
 
 	private static AMFEngine instance;
 

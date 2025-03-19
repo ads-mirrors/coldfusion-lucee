@@ -18,7 +18,7 @@
  **/
 package lucee.runtime.type.cfc;
 
-public class ComponentAccessSimulation {// implements ComponentAccess {
+public final class ComponentAccessSimulation {// implements ComponentAccess {
 	/*
 	 * private Component cfc;
 	 * 

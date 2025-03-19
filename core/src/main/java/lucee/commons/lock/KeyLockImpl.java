@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class KeyLockImpl<K> implements KeyLock<K> {
+public final class KeyLockImpl<K> implements KeyLock<K> {
 
 	private Map<Token<K>, SimpleLock<Token<K>>> locks = new HashMap<Token<K>, SimpleLock<Token<K>>>();
 

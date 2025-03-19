@@ -14,7 +14,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.Query;
 import lucee.runtime.type.util.KeyConstants;
 
-public class ExtensionList extends BIF {
+public final class ExtensionList extends BIF {
 
 	private static final long serialVersionUID = 3853910569001016577L;
 

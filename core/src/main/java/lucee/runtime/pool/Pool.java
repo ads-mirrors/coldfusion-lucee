@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import lucee.commons.lang.ParentThreasRefThread;
 
-public class Pool {
+public final class Pool {
 
 	private final long maxIdle;
 	private final int maxItems;
@@ -117,7 +117,7 @@ public class Pool {
 		}
 	}
 
-	public class Controller extends ParentThreasRefThread {
+	public final class Controller extends ParentThreasRefThread {
 
 		private Pool pool;
 

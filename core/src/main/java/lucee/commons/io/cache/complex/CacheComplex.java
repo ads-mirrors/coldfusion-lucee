@@ -14,7 +14,7 @@ import lucee.runtime.cache.CacheUtil;
 import lucee.runtime.config.Config;
 import lucee.runtime.type.Struct;
 
-public class CacheComplex implements Cache {
+public final class CacheComplex implements Cache {
 
 	private Cache cache;
 	private CacheConnection cc;

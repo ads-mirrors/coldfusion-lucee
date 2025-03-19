@@ -26,7 +26,7 @@ import lucee.transformer.bytecode.expression.ExpressionBase;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.bytecode.util.Types;
 
-public class EmptyStruct extends ExpressionBase {
+public final class EmptyStruct extends ExpressionBase {
 
 	public EmptyStruct(Factory factory) {
 		super(factory, null, null);

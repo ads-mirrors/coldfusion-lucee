@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map.Entry;
 
-public class CollectionAsEntryIterator implements Iterator<Entry> {
+public final class CollectionAsEntryIterator implements Iterator<Entry> {
 
 	private Iterator it;
 

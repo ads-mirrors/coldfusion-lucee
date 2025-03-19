@@ -20,7 +20,7 @@ package lucee.commons.net.http.httpclient;
 
 import org.apache.http.Header;
 
-public class HeaderWrap implements lucee.commons.net.http.Header {
+public final class HeaderWrap implements lucee.commons.net.http.Header {
 	public final Header header;
 
 	public HeaderWrap(Header header) {

@@ -20,7 +20,7 @@ package lucee.runtime.video;
 
 import java.io.IOException;
 
-public class VideoException extends IOException {
+public final class VideoException extends IOException {
 
 	public VideoException(String message) {
 		super(message);

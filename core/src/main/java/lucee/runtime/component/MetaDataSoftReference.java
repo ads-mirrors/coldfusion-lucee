@@ -20,7 +20,7 @@ package lucee.runtime.component;
 
 import java.lang.ref.SoftReference;
 
-public class MetaDataSoftReference<T> extends SoftReference<T> {
+public final class MetaDataSoftReference<T> extends SoftReference<T> {
 
 	public final long creationTime;
 

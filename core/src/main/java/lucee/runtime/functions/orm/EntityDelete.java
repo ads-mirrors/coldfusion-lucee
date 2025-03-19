@@ -23,7 +23,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.orm.ORMSession;
 import lucee.runtime.orm.ORMUtil;
 
-public class EntityDelete {
+public final class EntityDelete {
 	public static String call(PageContext pc, Object obj) throws PageException {
 		ORMSession session = ORMUtil.getSession(pc);
 		session.delete(pc, obj);

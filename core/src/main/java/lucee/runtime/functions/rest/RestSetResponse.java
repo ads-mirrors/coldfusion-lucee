@@ -24,7 +24,7 @@ import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.rest.Result;
 import lucee.runtime.type.Struct;
 
-public class RestSetResponse {
+public final class RestSetResponse {
 	public static String call(PageContext pc, Struct rsp) throws ApplicationException {
 		HttpServletRequest req = pc.getHttpServletRequest();
 

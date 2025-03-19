@@ -20,6 +20,6 @@ package lucee.runtime.tag;
 
 import lucee.runtime.ext.tag.BodyTagImpl;
 
-public class Interface extends BodyTagImpl {
+public final class Interface extends BodyTagImpl {
 
 }

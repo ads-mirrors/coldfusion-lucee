@@ -26,7 +26,7 @@ import lucee.runtime.type.scope.Session;
 import lucee.runtime.type.scope.storage.MemoryScope;
 import lucee.runtime.type.scope.storage.StorageScopeMemory;
 
-public class SessionMemory extends StorageScopeMemory implements Session, MemoryScope {
+public final class SessionMemory extends StorageScopeMemory implements Session, MemoryScope {
 
 	private static final long serialVersionUID = 7703261878730061485L;
 	private Component component;

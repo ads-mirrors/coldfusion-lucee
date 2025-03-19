@@ -26,7 +26,7 @@ import lucee.runtime.type.Query;
 import lucee.runtime.type.QueryColumn;
 import lucee.runtime.type.util.QueryUtil;
 
-public class ColumnExpression extends ExpressionSupport implements Column {
+public final class ColumnExpression extends ExpressionSupport implements Column {
 
 	private String table;
 	private String column;

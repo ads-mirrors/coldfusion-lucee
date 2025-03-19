@@ -12,7 +12,7 @@ import lucee.runtime.PageSourceImpl;
 import lucee.runtime.PageSourcePool;
 import lucee.runtime.config.ConfigPro;
 
-public class PageSourcePoolWatcher {
+public final class PageSourcePoolWatcher {
 
 	private final Map<String, SoftReference<PageSource>> pageSources;
 	private PageSourcePoolWatcherThread thread;

@@ -31,7 +31,7 @@ import lucee.commons.io.TemporaryStream;
 import lucee.commons.io.res.Resource;
 import lucee.runtime.util.IO;
 
-public class IOImpl implements IO {
+public final class IOImpl implements IO {
 
 	private static IO singelton;
 

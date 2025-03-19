@@ -55,7 +55,7 @@ import lucee.runtime.op.Caster;
 /**
  * Factory for obtaining an {@link Instrumentation} instance.
  */
-public class InstrumentationFactory {
+public final class InstrumentationFactory {
 	// private static final String _name = InstrumentationFactory.class.getName();
 	private static final String SEP = File.separator;
 	private static final String TOOLS_VERSION = "7u25";

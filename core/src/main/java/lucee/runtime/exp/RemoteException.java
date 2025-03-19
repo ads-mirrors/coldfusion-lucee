@@ -21,7 +21,7 @@ package lucee.runtime.exp;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.op.Caster;
 
-public class RemoteException extends PageExceptionImpl {
+public final class RemoteException extends PageExceptionImpl {
 
 	public RemoteException(Throwable t) {
 		super(createMessage(t), "remote");

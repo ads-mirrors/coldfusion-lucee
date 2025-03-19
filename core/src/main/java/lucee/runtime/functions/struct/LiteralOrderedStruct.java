@@ -24,7 +24,7 @@ import lucee.runtime.ext.function.Function;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.Struct;
 
-public class LiteralOrderedStruct extends BIF implements Function {
+public final class LiteralOrderedStruct extends BIF implements Function {
 
 	private static final long serialVersionUID = 3030769464899375329L;
 

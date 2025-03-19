@@ -6,7 +6,7 @@ import java.lang.instrument.Instrumentation;
  * An installer class which defined the hook-in methods that are required by the Java agent
  * specification.
  */
-public class Installer {
+public final class Installer {
 
 	/**
 	 * A field for carrying the {@link java.lang.instrument.Instrumentation} that was loaded by the Byte

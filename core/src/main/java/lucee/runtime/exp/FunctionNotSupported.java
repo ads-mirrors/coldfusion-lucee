@@ -18,7 +18,7 @@
  **/
 package lucee.runtime.exp;
 
-public class FunctionNotSupported extends ExpressionException {
+public final class FunctionNotSupported extends ExpressionException {
 
 	public FunctionNotSupported(String functionName) {
 		super("Function [" + functionName + "] is not supported/implemented");

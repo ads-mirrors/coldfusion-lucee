@@ -44,7 +44,7 @@ import lucee.runtime.type.scope.Scope;
 import lucee.runtime.type.scope.Variables;
 import lucee.runtime.type.util.StructUtil;
 
-public class SuperComponent extends MemberSupport implements Component, Member {
+public final class SuperComponent extends MemberSupport implements Component, Member {
 
 	private ComponentImpl comp;
 

@@ -26,7 +26,7 @@ import lucee.transformer.bytecode.statement.tag.Tag;
 import lucee.transformer.cfml.evaluator.EvaluatorException;
 import lucee.transformer.cfml.evaluator.EvaluatorSupport;
 
-public class Lock extends EvaluatorSupport {
+public final class Lock extends EvaluatorSupport {
 
 	@Override
 	public void evaluate(Tag tag) throws EvaluatorException {

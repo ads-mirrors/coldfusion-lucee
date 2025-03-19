@@ -29,7 +29,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.tag.Directory;
 import lucee.runtime.tag.util.FileUtil;
 
-public class DirectoryCreate {
+public final class DirectoryCreate {
 
 	public static String call(PageContext pc, String path) throws PageException {
 		return call(pc, path, true);

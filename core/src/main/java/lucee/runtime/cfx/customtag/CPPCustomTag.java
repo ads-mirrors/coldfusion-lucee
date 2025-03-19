@@ -28,7 +28,7 @@ import lucee.runtime.cfx.CFXTagException;
 import lucee.runtime.reflection.Reflector;
 import lucee.transformer.dynamic.meta.Method;
 
-public class CPPCustomTag implements CustomTag {
+public final class CPPCustomTag implements CustomTag {
 
 	// this is loaded dynamic, because the lib is optional
 	private static Method processRequest;

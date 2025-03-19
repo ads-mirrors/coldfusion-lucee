@@ -31,7 +31,7 @@ import lucee.commons.io.SystemUtil;
 import lucee.commons.lang.SerializableObject;
 import lucee.runtime.engine.ThreadLocalPageContext;
 
-public class JSONDateFormat {
+public final class JSONDateFormat {
 
 	public static final String PATTERN_CF = "MMMM, dd yyyy HH:mm:ss Z";
 	public static final String PATTERN_ISO8601 = "yyyy-MM-dd'T'HH:mm:ssZ"; // preferred pattern for json

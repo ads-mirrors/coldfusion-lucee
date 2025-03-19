@@ -4,7 +4,7 @@ import java.io.PrintStream;
 
 import lucee.runtime.exp.PageException;
 
-public class CommandPromptAIResponseListener implements AIResponseListener {
+public final class CommandPromptAIResponseListener implements AIResponseListener {
 
 	public static short OUT = 1;
 	public static short ERR = 2;

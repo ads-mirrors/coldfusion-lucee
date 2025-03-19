@@ -27,7 +27,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.type.scope.ScopeContext;
 import lucee.runtime.type.scope.Server;
 
-public class GlobalBinding implements Bindings {
+public final class GlobalBinding implements Bindings {
 
 	private final Server server;
 

@@ -18,7 +18,7 @@
  **/
 package lucee.runtime.text.feed;
 
-public class Attr {
+public final class Attr {
 
 	private String name;
 	private String defaultValue;

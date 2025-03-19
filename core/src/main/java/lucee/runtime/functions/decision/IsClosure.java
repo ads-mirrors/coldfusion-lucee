@@ -22,7 +22,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.op.Decision;
 import lucee.runtime.type.ObjectWrap;
 
-public class IsClosure {
+public final class IsClosure {
 	public static boolean call(PageContext pc, Object obj) {
 		if (obj instanceof ObjectWrap) {
 			return call(pc, ((ObjectWrap) obj).getEmbededObject(null));

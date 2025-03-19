@@ -28,7 +28,7 @@ import lucee.transformer.cfml.evaluator.FunctionEvaluator;
 import lucee.transformer.expression.Expression;
 import lucee.transformer.library.function.FunctionLibFunction;
 
-public class PrecisionEvaluate implements FunctionEvaluator {
+public final class PrecisionEvaluate implements FunctionEvaluator {
 
 	@Override
 	public void execute(BIF bif, FunctionLibFunction flf) throws TemplateException {

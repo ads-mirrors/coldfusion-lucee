@@ -23,7 +23,7 @@ import lucee.commons.io.cache.CacheKeyFilter;
 /**
  * accept everything
  */
-public class CacheKeyFilterAll implements CacheKeyFilter {
+public final class CacheKeyFilterAll implements CacheKeyFilter {
 
 	private static CacheKeyFilterAll instance = new CacheKeyFilterAll();
 

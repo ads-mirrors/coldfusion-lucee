@@ -9,7 +9,7 @@ import lucee.commons.lang.StringUtil;
 import lucee.runtime.config.Config;
 import lucee.runtime.engine.ThreadLocalPageContext;
 
-public class LogListener implements Listener {
+public final class LogListener implements Listener {
 
 	private Log log;
 	private long index;

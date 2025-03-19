@@ -26,7 +26,7 @@ import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 
-public class FileDelete {
+public final class FileDelete {
 
 	public static String call(PageContext pc, Object oSrc) throws PageException {
 		Resource src = Caster.toResource(pc, oSrc, false);

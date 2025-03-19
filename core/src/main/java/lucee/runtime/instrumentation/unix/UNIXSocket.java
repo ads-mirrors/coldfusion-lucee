@@ -7,7 +7,7 @@ import java.net.SocketAddress;
 /**
  * Implementation of an AF_UNIX domain socket.
  */
-public class UNIXSocket extends Socket {
+public final class UNIXSocket extends Socket {
 	protected UNIXSocketImpl impl;
 	UNIXSocketAddress addr;
 

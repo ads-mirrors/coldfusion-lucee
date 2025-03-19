@@ -20,7 +20,7 @@ package lucee.runtime.tag;
 
 import java.awt.Color;
 
-public class GridColumnBean {
+public final class GridColumnBean {
 
 	private boolean display;
 	private int width;

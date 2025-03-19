@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
-public class SetMaxSize<E> implements Set<E> {
+public final class SetMaxSize<E> implements Set<E> {
 
 	private int maxSize;
 

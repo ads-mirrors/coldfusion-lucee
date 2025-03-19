@@ -29,7 +29,7 @@ import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.runtime.PageContext;
 
-public class IsZipFile {
+public final class IsZipFile {
 
 	public static boolean call(PageContext pc, String path) {
 		try {

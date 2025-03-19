@@ -26,7 +26,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.scope.Session;
 import lucee.runtime.type.scope.storage.StorageScopeFile;
 
-public class SessionFile extends StorageScopeFile implements Session {
+public final class SessionFile extends StorageScopeFile implements Session {
 
 	private static final long serialVersionUID = 3896214476118229640L;
 

@@ -22,7 +22,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.exp.TagNotSupported;
 import lucee.runtime.ext.tag.TagImpl;
 
-public class AjaxImport extends TagImpl {
+public final class AjaxImport extends TagImpl {
 	// private String csssrc;
 	// private String scriptsrc;
 	// private String tags;

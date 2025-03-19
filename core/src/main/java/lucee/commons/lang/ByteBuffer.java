@@ -28,7 +28,7 @@ import lucee.commons.io.log.LogUtil;
 /**
  * class to handle characters, similar to StringBuffer, but dont copy big blocks of char arrays.
  */
-public class ByteBuffer {
+public final class ByteBuffer {
 
 	private final static int BLOCK_LENGTH = 1024;
 	private byte buffer[];

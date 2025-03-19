@@ -38,7 +38,7 @@ import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 
-public class MultiPartResponseUtils {
+public final class MultiPartResponseUtils {
 
 	public static boolean isMultipart(String mimetype) {
 		return !StringUtil.isEmpty(extractBoundary(mimetype, null)) && StringUtil.startsWithIgnoreCase(mimetype, "multipart/");

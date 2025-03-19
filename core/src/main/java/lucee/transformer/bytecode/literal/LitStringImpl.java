@@ -79,7 +79,7 @@ public class LitStringImpl extends ExpressionBase implements LitString, ExprStri
 
 	/**
 	 * lucee.transformer.expression.Expression#_writeOut(lucee.transformer.bytecode.BytecodeContext,
-	 *      int)
+	 * int)
 	 */
 	private static Type _writeOut(BytecodeContext bc, int mode, String str) throws TransformerException {
 		// write to a file instead to the bytecode

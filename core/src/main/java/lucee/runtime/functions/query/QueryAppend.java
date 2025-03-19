@@ -11,7 +11,7 @@ import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.Query;
 import lucee.runtime.type.util.ListUtil;
 
-public class QueryAppend extends BIF implements Function {
+public final class QueryAppend extends BIF implements Function {
 
 	private static final long serialVersionUID = 5814257234774888827L;
 

@@ -23,7 +23,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.orm.ORMSession;
 import lucee.runtime.orm.ORMUtil;
 
-public class EntityLoadByExample {
+public final class EntityLoadByExample {
 	public static Object call(PageContext pc, Object sampleEntity) throws PageException {
 		return call(pc, sampleEntity, false);
 	}

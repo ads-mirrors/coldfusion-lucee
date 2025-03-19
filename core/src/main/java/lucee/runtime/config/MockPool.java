@@ -5,7 +5,7 @@ import lucee.runtime.db.DatasourceConnection;
 // only exists for the Hibernate extension
 import lucee.runtime.exp.PageException;
 
-public class MockPool {
+public final class MockPool {
 
 	public DatasourceConnection getDatasourceConnection(Config config, DataSource ds, String user, String pass) throws PageException {
 		return ((ConfigPro) config).getDatasourceConnectionPool(ds, user, pass).borrowObject();

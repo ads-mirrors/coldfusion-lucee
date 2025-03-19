@@ -37,7 +37,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 
-public class GeminiSession extends AISessionSupport {
+public final class GeminiSession extends AISessionSupport {
 	private GeminiEngine geminiEngine;
 	private String systemMessage;
 

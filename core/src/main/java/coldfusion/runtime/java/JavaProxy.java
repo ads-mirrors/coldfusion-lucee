@@ -22,7 +22,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.java.JavaObject;
 
-public class JavaProxy extends JavaObject {
+public final class JavaProxy extends JavaObject {
 
 	public JavaProxy(Class clazz) {
 		super(ThreadLocalPageContext.get().getVariableUtil(), clazz, true);

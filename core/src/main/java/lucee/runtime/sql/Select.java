@@ -33,7 +33,7 @@ import lucee.runtime.sql.exp.value.ValueNumber;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.Query;
 
-public class Select {
+public final class Select {
 	private List selects = new ArrayList();
 	private Set<Key> additionalColumns = new HashSet();
 	private List froms = new ArrayList();

@@ -39,7 +39,7 @@ import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.dt.TimeSpan;
 
 // MUST this must be come from configuration
-public class CacheEngine {
+public final class CacheEngine {
 
 	private static Map caches = new HashMap();
 	private Cache cache;

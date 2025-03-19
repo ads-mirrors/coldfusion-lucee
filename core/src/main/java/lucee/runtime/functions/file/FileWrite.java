@@ -33,7 +33,7 @@ import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 
-public class FileWrite {
+public final class FileWrite {
 
 	public static String call(PageContext pc, Object obj, Object data) throws PageException {
 		return call(pc, obj, data, ((PageContextImpl) pc).getResourceCharset().name());

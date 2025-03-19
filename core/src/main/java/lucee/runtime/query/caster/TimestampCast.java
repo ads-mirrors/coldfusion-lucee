@@ -27,7 +27,7 @@ import java.util.TimeZone;
 import lucee.commons.date.JREDateTimeUtil;
 import lucee.runtime.type.dt.DateTimeImpl;
 
-public class TimestampCast implements Cast {
+public final class TimestampCast implements Cast {
 
 	private final boolean useTimeZone;
 

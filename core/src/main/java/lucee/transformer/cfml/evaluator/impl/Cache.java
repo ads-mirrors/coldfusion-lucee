@@ -26,7 +26,7 @@ import lucee.transformer.bytecode.statement.tag.Tag;
 import lucee.transformer.cfml.evaluator.EvaluatorException;
 import lucee.transformer.cfml.evaluator.EvaluatorSupport;
 
-public class Cache extends EvaluatorSupport {
+public final class Cache extends EvaluatorSupport {
 
 	@Override
 	public void evaluate(Tag tag) throws EvaluatorException {

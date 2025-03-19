@@ -6,7 +6,7 @@ import java.io.OutputStream;
 
 import org.codehaus.commons.compiler.util.resource.ResourceCreator;
 
-public class ResourceCreatorImpl implements ResourceCreator {
+public final class ResourceCreatorImpl implements ResourceCreator {
 
 	private ByteArrayOutputStream baos;
 

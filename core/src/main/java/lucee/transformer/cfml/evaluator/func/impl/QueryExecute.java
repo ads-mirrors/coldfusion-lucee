@@ -13,7 +13,7 @@ import lucee.transformer.cfml.evaluator.FunctionEvaluator;
 import lucee.transformer.expression.var.Variable;
 import lucee.transformer.library.function.FunctionLibFunction;
 
-public class QueryExecute implements FunctionEvaluator {
+public final class QueryExecute implements FunctionEvaluator {
 
 	@Override
 	public void execute(BIF bif, FunctionLibFunction flf) throws TemplateException {

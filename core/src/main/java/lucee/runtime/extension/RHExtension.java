@@ -104,7 +104,7 @@ import lucee.runtime.type.util.ListUtil;
 /**
  * Extension completely handled by the engine and not by the Install/config.xml
  */
-public class RHExtension implements Serializable {
+public final class RHExtension implements Serializable {
 
 	public static final short INSTALL_OPTION_NOT = 0;
 	public static final short INSTALL_OPTION_IF_NECESSARY = 1;

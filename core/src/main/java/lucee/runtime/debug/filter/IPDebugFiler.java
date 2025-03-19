@@ -18,7 +18,7 @@
  **/
 package lucee.runtime.debug.filter;
 
-public class IPDebugFiler implements DebugFilter {
+public final class IPDebugFiler implements DebugFilter {
 
 	@Override
 	public boolean accept() {

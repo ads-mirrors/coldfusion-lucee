@@ -49,7 +49,7 @@ import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.type.util.KeyConstants;
 
-public class Mapping {
+public final class Mapping {
 
 	private static final ResourceFilter _FILTER_CFML = new AndResourceFilter(
 			new ResourceFilter[] { new ExtensionResourceFilter(Constants.getCFMLComponentExtension()), new ResourceFilter() {

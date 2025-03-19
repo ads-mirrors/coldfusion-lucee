@@ -24,7 +24,7 @@ import java.security.MessageDigest;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.res.Resource;
 
-public class MD5Checksum {
+public final class MD5Checksum {
 
 	public static byte[] createChecksum(Resource res) throws Exception {
 		InputStream is = res.getInputStream();

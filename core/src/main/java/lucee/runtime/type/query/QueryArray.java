@@ -15,7 +15,7 @@ import lucee.runtime.type.Collection;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 
-public class QueryArray extends ArrayImpl implements QueryResult {
+public final class QueryArray extends ArrayImpl implements QueryResult {
 
 	private static final long serialVersionUID = -2123873025169506446L;
 

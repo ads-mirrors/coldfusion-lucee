@@ -20,6 +20,6 @@ package lucee.runtime.tag;
 
 import lucee.runtime.ext.tag.BodyTagImpl;
 
-public class Flash extends BodyTagImpl {
+public final class Flash extends BodyTagImpl {
 
 }

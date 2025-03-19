@@ -35,7 +35,7 @@ import lucee.runtime.type.Duplicable;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.KeyConstants;
 
-public class HTTPCacheItem implements CacheItem, Serializable, Dumpable, Duplicable {
+public final class HTTPCacheItem implements CacheItem, Serializable, Dumpable, Duplicable {
 
 	private static final long serialVersionUID = -8462614105941179140L;
 

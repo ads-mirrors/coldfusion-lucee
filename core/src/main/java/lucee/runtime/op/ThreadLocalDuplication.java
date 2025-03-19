@@ -24,7 +24,7 @@ import java.util.Map;
 import lucee.commons.lang.types.RefBoolean;
 import lucee.commons.lang.types.RefBooleanImpl;
 
-public class ThreadLocalDuplication {
+public final class ThreadLocalDuplication {
 
 	private static ThreadLocal<Map<Object, Object>> local = new ThreadLocal<Map<Object, Object>>();
 	private static ThreadLocal<RefBoolean> inside = new ThreadLocal<RefBoolean>();

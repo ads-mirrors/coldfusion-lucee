@@ -44,7 +44,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 
-public class DataSourceServiceImpl extends ServiceSupport implements DataSourceService {
+public final class DataSourceServiceImpl extends ServiceSupport implements DataSourceService {
 
 	private Number maxQueryCount = Double.valueOf(500);
 

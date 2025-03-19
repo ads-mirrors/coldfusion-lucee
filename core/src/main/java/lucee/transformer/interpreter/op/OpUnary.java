@@ -1,5 +1,5 @@
 package lucee.transformer.interpreter.op;
 
-public class OpUnary {
+public final class OpUnary {
 
 }

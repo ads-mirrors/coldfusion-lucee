@@ -27,7 +27,7 @@ import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.expression.ExpressionBase;
 import lucee.transformer.bytecode.util.Types;
 
-public class CollectionKey extends ExpressionBase {
+public final class CollectionKey extends ExpressionBase {
 
 	private String value;
 

@@ -25,7 +25,7 @@ import lucee.commons.io.cache.CacheKeyFilter;
 /**
  * Wildcard Filter
  */
-public class WildCardFilter implements CacheKeyFilter {
+public final class WildCardFilter implements CacheKeyFilter {
 
 	private static final String specials = "{}[]().+\\^$";
 

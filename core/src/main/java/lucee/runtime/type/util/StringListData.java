@@ -18,7 +18,7 @@
  **/
 package lucee.runtime.type.util;
 
-public class StringListData {
+public final class StringListData {
 
 	public final String list;
 	public final String delimiter;

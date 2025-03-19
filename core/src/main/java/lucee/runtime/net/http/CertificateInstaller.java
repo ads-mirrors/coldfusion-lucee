@@ -45,7 +45,7 @@ import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.res.Resource;
 
-public class CertificateInstaller {
+public final class CertificateInstaller {
 
 	private static Map<String, String> installed = new WeakHashMap();
 

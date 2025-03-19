@@ -24,7 +24,7 @@ import lucee.runtime.exp.TagNotSupported;
 import lucee.runtime.ext.tag.TagImpl;
 import lucee.runtime.op.Caster;
 
-public class TreeItem extends TagImpl {
+public final class TreeItem extends TagImpl {
 
 	private String value = null;
 	private String display = null;

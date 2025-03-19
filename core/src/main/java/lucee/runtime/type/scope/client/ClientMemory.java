@@ -25,7 +25,7 @@ import lucee.runtime.type.scope.Client;
 import lucee.runtime.type.scope.storage.MemoryScope;
 import lucee.runtime.type.scope.storage.StorageScopeMemory;
 
-public class ClientMemory extends StorageScopeMemory implements Client, MemoryScope {
+public final class ClientMemory extends StorageScopeMemory implements Client, MemoryScope {
 
 	private static final long serialVersionUID = 5032226519712666589L;
 

@@ -18,7 +18,7 @@
  **/
 package lucee.runtime.rest;
 
-public class RestSettingImpl implements RestSettings {
+public final class RestSettingImpl implements RestSettings {
 
 	private final boolean skipCFCWithError;
 	private int returnFormat;

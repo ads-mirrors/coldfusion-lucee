@@ -27,7 +27,7 @@ import lucee.runtime.db.DataSource;
 import lucee.runtime.db.DataSourceSupport;
 import lucee.runtime.db.ProcMetaCollection;
 
-public class DatasourceFlushMetaCache {
+public final class DatasourceFlushMetaCache {
 
 	public static boolean call(PageContext pc) {
 		return call(pc, null);

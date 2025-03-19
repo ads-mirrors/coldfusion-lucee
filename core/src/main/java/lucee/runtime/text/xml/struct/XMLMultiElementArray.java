@@ -41,7 +41,7 @@ import lucee.runtime.type.it.StringIterator;
 import lucee.runtime.type.util.ArraySupport;
 import lucee.runtime.type.wrap.ArrayAsArrayList;
 
-public class XMLMultiElementArray extends ArraySupport {
+public final class XMLMultiElementArray extends ArraySupport {
 
 	private static final long serialVersionUID = -2673749147723742450L;
 	private XMLMultiElementStruct struct;

@@ -27,7 +27,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.date.DateCaster;
 
-public class MavenUpdateProvider {
+public final class MavenUpdateProvider {
 
 	private static final String[] LCOS = new String[] { "lco", "lcojvm11", "lcojvm17", "lcojvm21" };
 

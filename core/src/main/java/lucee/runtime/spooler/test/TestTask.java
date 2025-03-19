@@ -26,7 +26,7 @@ import lucee.runtime.spooler.SpoolerTaskSupport;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 
-public class TestTask extends SpoolerTaskSupport {
+public final class TestTask extends SpoolerTaskSupport {
 
 	private int fail;
 	private String label;

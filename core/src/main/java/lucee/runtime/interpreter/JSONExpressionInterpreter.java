@@ -25,7 +25,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.interpreter.ref.Ref;
 import lucee.runtime.interpreter.ref.literal.LStringBuffer;
 
-public class JSONExpressionInterpreter extends CFMLExpressionInterpreter {
+public final class JSONExpressionInterpreter extends CFMLExpressionInterpreter {
 
 	public static final int FORMAT_JSON = 1;
 	public static final int FORMAT_JSON5 = 2;

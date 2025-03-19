@@ -22,7 +22,7 @@ import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.exp.PageRuntimeException;
 
-public class DummyORMEngine implements ORMEngine {
+public final class DummyORMEngine implements ORMEngine {
 
 	private static final String HIBERNATE = "FAD1E8CB-4F45-4184-86359145767C29DE";
 	private static boolean tryToInstall = true;

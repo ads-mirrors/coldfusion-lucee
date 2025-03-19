@@ -22,7 +22,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.type.Struct;
 
-public class CTCacheList {
+public final class CTCacheList {
 	public static Struct call(PageContext pc) {
 		ConfigPro config = (ConfigPro) pc.getConfig();
 		return config.listCTCache();

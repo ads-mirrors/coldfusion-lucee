@@ -33,7 +33,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.query.SimpleQuery;
 
-public class ForEachQueryIterator implements Iterator, Resetable {
+public final class ForEachQueryIterator implements Iterator, Resetable {
 
 	private Query qry;
 	private int pid;

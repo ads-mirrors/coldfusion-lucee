@@ -24,7 +24,7 @@ import lucee.runtime.orm.ORMSession;
 import lucee.runtime.orm.ORMUtil;
 import lucee.runtime.type.Query;
 
-public class EntityToQuery {
+public final class EntityToQuery {
 
 	public static Query call(PageContext pc, Object obj) throws PageException {
 		return call(pc, obj, null);

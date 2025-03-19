@@ -29,7 +29,7 @@ import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.it.ArrayListIteratorImpl;
 
-public class ArrayAsList implements List {
+public final class ArrayAsList implements List {
 
 	Array array;
 

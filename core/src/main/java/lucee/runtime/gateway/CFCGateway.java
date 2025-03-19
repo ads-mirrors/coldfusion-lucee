@@ -28,7 +28,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 
-public class CFCGateway implements GatewaySupport {
+public final class CFCGateway implements GatewaySupport {
 
 	// private static final Object OBJ = new Object();
 	// private Component _cfc;

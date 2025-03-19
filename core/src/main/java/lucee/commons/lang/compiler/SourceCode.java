@@ -5,7 +5,7 @@ import java.net.URI;
 
 import javax.tools.SimpleJavaFileObject;
 
-public class SourceCode extends SimpleJavaFileObject {
+public final class SourceCode extends SimpleJavaFileObject {
 	private final String contents;
 	private final String className;
 	private final String functionName;

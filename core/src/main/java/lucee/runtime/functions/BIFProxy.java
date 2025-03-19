@@ -24,7 +24,7 @@ import lucee.runtime.ext.function.BIF;
 import lucee.runtime.reflection.Reflector;
 import lucee.runtime.type.util.KeyConstants;
 
-public class BIFProxy extends BIF {
+public final class BIFProxy extends BIF {
 
 	private Class clazz;
 

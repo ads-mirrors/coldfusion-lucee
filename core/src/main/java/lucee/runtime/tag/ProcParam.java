@@ -25,7 +25,7 @@ import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.DatabaseException;
 import lucee.runtime.ext.tag.TagSupport;
 
-public class ProcParam extends TagSupport {
+public final class ProcParam extends TagSupport {
 
 	private ProcParamBean param = new ProcParamBean();
 

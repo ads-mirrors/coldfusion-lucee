@@ -40,7 +40,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.UDF;
 import lucee.runtime.type.util.KeyConstants;
 
-public class _CreateComponent {
+public final class _CreateComponent {
 
 	private static final Object[] EMPTY = new Object[0];
 	public static final ImportDefintion JAVA_LANG = new ImportDefintionImpl("java.lang", "*");

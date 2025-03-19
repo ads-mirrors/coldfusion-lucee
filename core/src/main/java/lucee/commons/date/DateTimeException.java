@@ -20,7 +20,7 @@ package lucee.commons.date;
 
 import lucee.runtime.exp.ExpressionException;
 
-public class DateTimeException extends ExpressionException {
+public final class DateTimeException extends ExpressionException {
 
 	public DateTimeException(String msg) {
 		super(msg);

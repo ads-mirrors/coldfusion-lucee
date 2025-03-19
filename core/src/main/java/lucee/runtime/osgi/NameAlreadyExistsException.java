@@ -21,7 +21,7 @@ import java.io.IOException;
 
 import lucee.commons.io.res.Resource;
 
-public class NameAlreadyExistsException extends IOException {
+public final class NameAlreadyExistsException extends IOException {
 
 	private String name;
 	private Resource file;

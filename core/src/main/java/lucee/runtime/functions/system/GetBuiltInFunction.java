@@ -24,7 +24,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.BIF;
 import lucee.runtime.op.Caster;
 
-public class GetBuiltInFunction extends BIF {
+public final class GetBuiltInFunction extends BIF {
 
 	private static final long serialVersionUID = 5639839935753070955L;
 

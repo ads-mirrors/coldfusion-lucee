@@ -26,7 +26,7 @@ import lucee.runtime.cache.tag.udf.UDFArgConverter;
 import lucee.runtime.type.Duplicable;
 import lucee.runtime.type.Struct;
 
-public class StoredProcCacheItem implements CacheItem, Serializable, Duplicable {
+public final class StoredProcCacheItem implements CacheItem, Serializable, Duplicable {
 
 	private static final long serialVersionUID = 7327671003736543783L;
 

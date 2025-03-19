@@ -29,7 +29,7 @@ import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.PageServletException;
 import lucee.runtime.op.Caster;
 
-public class RequestDispatcherWrap implements RequestDispatcher {
+public final class RequestDispatcherWrap implements RequestDispatcher {
 
 	private String realPath;
 	private HTTPServletRequestWrap req;

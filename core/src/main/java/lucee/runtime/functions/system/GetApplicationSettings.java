@@ -79,7 +79,7 @@ import lucee.runtime.type.util.ComponentUtil;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 
-public class GetApplicationSettings extends BIF {
+public final class GetApplicationSettings extends BIF {
 
 	public static Struct call(PageContext pc) throws PageException {
 		return call(pc, false, false);

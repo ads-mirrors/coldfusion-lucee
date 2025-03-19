@@ -26,7 +26,7 @@ import lucee.runtime.config.ConfigServer;
 import lucee.runtime.config.ConfigFactoryImpl;
 import lucee.runtime.config.ConfigFactoryImpl.MonitorTemp;
 
-public class ActionMonitorFatory {
+public final class ActionMonitorFatory {
 	public static ActionMonitorCollector getActionMonitorCollector() {
 		if (SystemUtil.getLoaderVersion() > 4) return new ActionMonitorCollectorImpl();
 		return new ActionMonitorCollectorRefImpl();

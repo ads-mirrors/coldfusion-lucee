@@ -40,7 +40,7 @@ import lucee.runtime.net.proxy.ProxyData;
 import lucee.runtime.net.proxy.ProxyDataImpl;
 import lucee.runtime.op.Caster;
 
-public class HTTPResource extends ReadOnlyResourceSupport {
+public final class HTTPResource extends ReadOnlyResourceSupport {
 
 	private final HTTPResourceProvider provider;
 	private final HTTPConnectionData data;

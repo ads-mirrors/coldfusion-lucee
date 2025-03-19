@@ -9,7 +9,7 @@ import javax.script.Bindings;
 import lucee.runtime.type.scope.Variables;
 import lucee.runtime.type.scope.VariablesImpl;
 
-public class VariablesBinding implements Bindings {
+public final class VariablesBinding implements Bindings {
 
 	private VariablesImpl var;
 

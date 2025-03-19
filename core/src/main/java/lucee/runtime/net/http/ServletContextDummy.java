@@ -50,7 +50,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.it.ItAsEnum;
 import lucee.runtime.util.EnumerationWrapper;
 
-public class ServletContextDummy implements ServletContext {
+public final class ServletContextDummy implements ServletContext {
 	private Struct attributes;
 	private Struct parameters;
 	private int majorVersion;

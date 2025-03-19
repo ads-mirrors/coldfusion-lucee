@@ -24,7 +24,7 @@ import java.io.OutputStream;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.SerializableObject;
 
-public class RetireOutputStream extends OutputStream {
+public final class RetireOutputStream extends OutputStream {
 
 	private Resource res;
 	private boolean append;

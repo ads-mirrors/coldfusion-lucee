@@ -3,7 +3,7 @@ package lucee.commons.i18n;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-public class FormatterWrapper {
+public final class FormatterWrapper {
 	public final DateTimeFormatter formatter;
 	public int successCount;
 	public final String pattern;

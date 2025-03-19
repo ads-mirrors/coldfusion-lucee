@@ -2,7 +2,7 @@ package lucee.runtime.net.ftp;
 
 import org.apache.commons.net.ftp.FTPSClient;
 
-public class FTPSClientImpl extends FTPClientImpl {
+public final class FTPSClientImpl extends FTPClientImpl {
 
 	private FTPSClient client;
 

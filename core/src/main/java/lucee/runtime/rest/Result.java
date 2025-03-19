@@ -23,7 +23,7 @@ import java.util.List;
 import lucee.commons.lang.mimetype.MimeType;
 import lucee.runtime.type.Struct;
 
-public class Result {
+public final class Result {
 
 	private final Source source;
 	private final String[] path;

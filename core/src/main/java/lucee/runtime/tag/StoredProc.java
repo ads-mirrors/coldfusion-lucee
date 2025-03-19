@@ -78,7 +78,7 @@ import lucee.runtime.type.dt.DateTime;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.util.PageContextUtil;
 
-public class StoredProc extends BodyTagTryCatchFinallySupport {
+public final class StoredProc extends BodyTagTryCatchFinallySupport {
 	// private static final int PROCEDURE_CAT=1;
 	// private static final int PROCEDURE_SCHEM=2;
 	// private static final int PROCEDURE_NAME=3;

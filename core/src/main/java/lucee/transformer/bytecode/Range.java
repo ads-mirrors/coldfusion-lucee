@@ -17,7 +17,7 @@
  */
 package lucee.transformer.bytecode;
 
-public class Range {
+public final class Range {
 
 	public final int from;
 	public final int to;

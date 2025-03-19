@@ -10,7 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 /**
  * Provides access to the request information needed for a request made to an HTTP servlet.
  */
-public class JakartaServletRequestContext extends AbstractRequestContext<HttpServletRequest> {
+public final class JakartaServletRequestContext extends AbstractRequestContext<HttpServletRequest> {
 
 	/**
 	 * Constructs a context for this request.

@@ -3,7 +3,7 @@ package lucee.commons.collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class AccessOrderLimitedSizeMap<K, V> extends LinkedHashMap<K, V> {
+public final class AccessOrderLimitedSizeMap<K, V> extends LinkedHashMap<K, V> {
 	private static final long serialVersionUID = -1255247883699115518L;
 	private final int maxSize;
 

@@ -31,7 +31,7 @@ import lucee.runtime.type.ArrayImpl;
 /**
  * implementation of the Function array
  */
-public class Array_ extends BIF {
+public final class Array_ extends BIF {
 
 	private static final long serialVersionUID = 4974431571073577001L;
 

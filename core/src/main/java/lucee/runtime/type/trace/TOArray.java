@@ -27,7 +27,7 @@ import lucee.runtime.op.Duplicator;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.Collection;
 
-public class TOArray extends TOCollection implements Array {
+public final class TOArray extends TOCollection implements Array {
 
 	private static final long serialVersionUID = 5130217962217368552L;
 

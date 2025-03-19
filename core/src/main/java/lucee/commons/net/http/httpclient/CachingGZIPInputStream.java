@@ -25,7 +25,7 @@ import java.util.zip.GZIPInputStream;
 
 import lucee.commons.io.IOUtil;
 
-public class CachingGZIPInputStream extends InputStream {
+public final class CachingGZIPInputStream extends InputStream {
 
 	private final byte[] barr;
 	private GZIPInputStream is;

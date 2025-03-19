@@ -5,7 +5,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import lucee.commons.io.log.Log;
 
-public class Closer {
+public final class Closer {
 	private CloserThread thread;
 	private Log log;
 	private final BlockingQueue<CloserJob> jobs = new LinkedBlockingQueue<>();

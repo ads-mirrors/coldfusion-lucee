@@ -19,7 +19,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.KeyConstants;
 
-public class ClaudeEngine extends AIEngineSupport {
+public final class ClaudeEngine extends AIEngineSupport {
 	private static final String DEFAULT_URL = "https://api.anthropic.com/v1/";
 	private static final int DEFAULT_CONVERSATION_SIZE_LIMIT = 100;
 	private static final String DEFAULT_VERSION = "2023-06-01";

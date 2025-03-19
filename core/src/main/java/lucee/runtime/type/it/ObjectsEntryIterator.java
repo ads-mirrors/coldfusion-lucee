@@ -26,7 +26,7 @@ import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.Objects;
 
-public class ObjectsEntryIterator implements Iterator<Entry<Key, Object>> {
+public final class ObjectsEntryIterator implements Iterator<Entry<Key, Object>> {
 
 	private Iterator<Key> keys;
 	private Objects objs;
@@ -57,7 +57,7 @@ public class ObjectsEntryIterator implements Iterator<Entry<Key, Object>> {
 		throw new UnsupportedOperationException("this operation is not suppored");
 	}
 
-	public class EntryImpl implements Entry<Key, Object> {
+	public final class EntryImpl implements Entry<Key, Object> {
 
 		protected Key key;
 		private Objects objcts;

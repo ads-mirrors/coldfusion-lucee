@@ -23,7 +23,7 @@ import lucee.transformer.expression.literal.LitNumber;
 /**
  * A Literal String
  */
-public class LitNumberImpl extends ExpressionBase implements LitNumber, ExprNumber {
+public final class LitNumberImpl extends ExpressionBase implements LitNumber, ExprNumber {
 
 	private static final Type LITERAL_VALUE = Type.getType(LiteralValue.class);
 

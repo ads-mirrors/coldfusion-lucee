@@ -28,7 +28,7 @@ import lucee.transformer.bytecode.statement.FlowControlFinal;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.bytecode.util.Types;
 
-public class TryFinallyVisitor implements Opcodes {
+public final class TryFinallyVisitor implements Opcodes {
 
 	private Label beforeTry;
 	private Label afterTry;

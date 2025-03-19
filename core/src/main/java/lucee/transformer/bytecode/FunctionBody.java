@@ -20,7 +20,7 @@ package lucee.transformer.bytecode;
 
 import lucee.transformer.Factory;
 
-public class FunctionBody extends FlowControlBody {
+public final class FunctionBody extends FlowControlBody {
 
 	public FunctionBody(Factory f) {
 		super(f);

@@ -21,7 +21,7 @@ package lucee.runtime.spooler;
 import lucee.runtime.config.Config;
 import lucee.runtime.exp.PageException;
 
-public class TaskWrap implements Task {
+public final class TaskWrap implements Task {
 
 	private SpoolerTask st;
 

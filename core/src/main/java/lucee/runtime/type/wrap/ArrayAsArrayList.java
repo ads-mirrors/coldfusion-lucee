@@ -29,7 +29,7 @@ import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.op.Duplicator;
 import lucee.runtime.type.Array;
 
-public class ArrayAsArrayList extends ArrayList {
+public final class ArrayAsArrayList extends ArrayList {
 
 	Array array;
 

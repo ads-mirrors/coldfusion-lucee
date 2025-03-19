@@ -23,7 +23,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.PageSource;
 import lucee.runtime.config.Constants;
 
-public class InitFile {
+public final class InitFile {
 
 	private PageSource ps;
 	private String filename;

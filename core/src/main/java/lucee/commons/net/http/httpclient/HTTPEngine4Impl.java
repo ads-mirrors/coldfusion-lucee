@@ -120,7 +120,7 @@ import lucee.runtime.type.dt.TimeSpan;
 import lucee.runtime.type.dt.TimeSpanImpl;
 import lucee.runtime.type.util.CollectionUtil;
 
-public class HTTPEngine4Impl {
+public final class HTTPEngine4Impl {
 
 	private static Field isShutDownField;
 	private static Map<String, PoolingHttpClientConnectionManager> connectionManagers = new ConcurrentHashMap<>();

@@ -69,7 +69,7 @@ import lucee.runtime.type.util.ArrayUtil;
  * This class resolves the Application settings that are defined in cfapplication tag attributes,
  * e.g. sessionManagement, localMode, etc.
  */
-public class ClassicApplicationContext extends ApplicationContextSupport {
+public final class ClassicApplicationContext extends ApplicationContextSupport {
 
 	private static final long serialVersionUID = 940663152793150953L;
 

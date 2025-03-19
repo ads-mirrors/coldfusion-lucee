@@ -29,7 +29,7 @@ import lucee.transformer.bytecode.statement.FlowControlFinal;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.bytecode.util.Types;
 
-public class TryCatchFinallyVisitor implements Opcodes {
+public final class TryCatchFinallyVisitor implements Opcodes {
 	private OnFinally onFinally;
 	private Label beginTry;
 	private Label endTry;

@@ -31,7 +31,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 
-public class ProxyDataImpl implements ProxyData, Serializable {
+public final class ProxyDataImpl implements ProxyData, Serializable {
 
 	public static final ProxyData NO_PROXY = new ProxyDataImpl();
 

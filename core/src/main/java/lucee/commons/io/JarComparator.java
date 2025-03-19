@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-public class JarComparator {
+public final class JarComparator {
 
 	public void compareJarFiles(File jarFile1, File jarFile2) throws IOException, NoSuchAlgorithmException {
 		Map<String, String> jar1Contents = getJarContents(jarFile1);

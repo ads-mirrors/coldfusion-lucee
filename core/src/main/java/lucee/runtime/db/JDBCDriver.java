@@ -28,7 +28,7 @@ import lucee.commons.io.IOUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.type.util.ListUtil;
 
-public class JDBCDriver {
+public final class JDBCDriver {
 
 	public final String label;
 	public final String id;

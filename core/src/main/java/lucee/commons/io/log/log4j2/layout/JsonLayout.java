@@ -51,7 +51,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.util.Creation;
 
-public class JsonLayout extends AbstractStringLayout { // TODO <Serializable>
+public final class JsonLayout extends AbstractStringLayout { // TODO <Serializable>
 
 	private static final int DEFAULT_SIZE = 256;
 	private static final String[] FORMATS = new String[] { "json" };

@@ -29,7 +29,7 @@ import lucee.runtime.type.Query;
 import lucee.runtime.type.QueryImpl;
 import lucee.runtime.type.util.CollectionUtil;
 
-public class CSVParser {
+public final class CSVParser {
 
 	public static Query toQuery(String csv, char delimiter, char textQualifier, String[] headers, boolean firstRowIsHeaders) throws CSVParserException, PageException {
 		List<List<String>> allRows = (new CSVString(csv, delimiter).parse());

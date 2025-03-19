@@ -8,7 +8,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.ListUtil;
 
-public class QueryTagFilter implements CacheEntryFilter {
+public final class QueryTagFilter implements CacheEntryFilter {
 
 	private Struct sct = new StructImpl();
 	private String[] tags;

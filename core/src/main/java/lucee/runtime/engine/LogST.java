@@ -9,7 +9,7 @@ import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.ParentThreasRefThread;
 
-public class LogST extends ParentThreasRefThread {
+public final class LogST extends ParentThreasRefThread {
 
 	private static final char NL = '\n';
 	private Thread thread;

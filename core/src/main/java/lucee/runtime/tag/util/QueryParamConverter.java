@@ -46,7 +46,7 @@ import lucee.runtime.type.scope.Argument;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 
-public class QueryParamConverter {
+public final class QueryParamConverter {
 
 	public static SQL convert(String sql, Argument params) throws PageException {
 		// All items of arguments will be key-based or position-based so proxy appropriate arrays

@@ -29,7 +29,7 @@ import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.tag.listener.TagListener;
 import lucee.runtime.type.Struct;
 
-public class ApplicationDataSource extends DataSourceSupport {
+public final class ApplicationDataSource extends DataSourceSupport {
 
 	private String connStr;
 

@@ -9,7 +9,7 @@ import org.osgi.framework.Version;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.type.util.ListUtil;
 
-public class VersionRange {
+public final class VersionRange {
 
 	List<VR> vrs = new ArrayList<VR>();
 

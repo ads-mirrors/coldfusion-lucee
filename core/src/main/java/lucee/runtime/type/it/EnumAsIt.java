@@ -21,7 +21,7 @@ package lucee.runtime.type.it;
 import java.util.Enumeration;
 import java.util.Iterator;
 
-public class EnumAsIt implements Iterator {
+public final class EnumAsIt implements Iterator {
 	private Enumeration e;
 
 	public EnumAsIt(Enumeration e) {

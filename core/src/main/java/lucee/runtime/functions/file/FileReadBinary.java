@@ -26,7 +26,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 
-public class FileReadBinary {
+public final class FileReadBinary {
 
 	public static Object call(PageContext pc, Object oSrc) throws PageException {
 		Resource src = Caster.toResource(pc, oSrc, false);

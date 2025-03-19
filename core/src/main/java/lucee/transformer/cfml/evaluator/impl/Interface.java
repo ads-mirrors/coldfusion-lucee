@@ -33,7 +33,7 @@ import lucee.transformer.expression.ExprString;
 import lucee.transformer.expression.literal.LitString;
 import lucee.transformer.library.tag.TagLibTag;
 
-public class Interface extends Component {
+public final class Interface extends Component {
 
 	@Override
 	public void evaluate(Tag tag, TagLibTag libTag) throws EvaluatorException {

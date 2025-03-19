@@ -11,7 +11,7 @@ import lucee.transformer.interpreter.expression.ExpressionBase;
 /**
  * A Literal String
  */
-public class LitStringImpl extends ExpressionBase implements LitString, ExprString {
+public final class LitStringImpl extends ExpressionBase implements LitString, ExprString {
 
 	private String str;
 	private boolean fromBracket;

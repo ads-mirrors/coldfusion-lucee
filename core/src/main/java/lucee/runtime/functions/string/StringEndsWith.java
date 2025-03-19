@@ -27,7 +27,7 @@ import lucee.runtime.op.Caster;
 /**
  * implements the member method String.endsWith(suffix, ignoreCase)
  */
-public class StringEndsWith extends BIF {
+public final class StringEndsWith extends BIF {
 
 	public static boolean call(PageContext pc, String input, String subs, boolean ignoreCase) {
 

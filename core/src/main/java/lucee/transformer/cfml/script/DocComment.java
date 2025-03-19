@@ -26,7 +26,7 @@ import lucee.transformer.Factory;
 import lucee.transformer.bytecode.statement.tag.Attribute;
 import lucee.transformer.expression.literal.Literal;
 
-public class DocComment {
+public final class DocComment {
 
 	private StringBuilder tmpHint = new StringBuilder();
 	private String hint;

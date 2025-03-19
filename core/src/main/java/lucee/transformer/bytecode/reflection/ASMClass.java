@@ -407,9 +407,9 @@ public final class ASMClass implements java.io.Serializable {
 	}
 
 	/**
-	 * Returns an array containing {@code Class} objects representing all the public classes and
+	 * Returns an array containing {@code Class} objects representing all the public final classes and
 	 * interfaces that are members of the class represented by this {@code Class} object. This includes
-	 * public class and interface members inherited from superclasses and public class and interface
+	 * public final class and interface members inherited from superclasses and public final class and interface
 	 * members declared by the class. This method returns an array of length 0 if this {@code Class}
 	 * object has no public member classes or interfaces. This method also returns an array of length 0
 	 * if this {@code Class} object represents a primitive type, an array class, or void.

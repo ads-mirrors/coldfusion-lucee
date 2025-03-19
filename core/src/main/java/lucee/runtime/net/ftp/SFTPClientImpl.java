@@ -29,7 +29,7 @@ import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.op.Caster;
 
-public class SFTPClientImpl extends AFTPClient {
+public final class SFTPClientImpl extends AFTPClient {
 
 	private JSch jsch;
 	private int timeout = 60000;

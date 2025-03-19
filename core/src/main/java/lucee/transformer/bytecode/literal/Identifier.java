@@ -21,7 +21,7 @@ package lucee.transformer.bytecode.literal;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 
-public class Identifier extends LitStringImpl {
+public final class Identifier extends LitStringImpl {
 
 	public static short CASE_ORIGNAL = 0;
 	public static short CASE_UPPER = 1;

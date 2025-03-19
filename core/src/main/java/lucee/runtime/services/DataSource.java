@@ -18,6 +18,6 @@
  **/
 package lucee.runtime.services;
 
-public class DataSource {
+public final class DataSource {
 
 }

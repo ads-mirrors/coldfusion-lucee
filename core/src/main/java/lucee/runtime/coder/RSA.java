@@ -20,7 +20,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 
-public class RSA {
+public final class RSA {
 
 	public static final int KEY_SIZE = 1024;
 	private Cipher encCipher;

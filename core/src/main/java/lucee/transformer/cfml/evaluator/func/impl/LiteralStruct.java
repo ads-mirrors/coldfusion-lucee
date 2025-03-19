@@ -17,7 +17,7 @@ import lucee.transformer.expression.var.Member;
 import lucee.transformer.expression.var.Variable;
 import lucee.transformer.library.function.FunctionLibFunction;
 
-public class LiteralStruct implements FunctionEvaluator {
+public final class LiteralStruct implements FunctionEvaluator {
 	private static final String GENERAL_MSG = " Invalid arguments for literal struct. "
 			+ "For full specifications, only named arguments are allowed, like {name:\"value\", name2:\"value2\"}."
 			+ " Shorthand notation is supported where the variable name and the key are identical (e.g., {name} as a shorthand for {name: name})."

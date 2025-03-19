@@ -57,7 +57,7 @@ import lucee.commons.lang.StringUtil;
  * @version 1.25, 12/03/01
  * @since JDK1.0
  */
-public class URLEncoder {
+public final class URLEncoder {
 
 	/**
 	 * You can't call the constructor.

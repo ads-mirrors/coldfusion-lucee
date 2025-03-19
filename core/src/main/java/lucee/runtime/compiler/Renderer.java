@@ -38,7 +38,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.transformer.util.SourceCode;
 
-public class Renderer {
+public final class Renderer {
 
 	private static final long MAX_SIZE = 1024 * 1024;
 	private static MemoryClassLoader mcl;

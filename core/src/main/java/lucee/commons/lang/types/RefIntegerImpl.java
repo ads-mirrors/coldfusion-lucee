@@ -30,7 +30,7 @@ import lucee.runtime.type.dt.DateTime;
 /**
  * Integer Type that can be modified
  */
-public class RefIntegerImpl implements RefInteger, Castable {
+public final class RefIntegerImpl implements RefInteger, Castable {
 
 	private int value;
 

@@ -29,7 +29,7 @@ import javax.management.NotificationEmitter;
 
 import lucee.runtime.config.ConfigServer;
 
-public class MemoryControler {
+public final class MemoryControler {
 	private final static Map<String, MemoryType> types = new HashMap<String, MemoryType>();
 	private static boolean init;
 

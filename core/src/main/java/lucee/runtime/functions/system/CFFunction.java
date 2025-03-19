@@ -40,7 +40,7 @@ import lucee.runtime.type.scope.VariablesImpl;
 import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.type.util.KeyConstants;
 
-public class CFFunction {
+public final class CFFunction {
 
 	private static final Variables VAR = new VariablesImpl();
 	// private static Map udfs=new ReferenceMap();

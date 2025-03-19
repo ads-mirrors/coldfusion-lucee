@@ -37,7 +37,7 @@ import lucee.runtime.thread.ThreadUtil;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.UDF;
 
-public class UDFCaller2<P> implements Callable<Data<P>> {
+public final class UDFCaller2<P> implements Callable<Data<P>> {
 
 	private PageContext parent;
 	private PageContextImpl pc;

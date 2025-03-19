@@ -23,7 +23,7 @@ import java.util.NoSuchElementException;
 
 import lucee.runtime.type.Array;
 
-public class ArrayListIteratorImpl implements ListIterator {
+public final class ArrayListIteratorImpl implements ListIterator {
 
 	private static final int UNDEFINED = Integer.MIN_VALUE;
 	private Array array;

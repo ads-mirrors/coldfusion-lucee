@@ -33,7 +33,7 @@ import lucee.runtime.type.Array;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.KeyConstants;
 
-public class CallStackDump {
+public final class CallStackDump {
 
 	public static String call(PageContext pc) throws PageException {
 		return call(pc, null);

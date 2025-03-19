@@ -35,7 +35,7 @@ import lucee.transformer.bytecode.util.ASMConstants;
 import lucee.transformer.bytecode.util.Types;
 import lucee.transformer.expression.var.Variable;
 
-public class NullConstant extends ExpressionBase {
+public final class NullConstant extends ExpressionBase {
 
 	private static final Method FULL = new Method("full", Types.BOOLEAN_VALUE, new Type[] { Types.PAGE_CONTEXT });
 	private static final Method GET = new Method("get", Types.OBJECT, new Type[] { Types.COLLECTION_KEY });

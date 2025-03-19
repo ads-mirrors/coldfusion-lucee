@@ -3,7 +3,7 @@ package lucee.commons.lang.compiler;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DynamicClassLoader extends ClassLoader {
+public final class DynamicClassLoader extends ClassLoader {
 
 	private Map<String, CompiledCode> customCompiledCode = new HashMap<>();
 

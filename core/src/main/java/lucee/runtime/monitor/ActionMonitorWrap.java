@@ -28,7 +28,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.Query;
 
-public class ActionMonitorWrap extends MonitorWrap implements ActionMonitor {
+public final class ActionMonitorWrap extends MonitorWrap implements ActionMonitor {
 
 	private static final Class[] PARAMS_LOG1 = new Class[] { PageContext.class, String.class, String.class, long.class, Object.class };
 	private static final Class[] PARAMS_LOG2 = new Class[] { ConfigWeb.class, String.class, String.class, long.class, Object.class };

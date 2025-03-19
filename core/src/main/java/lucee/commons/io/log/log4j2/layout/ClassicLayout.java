@@ -31,7 +31,7 @@ import lucee.runtime.format.DateFormat;
 import lucee.runtime.format.TimeFormat;
 import lucee.runtime.op.Caster;
 
-public class ClassicLayout extends AbstractStringLayout { // TODO <Serializable>
+public final class ClassicLayout extends AbstractStringLayout { // TODO <Serializable>
 
 	public ClassicLayout() {
 		// TODO custom charset?

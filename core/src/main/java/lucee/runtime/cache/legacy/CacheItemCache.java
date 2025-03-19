@@ -34,7 +34,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.dt.TimeSpan;
 
-public class CacheItemCache extends CacheItem {
+public final class CacheItemCache extends CacheItem {
 
 	private Cache cache;
 	private TimeSpan timespan;

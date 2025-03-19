@@ -36,7 +36,7 @@ import lucee.runtime.engine.ThreadLocalPageContext;
 /**
  * Manages actual File I/O for File Appenders.
  */
-public class ResourceManager extends OutputStreamManager {
+public final class ResourceManager extends OutputStreamManager {
 
 	private static final FileManagerFactory FACTORY = new FileManagerFactory();
 

@@ -26,7 +26,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.UDF;
 import lucee.runtime.type.util.KeyConstants;
 
-public class CreateComponent {
+public final class CreateComponent {
 	private static final Object[] EMPTY = new Object[0];
 
 	public static Component call(PageContext pc, String path) throws PageException {

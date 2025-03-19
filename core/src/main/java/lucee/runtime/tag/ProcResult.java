@@ -23,7 +23,7 @@ import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.ext.tag.TagSupport;
 import lucee.runtime.op.Caster;
 
-public class ProcResult extends TagSupport {
+public final class ProcResult extends TagSupport {
 
 	private ProcResultBean result = new ProcResultBean();
 

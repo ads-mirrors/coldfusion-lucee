@@ -17,7 +17,7 @@
  */
 package lucee.transformer;
 
-public class Position {
+public final class Position {
 
 	public final int line;
 	public final int column;

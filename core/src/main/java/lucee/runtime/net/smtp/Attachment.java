@@ -26,7 +26,7 @@ import lucee.commons.io.res.Resource;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.type.util.ListUtil;
 
-public class Attachment implements Serializable {
+public final class Attachment implements Serializable {
 
 	private String absolutePath;
 	private URL url;

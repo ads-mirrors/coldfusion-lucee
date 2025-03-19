@@ -32,7 +32,7 @@ import lucee.runtime.type.Array;
 import lucee.runtime.type.ArrayImpl;
 import lucee.runtime.type.Struct;
 
-public class DebuggerPool {
+public final class DebuggerPool {
 
 	// private LinkedList<Struct> queue = new LinkedList<Struct>();
 	private Queue<Struct> queue = new ConcurrentLinkedQueue<>();

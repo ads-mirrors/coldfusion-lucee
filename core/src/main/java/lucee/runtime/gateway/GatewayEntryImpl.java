@@ -37,7 +37,7 @@ import lucee.runtime.op.Duplicator;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.Struct;
 
-public class GatewayEntryImpl implements GatewayEntry {
+public final class GatewayEntryImpl implements GatewayEntry {
 
 	private final String id;
 	private final Struct custom;

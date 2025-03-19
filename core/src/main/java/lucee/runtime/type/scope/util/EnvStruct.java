@@ -10,7 +10,7 @@ import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.util.StructSupport;
 import lucee.runtime.type.util.StructUtil;
 
-public class EnvStruct extends AbsSystemStruct {
+public final class EnvStruct extends AbsSystemStruct {
 
 	private static EnvStruct instance = new EnvStruct();
 

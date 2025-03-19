@@ -2,7 +2,7 @@ package lucee.runtime.type.util;
 
 import java.io.IOException;
 
-public class ListParser {
+public final class ListParser {
 	private int pos = 0;
 	private final int len;
 	private final String str;

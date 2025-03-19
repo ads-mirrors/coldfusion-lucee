@@ -54,7 +54,7 @@ import lucee.runtime.type.UDFImpl;
 import lucee.runtime.type.util.KeyConstants;
 
 // DO NOT CHANGE interface used by extension axis
-public class CacheHandlerCollectionImpl implements CacheHandlerCollection {
+public final class CacheHandlerCollectionImpl implements CacheHandlerCollection {
 
 	public static final char CACHE_DEL = ';';
 	public static final char CACHE_DEL2 = ':';

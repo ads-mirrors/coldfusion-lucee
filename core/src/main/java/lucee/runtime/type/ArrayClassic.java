@@ -46,7 +46,7 @@ import lucee.runtime.type.util.ListIteratorImpl;
 /**
  * CFML array object
  */
-public class ArrayClassic extends ArraySupport {
+public final class ArrayClassic extends ArraySupport {
 
 	private static final long serialVersionUID = -6187994169003839005L;
 

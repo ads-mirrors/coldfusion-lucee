@@ -24,7 +24,7 @@ import lucee.runtime.Component;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.it.ValueIterator;
 
-public class ComponentValueIterator extends ValueIterator implements Iterator<Object> {
+public final class ComponentValueIterator extends ValueIterator implements Iterator<Object> {
 
 	private Component cfc;
 	private int access;

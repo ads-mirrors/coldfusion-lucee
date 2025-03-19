@@ -24,7 +24,7 @@ import lucee.transformer.cfml.ExprTransformer;
 import lucee.transformer.cfml.script.AbstrCFMLScriptTransformer;
 import lucee.transformer.expression.Expression;
 
-public class CFMLExprTransformer extends AbstrCFMLScriptTransformer implements ExprTransformer {
+public final class CFMLExprTransformer extends AbstrCFMLScriptTransformer implements ExprTransformer {
 
 	@Override
 	public Expression transformAsString(Data data) throws TemplateException {

@@ -29,7 +29,7 @@ import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.UDF;
 
-public class UDFFilter extends UDFFilterSupport implements ResourceAndResourceNameFilter {
+public final class UDFFilter extends UDFFilterSupport implements ResourceAndResourceNameFilter {
 
 	public UDFFilter(UDF udf) throws ExpressionException {
 		super(udf);

@@ -27,7 +27,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.Query;
 
-public class IntervallMonitorWrap extends MonitorWrap implements IntervallMonitor {
+public final class IntervallMonitorWrap extends MonitorWrap implements IntervallMonitor {
 	private static final Object[] PARAMS_LOG = new Object[0];
 
 	private Method log;

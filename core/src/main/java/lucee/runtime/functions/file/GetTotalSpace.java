@@ -26,7 +26,7 @@ import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 
-public class GetTotalSpace {
+public final class GetTotalSpace {
 	public static Number call(PageContext pc, Object obj) throws PageException {
 		Resource res = Caster.toResource(pc, obj, true, pc.getConfig().allowRealPath());
 		if (!(res instanceof File)) throw new FunctionException(pc, "getTotalSpace", 1, "filepath", "this function is only supported for the local filesystem");

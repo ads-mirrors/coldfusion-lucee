@@ -17,7 +17,7 @@ import lucee.transformer.bytecode.util.Types;
 import lucee.transformer.cfml.Data;
 import lucee.transformer.cfml.evaluator.EvaluatorException;
 
-public class ComponentAsExpression extends ExpressionBase implements AsExpression {
+public final class ComponentAsExpression extends ExpressionBase implements AsExpression {
 	private static final Type COMPONENT_LOADER = Type.getType(ComponentLoader.class);
 	// ComponentImpl loadInline(PageContext pc, CIPage page)
 	private static final Method LOAD_INLINE1 = new Method("loadInline", Types.COMPONENT_IMPL, new Type[] { Types.CI_PAGE });

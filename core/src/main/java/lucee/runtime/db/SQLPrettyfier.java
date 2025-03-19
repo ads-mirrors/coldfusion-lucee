@@ -27,7 +27,7 @@ import lucee.runtime.format.TimeFormat;
 import lucee.runtime.op.date.DateCaster;
 import lucee.runtime.type.dt.DateTime;
 
-public class SQLPrettyfier {
+public final class SQLPrettyfier {
 
 	public static final String PLACEHOLDER_COUNT = "placeholder_count";
 	public static final String PLACEHOLDER_ASTERIX = "placeholder_asterix";

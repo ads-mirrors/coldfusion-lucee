@@ -18,7 +18,7 @@
  **/
 package lucee.runtime.debug;
 
-public class ActiveLock {
+public final class ActiveLock {
 
 	public final long startTime;
 	public final short type;

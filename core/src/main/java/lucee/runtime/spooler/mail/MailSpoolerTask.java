@@ -44,7 +44,7 @@ import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.type.util.KeyConstants;
 
-public class MailSpoolerTask extends SpoolerTaskSupport {
+public final class MailSpoolerTask extends SpoolerTaskSupport {
 	private static final ExecutionPlan[] EXECUTION_PLANS = new ExecutionPlan[] { new ExecutionPlanImpl(1, 60), new ExecutionPlanImpl(1, 5 * 60), new ExecutionPlanImpl(1, 3600),
 			new ExecutionPlanImpl(2, 24 * 3600), };
 

@@ -25,7 +25,7 @@ import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.ParentThreasRefThread;
 
-public class RetireOutputStreamFactory {
+public final class RetireOutputStreamFactory {
 
 	static List<RetireOutputStream> list = new ArrayList<RetireOutputStream>();
 	private static RetireThread thread;

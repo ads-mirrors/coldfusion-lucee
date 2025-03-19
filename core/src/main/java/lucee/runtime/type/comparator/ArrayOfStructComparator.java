@@ -25,7 +25,7 @@ import lucee.runtime.type.Collection;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.Struct;
 
-public class ArrayOfStructComparator implements Comparator<Struct> {
+public final class ArrayOfStructComparator implements Comparator<Struct> {
 
 	private Key key;
 

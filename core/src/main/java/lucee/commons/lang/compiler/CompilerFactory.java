@@ -2,7 +2,7 @@ package lucee.commons.lang.compiler;
 
 import lucee.runtime.exp.ApplicationException;
 
-public class CompilerFactory {
+public final class CompilerFactory {
 	public static Compiler getInstance() throws ApplicationException {
 		JaninoCompiler janino = new JaninoCompiler();
 		if (janino.supported()) return janino;

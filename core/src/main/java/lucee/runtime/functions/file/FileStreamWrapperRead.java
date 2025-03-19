@@ -29,7 +29,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.op.Caster;
 
-public class FileStreamWrapperRead extends FileStreamWrapper {
+public final class FileStreamWrapperRead extends FileStreamWrapper {
 
 	private BufferedReader br;
 	private String charset;

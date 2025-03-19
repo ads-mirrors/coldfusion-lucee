@@ -20,7 +20,7 @@ package lucee.commons.lang.mimetype;
 
 import lucee.commons.lang.StringUtil;
 
-public class ContentType {
+public final class ContentType {
 	private String mimeType;
 	private String charset;
 

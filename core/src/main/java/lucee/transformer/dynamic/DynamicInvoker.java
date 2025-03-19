@@ -60,7 +60,7 @@ import lucee.transformer.dynamic.meta.LegacyMethod;
 import lucee.transformer.dynamic.meta.Method;
 import lucee.transformer.dynamic.meta.dynamic.ClazzDynamic;
 
-public class DynamicInvoker {
+public final class DynamicInvoker {
 
 	private static DynamicInvoker engine;
 	private Map<Integer, DynamicClassLoader> loaders = new HashMap<>();

@@ -21,7 +21,7 @@ package lucee.commons.sql;
 import lucee.runtime.op.Caster;
 import lucee.runtime.reflection.Reflector;
 
-public class OracleCaster {
+public final class OracleCaster {
 
 	private static final Object[] ZERO_ARGS = new Object[0];
 

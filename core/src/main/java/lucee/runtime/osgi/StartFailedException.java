@@ -5,7 +5,7 @@ import org.osgi.framework.BundleException;
 
 import lucee.runtime.osgi.OSGiUtil.BundleDefinition;
 
-public class StartFailedException extends Exception {
+public final class StartFailedException extends Exception {
 
 	private static final long serialVersionUID = -6268178595687225586L;
 

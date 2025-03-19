@@ -7,7 +7,7 @@ import lucee.runtime.ext.function.BIF;
 import lucee.runtime.future.Future;
 import lucee.runtime.op.Caster;
 
-public class RunAsync extends BIF {
+public final class RunAsync extends BIF {
 
 	@Override
 	public Object invoke(PageContext pc, Object[] args) throws PageException {

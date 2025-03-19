@@ -21,7 +21,7 @@ package lucee.runtime.sql.exp.value;
 import lucee.runtime.op.Caster;
 import lucee.runtime.sql.exp.Literal;
 
-public class ValueNumber extends ValueSupport implements Literal {
+public final class ValueNumber extends ValueSupport implements Literal {
 
 	private double value;
 

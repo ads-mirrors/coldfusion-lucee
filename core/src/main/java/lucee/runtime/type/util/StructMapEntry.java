@@ -23,7 +23,7 @@ import java.util.Map;
 import lucee.runtime.type.Collection;
 import lucee.runtime.type.Struct;
 
-public class StructMapEntry implements Map.Entry<String, Object> {
+public final class StructMapEntry implements Map.Entry<String, Object> {
 
 	private Collection.Key key;
 	private Object value;

@@ -33,7 +33,7 @@ import lucee.commons.lang.StringUtil;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.ExpressionException;
 
-public class MethodCleaner extends ClassVisitor implements Opcodes {
+public final class MethodCleaner extends ClassVisitor implements Opcodes {
 
 	private final String methodName;
 	// private Class[] arguments;

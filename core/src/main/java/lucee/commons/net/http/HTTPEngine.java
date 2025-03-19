@@ -32,7 +32,7 @@ import lucee.commons.net.http.httpclient.HTTPResponse4Impl;
 import lucee.commons.net.http.httpclient.HeaderImpl;
 import lucee.runtime.type.util.CollectionUtil;
 
-public class HTTPEngine {
+public final class HTTPEngine {
 
 	// private static final boolean use4=true;
 

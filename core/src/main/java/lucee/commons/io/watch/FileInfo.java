@@ -2,7 +2,7 @@ package lucee.commons.io.watch;
 
 import java.io.File;
 
-public class FileInfo {
+public final class FileInfo {
 	public long lastModified;
 	public long length;
 

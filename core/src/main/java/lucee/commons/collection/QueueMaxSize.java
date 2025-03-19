@@ -23,7 +23,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class QueueMaxSize<E> implements Queue<E> {
+public final class QueueMaxSize<E> implements Queue<E> {
 
 	private int maxSize;
 	private LinkedList<E> list = new LinkedList<E>();

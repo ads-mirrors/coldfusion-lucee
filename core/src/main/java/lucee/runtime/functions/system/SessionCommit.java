@@ -5,7 +5,7 @@ import lucee.runtime.PageContextImpl;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.Function;
 
-public class SessionCommit implements Function {
+public final class SessionCommit implements Function {
 	private static final long serialVersionUID = -2243745577257724777L;
 
 	public static String call(PageContext pc) throws PageException {

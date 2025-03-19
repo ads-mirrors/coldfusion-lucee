@@ -35,7 +35,7 @@ import javax.mail.Transport;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.lang.ExceptionUtil;
 
-public class SMTPConnectionPool {
+public final class SMTPConnectionPool {
 
 	private static Map<String, Stack<SessionAndTransport>> sessions = new ConcurrentHashMap<String, Stack<SessionAndTransport>>();
 

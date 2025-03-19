@@ -29,7 +29,7 @@ import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.net.http.ReqRspUtil;
 
-public class URLDecoder {
+public final class URLDecoder {
 
 	private URLDecoder() {
 	}

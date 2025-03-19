@@ -24,7 +24,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.orm.ORMSession;
 import lucee.runtime.orm.ORMUtil;
 
-public class ORMEvictCollection {
+public final class ORMEvictCollection {
 	public static String call(PageContext pc, String entityName, String collectionName) throws PageException {
 		return call(pc, entityName, collectionName, null);
 	}

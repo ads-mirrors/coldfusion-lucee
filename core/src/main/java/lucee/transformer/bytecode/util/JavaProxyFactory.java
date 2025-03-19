@@ -66,7 +66,7 @@ import lucee.transformer.bytecode.visitor.ArrayVisitor;
  * creates a Java Proxy for components, so you can use componets as java classes following a certain
  * interface or class
  */
-public class JavaProxyFactory {
+public final class JavaProxyFactory {
 
 	private static final short TYPE_CFC = 1;
 	private static final short TYPE_UDF = 2;

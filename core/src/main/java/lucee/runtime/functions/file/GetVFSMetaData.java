@@ -23,7 +23,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 
-public class GetVFSMetaData {
+public final class GetVFSMetaData {
 	public static Struct call(PageContext pc, String scheme) {
 		ResourceProvider[] providers = pc.getConfig().getResourceProviders();
 		ResourceProvider provider;

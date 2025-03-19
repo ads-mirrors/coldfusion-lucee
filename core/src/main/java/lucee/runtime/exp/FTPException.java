@@ -24,7 +24,7 @@ import lucee.runtime.config.Config;
 import lucee.runtime.net.ftp.AFTPClient;
 import lucee.runtime.op.Caster;
 
-public class FTPException extends ApplicationException {
+public final class FTPException extends ApplicationException {
 
 	private int code;
 	private String msg;

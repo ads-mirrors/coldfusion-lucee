@@ -21,7 +21,7 @@ import lucee.runtime.type.Objects;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.dt.DateTime;
 
-public class WSClientReflector implements WSClient {
+public final class WSClientReflector implements WSClient {
 
 	private final Object obj;
 	private final Objects objects;

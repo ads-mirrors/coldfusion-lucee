@@ -20,7 +20,7 @@ package lucee.runtime.sql.exp.op;
 
 import java.util.List;
 
-public class OperationAggregate extends OperationN {
+public final class OperationAggregate extends OperationN {
 
 	public OperationAggregate(String operator, List operants) {
 		super(operator, operants);

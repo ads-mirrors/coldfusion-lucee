@@ -30,7 +30,7 @@ import lucee.transformer.bytecode.statement.Argument;
 import lucee.transformer.expression.ExprString;
 import lucee.transformer.expression.literal.LitString;
 
-public class JavaFunctionDef implements FunctionDef {
+public final class JavaFunctionDef implements FunctionDef {
 
 	private Class<?> javaClass;
 	private String javaMethodName;
@@ -152,7 +152,7 @@ public class JavaFunctionDef implements FunctionDef {
 		sb.append("import lucee.runtime.op.Caster;\n");
 		sb.append("import lucee.runtime.type.FunctionArgumentImpl;\n");
 
-		sb.append("public class " + className);
+		sb.append("public final class " + className);
 		sb.append(" extends lucee.runtime.JF ");
 		sb.append(" implements UDF");
 		if (javaFunctionClass != null) sb.append("," + javaFunctionClass.getName());

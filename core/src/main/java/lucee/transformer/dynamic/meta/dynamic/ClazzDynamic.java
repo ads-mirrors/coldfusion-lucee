@@ -49,7 +49,7 @@ import lucee.transformer.dynamic.meta.Constructor;
 import lucee.transformer.dynamic.meta.FunctionMember;
 import lucee.transformer.dynamic.meta.Method;
 
-public class ClazzDynamic extends Clazz {
+public final class ClazzDynamic extends Clazz {
 
 	private static final long serialVersionUID = 862370302422701585L;
 

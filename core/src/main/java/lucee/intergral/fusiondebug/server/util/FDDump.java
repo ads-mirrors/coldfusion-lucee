@@ -26,7 +26,7 @@ import com.intergral.fusiondebug.server.IFDVariable;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 
-public class FDDump {
+public final class FDDump {
 
 	public static void dump(IFDVariable var) {
 		LogUtil.log(Log.LEVEL_INFO, FDDump.class.getName(), toString(var));

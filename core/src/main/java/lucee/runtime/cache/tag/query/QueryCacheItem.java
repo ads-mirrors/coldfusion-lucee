@@ -23,7 +23,7 @@ import lucee.runtime.cache.tag.udf.UDFArgConverter;
 import lucee.runtime.type.Query;
 import lucee.runtime.type.query.QueryResult;
 
-public class QueryCacheItem extends QueryResultCacheItem {
+public final class QueryCacheItem extends QueryResultCacheItem {
 
 	private static final long serialVersionUID = 7327671003736543783L;
 

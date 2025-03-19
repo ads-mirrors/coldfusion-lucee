@@ -25,7 +25,7 @@ import lucee.runtime.type.Collection;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.util.KeyConstants;
 
-public class ComponentCacheEventListener implements CacheEventListener {
+public final class ComponentCacheEventListener implements CacheEventListener {
 
 	private static final long serialVersionUID = 6271280246677734153L;
 	private static final Collection.Key ON_EXPIRES = KeyConstants._onExpires;

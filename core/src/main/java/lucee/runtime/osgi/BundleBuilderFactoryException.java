@@ -17,7 +17,7 @@
  */
 package lucee.runtime.osgi;
 
-public class BundleBuilderFactoryException extends Exception {
+public final class BundleBuilderFactoryException extends Exception {
 
 	public BundleBuilderFactoryException(String msg) {
 		super(msg);

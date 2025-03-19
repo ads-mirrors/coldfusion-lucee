@@ -20,7 +20,7 @@ package lucee.commons.lang;
 
 import java.io.IOException;
 
-public class KeyGenerator {
+public final class KeyGenerator {
 	public static String createKey(String value) throws IOException {
 		// create a crossfoot of the string and change result in constealltion of the position
 		long sum = 0;

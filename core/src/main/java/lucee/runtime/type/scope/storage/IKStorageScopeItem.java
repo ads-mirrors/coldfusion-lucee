@@ -11,7 +11,7 @@ import lucee.runtime.op.OpUtil;
 import lucee.runtime.type.ObjectWrap;
 import lucee.runtime.type.dt.DateTime;
 
-public class IKStorageScopeItem implements Serializable, ObjectWrap, Castable {
+public final class IKStorageScopeItem implements Serializable, ObjectWrap, Castable {
 
 	private static final long serialVersionUID = -8187816208907138226L;
 

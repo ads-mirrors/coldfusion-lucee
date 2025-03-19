@@ -35,7 +35,7 @@ import lucee.commons.io.res.Resources;
 import lucee.commons.io.res.util.ResourceLockImpl;
 import lucee.commons.lang.StringUtil;
 
-public class SMBResourceProvider implements ResourceProvider {
+public final class SMBResourceProvider implements ResourceProvider {
 
 	private String scheme = "smb";
 	private Map<String, String> args;

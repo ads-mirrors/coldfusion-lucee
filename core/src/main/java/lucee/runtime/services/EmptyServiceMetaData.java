@@ -20,7 +20,7 @@ package lucee.runtime.services;
 
 import coldfusion.server.ServiceMetaData;
 
-public class EmptyServiceMetaData implements ServiceMetaData {
+public final class EmptyServiceMetaData implements ServiceMetaData {
 
 	@Override
 	public int getPropertyCount() {

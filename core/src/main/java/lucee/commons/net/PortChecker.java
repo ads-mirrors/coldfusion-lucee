@@ -28,7 +28,7 @@ import java.util.Map;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.log.LogUtil;
 
-public class PortChecker {
+public final class PortChecker {
 
 	public static boolean isActive(String host, int port) {
 		Socket s = null;

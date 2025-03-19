@@ -22,7 +22,7 @@ import lucee.commons.lang.StringUtil;
 import lucee.runtime.type.util.ListUtil;
 import lucee.runtime.util.Strings;
 
-public class StringsImpl implements Strings {
+public final class StringsImpl implements Strings {
 
 	private static Strings singelton;
 

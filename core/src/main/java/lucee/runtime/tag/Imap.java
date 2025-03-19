@@ -20,7 +20,7 @@ package lucee.runtime.tag;
 
 import lucee.runtime.net.mail.MailClient;
 
-public class Imap extends _Mail {
+public final class Imap extends _Mail {
 
 	@Override
 	protected int getDefaultPort() {

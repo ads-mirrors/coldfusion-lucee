@@ -26,7 +26,7 @@ import lucee.transformer.bytecode.statement.tag.Attribute;
 import lucee.transformer.expression.Expression;
 import lucee.transformer.expression.literal.LitBoolean;
 
-public class DocCommentTransformer {
+public final class DocCommentTransformer {
 
 	public DocComment transform(Factory f, String str) {
 		try {

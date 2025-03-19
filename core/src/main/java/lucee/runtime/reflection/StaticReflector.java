@@ -18,6 +18,6 @@
  **/
 package lucee.runtime.reflection;
 
-public class StaticReflector {
+public final class StaticReflector {
 
 }

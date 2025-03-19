@@ -34,7 +34,7 @@ import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 
-public class StructKeyTranslate extends BIF {
+public final class StructKeyTranslate extends BIF {
 
 	private static final long serialVersionUID = -7978129950865681102L;
 

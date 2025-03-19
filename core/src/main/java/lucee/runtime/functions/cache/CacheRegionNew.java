@@ -37,7 +37,7 @@ import lucee.transformer.library.ClassDefinitionImpl;
  * Engines and should be avoided where possible. The preferred method to manipulate Cache
  * connections is via the Administrator interface or in Application.
  */
-public class CacheRegionNew extends BIF {
+public final class CacheRegionNew extends BIF {
 
 	public static String call(PageContext pc, String cacheName, Object arg2, Object arg3, String arg4) throws PageException { // used Object for args 2 & 3 to match fld
 		return _call(pc, cacheName, (Struct) arg2, (Boolean) arg3, arg4);

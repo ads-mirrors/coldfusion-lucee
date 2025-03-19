@@ -25,7 +25,7 @@ import lucee.runtime.type.util.ListUtil;
  *             files, DO NOT USE
  */
 @Deprecated
-public class List {
+public final class List {
 
 	public static Array listToArrayRemoveEmpty(String list, String delimiter) {
 		return ListUtil.listToArrayRemoveEmpty(list, delimiter);

@@ -54,7 +54,7 @@ import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.CollectionUtil;
 import lucee.runtime.type.util.KeyConstants;
 
-public class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
+public final class OpenAIEngine extends AIEngineSupport implements AIEngineFile {
 	// https://platform.openai.com/docs/api-reference/introduction
 
 	private static final String DEFAULT_CHARSET = "UTF-8";

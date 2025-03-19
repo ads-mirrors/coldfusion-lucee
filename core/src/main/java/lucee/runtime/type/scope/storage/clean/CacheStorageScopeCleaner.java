@@ -33,7 +33,7 @@ import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.type.scope.storage.StorageScopeEngine;
 import lucee.runtime.type.scope.storage.StorageScopeListener;
 
-public class CacheStorageScopeCleaner extends StorageScopeCleanerSupport {
+public final class CacheStorageScopeCleaner extends StorageScopeCleanerSupport {
 
 	public static final long SAVE_EXPIRES_OFFSET = 60 * 60 * 1000;
 

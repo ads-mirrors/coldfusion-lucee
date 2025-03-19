@@ -10,7 +10,7 @@ import lucee.runtime.ext.function.Function;
 import lucee.runtime.extension.RHExtension;
 import lucee.runtime.op.Caster;
 
-public class ExtensionExists extends BIF implements Function {
+public final class ExtensionExists extends BIF implements Function {
 
 	private static final long serialVersionUID = 2627423175121799118L;
 

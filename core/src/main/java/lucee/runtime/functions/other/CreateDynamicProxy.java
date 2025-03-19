@@ -42,7 +42,7 @@ import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 import lucee.transformer.bytecode.util.JavaProxyFactory;
 
-public class CreateDynamicProxy implements Function {
+public final class CreateDynamicProxy implements Function {
 
 	private static final long serialVersionUID = -1787490871697335220L;
 

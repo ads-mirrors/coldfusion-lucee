@@ -29,7 +29,7 @@ import lucee.runtime.config.Config;
 import lucee.transformer.bytecode.statement.udf.Function;
 import lucee.transformer.expression.literal.LitString;
 
-public class ConstrBytecodeContext extends BytecodeContext {
+public final class ConstrBytecodeContext extends BytecodeContext {
 
 	private List<Data> properties = new ArrayList<Data>();
 

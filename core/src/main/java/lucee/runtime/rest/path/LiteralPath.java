@@ -20,7 +20,7 @@ package lucee.runtime.rest.path;
 
 import lucee.runtime.type.Struct;
 
-public class LiteralPath extends Path {
+public final class LiteralPath extends Path {
 
 	private String path;
 

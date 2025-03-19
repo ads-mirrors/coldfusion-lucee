@@ -7,7 +7,7 @@ import lucee.transformer.expression.var.Variable;
 import lucee.transformer.interpreter.InterpreterContext;
 import lucee.transformer.interpreter.expression.ExpressionBase;
 
-public class Null extends ExpressionBase {
+public final class Null extends ExpressionBase {
 
 	public Null(Factory f, Position start, Position end) {
 		super(f, start, end);

@@ -25,7 +25,7 @@ import javax.script.Bindings;
 
 import lucee.runtime.PageContext;
 
-public class EngineBinding implements Bindings {
+public final class EngineBinding implements Bindings {
 
 	private PageContext pc;
 

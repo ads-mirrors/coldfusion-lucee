@@ -7,7 +7,7 @@ import org.apache.http.message.BasicHeader;
 
 import lucee.commons.lang.StringUtil;
 
-public class HeadersHttpURLConnection implements HeadersCollection {
+public final class HeadersHttpURLConnection implements HeadersCollection {
 
 	private HttpURLConnection conn;
 

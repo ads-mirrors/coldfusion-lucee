@@ -25,7 +25,7 @@ import lucee.commons.io.res.Resource;
 import lucee.commons.lang.SerializableObject;
 import lucee.runtime.PageSource;
 
-public class ResourceSnippetsMap {
+public final class ResourceSnippetsMap {
 
 	/* methods that access these Map objects should take care of synchronization */
 	private final Map<String, String> sources;

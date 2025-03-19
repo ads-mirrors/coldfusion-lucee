@@ -6,7 +6,7 @@ import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.BIF;
 
-public class IsInThread extends BIF {
+public final class IsInThread extends BIF {
 
 	private static final long serialVersionUID = 9100222392353284434L;
 

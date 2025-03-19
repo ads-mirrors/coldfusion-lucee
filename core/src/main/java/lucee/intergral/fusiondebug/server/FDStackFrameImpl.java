@@ -43,7 +43,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.scope.Scope;
 import lucee.runtime.type.util.KeyConstants;
 
-public class FDStackFrameImpl implements IFDStackFrame {
+public final class FDStackFrameImpl implements IFDStackFrame {
 
 	private static final int[] SCOPES_AS_INT = new int[] { Scope.SCOPE_VARIABLES, Scope.SCOPE_CGI, Scope.SCOPE_URL, Scope.SCOPE_FORM, Scope.SCOPE_COOKIE, Scope.SCOPE_CLIENT,
 			Scope.SCOPE_APPLICATION, Scope.SCOPE_CALLER, Scope.SCOPE_CLUSTER, Scope.SCOPE_REQUEST, Scope.SCOPE_SERVER, Scope.SCOPE_SESSION };

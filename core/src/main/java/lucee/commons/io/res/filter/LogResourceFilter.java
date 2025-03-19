@@ -20,7 +20,7 @@ package lucee.commons.io.res.filter;
 
 import lucee.commons.io.res.Resource;
 
-public class LogResourceFilter implements ResourceFilter {
+public final class LogResourceFilter implements ResourceFilter {
 
 	private ResourceFilter filter;
 

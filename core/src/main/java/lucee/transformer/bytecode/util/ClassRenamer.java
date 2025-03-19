@@ -27,7 +27,7 @@ import org.objectweb.asm.Opcodes;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.type.util.ListUtil;
 
-public class ClassRenamer extends ClassVisitor implements Opcodes {
+public final class ClassRenamer extends ClassVisitor implements Opcodes {
 
 	private final String newName;
 	private String oldName;

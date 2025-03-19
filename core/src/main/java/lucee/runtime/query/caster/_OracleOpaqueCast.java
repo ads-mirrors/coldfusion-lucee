@@ -24,7 +24,7 @@ import java.sql.SQLException;
 
 import lucee.commons.lang.ClassUtil;
 
-public class _OracleOpaqueCast {
+public final class _OracleOpaqueCast {
 
 	private static final Object[] ZERO_ARGS = new Object[0];
 

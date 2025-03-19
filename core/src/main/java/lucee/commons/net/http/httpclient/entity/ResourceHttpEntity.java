@@ -31,7 +31,7 @@ import lucee.commons.io.res.Resource;
 /**
  * A RequestEntity that represents a Resource.
  */
-public class ResourceHttpEntity extends AbstractHttpEntity implements Entity4 {
+public final class ResourceHttpEntity extends AbstractHttpEntity implements Entity4 {
 
 	final Resource res;
 	private ContentType ct;

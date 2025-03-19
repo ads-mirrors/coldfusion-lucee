@@ -28,7 +28,7 @@ import lucee.runtime.PageSource;
 import lucee.runtime.PageContextImpl;
 import lucee.runtime.op.Caster;
 
-public class ConsoleExecutionLog extends ExecutionLogSupport {
+public final class ConsoleExecutionLog extends ExecutionLogSupport {
 
 	private PrintWriter pw;
 	private PageContext pc;

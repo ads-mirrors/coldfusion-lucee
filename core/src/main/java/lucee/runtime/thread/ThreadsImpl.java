@@ -49,7 +49,7 @@ import lucee.runtime.type.util.CollectionUtil;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.StructSupport;
 
-public class ThreadsImpl extends StructSupport implements lucee.runtime.type.scope.Threads {
+public final class ThreadsImpl extends StructSupport implements lucee.runtime.type.scope.Threads {
 
 	private static final Key KEY_ERROR = KeyConstants._ERROR;
 	private static final Key KEY_ELAPSEDTIME = KeyConstants._ELAPSEDTIME;

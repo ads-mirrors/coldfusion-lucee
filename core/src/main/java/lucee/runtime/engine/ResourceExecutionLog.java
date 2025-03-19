@@ -35,7 +35,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.functions.other.CreateUUID;
 import lucee.runtime.op.Caster;
 
-public class ResourceExecutionLog extends ExecutionLogSupport {
+public final class ResourceExecutionLog extends ExecutionLogSupport {
 
 	private static int count = 1;
 	private Resource file;

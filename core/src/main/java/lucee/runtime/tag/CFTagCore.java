@@ -25,7 +25,7 @@ import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.customtag.InitFile;
 import lucee.runtime.exp.PageException;
 
-public class CFTagCore extends CFTag {
+public final class CFTagCore extends CFTag {
 
 	private String name;
 	private String filename;

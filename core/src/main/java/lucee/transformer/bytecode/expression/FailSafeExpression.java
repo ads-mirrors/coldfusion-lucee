@@ -28,7 +28,7 @@ import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.util.Types;
 import lucee.transformer.expression.Expression;
 
-public class FailSafeExpression extends ExpressionBase implements Opcodes {
+public final class FailSafeExpression extends ExpressionBase implements Opcodes {
 
 	private Expression expr;
 	private Expression defaultValue;

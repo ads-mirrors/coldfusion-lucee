@@ -33,7 +33,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.ExpressionException;
 
-public class Command {
+public final class Command {
 
 	public static Process createProcess(String cmdline, boolean translate) throws IOException {
 		if (!translate) return Runtime.getRuntime().exec(cmdline);

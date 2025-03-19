@@ -49,7 +49,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 
-public class ORMConfigurationImpl implements ORMConfiguration {
+public final class ORMConfigurationImpl implements ORMConfiguration {
 
 	public static final int DBCREATE_NONE = 0;
 	public static final int DBCREATE_UPDATE = 1;

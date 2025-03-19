@@ -7,7 +7,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.BIF;
 import lucee.runtime.ext.function.Function;
 
-public class ClearTimeZone extends BIF implements Function {
+public final class ClearTimeZone extends BIF implements Function {
 
 	private static final long serialVersionUID = 2953112893625358220L;
 

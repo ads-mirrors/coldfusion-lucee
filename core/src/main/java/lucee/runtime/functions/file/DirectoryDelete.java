@@ -24,7 +24,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.tag.Directory;
 
-public class DirectoryDelete {
+public final class DirectoryDelete {
 	public static String call(PageContext pc, String path) throws PageException {
 		return call(pc, path, false);
 	}

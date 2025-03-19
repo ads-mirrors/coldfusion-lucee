@@ -11,7 +11,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.ArrayImpl;
 
-public class ArraySplice extends BIF implements Function {
+public final class ArraySplice extends BIF implements Function {
 
 	private static final long serialVersionUID = -8604228677976070247L;
 

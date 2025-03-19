@@ -24,7 +24,7 @@ import lucee.commons.digest.MD5;
 import lucee.runtime.coder.Base64Coder;
 import lucee.runtime.type.Duplicable;
 
-public class FileCacheItemBinary extends FileCacheItem implements Duplicable {
+public final class FileCacheItemBinary extends FileCacheItem implements Duplicable {
 
 	private static final long serialVersionUID = -7426486016811317332L;
 	public final byte[] data;

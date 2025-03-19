@@ -20,7 +20,7 @@ package lucee.runtime.cache.tag.file;
 import lucee.commons.digest.HashUtil;
 import lucee.runtime.type.Duplicable;
 
-public class FileCacheItemString extends FileCacheItem implements Duplicable {
+public final class FileCacheItemString extends FileCacheItem implements Duplicable {
 	private static final long serialVersionUID = 1655467049819824671L;
 	public final String data;
 

@@ -18,7 +18,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 
-public class DatasourceConnPool extends GenericObjectPool<DatasourceConnection> {
+public final class DatasourceConnPool extends GenericObjectPool<DatasourceConnection> {
 
 	public DatasourceConnPool(Config config, DataSource ds, String user, String pass, String logName, GenericObjectPoolConfig<DatasourceConnection> genericObjectPoolConfig) {
 		super(new DatasourceConnectionFactory(config, ds, user, pass, logName), genericObjectPoolConfig);

@@ -43,7 +43,7 @@ import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.Query;
 import lucee.runtime.type.QueryImpl;
 
-public class QueryPartitions {
+public final class QueryPartitions {
 	// Select expressions for target query
 	private Expression[] columns;
 	// Array of keys for fast lookup

@@ -20,7 +20,7 @@ package lucee.transformer.bytecode.statement;
 
 import org.objectweb.asm.Label;
 
-public class FlowControlFinalImpl implements FlowControlFinal {
+public final class FlowControlFinalImpl implements FlowControlFinal {
 
 	private Label entryLabel;
 	private Label gotoLabel;

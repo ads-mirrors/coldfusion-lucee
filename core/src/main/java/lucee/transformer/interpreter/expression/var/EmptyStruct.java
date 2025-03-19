@@ -6,7 +6,7 @@ import lucee.transformer.Factory;
 import lucee.transformer.interpreter.InterpreterContext;
 import lucee.transformer.interpreter.expression.ExpressionBase;
 
-public class EmptyStruct extends ExpressionBase {
+public final class EmptyStruct extends ExpressionBase {
 
 	public EmptyStruct(Factory factory) {
 		super(factory, null, null);

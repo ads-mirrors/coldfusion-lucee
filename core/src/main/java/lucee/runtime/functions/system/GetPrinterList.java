@@ -25,7 +25,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.BIF;
 
-public class GetPrinterList extends BIF {
+public final class GetPrinterList extends BIF {
 
 	private static final long serialVersionUID = -3863471828670823815L;
 

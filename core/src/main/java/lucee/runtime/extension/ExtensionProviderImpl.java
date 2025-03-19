@@ -21,7 +21,7 @@ package lucee.runtime.extension;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-public class ExtensionProviderImpl implements ExtensionProvider {
+public final class ExtensionProviderImpl implements ExtensionProvider {
 
 	// private String name;
 	private URL url;

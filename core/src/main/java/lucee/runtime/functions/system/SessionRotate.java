@@ -23,7 +23,7 @@ import lucee.runtime.PageContextImpl;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.Function;
 
-public class SessionRotate implements Function {
+public final class SessionRotate implements Function {
 
 	private static final long serialVersionUID = -114280474937883051L;
 

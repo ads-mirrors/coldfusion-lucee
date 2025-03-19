@@ -36,7 +36,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 
-public class CacheSetProperties extends BIF {
+public final class CacheSetProperties extends BIF {
 
 	private static final long serialVersionUID = -5700264673510261084L;
 	private static final Key OBJECT_TYPE = KeyConstants._objecttype;

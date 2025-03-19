@@ -12,7 +12,7 @@ import lucee.runtime.op.Caster;
  * runtime and expect the compiler did.
  * 
  */
-public class LiteralValue {
+public final class LiteralValue {
 
 	private static final double DBL_0 = 0d;
 	private static final double DBL_1 = 1d;

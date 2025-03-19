@@ -22,7 +22,7 @@ import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.exp.PageException;
 
-public class CacheHandlerCollections {
+public final class CacheHandlerCollections {
 
 	public final CacheHandlerCollectionImpl query;
 	public final CacheHandlerCollectionImpl function;

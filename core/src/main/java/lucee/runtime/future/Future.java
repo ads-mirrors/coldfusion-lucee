@@ -26,7 +26,7 @@ import lucee.runtime.type.dt.TimeSpan;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 
-public class Future implements Objects {
+public final class Future implements Objects {
 
 	private static final long serialVersionUID = -769725314696461494L;
 

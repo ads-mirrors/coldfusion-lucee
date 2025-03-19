@@ -18,7 +18,7 @@ import lucee.runtime.type.ArrayImpl;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.KeyConstants;
 
-public class GeminiStreamResponse implements Response {
+public final class GeminiStreamResponse implements Response {
 
 	private Array raw = new ArrayImpl();
 

@@ -1,6 +1,6 @@
 package lucee.runtime.cache.ram.ref;
 
-public class HardRef<T> implements Ref<T> {
+public final class HardRef<T> implements Ref<T> {
 
 	private T ref;
 

@@ -30,7 +30,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
 
-public class FileStreamWrapperWrite extends FileStreamWrapper {
+public final class FileStreamWrapperWrite extends FileStreamWrapper {
 
 	private BufferedOutputStream bos;
 	private boolean append;

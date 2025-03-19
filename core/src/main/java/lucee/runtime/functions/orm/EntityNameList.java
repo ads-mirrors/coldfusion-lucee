@@ -24,7 +24,7 @@ import lucee.runtime.orm.ORMSession;
 import lucee.runtime.orm.ORMUtil;
 import lucee.runtime.type.util.ListUtil;
 
-public class EntityNameList {
+public final class EntityNameList {
 
 	public static String call(PageContext pc) throws PageException {
 		return call(pc, ",");

@@ -25,7 +25,7 @@ import com.intergral.fusiondebug.server.IFDVariable;
 import lucee.runtime.type.Collection;
 import lucee.runtime.type.KeyImpl;
 
-public class FDVariable implements IFDVariable {
+public final class FDVariable implements IFDVariable {
 
 	private Collection.Key name;
 	private IFDValue value;

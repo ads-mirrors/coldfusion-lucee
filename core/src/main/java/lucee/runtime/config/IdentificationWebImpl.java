@@ -21,7 +21,7 @@ import java.io.Serializable;
 
 import lucee.runtime.engine.ThreadLocalPageContext;
 
-public class IdentificationWebImpl extends IdentificationImpl implements IdentificationWeb, Serializable {
+public final class IdentificationWebImpl extends IdentificationImpl implements IdentificationWeb, Serializable {
 
 	private transient ConfigWebPro cw;
 

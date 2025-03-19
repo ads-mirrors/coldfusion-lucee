@@ -37,7 +37,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.comparator.TextComparator;
 import lucee.runtime.type.util.CollectionUtil;
 
-public class FDCollection extends FDValueSupport {
+public final class FDCollection extends FDValueSupport {
 
 	private static final int INTERVAL = 10;
 	private ArrayList children;

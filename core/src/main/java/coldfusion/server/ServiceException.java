@@ -20,7 +20,7 @@ package coldfusion.server;
 
 import lucee.runtime.exp.ApplicationException;
 
-public class ServiceException extends ApplicationException {
+public final class ServiceException extends ApplicationException {
 
 	public ServiceException(String message) {
 		super(message);

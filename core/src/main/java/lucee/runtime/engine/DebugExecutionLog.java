@@ -25,7 +25,7 @@ import lucee.runtime.PageSource;
 import lucee.runtime.debug.DebugEntry;
 import lucee.runtime.util.PageContextUtil;
 
-public class DebugExecutionLog extends ExecutionLogSupport {
+public final class DebugExecutionLog extends ExecutionLogSupport {
 
 	private PageContext pc;
 

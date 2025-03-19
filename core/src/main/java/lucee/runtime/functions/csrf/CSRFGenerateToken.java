@@ -25,7 +25,7 @@ import lucee.runtime.ext.function.Function;
 import lucee.runtime.type.scope.CSRFTokenSupport;
 import lucee.runtime.type.scope.Session;
 
-public class CSRFGenerateToken implements Function {
+public final class CSRFGenerateToken implements Function {
 
 	private static final long serialVersionUID = -2411153524245619987L;
 

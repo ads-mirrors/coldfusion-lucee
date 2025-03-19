@@ -35,7 +35,7 @@ import lucee.runtime.type.Collection;
 import lucee.runtime.type.Query;
 import lucee.runtime.util.Creation;
 
-public class SizeAndCount {
+public final class SizeAndCount {
 
 	private static final int OBJECT_GRANULARITY_IN_BYTES = 8;
 	private static final int WORD_SIZE = Arch.getVMArchitecture().getWordSize();

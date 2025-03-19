@@ -12,7 +12,7 @@ import lucee.runtime.type.Query;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 
-public class QueryToStruct extends BIF {
+public final class QueryToStruct extends BIF {
 
 	public static Struct call(PageContext pc, Query qry, String columnKey) throws PageException {
 		return call(pc, qry, columnKey, "ordered", false);

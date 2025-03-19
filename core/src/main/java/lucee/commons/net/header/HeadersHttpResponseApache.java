@@ -3,7 +3,7 @@ package lucee.commons.net.header;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 
-public class HeadersHttpResponseApache implements HeadersCollection {
+public final class HeadersHttpResponseApache implements HeadersCollection {
 
 	private HttpResponse response;
 

@@ -32,7 +32,7 @@ import lucee.commons.io.res.util.WildCardFilter;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.runtime.converter.JavaConverter;
 
-public class MetaData implements Serializable {
+public final class MetaData implements Serializable {
 
 	private static Map<String, MetaData> instances = new HashMap<String, MetaData>();
 

@@ -40,7 +40,7 @@ import lucee.commons.io.res.util.ResourceOutputStream;
 import lucee.commons.io.res.util.ResourceSupport;
 import lucee.commons.io.res.util.ResourceUtil;
 
-public class SMBResource extends ResourceSupport implements Resource {
+public final class SMBResource extends ResourceSupport implements Resource {
 
 	private SMBResourceProvider provider;
 	private String path;

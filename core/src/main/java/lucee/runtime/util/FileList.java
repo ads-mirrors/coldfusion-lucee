@@ -7,7 +7,7 @@ import java.io.IOException;
 import lucee.aprint;
 import lucee.commons.io.IOUtil;
 
-public class FileList {
+public final class FileList {
 
 	private static int count = 0;
 

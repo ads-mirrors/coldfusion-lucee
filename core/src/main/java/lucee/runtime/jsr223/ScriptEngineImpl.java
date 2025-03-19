@@ -43,7 +43,7 @@ import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.scope.Variables;
 import lucee.runtime.util.PageContextUtil;
 
-public class ScriptEngineImpl implements ScriptEngine {
+public final class ScriptEngineImpl implements ScriptEngine {
 
 	private ScriptEngineFactoryImpl factory;
 	private ScriptContext context;

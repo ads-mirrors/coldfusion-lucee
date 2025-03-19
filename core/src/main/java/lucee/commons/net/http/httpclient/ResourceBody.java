@@ -29,7 +29,7 @@ import lucee.commons.io.IOUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.StringUtil;
 
-public class ResourceBody extends AbstractContentBody {
+public final class ResourceBody extends AbstractContentBody {
 
 	public static final String DEFAULT_MIMETYPE = "application/octet-stream";
 

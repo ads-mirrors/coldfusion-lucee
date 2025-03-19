@@ -22,7 +22,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.exp.TagNotSupported;
 import lucee.runtime.ext.tag.TagImpl;
 
-public class AjaxProxy extends TagImpl {
+public final class AjaxProxy extends TagImpl {
 	private String bind;
 	private String cfc;
 	private String jsClassName;

@@ -34,7 +34,7 @@ import lucee.runtime.config.Constants;
 import lucee.runtime.functions.system.ExpandPath;
 import lucee.runtime.type.util.ListUtil;
 
-public class SourceNameClassVisitor extends ClassVisitor {
+public final class SourceNameClassVisitor extends ClassVisitor {
 
 	private SourceInfo source;
 

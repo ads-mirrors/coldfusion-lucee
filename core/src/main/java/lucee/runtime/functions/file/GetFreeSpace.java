@@ -26,7 +26,7 @@ import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 
-public class GetFreeSpace {
+public final class GetFreeSpace {
 
 	public static Number call(PageContext pc, Object obj) throws PageException {
 		Resource res = Caster.toResource(pc, obj, true, pc.getConfig().allowRealPath());

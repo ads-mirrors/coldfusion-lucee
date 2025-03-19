@@ -29,7 +29,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.Query;
 
-public class RequestMonitorWrap extends MonitorWrap implements RequestMonitor {
+public final class RequestMonitorWrap extends MonitorWrap implements RequestMonitor {
 	private static final Class[] PARAMS_LOG = new Class[] { PageContext.class, boolean.class };
 
 	private Method log;

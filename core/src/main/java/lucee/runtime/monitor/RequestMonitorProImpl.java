@@ -11,7 +11,7 @@ import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.type.Query;
 
-public class RequestMonitorProImpl implements RequestMonitorPro {
+public final class RequestMonitorProImpl implements RequestMonitorPro {
 
 	private RequestMonitor monitor;// do not change that name, used by Argus Monitor
 	private Method init;

@@ -28,7 +28,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 
-public class DatSourceDefImpl implements DataSourceDef {
+public final class DatSourceDefImpl implements DataSourceDef {
 
 	private final DataSource ds;
 

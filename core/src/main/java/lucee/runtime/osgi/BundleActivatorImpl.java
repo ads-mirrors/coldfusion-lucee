@@ -10,7 +10,7 @@ import lucee.loader.engine.CFMLEngineFactory;
  * This class implements a simple bundle that utilizes the OSGi framework's event mechanism to
  * listen for service events. Upon receiving a service event, it prints out the event's details.
  **/
-public class BundleActivatorImpl implements BundleActivator {
+public final class BundleActivatorImpl implements BundleActivator {
 	/**
 	 * Implements BundleActivator.start(). Prints a message and adds itself to the bundle context as a
 	 * service listener.

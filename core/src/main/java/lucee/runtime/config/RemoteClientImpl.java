@@ -32,7 +32,7 @@ import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 
-public class RemoteClientImpl implements RemoteClient {
+public final class RemoteClientImpl implements RemoteClient {
 
 	private String url;
 	private String serverUsername;

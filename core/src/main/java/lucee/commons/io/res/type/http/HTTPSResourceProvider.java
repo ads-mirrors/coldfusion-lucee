@@ -18,6 +18,6 @@
  **/
 package lucee.commons.io.res.type.http;
 
-public class HTTPSResourceProvider extends HTTPResourceProvider {
+public final class HTTPSResourceProvider extends HTTPResourceProvider {
 
 }

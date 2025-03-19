@@ -26,7 +26,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.tag.FileTag;
 import lucee.runtime.tag.util.FileUtil;
 
-public class FileMove {
+public final class FileMove {
 
 	public static String call(PageContext pc, Object oSrc, Object oDst) throws PageException {
 		Resource src = Caster.toResource(pc, oSrc, false);

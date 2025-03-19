@@ -25,7 +25,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.interpreter.JSONExpressionInterpreter;
 import lucee.runtime.op.Caster;
 
-public class IsJSON {
+public final class IsJSON {
 
 	public static boolean call(PageContext pc, Object obj) {
 		String str = Caster.toString(obj, null);

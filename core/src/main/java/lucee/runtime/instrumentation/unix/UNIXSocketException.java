@@ -5,7 +5,7 @@ import java.net.SocketException;
 /**
  * Something went wrong with the communication to a Unix socket.
  */
-public class UNIXSocketException extends SocketException {
+public final class UNIXSocketException extends SocketException {
 	private static final long serialVersionUID = 1L;
 	private final String socketFile;
 

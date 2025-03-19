@@ -40,7 +40,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 
-public class OpenAISession extends AISessionSupport {
+public final class OpenAISession extends AISessionSupport {
 
 	private OpenAIEngine openaiEngine;
 	private String systemMessage;

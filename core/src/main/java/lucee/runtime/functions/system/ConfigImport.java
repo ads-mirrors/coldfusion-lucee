@@ -17,7 +17,7 @@ import lucee.runtime.ext.function.BIF;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.Struct;
 
-public class ConfigImport extends BIF {
+public final class ConfigImport extends BIF {
 
 	private static final long serialVersionUID = 2877661269574331695L;
 

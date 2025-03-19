@@ -1,5 +1,5 @@
 package lucee.runtime.vault;
 
-public class Test {
+public final class Test {
 
 }

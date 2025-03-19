@@ -25,7 +25,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.StructUtil;
 
-public class FeedProperties {
+public final class FeedProperties {
 	private static final Collection.Key ITEM = KeyConstants._ITEM;
 	private static final Collection.Key ITEMS = KeyConstants._ITEMS;
 	private static final Collection.Key ENTRY = KeyConstants._ENTRY;

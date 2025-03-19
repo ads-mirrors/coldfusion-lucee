@@ -35,7 +35,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 
-public class FeedQuery {
+public final class FeedQuery {
 
 	public static final Collection.Key VERSION = KeyConstants._VERSION;
 	public static final Collection.Key ITEM = KeyConstants._ITEM;

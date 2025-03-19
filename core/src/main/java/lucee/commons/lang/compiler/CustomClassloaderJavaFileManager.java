@@ -28,7 +28,7 @@ import org.osgi.framework.wiring.BundleWiring;
 import lucee.commons.io.log.Log;
 import lucee.runtime.engine.ThreadLocalPageContext;
 
-public class CustomClassloaderJavaFileManager extends ForwardingJavaFileManager<JavaFileManager> implements JavaFileManager, BundleListener {
+public final class CustomClassloaderJavaFileManager extends ForwardingJavaFileManager<JavaFileManager> implements JavaFileManager, BundleListener {
 	private final ClassLoader classLoader;
 	private final JavaFileManager standardFileManager;
 

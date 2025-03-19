@@ -2,7 +2,7 @@ package lucee.runtime.ai;
 
 import java.util.Date;
 
-public class AIFileSupport implements AIFile {
+public final class AIFileSupport implements AIFile {
 
 	private String object;
 	private String id;

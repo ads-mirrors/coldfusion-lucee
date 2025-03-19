@@ -25,7 +25,7 @@ import lucee.runtime.ext.function.Function;
 import lucee.runtime.functions.string.LenNumber;
 import lucee.runtime.op.Caster;
 
-public class IsEmpty implements Function {
+public final class IsEmpty implements Function {
 
 	private static final long serialVersionUID = -2839407878650099024L;
 

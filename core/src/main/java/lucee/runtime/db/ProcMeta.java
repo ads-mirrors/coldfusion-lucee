@@ -18,7 +18,7 @@
  **/
 package lucee.runtime.db;
 
-public class ProcMeta {
+public final class ProcMeta {
 	public int columnType;
 	public int dataType;
 

@@ -27,7 +27,7 @@ import lucee.runtime.ext.function.BIF;
 import lucee.runtime.ext.function.Function;
 import lucee.runtime.op.Caster;
 
-public class SetTimeZone extends BIF implements Function {
+public final class SetTimeZone extends BIF implements Function {
 
 	private static final long serialVersionUID = 3280374669839401883L;
 

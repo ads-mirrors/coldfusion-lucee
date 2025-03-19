@@ -26,7 +26,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.reflection.Reflector;
 
-public class OracleBlobCast implements Cast {
+public final class OracleBlobCast implements Cast {
 
 	private static final Object[] ZERO_ARGS = new Object[0];
 

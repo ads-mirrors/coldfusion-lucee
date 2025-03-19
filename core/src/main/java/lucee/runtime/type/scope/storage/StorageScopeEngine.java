@@ -21,7 +21,7 @@ package lucee.runtime.type.scope.storage;
 import lucee.commons.io.log.Log;
 import lucee.runtime.CFMLFactoryImpl;
 
-public class StorageScopeEngine {
+public final class StorageScopeEngine {
 
 	private StorageScopeCleaner[] cleaners;
 

@@ -21,7 +21,7 @@ package lucee.runtime.ext.tag;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TagMetaDataImpl implements TagMetaData {
+public final class TagMetaDataImpl implements TagMetaData {
 
 	private int attrMin;
 	private int attrMax;
