@@ -111,7 +111,7 @@ public abstract class StorageScopeCookie extends StorageScopeImpl {
 		String domain = null;
 		short samesite = CookieData.SAMESITE_EMPTY;
 		if (ac instanceof ApplicationContextSupport) {
-			SessionCookieData settings = ((ApplicationContextSupport) ac).getSessionCookie();
+			SessionCookieData settings = ac.getSessionCookie();
 			if (settings != null) {
 				isHttpOnly = settings.isHttpOnly();
 				isSecure = settings.isSecure();

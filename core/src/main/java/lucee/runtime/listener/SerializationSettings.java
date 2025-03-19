@@ -5,7 +5,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 
-public final class SerializationSettings {
+public final class SerializationSettings implements ISerializationSettings {
 
 	public static int SERIALIZE_AS_UNDEFINED = 0;
 	public static int SERIALIZE_AS_ROW = 1;
@@ -24,14 +24,17 @@ public final class SerializationSettings {
 		this.serializeQueryAs = serializeQueryAs;
 	}
 
+	@Override
 	public boolean getPreserveCaseForStructKey() {
 		return preserveCaseForStructKey;
 	}
 
+	@Override
 	public boolean getPreserveCaseForQueryColumn() {
 		return preserveCaseForQueryColumn;
 	}
 
+	@Override
 	public int getSerializeQueryAs() {
 		return serializeQueryAs;
 	}
@@ -55,7 +58,8 @@ public final class SerializationSettings {
 				Caster.toBooleanValue(sct.get("preserveCaseForQueryColumn", null), false), toSerializeQueryAs(Caster.toString(sct.get("serializeQueryAs", null), null)));
 	}
 
-	public Object toStruct() {
+	@Override
+	public Struct toStruct() {
 		Struct sct = new StructImpl();
 		sct.setEL("preserveCaseForStructKey", preserveCaseForStructKey);
 		sct.setEL("preserveCaseForQueryColumn", preserveCaseForQueryColumn);

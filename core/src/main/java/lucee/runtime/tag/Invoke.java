@@ -36,7 +36,6 @@ import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.UDF;
 
 /*
- * FUTURE tag invoke
  * Attributes: servicePort,timeout
  * */
 

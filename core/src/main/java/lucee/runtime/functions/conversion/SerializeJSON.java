@@ -31,6 +31,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.BIF;
 import lucee.runtime.ext.function.Function;
 import lucee.runtime.listener.ApplicationContextSupport;
+import lucee.runtime.listener.ISerializationSettings;
 import lucee.runtime.listener.SerializationSettings;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
@@ -88,7 +89,7 @@ public final class SerializeJSON extends BIF implements Function {
 				if (!StringUtil.isEmpty(queryFormat)) throw new FunctionException(pc, SerializeJSON.class.getSimpleName(), 3, "queryFormat",
 						"When var is a Query, argument [queryFormat] must be either a boolean value or a string with the value of [struct], [row], or [column]");
 				ApplicationContextSupport acs = (ApplicationContextSupport) pc.getApplicationContext();
-				SerializationSettings settings = acs.getSerializationSettings();
+				ISerializationSettings settings = acs.getSerializationSettings();
 				qf = settings.getSerializeQueryAs();
 			}
 

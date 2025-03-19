@@ -23,7 +23,7 @@ import java.io.Serializable;
 /**
  * a Simple name value Pair
  */
-public final class Pair<K, V> implements Serializable {
+public class Pair<K, V> implements Serializable {
 	K name;
 	V value;
 

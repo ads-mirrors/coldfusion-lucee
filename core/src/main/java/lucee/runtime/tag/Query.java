@@ -632,8 +632,7 @@ public final class Query extends BodyTagTryCatchFinallyImpl {
 						}
 						if (cacheItem instanceof QueryResultCacheItem) queryResult = ((QueryResultCacheItem) cacheItem).getQueryResult();
 					}
-					else { // FUTURE this else block can be removed when all cache handlers implement
-							// CacheHandlerPro
+					else {
 						CacheItem cacheItem;
 						try {
 							cacheItem = cacheHandler.get(pageContext, cacheId);

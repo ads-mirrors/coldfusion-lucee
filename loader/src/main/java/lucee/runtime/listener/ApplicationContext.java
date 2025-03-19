@@ -28,6 +28,8 @@ import java.util.TimeZone;
 
 import lucee.commons.io.log.Log;
 import lucee.commons.io.res.Resource;
+import lucee.commons.io.res.type.ftp.IFTPConnectionData;
+import lucee.commons.lang.Pair;
 import lucee.runtime.Mapping;
 import lucee.runtime.PageContext;
 import lucee.runtime.ai.AIEngine;
@@ -37,7 +39,9 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.net.proxy.ProxyData;
 import lucee.runtime.net.s3.Properties;
 import lucee.runtime.orm.ORMConfiguration;
+import lucee.runtime.regex.Regex;
 import lucee.runtime.rest.RestSettings;
+import lucee.runtime.tag.listener.TagListener;
 import lucee.runtime.type.Collection;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.CustomType;
@@ -443,4 +447,30 @@ public interface ApplicationContext extends Serializable {
 	public abstract AIEngine getAIEngine(String name) throws PageException;
 
 	public abstract String getAIEngineNameForDefault(String defaultName);
+
+	public abstract SessionCookieData getSessionCookie();
+
+	public abstract void setSessionCookie(SessionCookieData data);
+
+	public abstract AuthCookieData getAuthCookie();
+
+	public abstract void setAuthCookie(AuthCookieData data);
+
+	public abstract TagListener getQueryListener();
+
+	public abstract void setQueryListener(TagListener listener);
+
+	public abstract Regex getRegex();
+
+	public abstract void setRegex(Regex regex);
+
+	public abstract void setLoggers(Map<Key, Pair<Log, Struct>> logs);
+
+	public abstract ISerializationSettings getSerializationSettings();
+
+	public abstract void setSerializationSettings(ISerializationSettings settings);
+
+	public abstract IFTPConnectionData getFTP();
+
+	public abstract void setFTP(IFTPConnectionData ftp);
 }

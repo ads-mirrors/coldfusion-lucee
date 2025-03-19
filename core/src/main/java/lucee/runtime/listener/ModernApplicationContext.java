@@ -37,7 +37,7 @@ import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
-import lucee.commons.io.res.type.ftp.FTPConnectionData;
+import lucee.commons.io.res.type.ftp.IFTPConnectionData;
 import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.CharSet;
 import lucee.commons.lang.ExceptionUtil;
@@ -145,7 +145,7 @@ public final class ModernApplicationContext extends ApplicationContextSupport {
 	private DataSource[] dataSources;
 
 	private lucee.runtime.net.s3.Properties s3;
-	private FTPConnectionData ftp;
+	private IFTPConnectionData ftp;
 	private boolean triggerComponentDataMember;
 	private Map<Integer, String> defaultCaches;
 	private Map<Collection.Key, CacheConnection> cacheConnections;
@@ -161,7 +161,7 @@ public final class ModernApplicationContext extends ApplicationContextSupport {
 	private Object mailListener;
 	private TagListener queryListener;
 	private boolean fullNullSupport;
-	private SerializationSettings serializationSettings;
+	private ISerializationSettings serializationSettings;
 	private boolean queryPSQ;
 	private TimeSpan queryCachedAfter;
 	private int queryVarUsage;
@@ -1019,7 +1019,7 @@ public final class ModernApplicationContext extends ApplicationContextSupport {
 	}
 
 	@Override
-	public SerializationSettings getSerializationSettings() {
+	public ISerializationSettings getSerializationSettings() {
 		if (!initSerializationSettings) {
 			Struct sct = Caster.toStruct(get(component, KeyConstants._serialization, null), null);
 			if (sct != null) {
@@ -1032,7 +1032,7 @@ public final class ModernApplicationContext extends ApplicationContextSupport {
 	}
 
 	@Override
-	public void setSerializationSettings(SerializationSettings settings) {
+	public void setSerializationSettings(ISerializationSettings settings) {
 		serializationSettings = settings;
 		initSerializationSettings = true;
 	}
@@ -1433,7 +1433,7 @@ public final class ModernApplicationContext extends ApplicationContextSupport {
 	}
 
 	@Override
-	public FTPConnectionData getFTP() {
+	public IFTPConnectionData getFTP() {
 		if (!initFTP) {
 			Object o = get(component, KeyConstants._ftp, null);
 			if (o != null && Decision.isStruct(o)) ftp = AppListenerUtil.toFTP(Caster.toStruct(o, null));
@@ -1694,7 +1694,7 @@ public final class ModernApplicationContext extends ApplicationContextSupport {
 	}
 
 	@Override
-	public void setFTP(FTPConnectionData ftp) {
+	public void setFTP(IFTPConnectionData ftp) {
 		initFTP = true;
 		this.ftp = ftp;
 	}

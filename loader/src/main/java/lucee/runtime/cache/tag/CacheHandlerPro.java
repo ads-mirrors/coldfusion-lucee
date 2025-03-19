@@ -5,8 +5,6 @@ import lucee.runtime.exp.PageException;
 
 public interface CacheHandlerPro extends CacheHandler {
 
-	// FUTURE move methods to CacheHandler and delete this interface
-
 	/**
 	 * This method will be used by Time-based cache handers, e.g. TimespanCacheHander, to check that the
 	 * cached item is still viable. If the cached item is too old then null will be returned. If 0 is

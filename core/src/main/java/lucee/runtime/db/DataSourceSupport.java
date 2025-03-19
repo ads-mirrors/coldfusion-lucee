@@ -358,6 +358,7 @@ public abstract class DataSourceSupport implements DataSourcePro, Cloneable, Ser
 		return alwaysResetConnections;
 	}
 
+	@Override
 	public final boolean getLiteralTimestampWithTSOffset() {
 		return literalTimestampWithTSOffset;
 	}
@@ -380,7 +381,7 @@ public abstract class DataSourceSupport implements DataSourcePro, Cloneable, Ser
 	}
 
 	@Override
-	public TagListener getListener() { // FUTURE may add to interface
+	public TagListener getListener() {
 		return listener;
 	}
 

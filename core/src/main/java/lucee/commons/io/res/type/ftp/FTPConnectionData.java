@@ -22,7 +22,7 @@ import lucee.commons.lang.StringUtil;
 import lucee.runtime.net.proxy.ProxyData;
 import lucee.runtime.net.proxy.ProxyDataImpl;
 
-public final class FTPConnectionData {
+public final class FTPConnectionData implements IFTPConnectionData {
 
 	public String username = "";
 	public String password = "";
@@ -50,12 +50,12 @@ public final class FTPConnectionData {
 		this.customUserPass = customUserPass;
 	}
 
-	public static DataAndPath load(FTPConnectionData base, String path) {
+	public static DataAndPath load(IFTPConnectionData base, String path) {
 
-		String username = base == null ? "" : base.username;
-		String password = base == null ? "" : base.password;
-		String host = base == null ? "localhost" : base.host;
-		int port = base == null ? 21 : base.port;
+		String username = base == null ? "" : base.getUsername();
+		String password = base == null ? "" : base.getPassword();
+		String host = base == null ? "localhost" : base.getHost();
+		int port = base == null ? 21 : base.getPort();
 
 		boolean customUserPass = false;
 		boolean customHostPort = false;
@@ -115,6 +115,7 @@ public final class FTPConnectionData {
 				.toString();
 	}
 
+	@Override
 	public String key() {
 		StringBuilder sb = new StringBuilder();
 
@@ -130,10 +131,12 @@ public final class FTPConnectionData {
 		return "";
 	}
 
+	@Override
 	public boolean hasProxyData() {
 		return ProxyDataImpl.isValid(data);
 	}
 
+	@Override
 	public ProxyData getProxyData() {
 		return data;
 	}
@@ -143,5 +146,25 @@ public final class FTPConnectionData {
 		if (this == obj) return true;
 		if (!(obj instanceof FTPConnectionData)) return false;
 		return toString().equals(((FTPConnectionData) obj).toString());
+	}
+
+	@Override
+	public String getUsername() {
+		return username;
+	}
+
+	@Override
+	public String getPassword() {
+		return password;
+	}
+
+	@Override
+	public String getHost() {
+		return host;
+	}
+
+	@Override
+	public int getPort() {
+		return port;
 	}
 }

@@ -35,7 +35,6 @@ import lucee.commons.lang.SerializableObject;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.engine.ThreadLocalPageContext;
-import lucee.runtime.listener.ApplicationContextSupport;
 import lucee.runtime.net.proxy.Proxy;
 import lucee.runtime.net.proxy.ProxyDataImpl;
 import lucee.runtime.op.Caster;
@@ -91,9 +90,9 @@ public final class FTPResourceProvider implements ResourceProviderPro {
 		path = ResourceUtil.removeScheme(scheme, path);
 
 		PageContext pc = ThreadLocalPageContext.get();
-		FTPConnectionData base = null;
+		IFTPConnectionData base = null;
 		if (pc != null) {
-			base = ((ApplicationContextSupport) pc.getApplicationContext()).getFTP();
+			base = pc.getApplicationContext().getFTP();
 		}
 		DataAndPath dap = FTPConnectionData.load(base, path);
 		return new FTPResource(this, dap.data, dap.path);

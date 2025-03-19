@@ -26,7 +26,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.log.LoggerAndSourceData;
-import lucee.commons.io.res.type.ftp.FTPConnectionData;
 import lucee.commons.lang.Pair;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
@@ -39,8 +38,6 @@ import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Duplicator;
-import lucee.runtime.regex.Regex;
-import lucee.runtime.tag.listener.TagListener;
 import lucee.runtime.type.Collection;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.KeyImpl;
@@ -373,30 +370,4 @@ public abstract class ApplicationContextSupport implements ApplicationContext {
 		return las;
 	}
 
-	// FUTURE add to interface
-	public abstract SessionCookieData getSessionCookie();
-
-	public abstract void setSessionCookie(SessionCookieData data);
-
-	public abstract AuthCookieData getAuthCookie();
-
-	public abstract void setAuthCookie(AuthCookieData data);
-
-	public abstract FTPConnectionData getFTP();
-
-	public abstract void setFTP(FTPConnectionData ftp);
-
-	public abstract TagListener getQueryListener();
-
-	public abstract void setQueryListener(TagListener listener);
-
-	public abstract SerializationSettings getSerializationSettings();
-
-	public abstract void setSerializationSettings(SerializationSettings settings);
-
-	public abstract Regex getRegex();
-
-	public abstract void setRegex(Regex regex);
-
-	public abstract void setLoggers(Map<Key, Pair<Log, Struct>> logs);
 }

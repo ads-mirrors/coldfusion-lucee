@@ -32,6 +32,7 @@ import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.type.ftp.FTPConnectionData;
+import lucee.commons.io.res.type.ftp.IFTPConnectionData;
 import lucee.commons.lang.CharSet;
 import lucee.commons.lang.Pair;
 import lucee.commons.lang.StringUtil;
@@ -100,7 +101,7 @@ public final class ClassicApplicationContext extends ApplicationContextSupport {
 	private Object ormdatasource;
 	private ORMConfiguration ormConfig;
 	private Properties s3;
-	private FTPConnectionData ftp;
+	private IFTPConnectionData ftp;
 
 	private Integer localMode;
 	private Locale locale;
@@ -142,7 +143,7 @@ public final class ClassicApplicationContext extends ApplicationContextSupport {
 	private boolean wsMaintainSession;
 
 	private Boolean fullNullSupport;
-	private SerializationSettings serializationSettings = SerializationSettings.DEFAULT;
+	private ISerializationSettings serializationSettings = SerializationSettings.DEFAULT;
 
 	private Boolean queryPSQ;
 	private Integer queryVarUsage;
@@ -591,7 +592,7 @@ public final class ClassicApplicationContext extends ApplicationContextSupport {
 	}
 
 	@Override
-	public FTPConnectionData getFTP() {
+	public IFTPConnectionData getFTP() {
 		if (ftp == null) ftp = new FTPConnectionData();
 		return ftp;
 	}
@@ -730,7 +731,7 @@ public final class ClassicApplicationContext extends ApplicationContextSupport {
 	}
 
 	@Override
-	public void setFTP(FTPConnectionData ftp) {
+	public void setFTP(IFTPConnectionData ftp) {
 		this.ftp = ftp;
 	}
 
@@ -1059,12 +1060,12 @@ public final class ClassicApplicationContext extends ApplicationContextSupport {
 	}
 
 	@Override
-	public SerializationSettings getSerializationSettings() {
+	public ISerializationSettings getSerializationSettings() {
 		return serializationSettings;
 	}
 
 	@Override
-	public void setSerializationSettings(SerializationSettings settings) {
+	public void setSerializationSettings(ISerializationSettings settings) {
 		this.serializationSettings = settings;
 	}
 

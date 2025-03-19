@@ -939,8 +939,8 @@ public final class Application extends TagImpl implements DynamicAttributes {
 		if (setSessionManagement != null) ac.setSetSessionManagement(setSessionManagement.booleanValue());
 		if (localMode != -1) ac.setLocalMode(localMode);
 		if (mailListener != null) ac.setMailListener(mailListener);
-		if (queryListener != null) ((ApplicationContextSupport) ac).setQueryListener(queryListener);
-		if (serializationSettings != null) ((ApplicationContextSupport) ac).setSerializationSettings(serializationSettings);
+		if (queryListener != null) ac.setQueryListener(queryListener);
+		if (serializationSettings != null) ac.setSerializationSettings(serializationSettings);
 		if (locale != null) ac.setLocale(locale);
 		if (timeZone != null) ac.setTimeZone(timeZone);
 		if (nullSupport != null) ac.setFullNullSupport(nullSupport);
@@ -973,7 +973,7 @@ public final class Application extends TagImpl implements DynamicAttributes {
 		if (preciseMath != null) ac.setPreciseMath(preciseMath.booleanValue());
 		if (returnFormat != null) ac.setReturnFormat(returnFormat.intValue());
 		if (s3 != null) ac.setS3(AppListenerUtil.toS3(s3));
-		if (ftp != null) ((ApplicationContextSupport) ac).setFTP(AppListenerUtil.toFTP(ftp));
+		if (ftp != null) ac.setFTP(AppListenerUtil.toFTP(ftp));
 
 		// Scope cascading
 		if (scopeCascading != -1) ac.setScopeCascading(scopeCascading);

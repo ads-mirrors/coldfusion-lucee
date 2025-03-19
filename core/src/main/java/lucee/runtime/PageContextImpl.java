@@ -1023,7 +1023,7 @@ public final class PageContextImpl extends PageContext {
 				}
 			}
 		}
-		else if (cacheHandler != null) { // TODO this else block can be removed when all cache handlers implement CacheHandlerPro
+		else if (cacheHandler != null) {
 
 			CacheItem cacheItem = cacheHandler.get(this, cacheId);
 

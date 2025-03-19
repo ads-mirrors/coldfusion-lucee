@@ -1,5 +1,4 @@
 package lucee.runtime.listener;
-// FUTURE move to loader
 
 public interface SessionCookieData extends CookieData {
 

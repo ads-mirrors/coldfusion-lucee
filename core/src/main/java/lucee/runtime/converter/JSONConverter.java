@@ -61,6 +61,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.i18n.LocaleFactory;
 import lucee.runtime.java.JavaObject;
 import lucee.runtime.listener.ApplicationContextSupport;
+import lucee.runtime.listener.ISerializationSettings;
 import lucee.runtime.listener.SerializationSettings;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
@@ -1005,7 +1006,7 @@ public final class JSONConverter extends ConverterSupport {
 
 		ApplicationContextSupport acs = pc == null ? null : (ApplicationContextSupport) pc.getApplicationContext();
 		if (acs != null) {
-			SerializationSettings ss = acs.getSerializationSettings();
+			ISerializationSettings ss = acs.getSerializationSettings();
 			return forQuery ? ss.getPreserveCaseForQueryColumn() : ss.getPreserveCaseForStructKey();
 		}
 
