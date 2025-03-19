@@ -27,7 +27,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import lucee.print;
 import lucee.commons.lang.Md5;
 import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.PageRuntimeException;
@@ -117,19 +116,12 @@ public final class FunctionLib implements Lib {
 	public void setFunction(FunctionLibFunction function) {
 		// alias
 		if (function.getAlias() != null) {
-			print.e("xxxxxxxxxxxxxxx " + function.getAlias() + " xxxxxxxxxxxxxx");
-			print.e(function.getName());
-
 			FunctionLibFunction dbl = function.duplicate();
 			dbl.setName(function.getAlias());
 			dbl.setAlias(null);
 
 			dbl.setFunctionLib(this);
 			functions.put(dbl.getName(), dbl);
-
-			print.e("2xxxxxxxxxxxxxxx " + dbl.getAlias() + " xxxxxxxxxxxxxx");
-			print.e(dbl.getName());
-
 		}
 
 		function.setFunctionLib(this);
