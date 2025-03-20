@@ -95,4 +95,18 @@ public abstract class AISessionSupport implements AISession {
 		if (socketTimeout > 0) builder.setSocketTimeout(socketTimeout);
 		return builder;
 	}
+
+	public static Builder setRedirect(Builder builder) {
+		builder
+
+				.setRedirectsEnabled(true)
+
+				.setMaxRedirects(2)
+
+				.setCircularRedirectsAllowed(false)
+
+				.setRelativeRedirectsAllowed(true);
+		;
+		return builder;
+	}
 }

@@ -1,12 +1,15 @@
 package lucee.runtime.ai.openai;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.SocketTimeoutException;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -16,6 +19,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import lucee.commons.io.CharsetUtil;
+import lucee.commons.io.IOUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.lang.mimetype.MimeType;
@@ -49,12 +53,13 @@ public class OpenAISession extends AISessionSupport {
 		super(engine, limit, temp, connectTimeout, socketTimeout);
 		this.openaiEngine = engine;
 		this.systemMessage = systemMessage;
+
 	}
 
 	@Override
 	public Response inquiry(String message, AIResponseListener listener) throws PageException {
 		try {
-
+			if (openaiEngine.chatCompletionsURI == null) openaiEngine.chatCompletionsURI = new URI(openaiEngine.getBaseURL() + "chat/completions");
 			Struct msg;
 			Array arr = new ArrayImpl();
 			// add system
@@ -109,24 +114,15 @@ public class OpenAISession extends AISessionSupport {
 			JSONConverter json = new JSONConverter(true, CharsetUtil.UTF8, JSONDateFormat.PATTERN_CF, false);
 			String str = json.serialize(null, sct, SerializationSettings.SERIALIZE_AS_COLUMN, null);
 			try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-				URI uri = new URI(openaiEngine.getBaseURL() + "chat/completions");
-				// Create HttpPost request
-				HttpPost post = new HttpPost(uri);
-				post.setHeader("Content-Type", AIUtil.createJsonContentType(openaiEngine.charset));
-				post.setHeader("Authorization", "Bearer " + openaiEngine.secretKey);
-
-				StringEntity entity = new StringEntity(str, openaiEngine.charset);
-				post.setEntity(entity);
-
-				RequestConfig config = AISessionSupport.setTimeout(RequestConfig.custom(), this).build();
-				post.setConfig(config);
 
 				// Execute the request
-				try (CloseableHttpResponse response = httpClient.execute(post)) {
+				CloseableHttpResponse response = null;
+				try {
+					response = execute(httpClient, str);
+
 					HttpEntity responseEntity = response.getEntity();
 					Header ct = responseEntity.getContentType();
 					MimeType mt = MimeType.getInstance(ct.getValue());
-
 					String t = mt.getType() + "/" + mt.getSubtype();
 					String cs = mt.getCharset() != null ? mt.getCharset().toString() : openaiEngine.charset;
 
@@ -178,6 +174,9 @@ public class OpenAISession extends AISessionSupport {
 								+ "] that is not supported, only [application/json] is supported");
 					}
 				}
+				finally {
+					IOUtil.closeEL(response);
+				}
 			}
 		}
 		catch (SocketTimeoutException ste) {
@@ -189,6 +188,51 @@ public class OpenAISession extends AISessionSupport {
 		catch (Exception e) {
 			throw Caster.toPageException(e);
 		}
+	}
+
+	private CloseableHttpResponse execute(CloseableHttpClient httpClient, String str) throws ClientProtocolException, IOException, URISyntaxException {
+		int max = 3;
+		CloseableHttpResponse response = httpClient.execute(createHttpPost(openaiEngine.chatCompletionsURI, str));
+		while (response.getStatusLine().getStatusCode() >= 300 && response.getStatusLine().getStatusCode() < 400) {
+			if (--max == 0) return response;
+			// Get the Location header
+			Header locationHeader = response.getFirstHeader("Location");
+			if (locationHeader != null) {
+				String redirectUrl = locationHeader.getValue();
+				IOUtil.closeEL(response);
+
+				openaiEngine.chatCompletionsURI = new URI(
+
+						openaiEngine.chatCompletionsURI.getScheme(),
+
+						openaiEngine.chatCompletionsURI.getUserInfo(),
+
+						openaiEngine.chatCompletionsURI.getHost(),
+
+						openaiEngine.chatCompletionsURI.getPort(), redirectUrl,
+
+						openaiEngine.chatCompletionsURI.getQuery(),
+
+						openaiEngine.chatCompletionsURI.getFragment());
+
+				response = httpClient.execute(createHttpPost(openaiEngine.chatCompletionsURI, str));
+			}
+		}
+		return response;
+	}
+
+	private HttpPost createHttpPost(URI uri, String str) {
+		HttpPost post = new HttpPost(uri);
+		post.setHeader("Content-Type", AIUtil.createJsonContentType(openaiEngine.charset));
+		post.setHeader("Authorization", "Bearer " + openaiEngine.secretKey);
+
+		StringEntity entity = new StringEntity(str, openaiEngine.charset);
+		post.setEntity(entity);
+
+		RequestConfig config = AISessionSupport.setRedirect(AISessionSupport.setTimeout(RequestConfig.custom(), this)).build();
+		post.setConfig(config);
+
+		return post;
 	}
 
 	@Override
