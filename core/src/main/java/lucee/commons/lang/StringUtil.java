@@ -1463,7 +1463,7 @@ public final class StringUtil {
 	}
 
 	public static String unwrap(String str) {
-		if (StringUtil.isEmpty(str)) return "";
+		if (StringUtil.isEmpty(str, true)) return "";
 		str = str.trim();
 		boolean multiStart = false;
 		boolean multiEnd = false;
