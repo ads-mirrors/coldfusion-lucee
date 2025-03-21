@@ -131,6 +131,7 @@ public final class OpenAIEngine extends AIEngineSupport implements AIEngineFile 
 	private URL baseURL;
 	public Double temperature = null;
 	private int conversationSizeLimit = DEFAULT_CONVERSATION_SIZE_LIMIT;
+	URI chatCompletionsURI;
 
 	@Override
 	public AIEngine init(ClassDefinition<? extends AIEngine> cd, Struct properties, String name, String _default, String id) throws PageException {
@@ -140,7 +141,7 @@ public final class OpenAIEngine extends AIEngineSupport implements AIEngineFile 
 		// URL
 		/// we support some hard coded types to keep it simple
 		String str = Caster.toStringTrim(properties.get(KeyConstants._type, null), null);
-		if (!Util.isEmpty(str, true)) {
+		if (!Util.isEmpty(str, true) && !str.equalsIgnoreCase("other")) {
 			if ("chatgpt".equals(str) || "openai".equals(str)) {
 				label = "ChatGPT";
 				baseURL = DEFAULT_URL_OPENAI;
@@ -269,7 +270,7 @@ public final class OpenAIEngine extends AIEngineSupport implements AIEngineFile 
 			get.setHeader("Authorization", "Bearer " + secretKey);
 			get.setHeader("Content-Type", AIUtil.createJsonContentType(charset));
 
-			RequestConfig config = AISessionSupport.setTimeout(RequestConfig.custom(), getConnectTimeout(), getSocketTimeout()).build();
+			RequestConfig config = AISessionSupport.setRedirect(AISessionSupport.setTimeout(RequestConfig.custom(), getConnectTimeout(), getSocketTimeout())).build();
 			get.setConfig(config);
 
 			try (CloseableHttpClient httpClient = HttpClients.createDefault(); CloseableHttpResponse response = httpClient.execute(get)) {

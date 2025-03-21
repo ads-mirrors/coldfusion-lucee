@@ -70,7 +70,7 @@ public final class DeserializeJSON extends BIF implements Function {
 	private static Object _call(PageContext pc, String JSONVar, boolean strictMapping, int format) throws PageException {
 		if (StringUtil.isEmpty(JSONVar, true)) {
 			if (allowEmpty) {
-				LogUtil.log(Log.LEVEL_WARN, "datasource", "conversion",
+				LogUtil.log(Log.LEVEL_WARN, "application", "conversion",
 						"Deprecated functionality used at [" + LogUtil.caller(pc, "") + "]. An empty string was passed as a value to the function DeserializeJSON.");
 				return "";
 			}

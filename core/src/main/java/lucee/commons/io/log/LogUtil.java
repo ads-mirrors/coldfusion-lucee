@@ -276,16 +276,20 @@ public final class LogUtil {
 		logGlobal(config, Log.LEVEL_ERROR, type, msg + ";" + ExceptionUtil.getStacktrace(t, true));
 	}
 
+	public static boolean doesTrace(Log log) {
+		return (log != null && log.getLogLevel() <= Log.LEVEL_TRACE);
+	}
+
 	public static boolean doesInfo(Log log) {
-		return (log != null && log.getLogLevel() >= Log.LEVEL_INFO);
+		return (log != null && log.getLogLevel() <= Log.LEVEL_INFO);
 	}
 
 	public static boolean doesDebug(Log log) {
-		return (log != null && log.getLogLevel() >= Log.LEVEL_DEBUG);
+		return (log != null && log.getLogLevel() <= Log.LEVEL_DEBUG);
 	}
 
 	public static boolean doesWarn(Log log) {
-		return (log != null && log.getLogLevel() >= Log.LEVEL_WARN);
+		return (log != null && log.getLogLevel() <= Log.LEVEL_WARN);
 	}
 
 	public static boolean doesTrace(Log log) {
@@ -293,11 +297,11 @@ public final class LogUtil {
 	}
 
 	public static boolean doesError(Log log) {
-		return (log != null && log.getLogLevel() >= Log.LEVEL_ERROR);
+		return (log != null && log.getLogLevel() <= Log.LEVEL_ERROR);
 	}
 
 	public static boolean doesFatal(Log log) {
-		return (log != null && log.getLogLevel() >= Log.LEVEL_FATAL);
+		return (log != null && log.getLogLevel() <= Log.LEVEL_FATAL);
 	}
 
 	public static String caller(PageContext pc, String defaultValue) {
