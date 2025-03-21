@@ -277,6 +277,10 @@ public final class LogUtil {
 		logGlobal(config, Log.LEVEL_ERROR, type, msg + ";" + ExceptionUtil.getStacktrace(t, true));
 	}
 
+	public static boolean does(Log log, int logLevel) {
+		return (log != null && log.getLogLevel() <= logLevel);
+	}
+
 	public static boolean doesTrace(Log log) {
 		return (log != null && log.getLogLevel() <= Log.LEVEL_TRACE);
 	}
