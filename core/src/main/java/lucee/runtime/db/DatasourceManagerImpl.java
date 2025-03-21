@@ -73,6 +73,12 @@ public final class DatasourceManagerImpl implements DataSourceManager {
 		return getConnection(pc, pc.getDataSource(_datasource), user, pass);
 	}
 
+	/*
+	 * public PooledConnection getPooledConnection(PageContext pc, DataSource ds, String user, String
+	 * pass) throws PageException { return new PooledConnection(this, getConnection(pc, ds, user,
+	 * pass)); }
+	 */
+
 	@Override
 	public DatasourceConnection getConnection(PageContext pc, DataSource ds, String user, String pass) throws PageException {
 		if (autoCommit && !(ds).isRequestExclusive()) {
@@ -187,7 +193,7 @@ public final class DatasourceManagerImpl implements DataSourceManager {
 		if (!dc.isManaged() && autoCommit && (ignoreRequestExclusive || !dc.getDatasource().isRequestExclusive())) {
 
 			if (pc != null && ((PageContextImpl) pc).getTimeoutStackTrace() != null) {
-				IOUtil.closeEL(dc);
+				IOUtil.closeEL(dc.getConnection());
 			}
 			else {
 				dc.release();

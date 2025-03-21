@@ -2909,7 +2909,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	private void _doVerifyDatasource(DataSourcePro ds, String username, String password) throws PageException {
 		try {
 			DatasourceConnectionImpl dc = new DatasourceConnectionImpl(null, ds.getConnection(config, username, password), ds, username, password);
-			dc.close();
+			dc.getConnection().close();
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);

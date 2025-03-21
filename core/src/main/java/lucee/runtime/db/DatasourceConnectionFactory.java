@@ -120,7 +120,7 @@ public final class DatasourceConnectionFactory extends BasePooledObjectFactory<D
 		DatasourceConnection dc = null;
 		try {
 			dc = p.getObject();
-			dc.close();
+			dc.getConnection().close();
 		}
 		catch (SQLException e) {
 			throw new DatabaseException(e, dc);

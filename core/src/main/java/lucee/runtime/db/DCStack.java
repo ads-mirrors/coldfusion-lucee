@@ -167,7 +167,7 @@ class DCStack {
 			// when timeout was reached but it is still open, close it
 			if (!isClosedEL(current.dc.getConnection())) {
 				try {
-					current.dc.close();
+					current.dc.getConnection().close();
 				}
 				catch (Exception e) {
 				}
