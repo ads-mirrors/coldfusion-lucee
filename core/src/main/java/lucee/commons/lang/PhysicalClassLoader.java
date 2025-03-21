@@ -262,7 +262,9 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 
 	private Class<?> loadClass(String name, boolean resolve, boolean loadFromFS) throws ClassNotFoundException {
 		Class<?> c = loadClass(name, resolve, loadFromFS, null);
-		if (c == null) throw new ClassNotFoundException(name);
+		if (c == null) {
+			throw new ClassNotFoundException(name);
+		}
 		return c;
 	}
 

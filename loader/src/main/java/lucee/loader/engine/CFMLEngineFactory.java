@@ -948,14 +948,21 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 		if (engine instanceof CFMLEngineWrapper) engine = ((CFMLEngineWrapper) engine).getEngine();
 
 		try {
-			Method m = engine.getClass().getDeclaredMethod("getConfigServerImpl", new Class[] {});
-			m.setAccessible(true);
+			// newer Lucee version engine provide this
+			Method m = engine.getClass().getDeclaredMethod("getExistingConfigServer", new Class[] {});
 			return (ConfigServer) m.invoke(engine, new Object[] {});
 		}
 		catch (Exception e) {
-			e.printStackTrace();
+			// older version
+			try {
+				Method m = engine.getClass().getDeclaredMethod("getConfigServerImpl", new Class[] {});
+				m.setAccessible(true);
+				return (ConfigServer) m.invoke(engine, new Object[] {});
+			}
+			catch (Exception e2) {
+				e2.printStackTrace();
+			}
 		}
-
 		return null;
 	}
 

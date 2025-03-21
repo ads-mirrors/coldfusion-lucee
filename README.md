@@ -11,9 +11,9 @@ Lucee provides a compatibility layer for Adobe ColdFusion &copy;  CFML using les
 
  [What is new with Lucee 6](README-Lucee6.md)
 
- ## CFCAMP 2024 - Meet the Lucee team!
+ ## CFCAMP 2025 - Meet the Lucee team!
 
- [![Meet the Lucee Team at CFCAMP 2024](https://docs.lucee.org/assets/images/conferences/CFCAMP-2024.png)](https://www.cfcamp.org/?utm_source=website&utm_id=Ldoc)
+ [![Meet the Lucee Team at CFCAMP 2025](https://docs.lucee.org/assets/images/conferences/CFCAMP-2025.png)](https://www.cfcamp.org/?utm_source=website&utm_id=Ldoc)
 
 ## Installation
 
