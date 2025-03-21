@@ -114,7 +114,7 @@ public final class QueryParamConverter {
 			NamedSQLItem nsi = (NamedSQLItem) item;
 			sct.setEL(KeyConstants._name, nsi.getName());
 		}
-		if (fns || item.getValue() != null) sct.setEL(KeyConstants._value, item.getValue() );
+		if (fns || item.getValue() != null) sct.setEL(KeyConstants._value, item.getValue());
 		else sct.setEL(KeyConstants._value, "");
 		sct.setEL(KeyConstants._type, SQLCaster.toStringType(item.getType(), null));
 		sct.setEL(KeyConstants._scale, item.getScale());
@@ -251,17 +251,24 @@ public final class QueryParamConverter {
 	}
 
 	private static SQLItems<SQLItem> get(String name, List<SQLItems<NamedSQLItem>> items, String sql) throws ApplicationException {
-		Iterator<SQLItems<NamedSQLItem>> it = items.iterator();
-		SQLItems<NamedSQLItem> item;
-		while (it.hasNext()) {
-			item = it.next();
-			if (item.isEmpty()) {
-				throw new ApplicationException("param [" + name + "] may not be empty", "SQL: " + sql + "");
+		// looking for a matching item
+		for (SQLItems<NamedSQLItem> item: items) {
+			// item with data
+			if (!item.isEmpty()) {
+				if (item.get(0).name.equalsIgnoreCase(name)) {
+					return item.convertToSQLItems();
+				}
 			}
-			if (item.get(0).name.equalsIgnoreCase(name)) {
-				return item.convertToSQLItems();
+			// array item without data
+			else {
+				if (item.getName() != null && item.getName().equalsIgnoreCase(name)) {
+					throw new ApplicationException("param [" + name + "] may not be empty", "SQL: " + sql + "");
+					// return item.convertToSQLItems();
+				}
 			}
 		}
+
+		// general exception message
 		throw new ApplicationException("param [" + name + "] not found", "SQL: " + sql + "");
 	}
 
@@ -305,7 +312,13 @@ public final class QueryParamConverter {
 
 	private static class SQLItems<T extends SQLItem> extends ArrayList<T> {
 
+		private String name;
+
 		public SQLItems() {
+		}
+
+		public String getName() {
+			return name;
 		}
 
 		public SQLItems(T item) {
@@ -318,7 +331,6 @@ public final class QueryParamConverter {
 			Object oList = sct.get(KeyConstants._list, null);
 			Object value = filledItem.getValue();
 			boolean isList = ((oList != null && Caster.toBooleanValue(oList)) || (oList == null && (Decision.isArray(value) && !(value instanceof byte[]))));
-
 			if (isList) {
 				Array values;
 
@@ -340,6 +352,10 @@ public final class QueryParamConverter {
 					T clonedItem = (T) filledItem.clone(values.getE(i));
 					add(clonedItem);
 				}
+				if (len == 0 && isEmpty() && item instanceof NamedSQLItem) {
+					this.name = ((NamedSQLItem) item).name;
+				}
+
 			}
 			else {
 				add(filledItem);

@@ -5128,7 +5128,31 @@ To use cached data, the current query must use the same SQL statement, data sour
 			<name>params</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description></description>
+			<description>Alternative to using nested cfqueryparam tags. Supports two parameter styles:
+
+Positional parameters (Array): Use question marks (?) as placeholders in SQL.
+SQL example: "SELECT * FROM users WHERE status = ? AND id > ? LIMIT ?"
+Params: [
+{ type: "string", value: "active" },
+{ type: "integer", value: 42 },
+{ type: "integer", value: 100 }
+]
+
+Named parameters (Struct): Use colon-prefixed names as placeholders in SQL.
+SQL example: "SELECT * FROM users WHERE status = :status AND id > :id LIMIT :limit"
+Params: {
+"status": { type: "string", value: "active" },
+"id": { type: "integer", value: 42 },
+"limit": { type: "integer", value: 100 }
+}
+
+List parameters (for IN clauses): Set list=true to expand arrays into comma-separated values.
+SQL example: "SELECT * FROM users WHERE status IN (?)"
+Params: [
+{ type: "string", value: ["active", "pending"], list: true }
+]
+(The same can be done with named parameters)
+</description>
 		</attribute>
 		<attribute>
 			<type>numeric</type>
@@ -5188,31 +5212,50 @@ To use cached data, the current query must use the same SQL statement, data sour
 	<tag>
 		<name>queryParam</name>
 		<tag-class>lucee.runtime.tag.QueryParam</tag-class>
-
 		<body-content>empty</body-content>
 		<body-rtexprvalue>false</body-rtexprvalue>
 		<script>
 			<type>multiple</type>
 			<rtexprvalue>true</rtexprvalue>
 		</script>
-		<description>Checks the data type of a query parameter. The cfqueryparam tag is nested within a cfquery tag.
-  It is embedded within the query SQL statement. If you specify its optional parameters, cfqueryparam
-  also performs data validation.</description>
+		<description>Checks the data type of a query parameter. The cfqueryparam tag is nested within a cfquery tag and embedded within the SQL statement.
+	
+	This tag:
+	- Improves security by preventing SQL injection attacks
+	- Provides data validation for parameter values
+	- Enhances performance by enabling database query caching
+	- Correctly handles type conversion between CFML and database types
+		</description>
 		<attribute-type>fixed</attribute-type>
 		<attribute>
 			<type>any</type>
 			<name>value</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Specifies the actual value that Lucee passes to the right of the comparison operator in a
-	where clause.</description>
+			<description>Specifies the actual value that Lucee passes to the database.
+	
+	- For standard parameters: The single value used in the query
+	- For list parameters: Can be an array, list string, or other collection type
+	- For null values: Set the `null` attribute to true and this attribute is ignored
+	
+	The value will be automatically escaped to prevent SQL injection.</description>
 		</attribute>
 		<attribute>
 			<type>string</type>
 			<name>sqlType</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>The SQL type that the parameter (any type) will be bound to.</description>
+			<description>The SQL data type that the parameter will be bound to.
+	
+	Common types include:
+	- `varchar`: For strings (default)
+	- `integer`, `bigint`, `smallint`, `tinyint`: For various sized integers
+	- `double`, `decimal`, `money`: For floating point/decimal values
+	- `bit`, `boolean`: For boolean values
+	- `date`, `time`, `timestamp`: For date/time values
+	- `binary`, `blob`: For binary data
+	
+	Using the correct type improves security, enables proper type checking, and optimizes query execution.</description>
 		</attribute>
 		<attribute>
 			<type>string</type>
@@ -5220,26 +5263,35 @@ To use cached data, the current query must use the same SQL statement, data sour
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 			<status>deprecated</status>
-			<description>
-			This attribute has been deprecated, use instead the attribute "sqlType" that has exact the same functionality.
-			</description>
+			<description>This attribute has been deprecated, use the `sqlType` attribute instead which provides identical functionality.
+	
+	Maintained for backward compatibility with older code that used the CFML-specific naming convention.</description>
 		</attribute>
 		<attribute>
 			<type>number</type>
 			<name>maxLength</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Maximum length of the parameter. The default value is the length of the string specified in
-	the value attribute. if the attribute charset is defined, this comparison will be byte based.</description>
+			<description>Maximum allowed length of the parameter value (validation check).
+	
+	- For string values: The maximum number of characters allowed
+	- For binary values: The maximum number of bytes allowed
+	- If the value exceeds this length, Lucee will throw an exception
+	- If not specified, defaults to the actual length of the provided value
+	- If the attribute `charset` is defined, string length comparison will be byte-based for that encoding</description>
 		</attribute>
 		<attribute>
 			<type>string</type>
 			<name>charset</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>This attribute is used for 2 things:
-			- it checks if the given value is compatible with that charset
-			- to check the binary length of the value (see attribute maxLength).</description>
+			<description>Specifies the character encoding for string validation.
+	
+	This attribute serves two purposes:
+	1. It validates that the given value is compatible with the specified charset
+	2. It determines how byte length is calculated for `maxLength` validation
+	
+	Common values include `UTF-8`, `ISO-8859-1`, or other valid Java charset names.</description>
 			<introduced>5.3.8.25</introduced>
 		</attribute>
 		<attribute>
@@ -5247,35 +5299,55 @@ To use cached data, the current query must use the same SQL statement, data sour
 			<name>scale</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Number of decimal places of the parameter. The default value is zero.</description>
+			<description>Number of decimal places to allow for numeric parameters.
+	
+	- Only applies to decimal data types (decimal, numeric, money, etc.)
+	- Values with more decimal places than specified will be rounded
+	- Particularly important for financial calculations to control precision
+	- Default value is zero if not specified</description>
 		</attribute>
 		<attribute>
 			<type>boolean</type>
 			<name>null</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Yes or No. Indicates whether the parameter is passed as a null. If Yes, the tag ignores the
-	value attribute. The default is No.</description>
+			<description>Indicates whether the parameter should be treated as NULL.
+	
+	- `true`: The parameter is passed as NULL to the database (ignores the `value` attribute)
+	- `false`: The parameter uses the value provided in the `value` attribute
+	- Default is `false`
+	
+	SQL comparison with NULL requires special syntax in most databases (using `IS NULL` rather than `= NULL`).</description>
 		</attribute>
 		<attribute>
 			<type>boolean</type>
 			<name>list</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>true, false or not set. 
-			If set to true this indicates that the parameter value of the value attribute is a list of values and is handled as such,
-			if set to false it is handled as a simple value.
-			if not set lucee will automatically detect if it is an array or not.
-			</description>
+			<description>Controls how the parameter value is handled:
+	
+	- `true`: The parameter value is treated as a list of values (typically used with SQL's `IN` operator)
+	- `false`: The parameter is handled as a simple value
+	- Not set: Lucee automatically detects if the value is an array and treats it as a list if it is (but not for byte arrays)
+	
+	When working with lists/arrays:
+	- **Empty Arrays**: When an empty array is provided with `list=true` (or auto-detected as a list), Lucee will handle this correctly by effectively omitting the parameter from the query
+	- **Usage with IN**: Typically used with SQL's `IN` operator
+	- **Array Elements**: Each element in the array will be properly typed according to the specified `sqlType`</description>
 		</attribute>
 		<attribute>
 			<type>string</type>
 			<name>separator</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Specifies the character that separates values in the list of parameter values in the value
-	attribute. The default is a comma. If you specify a list of values for the value attribute, you must
-	also specify the list attribute.</description>
+			<description>Specifies the character that separates values in string lists.
+	
+	- Only used when `list="true"` and the value is a string (not an array)
+	- Default separator is a comma (`,`)
+	- Common alternatives include semicolon (`;`), pipe (`|`), or tab
+	- Example: For a string like "red;green;blue" with `list="true" separator=";"`, the values would be treated as three separate items
+	
+	Note: For best results with complex separators or values that might contain the separator character, consider using an array instead of a delimited string.</description>
 		</attribute>
 	</tag>
 
