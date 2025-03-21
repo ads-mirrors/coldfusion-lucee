@@ -38,6 +38,7 @@ import lucee.runtime.config.ConfigPro;
 import lucee.runtime.engine.CFMLEngineImpl;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.PageException;
+import lucee.runtime.functions.system.ExtensionExists;
 import lucee.runtime.net.proxy.ProxyDataImpl;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.Array;
@@ -71,7 +72,7 @@ public final class SchedulerImpl implements Scheduler {
 		this.engine = (CFMLEngineImpl) engine;
 		this.config = config;
 		this.tasks = readInAllTasks(tasks);
-		init();
+		init(config);
 	}
 
 	/**
@@ -85,13 +86,16 @@ public final class SchedulerImpl implements Scheduler {
 		this.engine = (CFMLEngineImpl) engine;
 		this.config = config;
 		tasks = new ConcurrentLinkedQueue<>();
-		init();
+		init(config);
 	}
 
 	/**
 	 * initialize all tasks
 	 */
-	private void init() {
+	private void init(Config config) {
+		// in case the Scheduler extension is not installed we do not start tasks
+		if (!ExtensionExists.has(config, "97EB5427-F051-4684-91EBA6DBB5C5203F")) return;
+
 		for (TaskRef ref: tasks) {
 			init(ref.task);
 		}

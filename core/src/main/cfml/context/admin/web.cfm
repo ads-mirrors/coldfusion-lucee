@@ -398,6 +398,7 @@
 
 	strNav ="";
 	adminUrls = []; // track menu urls for automated testing
+	hasScheduler=extensionExists("97EB5427-F051-4684-91EBA6DBB5C5203F");
 	for(i=1;i lte arrayLen(navigation);i=i+1) {
 		stNavi = navigation[i];
 		hasChildren=structKeyExists(stNavi,"children");
@@ -426,7 +427,7 @@
 					}*/
 					if (structKeyExists(stCld,'_action'))_action=stCld._action;
 					else _action=stNavi.action & '.' & stCld.action;
-
+					if(!hasScheduler && _action=="services.schedule") continue;
 					isfavorite = application.adminfunctions.isfavorite(_action);
 					li = '<li' & (isfavorite ? ' class="favorite"':'') & '><a '&(isActive?'class="menu_active"':'class="menu_inactive"')&' href="' & request.self & '?action=' &ListCompact( _action,'.') & '"> ' & stCld.label & '</a></li>';
 					ArrayAppend(adminUrls, request.self & '?action=' &ListCompact( _action,'.'));
@@ -451,19 +452,13 @@
 		else {
 			idName = toIDField(stNavi.label);
 			isCollapsed = !hasActiveItem && application.adminfunctions.getdata('collapsed_' & idName) == 1;
-			strNav = strNav & '<li id="#idName#"#isCollapsed ? ' class="collapsed"':''#><a href="##">' & stNavi.label & '</a><ul#isCollapsed ? ' style="display:none"':''#>'&subNav& "</ul></li>";
-			//strNav = strNav & '<div class="navtop">' & stNavi.label & '</div>'&subNav& "";
+			strNav = strNav & '<li id="#idName#"#isCollapsed ? ' class="collapsed"':''#><a href="##">' &
+				 stNavi.label & '</a><ul#isCollapsed ? ' style="display:none"':''#>'&subNav& "</ul></li>";
 		}
-		//strNav = strNav ;
 	}
 	strNav ='<ul id="menu">'& strNav&'</ul>' ;
 
-/* moved to title in content area
-	if (favoriteLis != "")
-	{
-		strNav = '<li id="favorites"><a href="##">Favorites</a><ul>' & favoriteLis & "</ul></li>" & strNav;
-	}
-	*/
+
 
 	function toBool(sct,key) {
 		if (!structKeyExists(arguments.sct,arguments.key)) return false;

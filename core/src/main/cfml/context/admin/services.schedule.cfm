@@ -64,6 +64,11 @@
 
 	error.message="";
 	error.detail="";
+
+	if(!extensionExists("97EB5427-F051-4684-91EBA6DBB5C5203F")) {
+		cflocation(url="#request.self#" addtoken="no");
+	}
+
 </cfscript>
 
 <cfif request.adminType EQ "web" OR request.singlemode>
