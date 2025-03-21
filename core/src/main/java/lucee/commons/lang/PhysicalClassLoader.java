@@ -201,12 +201,13 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 		return loadClass(name, resolve, true);
 	}
 
-	public boolean isClassAvailable(ClassLoader loader, String className) {
+	public Boolean isClassAvailable(ClassLoader loader, String className) {
 		if (allLoadedClasses.containsKey(className)) return true;
 		if (unavaiClasses.containsKey(className)) return false;
 
-		String resourcePath = className.replace('.', '/').concat(".class");
-		return loader.getResource(resourcePath) != null;
+		return null;
+		// String resourcePath = className.replace('.', '/').concat(".class");
+		// return loader.getResource(resourcePath) != null;
 	}
 
 	@Override
@@ -290,12 +291,15 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 			return super.findClass(name);
 		}
 
-		if (addionalClassLoader != null && isClassAvailable(addionalClassLoader, name)) {
-			try {
-				return addionalClassLoader.loadClass(name);
-			}
-			catch (ClassNotFoundException e) {
-				LogUtil.trace("physical-classloader", e);
+		if (addionalClassLoader != null) {
+			// boolean true in case it returns TRUE or null
+			if (!Boolean.FALSE.equals(isClassAvailable(addionalClassLoader, name))) {
+				try {
+					return addionalClassLoader.loadClass(name);
+				}
+				catch (ClassNotFoundException e) {
+					LogUtil.trace("physical-classloader", e);
+				}
 			}
 		}
 

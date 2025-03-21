@@ -490,7 +490,14 @@ public abstract class AbstrCFMLScriptTransformer extends AbstrCFMLExprTransforme
 
 		// parse the component
 		TagLibTag tlt = CFMLTransformer.getTLT(data.srcCode, getComponentName(), data.config.getIdentification());
-		TagComponent comp = (TagComponent) _multiAttrStatement(parent, data, tlt);
+		Statement stat = _multiAttrStatement(parent, data, tlt);
+		// Patch for LDEV-5399
+		if (!(stat instanceof TagComponent)) {
+			data.srcCode.setPos(pos);
+			return null;
+		}
+
+		TagComponent comp = (TagComponent) stat;
 		if (mod != Component.MODIFIER_NONE) comp.addAttribute(new Attribute(false, "modifier", data.factory.createLitString(id), "string"));
 		return comp;
 	}
