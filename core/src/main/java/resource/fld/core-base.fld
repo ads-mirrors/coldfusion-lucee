@@ -5928,7 +5928,13 @@ Example Values:
 	<function>
 		<name>getAuthUser</name>
 		<class>lucee.runtime.functions.other.GetAuthUser</class>
-		<description>Gets the name of an authenticated user.</description>
+		<description>
+			Returns the name of the currently authenticated user. 
+			This function checks the application's authentication system and returns the username of the logged-in user.
+			If no user is authenticated, it returns an empty string. 
+			The function first attempts to retrieve credentials from the application security context, and if none exist, 
+			it falls back to checking the HTTP servlet request for remote user information.
+		</description>
 		<return>
 			<type>string</type>
 		</return>
