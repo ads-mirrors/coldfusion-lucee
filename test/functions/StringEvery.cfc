@@ -23,7 +23,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 		local.testString = "123456789";
 		
 		var res="";
-		callback = function(chr){
+		var callback = function(chr){
 				res=chr;
 				return false;
 		}
@@ -31,7 +31,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 		assertEquals( "1", res); 
 
 		var res="";
-		callback = function(chr){
+		var callback = function(chr){
 				res=chr;
 				return true;
 		}

@@ -27,7 +27,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"  labels="mysql" {
 
 		names="";
 		loop from=1 to=10 index="local.i" {
-			names=listAppend(names,"manual#i#");
+			var names=listAppend(names,"manual#i#");
 			names=listAppend(names,"auto#i#");
 			thread name="manual#i#" {
 				transaction isolation="read_uncommitted" {
@@ -47,7 +47,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"  labels="mysql" {
 		// check the results
 		var failures=[];
 		loop list="#names#" item="local.name" {
-			t=cfthread[name];
+			var t=cfthread[name];
 			if(t.status!="completed") arrayAppend(failures,t);
 		}
 		if(failures.len()) throw serialize(failures);

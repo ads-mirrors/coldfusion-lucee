@@ -49,12 +49,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="mail" {
 					var msg=messages[1];
 					
 					// from
-					froms=msg.getFrom();
+					var froms=msg.getFrom();
 					expect( len(froms) ).toBe( 1 );
 					expect( froms[1].getAddress() ).toBe( variables.from );
 					
 					// to
-					tos=msg.getAllRecipients();
+					var tos=msg.getAllRecipients();
 					expect( len(tos) ).toBe( 1 );
 					expect( tos[1].getAddress() ).toBe( variables.to );
 					

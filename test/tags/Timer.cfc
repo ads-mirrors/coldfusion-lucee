@@ -39,7 +39,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 	public function testTimerType() localmode="true" {
 		expect( 
 			function() {
-				loop list="comment, debug, inline, outline" item="timerType"{
+				loop list="comment, debug, inline, outline" item="local.timerType"{
 					timer type="#timerType#" {
 						sleep( 1 );
 					}

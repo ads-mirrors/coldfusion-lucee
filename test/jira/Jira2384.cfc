@@ -41,7 +41,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 			assertEquals(false,isNull(dat));
 		}
 		
-		s=qry.str;
+		var s=qry.str;
 		assertEquals('java.lang.String',s.getClass().getName());
 		s=qry.nbr;
 		assertEquals('java.lang.String',s.getClass().getName());

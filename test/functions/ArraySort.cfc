@@ -112,7 +112,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				arraySort(arr,doSort);
 				assertEquals("hello,susi,world,world",arrayToList(arr));
 				// Closure
-				doSort=function (left,right){
+				var doSort=function (left,right){
 					return Compare(left,right);
 				};
 				arraySort(arr,doSort);

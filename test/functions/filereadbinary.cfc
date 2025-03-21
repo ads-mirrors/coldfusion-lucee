@@ -10,7 +10,7 @@ component extends = "org.lucee.cfml.test.LuceeTestCase"{
 	function run( testResults , testBox ) {
 		describe( "test case for FileReadBinary", function() {
 			it(title = "Checking with FileReadBinary with local image", body = function( currentSpec ) {
-				imgBinary = imageNew("",200,200,"rgb","red");
+				var imgBinary = imageNew("",200,200,"rgb","red");
 				cfimage(action = "write", source = imgBinary, destination = path&"filebinaryImg.jpg", overwrite="yes");
 			  	expect(isbinary(FileReadBinary(path&'filebinaryImg.jpg'))).tobe("true");
 			});

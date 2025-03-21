@@ -19,8 +19,8 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"	{
 	
 	public function beforeTests(){
-		short=queryNew("a,b");
-		qry=queryNew("a,b");
+		variables.short=queryNew("a,b");
+		variables.qry=queryNew("a,b");
 		for(i=1;i<=35;i++){
 			row=queryAddrow(qry);
 			querySetcell(qry,'a',"a"&i,row);
@@ -31,7 +31,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 	
 	public void function testValidRanges(){
 		//writedump(qry);
-		sct=QueryConvertForGrid(qry,1,10);
+		var sct=QueryConvertForGrid(qry,1,10);
 		assertEquals('a1,a2,a3,a4,a5,a6,a7,a8,a9,a10',valueList(sct.query.a));
 		sct=QueryConvertForGrid(qry,2,10);
 		assertEquals('a11,a12,a13,a14,a15,a16,a17,a18,a19,a20',valueList(sct.query.a));
@@ -44,7 +44,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 	
 	public void function testValidRanges2(){
 		
-		sct=QueryConvertForGrid(qry,1,-10);
+		var sct=QueryConvertForGrid(qry,1,-10);
 		assertEquals('',valueList(sct.query.a));
 		
 		sct=QueryConvertForGrid(qry,5,10);

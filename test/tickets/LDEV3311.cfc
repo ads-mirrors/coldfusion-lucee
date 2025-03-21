@@ -140,7 +140,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 
 	private function getDummyData (){
 		var q = queryNew("id,name,data","integer,varchar, varchar");
-		loop list="micha,zac,brad,pothys,gert" item="n" index="i" {
+		loop list="micha,zac,brad,pothys,gert" item="local.n" index="local.i" {
 			var r = queryAddRow(q);
 			querySetCell(q, "id", r, r)
 			querySetCell(q, "name", n, r)

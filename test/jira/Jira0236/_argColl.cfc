@@ -20,8 +20,8 @@
 <cffunction name="onMissingMethod" hint="method to handle missing methods" access="public" returntype="Any" output="true">
     <cfargument name="missingMethodName" type="string" required="true">
     <cfargument name="missingMethodArguments" type="struct" required="false" default="#StructNew()#">
-    <cfinvoke method="test" argumentcollection="#arguments.missingMethodArguments#" returnvariable="res1"/>
-    <cfinvoke method="test" argumentcollection="#arguments.missingMethodArguments#" b="37"  returnvariable="res2"/>
+    <cfinvoke method="test" argumentcollection="#arguments.missingMethodArguments#" returnvariable="local.res1"/>
+    <cfinvoke method="test" argumentcollection="#arguments.missingMethodArguments#" b="37"  returnvariable="local.res2"/>
     #trim(res1)##trim(res2)#
 </cffunction>
 
@@ -32,7 +32,7 @@
     <cfset var keys=structKeyArray(arguments)>
     <cfset ArraySort(keys,'textnocase')>
     
-    <cfloop array="#keys#" index="key">
+    <cfloop array="#keys#" index="local.key">
     	<cfset rtn=rtn&key&":"&arguments[key]&";">
     </cfloop>
     

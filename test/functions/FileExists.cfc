@@ -36,7 +36,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 	}
 
 	function testRelPath(){
-		path=structNew();
+		var path=structNew();
 		path.abs=GetCurrentTemplatePath();
 		path.real=ListLast(path.abs,"/\");
 		assertEquals(false,"#evaluate('fileExists(path.real,false)')#");

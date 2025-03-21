@@ -21,12 +21,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 
 	public void function testStringSome(){
 		myString="123456789"; 
-    	callback=function(num){ 
+    	var callback=function(num){ 
         	return num>5;
     	}
     	assertEquals(true, StringSome(myString, callback));
 
-    	myString="Hello";
+    	var myString="Hello";
     	callback=(x)=>x >= 'a';
     	assertEquals(true, StringSome(myString, callback));
     	callback_1=(x)=>x >= 'z';

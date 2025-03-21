@@ -211,7 +211,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 
 			describe( 'Sorting' , ()=>{
 
-				loop list="#typeList#,unicode" index="datatype" {
+				loop list="#typeList#,unicode" index="local.datatype" {
 					it( title='can sort #datatype#', data={ datatype : datatype } , body=function(data) {
 						var actual = QueryExecute(
 							sql = "

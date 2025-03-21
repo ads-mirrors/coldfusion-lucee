@@ -3,15 +3,15 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 		describe( "Test suite for LDEV-278", function() {
 			
 			it('Casting CF array to java character array',  function( currentSpec ) {
-				sampleArray = ["H","e","l","l","o"," ","W","o","r","l","d"];
-				castedArray = javaCast("char[]", sampleArray);
+				var sampleArray = ["H","e","l","l","o"," ","W","o","r","l","d"];
+				var castedArray = javaCast("char[]", sampleArray);
 				expect(arrayLen(castedArray)).toBe(11);
 			});
 
 			it('Casting string to java character array',  function( currentSpec ) {
-				try{
-					sampleString = "Hello World";
-					castedArray = javaCast("char[]", sampleString);
+				try {
+					var sampleString = "Hello World";
+					var castedArray = javaCast("char[]", sampleString);
 					expect(arrayLen(castedArray)).toBe(11);
 				} catch( any e ){
 					expect(e.Message).toBe("");
@@ -19,20 +19,20 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			});
 
 			it('Casting CF array to java string array',  function( currentSpec ) {
-				sampleArray = ["H","e","l","l","o"];
-				castedArray = javaCast("String[]", sampleArray);
+				var sampleArray = ["H","e","l","l","o"];
+				var castedArray = javaCast("String[]", sampleArray);
 				expect(arrayLen(castedArray)).toBe(5);
 			});
 
 			it('Casting CF array to java string array',  function( currentSpec ) {
-				sampleArray = ["H","e","l","l","o"];
-				castedArray = javaCast("String[]", sampleArray);
+				var sampleArray = ["H","e","l","l","o"];
+				var castedArray = javaCast("String[]", sampleArray);
 				expect(arrayLen(castedArray)).toBe(5);
 			});
 
 			it('Casting deep CF array to java string array',  function( currentSpec ) {
-				sampleArray = [[["a","b"]]];
-				castedArray = javaCast("String[][][]", sampleArray);
+				var sampleArray = [[["a","b"]]];
+				var castedArray = javaCast("String[][][]", sampleArray);
 				expect(arrayLen(castedArray)).toBe(1);
 				expect(arrayLen(castedArray[1])).toBe(1);
 				expect(arrayLen(castedArray[1][1])).toBe(2);
@@ -40,8 +40,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			});
 
 			it('Casting deep CF array to java BigDecimal array',  function( currentSpec ) {
-				sampleArray = [[["1","1"]]];
-				castedArray = javaCast("java.math.BigDecimal[][][]", sampleArray);
+				var sampleArray = [[["1","1"]]];
+				var castedArray = javaCast("java.math.BigDecimal[][][]", sampleArray);
 				expect(arrayLen(castedArray)).toBe(1);
 				expect(arrayLen(castedArray[1])).toBe(1);
 				expect(arrayLen(castedArray[1][1])).toBe(2);
