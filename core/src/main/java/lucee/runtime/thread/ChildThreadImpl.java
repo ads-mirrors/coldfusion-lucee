@@ -191,10 +191,9 @@ public final class ChildThreadImpl extends ChildThread implements Serializable {
 				pc.addPageSource(p.getPageSource(), true);
 			}
 
-			ConfigWebPro ci = (ConfigWebPro) pc.getConfig();
 			if (!pc.isGatewayContext() && PageContextUtil.debug(pc)) {
 				((DebuggerImpl) pc.getDebugger()).setThreadName(tagName);
-				if (pc.hasDebugOptions(ConfigPro.DEBUG_TEMPLATE)) debugEntry = pc.getDebugger().getEntry(pc, page.getPageSource());
+				if (pc.hasDebugOptions(ConfigPro.DEBUG_TEMPLATE)) debugEntry = pc.getDebugger().getEntry(pc, p.getPageSource());
 			}
 
 			threadScope = pc.getCFThreadScope();

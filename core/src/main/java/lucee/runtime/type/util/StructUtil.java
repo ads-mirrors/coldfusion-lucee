@@ -302,6 +302,8 @@ public final class StructUtil {
 			res.set(KeyConstants._type, toType(type, "unsynchronized"));
 			res.set("ordered", type == Struct.TYPE_LINKED ? "ordered" : "unordered");
 			res.set(KeyConstants._class, sct.getClass());
+			// added for backward compat to code expecting simply the class instance is returned LDEV-5381
+			res.set(KeyConstants._name, sct.getClass().getName());
 		}
 		return res;
 	}

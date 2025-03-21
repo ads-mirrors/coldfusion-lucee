@@ -1,4 +1,4 @@
-component extends="org.lucee.cfml.test.LuceeTestCase" skip=true {
+component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 	function run( testResults , testBox ) {
 
@@ -8,14 +8,14 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip=true {
 				var myArray = [];
 				var meta = getMetadata( myArray );
 				expect( meta ).toHaveKey( "name" );
-				expect( meta ).toHaveKey( "methods" );
+				expect( meta.name ).toBe( "lucee.runtime.type.ArrayImpl");
 			});
 
 			it( title='struct metadata', body=function() {
 				var myStruct = {};
 				var meta = getMetadata( myStruct );
 				expect( meta ).toHaveKey( "name" );
-				expect(meta ).toHaveKey( "methods" );
+				expect( meta.name ).toBe( "lucee.runtime.type.StructImpl");
 			});
 
 			it( title='cfc metadata', body=function() {
