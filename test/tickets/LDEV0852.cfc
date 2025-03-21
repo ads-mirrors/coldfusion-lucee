@@ -59,7 +59,7 @@
 					try{
 						var count = 0;
 						var x = '1,2,3,4,5';
-						for (i = 1; i <= ListLen(x); i++) {
+						for (var i = 1; i <= ListLen(x); i++) {
 							var variables['myVar#i#']=file;
 							cfDocument(format="PDF" name="myVar#i#"){
 								DocumentSectionWithDynamicVariable(i);

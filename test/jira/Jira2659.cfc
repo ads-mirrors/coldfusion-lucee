@@ -44,7 +44,7 @@
 	
 	<cffunction name="testTagLoopScriptContinue" access="public">
 		<cfsavecontent variable="local.c" trim="true">
-		<cfloop index="o" from="1" to="4" label="outer">outer<cfloop  index="i" from="1" to="4" label="inner">inner<cfscript>
+		<cfloop index="local.o" from="1" to="4" label="outer">outer<cfloop  index="local.i" from="1" to="4" label="inner">inner<cfscript>
 			continue outer;
 		</cfscript></cfloop></cfloop>
 		</cfsavecontent>
@@ -57,7 +57,7 @@
 		var res="";
 		whileLabel:while(true){
 			res&="o;";
-			loop index="x" from="1" to="5"  {
+			loop index="local.x" from="1" to="5"  {
 				res&="i;";
 				break whileLabel;
 			}
@@ -70,10 +70,10 @@
 	<cffunction name="testScriptWhileScriptContinue">
 		<cfscript>
 		var res="";
-		count=0;
+		var count=0;
 		whileLabel:while(count++<2){
 			res&="o;";
-			loop index="x" from="1" to="5"  {
+			loop index="local.x" from="1" to="5"  {
 				res&="i;";
 				continue whileLabel;
 			}
@@ -87,7 +87,7 @@
 		var res="";
 		loop index="x" from="1" to="5" label="susi" {
 			res&="o;";
-			loop index="x" from="1" to="5"  {
+			loop index="local.x" from="1" to="5"  {
 				res&="i;";
 				break susi;
 			}
@@ -98,7 +98,7 @@
 	<cffunction name="testScriptLoopScriptContinue">
 		<cfscript>
 		var res="";
-		loop index="x" from="1" to="2" label="susi" {
+		loop index="local.x" from="1" to="2" label="susi" {
 			res&="o;";
 			loop index="x" from="1" to="2"  {
 				res&="i;";

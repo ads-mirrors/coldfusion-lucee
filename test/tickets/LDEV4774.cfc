@@ -21,7 +21,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="date" {
 			});
 			it( title="string format 'dd/mm/yyyy' should be treated as a date(Set the date directly in the loop)", body=function( currentSpec ) {
 				expect(function() {
-					loop from="01/01/2024" to="01/10/2024" index="i" step="#CreateTimeSpan(1,0,0,0)#" {
+					loop from="01/01/2024" to="01/10/2024" index="local.i" step="#CreateTimeSpan(1,0,0,0)#" {
 						// writeOutput(dateformat(i, "dd/mm/yyyy"));
 					}
 				}).notToThrow();

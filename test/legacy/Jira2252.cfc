@@ -40,7 +40,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 			echo("SELECT DISTINCT optionvalue, optiontext, lft, rgt, lvl FROM qry ORDER BY lft");
 		}
 		
-		last=-1;
+		var last=-1;
 		loop query="#qry#" {
 			assertEquals(true,last<qry.lft);
 			last=qry.lft;

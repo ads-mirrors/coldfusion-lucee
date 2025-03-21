@@ -25,7 +25,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 	//public function setUp(){}
 	
 	public void function testVariablesSister(){
-		rtn=new Jira2633.Test().getSisterVariables();
+		var rtn=new Jira2633.Test().getSisterVariables();
 		rtn=rtn();
 		
 		assertEquals("2633",rtn.c); // local test (inside the outer closure)
@@ -37,7 +37,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 	
 	
 	public void function testThisSister(){
-		rtn=new Jira2633.Test().getSisterThis();
+		var rtn=new Jira2633.Test().getSisterThis();
 		rtn=rtn();
 		
 		assertEquals("2633",rtn.c); // local test (inside the outer closure)
@@ -48,7 +48,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 	}
 	
 	public void function testUndefinedSister(){
-		rtn=new Jira2633.Test().getSisterUndefined();
+		var rtn=new Jira2633.Test().getSisterUndefined();
 		rtn=rtn();
 		
 		assertEquals("2633",rtn.c); // local test (inside the outer closure)

@@ -18,7 +18,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect( toString(getTimeZone()) ).toBe("Asia/Calcutta");
 				expect( getTimeZone().shortNameDST ).toBe("IDT");
 				expect( function() {
-					loop struct=getTimeZone() index="key" item="val" {
+					loop struct=getTimeZone() index="local.key" item="local.val" {
 						// writeDump(label:k,var:v);
 					}
 				} ).notToThrow();

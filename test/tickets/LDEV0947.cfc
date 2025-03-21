@@ -20,7 +20,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 		
 	public void function testConcurrentModification(){
 		var threadNames = [];
-		loop from=1 to=50 index="i" {
+		loop from=1 to=50 index="local.i" {
 			arrayAppend(threadNames, "t947_#i#");
 			thread action="run" name="t947_#i#" {
 				loop from=1 to=1000 index="y" {

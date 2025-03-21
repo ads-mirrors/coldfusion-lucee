@@ -23,22 +23,22 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			});
 
 			it(title="test assign function call", body=function() {
-				x=myvar?.firstlevel();
+				var x=myvar?.firstlevel();
 				expect(isNull(x)).toBeTrue();
 				
-				x=myvar?.firstlevel?.nextlevel();
+				var x=myvar?.firstlevel?.nextlevel();
 				expect(isNull(x)).toBeTrue();
 				
-				x=myvar?.firstlevel?.nextlevel?.udf();
+				var x=myvar?.firstlevel?.nextlevel?.udf();
 				expect(isNull(x)).toBeTrue();
 			});
 
 			it(title="test assign variable", body=function() {
-				x=myvar?.firstlevel;
+				var x=myvar?.firstlevel;
 				expect(isNull(x)).toBeTrue();
-				x=myvar?.firstlevel?.nextlevel;
+				var x=myvar?.firstlevel?.nextlevel;
 				expect(isNull(x)).toBeTrue();
-				x=myvar?.firstlevel?.nextlevel?.udf;
+				var x=myvar?.firstlevel?.nextlevel?.udf;
 				expect(isNull(x)).toBeTrue();
 			});
 

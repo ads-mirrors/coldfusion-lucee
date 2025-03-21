@@ -38,7 +38,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 		
 		
 	assertEquals(isNull(v1),true);  
-	v1=1;
+	var v1=1;
 	assertEquals(isNull(v1),false);  
 	v1=nullValue();
 	assertEquals(isNull(v1),true);  
@@ -68,7 +68,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 	assertEquals(isNull(local.v3),true);  
 	
 	assertEquals(isNull(a.b.c.d.e),true);  
-	a.b.c.d.e=1;
+	local.a.b.c.d.e=1;
 	assertEquals(isNull(a.b.c.d.e),false);  
 	a.b.c.d.e=nullValue();
 	assertEquals(isNull(a.b.c.d.e),true);  
@@ -79,7 +79,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 	variables.a1.b.c.d.e=nullValue();
 	assertEquals(isNull(variables.a1.b.c.d.e),true);  
 	
-	dyn="abx";
+	var dyn="abx";
 	assertEquals(isNull(a.b[dyn].d.e),true);  
 	a.b[dyn].d.e=1;
 	assertEquals(isNull(a.b[dyn].d.e),false);  
@@ -100,9 +100,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 	assertEquals(isNull(variables.arr[2]),true);
 	assertEquals(isNull(variables.arr[3]),false);
   	
-  	one=1;
-  	two=2;
-  	three=3;
+	var one=1;
+	var two=2;
+	var three=3;
   	
   	assertEquals(isNull(variables.arr[one]),false);
 	assertEquals(isNull(variables.arr[two]),true);

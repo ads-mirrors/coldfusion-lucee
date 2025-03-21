@@ -26,7 +26,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 			header:{'content-type':'application/json; charset=utf-8'},
 			body:'{"foo":"bar"}');
 		//result=httpCall(calledName:"Jira2588/index.cfm",method:"post",body:'{"foo":"bar"}');
-		body=evaluate(trim(result.filecontent));
+		variables.body=evaluate(trim(result.filecontent));
 	}
 
 	public void function testHTTPReqData(){
