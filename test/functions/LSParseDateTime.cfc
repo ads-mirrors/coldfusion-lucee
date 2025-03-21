@@ -456,7 +456,7 @@
 
 			it( title="checking LSparseDateTime() function with 1/1", body = function( currentSpec ) {
 				assertEquals("-{ts '#year(now())#-01-01 00:00:00'}", "-#LSParseDateTime("1/1",'en_us')#");
-				cfloop( list="ar_SA,zh_CN,zh_TW,nl_NL,en_AU,en_CA,en_GB,fr_CA,fr_FR,de_DE,iw_IL,hi_IN,it_IT,ja_JP,ko_KR,pt_BR,es_ES,sv_SE,th_TH,th_TH_TH", index="locale"){
+				cfloop( list="ar_SA,zh_CN,zh_TW,nl_NL,en_AU,en_CA,en_GB,fr_CA,fr_FR,de_DE,iw_IL,hi_IN,it_IT,ja_JP,ko_KR,pt_BR,es_ES,sv_SE,th_TH,th_TH_TH", index="local.locale"){
 					try {
 						LSParseDateTime("1/1",locale);
 						fail("must throw:#locale# -)> can't cast [1/1] to date value");

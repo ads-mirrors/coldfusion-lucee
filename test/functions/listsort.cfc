@@ -13,7 +13,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
   				assertEquals("#ListSort(',,ccc,,,aaa,,,bbb,,,AAAA,,,BB,,','textnocase','asc',',',false)#", "aaa,AAAA,BB,bbb,ccc");
 				assertEquals("#ListSort(',,1,,,4,,,9,,,8,,,3,,','numeric','asc',',',false)#", "1,3,4,8,9");
 
-				list=("d,a,a,b,A");
+				var list=("d,a,a,b,A");
 				list=ListSort(list, "textnocase","desc");
 				assertEquals("#list#", "d,b,A,a,a");
 

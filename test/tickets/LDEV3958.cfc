@@ -3,7 +3,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="array"{
         describe("Testcase for LDEV3958", function() {
             it( title="Checking performance of arraySlice() with array has 2.1M elements", body=function( currentSpec ) {
                 var arr = []
-                for( i = 1; i <= 2100000; i++ ) {
+                for( var i = 1; i <= 2100000; i++ ) {
                     arr.append(i);
                 }
                 var start = getTickCount();

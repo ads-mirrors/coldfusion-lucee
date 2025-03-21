@@ -26,7 +26,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 		describe( 'QofQ' , function(){
 
 			it( 'Can select *' , function() {				
-				actual = QueryExecute(
+				var actual = QueryExecute(
 					sql = "SELECT * FROM employees",
 					options = { dbtype: 'query' }
 				);
@@ -35,7 +35,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 			});
 
 			it( 'Can select with extra space in multi-word clause' , function() {				
-				actual = QueryExecute(
+				var actual = QueryExecute(
 					sql = "SELECT count(1) from employees where empID is 	 null or empID is 	 not 	 null and isActive not  	 like 'test' and isactive not 	   in ('test')",
 					options = { dbtype: 'query' }
 				);
@@ -44,7 +44,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 			});
 
 			it( 'Can select with functions' , function() {				
-				actual = QueryExecute(
+				var actual = QueryExecute(
 					sql = "SELECT upper(name), lower(email), coalesce( null, age ) FROM employees",
 					options = { dbtype: 'query' }
 				);
@@ -53,7 +53,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 			
 				
 			it( 'Can select with math operations' , function() {				
-				actual = QueryExecute(
+				var actual = QueryExecute(
 					sql = "SELECT yearsEmployed/sickDaysLeft as calc1,
 								yearsEmployed*sickDaysLeft as calc2,
 								yearsEmployed-sickDaysLeft as calc3,
@@ -66,7 +66,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 			});
 
 			it( 'Can select with functions that are aliased' , function() {				
-				actual = QueryExecute(
+				var actual = QueryExecute(
 					sql = "SELECT upper(name) as name, lower(email) email, coalesce( null, age ) as foo FROM employees",
 					options = { dbtype: 'query' }
 				);
@@ -74,7 +74,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 			});
 				
 			it( 'Can select with order bys' , function() {				
-				actual = QueryExecute(
+				var actual = QueryExecute(
 					sql = "SELECT * from employees ORDER BY department, isActive desc, name, email",
 					options = { dbtype: 'query' }
 				);
@@ -84,7 +84,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 			});
 				
 			it( 'Can order by alias' , function() {				
-				actual = QueryExecute(
+				var actual = QueryExecute(
 					sql = "SELECT department as dept from employees ORDER BY dept",
 					options = { dbtype: 'query' }
 				);
@@ -94,7 +94,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 			});
 				
 			it( 'Can order by columns not in select' , function() {				
-				actual = QueryExecute(
+				var actual = QueryExecute(
 					sql = "SELECT department from employees ORDER BY department, isActive desc, name, email",
 					options = { dbtype: 'query' }
 				);
@@ -104,7 +104,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 			});
 				
 			it( 'Can have extra whitespace in group by and order by clauses' , function() {
-				actual = QueryExecute(
+				var actual = QueryExecute(
 					sql = "SELECT department from employees group       by department ORDER       BY department",
 					options = { dbtype: 'query' }
 				);
@@ -114,7 +114,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 			});
 				
 			it( 'Can filter on date column' , function() {
-				actual = QueryExecute(
+				var actual = QueryExecute(
 					sql = "SELECT * from employees where hireDate = '2019-10-21 00:00:00.000'",
 					options = { dbtype: 'query' }
 				);
@@ -123,7 +123,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 			});
 				
 			it( 'Can handle isnull' , function() {
-				actual = QueryExecute(
+				var actual = QueryExecute(
 					sql = "SELECT empid, isNull( empID, 'default' ) as empIDNonNull from employees where email in ( 'Doris@company.com','Mary@company.com','Aurthur@company.com' ) order by email",
 					options = { dbtype: 'query' }
 				);
@@ -138,7 +138,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				
 			it( 'Can handle isnull with full null support' , function() {
 				application nullsupport=true action='update';
-				actual = QueryExecute(
+				var actual = QueryExecute(
 					sql = "SELECT empid, isNull( empID, 'default' ) as empIDNonNull from employees where email in ( 'Doris@company.com','Mary@company.com','Aurthur@company.com' ) order by email",
 					options = { dbtype: 'query' }
 				);
@@ -156,7 +156,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 			describe( 'Distinct' , function(){
 		
 				it( 'Can select distinct' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT distinct department FROM employees ORDER BY department",
 						options = { dbtype: 'query' }
 					);
@@ -168,7 +168,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 		
 				it( 'Can select distinct with order by' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT distinct department FROM employees order by department",
 						options = { dbtype: 'query' }
 					);
@@ -176,7 +176,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 	
 				it( 'Can select distinct with top' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT top 2 distinct department as foo FROM employees",
 						options = { dbtype: 'query' }
 					);
@@ -184,7 +184,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 	
 				it( 'Can select distinct with maxrows' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT distinct department FROM employees order by department",
 						options = { dbtype: 'query', maxrows: 2 }
 					);
@@ -194,7 +194,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 	
 				it( 'Can select distinct with *' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT distinct * FROM employees",
 						options = { dbtype: 'query'}
 					);
@@ -206,7 +206,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 			describe( 'Query Union' , function(){
 				
 					it( 'Can union' , function() {				
-					actual = QueryExecute(
+						var actual = QueryExecute(
 						sql = "SELECT * FROM employees
 							union
 							SELECT * FROM employees",
@@ -216,7 +216,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 				
 				it( 'Can union all' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT * FROM employees
 							union all
 							SELECT * FROM employees",
@@ -226,7 +226,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 				
 				it( 'Can union distinct' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT upper( favoriteColor ) as favoriteColor FROM employees
 							union distinct
 							SELECT upper( favoriteColor ) FROM employees
@@ -242,7 +242,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 				
 				it( 'Can union with top' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT top 2 * FROM employees
 							union all
 							SELECT top 3 * FROM employees",
@@ -252,7 +252,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 				
 				it( 'Can union with maxrows' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT * FROM employees
 							union all
 							SELECT * FROM employees",
@@ -262,7 +262,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 				
 				it( 'Can union with order' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT * FROM employees
 							union
 							SELECT * FROM employees
@@ -275,7 +275,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 				
 				it( 'Can union with group by' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT department as thing, count(1) as count, max(age) as age FROM employees
 							GROUP BY department
 							union all
@@ -294,7 +294,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 				
 				it( 'Can union with literals' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT TOP 1 'brad' as firstname, 'wood' as lastname FROM employees
 							union all SELECT TOP 1 'Scott', 'Steinbeck' FROM employees
 							union all SELECT TOP 1 'Gavin', 'Pickin' FROM employees
@@ -312,7 +312,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 			describe( 'Query grouping' , function(){
 				
 				it( 'Can use aggregates with no group by' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT avg(age) as avgAge, count(1) as totalEmps, max(hireDate) as mostRecentHire, min(sickDaysLeft) as fewestSickDays FROM employees",
 						options = { dbtype: 'query' }
 					);
@@ -324,7 +324,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 				
 				it( 'Can use count all and count distinct' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT count(1) as cNum, 
 									count(*) as cStar, 
 									count('asdf') as cLiteral, 
@@ -350,7 +350,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 				
 				it( 'Can use aggregates with no group by and where' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT sum(age) sumAge FROM employees where department = 'IT'",
 						options = { dbtype: 'query' }
 					);
@@ -359,7 +359,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 				
 				it( 'Can use group by' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT department as dept FROM employees GROUP BY department ORDER BY department",
 						options = { dbtype: 'query' }
 					);
@@ -371,7 +371,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 				
 				it( 'Can use group by with distinct' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT distinct department as dept FROM employees GROUP BY department ORDER BY department",
 						options = { dbtype: 'query' }
 					);
@@ -383,7 +383,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 				
 				it( 'Can use group by with aggregates' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT department as dept, max(hireDate) as mostRecentHire, min(age) as youngestAge, max( email ) FROM employees GROUP BY department order by mostRecentHire desc",
 						options = { dbtype: 'query' }
 					);
@@ -395,7 +395,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 				
 				it( 'Can use group by with more than one group by' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT department, isContract, isActive FROM employees GROUP BY department, isContract, isActive ORDER BY department, isContract, isActive",
 						options = { dbtype: 'query' }
 					);
@@ -406,7 +406,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 				
 				it( 'Can use group by with having clause' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT department, max(age) as maxAge from employees GROUP BY department HAVING max(age) > 30 ORDER BY department",
 						options = { dbtype: 'query' }
 					);
@@ -420,7 +420,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 				
 				it( 'Can use group by with having clause and distinct' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT department, max(age) as maxAge from employees GROUP BY department HAVING max(age) > 30 ORDER BY department",
 						options = { dbtype: 'query' }
 					)
@@ -434,7 +434,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 				
 				it( 'Can use group by with operations' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT lower(department) as lowerDept from employees GROUP BY upper(department) HAVING max(age) > 30 ORDER BY lower(department)",
 						options = { dbtype: 'query' }
 					);
@@ -445,7 +445,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 				
 				it( 'Can use group by with columns not in select' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT 'test' as val from employees GROUP BY department, age, lower(email) ORDER BY upper(department)",
 						options = { dbtype: 'query' }
 					);
@@ -455,7 +455,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 				
 				it( 'Can order by aggregate columns' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT department, max(age) as maxAge from employees GROUP BY department HAVING max(age) > 30 ORDER BY max(age)",
 						options = { dbtype: 'query' }
 					);
@@ -469,7 +469,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 				
 				it( 'Can reference more than one column in aggregate function' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT department, sum(yearsEmployed * sickDaysLeft) as calc from employees GROUP BY department order by department",
 						options = { dbtype: 'query' }
 					);
@@ -481,7 +481,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 				
 				it( 'Can wrap aggregate function in scalar function' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT floor(sum(yearsEmployed * sickDaysLeft)) as calc from employees group by department order by department",
 						options = { dbtype: 'query' }
 					);
@@ -493,7 +493,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				});
 				
 				it( 'Can nest scalar functions inside of aggregates inside of scalar functions and use more than aggregate in a single operation' , function() {				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT department, max( yearsEmployed ) as max, count(1) as count, ceiling( max( floor( yearsEmployed ) )+count(1) )  as calc from employees group by department order by department",
 						options = { dbtype: 'query' }
 					);
@@ -506,7 +506,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				
 				it( 'Aggregate select with no group by against empty query returns 1 row of empty strings' , function() {
 					var qry = queryNew( 'col', 'varchar' );				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT 'const' as const, count(1) as count, avg(col) as avg, min(col) as min, max(col) as max, isNull( max(col), 'test' ) as max2 from qry",
 						options = { dbtype: 'query' }
 					);
@@ -525,7 +525,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				
 				it( 'Aggregate select with no group by and a where clause against empty query returns 1 row of empty strings' , function() {
 					var qry = queryNew( 'col', 'varchar' );				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT 'const' as const, count(1) as count, avg(col) as avg, min(col) as min, max(col) as max, isNull( max(col), 'test' ) as max2 from qry where col = ''",
 						options = { dbtype: 'query' }
 					);
@@ -544,7 +544,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 				
 				it( 'Aggregate select with group by against empty query returns 0 rows' , function() {
 					var qry = queryNew( 'col', 'varchar' );				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT count(1) as count from qry group by col",
 						options = { dbtype: 'query' }
 					);
@@ -557,7 +557,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 						[ nullValue(), nullValue() ],
 						[ 100, nullValue() ],
 					] );				
-					actual = QueryExecute(
+					var actual = QueryExecute(
 						sql = "SELECT sum(col) as sum, avg(col) as avg, min(col) as min, max(col) as max, sum(col2) as sum2, avg(col2) as avg2, min(col2) as min2, max(col2) as max2 from qry",
 						options = { dbtype: 'query' }
 					);

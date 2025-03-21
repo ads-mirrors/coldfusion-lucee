@@ -5,10 +5,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="image" {
 	function run( testResults, testBox ){
 		describe( "Test suite for LDEV2228", function(){
 			it( title = "rotate image", body = function( currentSpec ){
-				img=imageNew("",100,88,"RGB","0fb9b1");
+				var img=imageNew("",100,88,"RGB","0fb9b1");
 				imageRotate(img, "90");
 				
-				img=imageNew("",100,87,"RGB","0fb9b1");
+				var img=imageNew("",100,87,"RGB","0fb9b1");
 				imageRotate(img, "90");
 			});
 		});

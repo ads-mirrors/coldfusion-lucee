@@ -9,7 +9,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
                 setTimeZone(variables.startingTZ?:"UTC");
             });
 			it(title="checking DaysInMonth() function", body=function( currentSpec ) {
-				d1 = CreateDateTime(2001, 12, 1, 4, 10, 1);
+				var d1 = CreateDateTime(2001, 12, 1, 4, 10, 1);
 				assertEquals("31", "#daysInMonth(d1)#");
 					
 				<!--- all month of a year --->
@@ -36,7 +36,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			});
 
 			it(title="checking DateTime.DaysInMonth() member function", body=function( currentSpec ) {
-				d1 = CreateDateTime(2001, 12, 1, 4, 10, 1);
+				var d1 = CreateDateTime(2001, 12, 1, 4, 10, 1);
 				assertEquals("31", "#d1.daysInMonth()#");
 					
 				<!--- all month of a year --->

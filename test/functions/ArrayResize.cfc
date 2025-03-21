@@ -2,7 +2,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function run( testResults , testBox ) {
 		describe( title="Test suite for ArrayResize()", body=function() {
 			it(title="checking ArrayResize() function", body = function( currentSpec ) {
-				arr=arrayNew(1);
+				var arr=arrayNew(1);
 				assertEquals(0, arrayLen(arr));
 				ArrayResize(arr, 20);
 				assertEquals(20, arrayLen(arr));

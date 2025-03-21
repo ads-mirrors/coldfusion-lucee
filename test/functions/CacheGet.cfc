@@ -29,7 +29,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="cache,ehCache" {
 			cachePut('abc','123');
 
 			assertEquals("123",cacheGet('abc'));
-			cacheGetKey=cacheGet('def');
+			var cacheGetKey=cacheGet('def');
 
 			assertEquals("false",structKeyExists(variables,'cacheGetKey') and !isNull(variables.cacheGetKey));
 

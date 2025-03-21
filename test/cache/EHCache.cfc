@@ -47,14 +47,14 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="cache,ehCache" {
 		cachePut(id=cacheId, value=testData, timeSpan=createTimespan(0,0,0,1), cacheName=cacheName);
 		
 		// getting back without waiting on it
-		theValue = cacheGet(id=cacheId, cacheName=cacheName);
-		wasFound = !isNull(theValue);
+		var theValue = cacheGet(id=cacheId, cacheName=cacheName);
+		var wasFound = !isNull(theValue);
 		assertTrue(wasFound);
 
 		// getting back after at least a second
 		sleep(1500); // take a nap
-		theValue = cacheGet(id=cacheId, cacheName=cacheName);
-		wasFound = !isNull(theValue);
+		var theValue = cacheGet(id=cacheId, cacheName=cacheName);
+		var wasFound = !isNull(theValue);
 		assertFalse(wasFound);		
 	}
 
@@ -102,7 +102,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="cache,ehCache" {
 		// on the first request everything is equal
 		local.result=_InternalRequest(template:uri,urls:urls,addtoken:true);
 		local.sct=evaluate(result.filecontent);
-		loop list="client,session" item="scp" {
+		loop list="client,session" item="local.scp" {
 			assertEquals(sct[scp].lastvisit&"",sct[scp].timecreated&"");
 		}
 
@@ -111,7 +111,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="cache,ehCache" {
 		// on the second request time is different
 		local.result=_InternalRequest(template:uri,urls:urls,addtoken:true);
 		local.sct=evaluate(result.filecontent);
-		loop list="client,session" item="scp" {
+		loop list="client,session" item="local.scp" {
 			assertEquals(sct[scp].lastvisit&"",sct[scp].timecreated&"");
 		}
 

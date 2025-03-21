@@ -12,7 +12,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				// Closure
 				var arr=["hello","world"];
 				request.arrayEach=[];
-				sseachFilter=function (arg1){
+				var sseachFilter=function (arg1){
 					arrayAppend(request.arrayEach,arg1);
 				};
 				ArrayEach(arr,eachFilter);

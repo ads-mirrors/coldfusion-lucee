@@ -2,7 +2,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="image" {
 	function run( testResults , testBox ) {
 		describe( "test case for LDEV-1476", function() {
 			it(title = "checking image data from tobase64() function", body = function( currentSpec ) {
-				arrSrc=["tomcat.gif", "lucee.png","test.jpg"];
+				var arrSrc=["tomcat.gif", "lucee.png","test.jpg"];
 
 				loop array=arrSrc item="src" {
 					var result = "";
@@ -23,9 +23,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="image" {
 			});
 
 			it(title = "checking image data from filereadBinary() function", body = function( currentSpec ) {
-				arrSrc=["tomcat.gif", "lucee.png","test.jpg"];
+				var arrSrc=["tomcat.gif", "lucee.png","test.jpg"];
 
-				loop array=arrSrc item="src" {
+				loop array=arrSrc item="local.src" {
 					var result = "";
 					try{
 						var img = ImageRead("LDEV1476\#src#");

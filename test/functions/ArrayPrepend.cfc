@@ -2,7 +2,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function run( testResults , testBox ) {
 		describe( title="Test suite for ArrayPrepend()", body=function() {
 			it(title="checking ArrayPrepend() function", body = function( currentSpec ) {
-				arr=arrayNew(1);
+				var arr=arrayNew(1);
 				arr[1]=1;
 				arr[2]=2;
 				ArrayPrepend( arr, 'a' );

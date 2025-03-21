@@ -23,10 +23,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				assertEquals("#CreateODBCDateTime(1.1111)#x","{ts '1899-12-31 02:39:59'}x");
 				assertEquals("#CreateODBCDateTime(1.11111)#x","{ts '1899-12-31 02:39:59'}x");
     
-				tz = createObject('java','java.util.TimeZone').getTimeZone("America/Mexico_City");
-				c = createObject('java','java.util.Calendar').getInstance();
+				var tz = createObject('java','java.util.TimeZone').getTimeZone("America/Mexico_City");
+				var c = createObject('java','java.util.Calendar').getInstance();
 				c.setTimeZone(tz);
-				dt=CreateDateTime(2000,1,1,1,1,1);
+				var dt=CreateDateTime(2000,1,1,1,1,1);
 				c.setTime(dt);
 
 				assertEquals("#dt#x","#c#x");

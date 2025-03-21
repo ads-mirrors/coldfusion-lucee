@@ -42,14 +42,14 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 		cachePut(id=cacheId, value=testData, cacheName=cacheName);
 
 		// getting back without waiting on it
-		theValue = cacheGet(id=cacheId, cacheName=cacheName);
-		wasFound = !isNull(theValue);
+		var theValue = cacheGet(id=cacheId, cacheName=cacheName);
+		var wasFound = !isNull(theValue);
 		assertTrue(wasFound);
 
 		// getting back after at least a second
 		sleep(1500); // take a nap
-		theValue = cacheGet(id=cacheId, cacheName=cacheName);
-		wasFound = !isNull(theValue);
+		var theValue = cacheGet(id=cacheId, cacheName=cacheName);
+		var wasFound = !isNull(theValue);
 		assertFalse(wasFound);		
 	}
 

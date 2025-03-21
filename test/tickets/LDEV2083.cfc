@@ -9,7 +9,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			"txtPath": base & "LDEV2083\test.txt",
 			"mp3Path": base & "LDEV2083\sound.mp3"
 		};
-		cfloop (collection="#structPath#" item = "filePath"){
+		cfloop (collection="#structPath#" item = "local.filePath"){
 			if( !fileExists( structFind( structPath, filePath ) ) ){
 				FileWrite( structFind( structPath, filePath ), '' );
 			}

@@ -739,12 +739,12 @@ component {
 			type="server"
 			password="#server.SERVERADMINPASSWORD#" 
 			action="getBundles" 
-			returnvariable="q_bundles"
+			returnvariable="local.q_bundles"
 		var bundles = {};
 		loop query=q_bundles {
 			var _bundle = {};
 			_bundle.append( q_bundles.headers );
-			bundles[ _bundle[ 'Bundle-SymbolicName' ] ] = _bundle[ 'Bundle-Version' ];
+			local.bundles[ _bundle[ 'Bundle-SymbolicName' ] ] = _bundle[ 'Bundle-Version' ];
 		}
 		return bundles;
 	}

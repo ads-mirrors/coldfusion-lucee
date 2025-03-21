@@ -13,7 +13,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="xml" {
 						}
 					]
 				}
-				feed action='create' name=theFeed xmlVar='feedXML';
+				feed action='create' name=theFeed xmlVar='local.feedXML';
 				assertEquals(true, isxml(feedXML));
 				var ParseXml = xmlParse(feedXML);
 				var result = xmlSearch( ParseXml,'//*[ local-name()=''feed'' ]')[1].XmlChildren[1].XmlChildren[4].XmlAttributes.type;

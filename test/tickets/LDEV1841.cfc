@@ -12,21 +12,21 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 					return accountBalance-ccBill;
 				}
 
-				payEMIs = function(accountBalance){
+				var payEMIs = function(accountBalance){
 					var mortgageEMI = 1000;
 					var carLeaseEMI = 750;
 					var healthInsuranceEMI = 250;
 				    return accountBalance-(mortgageEMI+carLeaseEMI+healthInsuranceEMI);
 				}
 
-				miscellenousExpenses = function(accountBalance){
+				var miscellenousExpenses = function(accountBalance){
 					var shopping = 1500;
 					var clubExpense  =1000;
 					var casinoExpense = 2000;
 					return accountBalance-(shopping+clubExpense+casinoExpense);
 				}
 
-				checkBalance = function(accountBalance){
+				var checkBalance = function(accountBalance){
 					while(accountBalance > 5000){
 						accountBalance = miscellenousExpenses(accountBalance);
 				    }
@@ -34,13 +34,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				    	throw (message="Account balance below threshold!!!", type="info");
 				}
 
-				errorHandler = function(error){
+				var errorHandler = function(error){
 					if(error.message contains "Account balance below threshold!"){
 					 return "You have reached your spending limit!";
 					}
 				}
 
-				future = runAsync(getAccountBalance).then(payCreditCardBill).then(payEMIs).then(miscellenousExpenses);
+				var future = runAsync(getAccountBalance).then(payCreditCardBill).then(payEMIs).then(miscellenousExpenses);
 				assertEquals(false , future.isCancelled());
 				assertEquals(111610, future.get());
 				assertEquals(true, future.isDone());
@@ -53,7 +53,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				function add(){
 					return 10+20;
 				}
-				Future = runAsync(add);
+				var Future = runAsync(add);
 				assertEquals(30, Future.get());
 				assertEquals(true, Future.isDone());
 				assertEquals(false, Future.isCancelled());

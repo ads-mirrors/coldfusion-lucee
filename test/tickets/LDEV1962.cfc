@@ -7,8 +7,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 		this[ arguments.name ] = arguments.UDF;
 	}
 	function run( testResults , testBox ) {
-		objComponent1 = new LDEV1962.component1();
-		objComponent2 = new LDEV1962.component2();
+		var objComponent1 = new LDEV1962.component1();
+		var objComponent2 = new LDEV1962.component2();
 		objComponent2.injectMixin = injectMixin;
 		objComponent2.injectMixin('getMessage', objComponent1.getMessage);
 		objComponent2.injectMixin('getMessagex', objComponent1.getMessage);

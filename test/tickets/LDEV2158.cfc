@@ -4,7 +4,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq"{
 			it(title = "Query sorting ignores leading hyphen", body = function( currentSpec ) {
 				var testQuery = queryNew("getLtr", "CF_SQL_VARCHAR");
 				var dataArr = listToArray("a,A,B,C,-A,-B,-C,- A,- B,- C,@A,@B,@C,*A,*B,*C,1A,1B,1C,-a,2A,/c");
-				for (i = 1; i <= arrayLen(dataArr); i++)
+				for (var i = 1; i <= arrayLen(dataArr); i++)
 					queryAddRow(testQuery, {getLtr: dataArr[i]});
 				var testQuery = queryExecute("SELECT * FROM testQuery ORDER BY getLtr", {}, {dbType: "query"});
 

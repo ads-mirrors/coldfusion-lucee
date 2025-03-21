@@ -25,7 +25,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 
 
 			it(title="checking ArraySort() function", body = function( currentSpec ) {
-				arr=arrayNew(1);
+				var arr=arrayNew(1);
 				arr[1]=111;
 				arr[2]=22;
 				arr[3]=3;

@@ -13,7 +13,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="zip"{
 					}
 					cfdirectory(action="list", directory=trg,  name="result" recurse=true);
 					
-					result=queryFilter(result,function(row) {
+					var result=queryFilter(result,function(row) {
 						return row.type=="file";
 					});
 				}
@@ -35,7 +35,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="zip"{
 					cfdirectory(action="list", directory=trg,  name="result" recurse=true);
 					
 					
-					result=queryFilter(result,function(row) {
+					var result=queryFilter(result,function(row) {
 						return row.type=="file";
 					});
 				}
@@ -58,7 +58,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="zip"{
 					}
 					cfdirectory(action="list", directory=trg,  name="result" recurse=true);
 					
-					result=queryFilter(result,function(row) {
+					var result=queryFilter(result,function(row) {
 						return row.type=="file";
 					});
 				}
@@ -83,7 +83,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="zip"{
 					}
 					cfdirectory(action="list", directory=trg,  name="result" recurse=true);
 					
-					result=queryFilter(result,function(row) {
+					var result=queryFilter(result,function(row) {
 						return row.type=="file";
 					});
 

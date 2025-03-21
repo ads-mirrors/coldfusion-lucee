@@ -20,10 +20,10 @@
 				});
 
 				it("checking script based", function( currentSpec ) {
-					cfdocument(format="PDF" name="pdf2" filename="#variables.uri#/test2.pdf" overwrite="true"){
+					cfdocument(format="PDF" name="local.pdf2" filename="#variables.uri#/test2.pdf" overwrite="true"){
 						writeOutput("Lucee");
 					}
-					cfpdf ( action = "extracttext" source = "pdf2" name="result" ) {
+					cfpdf ( action = "extracttext" source = "pdf2" name="local.result" ) {
 					}
 					expect(isXML(result)).toBeTrue();
 				});
@@ -38,13 +38,13 @@
 	</cfscript>
 
 	<cffunction name="tagBased" access="private" returntype="any">
-		<cfset path ="#getDirectoryFromPath(getCurrenttemplatepath())#"/>
+		<cfset local.path ="#getDirectoryFromPath(getCurrenttemplatepath())#"/>
 		<cfdocument format="PDF" overwrite="true" name="pdf" filename="#variables.uri#/test.pdf">
 			<cfdocumentsection>
 				Lucee test documents
 			</cfdocumentsection>
 		</cfdocument>
-		<cfpdf action = "extracttext" source = "pdf" name="read" >
+		<cfpdf action = "extracttext" source = "pdf" name="local.read" >
 		<cfreturn read>
 	</cffunction>
 </cfcomponent>

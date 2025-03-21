@@ -12,14 +12,14 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 		describe( "test case for fileMove", function() {
 			it(title = "Checking with fileMove", body = function( currentSpec ) {
 				<!--- begin old test code --->
-				srcDir=dir&"src/";
-				trgDir=dir&"trg/";
+				var srcDir=dir&"src/";
+				var trgDir=dir&"trg/";
 				cfdirectory(directory="#srcDir#" action="create" mode="777");
 				cfdirectory(directory="#trgDir#" action="create" mode="777");
 				// define paths
-				src=srcDir&"test.txt";
-				dest1=trgDir&"testx.txt";
-				dest3=trgDir&'test.txt';
+				var src=srcDir&"test.txt";
+				var dest1=trgDir&"testx.txt";
+				var dest3=trgDir&'test.txt';
 				assertEquals(FileExists(dest1),false);
 				assertEquals(FileExists(dest3),false);
 				// copy with destination file
