@@ -30,7 +30,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 		});
 
 		describe( title="Test suite for LSparseDateTime()", skip=true, body=function() { 
-			cfloop( list=#Server.Coldfusion.SupportedLocales#, index="locale"){
+			cfloop( list=#Server.Coldfusion.SupportedLocales#, index="local.locale"){
 				describe(title="test LSparseDateTime locale format: [#locale#]", body=function() {
 					beforeEach( function(){
 						variables.startingTZ=getTimeZone();

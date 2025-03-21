@@ -6,23 +6,23 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 
 		describe( "Test suite for LDEV-2108", function(){
 			it( title = "queryformat as string", body = function( currentSpec ){
-					q=query('a':[1,2]);
+					var q=query('a':[1,2]);
 					serializeJson(q,"1");
 			});
 			it( title = "queryformat as number", body = function( currentSpec ){
-					q=query('a':[1,2]);
+				var q=query('a':[1,2]);
 					serializeJson(q,1);
 			});
 			it( title = "queryformat as boolean", body = function( currentSpec ){
-					q=query('a':[1,2]);
+				var q=query('a':[1,2]);
 					serializeJson(q,true);
 			});
 			it( title = "queryformat as number, next as charset (string)", body = function( currentSpec ){
-					q=query('a':[1,2]);
+				var q=query('a':[1,2]);
 					serializeJson(q,1,"UTF-8");
 			});
 			it( title = "queryformat as number, next as useSecure (boolean)", body = function( currentSpec ){
-					q=query('a':[1,2]);
+				var q=query('a':[1,2]);
 					serializeJson(q,1,false);
 					serializeJson(q,1,1);
 					serializeJson(q,1,"1");

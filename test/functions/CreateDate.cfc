@@ -9,8 +9,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				assertEquals("{ts '2000-12-01 00:00:00'}x","#CreateDate(2000, 12, 1)#x");
 				assertEquals("#CreateODBCDate(1)#x","{d '1899-12-31'}x");
 					
-				d = CreateDate(2007,11,30);
-				d1 = d - 0;
+				var d = CreateDate(2007,11,30);
+				var d1 = d - 0;
 				assertEquals("39416","#d1#");
 
 				d = CreateDate(2007,5,1);

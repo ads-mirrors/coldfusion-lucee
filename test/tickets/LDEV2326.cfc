@@ -5,7 +5,7 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" labels="pdf" {
 		variables.tempDir=getTempDirectory() & "LDEV2326_" & createGUID();
 		afterAll();
 		directoryCreate( variables.tempDir );
-		cfloop( from = "1" to = "2" index = "i" ){
+		cfloop( from = "1" to = "2" index = "local.i" ){
 			cfdocument(format = "PDF" filename = "#variables.tempDir#/#i#.pdf" overwrite = "true"){
 				writeOutput("lucee");
 			}

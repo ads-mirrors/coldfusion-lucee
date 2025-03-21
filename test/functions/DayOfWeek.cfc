@@ -9,7 +9,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
                 setTimeZone(variables.startingTZ?:"UTC");
             });
 			it(title="checking DayOfWeek() function", body = function( currentSpec ) {
-				d1=CreateDateTime(2001, 12, 1, 4, 10, 1); 
+				var d1=CreateDateTime(2001, 12, 1, 4, 10, 1); 
 				assertEquals("7", "#dayOfWeek(d1)#");
 				assertEquals("#DayOfWeek(1)#", "1");
 

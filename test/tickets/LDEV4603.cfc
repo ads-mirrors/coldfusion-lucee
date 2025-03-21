@@ -11,6 +11,7 @@ component extends = "org.lucee.cfml.test.LuceeTestCase"  {
 
 						var f=getTempFile(getDirectoryFromPath(getCurrentTemplatePath()), "ldev4603-slow-parsing-#data.lines#", "cfs");
 						try {
+							var counter=0;
 							debug(arrayToList(a, "#chr(10)#" ));
 							fileWrite( f, "counter=0;"&arrayToList(a, "#chr(10)#" ) );  // approx 1.5mb of crap cfml
 							// systemOutput( f );

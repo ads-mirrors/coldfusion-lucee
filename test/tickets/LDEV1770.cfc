@@ -54,7 +54,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="xml"{
 		var colMap.rsslink = "ARTID";
 		var colMap.title = "ARTNAME";
 
-		cffeed (action="create" query="#getArt#" columnMap="#colMap#" properties="#feedMeta#" xmlVar="feedXML");
+		cffeed (action="create" query="#getArt#" columnMap="#colMap#" properties="#feedMeta#" xmlVar="local.feedXML");
 		var testContent = xmlParse(feedXML);
 		return testContent;
 	}

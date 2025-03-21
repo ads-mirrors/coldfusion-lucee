@@ -9,14 +9,14 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
                 setTimeZone(variables.startingTZ?:"UTC");
             });
 			it(title="checking DateAdd() function with testDateAddMember", body = function( currentSpec ) {
-				fixDate=CreateDateTime(2001, 11, 1, 4, 10, 4);
+				var fixDate=CreateDateTime(2001, 11, 1, 4, 10, 4);
 				assertEquals("{ts '2002-11-01 04:10:04'}","#fixDate.Add("yyyy", 1)#");
 				assertEquals("{ts '2011-11-01 04:10:04'}","#fixDate.Add("yyyy", 10)#");
 				assertEquals("{ts '123458790-11-01 04:10:04'}","#fixDate.Add("yyyy", 123456789)#");
 			});
 			it(title="checking DateAdd() function with testDateAdd", body = function( currentSpec ) {
 				setTimeZone('Europe/Berlin');
-				fixDate=CreateDateTime(2001, 11, 1, 4, 10, 4);
+				var fixDate=CreateDateTime(2001, 11, 1, 4, 10, 4);
 				assertEquals("{ts '2002-11-01 04:10:04'}","#DateAdd("yyyy", 1, fixDate)#");
 				assertEquals("{ts '2011-11-01 04:10:04'}","#DateAdd("yyyy", 10, fixDate)#");
 				assertEquals("{ts '123458790-11-01 04:10:04'}","#DateAdd("yyyy", 123456789, fixDate)#");
@@ -72,14 +72,14 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				assertEquals("#DateAdd("yyyy", 2, 1)#","#parseDateTime("{ts '1901-12-31 00:00:00'}")#" );
 				assertEquals("#DateAdd("yyyy", 2, 1)#","{ts '1901-12-31 00:00:00'}");
 					
-				date=CreateDateTime(2008,10,28,0,0,0);
+				var date=CreateDateTime(2008,10,28,0,0,0);
 				assertEquals("+{ts '2008-10-28 00:00:00'}+","+#date#+");
 				assertEquals("+39750+","+#date+1#+");
 				assertEquals("+{ts '1899-12-30 00:00:00'}+","+#DateAdd('d',0,0)#+");
 				assertEquals("+{ts '2008-10-29 00:00:00'}+","+#DateAdd('d',0,date+1)#+");
 
-				date1=CreateDate(2009, 1, 1);
-				date2=DateAdd('m', 1, date1);
+				var date1=CreateDate(2009, 1, 1);
+				var date2=DateAdd('m', 1, date1);
 				assertEquals("{ts '2009-01-01 00:00:00'}x","#date1#x");
 				assertEquals("{ts '2009-02-01 00:00:00'}x","#date2#x");
 				assertEquals("1x","#DateDiff('m', date1, date2)#x");

@@ -9,7 +9,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				assertEquals("#ListSetAt(',,aaa,bbb,ccc',3,'xxx')#", ",,aaa,bbb,xxx");
 				assertEquals("#ListSetAt(',,aaa,,,bbb,ccc',3,'xxx')#", ",,aaa,,,bbb,xxx");
 
-				list="eins,,zwei,drei,vier";
+				var list="eins,,zwei,drei,vier";
 				list=listSetAt(list,2,'new');
 				assertEquals("#list#", "eins,,new,drei,vier");
 				list=listSetAt(",,,,,,eins,zwei,drei",2,'new');
@@ -17,8 +17,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				list=listSetAt("zero,,,,,,eins,zwei,drei",2,'new');
 				assertEquals("#list#", "zero,,,,,,new,zwei,drei");
 
-				sUrl="http://localhost/";
-				sMyurl=ListSetAt(sUrl, 2, "pc-cst", '/');
+				var sUrl="http://localhost/";
+				var sMyurl=ListSetAt(sUrl, 2, "pc-cst", '/');
 				assertEquals("#ListSetAt(sUrl, 2, "pc-cst", '/')#", "http://pc-cst/");
 				assertEquals("#ListSetAt(sUrl, 1, "pc-cst", '/')#", "pc-cst//localhost/");
 				assertEquals("#ListSetAt(',,aaa,,,bbb,,,ccc',1,'xxx',',',false)#", ",,xxx,,,bbb,,,ccc");

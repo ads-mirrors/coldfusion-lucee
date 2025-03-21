@@ -9,12 +9,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
                 setTimeZone(variables.startingTZ?:"UTC");
             });
 			it(title = "Checking with DatePartMember", body = function( currentSpec ) {
-				d1=CreateDateTime(2001, 12, 1, 4, 10, 1);
+				var d1=CreateDateTime(2001, 12, 1, 4, 10, 1);
 				assertEquals("12", "#d1.part("m")#");
 			});
 			
 			it(title = "Checking with DatePart", body = function( currentSpec ) {
-				d1=CreateDateTime(2001, 12, 1, 4, 10, 1);
+				var d1=CreateDateTime(2001, 12, 1, 4, 10, 1);
 				assertEquals("12", "#datePart("m",d1)#");
 
 				assertEquals("#DatePart("yyyy", 1)#", "1899" );

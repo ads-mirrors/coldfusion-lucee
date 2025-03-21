@@ -14,7 +14,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="date" {
 				expect(function() {
 					var fromDate = "01/01/2024";
 					var toDate = "01/10/2024";
-					loop from="#fromDate#" to="#toDate#" index="i" step="#CreateTimeSpan(1,0,0,0)#" {
+					loop from="#fromDate#" to="#toDate#" index="local.i" step="#CreateTimeSpan(1,0,0,0)#" {
 						// writeOutput(dateformat(i, "dd/mm/yyyy"));
 					}
 				}).notToThrow();

@@ -62,7 +62,7 @@
 
 	function testDeleteWhere(){
 		for(var x=1; x lte 3; x++){
-			user = entityNew("ActiveUser");
+			var user = entityNew("ActiveUser");
 			user.setFirstName('unitTest#x#');
 			user.setLastName('unitTest');
 			user.setUsername('unitTest');
@@ -70,7 +70,7 @@
 			entitySave(user);
 		}
 		ORMFlush();
-		q = new Query();
+		var q = new Query();
 
 		try{
 			if( structKeyExists( server, "lucee" ) ){ ORMCloseSession(); }
@@ -78,7 +78,7 @@
 			ORMFlush();
 			ORMClearSession();
 
-			result = q.execute(sql="select * from users1428 where userName = 'unitTest'");
+			var result = q.execute(sql="select * from users1428 where userName = 'unitTest'");
 			echo("#result.getResult().recordcount#|" );
 		}
 		catch(any e){

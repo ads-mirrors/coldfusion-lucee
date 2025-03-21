@@ -9,7 +9,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 
 				assertEquals("hallo welt","#trim(decrypt(encrypt("hallo welt","stringkey"),"stringkey"))#");
 					
-				key=generateSecretKey("AES");
+				var key=generateSecretKey("AES");
 				assertEquals("hallo welt","#trim(decrypt(encrypt("hallo welt",key,"AES"),key,"AES"))#");
 
 				key=generateSecretKey("BLOWFISH");

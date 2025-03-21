@@ -20,7 +20,7 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"	{
 	
 	public void function testCase(){
-		arr=['SUSI'];
+		var arr=['SUSI'];
 		assertEquals("SUSI",arrayToList(arr));
 		arrayDeleteNoCase(arr,'susi');
 		assertEquals("",arrayToList(arr));
@@ -52,7 +52,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 		arrayDeleteNoCase(arr,'SUSI');
 		assertEquals("susi",arrayToList(arr));
 		
-		n=now();
+		var n=now();
 		arr=[now()];
 		arrayDeleteNoCase(arr,n);
 		assertEquals("",arrayToList(arr));

@@ -15,11 +15,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 		describe( "test case for directoryRename", function() {
 			it(title = "Checking with directoryRename", body = function( currentSpec ) {
 				cflock(name="testdirectoryDelete" timeout="1" throwontimeout="no" type="exclusive"){
-					dir=parent&createUUID();
-					nn="DirectoryRename-"&createUUID();
-					dir2=parent&nn;
+					var dir=parent&createUUID();
+					var nn="DirectoryRename-"&createUUID();
+					var dir2=parent&nn;
 					directoryCreate(dir);
-					newPath = directoryRename(dir,dir2);
+					var newPath = directoryRename(dir,dir2);
 					assertEquals(nn, listLast(newpath, "/\"));
 					assertEquals(replaceNoCase(dir2,"\", "/","all"), replaceNoCase(newPath,"\", "/","all"));
 					assertEquals(true, directoryExists(newPath));

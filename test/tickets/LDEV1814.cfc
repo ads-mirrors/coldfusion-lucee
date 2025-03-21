@@ -33,7 +33,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				local.result = _InternalRequest(
 				template:"#variables.uri#/sample/test3.cfm"
 				);
-				testContent = HtmlParse(local.result.filecontent.trim()) ;
+				var testContent = HtmlParse(local.result.filecontent.trim()) ;
 				expect(arrayLen(testContent.XmlRoot.XmlChildren[2].XmlChildren)).toBe(1);
 			});
 

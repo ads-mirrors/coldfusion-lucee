@@ -62,12 +62,12 @@
 			it(title="checking DeSerializeJSON() function", body = function( currentSpec ) {
 				server.enable21=1;
 
-				sct.a=listToArray('a,b,c,d');
+				local.sct.a=listToArray('a,b,c,d');
 				sct.b=true;
 				sct['susi sorglos']="""";
 				sct.d=[1,2,"qq""qq",arrayNew(1),23];
 
-				qry=queryNew('aaa,bbb');
+				var qry=queryNew('aaa,bbb');
 
 				QueryAddRow(qry);
 				querysetCell(qry,'aaa',"a");
@@ -84,11 +84,11 @@
 				assertEquals('Januar, 01 2000 01:01:01', "#deserializeJSON('"Januar, 01 2000 01:01:01"')#");
 				assertEquals('true', "#isArray(deserializeJSON('["a","b","c\"c"]'))#");
 
-				s.a="x";
+				local.s.a="x";
 				assertEquals(true,"#isStruct(deserializeJSON('{"A":"x"}'))#");
 
-				qry1='{"COLUMNS":["AAA","BBB"],"DATA":[["a","b"],["c","d"]]}';
-				qry2='{"ROWCOUNT":2,"COLUMNS":["AAA","BBB"],"DATA":{"aaa":["a","c"],"bbb":["b","d"]}}';
+				var qry1='{"COLUMNS":["AAA","BBB"],"DATA":[["a","b"],["c","d"]]}';
+				var qry2='{"ROWCOUNT":2,"COLUMNS":["AAA","BBB"],"DATA":{"aaa":["a","c"],"bbb":["b","d"]}}';
 
 				assertEquals('true',"#isQuery(deserializeJSON(qry1,false))#");
 				assertEquals('false',"#isQuery(deserializeJSON(qry1,true))#");
@@ -102,13 +102,13 @@
 				qry2='{"ROWCOUNT":2,"COLUMNS":[[1,2],"BBB"],"DATA":{"aaa":["a","c"],"bbb":["b","d"]}}';
 				assertEquals('false',"#isQuery(deserializeJSON(qry2,false))#");
 
-				q1='{"ROWCOUNT":2,"COLUMNS":["AAA","BBB"],"DATA":{"aaa":[1.0,3.0],"bbb":[2.0,4.0]}}';
-				q2='{"COLUMNS":["AAA","BBB"],"DATA":[[1.0,2.0],[3.0,4.0]]}';
-				q3='{"susi":[[[{"COLUMNS":["AAA","BBB"],"DATA":[[1.0,2.0],[3.0,4.0]]}]]]}';
-				q4='{"susi":[[[{"COLUMNS":["AAA","BBB"],"DATA":[[{"ROWCOUNT":2,"COLUMNS":["AAA","BBB"],"DATA":{"aaa":[1.0,3.0],"bbb":[{"COLUMNS":["AAA","BBB"],"DATA":[[1.0,2.0],[3.0,4.0]]},4.0]}},2.0],[3.0,4.0]]}]]]}';
+				var q1='{"ROWCOUNT":2,"COLUMNS":["AAA","BBB"],"DATA":{"aaa":[1.0,3.0],"bbb":[2.0,4.0]}}';
+				var q2='{"COLUMNS":["AAA","BBB"],"DATA":[[1.0,2.0],[3.0,4.0]]}';
+				var q3='{"susi":[[[{"COLUMNS":["AAA","BBB"],"DATA":[[1.0,2.0],[3.0,4.0]]}]]]}';
+				var q4='{"susi":[[[{"COLUMNS":["AAA","BBB"],"DATA":[[{"ROWCOUNT":2,"COLUMNS":["AAA","BBB"],"DATA":{"aaa":[1.0,3.0],"bbb":[{"COLUMNS":["AAA","BBB"],"DATA":[[1.0,2.0],[3.0,4.0]]},4.0]}},2.0],[3.0,4.0]]}]]]}';
 
-				str = savecontent1();
-				sct=DeserializeJSON(str);
+				var str = savecontent1();
+				var sct=DeserializeJSON(str);
 				assertEquals("\//-//''-''""""	","#sct.profile.identifier#");
 
 				str = savecontent2();
@@ -120,19 +120,19 @@
 				assertEquals("//-//""-""","#sct.profile.identifier#");
 
 
-				content = savecontent4();
-				data=deserializejson(content);
-				str="";
-				loop index="i" from="1" to="#len(data.text)#" {
+				var content = savecontent4();
+				var data=deserializejson(content);
+				var str="";
+				loop index="local.i" from="1" to="#len(data.text)#" {
 					str&=asc(mid(data.text,i,1));
 				}
 				assertEquals("98149813981298249830982718918883648252983642982510085978617417410006","#str#");
 
-				json = savecontent5();
-				str = savecontent6();
+				var json = savecontent5();
+				var str = savecontent6();
 				assertEquals("#str#","#toAsc(deserializejson(json))#");
-				str='"\u2765\u263a\u00ae\u00ae\u2716"';
-				data=deserializejson(str);
+				var str='"\u2765\u263a\u00ae\u00ae\u2716"';
+				var data=deserializejson(str);
 				assertEquals("#toAsc(serializeJson(data,false,"us-ascii"))#","#toAsc(str)#");
 			});
 			
@@ -249,28 +249,28 @@
 	</cfscript>
 
 	<cffunction name="savecontent1">
-		<cfsavecontent variable="str">
+		<cfsavecontent variable="local.str">
 			{"profile":{"identifier":"\\\/\/-//\'\'-''\"\"\t"}} 
 		</cfsavecontent>
 		<cfreturn str>
 	</cffunction>
 
 	<cffunction name="savecontent2">
-		<cfsavecontent variable="str">
+		<cfsavecontent variable="local.str">
 			{"profile":{"identifier":"//-//''-''"}} 
 		</cfsavecontent>
 		<cfreturn str>
 	</cffunction>
 
 	<cffunction name="savecontent3">
-		<cfsavecontent variable="str">
+		<cfsavecontent variable="local.str">
 			{"profile":{"identifier":'//-//"-"'}} 
 		</cfsavecontent>
 		<cfreturn str>
 	</cffunction>
 
 	<cffunction name="savecontent4">
-		<cfsavecontent variable="content">
+		<cfsavecontent variable="local.content">
 			{"geo":null,"truncated":false,"source":"web","created_at":"Thu Oct 0101:02:51 +00002009","in_reply_to_status_id":null,"favorited":false,"user":{"profile_background_image_url":"http://s.twimg.com/a/1254344155/images/themes/theme6/bg.gif","description":null,"profile_link_color":"FF3300","followers_count":8,"url":null,"following":null,"profile_background_tile":false,"friends_count":3,"profile_background_color":"709397","verified":false,"time_zone":null,"created_at":"SatMay 16 23:52:45 +00002009","statuses_count":5,"favourites_count":0,"profile_sidebar_fill_color":"A0C5C7","profile_sidebar_border_color":"86A4A6","protected":false,"profile_image_url":"http://a1.twimg.com/profile_images/266659234/5776822-2_normal.jpg","notifications":null,"location":null,"name":"brandonsloan","screen_name":"crookedbrandon","id":40568411,"geo_enabled":false,"utc_offset":null,"profile_text_color":"333333"},"in_reply_to_user_id":null,"in_reply_to_screen_name":null,"id":4512512993,"text":"\u2656\u2655\u2654\u2660\u2666\u2663\u00bd\u00bc\u20ac\u203c\u266c*\u2661\u2765\u263a\u00ae\u00ae\u2716"}
 		</cfsavecontent>
 		<cfreturn content>
@@ -278,14 +278,14 @@
 
 	<cffunction name="savecontent5">
 		<cfoutput>
-			<cfsavecontent variable="json">"<cfloop index="i" from="1" to="9814">\u#toHex(i)#</cfloop>"</cfsavecontent>
+			<cfsavecontent variable="local.json">"<cfloop index="local.i" from="1" to="9814">\u#toHex(i)#</cfloop>"</cfsavecontent>
 		</cfoutput>
 		<cfreturn json>
 	</cffunction>
 
 	<cffunction name="savecontent6">
 		<cfoutput>
-			<cfsavecontent variable="str"><cfloop index="i" from="1" to="9814">#i#</cfloop></cfsavecontent>
+			<cfsavecontent variable="local.str"><cfloop index="local.i" from="1" to="9814">#i#</cfloop></cfsavecontent>
 		</cfoutput>
 		<cfreturn str>
 	</cffunction>

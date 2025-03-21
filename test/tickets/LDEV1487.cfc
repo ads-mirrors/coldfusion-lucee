@@ -40,7 +40,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 		        var fileName = "LDEV1487/"&name & '.cfc';
 		        var cfcName = "LDEV1487."&name ;
 		        fileWrite( fileName, 'component { function foo() { return createObject("MyCFC"); } }' );
-		        test =  createObject(cfcName);
+		        var test =  createObject(cfcName);
 		        fileDelete( fileName );
 		        getMetadata(test);
 			});

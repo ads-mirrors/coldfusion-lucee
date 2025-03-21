@@ -41,7 +41,7 @@ component {
 	}
 
 	private any function _getPolicy( required string policy ) {
-		_policies = _policies ?: {};
+		variables._policies = _policies ?: {};
 
 		if ( !StructKeyExists( _policies, arguments.policy ) ) {
 			var policyFile    = _getPolicyFile( arguments.policy );
@@ -91,13 +91,13 @@ component {
 		return _policyFiles;
 	}
 	private void function _setPolicyFiles( required struct policyFiles ) {
-		_policyFiles = arguments.policyFiles;
+		variables._policyFiles = arguments.policyFiles;
 	}
 
 	private any function _getAntiSamy() {
 		return _antiSamy;
 	}
 	private void function _setAntiSamy( required any antiSamy ) {
-		_antiSamy = arguments.antiSamy;
+		variables._antiSamy = arguments.antiSamy;
 	}
 }

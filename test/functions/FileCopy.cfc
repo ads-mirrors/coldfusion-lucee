@@ -10,14 +10,14 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function run( testResults , testBox ) {
 		describe( "test case for FileCopy", function() {
 			it(title = "Checking with FileCopy", body = function( currentSpec ) {
-				srcDir=dir&"src/";
-				trgDir=dir&"trg/";
+				var srcDir=dir&"src/";
+				var trgDir=dir&"trg/";
 				cfdirectory(directory="#srcDir#" action="create" mode="777");
 				cfdirectory(directory="#trgDir#" action="create" mode="777");
 				// define paths
-				src=srcDir&"test.txt";
-				dest1=trgDir&"testx.txt";
-				dest3=trgDir&'test.txt';
+				var src=srcDir&"test.txt";
+				var dest1=trgDir&"testx.txt";
+				var dest3=trgDir&'test.txt';
 				fileWrite(src,"Susi");
 				assertEquals(false,FileExists(dest1));
 				assertEquals(false,FileExists(dest3));

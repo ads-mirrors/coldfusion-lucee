@@ -4,7 +4,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 		describe( title="Testcase for replaceNocase", body=function() {
 			it(title="Checking with replaceNoCase function", body=function( currentSpec ) {
 				var text = "I Love Lucee";
-				res=replaceNoCase(text, {"Lucee":"Lucee!"});
+				var res=replaceNoCase(text, {"Lucee":"Lucee!"});
 
 				expect(res).toBe("I Love Lucee!");
 				expect("#replaceNoCase("xxabcxxabcxx", "abc", "def")#").toBe("xxdefxxabcxx");

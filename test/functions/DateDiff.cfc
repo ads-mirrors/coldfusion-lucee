@@ -11,8 +11,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			it(title="Checking with DateDiff", body=function( currentSpec ) {
 
 				setTimeZone("CET");<!--- this timezone is used for DST tests --->
-				d1 = CreateDateTime(2001, 11, 1, 4, 10, 4);
-				d2 = CreateDateTime(2004, 03, 4, 6, 3, 1);
+				var d1 = CreateDateTime(2001, 11, 1, 4, 10, 4);
+				var d2 = CreateDateTime(2004, 03, 4, 6, 3, 1);
 
 				assertEquals("73792377", "#DateDiff("s",d1, d2)#");
 				assertEquals("1229872", "#DateDiff("n",d1, d2)#");
@@ -318,8 +318,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			// Checking member function for dateTime.diff()
 			it(title="Checking with dateTime.diff() member function", body=function( currentSpec ) {
 				setTimeZone("CET");<!--- this timezone is used for DST tests --->
-				d1 = CreateDateTime(2001, 11, 1, 4, 10, 4);
-				d2 = CreateDateTime(2004, 03, 4, 6, 3, 1);
+				var d1 = CreateDateTime(2001, 11, 1, 4, 10, 4);
+				var d2 = CreateDateTime(2004, 03, 4, 6, 3, 1);
 
 				assertEquals("73792377", "#d2.diff("s",d1)#");
 				assertEquals("1229872", "#d2.diff("n",d1)#");

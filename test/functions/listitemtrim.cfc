@@ -8,9 +8,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 			});
 
 			it( title = "Checking with string.listItemTrim()", body = function( currentSpec ){
-				listOne = ",,,,, , a ,, b ,c,d";
+				var listOne = ",,,,, , a ,, b ,c,d";
 				assertEquals(",,,,,,a,,b,c,d",listOne.listItemTrim(',',true));
-				listTwo = ",,,,, , a ,, b ,c,d";
+				var listTwo = ",,,,, , a ,, b ,c,d";
 				assertEquals(",a,b,c,d",listTwo.listItemTrim(','));
 			});
 		});

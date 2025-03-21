@@ -46,7 +46,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 					assertEquals(1, ArrayMin(arr));
 					fail("must throw:The array passed cannot contain more than one dimension.");
 				} catch (any e){}
-				myNumberArray = [];
+				var myNumberArray = [];
 				myNumberArray[1]	= -1;
 				myNumberArray[2]	= -100;
 				myNumberArray[3]	= -200;

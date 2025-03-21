@@ -24,8 +24,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				assertEquals("-1" , "#DateCompare("{ts '2007-10-09 00:00:00'}","{ts '2007-10-10 00:00:00'}","d")#");
 				assertEquals("-1", "#dateCompare(1,2)#");
 
-				d1 = CreateDateTime(2001, 11, 1, 4, 10, 1);
-				d2 = CreateDateTime(2001, 11, 1, 4, 10, 4);
+				var d1 = CreateDateTime(2001, 11, 1, 4, 10, 1);
+				var d2 = CreateDateTime(2001, 11, 1, 4, 10, 4);
 				assertEquals("-1" , "#DateCompare(d1, d2)#");
 				assertEquals("-1" , "#DateCompare(d1, d2,"s")#");
 				assertEquals("0" , "#DateCompare(d1, d2,"n")#");
@@ -55,8 +55,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			});
 
 			it(title="Checking with DateTime.Compare() member function", body=function( currentSpec ) {
-				d1 = CreateDateTime(2001, 11, 1, 4, 10, 1);
-				d2 = CreateDateTime(2001, 11, 1, 4, 10, 4);
+				var d1 = CreateDateTime(2001, 11, 1, 4, 10, 1);
+				var d2 = CreateDateTime(2001, 11, 1, 4, 10, 4);
 				assertEquals("-1" , "#d1.compare(d2)#");
 				assertEquals("-1" , "#d1.compare(d2,"s")#");
 				assertEquals("0" , "#d1.compare(d2,"n")#");

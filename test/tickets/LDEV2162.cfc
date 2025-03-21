@@ -1,7 +1,7 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function beforeAll(){
 		variables.uri = createURI("LDEV2162");
-		fr="<";br=">";
+		variables.fr="<";variables.br=">";
 		directoryCreate(variables.uri);
 		fileWrite("#variables.uri#/test.cfm", '#fr#cfscript#br##chr(10)#function outerTest(){#chr(10)#  function innserTest(){}#chr(10)#}#chr(10)#outerTest(); #chr(10)#writeoutput(structkeylist(variables));#chr(10)##fr#/cfscript#br#');
 	}

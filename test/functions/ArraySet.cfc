@@ -2,7 +2,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function run( testResults , testBox ) {
 		describe( title="Test suite for ArraySet()", body=function() {
 			it(title="checking ArraySet() function", body = function( currentSpec ) {
-				arr=arrayNew(1);
+				var arr=arrayNew(1);
 				ArraySet(arr, 3, 5, "val");
 				assertEquals(5, arrayLen(arr));
 				assertEquals("val", arr[3]);
@@ -14,7 +14,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				} catch (any e){}
 
 				arr=arrayNew(1);
-				sub=arrayNew(1);
+				var sub=arrayNew(1);
 				ArraySet(arr, 3, 5, sub);
 				sub[1]=1;
 				<!---
@@ -49,11 +49,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 					fail("must throw:3 is not greater than zero or less than or equal to 1 The range passed to ArraySet must begin with a number greater than zero and less than or equal to the second number ");
 				} catch (any e){}
 
-				ax=arrayNew(1);
+				var ax=arrayNew(1);
 				ax[1]=1;
 				ax[2]=2;
 				ax[4]=4;
-				inner=arrayNew(1);
+				var inner=arrayNew(1);
 				inner[1]=1;
 				ArraySet(ax,1,3,inner);
 				inner[1]=2;

@@ -92,7 +92,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 			expect( deserializeJson( result.filecontent, false ).recordcount ).toBe( 0 );
 		}
 
-		result = testSession("create a session", {
+		var result = testSession("create a session", {
 			timezone: arguments.timezone,
 			sessionStorageType: arguments.sessionStorageType,
 			action: "createSession"
@@ -109,7 +109,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 			expect( deserializeJson( result.filecontent, false ).recordcount ).toBe( 1 );
 		}
 
-		result = testSession("check that the current session is still active", {
+		var result = testSession("check that the current session is still active", {
 				action: "checkSession",
 				sessionEnable: true,
 				timezone: arguments.timezone,
@@ -129,7 +129,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 			type="server"
 			password="#request.SERVERADMINPASSWORD#";
 
-		result = testSession("dump sessions from memory, should have 0 sessions", {
+		var result = testSession("dump sessions from memory, should have 0 sessions", {
 			action: "dumpMemorySessions",
 			sessionEnable: false,
 			timezone: arguments.timezone,
@@ -140,7 +140,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 
 		expect ( remainingSessionCount.recordcount ).toBe( 0 );
 
-		result = testSession("check that the current session was recreated, requestcount 1", {
+		var result = testSession("check that the current session was recreated, requestcount 1", {
 				action: "checkSession",
 				sessionEnable: true,
 				timezone: arguments.timezone,

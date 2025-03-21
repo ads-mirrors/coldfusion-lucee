@@ -1,7 +1,7 @@
 component extends = "org.lucee.cfml.test.LuceeTestCase"	{
 
 	function run( testResults , testBox ) {
-		myQry = QueryNew("id,name","Integer,VarChar",[[1,'Lucee'],[2,'Lucee1']]);
+		var myQry = QueryNew("id,name","Integer,VarChar",[[1,'Lucee'],[2,'Lucee1']]);
 		describe( title = "Test suite for queryGetRow", body = function() {
 
 			it( title = 'Test case for queryGetRow in function',body = function( currentSpec ) {

@@ -39,7 +39,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 		assertEquals( "9", res); 
 
 		var res="";
-		callback_1 = function(chr){
+		local.callback_1 = function(chr){
 				res=chr;
 				return false;
 		}

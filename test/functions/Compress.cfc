@@ -1,6 +1,6 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
 function test() {
-	loop list="tgz:m,zip:m,tbz:m,tar:m,gzip:s,bzip:s" item="format2type" {
+	loop list="tgz:m,zip:m,tbz:m,tar:m,gzip:s,bzip:s" item="local.format2type" {
 		var format=listFirst(format2type,":");
 		var type=listLast(format2type,":");
 

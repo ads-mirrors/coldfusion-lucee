@@ -122,7 +122,7 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" skip=false {
 				var outputMap = points.map(function( el ) {
 					return el[ 2 ];
 				});
-				for( i=1; i < len(points); i++ ) {
+				for(var i=1; i < len(points); i++ ) {
 					delta[i] = ( outputMap[i + 1] - outputMap[i]) / (inputMap[i + 1] - inputMap[i] );
 				}
 			});

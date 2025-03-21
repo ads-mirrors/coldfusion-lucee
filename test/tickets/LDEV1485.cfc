@@ -14,14 +14,14 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 	}
 
 	function doSomething() {
-	   ArrayFilter1 = ArrayFilter( arguments, function() {
+	   var ArrayFilter1 = ArrayFilter( arguments, function() {
 	       return true;
 	   });
 	  return ArrayFilter1;
 	}
 
 	function doSomething2(foo,bar) {
-	   ArrayFilter2 = ArrayFilter( arguments, function() {
+	   var ArrayFilter2 = ArrayFilter( arguments, function() {
 	       return true;
 	   });
 	  return ArrayFilter2;
