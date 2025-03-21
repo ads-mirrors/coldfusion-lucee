@@ -154,6 +154,7 @@
 		<available file="${cache}/${extPDF}-${extPDFVersion}.lex" property="pdf.present"/>
 		<available file="${cache}/${extImage}-${extImageVersion}.lex" property="image.present"/>
 		<available file="${cache}/${extEsapi}-${extEsapiVersion}.lex" property="esapi.present"/>
+		<available file="${cache}/${extScheduler}-${extSchedulerVersion}.lex" property="scheduler.present"/>
 		<available file="${cache}/${extCompress}-${extCompressVersion}.lex" property="compress.present"/>
 	</target>
 
@@ -186,6 +187,9 @@
 	</target>
 	<target name="check-esapi" depends="check-cache" unless="esapi.present">
 		<get src="${extURL}${extEsapi}?version=${extEsapiVersion}" dest="${cache}/${extEsapi}-${extEsapiVersion}.lex"/>
+	</target>
+	<target name="check-scheduler" depends="check-cache" unless="scheduler.present">
+		<get src="${extURL}${extScheduler}?version=${extSchedulerVersion}" dest="${cache}/${extScheduler}-${extSchedulerVersion}.lex"/>
 	</target>
 	<target name="check-compress" depends="check-cache" unless="compress.present">
 		<get src="${extURL}${extCompress}?version=${extCompressVersion}" dest="${cache}/${extCompress}-${extCompressVersion}.lex"/>
@@ -318,6 +322,18 @@
 			tofile="${goal}/extensions/${ext_esapi.filename}"/>
 		<echo level="info">add:${goal}/extensions/${ext_esapi.filename}</echo>
 		<echo file="${goal}/extensions/.index" append="true">${ext_esapi.filename};</echo>
+
+		<!-- add extension Scheduler -->
+		<loadmf jar="${cache}/${extScheduler}-${extSchedulerVersion}.lex" prefix="ext_scheduler."/>
+		<toFileName id="${ext_scheduler.id}" name="${ext_scheduler.name}" version="${ext_scheduler.version}" property="ext_scheduler.filename"/>
+		<copy 
+			file="${cache}/${extScheduler}-${extSchedulerVersion}.lex" 
+			todir="${goal}/extensions/"/>
+		<move 
+			file="${goal}/extensions/${extScheduler}-${extSchedulerVersion}.lex" 
+			tofile="${goal}/extensions/${ext_scheduler.filename}"/>
+		<echo level="info">add:${goal}/extensions/${ext_scheduler.filename}</echo>
+		<echo file="${goal}/extensions/.index" append="true">${ext_scheduler.filename};</echo>
 
 		<!-- add extension Compress -->
 		<loadmf jar="${cache}/${extCompress}-${extCompressVersion}.lex" prefix="ext_compress."/>
