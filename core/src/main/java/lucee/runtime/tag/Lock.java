@@ -99,7 +99,7 @@ public final class Lock extends BodyTagTryCatchFinallyImpl {
 	private LockManager manager;
 	private LockData data = null;
 	private long start;
-	private String result = "cflock";
+	private String result = null;
 
 	@Override
 	public void release() {
@@ -112,7 +112,7 @@ public final class Lock extends BodyTagTryCatchFinallyImpl {
 		this.data = null;
 		id = "anonymous";
 		timeoutInMillis = 0;
-		result = "cflock";
+		result = null;
 	}
 
 	/**
@@ -247,7 +247,14 @@ public final class Lock extends BodyTagTryCatchFinallyImpl {
 		Struct cflock = new StructImpl();
 		cflock.set(KeyConstants._succeeded, Boolean.TRUE);
 		cflock.set(KeyConstants._errortext, "");
-		pageContext.setVariable(result, cflock);
+
+		if (result == null) {
+			if (pageContext.undefinedScope().getCheckArguments()) pageContext.localScope().setEL(KeyConstants._cflock, cflock);
+			else pageContext.undefinedScope().setEL(KeyConstants._cflock, cflock);
+		}
+		else {
+			pageContext.setVariable(result, cflock);
+		}
 		start = System.nanoTime();
 		try {
 			((PageContextImpl) pageContext).setActiveLock(new ActiveLock(type, name, timeoutInMillis)); // this has to be first, otherwise LockTimeoutException has nothing to

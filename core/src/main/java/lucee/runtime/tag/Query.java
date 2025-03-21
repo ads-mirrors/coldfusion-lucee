@@ -106,12 +106,6 @@ import lucee.runtime.util.PageContextUtil;
  **/
 public final class Query extends BodyTagTryCatchFinallyImpl {
 
-	private static final Collection.Key SQL_PARAMETERS = KeyConstants._sqlparameters;
-	private static final Collection.Key CFQUERY = KeyConstants._cfquery;
-	private static final Collection.Key GENERATEDKEY = KeyConstants._generatedKey;
-	private static final Collection.Key MAX_RESULTS = KeyConstants._maxResults;
-	private static final Collection.Key TIMEOUT = KeyConstants._timeout;
-
 	public static final int RETURN_TYPE_UNDEFINED = 0;
 	public static final int RETURN_TYPE_QUERY = 1;
 	public static final int RETURN_TYPE_ARRAY = 2;
@@ -844,7 +838,7 @@ public final class Query extends BodyTagTryCatchFinallyImpl {
 							generatedKey.append(sb);
 						}
 					}
-					if (generatedKey.length() > 0) meta.setEL(GENERATEDKEY, generatedKey.toString());
+					if (generatedKey.length() > 0) meta.setEL(KeyConstants._generatedKey, generatedKey.toString());
 				}
 			}
 
@@ -853,7 +847,7 @@ public final class Query extends BodyTagTryCatchFinallyImpl {
 				SQLItem[] params = sqlQuery.getItems();
 				if (params != null && params.length > 0) {
 					Array arr = new ArrayImpl();
-					meta.setEL(SQL_PARAMETERS, arr);
+					meta.setEL(KeyConstants._sqlparameters, arr);
 					for (int i = 0; i < params.length; i++) {
 						if (fns) arr.append(params[i].isNulls() ? null : params[i].getValue());
 						else arr.append(params[i].isNulls() ? "" : params[i].getValue());
@@ -1025,7 +1019,11 @@ public final class Query extends BodyTagTryCatchFinallyImpl {
 		// meta
 		rm.meta = args.get(KeyConstants._meta, null);
 		if (rm.meta != null) {
-			if (StringUtil.isEmpty(data.result)) pageContext.undefinedScope().setEL(CFQUERY, rm.meta);
+			if (StringUtil.isEmpty(data.result)) {
+				if (pageContext.undefinedScope().getCheckArguments()) pageContext.localScope().setEL(KeyConstants._cfquery, rm.meta);
+				else pageContext.undefinedScope().setEL(KeyConstants._cfquery, rm.meta);
+
+			}
 			else {
 				if (setVars) pageContext.setVariable(data.result, rm.meta);
 			}
@@ -1053,7 +1051,8 @@ public final class Query extends BodyTagTryCatchFinallyImpl {
 	private static Struct setExecutionTime(PageContext pc, long exe) {
 		Struct sct = new StructImpl();
 		sct.setEL(KeyConstants._executionTime, Double.valueOf(exe));
-		pc.undefinedScope().setEL(CFQUERY, sct);
+		if (pc.undefinedScope().getCheckArguments()) pc.localScope().setEL(KeyConstants._cfquery, sct);
+		else pc.undefinedScope().setEL(KeyConstants._cfquery, sct);
 		return sct;
 	}
 
@@ -1072,8 +1071,9 @@ public final class Query extends BodyTagTryCatchFinallyImpl {
 		}
 
 		// query options
-		if (data.maxrows != -1 && !ormoptions.containsKey(MAX_RESULTS)) ormoptions.setEL(MAX_RESULTS, Double.valueOf(data.maxrows));
-		if (data.timeout != null && ((int) data.timeout.getSeconds()) > 0 && !ormoptions.containsKey(TIMEOUT)) ormoptions.setEL(TIMEOUT, Double.valueOf(data.timeout.getSeconds()));
+		if (data.maxrows != -1 && !ormoptions.containsKey(KeyConstants._maxResults)) ormoptions.setEL(KeyConstants._maxResults, Double.valueOf(data.maxrows));
+		if (data.timeout != null && ((int) data.timeout.getSeconds()) > 0 && !ormoptions.containsKey(KeyConstants._timeout))
+			ormoptions.setEL(KeyConstants._timeout, Double.valueOf(data.timeout.getSeconds()));
 		/*
 		 * MUST offset: Specifies the start index of the resultset from where it has to start the retrieval.
 		 * cacheable: Whether the result of this query is to be cached in the secondary cache. Default is
