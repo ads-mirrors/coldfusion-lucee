@@ -22,9 +22,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import lucee.commons.io.SystemUtil;
+import lucee.commons.io.log.Log;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.filter.ResourceNameFilter;
 import lucee.commons.lang.ExceptionUtil;
+import lucee.commons.lang.StringUtil;
 import lucee.runtime.ComponentScope;
 import lucee.runtime.PageContext;
 import lucee.runtime.PageContextImpl;
@@ -39,6 +43,7 @@ import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.functions.system.CFFunction;
 import lucee.runtime.listener.ApplicationContextSupport;
+import lucee.runtime.op.Caster;
 import lucee.runtime.op.Duplicator;
 import lucee.runtime.type.BIF;
 import lucee.runtime.type.Collection;
@@ -63,6 +68,16 @@ import lucee.runtime.util.QueryStackImpl;
 public final class UndefinedImpl extends StructSupport implements Undefined, Objects {
 
 	private static final long serialVersionUID = -5626787508494702023L;
+	private static final String LOG_CASCADING_WRITE_LOG;
+	private static final int LOG_CASCADING_WRITE_LOG_LEVEL;
+
+	static {
+		String tmp = StringUtil.unwrap(Caster.toString(SystemUtil.getSystemPropOrEnvVar("lucee.cascading.write.to.variables.log", null), null));
+		LOG_CASCADING_WRITE_LOG = StringUtil.isEmpty(tmp, true) ? null : tmp.trim();
+		tmp = StringUtil.unwrap(Caster.toString(SystemUtil.getSystemPropOrEnvVar("lucee.cascading.write.to.variables.loglevel", null), null));
+		LOG_CASCADING_WRITE_LOG_LEVEL = StringUtil.isEmpty(tmp, true) ? Log.LEVEL_DEBUG : LogUtil.toLevel(tmp.trim(), Log.LEVEL_DEBUG);
+
+	}
 
 	private Scope[] scopes;
 	private QueryStackImpl qryStack = new QueryStackImpl();
@@ -77,6 +92,7 @@ public final class UndefinedImpl extends StructSupport implements Undefined, Obj
 	private Argument argument;
 	private PageContextImpl pc;
 	private boolean debug;
+	private boolean logCascadingWrite;
 
 	/**
 	 * constructor of the class
@@ -520,9 +536,13 @@ public final class UndefinedImpl extends StructSupport implements Undefined, Obj
 				if (debug) debugCascadedAccess(pc, argument.getTypeAsString(), key);
 				return argument.setEL(key, value);
 			}
+			if (debug) debugCascadedAccess(pc, variable.getTypeAsString(), key);
+			if (logCascadingWrite && !KeyConstants._cfquery.equals(key) && !KeyConstants._cflock.equals(key) && !KeyConstants._thread.equals(key)) {
+				LogUtil.log(LOG_CASCADING_WRITE_LOG_LEVEL, LOG_CASCADING_WRITE_LOG, "cascading-write",
+						"Variable Scope Cascading Write Detected: The variable [" + key + "] is being implicitly written to the variables scope at [" + LogUtil.caller(pc, "")
+								+ "]. This occurs when no explicit scope (such as local, arguments, or variables) is specified in the assignment.");
+			}
 		}
-
-		if (debug && checkArguments) debugCascadedAccess(pc, variable.getTypeAsString(), key);
 		return variable.setEL(key, value);
 	}
 
@@ -534,9 +554,13 @@ public final class UndefinedImpl extends StructSupport implements Undefined, Obj
 				if (debug) debugCascadedAccess(pc, argument.getTypeAsString(), key);
 				return argument.set(key, value);
 			}
-
+			if (debug) debugCascadedAccess(pc, variable.getTypeAsString(), key);
+			if (logCascadingWrite && !KeyConstants._cfquery.equals(key) && !KeyConstants._cflock.equals(key) && !KeyConstants._thread.equals(key)) {
+				LogUtil.log(LOG_CASCADING_WRITE_LOG_LEVEL, LOG_CASCADING_WRITE_LOG, "cascading-write",
+						"Variable Scope Cascading Write Detected: The variable [" + key + "] is being implicitly written to the variables scope at [" + LogUtil.caller(pc, "")
+								+ "]. This occurs when no explicit scope (such as local, arguments, or variables) is specified in the assignment.");
+			}
 		}
-		if (debug && checkArguments) debugCascadedAccess(pc, variable.getTypeAsString(), key);
 		return variable.set(key, value);
 	}
 
@@ -572,7 +596,19 @@ public final class UndefinedImpl extends StructSupport implements Undefined, Obj
 
 	@Override
 	public void initialize(PageContext pc) {
-		// if(isInitalized()) return;
+		if (LOG_CASCADING_WRITE_LOG != null) {
+			try {
+				logCascadingWrite = LogUtil.does(((PageContextImpl) pc).getLog(LOG_CASCADING_WRITE_LOG, false), LOG_CASCADING_WRITE_LOG_LEVEL);
+			}
+			catch (PageException e) {
+				LogUtil.log("scope-cascading", e);
+				logCascadingWrite = false;
+			}
+		}
+		else {
+			logCascadingWrite = false;
+		}
+
 		isInit = true;
 		variable = pc.variablesScope();
 		argument = pc.argumentsScope();
