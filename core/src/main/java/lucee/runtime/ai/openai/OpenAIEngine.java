@@ -229,7 +229,7 @@ public final class OpenAIEngine extends AIEngineSupport implements AIEngineFile 
 		if (!Util.isEmpty(systemMessage, true)) systemMessage = systemMessage.trim();
 
 		// validate
-		boolean validate = Caster.toBooleanValue(properties.get(KeyConstants._validate, null), true);
+		boolean validate = Caster.toBooleanValue(properties.get(KeyConstants._validate, null), false);
 		if (validate) AIUtil.valdate(this, getConnectTimeout(), getSocketTimeout());
 		return this;
 	}
