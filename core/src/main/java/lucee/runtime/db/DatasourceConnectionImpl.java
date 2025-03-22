@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
-import lucee.print;
 import lucee.commons.db.DBUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
@@ -294,7 +293,6 @@ public final class DatasourceConnectionImpl implements DatasourceConnection, Tas
 
 	@Override
 	public void close() throws SQLException {
-		print.e(">>>> close <<<<<");
 		release();
 	}
 
