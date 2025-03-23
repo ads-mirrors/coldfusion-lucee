@@ -801,15 +801,20 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 			}
 		}
 
-		final StringBuilder sb = new StringBuilder("Loading felix with config:");
-		final Iterator<Entry<String, Object>> it = config.entrySet().iterator();
-		Entry<String, Object> e;
-		while (it.hasNext()) {
-			e = it.next();
-			sb.append("\n- ").append(e.getKey()).append(':').append(e.getValue());
+		// log felix settings
+		String doLog = Util.getSystemPropOrEnvVar("felix.log.settings", null);
+		if (!Util.isEmpty(doLog, true) && doLog.trim().equalsIgnoreCase("true")) {
+			final StringBuilder sb = new StringBuilder("Loading felix with config:");
+			final Iterator<Entry<String, Object>> it = config.entrySet().iterator();
+			Entry<String, Object> e;
+			while (it.hasNext()) {
+				e = it.next();
+				sb.append("\n- ").append(e.getKey()).append(':').append(e.getValue());
+			}
+			log(Logger.LOG_INFO, sb.toString());
+			// System.err.println(sb.toString());
 		}
-		// log(Logger.LOG_INFO, sb.toString());
-		System.err.print(sb.toString());
+
 		felix = new Felix(config);
 		try {
 			felix.start();
