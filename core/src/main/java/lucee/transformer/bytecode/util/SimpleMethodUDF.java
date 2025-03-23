@@ -8,7 +8,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.FunctionArgument;
 import lucee.runtime.type.UDF;
 
-public final class SimpleMethodUDF implements SimpleMethod {
+public final class SimpleMethodUDF extends SimpleMethodSupport {
 
 	private UDF udf;
 
