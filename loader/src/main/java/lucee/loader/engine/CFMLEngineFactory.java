@@ -679,7 +679,9 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 			Util.initCauseEL(se, e);
 			throw se;
 		}
-		System.err.println("Lucee startup in " + (System.currentTimeMillis() - start) + " ms");
+
+		String startup = Util.getSystemPropOrEnvVar("lucee.startup.out", null);
+		if (startup != null && "true".equalsIgnoreCase(startup)) System.err.println("Lucee startup in " + (System.currentTimeMillis() - start) + " ms");
 	}
 
 	private static String getVersion(File file) throws IOException, BundleException {
