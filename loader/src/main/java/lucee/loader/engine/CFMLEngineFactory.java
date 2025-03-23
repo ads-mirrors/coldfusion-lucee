@@ -505,7 +505,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 	}
 
 	private void initEngine() throws ServletException {
-
+		long start = System.currentTimeMillis();
 		final Version coreVersion = VersionInfo.getIntVersion();
 		final long coreCreated = VersionInfo.getCreateTime();
 
@@ -679,6 +679,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 			Util.initCauseEL(se, e);
 			throw se;
 		}
+		System.err.println("Lucee startup in " + (System.currentTimeMillis() - start) + " ms");
 	}
 
 	private static String getVersion(File file) throws IOException, BundleException {
@@ -745,7 +746,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 		extend(config, "felix.cache.locking", null, false);
 		extend(config, "org.osgi.framework.executionenvironment", null, false);
 		extend(config, "org.osgi.framework.storage", null, false);
-		extend(config, "org.osgi.framework.storage.clean", Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT, false);
+		extend(config, "org.osgi.framework.storage.clean", "none", false);
 		extend(config, Constants.FRAMEWORK_BUNDLE_PARENT, Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK, false);
 
 		boolean isNew = false;
@@ -766,11 +767,24 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 		extend(config, "felix.bootdelegation.implicit", null, false);
 		extend(config, "felix.systembundle.activators", null, false);
 		extend(config, "org.osgi.framework.startlevel.beginning", null, false);
-		extend(config, "felix.startlevel.bundle", null, false);
 		extend(config, "felix.service.urlhandlers", null, false);
 		extend(config, "felix.auto.deploy.dir", null, false);
 		extend(config, "felix.auto.deploy.action", null, false);
 		extend(config, "felix.shutdown.hook", null, false);
+		extend(config, "felix.threading.timeout", null, false);
+		extend(config, "felix.service.urlhandlers", null, false);
+		extend(config, "felix.startlevel.bundle", null, false);
+
+		String proCount = Runtime.getRuntime().availableProcessors() + "";
+		extend(config, "felix.resolver.parallelism", proCount, false);
+		extend(config, "felix.systembundle.activators.start.parallelism", proCount, false);
+
+		// Skip waiting for service events to be delivered
+		extend(config, "felix.service.timeout", null, false);
+		extend(config, "felix.threading.timeout", null, false);
+
+		// Set framework start level immediately to final value
+		extend(config, "org.osgi.framework.startlevel.beginning", null, false);
 
 		if (logger != null) config.put("felix.log.logger", logger);
 		// TODO felix.log.logger
@@ -795,7 +809,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 			sb.append("\n- ").append(e.getKey()).append(':').append(e.getValue());
 		}
 		// log(Logger.LOG_INFO, sb.toString());
-
+		System.err.print(sb.toString());
 		felix = new Felix(config);
 		try {
 			felix.start();
