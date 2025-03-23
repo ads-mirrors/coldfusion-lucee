@@ -28,6 +28,8 @@ import lucee.runtime.type.Collection.Key;
 
 public final class UDFGetterProperty extends UDFGSProperty {
 
+	private static final long serialVersionUID = 3118831729288197069L;
+
 	private static final FunctionArgument[] EMPTY = new FunctionArgument[0];
 
 	private final Property prop;
@@ -35,10 +37,9 @@ public final class UDFGetterProperty extends UDFGSProperty {
 	private final Key propName;
 
 	public UDFGetterProperty(Component component, Property prop) {
-		super(component, "get" + StringUtil.ucFirst(prop.getName()), EMPTY, CFTypes.TYPE_STRING);
+		super(component, "get" + StringUtil.ucFirst(prop.getName()), EMPTY, CFTypes.toShortStrict(prop.getType(), CFTypes.TYPE_ANY));
 		this.prop = prop;
 		this.propName = KeyImpl.init(prop.getName());
-
 	}
 
 	@Override
