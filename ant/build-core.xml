@@ -578,6 +578,7 @@
       <jvmarg value="-Dlucee.ssl.checkserveridentity=false"/>
       <jvmarg value="-Dlucee.compiler.java.version=${javaVersionCoreDefault}"/>
       <jvmarg value="-Dlucee.cascading.write.to.variables.log=deploy"/>
+      <jvmarg value="-Dlucee.startup.out=true"/>
 
     </java>
     <outputTrimmedString str="${exc}"/>
@@ -658,6 +659,7 @@
       <jvmarg value="-Xdebug" if:true="${testDebugger}"/>
       <jvmarg value="-Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5000" if:true="${testDebugger}"/>
       <jvmarg value="-Dlucee.cascading.write.to.variables.log=deploy"/>
+      <jvmarg value="-Dlucee.startup.out=true"/>
       <!--
         felix.log.level
         lucee.controller.disabled
@@ -703,6 +705,7 @@
       <jvmarg value="-DtrgLoader=${trgLoader}"/>
       <jvmarg value="-DluceeVersion=${version}"/>
       <jvmarg value="-Dlucee.cascading.write.to.variables.log=deploy"/>
+      <jvmarg value="-Dlucee.startup.out=true"/>
 
     </java>
     <outputTrimmedString str="${exc3}"/>
@@ -729,6 +732,7 @@
       <jvmarg value="-Dlucee.web.dir=${temp}/warmup/webroot"/>
       <jvmarg value="-Dlucee.enable.warmup=true"/>
       <jvmarg value="-Dlucee.cascading.write.to.variables.log=deploy"/>
+      <jvmarg value="-Dlucee.startup.out=true"/>
     </java>
     <echo level="info">${exc4}</echo>
 </target>
@@ -773,6 +777,7 @@
       <jvmarg value="-Dlucee.enable.bundle.download=true"/>
       <jvmarg value="-Dlucee.cli.printExceptions=true"/>
       <jvmarg value="-Dlucee.cascading.write.to.variables.log=deploy"/>
+      <jvmarg value="-Dlucee.startup.out=true"/>
     </java>
     <outputTrimmedString str="${exc}"/> -->
 </target>

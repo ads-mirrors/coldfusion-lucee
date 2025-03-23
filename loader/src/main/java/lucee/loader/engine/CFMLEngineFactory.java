@@ -505,6 +505,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 	}
 
 	private void initEngine() throws ServletException {
+		long start = System.currentTimeMillis();
 
 		final Version coreVersion = VersionInfo.getIntVersion();
 		final long coreCreated = VersionInfo.getCreateTime();
@@ -679,6 +680,9 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 			Util.initCauseEL(se, e);
 			throw se;
 		}
+
+		String startup = getSystemPropOrEnvVar("lucee.startup.out", null);
+		if (startup != null && "true".equalsIgnoreCase(startup)) System.err.println("Lucee startup in " + (System.currentTimeMillis() - start) + " ms");
 	}
 
 	private static String getVersion(File file) throws IOException, BundleException {
@@ -745,7 +749,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 		extend(config, "felix.cache.locking", null, false);
 		extend(config, "org.osgi.framework.executionenvironment", null, false);
 		extend(config, "org.osgi.framework.storage", null, false);
-		extend(config, "org.osgi.framework.storage.clean", Constants.FRAMEWORK_STORAGE_CLEAN_ONFIRSTINIT, false);
+		extend(config, "org.osgi.framework.storage.clean", "none", false);
 		extend(config, Constants.FRAMEWORK_BUNDLE_PARENT, Constants.FRAMEWORK_BUNDLE_PARENT_FRAMEWORK, false);
 
 		boolean isNew = false;
