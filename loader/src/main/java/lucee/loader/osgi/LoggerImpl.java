@@ -35,9 +35,9 @@ public class LoggerImpl extends Logger {
 
 	private final File logFile;
 
-	public LoggerImpl(final File logFile) {
+	public LoggerImpl(final File logFile, int logLevel) {
 		this.logFile = logFile;
-		setLogLevel(LOG_ERROR);
+		setLogLevel(logLevel);
 		if (!logFile.exists()) try {
 			logFile.createNewFile();
 		}
@@ -81,7 +81,7 @@ public class LoggerImpl extends Logger {
 		BufferedWriter bw = null;
 		try {
 			bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(logFile, true)));
-			bw.write(toLevel(level) + " [" + new Date() + "]:\n" + msg + "\n");
+			bw.write(toLevel(level, "ERROR") + " [" + new Date() + "]:\n" + msg + "\n");
 			bw.flush();
 		}
 		catch (final IOException ioe) {
@@ -95,7 +95,7 @@ public class LoggerImpl extends Logger {
 		}
 	}
 
-	private String toLevel(int level) {
+	public static String toLevel(int level, String defaultValue) {
 		switch (level) {
 		case LOG_DEBUG:
 			return "DEBUG";
@@ -106,18 +106,20 @@ public class LoggerImpl extends Logger {
 		case LOG_WARNING:
 			return "WARNING";
 		default:
-			return "UNKNOWNN[" + level + "]";
+			return defaultValue;
 		}
+
 	}
 
-	private int toLevel(String level) {
+	public static int toLevel(String level, int defaultValue) {
 		if (level != null) {
 			if ("DEBUG".equalsIgnoreCase(level)) return LOG_DEBUG;
 			if ("ERROR".equalsIgnoreCase(level)) return LOG_ERROR;
 			if ("INFO".equalsIgnoreCase(level)) return LOG_INFO;
 			if ("WARNING".equalsIgnoreCase(level)) return LOG_WARNING;
+			if ("WARN".equalsIgnoreCase(level)) return LOG_WARNING;
 		}
-		return LOG_ERROR;
+		return defaultValue;
 	}
 
 }

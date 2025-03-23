@@ -41,6 +41,7 @@ import java.nio.file.Paths;
 import java.security.CodeSource;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -158,7 +159,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 			e.printStackTrace();
 		}
 		logFile.getParentFile().mkdirs();
-		logger = new LoggerImpl(logFile);
+		logger = new LoggerImpl(logFile, LoggerImpl.toLevel(Util.getSystemPropOrEnvVar("felix.log.level", null), LoggerImpl.LOG_ERROR));
 	}
 
 	/**
@@ -506,6 +507,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 
 	private void initEngine() throws ServletException {
 		long start = System.currentTimeMillis();
+		long totalStart = start;
 		final Version coreVersion = VersionInfo.getIntVersion();
 		final long coreCreated = VersionInfo.getCreateTime();
 
@@ -519,6 +521,8 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 			throw new ServletException(e);
 		}
 		File lucee = null;
+		log(LoggerImpl.LOG_DEBUG, "time to load path directory: " + (System.currentTimeMillis() - start) + "ms");
+		start = System.currentTimeMillis();
 
 		if (isEmbeddedMode()) embedded = true;
 
@@ -529,6 +533,8 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 			catch (IOException e) {
 				throw new ServletException(e);
 			}
+			log(LoggerImpl.LOG_DEBUG, "time to create bundle from source: " + (System.currentTimeMillis() - start) + "ms");
+			start = System.currentTimeMillis();
 		}
 		String tmp = getSystemPropOrEnvVar("lucee.version", null);
 		Version specificVersion = (!Util.isEmpty(tmp, true)) ? toVersion(tmp, null) : null;
@@ -541,6 +547,9 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 			else {
 				log(org.apache.felix.resolver.Logger.LOG_DEBUG, "specific version [" + specificVersion + "] defined.");
 			}
+
+			log(LoggerImpl.LOG_DEBUG, "time to load specific version info: " + (System.currentTimeMillis() - start) + "ms");
+			start = System.currentTimeMillis();
 		}
 
 		// read lucee core from patch directory
@@ -580,6 +589,8 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 				lucee = null;
 			}
 		}
+		log(LoggerImpl.LOG_DEBUG, "time to load core from patch directory: " + (System.currentTimeMillis() - start) + "ms");
+		start = System.currentTimeMillis();
 
 		try {
 
@@ -657,13 +668,19 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 				engine = _getCore(lucee);
 
 				setEngine(engine);
+				log(LoggerImpl.LOG_DEBUG, "time to load engine from lucee jar: " + (System.currentTimeMillis() - start) + "ms");
+				start = System.currentTimeMillis();
 			}
 			else {
 				bundleCollection = BundleLoader.loadBundles(this, getFelixCacheDirectory(), getBundleDirectory(), lucee, bundleCollection);
-				// bundle=loadBundle(lucee);
+
+				log(LoggerImpl.LOG_DEBUG, "time to load bundles: " + (System.currentTimeMillis() - start) + "ms");
+				start = System.currentTimeMillis();
 				log(org.apache.felix.resolver.Logger.LOG_DEBUG, "Loaded bundle: [" + bundleCollection.core.getSymbolicName() + "]");
 				setEngine(getEngine(bundleCollection));
 				log(org.apache.felix.resolver.Logger.LOG_DEBUG, "Loaded engine: [" + singelton + "]");
+				log(LoggerImpl.LOG_DEBUG, "time to load engine: " + (System.currentTimeMillis() - start) + "ms");
+				start = System.currentTimeMillis();
 			}
 			version = singelton.getInfo().getVersion();
 
@@ -680,8 +697,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 			throw se;
 		}
 
-		String startup = Util.getSystemPropOrEnvVar("lucee.startup.out", null);
-		if (startup != null && "true".equalsIgnoreCase(startup)) System.err.println("Lucee startup in " + (System.currentTimeMillis() - start) + " ms");
+		log(LoggerImpl.LOG_DEBUG, "time to load Lucee: " + (System.currentTimeMillis() - totalStart) + "ms");
 	}
 
 	private static String getVersion(File file) throws IOException, BundleException {
@@ -866,7 +882,12 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 	}
 
 	public void log(final int level, final String msg) {
-		if (logger != null) logger.log(level, msg);
+		if (logger != null) {
+			logger.log(level, msg);
+			if (logger.getLogLevel() == LoggerImpl.LOG_DEBUG) {
+				System.err.println(LoggerImpl.toLevel(level, "UNKNOWN") + " [" + new Date() + "]:\n" + msg + "\n");
+			}
+		}
 	}
 
 	private CFMLEngine _getCore(File rc) throws IOException, BundleException, ClassNotFoundException, SecurityException, NoSuchMethodException, IllegalArgumentException,
