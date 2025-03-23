@@ -885,7 +885,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 		if (logger != null) {
 			logger.log(level, msg);
 			if (logger.getLogLevel() == LoggerImpl.LOG_DEBUG) {
-				System.err.println(LoggerImpl.toLevel(level, "UNKNOWN") + " [" + new Date() + "]:\n" + msg + "\n");
+				System.err.println(LoggerImpl.toLevel(level, "UNKNOWN") + " [" + new Date() + "]:" + msg + "\n");
 			}
 		}
 	}
