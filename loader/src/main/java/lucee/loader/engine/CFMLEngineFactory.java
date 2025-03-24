@@ -41,7 +41,6 @@ import java.nio.file.Paths;
 import java.security.CodeSource;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -521,8 +520,9 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 			throw new ServletException(e);
 		}
 		File lucee = null;
-		log(LoggerImpl.LOG_DEBUG, "time to load path directory: " + (System.currentTimeMillis() - start) + "ms");
-		start = System.currentTimeMillis();
+		long ltmp = System.currentTimeMillis();
+		log(LoggerImpl.LOG_DEBUG, "loaded patch directory in " + (ltmp - start) + "ms");
+		start = ltmp;
 
 		if (isEmbeddedMode()) embedded = true;
 
@@ -548,8 +548,9 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 				log(org.apache.felix.resolver.Logger.LOG_DEBUG, "specific version [" + specificVersion + "] defined.");
 			}
 
-			log(LoggerImpl.LOG_DEBUG, "time to load specific version info: " + (System.currentTimeMillis() - start) + "ms");
-			start = System.currentTimeMillis();
+			ltmp = System.currentTimeMillis();
+			log(LoggerImpl.LOG_DEBUG, "loaded specific version info in " + (ltmp - start) + "ms");
+			start = ltmp;
 		}
 
 		// read lucee core from patch directory
@@ -589,8 +590,9 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 				lucee = null;
 			}
 		}
-		log(LoggerImpl.LOG_DEBUG, "time to load core from patch directory: " + (System.currentTimeMillis() - start) + "ms");
-		start = System.currentTimeMillis();
+		ltmp = System.currentTimeMillis();
+		log(LoggerImpl.LOG_DEBUG, "time to load core from patch directory: " + (ltmp - start) + "ms");
+		start = ltmp;
 
 		try {
 
@@ -668,19 +670,22 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 				engine = _getCore(lucee);
 
 				setEngine(engine);
-				log(LoggerImpl.LOG_DEBUG, "time to load engine from lucee jar: " + (System.currentTimeMillis() - start) + "ms");
-				start = System.currentTimeMillis();
+				ltmp = System.currentTimeMillis();
+				log(LoggerImpl.LOG_DEBUG, "loaded the engine from lucee jar in " + (ltmp - start) + "ms");
+				start = ltmp;
 			}
 			else {
 				bundleCollection = BundleLoader.loadBundles(this, getFelixCacheDirectory(), getBundleDirectory(), lucee, bundleCollection);
 
-				log(LoggerImpl.LOG_DEBUG, "time to load bundles: " + (System.currentTimeMillis() - start) + "ms");
-				start = System.currentTimeMillis();
+				ltmp = System.currentTimeMillis();
+				log(LoggerImpl.LOG_DEBUG, "loaded bundles in " + (ltmp - start) + "ms");
+				start = ltmp;
 				log(org.apache.felix.resolver.Logger.LOG_DEBUG, "Loaded bundle: [" + bundleCollection.core.getSymbolicName() + "]");
 				setEngine(getEngine(bundleCollection));
 				log(org.apache.felix.resolver.Logger.LOG_DEBUG, "Loaded engine: [" + singelton + "]");
-				log(LoggerImpl.LOG_DEBUG, "time to load engine: " + (System.currentTimeMillis() - start) + "ms");
-				start = System.currentTimeMillis();
+				ltmp = System.currentTimeMillis();
+				log(LoggerImpl.LOG_DEBUG, "set engine in " + (ltmp - start) + "ms");
+				start = ltmp;
 			}
 			version = singelton.getInfo().getVersion();
 
@@ -697,7 +702,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 			throw se;
 		}
 
-		log(LoggerImpl.LOG_DEBUG, "time to load Lucee: " + (System.currentTimeMillis() - totalStart) + "ms");
+		log(LoggerImpl.LOG_DEBUG, "loaded Lucee in " + (System.currentTimeMillis() - totalStart) + "ms");
 	}
 
 	private static String getVersion(File file) throws IOException, BundleException {
@@ -835,6 +840,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 
 		felix = new Felix(config);
 		try {
+			log(LoggerImpl.LOG_DEBUG, "start felix");
 			felix.start();
 		}
 		catch (BundleException be) {
@@ -884,9 +890,6 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 	public void log(final int level, final String msg) {
 		if (logger != null) {
 			logger.log(level, msg);
-			if (logger.getLogLevel() == LoggerImpl.LOG_DEBUG) {
-				System.err.println(LoggerImpl.toLevel(level, "UNKNOWN") + " [" + new Date() + "]:" + msg + "\n");
-			}
 		}
 	}
 
