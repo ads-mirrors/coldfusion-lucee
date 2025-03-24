@@ -16138,69 +16138,98 @@ you can use tag cfadmin instead. we will add support for this function in a futu
 	<!-- createObject -->
 	<function>
 		<name>createObject</name>
-		<!-- <status>deprecated</status> -->
 		<class>lucee.runtime.functions.other.CreateObject</class>
-		<modified>5.0.0.0</modified>
+		<modified>6.2.0.0</modified>
 		<description>
-		The CreateObject function takes different arguments depending on the value of the first argument:
-        CreateObject('com', class, context, serverName)
-        CreateObject('component', component-name)
-        CreateObject('java', class, ...)
-        CreateObject('webservice', urlToWsdl, [, portName])</description>
+			Creates and returns a reference to objects of various types including Java classes, components, web services, and COM objects.
+	
+			## Type: "java"
+			Creates a Java object instance. As of Lucee 6.2, this supports Maven dependency management.
+	
+			```
+			CreateObject('java', className [, classpath|bundleName|javasettings] [, delimiter|bundleVersion])
+			```
+	
+			You can provide Java libraries in three ways:
+			- Using classpath: Specify directories or JAR files
+			- Using OSGi bundles: Provide a bundle name and version
+			- Using Maven: Define Maven artifacts via a javasettings structure
+	
+			## Type: "component"
+			Creates a CFC instance without calling the init method.
+	
+			```
+			CreateObject('component', componentName)
+			```
+	
+			## Type: "webservice"
+			Creates a web service client from a WSDL.
+	
+			```
+			CreateObject('webservice', urlToWsdl [, portName] [, options])
+			```
+	
+			## Type: "com"
+			Creates a COM object (Windows only).
+	
+			```
+			CreateObject('com', class, context, serverName)
+			```
+		</description>
 		<argument>
 			<name>type</name>
 			<alias>componentType</alias>
 			<type>string</type>
 			<required>Yes</required>
-		<description>one of the following:
-- java: for loading a java object
-- webservice: for loading a remote webservice 
-- component: for loading a Component (this functions does not call the init method of the component)
-- com: for loading a com Object</description>
-    </argument>
+			<description>Specifies the type of object to create:
+				- "java": Creates a Java object instance
+				- "component": Creates a CFC without calling the init method
+				- "webservice": Creates a web service client
+				- "com": Creates a COM object (Windows only)</description>
+		</argument>
 		<argument>
 			<name>classname</name>
 			<alias>component,class</alias>
 			<type>object</type>
 			<required>no</required>
-		<description>
-the usage of this argument depend on type defined with argument "type":
-- java: java class to load
-- webservice: WSDL url to call
-- component: The CFC name; corresponds to the name of the file that defines the component
-- com: Component ProgID for the object to invoke.
-		</description>
-    </argument>
+			<description>Specifies the object to create based on the type:
+				- "java": Fully qualified Java class name
+				- "component": CFC name (file path without .cfc extension)
+				- "webservice": URL to the WSDL
+				- "com": Component ProgID for the object</description>
+		</argument>
 		<argument>
 			<name>context</name>
-			<alias>bundleName,name,webservice,Assembly,WSPortName,thirdArg</alias>
+			<alias>bundleName,name,webservice,Assembly,WSPortName,thirdArg,javasettings</alias>
 			<type>object</type>
 			<required>No</required>
-		<description>
-the usage of this argument depend on type defined with argument "type":
-- com: not used (ignored)
-- java: "classpath" or "bundleName" used to load the defined class, 
-this can be a list of multiple paths (directories containing class files or jar files) as string list or array or a name of an OSGi bundle (Lucee can download OSGi bundles automatically if necessary)
-- webservice: a struct containing the following optional keys (username,password,proxyServer,proxyPort,proxyUser,proxyPassword) 
-- component: not used (ignored)
-</description>
-    </argument>
+			<description>Varies by object type:
+				- "java": 
+				  * Classpath: String list or array of paths to class files or JAR files
+				  * BundleName: Name of an OSGi bundle
+				  * JavaSettings: Structure containing Maven configuration
+				- "webservice": Structure with web service options (username, password, proxyServer, proxyPort, proxyUser, proxyPassword)
+				- "component": Not used
+				- "com": Not used</description>
+		</argument>
 		<argument>
 			<name>delimiterOrVersion</name>
 			<alias>delimiter,version,bundleVersion</alias>
 			<type>object</type>
 			<required>No</required>
-		<description>
-the usage of this argument depend on type defined with argument "type":
-- java: delimiter used for the classpath (default comma) or bundle version when the previous argument was a bundle name
-- webservice: not used (ignored)
-- component: not used (ignored)
-- com: not used (ignored)</description>
-    </argument>
+			<description>Varies by object type:
+				- "java": 
+				  * Delimiter for classpath (default is comma)
+				  * Bundle version when using an OSGi bundle
+				- "webservice": Not used
+				- "component": Not used
+				- "com": Not used</description>
+		</argument>
 		<return>
 			<type>any</type>
 		</return>
 	</function>
+	
 	
 	<!-- createODBCDate -->
 	<function>
@@ -16213,13 +16242,13 @@ the usage of this argument depend on type defined with argument "type":
 			<type>datetime</type>
 			<required>Yes</required>
 			<description>date object</description>
-    	</argument>
+		</argument>
 		<argument>
 			<name>timezone</name>
 			<type>timezone</type>
 			<required>no</required>
 			<description>timezone to use</description>
-    	</argument>
+		</argument>
 		<return>
 			<type>datetime</type>
 		</return>
@@ -16236,7 +16265,7 @@ the usage of this argument depend on type defined with argument "type":
 			<type>datetime</type>
 			<required>Yes</required>
 		<description>date object</description>
-    </argument>
+	</argument>
 		<return>
 			<type>datetime</type>
 		</return>
@@ -16252,7 +16281,7 @@ the usage of this argument depend on type defined with argument "type":
 			<type>datetime</type>
 			<required>Yes</required>
 		<description>date object</description>
-    </argument>
+	</argument>
 		<return>
 			<type>datetime</type>
 		</return>
@@ -16262,8 +16291,8 @@ the usage of this argument depend on type defined with argument "type":
 	<function>
 		<name>dateFormat</name>
 		<member-name>dateFormat</member-name>
-        <member-type>date</member-type>
-        
+		<member-type>date</member-type>
+		
 		<class>lucee.runtime.functions.displayFormatting.DateFormat</class>
 		<keywords>date,string,formatting</keywords>
 		<description>Formats a date string to a given output</description>
@@ -16272,7 +16301,7 @@ the usage of this argument depend on type defined with argument "type":
 			<type>any</type>
 			<required>Yes</required>
 		<description>Date object</description>
-    </argument>
+	</argument>
 		<argument>
 			<name>mask</name>
 			<type>string</type>
@@ -16294,16 +16323,16 @@ Characters that show how Lucee displays a date:
 - z: Time zone in literal format, for example, IST
 - Z: Time zone in hours of offset (RFC 822 TimeZone), for example, +0530
 - X: Time zone in hours of offset in ISO 8601 format. The following are the three ways of using 'X':
-         X: +05
-         XX: +0530
-         XXX: +5:30
+		 X: +05
+		 XX: +0530
+		 XXX: +5:30
 
 - short: equivalent to "m/d/y"
 - medium: equivalent to "mmm d, yyyy"
 - long: equivalent to "mmmm d, yyyy"
 - full: equivalent to "dddd, mmmm d, yyyy"
 - ISO8601/ISO: equivalent to "yyyy-mm-dd"</description>
-    </argument>
+	</argument>
 		<argument>
 			<name>timezone</name>
 			<type>timezone</type>
@@ -16313,11 +16342,11 @@ A datetime object is independent of a specific timezone, it is only an offset in
 This means that the timezone only comes into play when you need specific information like hours in a day, minutes in a hour or which day it is since those calculations depend on the timezone.
 For these calculations, a timezone must be specified in order to translate the date object to something else. If you do not provide the timezone in the function call, it will default to the timezone specified in the Lucee Administrator (Settings/Regional), or the timezone specified for the current request using the function setTimezone.
 You can find a list of all available timezones in the Lucee administrator (Settings/Regional). Some examples of valid timezones:
-       - AGT (for time in Argentina)
-       - Europe/Zurich (for time in Zurich/Switzerland)
-       - HST (Hawaiian Standard Time in the USA)
+	   - AGT (for time in Argentina)
+	   - Europe/Zurich (for time in Zurich/Switzerland)
+	   - HST (Hawaiian Standard Time in the USA)
 		</description>
-    </argument>
+	</argument>
 		<return>
 			<type>string</type>
 		</return>
@@ -16338,7 +16367,7 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<type>any</type>
 			<required>Yes</required>
 		<description>Datetime object</description>
-    </argument>
+	</argument>
 		<argument>
 			<name>mask</name>
 			<type>string</type>
@@ -16399,7 +16428,7 @@ The following masks can be used to format the full date and time and may not be 
 - epoch: Total seconds of a given date (Example:1567517664)
 - epochms: Total millseconds of a given date (Example:1567517664000)
 </description>
-    </argument>
+	</argument>
 		<argument>
 			<name>timezone</name>
 			<type>timezone</type>
@@ -16409,11 +16438,11 @@ A datetime object is independent of a specific timezone, it is only an offset in
 This means that the timezone only comes into play when you need specific information like hours in a day, minutes in a hour or which day it is since those calculations depend on the timezone.
 For these calculations, a timezone must be specified in order to translate the date object to something else. If you do not provide the timezone in the function call, it will default to the timezone specified in the Lucee Administrator (Settings/Regional), or the timezone specified for the current request using the function setTimezone.
 You can find a list of all available timezones in the Lucee administrator (Settings/Regional). Some examples of valid timezones:
-       - AGT (for time in Argentina)
-       - Europe/Zurich (for time in Zurich/Switzerland)
-       - HST (Hawaiian Standard Time in the USA)
+	   - AGT (for time in Argentina)
+	   - Europe/Zurich (for time in Zurich/Switzerland)
+	   - HST (Hawaiian Standard Time in the USA)
 		</description>
-    </argument>
+	</argument>
 		<return>
 			<type>string</type>
 		</return>
@@ -16444,13 +16473,13 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 - s: Second
 - l: Millisecond
 </description>
-    </argument>
+	</argument>
 		<argument>
 			<name>date</name>
 			<type>datetime</type>
 			<required>Yes</required>
 		<description>date object the get part from</description>
-    </argument>
+	</argument>
 		<argument>
 			<name>timezone</name>
 			<type>timezone</type>
@@ -16460,11 +16489,11 @@ A datetime object is independent of a specific timezone, it is only an offset in
 This means that the timezone only comes into play when you need specific information like hours in a day, minutes in a hour or which day it is since those calculations depend on the timezone.
 For these calculations, a timezone must be specified in order to translate the date object to something else. If you do not provide the timezone in the function call, it will default to the timezone specified in the Lucee Administrator (Settings/Regional), or the timezone specified for the current request using the function setTimezone.
 You can find a list of all available timezones in the Lucee administrator (Settings/Regional). Some examples of valid timezones:
-       - AGT (for time in Argentina)
-       - Europe/Zurich (for time in Zurich/Switzerland)
-       - HST (Hawaiian Standard Time in the USA)
+	   - AGT (for time in Argentina)
+	   - Europe/Zurich (for time in Zurich/Switzerland)
+	   - HST (Hawaiian Standard Time in the USA)
 		</description>
-    </argument>
+	</argument>
 		<return>
 			<type>number</type>
 		</return>
@@ -16481,7 +16510,7 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<type>datetime</type>
 			<required>Yes</required>
 		<description>Date/time object</description>
-    </argument>
+	</argument>
 		<argument>
 			<name>timezone</name>
 			<type>timezone</type>
@@ -16491,11 +16520,11 @@ A datetime object is independent of a specific timezone, it is only an offset in
 This means that the timezone only comes into play when you need specific information like hours in a day, minutes in a hour or which day it is since those calculations depend on the timezone.
 For these calculations, a timezone must be specified in order to translate the date object to something else. If you do not provide the timezone in the function call, it will default to the timezone specified in the Lucee Administrator (Settings/Regional), or the timezone specified for the current request using the function setTimezone.
 You can find a list of all available timezones in the Lucee administrator (Settings/Regional). Some examples of valid timezones:
-       - AGT (for time in Argentina)
-       - Europe/Zurich (for time in Zurich/Switzerland)
-       - HST (Hawaiian Standard Time in the USA)
+	   - AGT (for time in Argentina)
+	   - Europe/Zurich (for time in Zurich/Switzerland)
+	   - HST (Hawaiian Standard Time in the USA)
 		</description>
-    </argument>
+	</argument>
 		<return>
 			<type>number</type>
 		</return>
@@ -16512,13 +16541,13 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<type>datetime</type>
 			<required>Yes</required>
 		<description>datetime object</description>
-    </argument>
+	</argument>
 		<argument>
 			<name>locale</name>
 			<type>locale</type>
 			<required>no</required>
 		<description>Locale to use instead of the locale of the page when processing the function</description>
-    </argument>
+	</argument>
 		<argument>
 			<name>timezone</name>
 			<type>timezone</type>
@@ -16528,8 +16557,8 @@ A datetime object is independent of a specific timezone, it is only an offset in
 This means that the timezone only comes into play when you need specific information like hours in a day, minutes in a hour or which day it is since those calculations depend on the timezone.
 For these calculations, a timezone must be specified in order to translate the date object to something else. If you do not provide the timezone in the function call, it will default to the timezone specified in the Lucee Administrator (Settings/Regional), or the timezone specified for the current request using the function setTimezone.
 You can find a list of all available timezones in the Lucee administrator (Settings/Regional). Some examples of valid timezones:
-       - AGT (for time in Argentina)
-       - Europe/Zurich (for time in Zurich/Switzerland)
+	   - AGT (for time in Argentina)
+	   - Europe/Zurich (for time in Zurich/Switzerland)
        - HST (Hawaiian Standard Time in the USA)
 		</description>
     </argument>
