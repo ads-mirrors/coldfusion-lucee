@@ -3,7 +3,6 @@ package lucee.runtime.functions.mvn;
 import java.io.IOException;
 import java.util.List;
 
-import lucee.print;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
@@ -142,8 +141,5 @@ public class MavenInfo implements Function {
 		qry.setAt(KeyConstants._checksum, row, checksum);
 		qry.setAt(KeyConstants._url, row, pom.getArtifactAsURL("jar").toExternalForm());
 		qry.setAt(KeyConstants._path, row, jar.toString());
-
-		print.e(pom.getPackaging());
-
 	}
 }
