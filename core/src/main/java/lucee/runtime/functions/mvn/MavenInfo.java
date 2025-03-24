@@ -83,7 +83,7 @@ public class MavenInfo implements Function {
 
 			List<POM> deps = root.getAllDependencies(includeOptional);
 			Query qry = new QueryImpl(new Key[] { KeyConstants._groupId, KeyConstants._artifactId, KeyConstants._version, KeyConstants._scope, KeyConstants._optional,
-					KeyConstants._checksum, KeyConstants._url, KeyConstants._path }, deps.size() + 1, "dependencies");
+					KeyConstants._checksum, KeyConstants._url, KeyConstants._path }, 0, "dependencies");
 			addRow(qry, root, false);
 			for (POM pom: deps) {
 				addRow(qry, pom, true); // depencies are "compile" by default
@@ -106,7 +106,7 @@ public class MavenInfo implements Function {
 
 	private static void addRow(Query qry, POM pom, boolean dependency) throws PageException, IOException {
 
-		if (pom.getPackaging().equals("jar")) return;
+		if (!pom.getPackaging().equals("jar")) return;
 		int row = qry.addRow();
 
 		// scope
@@ -140,7 +140,7 @@ public class MavenInfo implements Function {
 		qry.setAt(KeyConstants._scope, row, scope);
 		qry.setAt(KeyConstants._optional, row, optional);
 		qry.setAt(KeyConstants._checksum, row, checksum);
-		qry.setAt(KeyConstants._url, row, pom.getArtifactAsURL("jar"));
+		qry.setAt(KeyConstants._url, row, pom.getArtifactAsURL("jar").toExternalForm());
 		qry.setAt(KeyConstants._path, row, jar.toString());
 
 		print.e(pom.getPackaging());
