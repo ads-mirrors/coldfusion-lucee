@@ -129,7 +129,6 @@ public final class POM {
 		if (groupId == null) throw new IllegalArgumentException("groupId cannot be null");
 		if (artifactId == null) throw new IllegalArgumentException("artifactId cannot be null");
 		if (version == null) throw new IllegalArgumentException("version cannot be null");
-
 		this.localDirectory = localDirectory;
 		this.checksum = checksum;
 		if (repositories == null) {
@@ -141,6 +140,7 @@ public final class POM {
 		this.artifactId = artifactId.trim();
 		this.version = version == null ? null : version.trim();
 		this.scope = scope == null ? null : scope.trim();
+
 		this.optional = optional == null ? null : optional.trim();
 		this.dependencyScopeManagement = dependencyScopeManagement;
 		this.dependencyScope = dependencyScope;
@@ -174,7 +174,7 @@ public final class POM {
 					}
 					catch (SAXException e) {
 						IOException cause = ExceptionUtil.toIOException(e);
-						IOException ioe = new IOException("failed to load pom file [" + getArtifact("pom", initRepositories) + "]");
+						IOException ioe = new IOException("failed to load pom file [" + getArtifactAsURL("pom", initRepositories) + "]");
 						ExceptionUtil.initCauseEL(ioe, cause);
 						throw ioe;
 					}
@@ -319,9 +319,9 @@ public final class POM {
 		return scope;
 	}
 
-	public int getScope() throws IOException {
+	public int getScope(int scopeReturnIfNoScopeSet) throws IOException {
 		initProperties();
-		return MavenUtil.toScope(getScopeAsString(), SCOPE_COMPILE);
+		return MavenUtil.toScope(getScopeAsString(), scopeReturnIfNoScopeSet);
 	}
 
 	public String getOptionaUnresolved() {
@@ -364,7 +364,7 @@ public final class POM {
 		return hash;
 	}
 
-	Resource getArtifact(String type) {
+	public Resource getArtifact(String type) {
 		return local(localDirectory, type);
 	}
 
@@ -421,7 +421,11 @@ public final class POM {
 		return parent.getRealResource(artifactId + "-" + version + "." + extension);
 	}
 
-	public URL getArtifact(String type, Collection<Repository> repositories) throws IOException {
+	public URL getArtifactAsURL(String type) throws IOException {
+		return getArtifactAsURL(type, initRepositories);
+	}
+
+	public URL getArtifactAsURL(String type, Collection<Repository> repositories) throws IOException {
 		// TODO type check
 		StringBuilder sb = null;
 		URL url;
@@ -527,8 +531,7 @@ public final class POM {
 				executor = ThreadUtil.createExecutorService(deps.size(), false);
 				List<Future<Pair<IOException, POM>>> futures = new ArrayList<>();
 				for (POM p: deps) {
-					if (!node.addChild(p) || (!optional && p.getOptional())) continue;
-
+					if ((!optional && p.getOptional()) || !node.addChild(p)) continue;
 					// Handle recursive processing in a separate thread
 					if (recursive) {
 						Future<Pair<IOException, POM>> future = executor.submit(() -> {
@@ -685,4 +688,5 @@ public final class POM {
 	public String getChecksum() {
 		return checksum;
 	}
+
 }

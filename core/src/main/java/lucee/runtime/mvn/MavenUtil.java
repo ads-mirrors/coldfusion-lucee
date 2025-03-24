@@ -22,6 +22,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
+import lucee.commons.digest.Hash;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
@@ -48,7 +49,6 @@ public final class MavenUtil {
 
 		int size = properties == null ? 0 : properties.size();
 		if (rawProperties != null) size += rawProperties.size();
-
 		Map<String, String> newProperties = new HashMap<>(size);
 
 		// copy data from parent
@@ -189,7 +189,6 @@ public final class MavenUtil {
 				throw new IOException("could not find version for dependency [" + g + ":" + a + "] in [" + current + "]");
 			}
 		}
-
 		v = resolvePlaceholders(current, v, properties);
 		// PATCH TODO better solution for this
 		if (v != null && v.startsWith("[")) {
@@ -204,8 +203,8 @@ public final class MavenUtil {
 				o = pdm.getOptionalAsString();
 			}
 		}
-		if (o != null) s = resolvePlaceholders(current, o, properties);
-		return new GAVSO(g, a, v, s, o, null);
+		if (o != null) o = resolvePlaceholders(current, o, properties);
+		return new GAVSO(g, a, v, s, o, null).setDependency(GAVSO.ORIGIN_DEPENDENCY);
 		// p = POM.getInstance(localDirectory, g, a, v, s, o, current.getDependencyScope(),
 		// current.getDependencyScopeManagement());
 
@@ -213,12 +212,16 @@ public final class MavenUtil {
 	}
 
 	public static class GAVSO implements Serializable {
+
+		public static int ORIGIN_DEPENDENCY = 1;
+
 		public final String g;// groupId
 		public final String a;// artifactId
 		public final String v;// version
 		public final String s;// scope
 		public final String o;// optional
 		public final String c;// checksum
+		private int d;// dependency
 
 		public GAVSO(String g, String a, String v) {
 			this.g = g;
@@ -227,6 +230,15 @@ public final class MavenUtil {
 			this.s = null;
 			this.o = null;
 			this.c = null;
+		}
+
+		public GAVSO setDependency(int d) {
+			this.d = d;
+			return this;
+		}
+
+		public int getDependency() {
+			return d;
 		}
 
 		public GAVSO(String g, String a, String v, String s, String o, String c) {
@@ -442,7 +454,7 @@ public final class MavenUtil {
 			synchronized (SystemUtil.createToken("mvn", res.getAbsolutePath())) {
 				if (!res.isFile()) {
 					try {
-						URL url = pom.getArtifact(type, repositories);
+						URL url = pom.getArtifactAsURL(type, repositories);
 						if (log != null) log.info("maven", "download [" + url + "]");
 						try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
 							HttpGet request = new HttpGet(url.toExternalForm());
@@ -507,14 +519,36 @@ public final class MavenUtil {
 
 	public static int toScopes(String scopes, int defaultValue) {
 		if (StringUtil.isEmpty(scopes, true)) return defaultValue;
+		return toScopes(ListUtil.listToStringArray(scopes, ','), defaultValue);
+	}
+
+	public static int toScopes(String[] scopes, int defaultValue) {
+		if (scopes.length == 0) return defaultValue;
 
 		int rtn = 0;
-		for (String scope: ListUtil.listToStringArray(scopes, ',')) {
+		for (String scope: scopes) {
 			rtn += toScope(scope, 0);
 		}
 		if (rtn > 0) return rtn;
 
 		return defaultValue;
+	}
+
+	public static int toScopes(String scopes) throws IOException {
+		if (StringUtil.isEmpty(scopes, true)) throw new IOException("there is no scope defined");
+		return toScopes(ListUtil.listToStringArray(scopes, ','));
+	}
+
+	public static int toScopes(String[] scopes) throws IOException {
+		if (scopes.length == 0) throw new IOException("there is no scope defined");
+
+		int rtn = 0, tmp;
+		for (String scope: scopes) {
+			tmp = toScope(scope, 0);
+			if (tmp == 0) throw new IOException("scope [" + scope + "] is not a supported scope, valid scope names are [compile,test,provided,runtime,system,import]");
+			rtn += tmp;
+		}
+		return rtn;
 	}
 
 	public static int toScope(String scope, int defaultValue) {
@@ -740,4 +774,12 @@ public final class MavenUtil {
 		return version.matches(versionPattern);
 	}
 
+	public static String createChecksum(Resource res, String algorithm) throws IOException {
+		if ("md5".equalsIgnoreCase(algorithm)) return "md5:" + Hash.md5(res);
+		else if ("sha1".equalsIgnoreCase(algorithm)) return "sha1:" + Hash.sha1(res);
+		else if ("sha256".equalsIgnoreCase(algorithm)) return "sha256:" + Hash.sha256(res);
+		else if ("sha512".equalsIgnoreCase(algorithm)) return "sha512:" + Hash.sha512(res);
+
+		throw new IOException("Invalid checksum algorithm '" + algorithm + "'. Only the following algorithms are supported: md5, sha1, sha256, sha512");
+	}
 }

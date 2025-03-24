@@ -9863,6 +9863,68 @@ The following things are considered to be empty:
 			<type>struct</type>
 		</return>
 	</function>
+	<!-- MavenInfo -->
+<!-- MavenInfo -->
+	<function>
+		<name>MavenInfo</name>
+		<class>lucee.runtime.functions.mvn.MavenInfo</class>
+		<introduced>7.0.0.136</introduced>
+		<keywords>maven,classloading,dependencies,jars</keywords>
+		<description>Retrieves information about a Maven artifact and its dependencies.
+	
+	This function allows you to query details about a specific Maven artifact by providing its coordinates (groupId, artifactId, and optionally version). 
+	It returns a query containing information about the artifact itself and all of its dependencies based on the specified scope.
+	
+	The returned query includes columns for:
+	- **groupId**: The group identifier of the artifact
+	- **artifactId**: The artifact identifier
+	- **version**: The version of the artifact
+	- **scope**: The scope of the dependency (compile, provided, runtime, test, system)
+	- **optional**: Whether the dependency is optional
+	- **checksum**: Checksum information
+	- **url**: URL where the artifact can be found
+	- **path**: Local file path to the artifact
+	
+	This function is useful for debugging classloading issues, understanding dependency trees, or gathering information about the libraries your application depends on.</description>
+		<argument>
+			<name>groupId</name>
+			<type>string</type>
+			<required>Yes</required>
+			<description>The Maven group identifier that specifies the namespace for the artifact.</description>
+		</argument>
+		<argument>
+			<name>artifactId</name>
+			<type>string</type>
+			<required>Yes</required>
+			<description>The Maven artifact identifier that specifies the name of the artifact.</description>
+		</argument>
+		<argument>
+			<name>version</name>
+			<type>string</type>
+			<required>Yes</required>
+			<description>The specific version of the Maven artifact to query. </description>
+		</argument>
+		<argument>
+			<name>scopes</name>
+			<type>array</type>
+			<required>No</required>
+			<description>The dependency scopes to consider when retrieving dependencies. this is an array containing all scopes you wanna include in the resulting query. 
+			Valid values are: compile, provided, runtime, test, system. 
+			Default are all scopes exluding test.
+			</description>
+		</argument>
+		<argument>
+			<name>includeOptional</name>
+			<type>boolean</type>
+			<default>true</default>
+			<required>No</required>
+			<description>If true, includes optional dependencies in the results. If false, excludes dependencies marked as optional from the query results.</description>
+		</argument>
+		<return>
+			<description>Returns a query object containing information about the specified Maven artifact and all its dependencies. Each row represents one artifact, with the first row being the requested artifact itself.</description>
+			<type>query</type>
+		</return>
+	</function>
 	
 		
 	<!-- MavenLoad -->
