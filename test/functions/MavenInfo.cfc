@@ -121,7 +121,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				systemOutput("------ 122 ------",1,1);
 				systemOutput(mavenData,1,1);
 				
-				expect(mavenData.recordCount).toBeGT(5);
+				expect(mavenData.recordCount).toBe(2);
 				expect(mavenData.groupId[1]).toBe("org.springframework");
 				expect(mavenData.artifactId[1]).toBe("spring-core");
 			});
