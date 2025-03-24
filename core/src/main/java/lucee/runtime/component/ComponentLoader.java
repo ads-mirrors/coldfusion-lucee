@@ -692,8 +692,14 @@ public final class ComponentLoader {
 	private static ComponentImpl initComponent(PageContext pc, CIPage page, String callPath, boolean isRealPath, final boolean isExtendedComponent, boolean executeConstr,
 			boolean validate) throws PageException {
 		// is not a component, then it has to be an interface
-		if (validate && !(page instanceof ComponentPageImpl)) throw new ApplicationException("you cannot instantiate the interface [" + page.getPageSource().getDisplayPath()
-				+ "] as a component (" + page.getClass().getName() + "" + (page instanceof InterfacePageImpl) + ")");
+		if (validate && !(page instanceof ComponentPageImpl)) {
+			if (page instanceof InterfacePageImpl) throw new ApplicationException(
+					"you cannot instantiate the interface [" + page.getPageSource().getDisplayPath() + "] as a component (" + page.getClass().getName() + "" + ")");
+
+			throw new ApplicationException("there is a problem with casting  [" + page.getPageSource().getDisplayPath() + "/" + page.getClass().getName()
+					+ "] to a component (ComponentPageImpl) (" + page.getClass().getClassLoader() + "" + ")");
+
+		}
 
 		ComponentPageImpl cp = (ComponentPageImpl) page;
 		ComponentImpl c = cp.newInstance(pc, callPath, isRealPath, isExtendedComponent, executeConstr);
