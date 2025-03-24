@@ -26,8 +26,6 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 						ORDER BY salary DESC
 						```
 					}
-					
-					var result = queryResultScopeTest();
 					expect(structKeyExists(local, "cfquery")).toBeTrue("The unnamed query result should exist in the local scope");
 					expect(structKeyExists(variables, "cfquery")).toBeFalse("The unnamed query result should NOT exist in the variables scope");
 				});
