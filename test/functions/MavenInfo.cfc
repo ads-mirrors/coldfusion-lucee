@@ -29,8 +29,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 			it("should retrieve artifact info with specific version", function() {
 				var version = "4.5.14";
 				var mavenData = MavenInfo("org.apache.httpcomponents", "httpclient", version);
-				serializeJSON("------ 33 ------",1,1);
-				serializeJSON(mavenData,1,1);
+				systemOutput("------ 33 ------",1,1);
+				systemOutput(mavenData,1,1);
 				
 				expect(mavenData.recordCount).toBeGT(0);
 				expect(mavenData.version[1]).toBe(version);
@@ -118,8 +118,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 			
 			it("should handle artifact with many dependencies", function() {
 				var mavenData = MavenInfo("org.springframework", "spring-core", "5.3.29");
-				serializeJSON("------ 120 ------",1,1);
-				serializeJSON(mavenData,1,1);
+				systemOutput("------ 122 ------",1,1);
+				systemOutput(mavenData,1,1);
 				
 				expect(mavenData.recordCount).toBeGT(5);
 				expect(mavenData.groupId[1]).toBe("org.springframework");
@@ -128,8 +128,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 			
 			it("should have valid paths for all dependencies", function() {
 				var mavenData = MavenInfo("commons-io", "commons-io", "2.11.0");
-				serializeJSON("------ 130 ------",1,1);
-				serializeJSON(mavenData,1,1);
+				systemOutput("------ 132 ------",1,1);
+				systemOutput(mavenData,1,1);
 				for (var i = 1; i <= mavenData.recordCount; i++) {
 					var path = mavenData.path[i];
 					expect(path).toBeTypeOf("string");
