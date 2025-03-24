@@ -30,6 +30,7 @@ WEB-INF
 /.vscode
 /.idea
 /dev/
+/versions/
 loader/env.json
 buildVersionNumber.txt
 /test/reports
