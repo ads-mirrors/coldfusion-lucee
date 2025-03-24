@@ -53,13 +53,9 @@ public class BundleLoader {
 
 	public static BundleCollection loadBundles(final CFMLEngineFactory engFac, final File cacheRootDir, final File jarDirectory, final File rc, final BundleCollection old)
 			throws IOException, BundleException {
-
+		long start = System.currentTimeMillis();
 		final JarFile jf = new JarFile(rc);// TODO this should work in any case, but we should still improve this code
 		try {
-			// Manifest
-			final Manifest mani = jf.getManifest();
-			if (mani == null) throw new IOException("lucee core [" + rc + "] is invalid, there is no META-INF/MANIFEST.MF File");
-			final Attributes attrs = mani.getMainAttributes();
 			// default properties
 			final Properties defProp = loadDefaultProperties(jf);
 			// read the config from default.properties
@@ -75,19 +71,36 @@ public class BundleLoader {
 					config.put(k, CFMLEngineFactorySupport.removeQuotes((String) e.getValue(), true));
 				}
 			}
+			long tmp = System.currentTimeMillis();
+			engFac.log(LoggerImpl.LOG_DEBUG, "loaded default properties in " + (tmp - start) + "ms");
+			start = tmp;
 
 			// close all bundles
 			Felix felix;
 			if (old != null) {
+				engFac.log(LoggerImpl.LOG_DEBUG, "onload/uninstall existig bundle context");
 				removeBundlesEL(old);
 				felix = old.felix;
 				// stops felix (wait for it)
 				BundleUtil.stop(felix, false);
 				felix = engFac.getFelix(cacheRootDir, config);
+				tmp = System.currentTimeMillis();
+				engFac.log(LoggerImpl.LOG_DEBUG, "reloaded Felix in " + (tmp - start) + "ms");
+				start = tmp;
 			}
-			else felix = engFac.getFelix(cacheRootDir, config);
+			else {
+				felix = engFac.getFelix(cacheRootDir, config);
+				tmp = System.currentTimeMillis();
+				engFac.log(LoggerImpl.LOG_DEBUG, "loaded Felix in " + (tmp - start) + "ms");
+				start = tmp;
+			}
 
 			final BundleContext bc = felix.getBundleContext();
+
+			// Manifest
+			final Manifest mani = jf.getManifest();
+			if (mani == null) throw new IOException("lucee core [" + rc + "] is invalid, there is no META-INF/MANIFEST.MF File");
+			final Attributes attrs = mani.getMainAttributes();
 
 			// get bundle needed for that core
 			final String rb = attrs.getValue("Require-Bundle");
@@ -118,9 +131,16 @@ public class BundleLoader {
 			// Add Lucee core Bundle
 			Bundle bundle = BundleUtil.addBundle(engFac, bc, rc, null);
 
+			tmp = System.currentTimeMillis();
+			engFac.log(LoggerImpl.LOG_DEBUG, "loaded bundles in " + (tmp - start) + "ms");
+			start = tmp;
+
 			// Start the bundles
 			BundleUtil.start(engFac, bundles);
 			BundleUtil.start(engFac, bundle);
+			tmp = System.currentTimeMillis();
+			engFac.log(LoggerImpl.LOG_DEBUG, "started bundles in " + (tmp - start) + "ms");
+			start = tmp;
 
 			return new BundleCollection(felix, bundle, bundles);
 		}
