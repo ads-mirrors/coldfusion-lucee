@@ -993,11 +993,56 @@ public abstract class AbstrCFMLExprTransformer {
 		}
 
 		// Dynamic
-		if ((expr = dynamic(data)) != null) {
-			expr = newOp(data, expr);
+		int pos = data.srcCode.getPos();
+		if ((expr = dynamic(data, true)) != null) {
+
+			// do we have a java or cfml prefix?
+			Expression tmp = null;
+			if (expr instanceof LitString && ((LitString) expr).getString().startsWith("saklsdjasklfhnsalkfddsf:")) {
+				tmp = expr;
+				expr = dynamic(data, false);
+			}
+			// new operator?
+			else {
+				expr = newOp(data, expr);
+			}
+
 			expr = subDynamic(data, expr, true, false);
-			data.mode = DYNAMIC;
-			return expr;
+
+			// did we have a java or cfml prefix before?
+			if (tmp != null) {
+				boolean isMatch = false;
+				// did we get back a Variable
+				if (expr instanceof Variable) {
+					Member member = ((Variable) expr).getFirstMember();
+					// is the first member a BIF?
+					if (member instanceof BIF) {
+						// is it a static scope
+						if ("_getstaticscope".equals(((BIF) member).getFlf().getName())) {
+							// add type (cfml or java)
+							String str = ((LitString) tmp).getString();
+							str.indexOf(':');
+							str = str.substring(str.indexOf(':') + 1);
+							((BIF) member).addArgument(new Argument(expr.getFactory().createLitString(str), "string"));
+							isMatch = true;
+						}
+					}
+				}
+
+				// we may have a syntax also using "java:", but not following a static scope
+				if (!isMatch) {
+					data.srcCode.setPos(pos);
+					if ((expr = dynamic(data, false)) != null) {
+						expr = newOp(data, expr);
+						expr = subDynamic(data, expr, true, false);
+					}
+
+				}
+			}
+			if (expr != null) {
+				data.mode = DYNAMIC;
+				return expr;
+			}
 		}
 		// Sharp
 		if ((expr = sharp(data)) != null) {
@@ -1219,7 +1264,7 @@ public abstract class AbstrCFMLExprTransformer {
 	 * @return CFXD Element
 	 * @throws TemplateException
 	 */
-	private Expression dynamic(Data data) throws TemplateException {
+	private Expression dynamic(Data data, boolean checkPrefix) throws TemplateException {
 		// Die Implementation weicht ein wenig von der Grammatik ab,
 		// aber nicht in der Logik sondern rein wie es umgesetzt wurde.
 
@@ -1239,7 +1284,6 @@ public abstract class AbstrCFMLExprTransformer {
 
 		Variable var;
 		comments(data);
-
 		// Boolean constant
 		if (id.getString().equalsIgnoreCase("TRUE")) {// || name.equals("YES")) {
 			comments(data);
@@ -1252,6 +1296,14 @@ public abstract class AbstrCFMLExprTransformer {
 		else if (id.getString().equalsIgnoreCase("NULL") && !data.srcCode.isCurrent('.') && !data.srcCode.isCurrent('[')) {
 			comments(data);
 			return id.getFactory().createNullConstant(line, data.srcCode.getPosition());
+		}
+		else if (checkPrefix && (id.getString().equalsIgnoreCase("JAVA") || id.getString().equalsIgnoreCase("CLASS")) && data.srcCode.forwardIfCurrent(':')) {
+			comments(data);
+			return id.getFactory().createLitString("saklsdjasklfhnsalkfddsf:java");
+		}
+		else if (checkPrefix && (id.getString().equalsIgnoreCase("CFML") || id.getString().equalsIgnoreCase("CFC")) && data.srcCode.forwardIfCurrent(':')) {
+			comments(data);
+			return id.getFactory().createLitString("saklsdjasklfhnsalkfddsf:cfml");
 		}
 
 		// Extract Scope from the Variable

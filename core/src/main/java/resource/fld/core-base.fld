@@ -2858,6 +2858,12 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<required>Yes</required>
 			<description>component or component name</description>
 	    </argument>
+	    <argument>
+			<name>type</name>
+			<type>string</type>
+			<required>No</required>
+			<description>Type, java or cfml</description>
+	    </argument>
 		<return>
 			<type>any</type>
 		</return>

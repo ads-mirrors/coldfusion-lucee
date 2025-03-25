@@ -24,18 +24,24 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.Function;
 import lucee.runtime.java.JavaObject;
 
-public final class _GetStaticScope implements Function {
+public class _GetStaticScope implements Function {
 
 	private static final long serialVersionUID = -2676531632543576056L;
 
 	public static Object call(PageContext pc, String componentPath) throws PageException {
+		return call(pc, componentPath, null);
+	}
 
-		StaticScope ss = ComponentLoader.getStaticScope(pc, null, componentPath, null, null, false);
-		if (ss != null) return ss;
+	public static Object call(PageContext pc, String componentPath, String type) throws PageException {
 
+		if (type == null || "cfml".equalsIgnoreCase(type)) {
+			StaticScope ss = ComponentLoader.getStaticScope(pc, null, componentPath, null, null, type != null);
+			if (ss != null) return ss;
+		}
+		// no if needed, if type=="cfml", getStaticScope return a result or throw an exception
 		Class cls = _CreateComponent.loadClass(pc, componentPath);
-
 		return new JavaObject((pc).getVariableUtil(), cls, false);
+
 	}
 
 }
