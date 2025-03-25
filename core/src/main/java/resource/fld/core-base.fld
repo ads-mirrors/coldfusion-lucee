@@ -12634,6 +12634,35 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 		</return>
 	</function>
 	
+	<!-- sanitize -->
+	<function>
+	    <name>sanitize</name>
+	    <class>lucee.runtime.functions.string.Sanitize</class>
+	    <member-name>second</member-name>
+	    <description>Detects and masks sensitive information (such as passwords, API keys, tokens, etc.) from a given string. 
+	    The function identifies patterns commonly used for sensitive data and replaces them with a mask.</description>
+	    <argument>
+	        <name>text</name>
+	        <alias>string</alias>
+	        <type>string</type>
+	        <required>Yes</required>
+	        <description>The input string to be sanitized.</description>
+	    </argument>
+	    <argument>
+	        <name>replacement</name>
+	        <alias>mask</alias>
+	        <type>string</type>
+	        <default>****</default>
+	        <required>no</required>
+	        <description>The replacement string to use as a mask for sensitive data. If not specified, defaults to "****".</description>
+	    </argument>
+	    <return>
+	        <type>string</type>
+	    </return>
+	</function>
+	
+	
+
 	<!-- second -->
 	<function>
 		<name>second</name>
