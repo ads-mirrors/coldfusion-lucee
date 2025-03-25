@@ -43,6 +43,43 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
                 expect(result.result).toBe("Thread was interrupted during sleep");
                 expect(result.threadInterrupted).toBeTrue();
             });
+
+            it("interrupts a sleeping thread and verifies interruption using the alias function interruptThread()", function() {
+                // Create a thread that sleeps
+                var threadName = variables.threadPrefix & "_sleeping";
+                var threadInterrupted = false;
+                
+                thread name=threadName action="run" {
+                    try {
+                        sleep(1000); // Sleep for 2 seconds
+                        thread.result = "Sleep completed without interruption";
+                    } 
+                    catch (any e) {
+                        if (e.type == "java.lang.InterruptedException") {
+                            thread.result = "Thread was interrupted during sleep";
+                            thread.threadInterrupted = true;
+                        } else {
+                            thread.result = "Unexpected exception(#e.type?:""#): " & e.message;
+                            thread.threadInterrupted = false;
+                        }
+                    }
+                }
+                
+                // Give thread time to start sleeping
+                sleep(100);
+                
+                // Interrupt the thread
+                interruptThread(threadName);
+                
+                // Join and verify interruption
+                threadJoin(threadName);
+                
+                var result = cfthread[threadName];
+                expect(result).toBeStruct();
+                expect(result.STATUS).toBe("COMPLETED");
+                expect(result.result).toBe("Thread was interrupted during sleep");
+                expect(result.threadInterrupted).toBeTrue();
+            });
             
             it("interrupts a thread doing interrupt-aware operations", function() {
                 // Create a thread that checks for interruption
