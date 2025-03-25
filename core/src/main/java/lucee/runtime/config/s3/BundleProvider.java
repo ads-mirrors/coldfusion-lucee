@@ -592,6 +592,8 @@ public final class BundleProvider extends DefaultHandler {
 			if (rsp != null) {
 				int sc = rsp.getStatusCode();
 				if (sc >= 200 && sc < 300) return url;
+				else LogUtil.log(Logger.LOG_WARNING, "deploy", "bundle-download",
+					"Fetch bundle url [" + url + "] returned [" + sc + "]" );
 			}
 		}
 		catch (Exception e) {
