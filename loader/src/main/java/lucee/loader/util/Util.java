@@ -589,21 +589,21 @@ public final class Util {
 
 		// env
 		String value = System.getenv(name);
-		if (!Util.isEmpty(value)) return value;
+		if (value != null) return value;
 
 		// prop
 		value = System.getProperty(name, null);
-		if (!Util.isEmpty(value)) return value;
+		if (value != null) return value;
 
 		// try to convert prop to env
 		String key = name.replace('.', '_').toUpperCase();
 		value = System.getenv(key);
-		if (!Util.isEmpty(value)) return value;
+		if (value != null) return value;
 
 		// try to convert env to prop
 		key = name.replace('_', '.').toLowerCase();
 		value = System.getProperty(key, null);
-		if (!Util.isEmpty(value)) return value;
+		if (value != null) return value;
 
 		return defaultValue;
 	}

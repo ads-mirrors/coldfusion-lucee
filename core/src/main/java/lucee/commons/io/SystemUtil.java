@@ -1352,16 +1352,16 @@ public final class SystemUtil {
 	public static String getSystemPropOrEnvVar(String name, String defaultValue) {
 		// env
 		String value = System.getenv(name);
-		if (!StringUtil.isEmpty(value)) return value;
+		if (value != null) return value;
 
 		// prop
 		value = System.getProperty(name);
-		if (!StringUtil.isEmpty(value)) return value;
+		if (value != null) return value;
 
 		// env 2
 		name = convertSystemPropToEnvVar(name);
 		value = System.getenv(name);
-		if (!StringUtil.isEmpty(value)) return value;
+		if (value != null) return value;
 
 		return defaultValue;
 	}
