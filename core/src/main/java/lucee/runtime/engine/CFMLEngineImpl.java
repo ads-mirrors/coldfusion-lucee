@@ -846,11 +846,12 @@ public final class CFMLEngineImpl implements CFMLEngine {
 			boolean multi = configServer.getAdminMode() == ConfigImpl.ADMINMODE_MULTI;
 			ConfigWebPro config;
 			RefBoolean isCustomSetting = new RefBooleanImpl();
-			Resource configDir = getConfigDirectory(sg, configServer, countExistingContextes, isCustomSetting);
 			if (multi) {
+				Resource configDir = getConfigDirectory(sg, configServer, countExistingContextes, isCustomSetting);
 				config = ConfigWebFactory.newInstanceMulti(this, factory, configServer, configDir, sg, null);
 			}
 			else {
+				Resource configDir = configServer.getConfigDir();
 				config = ConfigWebFactory.newInstanceSingle(this, factory, configServer, configDir, sg, null);
 			}
 
