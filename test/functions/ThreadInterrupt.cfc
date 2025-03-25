@@ -46,7 +46,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
             it("interrupts a sleeping thread and verifies interruption using the alias function interruptThread()", function() {
                 // Create a thread that sleeps
-                var threadName = variables.threadPrefix & "_sleeping";
+                var threadName = variables.threadPrefix & "_sleeping_alias";
                 var threadInterrupted = false;
                 
                 thread name=threadName action="run" {
