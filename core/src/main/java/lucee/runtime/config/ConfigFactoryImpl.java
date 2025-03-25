@@ -202,6 +202,8 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 	public static final String DEFAULT_LOCATION = Constants.DEFAULT_UPDATE_URL.toExternalForm();
 	public static final ClassDefinition<DummyORMEngine> DUMMY_ORM_ENGINE = new ClassDefinitionImpl<DummyORMEngine>(DummyORMEngine.class);
 	public static final String[] CONFIG_FILE_NAMES = new String[] { ".CFConfig.json", "config.json" };
+	private static String forceLogAppender = SystemUtil.getSystemPropOrEnvVar("lucee.logging.force.appender", null);
+	private static String forceLogLevel = SystemUtil.getSystemPropOrEnvVar("lucee.logging.force.level", null);
 
 	public static ConfigWebPro newInstanceWeb(CFMLEngine engine, CFMLFactoryImpl factory, ConfigServerImpl configServer, ServletConfig servletConfig,
 			ConfigWebImpl existingToUpdate) throws PageException {
@@ -1426,7 +1428,8 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 					name = entry.getKey().getString();
 
 					// appender
-					cdAppender = getClassDefinition(child, "appender", config.getIdentification());
+					if (forceLogAppender != null) cdAppender = config.getLogEngine().appenderClassDefintion(forceLogAppender);
+					else cdAppender = getClassDefinition(child, "appender", config.getIdentification());
 					if (!cdAppender.hasClass()) {
 						tmp = StringUtil.trim(getAttr(child, "appender"), "");
 						cdAppender = config.getLogEngine().appenderClassDefintion(tmp);
@@ -1448,6 +1451,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 					layoutArgs = toArguments(child, "layoutArguments", true, false);
 
 					String strLevel = getAttr(child, "level");
+					if (forceLogLevel !=null) strLevel = forceLogLevel;
 					if (StringUtil.isEmpty(strLevel, true)) strLevel = getAttr(child, "logLevel");
 					level = LogUtil.toLevel(StringUtil.trim(strLevel, ""), Log.LEVEL_ERROR);
 					readOnly = Caster.toBooleanValue(getAttr(child, "readOnly"), false);
