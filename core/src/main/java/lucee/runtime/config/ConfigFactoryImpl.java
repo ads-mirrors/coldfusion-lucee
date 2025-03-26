@@ -53,6 +53,7 @@ import org.osgi.framework.BundleException;
 import org.xml.sax.SAXException;
 
 import jakarta.servlet.ServletConfig;
+import lucee.print;
 import lucee.commons.collection.MapFactory;
 import lucee.commons.date.TimeZoneConstants;
 import lucee.commons.date.TimeZoneUtil;
@@ -552,7 +553,6 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 	public static void loadResourceProvider(ConfigImpl config, Struct root) {
 		try {
 			Array providers = ConfigUtil.getAsArray("resourceProviders", root);
-
 			// Resource Provider
 			boolean hasZip = false, hasS3 = false;
 			if (providers != null && providers.size() > 0) {
@@ -567,7 +567,6 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 				while (pit.hasNext()) {
 					provider = Caster.toStruct(pit.next(), null);
 					if (provider == null) continue;
-
 					try {
 						prov = getClassDefinition(provider, "", config.getIdentification());
 						strProviderCFC = getAttr(provider, "component");
@@ -579,6 +578,8 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 							continue;
 
 						strProviderScheme = getAttr(provider, "scheme");
+						print.e("-------------- " + strProviderScheme + " --------------");
+						print.e(provider);
 						// class
 						if (prov.hasClass() && !StringUtil.isEmpty(strProviderScheme)) {
 							strProviderScheme = strProviderScheme.trim().toLowerCase();
@@ -605,6 +606,9 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
+
+						print.e(t);
+
 						log(config, t);
 					}
 				}
@@ -1451,7 +1455,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 					layoutArgs = toArguments(child, "layoutArguments", true, false);
 
 					String strLevel = getAttr(child, "level");
-					if (forceLogLevel !=null) strLevel = forceLogLevel;
+					if (forceLogLevel != null) strLevel = forceLogLevel;
 					if (StringUtil.isEmpty(strLevel, true)) strLevel = getAttr(child, "logLevel");
 					level = LogUtil.toLevel(StringUtil.trim(strLevel, ""), Log.LEVEL_ERROR);
 					readOnly = Caster.toBooleanValue(getAttr(child, "readOnly"), false);

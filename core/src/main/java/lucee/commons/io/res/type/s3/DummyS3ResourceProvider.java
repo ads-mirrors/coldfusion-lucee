@@ -93,7 +93,7 @@ public final class DummyS3ResourceProvider implements ResourceProviderPro {
 	}
 
 	private PageException notInstalled() {
-		return new ApplicationException("No S3 Resource installed!", "Check out the Extension Store in the Lucee Administrator for \"S3\".");
+		return new ApplicationException("No S3 Resource Provider installed!", "Check out the Extension Store in the Lucee Administrator for \"S3\".");
 	}
 
 	private PageRuntimeException notInstalledEL() {
