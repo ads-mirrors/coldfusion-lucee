@@ -888,13 +888,13 @@ public final class PageContextImpl extends PageContext {
 		LogUtil.log(this, Log.LEVEL_INFO, PageContextImpl.class.getName(), "method getRelativePageSource is deprecated");
 		if (StringUtil.startsWith(realPath, '/')) return PageSourceImpl.best(getPageSources(realPath));
 		if (pathList.size() == 0) return null;
-		return pathList.getLast().getRealPage(realPath);
+		return ((PageSourceImpl) pathList.getLast()).getRealPageSource(this, realPath);
 	}
 
 	public PageSource getRelativePageSourceExisting(String realPath) {
 		if (StringUtil.startsWith(realPath, '/')) return getPageSourceExisting(realPath);
 		if (pathList.size() == 0) return null;
-		PageSource ps = pathList.getLast().getRealPage(realPath);
+		PageSource ps = ((PageSourceImpl) pathList.getLast()).getRealPageSource(this, realPath);
 		if (PageSourceImpl.pageExist(ps)) return ps;
 		return null;
 	}
@@ -925,7 +925,7 @@ public final class PageContextImpl extends PageContext {
 		}
 		else ps = pathList.getLast();
 
-		ps = ps.getRealPage(realPath);
+		ps = ((PageSourceImpl) ps).getRealPageSource(this, realPath);
 		if (PageSourceImpl.pageExist(ps)) return ps;
 		return null;
 	}
@@ -936,7 +936,7 @@ public final class PageContextImpl extends PageContext {
 		PageSource ps = getCurrentPageSource(null);
 		if (ps == null) return null;
 
-		return new PageSource[] { ps.getRealPage(realPath) };
+		return new PageSource[] { ((PageSourceImpl) ps).getRealPageSource(this, realPath) };
 	}
 
 	public PageSource getPageSource(String realPath) {

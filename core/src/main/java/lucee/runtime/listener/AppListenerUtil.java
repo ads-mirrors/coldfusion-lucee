@@ -37,6 +37,7 @@ import lucee.runtime.Page;
 import lucee.runtime.PageContext;
 import lucee.runtime.PageContextImpl;
 import lucee.runtime.PageSource;
+import lucee.runtime.PageSourceImpl;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.ConfigUtil;
@@ -122,7 +123,7 @@ public final class AppListenerUtil {
 	}
 
 	public static Page getApplicationPageCurrent(PageContext pc, PageSource requestedPage, String filename) throws PageException {
-		PageSource ps = requestedPage.getRealPage(filename);
+		PageSource ps = ((PageSourceImpl) requestedPage).getRealPageSource(pc, filename);
 		if (ps.exists()) ps.loadPage(pc, false);
 		return null;
 	}
@@ -134,7 +135,7 @@ public final class AppListenerUtil {
 	}
 
 	public static Page getApplicationPageCurr2Root(PageContext pc, PageSource requestedPage, String filename) throws PageException {
-		PageSource ps = requestedPage.getRealPage(filename);
+		PageSource ps = ((PageSourceImpl) requestedPage).getRealPageSource(pc, filename);
 		if (ps.exists()) return ps.loadPage(pc, false);
 
 		Array arr = lucee.runtime.type.util.ListUtil.listToArrayRemoveEmpty(requestedPage.getRealpathWithVirtual(), "/");

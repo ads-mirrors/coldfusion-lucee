@@ -34,7 +34,6 @@ import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.apache.felix.framework.Logger;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.xml.sax.Attributes;
@@ -592,8 +591,7 @@ public final class BundleProvider extends DefaultHandler {
 			if (rsp != null) {
 				int sc = rsp.getStatusCode();
 				if (sc >= 200 && sc < 300) return url;
-				else LogUtil.log(Log.LEVEL_WARN, "deploy", "bundle-download",
-					"Fetch bundle url [" + url + "] returned [" + sc + "]" );
+				else LogUtil.log(Log.LEVEL_WARN, "deploy", "bundle-download", "Fetch bundle url [" + url + "] returned [" + sc + "]");
 			}
 		}
 		catch (Exception e) {

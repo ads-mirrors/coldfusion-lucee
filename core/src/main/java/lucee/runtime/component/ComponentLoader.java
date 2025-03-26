@@ -421,7 +421,7 @@ public final class ComponentLoader {
 			}
 
 			if (loadingLocation != null) {
-				ps = loadingLocation.getRealPage(pathWithCFC);
+				ps = ((PageSourceImpl) loadingLocation).getRealPageSource(pc, pathWithCFC);
 				if (ps != null) {
 					page = toCIPage(ps.loadPageThrowTemplateException(pc, false, (Page) null));
 

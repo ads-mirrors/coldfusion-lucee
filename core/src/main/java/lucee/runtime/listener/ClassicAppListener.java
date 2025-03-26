@@ -25,6 +25,7 @@ import lucee.runtime.Page;
 import lucee.runtime.PageContext;
 import lucee.runtime.PageContextImpl;
 import lucee.runtime.PageSource;
+import lucee.runtime.PageSourceImpl;
 import lucee.runtime.config.Constants;
 import lucee.runtime.exp.MissingIncludeException;
 import lucee.runtime.exp.PageException;
@@ -79,7 +80,7 @@ public final class ClassicAppListener extends AppListenerSupport {
 
 		// on Request End
 		if (application != null) {
-			PageSource onReqEnd = application.getPageSource().getRealPage(Constants.CFML_CLASSIC_APPLICATION_END_EVENT_HANDLER);
+			PageSource onReqEnd = ((PageSourceImpl) application.getPageSource()).getRealPageSource(pc, Constants.CFML_CLASSIC_APPLICATION_END_EVENT_HANDLER);
 			if (onReqEnd.exists()) pci._doInclude(new PageSource[] { onReqEnd }, false, null);
 		}
 	}
@@ -185,6 +186,7 @@ public final class ClassicAppListener extends AppListenerSupport {
 		return singelton;
 	}
 
+	@Override
 	public void setSingelton(boolean singelton) {
 		this.singelton = singelton;
 	}

@@ -377,13 +377,13 @@ public final class ResourceUtil {
 		PageSource ps = pc.getCurrentPageSource(null);
 		if (ps != null) {
 			if (ps instanceof PageSourceImpl) {
-				Resource res = ((PageSourceImpl) ps).getRealResource(destination);
+				Resource res = ((PageSourceImpl) ps).getRealPageSource(pc, destination).getResource();
 				if (res != null) return res;
 			}
 
 			// we should no longer come ever to this point
 			LogUtil.log(Log.LEVEL_ERROR, "resources", "expected PageSoucre to be from type PageSourceImpl, but it is not, it is [" + ps.getClass().getName() + "]");
-			ps = ps.getRealPage(destination);
+			ps = ((PageSourceImpl) ps).getRealPageSource(pc, destination);
 			if (ps != null) {
 				Resource res = ps.getResource();
 				if (res != null) {

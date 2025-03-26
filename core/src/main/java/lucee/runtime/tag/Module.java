@@ -23,6 +23,7 @@ import lucee.runtime.Mapping;
 import lucee.runtime.MappingImpl;
 import lucee.runtime.PageContextImpl;
 import lucee.runtime.PageSource;
+import lucee.runtime.PageSourceImpl;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.customtag.CustomTagUtil;
@@ -59,7 +60,7 @@ public final class Module extends CFTag {
 				source = new InitFile(pageContext, ps, template);
 			}
 			else {
-				source = new InitFile(pageContext, pageContext.getCurrentPageSource().getRealPage(template), template);
+				source = new InitFile(pageContext, ((PageSourceImpl) pageContext.getCurrentPageSource()).getRealPageSource(pageContext, template), template);
 				if (!MappingImpl.isOK(source.getPageSource())) {
 					throw new MissingIncludeException(source.getPageSource(),
 							"could not find template [" + template + "], file [" + source.getPageSource().getDisplayPath() + "] doesn't exist");

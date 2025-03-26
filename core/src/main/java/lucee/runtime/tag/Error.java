@@ -19,6 +19,7 @@
 package lucee.runtime.tag;
 
 import lucee.runtime.PageSource;
+import lucee.runtime.PageSourceImpl;
 import lucee.runtime.err.ErrorPage;
 import lucee.runtime.err.ErrorPageImpl;
 import lucee.runtime.exp.ExpressionException;
@@ -81,7 +82,7 @@ public final class Error extends TagImpl {
 	 * @throws MissingIncludeException
 	 **/
 	public void setTemplate(String template) throws MissingIncludeException {
-		PageSource ps = pageContext.getCurrentPageSource().getRealPage(template);
+		PageSource ps = ((PageSourceImpl) pageContext.getCurrentPageSource()).getRealPageSource(pageContext, template);
 		if (!ps.exists()) throw new MissingIncludeException(ps);
 		errorPage.setTemplate(ps);
 	}

@@ -651,7 +651,7 @@ public final class PageSourceImpl implements PageSource {
 	 * @param isOutSide
 	 * @return merged realpath
 	 */
-	private static String mergeRealPathes(Mapping mapping, String parentRealPath, String newRealPath, RefBoolean isOutSide) {
+	private static String mergeRealPathes(String parentRealPath, String newRealPath, RefBoolean isOutSide) {
 		parentRealPath = pathRemoveLast(parentRealPath, isOutSide);
 		while (newRealPath.startsWith("../")) {
 			parentRealPath = pathRemoveLast(parentRealPath, isOutSide);
@@ -659,39 +659,22 @@ public final class PageSourceImpl implements PageSource {
 		}
 
 		// check if come back
-		String path = parentRealPath.concat("/").concat(newRealPath);
+		// String path = parentRealPath.concat("/").concat(newRealPath);
+		// print.e(path);
 
-		if (path.startsWith("../")) {
-			int count = 0;
-			do {
-				count++;
-				path = path.substring(3);
-			}
-			while (path.startsWith("../"));
-
-			String strRoot = mapping.getPhysical().getAbsolutePath().replace('\\', '/');
-			if (!StringUtil.endsWith(strRoot, '/')) {
-				strRoot += '/';
-			}
-			int rootLen = strRoot.length();
-			String[] arr = ListUtil.toStringArray(ListUtil.listToArray(path, '/'), "");// path.split("/");
-			int tmpLen;
-			for (int i = count; i > 0; i--) {
-				if (arr.length > i) {
-					String tmp = '/' + list(arr, 0, i);
-					tmpLen = rootLen - tmp.length();
-					if (strRoot.lastIndexOf(tmp) == tmpLen && tmpLen >= 0) {
-						StringBuffer rtn = new StringBuffer();
-						while (i < count - i) {
-							count--;
-							rtn.append("../");
-						}
-						isOutSide.setValue(rtn.length() != 0);
-						return (rtn.length() == 0 ? "/" : rtn.toString()) + list(arr, i, arr.length);
-					}
-				}
-			}
-		}
+		/*
+		 * if (path.startsWith("../") && mapping.hasPhysical() && !mapping.hasArchive()) { int count = 0; do
+		 * { count++; path = path.substring(3); } while (path.startsWith("../"));
+		 * 
+		 * String strRoot = mapping.getPhysical().getAbsolutePath().replace('\\', '/'); if
+		 * (!StringUtil.endsWith(strRoot, '/')) { strRoot += '/'; } int rootLen = strRoot.length(); String[]
+		 * arr = ListUtil.toStringArray(ListUtil.listToArray(path, '/'), "");// path.split("/"); int tmpLen;
+		 * for (int i = count; i > 0; i--) { if (arr.length > i) { String tmp = '/' + list(arr, 0, i);
+		 * tmpLen = rootLen - tmp.length(); if (strRoot.lastIndexOf(tmp) == tmpLen && tmpLen >= 0) {
+		 * StringBuffer rtn = new StringBuffer(); while (i < count - i) { count--; rtn.append("../"); }
+		 * isOutSide.setValue(rtn.length() != 0); return (rtn.length() == 0 ? "/" : rtn.toString()) +
+		 * list(arr, i, arr.length); } } } }
+		 */
 		return parentRealPath.concat("/").concat(newRealPath);
 	}
 
@@ -721,11 +704,11 @@ public final class PageSourceImpl implements PageSource {
 	 */
 	private static String pathRemoveLast(String path, RefBoolean isOutSide) {
 		if (path.length() == 0) {
-			isOutSide.setValue(true);
+			if (isOutSide != null) isOutSide.setValue(true);
 			return "..";
 		}
 		else if (path.endsWith("..")) {
-			isOutSide.setValue(true);
+			if (isOutSide != null) isOutSide.setValue(true);
 			return path.concat("/..");// path+"/..";
 		}
 		return path.substring(0, path.lastIndexOf('/'));
@@ -954,38 +937,42 @@ public final class PageSourceImpl implements PageSource {
 	}
 
 	@Override
+	@Deprecated
 	public PageSource getRealPage(String realPath) {
-		if (realPath.equals(".") || realPath.equals("..")) realPath += '/';
-		else realPath = realPath.replace('\\', '/');
-		RefBoolean _isOutSide = new RefBooleanImpl(isOutSide);
-
-		if (realPath.indexOf('/') == 0 || ResourceUtil.isWindowsPath(realPath)) {
-			_isOutSide.setValue(false);
-		}
-		else if (realPath.startsWith("./")) {
-			realPath = mergeRealPathes(mapping, this.relPath, realPath.substring(2), _isOutSide);
-		}
-		else {
-			realPath = mergeRealPathes(mapping, this.relPath, realPath, _isOutSide);
-		}
-		return mapping.getPageSource(realPath, _isOutSide.toBooleanValue());
+		return getRealPageSource(null, realPath);
 	}
 
-	public Resource getRealResource(String realPath) {
+	// FUTURE add to interface
+	public PageSource getRealPageSource(PageContext pc, String realPath) {
+		RefBoolean _isOutSide = new RefBooleanImpl(isOutSide);
+
+		String realResolved = resolveReal(realPath, _isOutSide);
+
+		// in case we step outside the mapping we meed to open up to all mappings
+		if (realResolved.startsWith(".")) {
+			// add virtual
+			realResolved = mergeRealPathes(mapping.getVirtualLowerCaseWithSlash(), realResolved, null);
+
+			PageContextImpl pci = (PageContextImpl) ThreadLocalPageContext.get(pc);
+			return pci.getPageSource(realResolved);
+		}
+		return mapping.getPageSource(realResolved, _isOutSide.toBooleanValue());
+	}
+
+	private String resolveReal(String realPath, RefBoolean _isOutSide) {
 		if (realPath.equals(".") || realPath.equals("..")) realPath += '/';
 		else realPath = realPath.replace('\\', '/');
-		RefBoolean _isOutSide = new RefBooleanImpl(isOutSide);
 
 		if (realPath.indexOf('/') == 0 || ResourceUtil.isWindowsPath(realPath)) {
 			_isOutSide.setValue(false);
 		}
 		else if (realPath.startsWith("./")) {
-			realPath = mergeRealPathes(mapping, this.relPath, realPath.substring(2), _isOutSide);
+			realPath = mergeRealPathes(this.relPath, realPath.substring(2), _isOutSide);
 		}
 		else {
-			realPath = mergeRealPathes(mapping, this.relPath, realPath, _isOutSide);
+			realPath = mergeRealPathes(this.relPath, realPath, _isOutSide);
 		}
-		return mapping.getResource(realPath, _isOutSide.toBooleanValue());
+		return realPath;
 	}
 
 	@Override
