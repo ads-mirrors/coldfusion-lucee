@@ -141,7 +141,7 @@ public final class CFConfigImport {
 
 			admin.updateConfig(json, flushExistingData);
 			admin.storeAndReload();
-			ConfigUtil.getConfigServerImpl(config).resetAll();
+			ConfigUtil.getConfigServerImpl(config).resetAll(null);
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);

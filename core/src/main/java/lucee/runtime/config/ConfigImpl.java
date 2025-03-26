@@ -6313,12 +6313,18 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		baseComponentPageSource = null;
 	}
 
-	public void resetAll() throws IOException {
+	public void resetAll(ResetFilter filter) throws IOException {
 		List<Method> methods = Reflector.getMethods(this.getClass());
-
-		for (Method method: methods) {
-			if (!method.getName().startsWith("reset") || method.getName().equals("reset") || method.getName().equals("resetAll") || method.getArgumentCount() != 0) continue;
-			method.invoke(this);
+		if (filter == null) {
+			for (Method method: methods) {
+				if (!method.getName().startsWith("reset") || method.getName().equals("reset") || method.getName().equals("resetAll") || method.getArgumentCount() != 0) continue;
+				method.invoke(this);
+			}
+		}
+		else {
+			for (Method method: methods) {
+				if (method.getArgumentCount() == 0 && filter.allow(method.getName())) method.invoke(this);
+			}
 		}
 	}
 

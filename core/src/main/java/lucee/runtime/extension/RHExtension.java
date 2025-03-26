@@ -70,6 +70,7 @@ import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.config.Constants;
 import lucee.runtime.config.DeployHandler;
+import lucee.runtime.config.ResetFilter;
 import lucee.runtime.converter.ConverterException;
 import lucee.runtime.converter.JSONConverter;
 import lucee.runtime.converter.JSONDateFormat;
@@ -264,16 +265,21 @@ public final class RHExtension implements Serializable {
 		// get installed res
 		Resource res = StringUtil.isEmpty(version) ? null : getExtensionInstalledFile(config, id, version, false);
 		boolean installed = (res != null && res.isFile());
-
+		ResetFilter filter = new ResetFilter();
 		if (!installed) {
-			if (!StringUtil.isEmpty(resource) && (res = ResourceUtil.toResourceExisting(config, resource, null)) != null) {
-				return DeployHandler.deployExtension(config, new ExtensionDefintion(id, version).setSource(config, res), null, false, true, true, new RefBooleanImpl());
+			try {
+				if (!StringUtil.isEmpty(resource) && (res = ResourceUtil.toResourceExisting(config, resource, null)) != null) {
+					return DeployHandler.deployExtension(config, new ExtensionDefintion(id, version).setSource(config, res), filter, null, false, true, true, new RefBooleanImpl());
+				}
+				else if (!StringUtil.isEmpty(id)) {
+					return DeployHandler.deployExtension(config, new ExtensionDefintion(id, version), filter, null, false, true, true, new RefBooleanImpl()); // MUSTT
+				}
+				else {
+					throw new IOException("cannot install extension based on the given data [id:" + id + ";version:" + version + ";resource:" + resource + "]");
+				}
 			}
-			else if (!StringUtil.isEmpty(id)) {
-				return DeployHandler.deployExtension(config, new ExtensionDefintion(id, version), null, false, true, true, new RefBooleanImpl()); // MUSTT
-			}
-			else {
-				throw new IOException("cannot install extension based on the given data [id:" + id + ";version:" + version + ";resource:" + resource + "]");
+			finally {
+				filter.reset(config);
 			}
 		}
 		// if forced we also install if it already is
@@ -965,12 +971,18 @@ public final class RHExtension implements Serializable {
 		if (resources == null || resources.length == 0) return;
 		int rt;
 		RHExtension xmlExt;
-		for (int i = 0; i < resources.length; i++) {
-			ext = getInstance(config, resources[i]);
-			xmlExt = xmlExtensions.get(ext.getId());
-			if (xmlExt != null && (xmlExt.getVersion() + "").equals(ext.getVersion() + "")) continue;
-			rt = ext.getMetadata().getReleaseType();
-			ConfigAdmin._updateRHExtension((ConfigPro) config, resources[i], true, true, RHExtension.ACTION_MOVE);
+		ResetFilter filter = new ResetFilter();
+		try {
+			for (int i = 0; i < resources.length; i++) {
+				ext = getInstance(config, resources[i]);
+				xmlExt = xmlExtensions.get(ext.getId());
+				if (xmlExt != null && (xmlExt.getVersion() + "").equals(ext.getVersion() + "")) continue;
+				rt = ext.getMetadata().getReleaseType();
+				ConfigAdmin._updateRHExtension((ConfigPro) config, resources[i], filter, true, true, RHExtension.ACTION_MOVE);
+			}
+		}
+		finally {
+			filter.resetThrowPageException(config);
 		}
 	}
 

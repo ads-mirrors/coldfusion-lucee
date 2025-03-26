@@ -111,6 +111,7 @@ import lucee.runtime.config.Password;
 import lucee.runtime.config.PasswordImpl;
 import lucee.runtime.config.RemoteClient;
 import lucee.runtime.config.RemoteClientImpl;
+import lucee.runtime.config.ResetFilter;
 import lucee.runtime.db.ClassDefinition;
 import lucee.runtime.db.DataSource;
 import lucee.runtime.db.DataSourceImpl;
@@ -4292,8 +4293,15 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 			String version = getString("version", null);
 			if (!StringUtil.isEmpty(version, true) && !"latest".equalsIgnoreCase(version)) ed = new ExtensionDefintion(id, version);
 			else ed = RHExtension.toExtensionDefinition(id);
-			DeployHandler.deployExtension(config, ed, config == null ? null : ThreadLocalPageContext.getLog(pageContext, "application"), true, true, throwOnError,
-					new RefBooleanImpl());
+
+			ResetFilter filter = new ResetFilter();
+			try {
+				DeployHandler.deployExtension(config, ed, filter, config == null ? null : ThreadLocalPageContext.getLog(pageContext, "application"), true, true, throwOnError,
+						new RefBooleanImpl());
+			}
+			finally {
+				filter.resetThrowPageException(config);
+			}
 			return;
 		}
 
@@ -4319,16 +4327,26 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		// path
 		if (obj instanceof String) {
 			Resource src = ResourceUtil.toResourceExisting(config, (String) obj);
-			ConfigAdmin._updateRHExtension(config, src, true, true, RHExtension.ACTION_MOVE);
+			ResetFilter filter = new ResetFilter();
+			try {
+				ConfigAdmin._updateRHExtension(config, src, filter, true, true, RHExtension.ACTION_MOVE);
+			}
+			finally {
+				filter.resetThrowPageException(config);
+			}
 		}
 		else {
+			ResetFilter filter = new ResetFilter();
 			try {
 				Resource tmp = SystemUtil.getTempFile("lex", true);
 				IOUtil.copy(new ByteArrayInputStream(Caster.toBinary(obj)), tmp, true);
-				ConfigAdmin._updateRHExtension(config, tmp, true, true, RHExtension.ACTION_MOVE);
+				ConfigAdmin._updateRHExtension(config, tmp, filter, true, true, RHExtension.ACTION_MOVE);
 			}
 			catch (IOException ioe) {
 				throw Caster.toPageException(ioe);
+			}
+			finally {
+				filter.resetThrowPageException(config);
 			}
 		}
 

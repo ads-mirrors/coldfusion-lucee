@@ -4537,7 +4537,13 @@ public final class ConfigAdmin {
 			}
 
 			if (id.equalsIgnoreCase(rhe.getId()) || id.equalsIgnoreCase(rhe.getMetadata().getSymbolicName())) {
-				removeRHExtension(config, rhe, null, true);
+				ResetFilter filter = new ResetFilter();
+				try {
+					removeRHExtension(config, rhe, null, filter, true);
+				}
+				finally {
+					filter.resetThrowPageException(config);
+				}
 				children.removeEL(key);
 			}
 		}
@@ -4676,17 +4682,17 @@ public final class ConfigAdmin {
 		}
 	}
 
-	public static RHExtension _updateRHExtension(ConfigPro config, ExtensionDefintion ext, boolean reload, boolean force, short action) throws PageException {
+	public static RHExtension _updateRHExtension(ConfigPro config, ExtensionDefintion ext, ResetFilter filter, boolean reload, boolean force, short action) throws PageException {
 		try {
 			ConfigAdmin admin = new ConfigAdmin(config, null, true);
-			return admin.updateRHExtension(config, ext, reload, force, action);
+			return admin.updateRHExtension(config, ext, filter, reload, force, action);
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);
 		}
 	}
 
-	public RHExtension updateRHExtension(Config config, ExtensionDefintion ext, boolean reload, boolean force, short action) throws PageException {
+	public RHExtension updateRHExtension(Config config, ExtensionDefintion ext, ResetFilter filter, boolean reload, boolean force, short action) throws PageException {
 		RHExtension rhext;
 		try {
 			rhext = RHExtension.getInstance(config, ext);
@@ -4698,21 +4704,21 @@ public final class ConfigAdmin {
 			ExceptionUtil.rethrowIfNecessary(t);
 			throw Caster.toPageException(t);
 		}
-		updateRHExtension(config, rhext, reload, force);
+		updateRHExtension(config, rhext, filter, reload, force);
 		return rhext;
 	}
 
-	public static RHExtension _updateRHExtension(ConfigPro config, Resource ext, boolean reload, boolean force, short action) throws PageException {
+	public static RHExtension _updateRHExtension(ConfigPro config, Resource ext, ResetFilter filter, boolean reload, boolean force, short action) throws PageException {
 		try {
 			ConfigAdmin admin = new ConfigAdmin(config, null, true);
-			return admin.updateRHExtension(config, ext, reload, force, action);
+			return admin.updateRHExtension(config, ext, filter, reload, force, action);
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);
 		}
 	}
 
-	public RHExtension updateRHExtension(Config config, Resource ext, boolean reload, boolean force, short action) throws PageException {
+	public RHExtension updateRHExtension(Config config, Resource ext, ResetFilter filter, boolean reload, boolean force, short action) throws PageException {
 		RHExtension rhext;
 		try {
 			rhext = RHExtension.getInstance(config, ext);
@@ -4725,31 +4731,31 @@ public final class ConfigAdmin {
 			if (ext != null) DeployHandler.moveToFailedFolder(ext.getParentResource(), ext);
 			throw Caster.toPageException(t);
 		}
-		updateRHExtension(config, rhext, reload, force);
+		updateRHExtension(config, rhext, filter, reload, force);
 		return rhext;
 	}
 
-	protected static void _updateRHExtension(ConfigPro config, RHExtension rhext, boolean reload, boolean force) throws PageException {
+	protected static void _updateRHExtension(ConfigPro config, RHExtension rhext, ResetFilter filter, boolean reload, boolean force) throws PageException {
 		try {
 			ConfigAdmin admin = new ConfigAdmin(config, null, true);
-			admin.updateRHExtension(config, rhext, reload, force);
+			admin.updateRHExtension(config, rhext, filter, reload, force);
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);
 		}
 	}
 
-	protected static void _removeRHExtension(ConfigPro config, RHExtension rhext, RHExtension replacementRH, boolean deleteExtension) throws PageException {
+	protected static void _removeRHExtension(ConfigPro config, RHExtension rhext, RHExtension replacementRH, ResetFilter filter, boolean deleteExtension) throws PageException {
 		try {
 			ConfigAdmin admin = new ConfigAdmin(config, null, true);
-			admin.removeRHExtension(config, rhext, replacementRH, deleteExtension);
+			admin.removeRHExtension(config, rhext, replacementRH, filter, deleteExtension);
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);
 		}
 	}
 
-	public void updateRHExtension(Config config, RHExtension rhext, boolean reload, boolean force) throws PageException {
+	public void updateRHExtension(Config config, RHExtension rhext, ResetFilter filter, boolean reload, boolean force) throws PageException {
 
 		// MUST 7 rest all values set
 		try {
@@ -4770,12 +4776,12 @@ public final class ConfigAdmin {
 		if (existingRH != null) {
 			// same version
 			if (existingRH.getVersion().compareTo(rhext.getVersion()) == 0) {
-				removeRHExtension(config, existingRH, rhext, false);
+				removeRHExtension(config, existingRH, rhext, filter, false);
 			}
 			else {
-				removeRHExtension(config, existingRH, rhext, true);
+				removeRHExtension(config, existingRH, rhext, filter, true);
 			}
-			ConfigUtil.getConfigServerImpl(config).resetExtensionDefinitions().resetRHExtensions();
+			filter.add("resetExtensionDefinitions", "resetRHExtensions");
 		}
 		// INSTALL
 		try {
@@ -4816,14 +4822,14 @@ public final class ConfigAdmin {
 				if (!entry.isDirectory() && startsWith(path, type, "flds") && (StringUtil.endsWithIgnoreCase(path, ".fld") || StringUtil.endsWithIgnoreCase(path, ".fldx"))) {
 					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy fld [" + fileName + "]");
 					updateFLD(zis, fileName, false);
-					ConfigUtil.getConfigServerImpl(config).resetFLDs();
+					filter.add("resetFLDs");
 					reloadNecessary = true;
 				}
 				// tlds
 				if (!entry.isDirectory() && startsWith(path, type, "tlds") && (StringUtil.endsWithIgnoreCase(path, ".tld") || StringUtil.endsWithIgnoreCase(path, ".tldx"))) {
 					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy tld/tldx [" + fileName + "]");
 					updateTLD(zis, fileName, false);
-					ConfigUtil.getConfigServerImpl(config).resetTLDs();
+					filter.add("resetTLDs");
 					reloadNecessary = true;
 				}
 
@@ -4832,7 +4838,7 @@ public final class ConfigAdmin {
 					String sub = subFolder(entry);
 					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy tag [" + sub + "]");
 					updateTag(zis, sub, false);
-					ConfigUtil.getConfigServerImpl(config).resetTLDs();
+					filter.add("resetTLDs");
 					reloadNecessary = true;
 				}
 
@@ -4841,7 +4847,7 @@ public final class ConfigAdmin {
 					String sub = subFolder(entry);
 					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy function [" + sub + "]");
 					updateFunction(zis, sub, false);
-					ConfigUtil.getConfigServerImpl(config).resetFLDs();
+					filter.add("resetFLDs");
 					reloadNecessary = true;
 				}
 
@@ -4850,7 +4856,7 @@ public final class ConfigAdmin {
 					String sub = subFolder(entry);
 					logger.log(Log.LEVEL_DEBUG, "extension", "deploy mapping " + sub);
 					updateArchive(zis, sub, false);
-					ConfigUtil.getConfigWebIfPossible(config).resetMappings();
+					filter.add("resetMappings");
 					reloadNecessary = true;
 				}
 
@@ -4860,7 +4866,7 @@ public final class ConfigAdmin {
 					String sub = subFolder(entry);
 					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy event-gateway [" + sub + "]");
 					updateEventGateway(zis, sub, false);
-					ConfigUtil.getConfigServerImpl(config).resetGatewayEntries();
+					filter.add("resetGatewayEntries");
 				}
 
 				// context
@@ -4942,8 +4948,8 @@ public final class ConfigAdmin {
 					ClassDefinition cd = ClassDefinitionImpl.toClassDefinition(map, false, config.getIdentification());
 					if (cd != null && cd.isBundle()) {
 						_updateCache(cd);
-						ConfigUtil.getConfigServerImpl(config).resetCacheDefinitions();
-						ConfigUtil.getConfigServerImpl(config).resetCacheAll();
+						filter.add("resetCacheDefinitions");
+						filter.add("resetCacheAll");
 						reloadNecessary = true;
 					}
 					logger.info("extension", "Update cache [" + cd + "] from extension [" + rhext.getMetadata().getName() + ":" + rhext.getVersion() + "]");
@@ -4961,7 +4967,7 @@ public final class ConfigAdmin {
 					String _id = map.get("id");
 					if (!StringUtil.isEmpty(_id) && cd != null && cd.hasClass()) {
 						_updateCacheHandler(_id, cd);
-						ConfigUtil.getConfigServerImpl(config).resetCacheHandlers();
+						filter.add("resetCacheHandlers");
 						reloadNecessary = true;
 					}
 					logger.info("extension", "Update cache handler [" + cd + "] from extension [" + rhext.getMetadata().getName() + ":" + rhext.getVersion() + "]");
@@ -4978,7 +4984,7 @@ public final class ConfigAdmin {
 					ClassDefinition cd = ClassDefinitionImpl.toClassDefinition(map, false, config.getIdentification());
 					if (cd != null && cd.hasClass()) {
 						_updateSearchEngine(cd);
-						ConfigUtil.getConfigServerImpl(config).resetSearchEngineClassDefinition().resetSearchEngineDirectory();
+						filter.add("resetSearchEngineClassDefinition", "resetSearchEngineDirectory");
 						reloadNecessary = true;
 					}
 					logger.info("extension", "Update search engine [" + cd + "] from extension [" + rhext.getMetadata().getName() + ":" + rhext.getVersion() + "]");
@@ -5015,7 +5021,7 @@ public final class ConfigAdmin {
 						args.remove("scheme");
 						_updateResourceProvider(scheme, cd, args);
 						resetResources = true;
-						ConfigUtil.getConfigServerImpl(config).resetResources();
+						filter.add("resetResources");
 						reloadNecessary = true;
 					}
 					logger.info("extension", "Update resource provider [" + scheme + "] from extension [" + rhext.getMetadata().getName() + ":" + rhext.getVersion() + "]");
@@ -5033,7 +5039,7 @@ public final class ConfigAdmin {
 
 					if (cd != null && cd.hasClass()) {
 						_updateORMEngine(cd);
-						ConfigUtil.getConfigServerImpl(config).resetORMConfig().resetORMEngineClassDefintion();
+						filter.add("resetORMConfig", "resetORMEngineClassDefintion");
 						reloadNecessary = true;
 					}
 					logger.info("extension", "Update orm engine [" + cd + "] from extension [" + rhext.getMetadata().getName() + ":" + rhext.getVersion() + "]");
@@ -5068,7 +5074,7 @@ public final class ConfigAdmin {
 					if (cd != null && cd.hasClass()) {
 						_updateMonitorEnabled(true);
 						_updateMonitor(cd, map.get("type"), map.get("name"), true);
-						ConfigUtil.getConfigServerImpl(config).resetMonitors().resetMonitoringEnabled();
+						filter.add("resetMonitors", "resetMonitoringEnabled");
 						reloadNecessary = true;
 					}
 					logger.info("extension", "Update monitor engine [" + cd + "] from extension [" + rhext.getMetadata().getName() + ":" + rhext.getVersion() + "]");
@@ -5089,7 +5095,7 @@ public final class ConfigAdmin {
 					if (StringUtil.isEmpty(_dsn, true)) _dsn = map.get("dsn");
 					if (cd != null && cd.isBundle()) {
 						_updateJDBCDriver(_label, _id, cd, _dsn);
-						ConfigUtil.getConfigServerImpl(config).resetJDBCDrivers();
+						filter.add("resetJDBCDrivers");
 						reloadNecessary = true;
 					}
 					logger.info("extension", "Update JDBC Driver [" + _label + ":" + cd + "] from extension [" + rhext.getMetadata().getName() + ":" + rhext.getVersion() + "]");
@@ -5109,14 +5115,14 @@ public final class ConfigAdmin {
 					// class
 					if (cd != null && cd.isBundle()) {
 						_updateStartupHook(cd);
-						ConfigUtil.getConfigServerImpl(config).resetStartups();
+						filter.add("resetStartups");
 						reloadNecessary = true;
 						logger.info("extension", "Update Startup Hook [" + cd + "] from extension [" + rhext.getMetadata().getName() + ":" + rhext.getVersion() + "]");
 					}
 					// component
 					else if (!StringUtil.isEmpty(cfc, true)) {
 						_updateStartupHook(cfc);
-						ConfigUtil.getConfigServerImpl(config).resetStartups();
+						filter.add("resetStartups");
 						reloadNecessary = true;
 						logger.info("extension", "Update Startup Hook [" + cfc + "] from extension [" + rhext.getMetadata().getName() + ":" + rhext.getVersion() + "]");
 					}
@@ -5237,7 +5243,7 @@ public final class ConfigAdmin {
 					if (!StringUtil.isEmpty(id) && (!StringUtil.isEmpty(cfcPath) || (cd != null && cd.hasClass()))) {
 						reloadNecessary = true;
 						_updateGatewayEntry(id, cd, cfcPath, listenerCfcPath, startupMode, custom, readOnly);
-						ConfigUtil.getConfigServerImpl(config).resetGatewayEntries();
+						filter.add("resetGatewayEntries");
 					}
 
 					logger.info("extension", "Update event gateway entry [" + id + "] from extension [" + rhext.getMetadata().getName() + ":" + rhext.getVersion() + "]");
@@ -5249,11 +5255,8 @@ public final class ConfigAdmin {
 			reloadNecessary = true;
 			if (reload && reloadNecessary) {
 				_storeAndReload();
-				// ConfigUtil.getConfigServerImpl(config).resetAll();
 			}
 			else _store();
-
-			if (resetResources) ConfigUtil.getConfigServerImpl(config).resetResources();
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
@@ -5291,7 +5294,7 @@ public final class ConfigAdmin {
 	 *            defined in this extension.
 	 * @throws PageException
 	 */
-	private void removeRHExtension(Config config, RHExtension rhe, RHExtension replacementRH, boolean deleteExtension) throws PageException {
+	private void removeRHExtension(Config config, RHExtension rhe, RHExtension replacementRH, ResetFilter filter, boolean deleteExtension) throws PageException {
 		ConfigPro ci = ((ConfigPro) config);
 		Log logger = ThreadLocalPageContext.getLog(ci, "deploy");
 
@@ -5353,8 +5356,7 @@ public final class ConfigAdmin {
 
 					if (!StringUtil.isEmpty(_id) && cd != null && cd.hasClass()) {
 						_removeCacheHandler(_id);
-						ConfigUtil.getConfigServerImpl(config).resetCacheHandlers();
-						// reload=true;
+						filter.add("resetCacheHandlers");
 					}
 					logger.info("extension", "Remove cache handler [" + cd + "] from extension [" + rhe.getMetadata().getName() + ":" + rhe.getVersion() + "]");
 				}
@@ -5489,11 +5491,11 @@ public final class ConfigAdmin {
 
 					if (cd != null && cd.isBundle()) {
 						_removeStartupHook(cd);
-						ConfigUtil.getConfigServerImpl(config).resetStartups();
+						filter.add("resetStartups");
 					}
 					else if (!StringUtil.isEmpty(cfc, true)) {
 						_removeStartupHook(cfc);
-						ConfigUtil.getConfigServerImpl(config).resetStartups();
+						filter.add("resetStartups");
 					}
 					logger.info("extension", "Remove Startup Hook [" + cd + "] from extension [" + rhe.getMetadata().getName() + ":" + rhe.getVersion() + "]");
 				}

@@ -99,22 +99,28 @@ public final class DeployHandler {
 							}
 
 							// Lucee Extensions
-							else if ("lex".equalsIgnoreCase(ext)) ConfigAdmin._updateRHExtension((ConfigPro) config, child, true, force, RHExtension.ACTION_MOVE);
+							else if ("lex".equalsIgnoreCase(ext)) {
+								ResetFilter filter = new ResetFilter();
+								ConfigAdmin._updateRHExtension((ConfigPro) config, child, filter, true, force, RHExtension.ACTION_MOVE);
+								filter.reset(config);
+							}
 
 							// Lucee core
-							else if (config instanceof ConfigServer && "lco".equalsIgnoreCase(ext)) ConfigAdmin.updateCore((ConfigServerImpl) config, child, true);
+							else if (config instanceof ConfigServer && "lco".equalsIgnoreCase(ext)) {
+								ConfigAdmin.updateCore((ConfigServerImpl) config, child, true);
+							}
 							// CFConfig
 							else if ("json".equalsIgnoreCase(ext)) {
 								try {
-									if (ConfigFactoryImpl.isConfigFileName(child.getName())){
+									if (ConfigFactoryImpl.isConfigFileName(child.getName())) {
 										log.log(Log.LEVEL_INFO, "deploy handler", "Importing config file [" + child.getName() + "]");
 										CFConfigImport ci = new CFConfigImport(config, child, config.getResourceCharset(), null, "server", null, false, false, false);
 										ci.execute(true);
-										child.delete();	
+										child.delete();
 									}
 									else {
-										log.log(Log.LEVEL_ERROR, "deploy handler", "Deploy, unsupported json file [" + child.getName()
-											+ "], supported files are [" + Arrays.toString(ConfigFactoryImpl.CONFIG_FILE_NAMES) + "]");
+										log.log(Log.LEVEL_ERROR, "deploy handler", "Deploy, unsupported json file [" + child.getName() + "], supported files are ["
+												+ Arrays.toString(ConfigFactoryImpl.CONFIG_FILE_NAMES) + "]");
 										DeployHandler.moveToFailedFolder(config.getDeployDirectory(), child);
 									}
 								}
@@ -147,7 +153,7 @@ public final class DeployHandler {
 						try {
 							log.log(Log.LEVEL_ERROR, "deploy handler", "Deploy, unsupported file type [" + child.getName() + "]");
 							DeployHandler.moveToFailedFolder(config.getDeployDirectory(), child);
-						} 
+						}
 						catch (Exception e) {
 							log.log(Log.LEVEL_ERROR, "deploy handler", e);
 						}
@@ -223,27 +229,42 @@ public final class DeployHandler {
 			throws PageException {
 		Map<ExtensionDefintion, Boolean> results = throwOnError ? null : new HashMap<>();
 		if (!ArrayUtil.isEmpty(eds)) {
+
 			ExtensionDefintion ed;
 			RefBoolean sucess = new RefBooleanImpl();
-			for (int i = 0; i < eds.length; i++) {
-				ed = eds[i];
-				if (StringUtil.isEmpty(ed.getId(), true)) {
-					if (!throwOnError) results.put(ed, Boolean.FALSE);
-					continue;
+			ResetFilter filter = new ResetFilter();
+			try {
+				for (int i = 0; i < eds.length; i++) {
+					ed = eds[i];
+					if (StringUtil.isEmpty(ed.getId(), true)) {
+						if (!throwOnError) results.put(ed, Boolean.FALSE);
+						continue;
+					}
+					try {
+						RHExtension ext = deployExtension(config, ed, filter, log, i + 1 == eds.length, force, throwOnError, sucess);
+						if (!throwOnError) results.put(ed, ext != null ? Boolean.TRUE : Boolean.FALSE);
+					}
+					catch (PageException e) {
+						if (throwOnError) throw e;
+						results.put(ed, Boolean.FALSE);
+
+						if (log != null) log.error("deploy-extension", e);
+						else LogUtil.log("deploy-extension", e);
+					}
 				}
+			}
+			finally {
 				try {
-					RHExtension ext = deployExtension(config, ed, log, i + 1 == eds.length, force, throwOnError, sucess);
-					if (!throwOnError) results.put(ed, ext != null ? Boolean.TRUE : Boolean.FALSE);
+					filter.reset(config);
 				}
-				catch (PageException e) {
-					if (throwOnError) throw e;
-					results.put(ed, Boolean.FALSE);
+				catch (IOException e) {
+					if (throwOnError) throw Caster.toPageException(e);
 
 					if (log != null) log.error("deploy-extension", e);
 					else LogUtil.log("deploy-extension", e);
 				}
-
 			}
+
 		}
 		return results;
 	}
@@ -254,23 +275,36 @@ public final class DeployHandler {
 			ExtensionDefintion ed;
 			Iterator<ExtensionDefintion> it = eds.iterator();
 			RefBoolean sucess = new RefBooleanImpl();
+			ResetFilter filter = new ResetFilter();
+			try {
+				int count = 0;
+				while (it.hasNext()) {
+					count++;
+					ed = it.next();
+					if (StringUtil.isEmpty(ed.getId(), true)) continue;
+					try {
+						deployExtension(config, ed, filter, log, count == eds.size(), force, throwOnError, sucess);
+					}
+					catch (PageException e) {
+						if (throwOnError) throw e;
+						if (log != null) log.error("deploy-extension", e);
+						else LogUtil.log("deploy-extension", e);
+						sucess.setValue(false);
+					}
+					if (!sucess.toBooleanValue()) allSucessfull = false;
 
-			int count = 0;
-			while (it.hasNext()) {
-				count++;
-				ed = it.next();
-				if (StringUtil.isEmpty(ed.getId(), true)) continue;
-				try {
-					deployExtension(config, ed, log, count == eds.size(), force, throwOnError, sucess);
 				}
-				catch (PageException e) {
-					if (throwOnError) throw e;
+			}
+			finally {
+				try {
+					filter.reset(config);
+				}
+				catch (IOException e) {
+					if (throwOnError) throw Caster.toPageException(e);
+
 					if (log != null) log.error("deploy-extension", e);
 					else LogUtil.log("deploy-extension", e);
-					sucess.setValue(false);
 				}
-				if (!sucess.toBooleanValue()) allSucessfull = false;
-
 			}
 		}
 		return allSucessfull;
@@ -289,8 +323,8 @@ public final class DeployHandler {
 	 * @return
 	 * @throws PageException
 	 */
-	public static RHExtension deployExtension(Config config, ExtensionDefintion ed, Log log, boolean reload, boolean force, boolean throwOnError, RefBoolean installDone)
-			throws PageException {
+	public static RHExtension deployExtension(Config config, ExtensionDefintion ed, ResetFilter filter, Log log, boolean reload, boolean force, boolean throwOnError,
+			RefBoolean installDone) throws PageException {
 		ConfigPro ci = (ConfigPro) config;
 		// is the extension already installed
 		try {
@@ -328,7 +362,7 @@ public final class DeployHandler {
 					res = SystemUtil.getTempDirectory().getRealResource(ed.getId() + "-" + ed.getVersion() + ".lex");
 					ResourceUtil.touch(res);
 					IOUtil.copy(ext.getSource(), res);
-					RHExtension _ext = ConfigAdmin._updateRHExtension((ConfigPro) config, res, reload, force, RHExtension.ACTION_MOVE);
+					RHExtension _ext = ConfigAdmin._updateRHExtension((ConfigPro) config, res, filter, reload, force, RHExtension.ACTION_MOVE);
 					installDone.setValue(true);
 					return _ext;
 				}
@@ -387,7 +421,7 @@ public final class DeployHandler {
 						ResourceUtil.touch(res);
 
 						IOUtil.copy(ext.getSource(), res);
-						RHExtension _ext = ConfigAdmin._updateRHExtension((ConfigPro) config, res, reload, force, RHExtension.ACTION_MOVE);
+						RHExtension _ext = ConfigAdmin._updateRHExtension((ConfigPro) config, res, filter, reload, force, RHExtension.ACTION_MOVE);
 						installDone.setValue(true);
 						return _ext;
 					}
@@ -410,7 +444,7 @@ public final class DeployHandler {
 				ResourceUtil.touch(res);
 
 				IOUtil.copy(ext.getSource(), res);
-				RHExtension _ext = ConfigAdmin._updateRHExtension((ConfigPro) config, res, reload, force, RHExtension.ACTION_MOVE);
+				RHExtension _ext = ConfigAdmin._updateRHExtension((ConfigPro) config, res, filter, reload, force, RHExtension.ACTION_MOVE);
 				installDone.setValue(true);
 				return _ext;
 			}
@@ -424,7 +458,7 @@ public final class DeployHandler {
 		Resource res = downloadExtension(ci, ed, log, throwOnError);
 		if (res != null) {
 			try {
-				RHExtension _ext = ConfigAdmin._updateRHExtension((ConfigPro) config, res, reload, force, RHExtension.ACTION_MOVE);
+				RHExtension _ext = ConfigAdmin._updateRHExtension((ConfigPro) config, res, filter, reload, force, RHExtension.ACTION_MOVE);
 				installDone.setValue(true);
 				return _ext;
 			}
@@ -534,10 +568,16 @@ public final class DeployHandler {
 	}
 
 	public static RHExtension deployExtension(ConfigPro config, Resource ext, boolean reload, boolean force, short action) throws PageException {
-		return ConfigAdmin._updateRHExtension(config, ext, reload, force, action);
+		ResetFilter filter = new ResetFilter();
+		try {
+			return ConfigAdmin._updateRHExtension(config, ext, filter, reload, force, action);
+		}
+		finally {
+			filter.resetThrowPageException(config);
+		}
 	}
 
-	public static void deployExtension(ConfigPro config, RHExtension rhext, boolean reload, boolean force) throws PageException {
-		ConfigAdmin._updateRHExtension(config, rhext, reload, force);
+	public static void deployExtension(ConfigPro config, RHExtension rhext, ResetFilter filter, boolean reload, boolean force) throws PageException {
+		ConfigAdmin._updateRHExtension(config, rhext, filter, reload, force);
 	}
 }
