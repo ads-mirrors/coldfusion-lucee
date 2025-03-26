@@ -40,8 +40,11 @@ public class StorageScopeEngine {
 	}
 
 	public void clean() {
+		clean(false);
+	}
+	public void clean(boolean force) {
 		for (int i = 0; i < cleaners.length; i++) {
-			cleaners[i].clean();
+			cleaners[i].clean(force);
 		}
 	}
 
