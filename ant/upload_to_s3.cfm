@@ -43,6 +43,8 @@
 	}
 
 	trg = {};
+	// test S3 by listening the buckets
+	buckets=S3ListBuckets(server.system.environment.S3_ACCESS_ID_DOWNLOAD,server.system.environment.S3_SECRET_KEY_DOWNLOAD);
 
 	// test s3 access
 	if ( DO_DEPLOY ) {
