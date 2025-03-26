@@ -32,6 +32,8 @@ public interface StorageScopeCleaner {
 	 */
 	public void clean();
 
+	public void clean(boolean force);
+
 	public void info(String msg);
 
 	public void error(String msg);

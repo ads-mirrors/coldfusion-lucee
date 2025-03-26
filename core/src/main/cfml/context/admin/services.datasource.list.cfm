@@ -191,10 +191,6 @@ list all mappings and display necessary edit fields --->
 		<cfset QuerySetCell(srcGlobal,"port",datasources.port?:'',row)>
 	</cfif>
 </cfloop>
-<cfset stText.Settings.active="Active">
-<cfset stText.Settings.idle="Idle">
-<cfset stText.Settings.activeConn="Active Connections">
-<cfset stText.Settings.idleConn="Idle Connections">
 
 <cfif request.adminType EQ "web" and srcGlobal.recordcount>
 	<cfoutput>
