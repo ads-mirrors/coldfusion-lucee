@@ -5002,8 +5002,6 @@ public final class ConfigAdmin {
 			// update Resource
 			List<Map<String, String>> resources = rhext.getMetadata().getResources();
 			boolean resetResources = false;
-			print.e("ssssssssssssss");
-			print.e(resources);
 			if (!ArrayUtil.isEmpty(resources)) {
 				Iterator<Map<String, String>> itl = resources.iterator();
 				Map<String, String> map;
@@ -5012,16 +5010,11 @@ public final class ConfigAdmin {
 					ClassDefinition cd = ClassDefinitionImpl.toClassDefinition(map, false, config.getIdentification());
 					String scheme = map.get("scheme");
 					if (cd != null && cd.hasClass() && !StringUtil.isEmpty(scheme)) {
-						print.e("ssssssssssss updateRHExtension:" + reload + " sssssssssss");
 						Struct args = new StructImpl(Struct.TYPE_LINKED);
 						copyButIgnoreClassDef(map, args);
 						args.remove("scheme");
-						print.e(map);
-						print.e(args);
 						_updateResourceProvider(scheme, cd, args);
 						resetResources = true;
-						print.ds();
-
 						ConfigUtil.getConfigServerImpl(config).resetResources();
 						reloadNecessary = true;
 					}
@@ -5260,7 +5253,7 @@ public final class ConfigAdmin {
 			}
 			else _store();
 
-			if (reload) ConfigUtil.getConfigServerImpl(config).resetResources();
+			if (resetResources) ConfigUtil.getConfigServerImpl(config).resetResources();
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
