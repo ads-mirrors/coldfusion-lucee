@@ -1528,7 +1528,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		for (int i = 0; i < webs.length; i++) {
 			ConfigWeb cw = webs[i];
 			try {
-				((CFMLFactoryImpl) cw.getFactory()).getScopeContext().clearUnused();
+				((CFMLFactoryImpl) cw.getFactory()).getScopeContext().clearUnused(true);
 			}
 			catch (Throwable t) {
 				ExceptionUtil.rethrowIfNecessary(t);

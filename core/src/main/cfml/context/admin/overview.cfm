@@ -444,17 +444,20 @@ Error Output --->
 				<!--- Datasource ---->
 				<table class="maintbl">
 					<tbody>
-
 						<tr>
-							<th scope="row" style="width:50%">
+							<th scope="row" style="width:50%" rowspan="2">
 								<h3>#stText.setting.datasource#</h3>
 								#stText.setting.datasourceDesc#
 							</th>
 							<cfset nbr=systemInfo.activeDatasourceConnections>
-							<td style="width:35%">&nbsp;</td>
+							<td style="width:35%"><b>#stText.Settings.active#</b></td>
 							<td align="right" <cfif nbr GTE 50> style="color:##cc0000"</cfif>>#nbr#</td>
 						</tr>
-
+						<tr>
+							<cfset nbr=systemInfo.idleDatasourceConnections>
+							<td style="width:35%"><b>#stText.Settings.idle#</b></td>
+							<td align="right" <cfif nbr GTE 50> style="color:##cc0000"</cfif>>#nbr#</td>
+						</tr>
 					</tbody>
 				</table>
 				<!--- Tasks ---->

@@ -621,17 +621,22 @@ public final class ScopeContext {
 	 * remove all unused scope objects
 	 */
 	public void clearUnused() {
+		clearUnused(false);
+	}
+	public void clearUnused(boolean force) {
 		Log log = getLog();
 		try {
 			// create cleaner engine for session/client scope
-			if (session == null) session = new StorageScopeEngine(factory, log, new StorageScopeCleaner[] { new FileStorageScopeCleaner(Scope.SCOPE_SESSION, null)// new
+			if (session == null) session = new StorageScopeEngine(factory, log, new StorageScopeCleaner[] {
+					new FileStorageScopeCleaner(Scope.SCOPE_SESSION, null)// new
 					// SessionEndListener())
 					, new DatasourceStorageScopeCleaner(Scope.SCOPE_SESSION, null)// new
 					// SessionEndListener())
 					// ,new CacheStorageScopeCleaner(Scope.SCOPE_SESSION, new SessionEndListener())
 			});
 			if (client == null) client = new StorageScopeEngine(factory, log,
-					new StorageScopeCleaner[] { new FileStorageScopeCleaner(Scope.SCOPE_CLIENT, null), new DatasourceStorageScopeCleaner(Scope.SCOPE_CLIENT, null)
+					new StorageScopeCleaner[] { new FileStorageScopeCleaner(Scope.SCOPE_CLIENT, null),
+					new DatasourceStorageScopeCleaner(Scope.SCOPE_CLIENT, null)
 					// ,new CacheStorageScopeCleaner(Scope.SCOPE_CLIENT, null) //Cache storage need no control, if
 					// there is no listener
 					});
@@ -645,8 +650,8 @@ public final class ScopeContext {
 			clearUnusedMemoryScope(factory, Scope.SCOPE_SESSION);
 
 			// session must be executed first, because session creates a reference from client scope
-			session.clean();
-			client.clean();
+			session.clean(force);
+			client.clean(force);
 
 			// clean all unused application scopes
 			clearUnusedApplications(factory);
