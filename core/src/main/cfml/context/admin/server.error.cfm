@@ -113,9 +113,9 @@ Error Output --->
 							</cfif>
 							<cfif hasAccess>
 								<cfif structKeyExists(session,"passwordserver")>
-									<cfdirectory action="LIST" directory="../templates/error/" name="err_templates" serverpassword="#session.passwordserver#">
+									<cfdirectory action="LIST" directory="../templates/error/" name="err_templates" filter="*.cfm" serverpassword="#session.passwordserver#">
 								<cfelse>
-									<cfdirectory action="LIST" directory="../templates/error/" name="err_templates">
+									<cfdirectory action="LIST" directory="../templates/error/" name="err_templates" filter="*.cfm">
 								</cfif>
 								<cfset isFromTemplate=false>
 								<cfset path=GetDirectoryFromPath(mid(GetDirectoryFromPath(cgi.SCRIPT_NAME),1,len(GetDirectoryFromPath(cgi.SCRIPT_NAME))-1))>
