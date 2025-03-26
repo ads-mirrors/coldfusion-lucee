@@ -553,6 +553,8 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 	public static void loadResourceProvider(ConfigImpl config, Struct root) {
 		try {
 			Array providers = ConfigUtil.getAsArray("resourceProviders", root);
+			print.e("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+			print.e(providers);
 			// Resource Provider
 			boolean hasZip = false, hasS3 = false;
 			if (providers != null && providers.size() > 0) {
@@ -571,11 +573,6 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 						prov = getClassDefinition(provider, "", config.getIdentification());
 						strProviderCFC = getAttr(provider, "component");
 						if (StringUtil.isEmpty(strProviderCFC)) strProviderCFC = getAttr(provider, "class");
-
-						// ignore OLD S3 extension from 4.0
-						if ("lucee.extension.io.resource.type.s3.S3ResourceProvider".equals(prov.getClassName())
-								|| "lucee.commons.io.res.type.s3.S3ResourceProvider".equals(prov.getClassName()))
-							continue;
 
 						strProviderScheme = getAttr(provider, "scheme");
 						print.e("-------------- " + strProviderScheme + " --------------");
@@ -628,6 +625,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 			}
 
 			if (!hasS3) {
+
 				ClassDefinition s3Class = new ClassDefinitionImpl(DummyS3ResourceProvider.class);
 				Map<String, String> args = new HashMap<>();
 				args.put("lock-timeout", "10000");
