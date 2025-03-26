@@ -43,9 +43,7 @@
 	}
 
 	trg = {};
-	// test S3 by listening the buckets
-	buckets=S3ListBuckets(server.system.environment.S3_ACCESS_ID_DOWNLOAD,server.system.environment.S3_SECRET_KEY_DOWNLOAD);
-
+	
 	// test s3 access
 	if ( DO_DEPLOY ) {
 		s3_bucket = "lucee-downloads";
@@ -53,9 +51,11 @@
 		trg.jar = trg.dir & src.jarName;
 		trg.core = trg.dir & src.coreName;
 
+
 		_logger( "Testing S3 Bucket Access" );
 		// it usually will throw an error, rather than even reach this throw, if it fails
-		if (! DirectoryExists( trg.dir ) )
+		if (!s3exists( bucketName:s3_bucket, accessKeyId:server.system.environment.S3_ACCESS_ID_DOWNLOAD, secretAccessKey:server.system.environment.S3_SECRET_KEY_DOWNLOAD) &&
+		! DirectoryExists( trg.dir ) )
 			_logger( "DirectoryExists failed for s3 bucket [#s3_bucket#]", true );
 	} else {
 		_logger( "Not publishing to S3 as DO_DEPLOY is false, only building Light and Zero" );
