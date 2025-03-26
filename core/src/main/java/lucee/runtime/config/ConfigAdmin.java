@@ -2312,13 +2312,13 @@ public final class ConfigAdmin {
 				return;
 			}
 		}
-
 		// Insert
 		Struct el = new StructImpl();
 		children.appendEL(el);
 		el.setEL("scheme", scheme);
 		el.setEL("arguments", arguments);
 		setClass(el, null, "", cd);
+		print.e(el);
 	}
 
 	public void updateDefaultResourceProvider(ClassDefinition cd, String arguments) throws PageException {
@@ -4750,6 +4750,7 @@ public final class ConfigAdmin {
 	}
 
 	public void updateRHExtension(Config config, RHExtension rhext, boolean reload, boolean force) throws PageException {
+
 		// MUST 7 rest all values set
 		try {
 			if (!force && _hasRHExtensionInstalled((ConfigPro) config, rhext.toExtensionDefinition()) != null) {
@@ -5011,11 +5012,16 @@ public final class ConfigAdmin {
 					ClassDefinition cd = ClassDefinitionImpl.toClassDefinition(map, false, config.getIdentification());
 					String scheme = map.get("scheme");
 					if (cd != null && cd.hasClass() && !StringUtil.isEmpty(scheme)) {
+						print.e("ssssssssssss updateRHExtension:" + reload + " sssssssssss");
 						Struct args = new StructImpl(Struct.TYPE_LINKED);
 						copyButIgnoreClassDef(map, args);
 						args.remove("scheme");
+						print.e(map);
+						print.e(args);
 						_updateResourceProvider(scheme, cd, args);
 						resetResources = true;
+						print.ds();
+
 						ConfigUtil.getConfigServerImpl(config).resetResources();
 						reloadNecessary = true;
 					}
@@ -5254,7 +5260,7 @@ public final class ConfigAdmin {
 			}
 			else _store();
 
-			if (resetResources) ConfigUtil.getConfigServerImpl(config).resetResources();
+			if (reload) ConfigUtil.getConfigServerImpl(config).resetResources();
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
