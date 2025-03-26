@@ -240,9 +240,7 @@ public class CatchBlockImpl extends StructImpl implements CatchBlock, Castable, 
 
 	@Override
 	public Collection duplicate(boolean deepCopy) {
-		Struct sct = new StructImpl();
-		StructUtil.copy(this, sct, true);
-		return sct;
+		return StructUtil.duplicate(this, deepCopy);
 	}
 
 	@Override
