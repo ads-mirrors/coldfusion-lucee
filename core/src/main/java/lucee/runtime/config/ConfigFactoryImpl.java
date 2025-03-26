@@ -554,7 +554,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		try {
 			Array providers = ConfigUtil.getAsArray("resourceProviders", root);
 			print.e("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-			print.e(providers);
+			print.ds(providers);
 			// Resource Provider
 			boolean hasZip = false, hasS3 = false;
 			if (providers != null && providers.size() > 0) {
@@ -575,7 +575,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 						if (StringUtil.isEmpty(strProviderCFC)) strProviderCFC = getAttr(provider, "class");
 
 						strProviderScheme = getAttr(provider, "scheme");
-						print.ds("-------------- " + strProviderScheme + " --------------");
+						print.e("-------------- " + strProviderScheme + " --------------");
 						print.e(provider);
 						// class
 						if (prov.hasClass() && !StringUtil.isEmpty(strProviderScheme)) {
