@@ -44,6 +44,10 @@
 
 	trg = {};
 	
+	s3listbucket(bucketName:"lucee-downloads", accessKeyId:server.system.environment.S3_ACCESS_ID_DOWNLOAD, secretAccessKey:server.system.environment.S3_SECRET_KEY_DOWNLOAD);
+
+
+
 	// test s3 access
 	if ( DO_DEPLOY ) {
 		s3_bucket = "lucee-downloads";
@@ -51,7 +55,7 @@
 		trg.jar = trg.dir & src.jarName;
 		trg.core = trg.dir & src.coreName;
 
-
+		
 		_logger( "Testing S3 Bucket Access" );
 		// it usually will throw an error, rather than even reach this throw, if it fails
 		if (!s3exists( bucketName:s3_bucket, accessKeyId:server.system.environment.S3_ACCESS_ID_DOWNLOAD, secretAccessKey:server.system.environment.S3_SECRET_KEY_DOWNLOAD) &&
