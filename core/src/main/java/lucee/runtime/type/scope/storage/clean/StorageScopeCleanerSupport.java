@@ -26,6 +26,7 @@ import lucee.runtime.type.scope.storage.StorageScopeListener;
 
 public abstract class StorageScopeCleanerSupport implements StorageScopeCleaner {
 
+	protected static final int INTERVALL_SECOND = 1000;
 	protected static final int INTERVALL_MINUTE = 60 * 1000;
 	protected static final int INTERVALL_HOUR = 60 * 60 * 1000;
 	protected static final int INTERVALL_DAY = 24 * 60 * 60 * 1000;
@@ -53,13 +54,18 @@ public abstract class StorageScopeCleanerSupport implements StorageScopeCleaner 
 	}
 
 	@Override
-	public final void clean() {
-		if (lastClean + intervall < System.currentTimeMillis()) {
+	public final void clean(boolean force) {
+		if (force || lastClean + intervall < System.currentTimeMillis()) {
 			// info("cleaning "+application);
 			_clean();
 			lastClean = System.currentTimeMillis();
 			// info("next cleaning intervall in "+(intervall/1000)+" seconds");
 		}
+	}
+
+	@Override
+	public final void clean() {
+		clean(false);
 	}
 
 	protected abstract void _clean();
