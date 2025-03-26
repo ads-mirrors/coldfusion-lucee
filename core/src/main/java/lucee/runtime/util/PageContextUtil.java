@@ -33,6 +33,7 @@ import jakarta.servlet.jsp.tagext.BodyContent;
 import lucee.commons.io.DevNullOutputStream;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.util.ResourceUtil;
+import lucee.commons.lang.ClassUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.loader.engine.CFMLEngine;
@@ -40,15 +41,19 @@ import lucee.loader.engine.CFMLEngineFactory;
 import lucee.loader.engine.CFMLEngineWrapper;
 import lucee.runtime.CFMLFactory;
 import lucee.runtime.CFMLFactoryImpl;
+import lucee.runtime.CIPage;
 import lucee.runtime.Mapping;
 import lucee.runtime.MappingImpl;
 import lucee.runtime.PageContext;
 import lucee.runtime.PageContextImpl;
 import lucee.runtime.PageSource;
+import lucee.runtime.PageSourceImpl;
+import lucee.runtime.component.ComponentLoader;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.ConfigServerImpl;
 import lucee.runtime.config.ConfigWeb;
+import lucee.runtime.config.Constants;
 import lucee.runtime.engine.CFMLEngineImpl;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.ApplicationException;
@@ -290,5 +295,22 @@ public final class PageContextUtil {
 	public static boolean show(PageContext pc) {
 		if (pc != null) return ((PageContextImpl) pc).show();
 		return false;
+	}
+
+	public static lucee.runtime.Component loadInline(PageContext pc, String realPath, String inlineName) throws PageException {
+		PageSource ps = PageSourceImpl.best(((PageContextImpl) pc).getRelativePageSources(realPath));
+		String className = ps.getClassName();
+		if (className.endsWith(Constants.CFML_CLASS_SUFFIX)) {
+			className = className.substring(0, className.length() - Constants.CFML_CLASS_SUFFIX.length()) + "$" + inlineName + Constants.CFML_CLASS_SUFFIX;
+			try {
+				return ComponentLoader.loadInline((CIPage) ClassUtil.loadInstance(ps.loadPage(pc, false).getClass().getClassLoader(), className, new Object[] { ps }), pc);
+				// return ComponentLoader.loadInline((CIPage)
+				// ClassUtil.loadInstance(ps.getMapping().getPhysicalClass(className), new Object[] { ps }), this);
+			}
+			catch (Exception e) {
+				throw Caster.toPageException(e);
+			}
+		}
+		throw new ApplicationException("unable to load inline component [" + inlineName + "] from [" + realPath + "]");
 	}
 }

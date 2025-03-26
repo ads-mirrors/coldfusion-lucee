@@ -128,6 +128,8 @@ public final class JavaProxyFactory {
 	private static final org.objectweb.asm.commons.Method GET_CONFIG = new org.objectweb.asm.commons.Method("getConfig", Types.CONFIG_WEB, new Type[] {});
 	private static final org.objectweb.asm.commons.Method GET = new org.objectweb.asm.commons.Method("get", Types.PAGE_CONTEXT, new Type[] {});
 	private static final org.objectweb.asm.commons.Method LOAD_COMPONENT = new org.objectweb.asm.commons.Method("loadComponent", Types.COMPONENT, new Type[] { Types.STRING });
+	private static final org.objectweb.asm.commons.Method LOAD_INLINE = new org.objectweb.asm.commons.Method("loadInline", Types.COMPONENT,
+			new Type[] { Types.PAGE_CONTEXT, Types.STRING, Types.STRING });
 	private static final org.objectweb.asm.commons.Method TO_COMPONENT = new org.objectweb.asm.commons.Method("_toComponent", Types.COMPONENT, new Type[] {});
 
 	public static Object createProxy(Object defaultValue, PageContext pc, UDF udf, Class interf) {
@@ -330,17 +332,39 @@ public final class JavaProxyFactory {
 					adapter.invokeVirtual(Types.PAGE_CONTEXT, GET_CONFIG); // Call getConfig() on PageContext
 					adapter.visitFieldInsn(Opcodes.PUTFIELD, classPath, "config", CONFIG_WEB_NAME); // this.config = <result>
 
-					String name = cfc.getAbsName();
-					String sub = ((ComponentImpl) cfc).getSubName();
-					if (!StringUtil.isEmpty(sub)) {
-						name += "$" + sub;
+					{
+						String sub = ((ComponentImpl) cfc).getSubName();
+
+						if (!StringUtil.isEmpty(sub)) {
+							// inline
+							if (((ComponentImpl) cfc).getInline()) {
+
+								// this.cfc = pc.loadInline(...);
+								adapter.loadThis(); // Load 'this' onto the stack
+								adapter.visitVarInsn(Opcodes.ALOAD, 1); // Load the PageContext (local variable 1)
+								adapter.push((((ComponentImpl) cfc).getPageSource().getRealpathWithVirtual()));
+								adapter.push(sub);
+								adapter.invokeStatic(Types.PAGE_CONTEXT_UTIL, LOAD_INLINE);
+
+							}
+							// sub
+							else {
+								// this.cfc = pc.loadComponent("quartz.CFMJob");
+								adapter.loadThis(); // Load 'this' onto the stack
+								adapter.visitVarInsn(Opcodes.ALOAD, 1); // Load the PageContext (local variable 1)
+								adapter.push(cfc.getAbsName() + "$" + sub);
+								adapter.invokeVirtual(Types.PAGE_CONTEXT, LOAD_COMPONENT);
+							}
+						}
+						else {
+							// this.cfc = pc.loadComponent("quartz.CFMJob");
+							adapter.loadThis(); // Load 'this' onto the stack
+							adapter.visitVarInsn(Opcodes.ALOAD, 1); // Load the PageContext (local variable 1)
+							adapter.push(cfc.getAbsName());
+							adapter.invokeVirtual(Types.PAGE_CONTEXT, LOAD_COMPONENT);
+						}
 					}
 
-					// this.cfc = pc.loadComponent("quartz.CFMJob");
-					adapter.loadThis(); // Load 'this' onto the stack
-					adapter.visitVarInsn(Opcodes.ALOAD, 1); // Load the PageContext (local variable 1)
-					adapter.push(name);
-					adapter.invokeVirtual(Types.PAGE_CONTEXT, LOAD_COMPONENT);
 					adapter.visitFieldInsn(Opcodes.PUTFIELD, classPath, "cfc", COMPONENT_NAME);
 
 					// End label

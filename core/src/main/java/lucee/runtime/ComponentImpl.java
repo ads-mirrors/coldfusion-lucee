@@ -1237,6 +1237,10 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 		return top.properties.getWsdlFile();
 	}
 
+	public boolean getInline() {
+		return top.properties.inline;
+	}
+
 	@Override
 	public String getName() {
 		if (top.properties.callPath == null) return "";
