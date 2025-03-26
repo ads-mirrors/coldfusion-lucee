@@ -281,25 +281,35 @@ public final class LSPEndpointFactory implements MessageProcessor {
 		}
 	}
 
+	@Deprecated
 	public void sendMessageToClient(Struct message) throws IOException, PageException, ServletException {
+		sendMessageToClient(message, true);
+	}
+
+	public void sendMessageToClient(Struct message, boolean addRandomIdIfMissing) throws IOException, PageException, ServletException {
 		if (clientOutputStreams.isEmpty()) {
 			log.error("lsp", "No connected clients to send message to");
 			return;
 		}
 
 		Struct data = new StructImpl(StructImpl.TYPE_LINKED);
+
 		// JSONRPC
-		data.set(JSONRPC, Caster.toString(message.remove(JSONRPC, null), "2.0"));
+		data.set(JSONRPC, Caster.toString(message.get(JSONRPC, null), "2.0"));
 		// ID
-		Integer id = Caster.toInteger(message.remove(KeyConstants._id, null), null);
-		if (id == null) id = requestId.incrementAndGet();
-		data.set(KeyConstants._id, id);
+		Integer id = Caster.toInteger(message.get(KeyConstants._id, null), null);
+		if (id != null) data.set(KeyConstants._id, id);
+		else if (addRandomIdIfMissing) data.set(KeyConstants._id, id = requestId.incrementAndGet());
 
 		// all other entries
 		Iterator<Entry<Key, Object>> it = message.entryIterator();
 		Entry<Key, Object> entry;
 		while (it.hasNext()) {
 			entry = it.next();
+			// we already added this key in proper case to the data struct, so no longer needed
+			if (entry.getKey().equals(JSONRPC) || entry.getKey().equals(KeyConstants._id)) {
+				continue;
+			}
 			data.set(entry.getKey(), entry.getValue());
 		}
 

@@ -156,7 +156,7 @@ function luceeMonoBlock(input,tablengt=1) {
 	return rtn;
 }
 function luceeCatchToString() {try{
-	var catchi=duplicate(catch);
+	var catchi=duplicate(catch,true);
 	var path=catch.TagContext[1].template?:"";
 	var line=catch.TagContext[1].line?:"";
 	

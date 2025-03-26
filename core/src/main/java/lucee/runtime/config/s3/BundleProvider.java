@@ -290,7 +290,7 @@ public final class BundleProvider extends DefaultHandler {
 		File jar = deployBundledBundle(jarDir, bd.getName(), bd.getVersionAsString());
 		if (jar != null && jar.isFile()) return jar;
 		if (jar != null) {
-			LogUtil.log(Logger.LOG_INFO, "deploy", "bundle-download",
+			LogUtil.log(Log.LEVEL_INFO, "deploy", "bundle-download",
 					jar + " should exist but does not (exist?" + jar.exists() + ";file?" + jar.isFile() + ";hidden?" + jar.isHidden() + ")");
 
 		}
@@ -305,7 +305,7 @@ public final class BundleProvider extends DefaultHandler {
 
 		final URL updateUrl = getBundleAsURL(bd, true);
 
-		LogUtil.log(Logger.LOG_INFO, "deploy", "bundle-download",
+		LogUtil.log(Log.LEVEL_INFO, "deploy", "bundle-download",
 				"Downloading bundle [" + bd.getName() + ":" + bd.getVersionAsString() + "] from " + updateUrl + " and copying to " + jar);
 
 		int code;
@@ -318,7 +318,7 @@ public final class BundleProvider extends DefaultHandler {
 			code = conn.getResponseCode();
 		}
 		catch (UnknownHostException e) {
-			LogUtil.log(Logger.LOG_INFO, "deploy", "bundle-download",
+			LogUtil.log(Log.LEVEL_INFO, "deploy", "bundle-download",
 					"Failed to download the bundle  [" + bd.getName() + ":" + bd.getVersionAsString() + "] from [" + updateUrl + "] and copy to [" + jar + "]");
 			// remove
 			throw new IOException("Failed to download the bundle  [" + bd.getName() + ":" + bd.getVersionAsString() + "] from [" + updateUrl + "] and copy to [" + jar + "]", e);
@@ -333,7 +333,7 @@ public final class BundleProvider extends DefaultHandler {
 				// just in case we check invalid names
 				if (location == null) location = conn.getHeaderField("location");
 				if (location == null) location = conn.getHeaderField("LOCATION");
-				LogUtil.log(Logger.LOG_INFO, "deploy", "bundle-download", "download redirected:" + location);
+				LogUtil.log(Log.LEVEL_INFO, "deploy", "bundle-download", "download redirected:" + location);
 
 				conn.disconnect();
 				URL url = new URL(location);
@@ -355,7 +355,7 @@ public final class BundleProvider extends DefaultHandler {
 			if (code != 200) {
 				final String msg = "Failed to download the bundle for [" + bd.getName() + "] in version [" + bd.getVersionAsString() + "] from [" + updateUrl
 						+ "], please download manually and copy to [" + jarDir + "]";
-				LogUtil.log(Logger.LOG_INFO, "deploy", "bundle-download", msg);
+				LogUtil.log(Log.LEVEL_INFO, "deploy", "bundle-download", msg);
 				conn.disconnect();
 				throw new IOException(msg);
 			}
@@ -381,21 +381,21 @@ public final class BundleProvider extends DefaultHandler {
 		InputStream is = getClass().getResourceAsStream("bundles/" + osgiFileName);
 		if (is == null) is = getClass().getResourceAsStream("/bundles/" + osgiFileName);
 
-		if (is != null) LogUtil.log(Logger.LOG_DEBUG, "deploy", "bundle-download", "Found ]/bundles/" + osgiFileName + "] in lucee.jar");
-		else LogUtil.log(Logger.LOG_INFO, "deploy", "bundle-download", "Could not find [/bundles/" + osgiFileName + "] in lucee.jar");
+		if (is != null) LogUtil.log(Log.LEVEL_DEBUG, "deploy", "bundle-download", "Found ]/bundles/" + osgiFileName + "] in lucee.jar");
+		else LogUtil.log(Log.LEVEL_INFO, "deploy", "bundle-download", "Could not find [/bundles/" + osgiFileName + "] in lucee.jar");
 
 		if (is != null) {
 			File temp = null;
 			try {
 				// copy to temp file
 				temp = File.createTempFile("bundle", ".tmp");
-				LogUtil.log(Logger.LOG_DEBUG, "deploy", "bundle-download", "Copying [lucee.jar!/bundles/" + osgiFileName + "] to [" + temp + "]");
+				LogUtil.log(Log.LEVEL_DEBUG, "deploy", "bundle-download", "Copying [lucee.jar!/bundles/" + osgiFileName + "] to [" + temp + "]");
 				Util.copy(new BufferedInputStream(is), new FileOutputStream(temp), true, true);
 
 				// adding bundle
 				File trg = new File(bundleDirectory, osgiFileName);
 				FileUtil.move(temp, trg);
-				LogUtil.log(Logger.LOG_DEBUG, "deploy", "bundle-download", "Adding bundle [" + symbolicName + "] in version [" + symbolicVersion + "] to [" + trg + "]");
+				LogUtil.log(Log.LEVEL_DEBUG, "deploy", "bundle-download", "Adding bundle [" + symbolicName + "] in version [" + symbolicVersion + "] to [" + trg + "]");
 				return trg;
 			}
 			catch (IOException ioe) {
@@ -436,7 +436,7 @@ public final class BundleProvider extends DefaultHandler {
 							if (bundleInfo != null && nameAndVersion.equals(bundleInfo)) {
 								File trg = new File(bundleDirectory, name);
 								temp.renameTo(trg);
-								LogUtil.log(Logger.LOG_DEBUG, "deploy", "bundle-download",
+								LogUtil.log(Log.LEVEL_DEBUG, "deploy", "bundle-download",
 										"Adding bundle [" + symbolicName + "] in version [" + symbolicVersion + "] to [" + trg + "]");
 
 								return trg;
@@ -592,6 +592,8 @@ public final class BundleProvider extends DefaultHandler {
 			if (rsp != null) {
 				int sc = rsp.getStatusCode();
 				if (sc >= 200 && sc < 300) return url;
+				else LogUtil.log(Log.LEVEL_WARN, "deploy", "bundle-download",
+					"Fetch bundle url [" + url + "] returned [" + sc + "]" );
 			}
 		}
 		catch (Exception e) {

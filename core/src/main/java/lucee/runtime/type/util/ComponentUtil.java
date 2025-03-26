@@ -59,6 +59,10 @@ import lucee.runtime.component.Property;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.ConfigWebPro;
+import lucee.runtime.dump.DumpData;
+import lucee.runtime.dump.DumpProperties;
+import lucee.runtime.dump.DumpUtil;
+import lucee.runtime.dump.Dumpable;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.ExpressionException;
@@ -920,7 +924,7 @@ public final class ComponentUtil {
 		return list;
 	}
 
-	private static class ReturnFormatValue implements Castable, SimpleValue, CharSequence {
+	private static class ReturnFormatValue implements Castable, SimpleValue, CharSequence, Dumpable {
 
 		@Override
 		public Boolean castToBoolean(Boolean defaultValue) {
@@ -1031,6 +1035,11 @@ public final class ComponentUtil {
 		@Override
 		public CharSequence subSequence(int start, int end) {
 			return toString().subSequence(start, end);
+		}
+
+		@Override
+		public DumpData toDumpData(PageContext pageContext, int maxlevel, DumpProperties properties) {
+			return DumpUtil.toDumpData(toString(), pageContext, maxlevel, properties);
 		}
 	}
 }
