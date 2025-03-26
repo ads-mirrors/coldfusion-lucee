@@ -1645,6 +1645,10 @@
       "namemissing": "Please enter a name for the datasource",
       "noDriver": "There is no driver available for this type, please install a matching Extension for this type.",
       "openConn": "Open Connections",
+      "active": "Active",
+      "idle": "Idle",
+      "activeConn": "Active Connections",
+      "idleConn":"Idle Connections",
       "orm": {
         "autogenmap": "Automatically generate mapping",
         "autogenmapDesc": "Specifies whether Lucee should automatically generate mapping for the persistent CFCs. If disabled, mapping should be provided in the form of .HBMXML files. This setting can be overwritten in Application.cfc as follows [this.ormsettings.autogenmap\u003dtrue]",
