@@ -2,6 +2,8 @@
 	// firstly, check are we even deploying to s3
 	DO_DEPLOY = server.system.environment.DO_DEPLOY ?: false;
 
+	// temporary remove the following line
+	getPageContext().getConfig().resetResources();
 	_logger( "" );
 	_logger( " #### Publish Builds to S3" );
 
