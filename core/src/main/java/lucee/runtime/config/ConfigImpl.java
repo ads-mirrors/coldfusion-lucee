@@ -6313,6 +6313,10 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		baseComponentPageSource = null;
 	}
 
+	public void resetAll() throws IOException {
+		resetAll(null);
+	}
+
 	public void resetAll(ResetFilter filter) throws IOException {
 		List<Method> methods = Reflector.getMethods(this.getClass());
 		if (filter == null) {
