@@ -5000,7 +5000,7 @@ public final class ConfigAdmin {
 
 			// update Resource
 			List<Map<String, String>> resources = rhext.getMetadata().getResources();
-
+			boolean resetResources = false;
 			print.e("ssssssssssssss");
 			print.e(resources);
 			if (!ArrayUtil.isEmpty(resources)) {
@@ -5015,6 +5015,7 @@ public final class ConfigAdmin {
 						copyButIgnoreClassDef(map, args);
 						args.remove("scheme");
 						_updateResourceProvider(scheme, cd, args);
+						resetResources = true;
 						ConfigUtil.getConfigServerImpl(config).resetResources();
 						reloadNecessary = true;
 					}
@@ -5252,7 +5253,8 @@ public final class ConfigAdmin {
 				// ConfigUtil.getConfigServerImpl(config).resetAll();
 			}
 			else _store();
-			// }
+
+			if (resetResources) ConfigUtil.getConfigServerImpl(config).resetResources();
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
