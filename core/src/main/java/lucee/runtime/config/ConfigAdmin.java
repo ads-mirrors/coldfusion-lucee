@@ -55,6 +55,7 @@ import org.xml.sax.SAXException;
 
 import com.allaire.cfx.CustomTag;
 
+import lucee.print;
 import lucee.commons.digest.MD5;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.FileUtil;
@@ -4999,6 +5000,9 @@ public final class ConfigAdmin {
 
 			// update Resource
 			List<Map<String, String>> resources = rhext.getMetadata().getResources();
+
+			print.e("ssssssssssssss");
+			print.e(resources);
 			if (!ArrayUtil.isEmpty(resources)) {
 				Iterator<Map<String, String>> itl = resources.iterator();
 				Map<String, String> map;
