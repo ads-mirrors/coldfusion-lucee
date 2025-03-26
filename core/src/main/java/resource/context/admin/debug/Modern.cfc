@@ -208,9 +208,20 @@ if(structKeyExists(arguments.custom, "metrics_Charts")) {
 	#-lucee-debugging-ExecTime table.details th, #-lucee-debugging-ImpAccess table.details th { cursor:pointer; } 
 	.sortby {text-decoration: underline; font-weight: bold;}
 
-	.-lucee-icon-plus 	{ background: url(data:image/gif;base64,R0lGODlhCQAJAIABAAAAAP///yH5BAEAAAEALAAAAAAJAAkAAAIRhI+hG7bwoJINIktzjizeUwAAOw==) no-repeat left center; padding: 4px 0 4px 16px; }
-	.-lucee-icon-minus 	{ background: url(data:image/gif;base64,R0lGODlhCQAJAIABAAAAAP///yH5BAEAAAEALAAAAAAJAAkAAAIQhI+hG8brXgPzTHllfKiDAgA7)     no-repeat left center; padding: 4px 0 4px 16px; }
-		</style>
+	.-lucee-icon-plus {
+		background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9' viewBox='0 0 9 9'%3E%3Crect x='0.5' y='0.5' width='8' height='8' fill='none' stroke='black' stroke-width='1'/%3E%3Crect x='2' y='4' width='5' height='1' fill='black'/%3E%3Crect x='4' y='2' width='1' height='5' fill='black'/%3E%3C/svg%3E")
+			no-repeat left center;
+  		padding: 4px 0 4px 16px;
+  		background-size:10px 10px;
+	}
+
+	.-lucee-icon-minus {
+  		background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9' viewBox='0 0 9 9'%3E%3Crect x='0.5' y='0.5' width='8' height='8' fill='none' stroke='black' stroke-width='1'/%3E%3Crect x='2' y='4' width='5' height='1' fill='black'/%3E%3C/svg%3E")
+    		no-repeat left center;
+  		padding: 4px 0 4px 16px;
+  		background-size: 10px 10px;
+	}
+	</style>
 
 
 
