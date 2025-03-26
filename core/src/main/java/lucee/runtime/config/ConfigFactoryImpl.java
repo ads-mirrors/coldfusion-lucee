@@ -575,7 +575,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 						if (StringUtil.isEmpty(strProviderCFC)) strProviderCFC = getAttr(provider, "class");
 
 						strProviderScheme = getAttr(provider, "scheme");
-						print.e("-------------- " + strProviderScheme + " --------------");
+						print.ds("-------------- " + strProviderScheme + " --------------");
 						print.e(provider);
 						// class
 						if (prov.hasClass() && !StringUtil.isEmpty(strProviderScheme)) {
