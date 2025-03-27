@@ -27,7 +27,7 @@
     {
         "sysprop": "lucee.mail.use.7bit.transfer.encoding.for.html.parts",
         "envvar": "LUCEE_MAIL_USE_7BIT_TRANSFER_ENCODING_FOR_HTML_PARTS",
-        "desc": ""
+        "desc": "Enabled by default in Lucee 7"
     },
     {
         "sysprop": "lucee.extensions",
