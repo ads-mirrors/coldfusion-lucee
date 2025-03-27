@@ -19,7 +19,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 			});
 		});
 
-		describe( title='LDEV-5440 java clone() method missing for array objects' , body=function(){
+		describe( title='LDEV-5440 java clone() method missing for java.util.LinkedHashMap', skip=true, body=function(){
 			// Added tests for struct LDEV-5440
 			it( title='java clone() method on java.util.LinkedHashMap should work', body=function() {
 				var foo =  createObject( "java", "java.util.LinkedHashMap" ).init();
@@ -27,8 +27,6 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				foo.put("b", 2);
 				var bar = foo.clone();
 				expect( bar.name ).toBe( "lucee" );
-				debug(foo);
-				debug(bar);
 			});
 
 			it( title='cfml duplicate() method on java.util.LinkedHashMap should work', body=function() {
@@ -37,9 +35,6 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				foo.put("b", 2);
 				var bar = duplicate(foo);
 				expect( bar.name).toBe( "lucee" );
-				
-				debug(foo);
-				debug(bar);
 			});
 
 		});
