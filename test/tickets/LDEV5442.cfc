@@ -9,7 +9,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect( as ).toHaveKey("listenerType");
 
 				expect( as.listenerMode ).toBe( "curr2root" );
-				expect( as.listenerType ).toBe( "modern" );
+				expect( as.listenerType ).toBe( "mixed" );
 			});
 		});
 	}
