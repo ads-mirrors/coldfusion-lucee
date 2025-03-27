@@ -627,14 +627,14 @@ public final class AppListenerUtil {
 	public static int translateLoginStorage(String strLoginStorage, int defaultValue) {
 		strLoginStorage = strLoginStorage.toLowerCase().trim();
 		if (strLoginStorage.equals("session")) return Scope.SCOPE_SESSION;
-		if (strLoginStorage.equals("cookie")) return Scope.SCOPE_COOKIE;
+		if (strLoginStorage.equals("cookie")) return Scope.SCOPE_COOKIE; // unsupported as of 7
 		return defaultValue;
 	}
 
 	public static int translateLoginStorage(String strLoginStorage) throws ApplicationException {
 		int ls = translateLoginStorage(strLoginStorage, -1);
 		if (ls != -1) return ls;
-		throw new ApplicationException("invalid loginStorage definition [" + strLoginStorage + "], valid values are [session,cookie]");
+		throw new ApplicationException("Invalid loginStorage definition [" + strLoginStorage + "], supported value is [session]");
 	}
 
 	public static Object toDefaultDatasource(Config config, Object o, Log log) throws PageException {

@@ -418,7 +418,6 @@ Error Output --->
 				<cfset stText.Scopes.SessionStorageDesc="Default Storage for Session, possible values are:<br>
 						- memory: the data are only in the memory, so in fact no persistent storage<br>
 						- file: the data are stored in the local filesystem<br>
-						- cookie: the data are stored in the users cookie<br>
 						- &lt;cache-name&gt;: name of a cache instance that has ""Storage"" enabled<br>
 						- &lt;datasource-name&gt;: name of a datasource instance that has ""Storage"" enabled">
 				<cfset stText.Scopes.ClientStorageDesc="Default Storage for Session, possible values are:<br>
@@ -450,7 +449,6 @@ Error Output --->
 						<select name="sessionStorage" class="medium">
 							<option value="memory" <cfif scope.sessionStorage EQ "memory">selected</cfif>>#ucFirst(stText.Scopes.memory)#</option>
 							<option value="file" <cfif scope.sessionStorage EQ "file">selected</cfif>>#ucFirst(stText.Scopes.file)#</option>
-							<option value="cookie" <cfif scope.sessionStorage EQ "cookie">selected</cfif>>#ucFirst(stText.Scopes.cookie)#</option>
 							<cfloop from="1" to="#arrayLen(cacheConnections)#" index="key">
 								<cfif key EQ 1>
 									<optgroup label="Cache">

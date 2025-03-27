@@ -8490,13 +8490,14 @@ Valid only for cfinput type="text".</description>
 		<attribute>
 			<type>string</type>
 			<name>loginStorage</name>
-			<values>cookie,session</values>
+			<values>session</values>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 			<description>
 			storage for the login data:
-			- cookie: store login information in the Cookie scope
 			- session: store login information in the Session scope
+
+			Support for cookie was removed in Lucee 7.0
 			</description>
 		</attribute>
 		<attribute>
@@ -8540,9 +8541,10 @@ Default value is defined in the Lucee Web Administrator. "j2ee" can not use a se
 <description>
 Specifies how Lucee stores session variables:
 - memory (default): the session is only kept in memory
-- cookie: the session is stored in the client cookie
 - file: the session is stored in a local file
 - "datasource-name"|"cache-name": when you select a name of an available datasource or cache, the session scope will be stored in there
+
+Suport for cookie was removed in Lucee 7
 </description>
 		</attribute>
 		<attribute>
