@@ -5486,6 +5486,7 @@ For example, 400 specifies that only the owner can read the file; 004 specifies 
 	<!-- FileModeToSymbolic -->
 	<function>
 		<name>FileModeToSymbolic</name>
+		<introduced>7.0.0.155</introduced>
 		<class>lucee.runtime.functions.file.FileModeToSymbolic</class>
 		<description>Converts a mode mask to it's symbolic representation.</description>
 		<argument>
