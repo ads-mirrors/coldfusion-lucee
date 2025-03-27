@@ -108,6 +108,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 	private static final int MAX_REDIRECTS = 5;
 
 	private static final Version MIN_VERSION = toVersion("5.0.0.248", null);
+	private static final Version MAX_VERSION = toVersion("7.0.0.115", null); // after that the loader changed
 
 	private static CFMLEngineFactory factory;
 	// private static CFMLEngineWrapper engineListener;
@@ -539,6 +540,11 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 				log(org.apache.felix.resolver.Logger.LOG_ERROR, "the version defined [" + specificVersion + "] cannot be used, version cannot be older than [" + MIN_VERSION + "]");
 				specificVersion = null;
 			}
+			else if (Util.isNewerThan(MAX_VERSION, specificVersion)) {
+				log(org.apache.felix.resolver.Logger.LOG_ERROR, "the version defined [" + specificVersion + "] cannot be used, version cannot be newver than [" + MAX_VERSION
+						+ "], update yout lucee.jar to use this version.");
+				specificVersion = null;
+			}
 			else {
 				log(org.apache.felix.resolver.Logger.LOG_DEBUG, "specific version [" + specificVersion + "] defined.");
 			}
@@ -571,8 +577,10 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 						continue;
 					}
 
-					// newest version
-					if (lucee == null || Util.isNewerThan(pv, toVersion(lucee.getName(), VERSION_ZERO))) lucee = patch;
+					// newest possible version
+					if ((lucee == null || Util.isNewerThan(pv, toVersion(lucee.getName(), VERSION_ZERO))) && !Util.isNewerThan(pv, MAX_VERSION)) {
+						lucee = patch;
+					}
 				}
 			}
 
