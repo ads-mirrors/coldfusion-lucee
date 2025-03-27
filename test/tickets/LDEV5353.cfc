@@ -18,6 +18,21 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect( bar[ 1 ] ).toBe( "first" );
 			});
 
+			// Added tests for struct LDEV-5440
+			it( title='java clone() method on cfml struct should work', body=function() {
+				var foo = StructNew();
+				foo.name = "lucee";
+				var bar = foo.clone();
+				expect( bar.name ).toBe( "lucee" );
+			});
+
+			it( title='cfml duplicate() method on cfml struct should work', body=function() {
+				var foo = StructNew();
+				foo.name = "lucee";
+				var bar = duplicate(foo);
+				expect( bar.name).toBe( "lucee" );
+			});
+
 		});
 	}
 }
