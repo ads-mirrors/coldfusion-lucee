@@ -272,7 +272,7 @@
     {
         "sysprop": "lucee.security.limitEvaluation",
         "envvar": "LUCEE_SECURITY_LIMITEVALUATION",
-        "desc": ""
+        "desc": "Disable evaluating expressions when accessing scopes, Lucee 7 defaults to enabling this setting for security reasons"
     },
     {
         "sysprop": "lucee.store.empty",
