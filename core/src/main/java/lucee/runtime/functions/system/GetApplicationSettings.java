@@ -46,6 +46,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.BIF;
 import lucee.runtime.i18n.LocaleFactory;
 import lucee.runtime.listener.AppListenerUtil;
+import lucee.runtime.listener.ApplicationListener;
 import lucee.runtime.listener.ApplicationContext;
 import lucee.runtime.listener.ApplicationContextSupport;
 import lucee.runtime.listener.ClassicApplicationContext;
@@ -210,6 +211,10 @@ public final class GetApplicationSettings extends BIF {
 		sct.setEL("dotNotationUpperCase", Caster.toBoolean(((ConfigPro) pc.getConfig()).getDotNotationUpperCase()));
 		// adminMode
 		sct.setEL("singleContext", Boolean.TRUE);
+
+		ApplicationListener appListener = pc.getConfig().getApplicationListener();
+		sct.setEL("listenerType", AppListenerUtil.toStringType(appListener));
+		sct.setEL("listenerMode", AppListenerUtil.toStringMode(appListener.getMode()));
 
 		Struct cs = new StructImpl(Struct.TYPE_LINKED);
 		cs.setEL("web", pc.getWebCharset().name());
