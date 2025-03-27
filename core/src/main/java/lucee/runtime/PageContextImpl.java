@@ -3329,10 +3329,7 @@ public final class PageContextImpl extends PageContext {
 				}
 			}
 			else if (getApplicationContext().getLoginStorage() == Scope.SCOPE_COOKIE) {
-				Object auth = cookieScope().get(name, null);
-				if (auth != null) {
-					remoteUser = CredentialImpl.decode(auth, roles, true);
-				}
+				throw new ApplicationException("invalid loginStorage definition, cookie no longer supported");
 			}
 		}
 		return remoteUser;

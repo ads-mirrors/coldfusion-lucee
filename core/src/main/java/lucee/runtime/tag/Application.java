@@ -677,8 +677,7 @@ public final class Application extends TagImpl implements DynamicAttributes {
 	public void setLoginstorage(String loginstorage) throws ApplicationException {
 		loginstorage = loginstorage.toLowerCase();
 		if (loginstorage.equals("session")) this.loginstorage = Scope.SCOPE_SESSION;
-		else if (loginstorage.equals("cookie")) this.loginstorage = Scope.SCOPE_COOKIE;
-		else throw new ApplicationException("invalid loginStorage definition [" + loginstorage + "] for tag application, valid values are [session,cookie]");
+		else throw new ApplicationException("invalid loginStorage definition [" + loginstorage + "] for tag application, valid values are [session]");
 	}
 
 	/**

@@ -186,7 +186,7 @@ public final class ClassicApplicationContext extends ApplicationContextSupport {
 		cp = (ConfigPro) config;
 		this.name = name;
 
-		loginStorage = Scope.SCOPE_COOKIE;
+		loginStorage = Scope.SCOPE_SESSION;
 		this.isDefault = isDefault;
 		this.source = source;
 		this.wstype = WS_TYPE_AXIS1;
