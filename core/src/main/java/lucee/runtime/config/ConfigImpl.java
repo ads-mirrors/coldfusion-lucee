@@ -1693,21 +1693,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		this.password = password;
 	}
 
-	protected void addTagXXX(String nameSpace, String nameSpaceSeperator, String name, ClassDefinition cd) {
-
-		TagLib[] tlds = cfmlTlds;
-		for (int i = 0; i < tlds.length; i++) {
-			if (tlds[i].getNameSpaceAndSeparator().equalsIgnoreCase(nameSpace + nameSpaceSeperator)) {
-				TagLibTag tlt = new TagLibTag(tlds[i]);
-				tlt.setAttributeType(TagLibTag.ATTRIBUTE_TYPE_DYNAMIC);
-				tlt.setBodyContent("free");
-				tlt.setTagClassDefinition(cd);
-				tlt.setName(name);
-				tlds[i].setTag(tlt);
-			}
-		}
-	}
-
 	/**
 	 * set the optional directory of the tag library deskriptors
 	 * 

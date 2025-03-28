@@ -22,11 +22,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import lucee.commons.lang.ClassUtil;
 import lucee.commons.lang.Md5;
@@ -62,8 +62,8 @@ public class TagLib implements Cloneable, Lib {
 	private String nameSpace;
 	private String nameSpaceSeperator = ":";
 	private ClassDefinition<? extends ExprTransformer> ELClass = EXPR_TRANSFORMER;
-	private HashMap<String, TagLibTag> tags = new HashMap<String, TagLibTag>();
-	private HashMap<String, TagLibTag> appendixTags = new HashMap<String, TagLibTag>();
+	private Map<String, TagLibTag> tags = new ConcurrentHashMap<String, TagLibTag>();
+	private Map<String, TagLibTag> appendixTags = new ConcurrentHashMap<String, TagLibTag>();
 	private ExprTransformer exprTransformer;
 
 	private char[] nameSpaceAndNameSpaceSeperator;
@@ -391,11 +391,11 @@ public class TagLib implements Cloneable, Lib {
 	 * @param deepCopy
 	 * @return cloned map
 	 */
-	private HashMap<String, TagLibTag> duplicate(HashMap<String, TagLibTag> tags, boolean deepCopy) {
+	private Map<String, TagLibTag> duplicate(Map<String, TagLibTag> tags, boolean deepCopy) {
 		if (deepCopy) throw new PageRuntimeException(new ExpressionException("deep copy not supported"));
 
 		Iterator<Entry<String, TagLibTag>> it = tags.entrySet().iterator();
-		HashMap<String, TagLibTag> cm = new HashMap<String, TagLibTag>();
+		Map<String, TagLibTag> cm = new ConcurrentHashMap<String, TagLibTag>();
 		Entry<String, TagLibTag> entry;
 		while (it.hasNext()) {
 			entry = it.next();

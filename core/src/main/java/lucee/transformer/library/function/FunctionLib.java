@@ -22,10 +22,10 @@ package lucee.transformer.library.function;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import lucee.commons.lang.Md5;
 import lucee.runtime.exp.ExpressionException;
@@ -38,7 +38,7 @@ import lucee.transformer.library.Lib;
  */
 public final class FunctionLib implements Lib {
 
-	private HashMap<String, FunctionLibFunction> functions = new HashMap<String, FunctionLibFunction>();
+	private Map<String, FunctionLibFunction> functions = new ConcurrentHashMap<String, FunctionLibFunction>();
 	private String version = "";
 	private String shortName = "";
 	private URI uri;
@@ -247,14 +247,14 @@ public final class FunctionLib implements Lib {
 	 * @param deepCopy
 	 * @return cloned map
 	 */
-	private HashMap duplicate(HashMap funcs, boolean deepCopy) {
+	private Map<String, FunctionLibFunction> duplicate(Map<String, FunctionLibFunction> funcs, boolean deepCopy) {
 		if (deepCopy) throw new PageRuntimeException(new ExpressionException("deep copy not supported"));
 
-		Iterator it = funcs.entrySet().iterator();
-		Map.Entry entry;
-		HashMap cm = new HashMap();
+		Iterator<Entry<String, FunctionLibFunction>> it = funcs.entrySet().iterator();
+		Entry<String, FunctionLibFunction> entry;
+		Map<String, FunctionLibFunction> cm = new ConcurrentHashMap<String, FunctionLibFunction>();
 		while (it.hasNext()) {
-			entry = (Entry) it.next();
+			entry = it.next();
 			cm.put(entry.getKey(), deepCopy ? entry.getValue() : // TODO add support for deepcopy ((FunctionLibFunction)entry.getValue()).duplicate(deepCopy):
 					entry.getValue());
 		}
