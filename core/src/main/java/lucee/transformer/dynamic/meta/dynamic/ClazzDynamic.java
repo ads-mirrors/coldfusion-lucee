@@ -131,7 +131,7 @@ public class ClazzDynamic extends Clazz {
 		if (clazz.getName().equals("java.util.LinkedHashMap")) {
 			print.e("------ LinkedHashMap ------");
 			for (Entry<String, FunctionMember> e: members.entrySet()) {
-				// if (!e.getKey().equals("clone()")) continue;
+				if (!e.getKey().equals("clone()")) continue;
 				print.e("---- " + e.getKey() + " --------");
 				print.e("DeclaringProviderClassNameWithSameAccess:" + e.getValue().getDeclaringProviderClassNameWithSameAccess());
 				print.e("DeclaringProviderClassName:" + e.getValue().getDeclaringProviderClassName());
@@ -500,7 +500,7 @@ public class ClazzDynamic extends Clazz {
 	private static Map<String, FunctionMember> _getFunctionMembers(Map<String, String> classes, Class clazz_, Log log) throws IOException {
 		final Class clazz = clazz_.isArray() ? Object.class : clazz_;
 		final Map<String, FunctionMember> members = new LinkedHashMap<>();
-		Map<String, FunctionMember> existing = membersCollection.get(clazz);
+		Map<String, FunctionMember> existing = null;// membersCollection.get(clazz);
 
 		if (existing != null) {
 			/*
