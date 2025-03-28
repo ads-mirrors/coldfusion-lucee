@@ -51,7 +51,7 @@ import lucee.transformer.dynamic.meta.Method;
 public class ClazzDynamic extends Clazz {
 
 	private static final long serialVersionUID = 862370302422701585L;
-
+	private static final boolean DEBUG = true;
 	private transient Class clazz;
 	// private static Map<String, SoftReference<ClazzDynamic>> classes = new ConcurrentHashMap<>();
 	private final Method[] methods;
@@ -269,7 +269,14 @@ public class ClazzDynamic extends Clazz {
 	public Method getMethod(String methodName, Object[] args, boolean nameCaseSensitive, boolean convertArgument, boolean convertComparsion) throws NoSuchMethodException {
 		Method method = getMethod(methodName, args, nameCaseSensitive, convertArgument, convertComparsion, null);
 		if (method != null) return method;
-
+		if (DEBUG) {
+			StringBuilder sb = new StringBuilder();
+			for (Method m: getMethods(null, true, -1)) {
+				sb.append(m.toString()).append(";");
+			}
+			throw new NoSuchMethodException("No matching method for " + clazz.getName() + "." + methodName + "(" + Reflector.getDspMethods(Reflector.getClasses(args))
+					+ ") found. Available methods are [" + sb + "]");
+		}
 		throw new NoSuchMethodException("No matching method for " + clazz.getName() + "." + methodName + "(" + Reflector.getDspMethods(Reflector.getClasses(args)) + ") found.");
 	}
 
