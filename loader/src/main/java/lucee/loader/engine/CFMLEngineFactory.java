@@ -587,7 +587,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 					}
 
 					// newest possible version
-					if ((lucee == null || Util.isNewerThan(pv, toVersion(lucee.getName(), VERSION_ZERO))) && (MAX_VERSION == null && !Util.isNewerThan(pv, MAX_VERSION))) {
+					if ((lucee == null || Util.isNewerThan(pv, toVersion(lucee.getName(), VERSION_ZERO))) && (MAX_VERSION == null || !Util.isNewerThan(pv, MAX_VERSION))) {
 						lucee = patch;
 					}
 				}
