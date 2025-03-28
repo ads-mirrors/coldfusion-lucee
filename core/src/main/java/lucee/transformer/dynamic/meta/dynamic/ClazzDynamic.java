@@ -10,12 +10,14 @@ import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -29,7 +31,6 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.osgi.framework.Bundle;
 
-import lucee.print;
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.log.Log;
@@ -128,18 +129,6 @@ public class ClazzDynamic extends Clazz {
 	private ClazzDynamic(Class clazz, Log log) throws IOException {
 		this.clazz = clazz;
 		Map<String, FunctionMember> members = getFunctionMembers(clazz, log);
-		if (clazz.getName().equals("java.util.LinkedHashMap")) {
-			print.e("------ LinkedHashMap ------");
-			for (Entry<String, FunctionMember> e: members.entrySet()) {
-				if (!e.getKey().equals("clone()")) continue;
-				print.e("---- " + e.getKey() + " --------");
-				print.e("DeclaringProviderClassNameWithSameAccess:" + e.getValue().getDeclaringProviderClassNameWithSameAccess());
-				print.e("DeclaringProviderClassName:" + e.getValue().getDeclaringProviderClassName());
-				print.e("DeclaringProviderClassName:" + e.getValue().getDeclaringProviderClassName());
-				print.e(e.getValue());
-			}
-		}
-
 		LinkedList<Method> tmpMethods = new LinkedList<>();
 		LinkedList<Method> tmpDeclaredMethods = new LinkedList<>();
 		LinkedList<Constructor> tmpConstructors = new LinkedList<>();
@@ -494,28 +483,20 @@ public class ClazzDynamic extends Clazz {
 
 	private static Map<String, FunctionMember> getFunctionMembers(final Class clazz, Log log) throws IOException {
 		final Map<String, String> classes = new ConcurrentHashMap<>();
-		print.e("------------ getFunctionMembers --------------");
-		return _getFunctionMembers(classes, clazz, log);
+		final Set<String> ignores = new HashSet<>();
+		return _getFunctionMembers(classes, ignores, clazz, log);
 
 	}
 
-	private static Map<String, FunctionMember> _getFunctionMembers(Map<String, String> classes, Class clazz_, Log log) throws IOException {
+	private static Map<String, FunctionMember> _getFunctionMembers(Map<String, String> classes, Set<String> ignores, Class clazz_, Log log) throws IOException {
 		final Class clazz = clazz_.isArray() ? Object.class : clazz_;
 		final Map<String, FunctionMember> members = new LinkedHashMap<>();
 		Map<String, FunctionMember> existing = membersCollection.get(clazz);
-		print.e("- " + clazz.getName() + ":" + (existing != null));
+		if (ignores.contains(clazz.getName())) return members;
 		if (existing != null) {
-			/*
-			 * if (true) { print.e("ex-->" + clazz.getName()); for (Entry<String, FunctionMember> e:
-			 * existing.entrySet()) { if (e.getValue().getDeclaringClass() != clazz &&
-			 * !Reflector.isInstaneOf(clazz, e.getValue().getDeclaringClass(), true) &&
-			 * e.getValue().getDeclaringClass() != Object.class) print.e("- " + e.getValue()); }
-			 * 
-			 * }
-			 */
-
 			for (Entry<String, FunctionMember> e: existing.entrySet()) {
 				members.put(e.getKey(), e.getValue());
+				ignores.add(e.getValue().getDeclaringClassName());
 			}
 			return members;
 		}
@@ -551,7 +532,7 @@ public class ClazzDynamic extends Clazz {
 							// print.e("->" + superName);
 							classes.put(superName, "");
 
-							add(members, _getFunctionMembers(classes, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), log));
+							add(members, _getFunctionMembers(classes, ignores, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), log));
 						}
 					}
 					catch (IllegalArgumentException iae) {
@@ -580,7 +561,7 @@ public class ClazzDynamic extends Clazz {
 								// add(members, _getFunctionMembers(clid,
 								// cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), log));
 
-								add(members, _getFunctionMembers(classes, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), log));
+								add(members, _getFunctionMembers(classes, ignores, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), log));
 							}
 						}
 						catch (Exception e) {
@@ -636,10 +617,8 @@ public class ClazzDynamic extends Clazz {
 
 						Type tmpType = tmpClass != null ? Type.getType(tmpClass) : null;
 						Type rtnType = rtnClass != null ? Type.getType(rtnClass) : null;
-
 						if (Clazz.compareAccess(fmParent, fmCurrent) >= 0) fmCurrent.setDeclaringProviderClassWithSameAccess(tmpClass, tmpType, rtnClass, rtnType);
 						fmCurrent.setDeclaringProviderClass(tmpClass, tmpType, rtnClass, rtnType);
-
 						/*
 						 * if (name.equals("nextElement")) { print.e(fm.getDeclaringProviderClassName());
 						 * print.e(fm.getDeclaringProviderClassNameWithSameAccess()); }
@@ -654,6 +633,7 @@ public class ClazzDynamic extends Clazz {
 		// Start visiting the class
 		classReader.accept(visitor, 0);
 		membersCollection.put(clazz, cloneIt(members));
+		ignores.add(clazz.getName());
 		return members;
 	}
 
