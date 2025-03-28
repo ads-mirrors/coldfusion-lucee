@@ -21,6 +21,7 @@ package lucee.runtime.reflection.pairs;
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.BiFunction;
 
+import lucee.print;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.runtime.exp.PageException;
@@ -146,6 +147,7 @@ public final class MethodInstance {
 			return getMethod() != null;
 		}
 		catch (PageException e) {
+			if (methodName.getString().equals("clone")) print.e(e);
 			return false;
 		}
 	}
