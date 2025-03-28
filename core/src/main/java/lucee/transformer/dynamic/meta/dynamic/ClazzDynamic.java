@@ -494,14 +494,16 @@ public class ClazzDynamic extends Clazz {
 
 	private static Map<String, FunctionMember> getFunctionMembers(final Class clazz, Log log) throws IOException {
 		final Map<String, String> classes = new ConcurrentHashMap<>();
+		print.e("------------ getFunctionMembers --------------");
 		return _getFunctionMembers(classes, clazz, log);
+
 	}
 
 	private static Map<String, FunctionMember> _getFunctionMembers(Map<String, String> classes, Class clazz_, Log log) throws IOException {
 		final Class clazz = clazz_.isArray() ? Object.class : clazz_;
 		final Map<String, FunctionMember> members = new LinkedHashMap<>();
-		Map<String, FunctionMember> existing = null;// membersCollection.get(clazz);
-
+		Map<String, FunctionMember> existing = membersCollection.get(clazz);
+		print.e("- " + clazz.getName() + ":" + (existing != null));
 		if (existing != null) {
 			/*
 			 * if (true) { print.e("ex-->" + clazz.getName()); for (Entry<String, FunctionMember> e:
@@ -517,7 +519,6 @@ public class ClazzDynamic extends Clazz {
 			}
 			return members;
 		}
-		// print.e("ne-->" + clazz.getName());
 
 		final String classPath = clazz.getName().replace('.', '/') + ".class";
 		final ClassLoader cl = getClassLoader(clazz);
