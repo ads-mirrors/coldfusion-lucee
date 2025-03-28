@@ -24,14 +24,8 @@ import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.tag.TagImpl;
 import lucee.runtime.listener.ApplicationContext;
-import lucee.runtime.listener.ApplicationContextSupport;
-import lucee.runtime.listener.AuthCookieData;
-import lucee.runtime.listener.AuthCookieDataImpl;
-import lucee.runtime.listener.CookieData;
 import lucee.runtime.security.CredentialImpl;
 import lucee.runtime.type.KeyImpl;
-import lucee.runtime.type.dt.TimeSpan;
-import lucee.runtime.type.scope.CookieImpl;
 import lucee.runtime.type.scope.Scope;
 
 public final class Loginuser extends TagImpl {
