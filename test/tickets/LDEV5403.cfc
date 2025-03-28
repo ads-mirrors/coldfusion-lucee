@@ -1,46 +1,21 @@
 component extends="org.lucee.cfml.test.LuceeTestCase" {
 	
 	function run( testResults, testBox ) {
-		describe("LDEV-5403 remove support for loginStorage=cookie", function() {
+		// this is still supported in 6, it's being removed in 7
+		describe("LDEV-5403 remove support for loginStorage=cookie and sessionStorage=cookie", function() {
 
-			it( title="check loginStorage=cookie throws", body=function( currentSpec ) {
-				expect(function(){
-					var result = _InternalRequest(
-						template : "#createURI("LDEV5403")#/loginStorageCookie/index.cfm",
-						url: {
-							"loginStorage": "cookie"
-						}
-					);
-				}).toThrow(); //  invalid loginStorage definition, cookie no longer supported
-			});
-
-			it( title="check loginStorage=session", body=function( currentSpec ) {
+			it( title="check loginStorage=cookie works in 6", body=function( currentSpec ) {
 				var result = _InternalRequest(
-					template : "#createURI("LDEV5403")#/loginStorageCookie/index.cfm",
-					url: {
-						"loginStorage": "session"
-					}
+					template : "#createURI("LDEV5403")#/loginStorageCookie/index.cfm"
 				);
+				expect( structKeyList( result.cookies ) ).toInclude( "CFAUTHORIZATION_" );
 			});
 
-			it( title="check loginStorage default", body=function( currentSpec ) {
+			it( title="check sessionStorage=cookie works in 6", body=function( currentSpec ) {
 				var result = _InternalRequest(
-					template : "#createURI("LDEV5403")#/loginStorageCookie/index.cfm",
-					url: {
-						"loginStorage": ""
-					}
+					template : "#createURI("LDEV5403")#/sessionStorageCookie/index.cfm"
 				);
-			});
-		});
-
-		describe("LDEV-5403 remove support sessionStorage=cookie", function() {
-
-			it( title="check sessionStorage=cookie throws ", body=function( currentSpec ) {
-				expect(function(){
-					var result = _InternalRequest(
-						template : "#createURI("LDEV5403")#/sessionStorageCookie/index.cfm"
-					);
-				}).toThrow(); //  sessionStorage cookie is no longer supported
+				expect( structKeyList( result.cookies ) ).toInclude( "CF_SESSION_" );
 			});
 		});
 	}
