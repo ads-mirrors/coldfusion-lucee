@@ -121,6 +121,7 @@ import lucee.runtime.listener.ApplicationContext;
 import lucee.runtime.listener.ApplicationListener;
 import lucee.runtime.listener.JavaSettings;
 import lucee.runtime.listener.JavaSettingsImpl;
+import lucee.runtime.listener.MixedAppListener;
 import lucee.runtime.listener.ModernAppListener;
 import lucee.runtime.net.mail.Server;
 import lucee.runtime.net.proxy.ProxyData;
@@ -3038,7 +3039,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 					if (StringUtil.isEmpty(strLT)) strLT = SystemUtil.getSystemPropOrEnvVar("lucee.application.listener", null);
 					if (StringUtil.isEmpty(strLT)) strLT = ConfigFactoryImpl.getAttr(root, new String[] { "listenerType", "applicationListener" });
 					listener = ConfigUtil.loadListener(strLT, null);
-					if (listener == null) listener = new ModernAppListener();
+					if (listener == null) listener = new MixedAppListener();
 
 					// mode
 					String strLM = SystemUtil.getSystemPropOrEnvVar("lucee.listener.mode", null);
