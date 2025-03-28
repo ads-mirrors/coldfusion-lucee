@@ -36,7 +36,6 @@ import org.apache.commons.io.FileCleaningTracker;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletInputStream;
 import jakarta.servlet.http.HttpServletRequest;
-import lucee.print;
 import lucee.commons.collection.MapFactory;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.IOUtil;
@@ -165,7 +164,6 @@ public final class FormImpl extends ScopeSupport implements Form, ScriptProtecte
 		if (o instanceof File) {
 			tempDir = (File) o;
 		}
-		print.e("newDiskFileItemFactory->tempDir:" + tempDir);
 		return DiskFileItemFactory.builder().setPath(tempDir.toPath()).setFileCleaningTracker(fileCleaningTracker).get();
 
 	}

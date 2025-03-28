@@ -347,8 +347,8 @@ public final class LSPEndpointFactory implements MessageProcessor {
 	}
 
 	private void error(String type, Exception e) {
-		System.err.println(type);
-		e.printStackTrace();
+		// System.err.println(type);
+		// e.printStackTrace();
 		log.error(type, e);
 	}
 }
