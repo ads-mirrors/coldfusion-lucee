@@ -37,7 +37,7 @@
 				<tr id="tr-header">	<!--- TODO: not sure where height of 275px is coming from? forcing here 113px/63px !--->
 					<td colspan="2">
 						<div id="header">
-								<a id="logo" class="sprite" href="#home#"></a>
+								<a id="logo" <!--- class="scale-up" ---> href="#home#"></a>
 								
 						</div>	<!--- #header !---><h5 style="margin-top:-30px;margin-left:50px">#server.lucee.version#</h5>
 					</td>
@@ -45,6 +45,7 @@
 				<tr>
 				<cfif hasNavigation>
 					<td id="navtd" class="lotd">
+						
 						<div id="nav">
 								<!---<form method="get" action="#cgi.SCRIPT_NAME#">
 									<input type="hidden" name="action" value="admin.search">
@@ -67,24 +68,6 @@
 									<!--- Favorites --->
 									<cfparam name="url.action" default="">
 									<cfset pageIsFavorite = application.adminfunctions.isFavorite(url.action)>
-									<!--- <div id="favorites">
-
-
-										<cfif url.action eq "">
-											<a href="##" class="sprite favorite tooltipMe" title="Go to your favorite pages"></a>
-										<cfelseif pageIsFavorite>
-											<a href="#request.self#?action=internal.savedata&action2=removefavorite&favorite=#url.action#" class="sprite favorite tooltipMe" title="Remove this page from your favorites"></a>
-										<cfelse>
-											<a href="#request.self#?action=internal.savedata&action2=addfavorite&favorite=#url.action#" class="sprite tooltipMe favorite_inactive" title="Add this page to your favorites"></a>
-										</cfif>
-										<ul>
-											<cfif attributes.favorites neq "">
-												#attributes.favorites#
-											<cfelse>
-												<li class="favtext"><i>No items yet.<br>Go to a page you use often, and click on "Favorites" to add it here.</i></li>
-											</cfif>
-										</ul>
-									</div>--->
 								</cfif>
 									<div class="box"><cfif structKeyExists(request,'title')>#request.title#<cfelse>#attributes.title#</cfif>
 									<cfif structKeyExists(request,'subTitle')> - #request.subTitle#</cfif></div>
