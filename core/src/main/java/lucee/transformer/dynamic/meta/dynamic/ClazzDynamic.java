@@ -29,6 +29,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.osgi.framework.Bundle;
 
+import lucee.print;
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.log.Log;
@@ -127,6 +128,17 @@ public class ClazzDynamic extends Clazz {
 	private ClazzDynamic(Class clazz, Log log) throws IOException {
 		this.clazz = clazz;
 		Map<String, FunctionMember> members = getFunctionMembers(clazz, log);
+		if (clazz.getName().equals("java.util.LinkedHashMap")) {
+			print.e("------ LinkedHashMap ------");
+			for (Entry<String, FunctionMember> e: members.entrySet()) {
+				// if (!e.getKey().equals("clone()")) continue;
+				print.e("---- " + e.getKey() + " --------");
+				print.e("DeclaringProviderClassNameWithSameAccess:" + e.getValue().getDeclaringProviderClassNameWithSameAccess());
+				print.e("DeclaringProviderClassName:" + e.getValue().getDeclaringProviderClassName());
+				print.e("DeclaringProviderClassName:" + e.getValue().getDeclaringProviderClassName());
+				print.e(e.getValue());
+			}
+		}
 
 		LinkedList<Method> tmpMethods = new LinkedList<>();
 		LinkedList<Method> tmpDeclaredMethods = new LinkedList<>();
