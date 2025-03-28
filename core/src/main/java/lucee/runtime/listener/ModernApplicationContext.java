@@ -122,7 +122,7 @@ public final class ModernApplicationContext extends ApplicationContextSupport {
 	private TimeSpan sessionTimeout;
 	private TimeSpan clientTimeout;
 	private TimeSpan requestTimeout;
-	private int loginStorage = Scope.SCOPE_COOKIE;
+	private int loginStorage = Scope.SCOPE_SESSION;
 	private int scriptProtect;
 	private boolean typeChecking;
 	private boolean allowCompression;

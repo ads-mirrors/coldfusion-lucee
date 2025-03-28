@@ -55,7 +55,6 @@ import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.scope.client.ClientCookie;
 import lucee.runtime.type.scope.client.ClientFile;
 import lucee.runtime.type.scope.client.ClientMemory;
-import lucee.runtime.type.scope.session.SessionCookie;
 import lucee.runtime.type.scope.session.SessionFile;
 import lucee.runtime.type.scope.session.SessionMemory;
 import lucee.runtime.type.scope.storage.IKHandlerCache;
@@ -245,7 +244,9 @@ public final class ScopeContext {
 
 					// cookie
 					else if ("cookie".equals(storage)) {
-						if (isSession) scope = (StorageScope) SessionCookie.getInstance(appContext.getName(), pc, createIfNeeded, getLog());
+						if (isSession){
+							throw new ApplicationException("sessionStorage cookie is no longer supported");
+						} 
 						else scope = ClientCookie.getInstance(appContext.getName(), pc, createIfNeeded, getLog());
 					}
 

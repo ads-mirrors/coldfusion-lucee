@@ -997,7 +997,7 @@ public final class SMTPClient implements Serializable {
 	 */
 	private boolean isUse7bitHtmlEncoding() {
 		try {
-			return Caster.toBoolean(SystemUtil.getSystemPropOrEnvVar("lucee.mail.use.7bit.transfer.encoding.for.html.parts", "false"));
+			return Caster.toBoolean(SystemUtil.getSystemPropOrEnvVar("lucee.mail.use.7bit.transfer.encoding.for.html.parts", "true"));
 		}
 		catch (Throwable t) {
 			return false;

@@ -79,7 +79,7 @@ public final class ReqRspUtil {
 	private static boolean urlEncodeAllowPlus;
 
 	static {
-		urlEncodeAllowPlus = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.url.encodeAllowPlus", "false"), false);
+		urlEncodeAllowPlus = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.url.encodeAllowPlus", "true"), true);
 	}
 
 	private static Map<String, String> rootPathes = new ReferenceMap<String, String>(HARD, SOFT);

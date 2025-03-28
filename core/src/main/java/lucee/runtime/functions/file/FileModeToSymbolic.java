@@ -1,7 +1,6 @@
-<!--- 
+/**
  *
- * Copyright (c) 2016, Lucee Association Switzerland. All rights reserved.
- * Copyright (c) 2014, the Railo Company LLC. All rights reserved.
+ * Copyright (c) 2014, the Railo Company Ltd. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,18 +15,24 @@
  * You should have received a copy of the GNU Lesser General Public 
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  * 
- ---><cfscript>
-component extends="org.lucee.cfml.test.LuceeTestCase" labels="http"	{
+ **/
+package lucee.runtime.functions.file;
 
-	variables.updateProvider = server.getTestService("updateProvider").url;
-			
-	public void function testImplicit(){
-		http url="#variables.updateProvider#/rest/update/provider/echoGet?filtername=henk+patat" result="local.res";
-		expect( isJson( res.filecontent ) ).toBeTrue( res.filecontent );
-		res=deserializeJSON(res.filecontent);
-		assertEquals("henk patat",res.url.filtername);
+import java.io.IOException;
+
+import lucee.commons.io.ModeUtil;
+import lucee.runtime.PageContext;
+import lucee.runtime.exp.PageException;
+import lucee.runtime.op.Caster;
+
+public class FileModeToSymbolic {
+
+	public static String call(PageContext pc, String strMode) throws PageException {
+		try {
+			return ModeUtil.fromOctalMode(ModeUtil.toOctalMode(strMode));
+		}
+		catch (IOException e) {
+			throw Caster.toPageException(e);
+		}
 	}
-
-	
-} 
-</cfscript>
+}

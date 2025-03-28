@@ -27,7 +27,7 @@
     {
         "sysprop": "lucee.mail.use.7bit.transfer.encoding.for.html.parts",
         "envvar": "LUCEE_MAIL_USE_7BIT_TRANSFER_ENCODING_FOR_HTML_PARTS",
-        "desc": ""
+        "desc": "Enabled by default in Lucee 7"
     },
     {
         "sysprop": "lucee.extensions",
@@ -272,7 +272,7 @@
     {
         "sysprop": "lucee.security.limitEvaluation",
         "envvar": "LUCEE_SECURITY_LIMITEVALUATION",
-        "desc": ""
+        "desc": "Disable evaluating expressions when accessing scopes, Lucee 7 defaults to enabling this setting for security reasons"
     },
     {
         "sysprop": "lucee.store.empty",
@@ -377,7 +377,7 @@
     {
         "sysprop": "lucee.url.encodeAllowPlus",
         "envvar": "LUCEE_URL_ENCODEALLOWPLUS",
-        "desc": "Lucee before 6.2 would attempt to re-encode a url param which contained a space. If the url param was already encoded, it would trigger re-encoding the param again, breaking it. This was avoidable previously by using cfhttp encodeurl=false, set to false to enable previous behaviour"
+        "desc": "Enabled by default in Lucee 7, previously Lucee would attempt to re-encode a url param which contained a space. If the url param was already encoded, it would trigger re-encoding the param again, breaking it. This was avoidable previously by using cfhttp encodeurl=false, set to false to enable previous behaviour"
     },
     {
         "sysprop": "lucee.dump.threads",
