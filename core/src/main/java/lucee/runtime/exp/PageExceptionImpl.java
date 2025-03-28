@@ -27,7 +27,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import lucee.print;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
@@ -160,8 +159,6 @@ public abstract class PageExceptionImpl extends PageException {
 						}
 					}
 					if (slashIndex != -1 && colonIndex != -1 && slashIndex > (colonIndex + 1)) {
-						print.e(slashIndex);
-						print.e(colonIndex);
 						String secretAccessKey = msg.substring(colonIndex + 1, slashIndex);
 						int index = secretAccessKey.indexOf(':');
 						if (index != -1) {
@@ -176,14 +173,6 @@ public abstract class PageExceptionImpl extends PageException {
 			}
 		}
 		return msg;
-	}
-
-	public static void main(String[] args) {
-
-		// print.e(filterSecrets("s3://aaa:bbb/ldev-contenttype-54016-32736/content-type.xml", 0));
-		// print.e(filterSecrets("s3://aaa:bbb@sss/ldev-contenttype-54016-32736/content-type.xml", 0));
-		print.e(filterSecrets("s3:///ldev-contenttype-54016-32736/content-type.xml", 0));
-
 	}
 
 	@Override

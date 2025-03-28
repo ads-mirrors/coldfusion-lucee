@@ -55,7 +55,6 @@ import org.xml.sax.SAXException;
 
 import com.allaire.cfx.CustomTag;
 
-import lucee.print;
 import lucee.commons.digest.MD5;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.FileUtil;
@@ -2318,7 +2317,6 @@ public final class ConfigAdmin {
 		el.setEL("scheme", scheme);
 		el.setEL("arguments", arguments);
 		setClass(el, null, "", cd);
-		print.e(el);
 	}
 
 	public void updateDefaultResourceProvider(ClassDefinition cd, String arguments) throws PageException {

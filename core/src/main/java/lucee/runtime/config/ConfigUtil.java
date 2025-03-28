@@ -30,7 +30,6 @@ import java.util.Map.Entry;
 
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletContext;
-import lucee.print;
 import lucee.commons.digest.MD5;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
@@ -1113,7 +1112,6 @@ public final class ConfigUtil {
 					? new Mapping[] { ConfigUtil.getConfigServerImpl(config).getDefaultTagMapping(), config.getDefaultTagMapping() }
 					: new Mapping[] { config.getDefaultTagMapping() };
 
-			print.e(tagMappings);
 			if (lcRealPath.startsWith(virtual, 0)) {
 				for (int i = 0; i < tagMappings.length; i++) {
 					if (asPageSource) {

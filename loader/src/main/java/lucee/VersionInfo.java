@@ -62,9 +62,9 @@ public class VersionInfo {
 			if (is != null) {
 				content = getContentAsString(is, "UTF-8");
 			}
-			else {
-				System.err.println("lucee/version not found");
-			}
+			/*
+			 * else { System.err.println("lucee/version not found"); }
+			 */
 		}
 		catch (final IOException e) {
 		}

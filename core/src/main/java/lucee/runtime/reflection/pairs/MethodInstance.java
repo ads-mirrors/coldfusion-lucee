@@ -21,7 +21,6 @@ package lucee.runtime.reflection.pairs;
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.BiFunction;
 
-import lucee.print;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.runtime.exp.PageException;
@@ -97,10 +96,6 @@ public final class MethodInstance {
 					.apply(obj, args);
 		}
 		catch (IncompatibleClassChangeError | ClassFormatError | ClassCastException e) { // java.lang.ClassCastException
-			print.e("-------------------------");
-			print.e(e);
-			print.e("-------------------------");
-			// if (!Clazz.allowReflection()) throw e;
 			LogUtil.log("dynamic", e);
 			DynamicInvoker di = DynamicInvoker.getExistingInstance();
 			try {

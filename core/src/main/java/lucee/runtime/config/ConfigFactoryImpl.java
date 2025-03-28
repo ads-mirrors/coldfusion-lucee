@@ -53,7 +53,6 @@ import org.osgi.framework.BundleException;
 import org.xml.sax.SAXException;
 
 import jakarta.servlet.ServletConfig;
-import lucee.print;
 import lucee.commons.collection.MapFactory;
 import lucee.commons.date.TimeZoneConstants;
 import lucee.commons.date.TimeZoneUtil;
@@ -553,8 +552,6 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 	public static void loadResourceProvider(ConfigImpl config, Struct root) {
 		try {
 			Array providers = ConfigUtil.getAsArray("resourceProviders", root);
-			print.e("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-			print.ds(providers);
 			// Resource Provider
 			boolean hasZip = false, hasS3 = false;
 			if (providers != null && providers.size() > 0) {
@@ -575,8 +572,6 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 						if (StringUtil.isEmpty(strProviderCFC)) strProviderCFC = getAttr(provider, "class");
 
 						strProviderScheme = getAttr(provider, "scheme");
-						print.e("-------------- " + strProviderScheme + " --------------");
-						print.e(provider);
 						// class
 						if (prov.hasClass() && !StringUtil.isEmpty(strProviderScheme)) {
 							strProviderScheme = strProviderScheme.trim().toLowerCase();
@@ -603,9 +598,6 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 					}
 					catch (Throwable t) {
 						ExceptionUtil.rethrowIfNecessary(t);
-
-						print.e(t);
-
 						log(config, t);
 					}
 				}
