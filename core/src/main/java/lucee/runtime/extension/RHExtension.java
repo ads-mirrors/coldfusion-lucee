@@ -452,32 +452,53 @@ public final class RHExtension implements Serializable {
 
 	private static void load(Config config, ExtensionMetadata metadata, Resource ext) throws PageException {
 
-		// print.e("-------" + ext);
-		// long start = System.currentTimeMillis();
-		// JarFile jf = new JarFile(ResourceUtil.toFile(ext));
-		// jf.getManifest();
-		// print.e("jarfile:" + (System.currentTimeMillis() - start));
-		// start = System.currentTimeMillis();
-
 		metadata.setType(config instanceof ConfigWeb ? "web" : "server");
 
 		final Data data = new Data();
 		final List<BundleInfo> bundles = new ArrayList<BundleInfo>();
+		final List<BundleInfo> bundlesSync = Collections.synchronizedList(bundles);
+
 		final List<String> jars = new ArrayList<String>();
+		final List<String> jarsSync = Collections.synchronizedList(jars);
+
 		final List<String> flds = new ArrayList<String>();
+		final List<String> fldsSync = Collections.synchronizedList(flds);
+
 		final List<String> tlds = new ArrayList<String>();
+		final List<String> tldsSync = Collections.synchronizedList(tlds);
+
 		final List<String> tags = new ArrayList<String>();
+		final List<String> tagsSync = Collections.synchronizedList(tags);
+
 		final List<String> functions = new ArrayList<String>();
+		final List<String> functionsSync = Collections.synchronizedList(functions);
+
 		final List<String> contexts = new ArrayList<String>();
+		final List<String> contextsSync = Collections.synchronizedList(contexts);
+
 		final List<String> configs = new ArrayList<String>();
+		final List<String> configsSync = Collections.synchronizedList(configs);
+
 		final List<String> webContexts = new ArrayList<String>();
+		final List<String> webContextsSync = Collections.synchronizedList(webContexts);
+
 		final List<String> applications = new ArrayList<String>();
+		final List<String> applicationsSync = Collections.synchronizedList(applications);
+
 		final List<String> components = new ArrayList<String>();
+		final List<String> componentsSync = Collections.synchronizedList(components);
+
 		final List<String> plugins = new ArrayList<String>();
+		final List<String> pluginsSync = Collections.synchronizedList(plugins);
+
 		final List<String> gateways = new ArrayList<String>();
+		final List<String> gatewaysSync = Collections.synchronizedList(gateways);
+
 		final List<String> archives = new ArrayList<String>();
+		final List<String> archivesSync = Collections.synchronizedList(archives);
 
 		try (ZipFile zip = new ZipFile(ResourceUtil.toFile(ext))) {
+			// zip.stream().forEach(entry -> {
 			zip.stream().parallel().forEach(entry -> {
 				try {
 					String path = entry.getName();
@@ -497,68 +518,61 @@ public final class RHExtension implements Serializable {
 							|| startsWith(path, type, "bundle") || startsWith(path, type, "lib") || startsWith(path, type, "libs"))
 							&& (StringUtil.endsWithIgnoreCase(path, ".jar"))) {
 
-								jars.add(fileName);
+								jarsSync.add(fileName);
 								BundleInfo bi = BundleInfo.getInstance(config, fileName, zip.getInputStream(entry), true);
-								if (bi.isBundle()) bundles.add(bi);
+								if (bi.isBundle()) bundlesSync.add(bi);
 							}
 
 					// flds
 					else if (!entry.isDirectory() && startsWith(path, type, "flds")
 							&& (StringUtil.endsWithIgnoreCase(path, ".fld") || StringUtil.endsWithIgnoreCase(path, ".fldx")))
-						flds.add(fileName);
+						fldsSync.add(fileName);
 
 					// tlds
 					else if (!entry.isDirectory() && startsWith(path, type, "tlds")
 							&& (StringUtil.endsWithIgnoreCase(path, ".tld") || StringUtil.endsWithIgnoreCase(path, ".tldx")))
-						tlds.add(fileName);
+						tldsSync.add(fileName);
 
 					// archives
 					else if (!entry.isDirectory() && (startsWith(path, type, "archives") || startsWith(path, type, "mappings")) && StringUtil.endsWithIgnoreCase(path, ".lar"))
-						archives.add(fileName);
+						archivesSync.add(fileName);
 
 					// event-gateway
 					else if (!entry.isDirectory() && (startsWith(path, type, "event-gateways") || startsWith(path, type, "eventGateways"))
 							&& (StringUtil.endsWithIgnoreCase(path, "." + Constants.getCFMLComponentExtension())))
-						gateways.add(sub);
+						gatewaysSync.add(sub);
 
 					// tags
-					else if (!entry.isDirectory() && startsWith(path, type, "tags")) tags.add(sub);
+					else if (!entry.isDirectory() && startsWith(path, type, "tags")) tagsSync.add(sub);
 
 					// functions
-					else if (!entry.isDirectory() && startsWith(path, type, "functions")) functions.add(sub);
+					else if (!entry.isDirectory() && startsWith(path, type, "functions")) functionsSync.add(sub);
 
 					// context
-					else if (!entry.isDirectory() && startsWith(path, type, "context") && !StringUtil.startsWith(fileName(entry), '.')) contexts.add(sub);
+					else if (!entry.isDirectory() && startsWith(path, type, "context") && !StringUtil.startsWith(fileName(entry), '.')) contextsSync.add(sub);
 
 					// web contextS
 					else if (!entry.isDirectory() && (startsWith(path, type, "webcontexts") || startsWith(path, type, "web.contexts"))
 							&& !StringUtil.startsWith(fileName(entry), '.'))
-						webContexts.add(sub);
+						webContextsSync.add(sub);
 
 					// config
-					else if (!entry.isDirectory() && startsWith(path, type, "config") && !StringUtil.startsWith(fileName(entry), '.')) configs.add(sub);
+					else if (!entry.isDirectory() && startsWith(path, type, "config") && !StringUtil.startsWith(fileName(entry), '.')) configsSync.add(sub);
 
 					// applications
 					else if (!entry.isDirectory() && (startsWith(path, type, "web.applications") || startsWith(path, type, "applications") || startsWith(path, type, "web"))
 							&& !StringUtil.startsWith(fileName(entry), '.'))
-						applications.add(sub);
+						applicationsSync.add(sub);
 
 					// components
-					else if (!entry.isDirectory() && (startsWith(path, type, "components")) && !StringUtil.startsWith(fileName(entry), '.')) components.add(sub);
+					else if (!entry.isDirectory() && (startsWith(path, type, "components")) && !StringUtil.startsWith(fileName(entry), '.')) componentsSync.add(sub);
 
 					// plugins
-					else if (!entry.isDirectory() && (startsWith(path, type, "plugins")) && !StringUtil.startsWith(fileName(entry), '.')) plugins.add(sub);
+					else if (!entry.isDirectory() && (startsWith(path, type, "plugins")) && !StringUtil.startsWith(fileName(entry), '.')) pluginsSync.add(sub);
 				}
 				catch (Exception e) {
 					throw Caster.toPageRuntimeException(e);
 				}
-				/*
-				 * try (BufferedReader reader = new BufferedReader(new
-				 * InputStreamReader(zip.getInputStream(entry)))) { String line; while ((line = reader.readLine())
-				 * != null) { // Process each line of the entry here System.out.println("Processing line: " + line);
-				 * } } catch (IOException e) { // Handle I/O exceptions specific to this entry e.printStackTrace();
-				 * }
-				 */
 
 			});
 		}
