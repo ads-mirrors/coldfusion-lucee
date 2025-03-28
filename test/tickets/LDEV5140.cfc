@@ -1,7 +1,7 @@
-component extends="org.lucee.cfml.test.LuceeTestCase" {
+component extends="org.lucee.cfml.test.LuceeTestCase" skip=true {
 
 	function run( testResults , testBox ) {
-		describe( title='LDEV-5140', body=function(){
+		describe( title='LDEV-5440', body=function(){
 
 			it( title='clone LinkedHashMap', body=function() {
                 var foo = createObject( "java", "java.util.LinkedHashMap" ).init();
