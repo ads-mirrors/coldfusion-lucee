@@ -24,6 +24,7 @@ import lucee.runtime.ai.AIModel;
 import lucee.runtime.ai.AISession;
 import lucee.runtime.ai.AISessionSupport;
 import lucee.runtime.ai.AIUtil;
+import lucee.runtime.ai.Conversation;
 import lucee.runtime.db.ClassDefinition;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
@@ -142,7 +143,9 @@ public final class GeminiEngine extends AIEngineSupport {
 	}
 
 	@Override
-	public AISession createSession(String inialMessage, int limit, double temp, int connectTimeout, int socketTimeout) {
+	public AISession createSession(String inialMessage, Conversation[] history, int limit, double temp, int connectTimeout, int socketTimeout) {
+		// TODO add support for history LDEV-5453
+		if (history != null && history.length > 0) throw new RuntimeException("history not supported yet");
 		return new GeminiSession(this, StringUtil.isEmpty(inialMessage, true) ? systemMessage : inialMessage.trim(), limit, temp, connectTimeout, socketTimeout);
 	}
 

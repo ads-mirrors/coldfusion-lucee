@@ -40,20 +40,12 @@ public interface AIEngine {
 	public String getId();
 
 	/**
-	 * Creates an AI session with an optional initial message.
-	 * 
+	 * Creates an AI session with customized parameters.
+	 *
 	 * @param initialMessage The initial message to send to the AI service. If null, uses any default
 	 *            message specified in the initialization properties
-	 * @return A new AISession instance
-	 * @throws PageException If session creation fails or the message cannot be sent
-	 */
-	public AISession createSession(String initialMessage) throws PageException;
-
-	/**
-	 * Creates an AI session with customized parameters.
-	 * 
-	 * @param initialMessage The initial message to send to the AI service. If null, no initial message
-	 *            is sent
+	 * @param history Give the session a conversation history, for example extracted from another
+	 *            session. Can be null
 	 * @param limit Maximum number of messages to retain in conversation history. If 0, uses the
 	 *            engine's default
 	 * @param temp Temperature setting for response generation (controls randomness). If 0, uses the
@@ -65,7 +57,7 @@ public interface AIEngine {
 	 * @return A new AISession instance with the specified parameters
 	 * @throws PageException If session creation fails or parameters are invalid
 	 */
-	public AISession createSession(String initialMessage, int limit, double temp, int connectTimeout, int socketTimeout) throws PageException;
+	public AISession createSession(String initialMessage, Conversation[] history, int limit, double temp, int connectTimeout, int socketTimeout) throws PageException;
 
 	/**
 	 * Returns the current socket timeout setting for this engine.

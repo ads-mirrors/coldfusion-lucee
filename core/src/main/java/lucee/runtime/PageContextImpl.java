@@ -4288,17 +4288,17 @@ public final class PageContextImpl extends PageContext {
 	}
 
 	public AISession createAISession(String nameAI, String systemMessage) throws PageException {
-		return getAIEngine(nameAI).createSession(systemMessage, -1, -1D, -1, -1);
+		return getAIEngine(nameAI).createSession(systemMessage, null, -1, -1D, -1, -1);
 	}
 
 	public AISession createAISession(String nameAI, String systemMessage, int limit, double temp, int connectTimeout, int socketTimeout) throws PageException {
-		return getAIEngine(nameAI).createSession(systemMessage, limit, temp, connectTimeout, socketTimeout);
+		return getAIEngine(nameAI).createSession(systemMessage, null, limit, temp, connectTimeout, socketTimeout);
 	}
 
 	public AISession createAISessionById(String id, String systemMessage, int limit, double temp, int connectTimeout, int socketTimeout) throws PageException {
 		AIEngine aie = AIEngineFactory.getExistingInstance(id, null);
 		if (aie == null) throw new ApplicationException("there is no AIEngine stored with id [" + id + "]");
-		return aie.createSession(systemMessage, limit, temp, connectTimeout, socketTimeout);
+		return aie.createSession(systemMessage, null, limit, temp, connectTimeout, socketTimeout);
 	}
 
 	public String getNameFromDefault(String defaultName) throws PageException {

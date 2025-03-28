@@ -45,7 +45,7 @@ public final class AIUtil {
 	}
 
 	public static void valdate(AIEngine aie, int connectTimeout, int socketTimeout) throws PageException {
-		AISession session = aie.createSession("keep the answer short", -1, -1D, connectTimeout <= 0 ? aie.getConnectTimeout() : connectTimeout,
+		AISession session = aie.createSession("keep the answer short", null, -1, -1D, connectTimeout <= 0 ? aie.getConnectTimeout() : connectTimeout,
 				socketTimeout <= 0 ? aie.getSocketTimeout() : socketTimeout);
 		session.inquiry("ping");
 	}

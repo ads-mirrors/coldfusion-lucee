@@ -46,9 +46,12 @@ public abstract class AIEngineSupport implements AIEngine {
 		return properties;
 	}
 
-	@Override
 	public final AISession createSession(String inialMessage) throws PageException {
-		return createSession(inialMessage, -1, -1D, -1, -1);
+		return createSession(inialMessage, null, -1, -1D, -1, -1);
+	}
+
+	public final AISession createSession(String inialMessage, Conversation[] history) throws PageException {
+		return createSession(inialMessage, history, -1, -1D, -1, -1);
 	}
 
 	@Override

@@ -11,6 +11,7 @@ import lucee.runtime.ai.AIEngine;
 import lucee.runtime.ai.AIEngineSupport;
 import lucee.runtime.ai.AIModel;
 import lucee.runtime.ai.AISession;
+import lucee.runtime.ai.Conversation;
 import lucee.runtime.db.ClassDefinition;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
@@ -94,7 +95,9 @@ public final class ClaudeEngine extends AIEngineSupport {
 	}
 
 	@Override
-	public AISession createSession(String initialMessage, int limit, double temp, int connectTimeout, int socketTimeout) {
+	public AISession createSession(String initialMessage, Conversation[] history, int limit, double temp, int connectTimeout, int socketTimeout) {
+		// TODO add support for history LDEV-5453
+		if (history != null && history.length > 0) throw new RuntimeException("history not supported yet");
 		return new ClaudeSession(this, StringUtil.isEmpty(initialMessage, true) ? systemMessage : initialMessage.trim(), limit, temp, connectTimeout, socketTimeout);
 	}
 
