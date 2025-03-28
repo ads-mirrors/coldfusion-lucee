@@ -24,6 +24,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -156,6 +157,7 @@ public class BundleLoader {
 	public static List<Bundle> addRequiredBundles(Map<String, String> requiredBundles, Map<String, File> availableBundles, boolean always, CFMLEngineFactory engFac,
 			BundleContext bc) {
 		final List<Bundle> bundles = new ArrayList<>();
+		final List<Bundle> bundlesSync = Collections.synchronizedList(bundles);
 		Iterator<Entry<String, String>> it = requiredBundles.entrySet().iterator();
 		// Use regular threads
 		List<CompletableFuture<?>> futures = new ArrayList<>();
@@ -168,7 +170,7 @@ public class BundleLoader {
 					if (f == null) {
 						f = engFac.downloadBundle(e.getKey(), e.getValue(), null);
 					}
-					bundles.add(BundleUtil.addBundle(engFac, bc, f, null));
+					bundlesSync.add(BundleUtil.addBundle(engFac, bc, f, null));
 				}
 				catch (Exception ex) {
 					ex.printStackTrace();
@@ -233,7 +235,6 @@ public class BundleLoader {
 					for (File jar: remainings) {
 						// Submit tasks for processing each jar file
 						futures.add(CompletableFuture.runAsync(() -> {
-							long start = System.currentTimeMillis();
 							try {
 								rtn.put(loadBundleInfo(jar), jar);
 							}
