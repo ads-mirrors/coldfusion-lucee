@@ -148,6 +148,7 @@ public final class SMTPConnectionPool {
 
 	private static SessionAndTransport pop(Stack<SessionAndTransport> satStack) {
 		try {
+			if (satStack.isEmpty()) return null;
 			return satStack.pop();
 		}
 		catch (Throwable t) {
