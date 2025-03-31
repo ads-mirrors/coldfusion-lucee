@@ -1,5 +1,9 @@
 package lucee.runtime.osgi;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -9,7 +13,9 @@ import org.osgi.framework.Version;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.type.util.ListUtil;
 
-public final class VersionRange {
+public final class VersionRange implements Serializable {
+
+	private static final long serialVersionUID = 5064857833235093768L;
 
 	List<VR> vrs = new ArrayList<VR>();
 
@@ -57,9 +63,12 @@ public final class VersionRange {
 		return sb.toString();
 	}
 
-	private static class VR {
-		private Version from;
-		private Version to;
+	private static class VR implements Serializable {
+
+		private static final long serialVersionUID = 2004939785062801700L;
+		// Mark as transient so Java's default serialization ignores them
+		private transient Version from;
+		private transient Version to;
 
 		public VR(Version from, Version to) {
 			this.from = from;
@@ -69,7 +78,6 @@ public final class VersionRange {
 		public boolean isWithin(Version version) {
 			if (from != null && OSGiUtil.isNewerThan(from, version)) return false;
 			if (to != null && OSGiUtil.isNewerThan(version, to)) return false;
-
 			return true;
 		}
 
@@ -77,6 +85,63 @@ public final class VersionRange {
 		public String toString() {
 			if (from != null && to != null && from.equals(to)) return from.toString();
 			return (from == null ? "" : from.toString()) + "-" + (to == null ? "" : to.toString());
+		}
+
+		/**
+		 * Custom serialization method to handle Version objects
+		 * 
+		 * @param out the output stream
+		 * @throws IOException if an I/O error occurs
+		 */
+		private void writeObject(ObjectOutputStream out) throws IOException {
+			out.defaultWriteObject();
+
+			// Write whether from is null
+			out.writeBoolean(from != null);
+			if (from != null) {
+				// Write from version as string representation
+				out.writeUTF(from.toString());
+			}
+
+			// Write whether to is null
+			out.writeBoolean(to != null);
+			if (to != null) {
+				// Write to version as string representation
+				out.writeUTF(to.toString());
+			}
+		}
+
+		/**
+		 * Custom deserialization method to handle Version objects
+		 * 
+		 * @param in the input stream
+		 * @throws IOException if an I/O error occurs
+		 * @throws ClassNotFoundException if the class of a serialized object cannot be found
+		 */
+		private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+			in.defaultReadObject();
+
+			// Read whether from was null
+			boolean hasFrom = in.readBoolean();
+			if (hasFrom) {
+				// Read from version from its string representation
+				String fromStr = in.readUTF();
+				this.from = Version.parseVersion(fromStr);
+			}
+			else {
+				this.from = null;
+			}
+
+			// Read whether to was null
+			boolean hasTo = in.readBoolean();
+			if (hasTo) {
+				// Read to version from its string representation
+				String toStr = in.readUTF();
+				this.to = Version.parseVersion(toStr);
+			}
+			else {
+				this.to = null;
+			}
 		}
 	}
 }

@@ -36,7 +36,10 @@ import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.mvn.POMReader.Dependency;
 import lucee.runtime.op.Caster;
 import lucee.runtime.thread.ThreadUtil;
+import lucee.runtime.type.Array;
+import lucee.runtime.type.ArrayImpl;
 import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 
@@ -324,6 +327,19 @@ public final class MavenUtil {
 			return sct;
 		}
 
+		public static Struct toStruct(GAVSO gavso) {
+			return gavso.populate(new StructImpl(Struct.TYPE_LINKED));
+		}
+
+		public static Array toArray(List<GAVSO> list) {
+			ArrayImpl arr = new ArrayImpl();
+			if (list == null || list.isEmpty()) return arr;
+			for (GAVSO gavso: list) {
+				arr.appendEL(gavso.populate(new StructImpl(Struct.TYPE_LINKED)));
+			}
+			return arr;
+		}
+
 		/**
 		 * same group and artifact id, but version MAY differ
 		 * 
@@ -341,6 +357,7 @@ public final class MavenUtil {
 			if (!v.equalsIgnoreCase(other.v)) return false;
 			return equalID(other);
 		}
+
 	}
 
 	public static boolean allowed(int allowedScopes, int scope) {

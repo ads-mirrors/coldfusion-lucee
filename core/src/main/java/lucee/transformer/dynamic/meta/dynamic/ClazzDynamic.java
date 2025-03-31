@@ -807,7 +807,7 @@ public final class ClazzDynamic extends Clazz {
 		}
 	}
 
-	private static Object deserializeAsync(ClassLoader cl, InputStream is, String path) throws TimeoutException, InterruptedException, ExecutionException {
+	public static Object deserializeAsync(ClassLoader cl, InputStream is, String path) throws TimeoutException, InterruptedException, ExecutionException {
 		return ThreadUtil.createExecutorService().submit(() -> {
 			ObjectInputStream ois = null;
 			Object o;
@@ -822,7 +822,7 @@ public final class ClazzDynamic extends Clazz {
 		}).get(10, TimeUnit.MILLISECONDS);
 	}
 
-	private static Object deserialize(ClassLoader cl, InputStream is) throws IOException, ClassNotFoundException {
+	public static Object deserialize(ClassLoader cl, InputStream is) throws IOException, ClassNotFoundException {
 
 		ObjectInputStream ois = null;
 		Object o = null;

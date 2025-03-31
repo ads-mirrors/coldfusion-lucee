@@ -55,9 +55,9 @@ import lucee.runtime.type.util.ListUtil;
 
 public class BundleInfo implements Serializable {
 
-	private static final long serialVersionUID = -8723070772449992030L;
-	private Object token = new Object();
-	private Version version;
+	private static final long serialVersionUID = 6361333066318375689L;
+	private transient Version _version;
+	private String strVersion;
 	private String name;
 	private String symbolicName;
 	private String exportPackage;
@@ -123,7 +123,10 @@ public class BundleInfo implements Serializable {
 			name = attrs.getValue("Bundle-Name");
 			symbolicName = attrs.getValue("Bundle-SymbolicName");
 			String tmp = attrs.getValue("Bundle-Version");
-			version = StringUtil.isEmpty(tmp, true) ? null : OSGiUtil.toVersion(tmp);
+			if (!StringUtil.isEmpty(tmp, true)) {
+				strVersion = tmp.trim();
+				_version = OSGiUtil.toVersion(strVersion);
+			}
 			exportPackage = attrs.getValue("Export-Package");
 			importPackage = attrs.getValue("Import-Package");
 			dynamicImportPackage = attrs.getValue("DynamicImport-Package");
@@ -155,11 +158,14 @@ public class BundleInfo implements Serializable {
 	}
 
 	public Version getVersion() {
-		return version;
+		if (_version == null && !StringUtil.isEmpty(strVersion)) {
+			_version = OSGiUtil.toVersion(strVersion, null);
+		}
+		return _version;
 	}
 
 	public String getVersionAsString() {
-		return version == null ? null : version.toString();
+		return strVersion;
 	}
 
 	private String getBundleName() {
@@ -327,8 +333,8 @@ public class BundleInfo implements Serializable {
 
 	@Override
 	public String toString() {
-		return "name:" + name + ";version:" + version + ";symbolicName:" + symbolicName + ";exportPackage:" + exportPackage + ";importPackage:" + importPackage + ";activator:"
-				+ activator + ";manifestVersion:" + manifestVersion + ";description:" + description + ";dynamicImportPackage:" + dynamicImportPackage + ";classPath:" + classPath
-				+ ";requireBundle:" + requireBundle + ";fragmentHost:" + fragementHost;
+		return "name:" + name + ";version:" + getVersionAsString() + ";symbolicName:" + symbolicName + ";exportPackage:" + exportPackage + ";importPackage:" + importPackage
+				+ ";activator:" + activator + ";manifestVersion:" + manifestVersion + ";description:" + description + ";dynamicImportPackage:" + dynamicImportPackage
+				+ ";classPath:" + classPath + ";requireBundle:" + requireBundle + ";fragmentHost:" + fragementHost;
 	}
 }

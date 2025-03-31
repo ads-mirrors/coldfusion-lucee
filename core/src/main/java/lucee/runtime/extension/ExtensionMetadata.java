@@ -1,5 +1,6 @@
 package lucee.runtime.extension;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,10 @@ import lucee.runtime.osgi.BundleInfo;
 import lucee.runtime.osgi.VersionRange;
 import lucee.runtime.type.util.ListUtil;
 
-public final class ExtensionMetadata {
+public final class ExtensionMetadata implements Serializable {
+
+	public static final long serialVersionUID = 6110072352169406250L;
+
 	private static final String[] EMPTY = new String[0];
 
 	private String id;
@@ -79,16 +83,22 @@ public final class ExtensionMetadata {
 	private List<Map<String, String>> startupHooks;
 	private String startupHooksRaw;
 
-	private List<Map<String, String>> mappings;
+	private transient List<Map<String, String>> mappings;
 	private String mappingsRaw;
 
-	private List<MavenUtil.GAVSO> maven;
+	private transient List<MavenUtil.GAVSO> maven;
 	private String mavenRaw;
 
-	private List<Map<String, Object>> eventGatewayInstances;
+	private transient List<Map<String, Object>> eventGatewayInstances;
 	private String eventGatewayInstancesRaw;
 
 	public List<Map<String, Object>> getEventGatewayInstances() {
+		if (eventGatewayInstances == null) {
+			if (!StringUtil.isEmpty(eventGatewayInstancesRaw, true)) {
+				eventGatewayInstances = RHExtension.toSettingsObj(null, eventGatewayInstancesRaw);
+			}
+			if (eventGatewayInstances == null) eventGatewayInstances = new ArrayList<Map<String, Object>>();
+		}
 		return eventGatewayInstances;
 	}
 
@@ -98,13 +108,17 @@ public final class ExtensionMetadata {
 
 	public void setEventGatewayInstances(String str, Log logger) {
 		if (!StringUtil.isEmpty(str, true)) {
-			eventGatewayInstances = RHExtension.toSettingsObj(logger, str);
 			eventGatewayInstancesRaw = str;
 		}
-		if (eventGatewayInstances == null) eventGatewayInstances = new ArrayList<Map<String, Object>>();
 	}
 
 	public List<Map<String, String>> getMappings() {
+		if (mappings == null) {
+			if (!StringUtil.isEmpty(mappingsRaw, true)) {
+				mappings = RHExtension.toSettings(null, mappingsRaw);
+			}
+			if (mappings == null) mappings = new ArrayList<Map<String, String>>();
+		}
 		return mappings;
 	}
 
@@ -114,13 +128,17 @@ public final class ExtensionMetadata {
 
 	public void setMapping(String str, Log logger) {
 		if (!StringUtil.isEmpty(str, true)) {
-			mappings = RHExtension.toSettings(logger, str);
 			mappingsRaw = str;
 		}
-		if (mappings == null) mappings = new ArrayList<Map<String, String>>();
 	}
 
 	public List<MavenUtil.GAVSO> getMaven() {
+		if (maven == null) {
+			if (!StringUtil.isEmpty(mavenRaw, true)) {
+				maven = MavenUtil.toGAVSOs(mavenRaw, null);
+			}
+			if (maven == null) maven = new ArrayList<GAVSO>();
+		}
 		return maven;
 	}
 
@@ -130,10 +148,6 @@ public final class ExtensionMetadata {
 
 	public void setMaven(String str, Log logger) {
 		mavenRaw = str;
-		if (!StringUtil.isEmpty(str, true)) {
-			maven = MavenUtil.toGAVSOs(str, null);
-		}
-		if (maven == null) maven = new ArrayList<GAVSO>();
 	}
 
 	public List<Map<String, String>> getStartupHooks() {

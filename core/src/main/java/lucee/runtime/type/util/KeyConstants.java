@@ -3050,6 +3050,10 @@ public final class KeyConstants {
 	public static final Key _INTERRUPTED = KeyImpl._const("INTERRUPTED");
 	public static final Key _warning = KeyImpl._const("warning");
 	public static final Key _ip = KeyImpl._const("ip");
+	public static final Key _amf = KeyImpl._const("amf");
+	public static final Key _monitor = KeyImpl._const("monitor");
+	public static final Key _jdbc = KeyImpl._const("jdbc");
+	public static final Key _jars = KeyImpl._const("jars");
 
 	private static Map<String, Key> _____keys;
 

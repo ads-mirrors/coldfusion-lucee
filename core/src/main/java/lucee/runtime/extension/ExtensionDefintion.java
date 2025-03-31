@@ -137,15 +137,23 @@ public final class ExtensionDefintion {
 		return rhe;
 	}
 
-	public Resource getSource() throws ApplicationException {
-		if (source != null) return source;
-		if (rhe != null) return rhe.getExtensionFile();
-		throw new ApplicationException("ExtensionDefinition does not contain a source.");
-	}
-
+	//
 	public Resource getSource(Resource defaultValue) {
 		if (source != null) return source;
 		if (rhe != null) return rhe.getExtensionFile();
-		return defaultValue;
+		try {
+			return source = RHExtension.getExtensionInstalledFile(config, getId(), getVersion(), false);
+		}
+		catch (Exception e) {
+			return defaultValue;
+		}
+	}
+
+	public Resource getSource() throws ApplicationException {
+		if (source != null) return source;
+		if (rhe != null) return rhe.getExtensionFile();
+
+		return source = RHExtension.getExtensionInstalledFile(config, getId(), getVersion(), false);
+
 	}
 }

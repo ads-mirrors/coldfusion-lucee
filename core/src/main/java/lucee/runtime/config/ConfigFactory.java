@@ -49,7 +49,6 @@ import lucee.runtime.converter.JSONDateFormat;
 import lucee.runtime.engine.InfoImpl;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.PageException;
-import lucee.runtime.extension.RHExtension;
 import lucee.runtime.interpreter.JSONExpressionInterpreter;
 import lucee.runtime.listener.SerializationSettings;
 import lucee.runtime.op.Caster;
@@ -597,7 +596,7 @@ public abstract class ConfigFactory {
 					String id = Caster.toString(data.get(KeyConstants._id, null), null);
 					String version = Caster.toString(data.get(KeyConstants._version, null), null);
 					String name = Caster.toString(data.get(KeyConstants._name, null), null);
-					RHExtension.storeMetaData(config, id, version, data);
+					// RHExtension.storeMetaData(config, id, version, data);
 					Struct sct = new StructImpl(Struct.TYPE_LINKED);
 					sct.setEL(KeyConstants._id, id);
 					sct.setEL(KeyConstants._version, version);
