@@ -35,7 +35,7 @@
 
  <cfscript>
 	include template="ext.functions.cfm";
-	//include template="services.update.functions.cfm";
+	include template="services.update.functions.cfm";
 
 	hasESAPI = ExtensionExists( "37C61C0A-5D7E-4256-8572639BE0CF5838" );
 	function safeText (str){
@@ -124,7 +124,7 @@
 	printError(error);
 
 	currMajor=listFirst(server.lucee.version,".");
-	
+	selectedUpdate = getUpdateForMajorVersion( otherVersions, currMajor );
 
 	// Jira
 /*
@@ -191,7 +191,9 @@
 							<cfif len(versionsStr[key].upgrade) gt 0|| len(versionsStr[key].downgrade) gt 0>
 								<optgroup class="td_#UcFirst(Lcase(key))#" label="#stText.services.update.short[key]#">
 									<cfloop array="#versionsStr[key].upgrade#" index="i">
-										<option class="td_#UcFirst(Lcase(key))#" value="#i#">#stText.services.update.upgradeTo# #i#</option>
+										<option class="td_#UcFirst(Lcase(key))#" value="#i#"
+											<cfif i eq selectedUpdate>selected</cfif>
+										>#stText.services.update.upgradeTo# #i#</option>
 									</cfloop>
 
 									<cfloop array="#versionsStr[key].downgrade#" index="i">
