@@ -18,7 +18,12 @@
  component hint="Mail Watcher Listener" {
 
 	public void function invoke(required struct data) output=false {
-		cflog( text=serialize(data), file="MailWatcher", type="information" );
+		cflog( text=data.toJson(), file="mailwatcher", type="information", application="false" );
+	}
+
+	public query function fetch(required struct config, required date newerThan) output=false {
+		cflog( text="placeholder no-op mailwatcher fetch function", file="mailwatcher", type="information", application="false" );
+		return queryNew("empty");
 	}
 
 }
