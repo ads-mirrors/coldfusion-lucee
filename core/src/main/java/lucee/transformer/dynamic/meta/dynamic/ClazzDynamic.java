@@ -10,12 +10,14 @@ import java.lang.ref.Reference;
 import java.lang.ref.SoftReference;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -52,7 +54,7 @@ import lucee.transformer.dynamic.meta.Method;
 public final class ClazzDynamic extends Clazz {
 
 	private static final long serialVersionUID = 862370302422701585L;
-
+	private static final boolean DEBUG = true;
 	private transient Class clazz;
 	// private static Map<String, SoftReference<ClazzDynamic>> classes = new ConcurrentHashMap<>();
 	private final Method[] methods;
@@ -128,7 +130,6 @@ public final class ClazzDynamic extends Clazz {
 	private ClazzDynamic(Class clazz, Log log) throws IOException {
 		this.clazz = clazz;
 		Map<String, FunctionMember> members = getFunctionMembers(clazz, log);
-
 		LinkedList<Method> tmpMethods = new LinkedList<>();
 		LinkedList<Method> tmpDeclaredMethods = new LinkedList<>();
 		LinkedList<Constructor> tmpConstructors = new LinkedList<>();
@@ -270,7 +271,14 @@ public final class ClazzDynamic extends Clazz {
 	public Method getMethod(String methodName, Object[] args, boolean nameCaseSensitive, boolean convertArgument, boolean convertComparsion) throws NoSuchMethodException {
 		Method method = getMethod(methodName, args, nameCaseSensitive, convertArgument, convertComparsion, null);
 		if (method != null) return method;
-
+		if (DEBUG) {
+			StringBuilder sb = new StringBuilder();
+			for (Method m: getMethods(null, true, -1)) {
+				sb.append(m.toString()).append(";");
+			}
+			throw new NoSuchMethodException("No matching method for " + clazz.getName() + "." + methodName + "(" + Reflector.getDspMethods(Reflector.getClasses(args))
+					+ ") found. Available methods are [" + sb + "]");
+		}
 		throw new NoSuchMethodException("No matching method for " + clazz.getName() + "." + methodName + "(" + Reflector.getDspMethods(Reflector.getClasses(args)) + ") found.");
 	}
 
@@ -476,30 +484,23 @@ public final class ClazzDynamic extends Clazz {
 
 	private static Map<String, FunctionMember> getFunctionMembers(final Class clazz, Log log) throws IOException {
 		final Map<String, String> classes = new ConcurrentHashMap<>();
-		return _getFunctionMembers(classes, clazz, log);
+		final Set<String> ignores = new HashSet<>();
+		return _getFunctionMembers(classes, ignores, clazz, log);
+
 	}
 
-	private static Map<String, FunctionMember> _getFunctionMembers(Map<String, String> classes, Class clazz_, Log log) throws IOException {
+	private static Map<String, FunctionMember> _getFunctionMembers(Map<String, String> classes, Set<String> ignores, Class clazz_, Log log) throws IOException {
 		final Class clazz = clazz_.isArray() ? Object.class : clazz_;
 		final Map<String, FunctionMember> members = new LinkedHashMap<>();
 		Map<String, FunctionMember> existing = membersCollection.get(clazz);
-
+		if (ignores.contains(clazz.getName())) return members;
 		if (existing != null) {
-			/*
-			 * if (true) { print.e("ex-->" + clazz.getName()); for (Entry<String, FunctionMember> e:
-			 * existing.entrySet()) { if (e.getValue().getDeclaringClass() != clazz &&
-			 * !Reflector.isInstaneOf(clazz, e.getValue().getDeclaringClass(), true) &&
-			 * e.getValue().getDeclaringClass() != Object.class) print.e("- " + e.getValue()); }
-			 * 
-			 * }
-			 */
-
 			for (Entry<String, FunctionMember> e: existing.entrySet()) {
 				members.put(e.getKey(), e.getValue());
+				ignores.add(e.getValue().getDeclaringClassName());
 			}
 			return members;
 		}
-		// print.e("ne-->" + clazz.getName());
 
 		final String classPath = clazz.getName().replace('.', '/') + ".class";
 		final ClassLoader cl = getClassLoader(clazz);
@@ -532,7 +533,7 @@ public final class ClazzDynamic extends Clazz {
 							// print.e("->" + superName);
 							classes.put(superName, "");
 
-							add(members, _getFunctionMembers(classes, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), log));
+							add(members, _getFunctionMembers(classes, ignores, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(superName))), log));
 						}
 					}
 					catch (IllegalArgumentException iae) {
@@ -561,7 +562,7 @@ public final class ClazzDynamic extends Clazz {
 								// add(members, _getFunctionMembers(clid,
 								// cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), log));
 
-								add(members, _getFunctionMembers(classes, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), log));
+								add(members, _getFunctionMembers(classes, ignores, cl.loadClass(ASMUtil.getClassName(Type.getObjectType(interf))), log));
 							}
 						}
 						catch (Exception e) {
@@ -617,10 +618,8 @@ public final class ClazzDynamic extends Clazz {
 
 						Type tmpType = tmpClass != null ? Type.getType(tmpClass) : null;
 						Type rtnType = rtnClass != null ? Type.getType(rtnClass) : null;
-
 						if (Clazz.compareAccess(fmParent, fmCurrent) >= 0) fmCurrent.setDeclaringProviderClassWithSameAccess(tmpClass, tmpType, rtnClass, rtnType);
 						fmCurrent.setDeclaringProviderClass(tmpClass, tmpType, rtnClass, rtnType);
-
 						/*
 						 * if (name.equals("nextElement")) { print.e(fm.getDeclaringProviderClassName());
 						 * print.e(fm.getDeclaringProviderClassNameWithSameAccess()); }
@@ -635,6 +634,7 @@ public final class ClazzDynamic extends Clazz {
 		// Start visiting the class
 		classReader.accept(visitor, 0);
 		membersCollection.put(clazz, cloneIt(members));
+		ignores.add(clazz.getName());
 		return members;
 	}
 

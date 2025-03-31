@@ -96,6 +96,7 @@ public final class MethodInstance {
 					.apply(obj, args);
 		}
 		catch (IncompatibleClassChangeError | ClassFormatError | ClassCastException e) { // java.lang.ClassCastException
+			if (!Clazz.allowReflection()) throw e;
 			LogUtil.log("dynamic", e);
 			DynamicInvoker di = DynamicInvoker.getExistingInstance();
 			try {
@@ -125,12 +126,9 @@ public final class MethodInstance {
 	}
 
 	public Method getMethod(Method defaultValue) {
-		try {
-			return getMethod();
-		}
-		catch (PageException e) {
-			return defaultValue;
-		}
+		getInstanceEL();
+		if (method == null) return defaultValue;
+		return method;
 	}
 
 	public boolean hasMethod() {
@@ -141,12 +139,8 @@ public final class MethodInstance {
 			return true;
 		}
 
-		try {
-			return getMethod() != null;
-		}
-		catch (PageException e) {
-			return false;
-		}
+		getInstanceEL();
+		return method != null;
 	}
 
 	public Method getMethod() throws PageException {
@@ -167,6 +161,25 @@ public final class MethodInstance {
 			catch (Throwable t) {
 				ExceptionUtil.rethrowIfNecessary(t);
 				throw Caster.toPageException(t);
+			}
+		}
+		return instance;
+	}
+
+	private Object getInstanceEL() {
+		if (instance == null) {
+			try {
+				DynamicInvoker di = DynamicInvoker.getExistingInstance();
+				ClazzDynamic clazzz = di.toClazzDynamic(clazz);
+				if (method == null) {
+					method = clazzz.getMethod(methodName.getString(), args, nameCaseSensitive, true, convertComparsion, null);
+					if (method == null) return null;
+				}
+				instance = di.getInstance(clazzz, method, args);
+			}
+			catch (Throwable t) {
+				ExceptionUtil.rethrowIfNecessary(t);
+				return null;
 			}
 		}
 		return instance;

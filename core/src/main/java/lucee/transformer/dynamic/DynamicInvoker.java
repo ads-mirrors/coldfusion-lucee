@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -45,6 +46,7 @@ import lucee.commons.lang.SystemOut;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.op.Caster;
 import lucee.runtime.reflection.Reflector;
+import lucee.runtime.reflection.pairs.MethodInstance;
 import lucee.runtime.type.ArrayImpl;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.KeyImpl;
@@ -423,7 +425,30 @@ public final class DynamicInvoker {
 		System.setProperty("lucee.allow.reflection", "false");
 		Resource classes = ResourcesImpl.getFileResourceProvider().getResource("/Users/mic/tmp8/classes/");
 		ResourceUtil.deleteContent(classes, null);
-		DynamicInvoker e = new DynamicInvoker(classes);
+		DynamicInvoker e = DynamicInvoker.getInstance(classes);
+		if (true) {
+
+			HashMap<String, String> arr = new HashMap<>();
+			arr.put("Susi", "Sorglos");
+			arr.clone();
+			MethodInstance mi = Reflector.getMethodInstance(arr.getClass(), KeyImpl.init("clone"), new Object[] {}, true, true);
+			aprint.e(mi.hasMethod());
+			aprint.e(mi.invoke(arr));
+
+		}
+
+		{
+
+			LinkedHashMap<String, String> arr = new LinkedHashMap<>();
+			arr.put("Susi", "Sorglos");
+			arr.clone();
+			MethodInstance mi = Reflector.getMethodInstance(arr.getClass(), KeyImpl.init("clone"), new Object[] {}, true, true);
+			aprint.e(mi.hasMethod());
+			aprint.e(mi.invoke(arr));
+
+			if (true) return;
+		}
+
 		{
 			ArrayImpl arr = new ArrayImpl();
 			arr.setE(1, "Susi");

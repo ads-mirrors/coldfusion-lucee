@@ -46,7 +46,7 @@
   
   <!-- https://www.coldbox.org/download/testbox -->
   <tstamp>
-      <format property="NOW" pattern="yyyy/MM/dd HH:mm:ss z" locale="en,GB"/>
+      <format property="NOW" pattern="yyyy/MM/dd HH:mm:ss 'UTC'" locale="en,GB" timezone="UTC"/>
   </tstamp>
 
   <macrodef name="echots">
