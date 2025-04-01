@@ -207,10 +207,16 @@ function luceeCatchToString() {try{
 			AI (Experimental)
 		</td>
 		<td id="ai-response-cell" class="mono">
-		    <cfif LuceeAIHas('default:exception')>
-				<a href="##" onclick="luceeLoadError(luceeCatchData); return false;">Analyse</a><cfelse>
-				For AI-driven exception analysis setup, see <a target="blank" href="https://github.com/lucee/lucee-docs/blob/master/docs/recipes/ai.md">AI Setup Guide</a>.
-			</cfif></td>
+		    <cftry>
+				<cfif LuceeAIHas('default:exception')>
+					<a href="##" onclick="luceeLoadError(luceeCatchData); return false;">Analyse</a><cfelse>
+					For AI-driven exception analysis setup, see <a target="blank" href="https://github.com/lucee/lucee-docs/blob/master/docs/recipes/ai.md">AI Setup Guide</a>.
+				</cfif>
+				<cfcatch>
+					<cflog log="application" exception="#cfcatch#">
+				</cfcatch>
+			</cftry>
+		</td>
 	</tr>
 	<cfif structkeyexists( catch, 'errorcode' ) && len( catch.errorcode ) && catch.errorcode NEQ 0>
 		<tr>
