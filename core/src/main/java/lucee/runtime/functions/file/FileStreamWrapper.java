@@ -85,7 +85,7 @@ public abstract class FileStreamWrapper extends StructSupport implements Struct,
 		info.setEL(KeyConstants._name, res.getName());
 		info.setEL(KeyConstants._path, res.getParent());
 		info.setEL(KeyConstants._status, getStatus());
-		info.setEL(KeyConstants._size, getSize() + " bytes");
+		info.setEL(KeyConstants._size, getSize());
 		info.setEL(KeyConstants._lastmodified, getLastmodified());
 		return info;
 	}
