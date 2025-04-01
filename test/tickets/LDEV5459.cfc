@@ -4,8 +4,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 		describe( title='LDEV-5459' , body=function(){
 
+			// this class can be removed in case the class get missing in the future 
 			it( title='missing object', body=function() {
-				var type = "org.hibernate.criterion.Restrictions";
+				var type = "org.hibernate.criterion.Restrictions";// must be a class with no empty constructor
 				var obj = createObject( "java", type );
 				expect( obj.getClass().getName() ).toBe( type );
 
@@ -25,7 +26,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 			});
 
 			it( title='missing object deeper structure ConcurrentHashMap', body=function() {
-				var type = "java.io.FileInputStream";
+				var type = "java.io.FileInputStream";// must be a class with no empty constructor
 				var obj = createObject( "java", type );
 				expect( obj.getClass().getName() ).toBe( type );
 
@@ -45,7 +46,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 			});
 
 			it( title='missing object flat structure ConcurrentHashMap', body=function() {
-				var type = "java.io.FileInputStream";
+				var type = "java.io.FileInputStream";// must be a class with no empty constructor
 				var obj = createObject( "java", type );
 				expect( obj.getClass().getName() ).toBe( type );
 
@@ -62,7 +63,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 
 			it( title='missing object deeper structure Struct', body=function() {
-				var type = "java.io.FileInputStream";
+				var type = "java.io.FileInputStream";// must be a class with no empty constructor
 				var obj = createObject( "java", type );
 				expect( obj.getClass().getName() ).toBe( type );
 
@@ -82,7 +83,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 			});
 
 			it( title='missing object flat structure Struct', body=function() {
-				var type = "java.io.FileInputStream";
+				var type = "java.io.FileInputStream"; // must be a class with no empty constructor
 				var obj = createObject( "java", type );
 				expect( obj.getClass().getName() ).toBe( type );
 
