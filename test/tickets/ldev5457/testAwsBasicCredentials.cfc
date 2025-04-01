@@ -5,7 +5,7 @@
                 awsBasicCredentials = createObject("java", "software.amazon.awssdk.auth.credentials.AwsBasicCredentials");
                 return  awsBasicCredentials.create("test", "test").getClass().getName();
             } catch (e) {
-                return e.message;
+                return e.stacktrace;
             }
         }
     </cfscript>
