@@ -4,9 +4,6 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" skip="true" {
 
 			it( "test AWS library", function() {
 				
-				software.amazon.awssdk.identity.spi.internal.DefaultAwsCredentialsIdentity
-
-
 				aws = new Component javasettings='{maven:["software.amazon.awssdk:auth:2.31.9", "software.amazon.awssdk:identity-spi:2.31.9"]}'{
 					import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 					import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
@@ -15,10 +12,26 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" skip="true" {
 					function test(){
 						return AwsBasicCredentials::create("test", "test").getClass().getName();
 					}
-				}
-				expect( aws.test() ).toBe( "software.amazon.awssdk.auth.credentials.AwsBasicCredentials" );
-			} );
+				};
+				expect(aws.test()).toBe("software.amazon.awssdk.auth.credentials.AwsBasicCredentials");
+			});
+
+			it("test AWS library with createObject", function() {
+                var uri = createURI("/LDEV5457");
+                var result =_InternalRequest(template:"#uri#\ldev5457.cfm");
+                expect( result.filecontent ).toBe( "software.amazon.awssdk.auth.credentials.AwsBasicCredentials" );
+		    } );
+
+			it("test AWS library using createObject with a component", function() {
+                var uri = createURI("/LDEV5457");
+                var result = createObject("component", "#uri#/testAwsBasicCredentials.cfc");
+                expect(result.test()).toBe("software.amazon.awssdk.auth.credentials.AwsBasicCredentials");
+            });
 
 		} );
+	}
+	private string function createURI(string calledName) {
+		var baseURI = "/test/#listLast(getDirectoryFromPath(getCurrenttemplatepath()),"\/")#/";
+		return baseURI & "" & calledName;
 	}
 }
