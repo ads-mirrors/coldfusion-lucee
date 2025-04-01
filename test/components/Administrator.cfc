@@ -499,7 +499,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 					loop list=props item="local.prop" {
 						expect( getRHServerExtensions ).toHaveKey( prop );
 					}
-					expect( structCount( getRHServerExtensions ) ).toBe( listLen(props ), props & " " & listSort( structKeyList( getRHServerExtensions ), "text" ) );
+					// LDEV-5458 this is more dynamic now and no longer can be tested this way expect( structCount( getRHServerExtensions ) ).toBe( listLen(props ), props & " " & listSort( structKeyList( getRHServerExtensions ), "text" ) );
 				});
 
 				it(title="checking getLocalExtensions()", body=function( currentSpec ) {
@@ -517,7 +517,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 					loop list=props item="local.prop" {
 						expect( localExtension ).toHaveKey( prop );
 					}
-					expect( structCount( localExtension ) ).toBe( listLen(props ), props & " " & listSort( structKeyList( localExtension ), "text" ) );
+					// LDEV-5458 this is more dynamic now and no longer can be tested this way expect( structCount( localExtension ) ).toBe( listLen(props ), props & " " & listSort( structKeyList( localExtension ), "text" ) );
 				});
 			});
 
