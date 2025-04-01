@@ -1,7 +1,7 @@
 component extends="org.lucee.cfml.test.LuceeTestCase" {
 	function run() {
 		describe( title="Test suite for structKeyList", body=function() {
-			student = [
+			var student = [
 				student1:[
 					id:1,
 					name:"joe"
@@ -23,7 +23,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 		});
 
 		describe( title="Test suite for structKeyList", body=function() {
-			studentnew = [
+			var studentnew = [
 				student1:[
 					id:1,
 					name:"joe"

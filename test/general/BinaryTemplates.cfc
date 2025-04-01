@@ -19,7 +19,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			fileWrite(run,content);
 			include "BinaryTemplates/"&runName&".cfm";
 			assertEquals("ok",functionA());
-			functionA="";
+			var functionA="";
 
 			var clazz=directoryList(path:cfclasses,recurse:true,filter:function(name){
 				return find(runName,arguments.name);
@@ -31,7 +31,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			fileCopy(clazz,run);
 			include "BinaryTemplates/"&runName&".cfm";
 			assertEquals("ok",functionA());
-			functionA="";
+			var functionA="";
 
 			// and an other name
 			if(fileExists(run2)) fileDelete(run2);

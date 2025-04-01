@@ -1,7 +1,7 @@
 component extends="org.lucee.cfml.test.LuceeTestCase" {
 	function run() {
 
-		student = {
+		var student = {
 			student1:{
 				id:1,
 				name:"joe"

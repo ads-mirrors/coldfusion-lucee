@@ -21,7 +21,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 
 	public void function testApplicationCFC1(){
 		checkEnv("mixed,modern");
-		uri=createURI("appCFC1/index.cfm");
+		var uri=createURI("appCFC1/index.cfm");
 		local.res=_InternalRequest(template:uri);
 		assertEquals("123456",res.filecontent.trim());
 
@@ -31,7 +31,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 
 	public void function testApplicationCFC2(){
 		checkEnv("mixed,modern");
-		uri=createURI("appCFC2/index.cfm");
+		var uri=createURI("appCFC2/index.cfm");
 		local.res=_InternalRequest(template:uri);
 		assertEquals("12",res.filecontent.trim());
 
@@ -41,7 +41,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 
 	public void function testApplicationCFM1(){
 		checkEnv("mixed,classic");
-		uri=createURI("appCFM1/index.cfm");
+		var uri=createURI("appCFM1/index.cfm");
 		local.res=_InternalRequest(template:uri);
 		assertEquals("123456",res.filecontent.trim());
 
@@ -51,7 +51,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 
 	public void function testApplicationCFM2(){
 		checkEnv("mixed,classic");
-		uri=createURI("appCFM2/index.cfm");
+		var uri=createURI("appCFM2/index.cfm");
 		local.res=_InternalRequest(template:uri);
 		assertEquals("12",res.filecontent.trim());
 

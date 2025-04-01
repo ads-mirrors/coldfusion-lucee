@@ -21,8 +21,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 	public function beforeTests(){
 		variables.short=queryNew("a,b");
 		variables.qry=queryNew("a,b");
-		for(i=1;i<=35;i++){
-			row=queryAddrow(qry);
+		for(var i=1;i<=35;i++){
+			var row=queryAddrow(qry);
 			querySetcell(qry,'a',"a"&i,row);
 			querySetcell(qry,'b',"b"&i,row);
 		}	

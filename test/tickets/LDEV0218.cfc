@@ -18,9 +18,9 @@
 	<cfscript>
 	function beforeAll(){
 		// runs before all testcases
-		allCountries = queryNew("Country,ShortCode");
-		CountryList = "India,Switzerland";
-		ShortCodeList = "IN,SWL";
+		var allCountries = queryNew("Country,ShortCode");
+		var CountryList = "India,Switzerland";
+		var ShortCodeList = "IN,SWL";
 		for(var idx=1;idx<="#listLen(CountryList)#";idx++){
 			queryAddRow(allCountries);
 			querySetCell(allCountries, "Country", listGetAt(CountryList, idx));
@@ -50,7 +50,7 @@
 			});
 
 			it(title="Case 1: result in variables scope", body=function(){
-				var qData = queryExecute("SELECT * FROM allCountries", {}, {dbtype="query", result="result"});
+				var qData = queryExecute("SELECT * FROM allCountries", {}, {dbtype="query", result="local.result"});
 
 				// Expectations for this case
 				expect(isNull(variables.result)).toBeFalse();
@@ -89,7 +89,7 @@
 			}, labels="result in local scoped struct");
 
 			it(title="Case 8: result in variables scoped struct", body=function(){
-				foo = {};
+				var foo = {};
 				var qData = queryExecute("SELECT * FROM allCountries", {}, {dbtype="query", result="foo.result"});
 
 				// Expectations for this case
@@ -149,7 +149,7 @@
 	</cfscript>
 
 	<cffunction name="Case9">
-		<cfquery name="local.qData" result="result" dbtype="query">
+		<cfquery name="local.qData" result="local.result" dbtype="query">
 			select * from allCountries
 		</cfquery>
 
@@ -191,7 +191,7 @@
 	</cffunction>
 
 	<cffunction name="Case13">
-		<cfset result = {}>
+		<cfset local.result = {}>
 		<cfquery name="local.qData" result=result dbtype="query">
 			select * from allCountries
 		</cfquery>
@@ -204,7 +204,7 @@
 	<cffunction name="Case14">
 		<cfset var isSuccess = true>
 		<cftry>
-			<cfquery name="local.qData" result=result dbtype="query">
+			<cfquery name="local.qData" result="local.result" dbtype="query">
 				select * from allCountries
 			</cfquery>
 			<cfcatch type="any">

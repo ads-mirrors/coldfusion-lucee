@@ -4,7 +4,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 		describe( title = "Testcase for isXmlElem() function", body = function() {
 			it( title = "Checking isXmlElem() function", body = function( currentSpec ) {
 				```
-				<cfxml variable="xmlobject">
+				<cfxml variable="local.xmlobject">
 					<office>
 						<employee>
 							<emp_name>lucee_dev</emp_name>
