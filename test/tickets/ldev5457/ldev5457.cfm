@@ -6,6 +6,6 @@
         );
         writeOutput(awsCredentials.getClass().getName());
     } catch (e) {
-        writeOutput(e.message);
+        writeOutput(e.stacktrace);
     } 
 </cfscript>
