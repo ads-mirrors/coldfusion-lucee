@@ -31,7 +31,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 
 		threadJoin(threadNames.toList());
 
-		loop from=1 to=1000 index="y" {
+		loop from=1 to=1000 index="local.y" {
 			structDelete(request,"ldev947-"&y);
 		}
 	}
