@@ -26,7 +26,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
-import lucee.print;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
@@ -465,13 +464,10 @@ public class MavenUtil {
 
 	public static void download(POM pom, Collection<Repository> repositories, String type, Log log) throws IOException {
 		Resource res = pom.getArtifact(type);
-		if ("jar".equals(type)) print.ds();
 		if (!res.isFile()) {
 			synchronized (SystemUtil.createToken("mvn", res.getAbsolutePath())) {
 				if (!res.isFile()) {
-
 					try {
-
 						if (repositories == null || repositories.isEmpty()) repositories = pom.getRepositories();
 
 						String scriptName = pom.getGroupId().replace('.', '/') + "/" + pom.getArtifactId() + "/" + pom.getVersion() + "/" + pom.getArtifactId() + "-"
@@ -498,7 +494,7 @@ public class MavenUtil {
 								HttpResponse response = httpClient.execute(request);
 								HttpEntity entity = response.getEntity();
 								int sc = response.getStatusLine().getStatusCode();
-								print.e(type + " >> " + url + " >> " + sc);
+								// print.e(type + " >> " + url + " >> " + sc);
 								if (sc == 200) {
 									if (entity != null) {
 										Exception ex = null;
@@ -543,11 +539,11 @@ public class MavenUtil {
 						// MUST add again ResourceUtil.deleteEmptyFoldersInside(pom.getLocalDirectory());
 						throw ex;
 					}
+					throw new IOException("Failed to download [" + pom + "] ");
 				}
 			}
 		}
 
-		throw new IOException("Failed to download [" + pom + "] ");
 	}
 
 	private static Repository[] sort(Collection<Repository> repositories) {
