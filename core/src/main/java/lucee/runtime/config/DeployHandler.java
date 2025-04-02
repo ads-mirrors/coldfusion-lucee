@@ -102,7 +102,10 @@ public class DeployHandler {
 							else if ("lex".equalsIgnoreCase(ext)) ConfigAdmin._updateRHExtension((ConfigPro) config, child, true, force, RHExtension.ACTION_MOVE);
 
 							// Lucee core
-							else if (config instanceof ConfigServer && "lco".equalsIgnoreCase(ext)) ConfigAdmin.updateCore((ConfigServerImpl) config, child, true);
+							else if ("lco".equalsIgnoreCase(ext)){
+								if (config instanceof ConfigServer) ConfigAdmin.updateCore((ConfigServerImpl) config, child, true);
+								else log.log(Log.LEVEL_ERROR, "deploy handler", "Deploy, config was instanceof " + config.getClass().getName());
+							} 
 							// CFConfig
 							else if ("json".equalsIgnoreCase(ext)) {
 								try {
