@@ -4,12 +4,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -26,6 +29,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
+import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
@@ -51,6 +55,9 @@ public class MavenUtil {
 	public static final int CONNECTION_TIMEOUT = 5000;
 	public static final int READ_TIMEOUT_HEAD = 5000;
 	public static final int READ_TIMEOUT_GET = 5000;
+	public static final long ARTIFACT_UNAVAILABLE_CACHE_DURATION = Caster.toLongValue(SystemUtil.getSystemPropOrEnvVar("lucee.maven.negative.cache.duration", null), 60000L * 10L);
+
+	private static final DateTimeFormatter MAVEN_DATE_FORMATTER = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
 
 	// Static initialization block
 	static {
@@ -464,14 +471,30 @@ public class MavenUtil {
 
 	public static void download(POM pom, Collection<Repository> repositories, String type, Log log) throws IOException {
 		Resource res = pom.getArtifact(type);
+
+		// file is empty or does not exist
 		if (!res.isFile()) {
 			synchronized (SystemUtil.createToken("mvn", res.getAbsolutePath())) {
+				// file is empty or does not exist
 				if (!res.isFile()) {
+					// it did already check for file, but it was not found
+					Resource lastUpdated = res.getParentResource().getRealResource(res.getName() + ".lastUpdated");
+					if (lastUpdated.isFile()) {
+
+						// try again? TODO read lastModified from file, there is an entry for every single endpoint
+						if ((lastUpdated.lastModified() + ARTIFACT_UNAVAILABLE_CACHE_DURATION) < System.currentTimeMillis()) {
+							lastUpdated.remove(true);
+							download(pom, repositories, type, log);
+							return;
+						}
+						throw new IOException("Failed to download [" + pom + "] ");
+					}
+
+					String scriptName = pom.getGroupId().replace('.', '/') + "/" + pom.getArtifactId() + "/" + pom.getVersion() + "/" + pom.getArtifactId() + "-" + pom.getVersion()
+							+ "." + type;
+					StringBuilder info = null;
 					try {
 						if (repositories == null || repositories.isEmpty()) repositories = pom.getRepositories();
-
-						String scriptName = pom.getGroupId().replace('.', '/') + "/" + pom.getArtifactId() + "/" + pom.getVersion() + "/" + pom.getArtifactId() + "-"
-								+ pom.getVersion() + "." + type;
 
 						if (repositories == null || repositories.size() == 0) {
 							IOException ioe = new IOException("Failed to download java artifact [" + pom.toString() + "] for type [" + type + "]");
@@ -480,7 +503,6 @@ public class MavenUtil {
 							// if (cause != null) ExceptionUtil.initCauseEL(ioe, cause);
 							throw ioe;
 						}
-
 						// url = pom.getArtifact(type, repositories);
 						//////// if (log != null) log.info("maven", "download [" + url + "]");
 						URL url;
@@ -523,10 +545,18 @@ public class MavenUtil {
 									}
 								}
 								else {
+									if (info == null) info = createInfo();
+									info.append(r).append(".error=").append('\n');
+									info.append(r).append(".lastUpdated=").append(System.currentTimeMillis()).append('\n');
 									EntityUtils.consume(entity); // Ensure the response entity is fully consumed
 									// throw new IOException("Failed to download: " + url + " for [" + pom + "] - " +
 									// response.getStatusLine().getStatusCode());
 								}
+							}
+							catch (Exception e) {
+								if (info == null) info = createInfo();
+								info.append(r).append(".error=").append('\n');
+								info.append(r).append(".lastUpdated=").append(System.currentTimeMillis()).append('\n');
 							}
 							finally {
 								httpClient.close();
@@ -534,16 +564,30 @@ public class MavenUtil {
 						}
 					}
 					catch (IOException ioe) {
+						createLastUpdated(res, info);
 						IOException ex = new IOException("Failed to download: " + pom + "");
 						ExceptionUtil.initCauseEL(ex, ioe);
 						// MUST add again ResourceUtil.deleteEmptyFoldersInside(pom.getLocalDirectory());
 						throw ex;
 					}
+
+					createLastUpdated(res, info);
 					throw new IOException("Failed to download [" + pom + "] ");
 				}
 			}
 		}
+	}
 
+	private static StringBuilder createInfo() {
+		return new StringBuilder("#NOTE: This is a Maven Resolver internal implementation file (created by Lucee), its format can be changed without prior notice.\n#")
+				.append(ZonedDateTime.now().format(MAVEN_DATE_FORMATTER)).append('\n');
+	}
+
+	private static void createLastUpdated(Resource res, StringBuilder info) throws IOException {
+		Resource lastUpdated = res.getParentResource().getRealResource(res.getName() + ".lastUpdated");
+		// print.e(lastUpdated);
+		// print.e(info);
+		IOUtil.write(lastUpdated, info.toString(), CharsetUtil.UTF8, false);
 	}
 
 	private static Repository[] sort(Collection<Repository> repositories) {
