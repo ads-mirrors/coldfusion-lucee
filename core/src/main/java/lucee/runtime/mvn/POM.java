@@ -27,6 +27,7 @@ import lucee.commons.tree.TreeNode;
 import lucee.runtime.mvn.POMReader.Dependency;
 import lucee.runtime.op.Caster;
 import lucee.runtime.thread.ThreadUtil;
+import lucee.runtime.type.util.ListUtil;
 
 public class POM {
 
@@ -49,6 +50,18 @@ public class POM {
 	// public static final Repository DEFAULT_REPOSITORY;
 
 	static {
+		String strRep = SystemUtil.getSystemPropOrEnvVar("lucee.maven.default.repositories", null);
+		if (!StringUtil.isEmpty(strRep, true)) {
+
+			for (String strURL: ListUtil.listToStringArray(strRep, ',')) {
+
+				if (!StringUtil.isEmpty(strURL, true)) {
+					strURL = strURL.trim();
+					REPOSITORIES.add(new Repository(strURL));
+				}
+			}
+		}
+
 		REPOSITORIES.add(REPOSITORY_MAVEN_CENTRAL);
 		REPOSITORIES.add(REPOSITORY_SONATYPE);
 		REPOSITORIES.add(REPOSITORY_JCENTER);
@@ -58,7 +71,6 @@ public class POM {
 		// REPOSITORIES.add(REPOSITORY_ALIYUN);
 
 		// set default repository
-		// String strRep = SystemUtil.getSystemPropOrEnvVar("lucee.maven.default.repository", null);
 
 	}
 
@@ -448,18 +460,18 @@ public class POM {
 
 	public URL getArtifact(String type, Collection<Repository> repositories) throws IOException {
 		StringBuilder sb = null;
-		URL url;
 		if (repositories == null || repositories.isEmpty()) repositories = getRepositories();
 
 		String scriptName = groupId.replace('.', '/') + "/" + artifactId + "/" + version + "/" + artifactId + "-" + version + "." + type;
-
+		URL url = null;
 		Exception cause = null;
 		for (Repository r: repositories) {
-			url = new URL(r.getUrl() + scriptName);
-
-			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			HttpURLConnection connection = null;
 			int responseCode = 0;
 			try {
+				url = new URL(r.getUrl() + scriptName);
+				connection = (HttpURLConnection) url.openConnection();
+
 				// Use GET instead of HEAD, but request zero bytes
 				connection.setRequestMethod("GET");
 				connection.setRequestProperty("Range", "bytes=0-0"); // Request just the first byte

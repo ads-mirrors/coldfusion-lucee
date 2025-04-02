@@ -5,10 +5,14 @@ public class Repository {
 	private String name;
 	private String url;
 
+	public Repository(String url) {
+		this.url = url.endsWith("/") ? url : (url + "/");
+	}
+
 	public Repository(String id, String name, String url) {
+		this(url);
 		this.id = id;
 		this.name = name;
-		this.url = url.endsWith("/") ? url : (url + "/");
 	}
 
 	public String getId() {
