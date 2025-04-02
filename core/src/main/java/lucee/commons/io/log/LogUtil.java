@@ -229,8 +229,10 @@ public final class LogUtil {
 	}
 
 	public static void logGlobal(Config config, int level, String type, String msg) {
+		CFMLEngineFactory factory = null;
 		try {
-			CFMLEngineFactory factory = ConfigWebUtil.getCFMLEngineFactory(config);
+			factory = ConfigWebUtil.getCFMLEngineFactory(config);
+
 			Resource log;
 			boolean check = false;
 			if (level > Log.LEVEL_DEBUG) {
@@ -265,7 +267,7 @@ public final class LogUtil {
 			ERR = null;
 			OUT = null;
 			aprint.e(type + ":" + msg);
-			aprint.e(e);
+			if (factory != null) aprint.e(e); // in case there is no factory, we expect an error and are fine to simply write to the console
 		}
 	}
 

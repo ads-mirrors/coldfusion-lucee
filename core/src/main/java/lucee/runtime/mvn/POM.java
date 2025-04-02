@@ -74,9 +74,9 @@ public class POM {
 
 	}
 
-	public static final int CONNECTION_TIMEOUT = 10000;
-	public static final int READ_TIMEOUT_HEAD = 10000;
-	public static final int READ_TIMEOUT_GET = 10000;
+	public static final int CONNECTION_TIMEOUT = 5000;
+	public static final int READ_TIMEOUT_HEAD = 5000;
+	public static final int READ_TIMEOUT_GET = 5000;
 
 	public static final int SCOPE_COMPILE = 1;
 	public static final int SCOPE_TEST = 2;
@@ -211,7 +211,7 @@ public class POM {
 					}
 					catch (SAXException e) {
 						IOException cause = ExceptionUtil.toIOException(e);
-						IOException ioe = new IOException("failed to load pom file [" + getArtifact("pom", initRepositories) + "]");
+						IOException ioe = new IOException("failed to load pom file [" + toString() + "]");
 						ExceptionUtil.initCauseEL(ioe, cause);
 						throw ioe;
 					}
@@ -235,7 +235,6 @@ public class POM {
 							if (!custom) throw ioe;
 						}
 					}
-
 					isInitXML = true;
 				}
 			}
@@ -459,9 +458,9 @@ public class POM {
 	}
 
 	public URL getArtifact(String type, Collection<Repository> repositories) throws IOException {
-		StringBuilder sb = null;
 		if (repositories == null || repositories.isEmpty()) repositories = getRepositories();
 
+		StringBuilder sb = null;
 		String scriptName = groupId.replace('.', '/') + "/" + artifactId + "/" + version + "/" + artifactId + "-" + version + "." + type;
 		URL url = null;
 		Exception cause = null;
@@ -481,10 +480,11 @@ public class POM {
 			}
 			catch (Exception e) {
 				cause = e;
-
-				if (sb == null) sb = new StringBuilder();
-				else sb.append(", ");
-				sb.append(url.toExternalForm());
+				if (url != null) {
+					if (sb == null) sb = new StringBuilder();
+					else sb.append(", ");
+					sb.append(url.toExternalForm());
+				}
 				continue;
 			}
 			// Close the connection immediately to avoid downloading content
@@ -507,7 +507,6 @@ public class POM {
 					connection.setReadTimeout(READ_TIMEOUT_HEAD);
 					responseCode = connection.getResponseCode();
 					connection.disconnect();
-
 					if (responseCode == 200 || responseCode == 206) {
 						return url;
 					}
@@ -666,7 +665,9 @@ public class POM {
 		try {
 			List<POM> deps = pom.getDependencyManagement();
 			if (deps != null) {
+
 				for (POM p: deps) {
+
 					try {
 						if (!node.addChild(p)) continue;
 						if (recursive) getDependencyManagement(p, recursive, level + 1, node);

@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -12,16 +13,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
+import lucee.print;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
@@ -42,6 +47,23 @@ import lucee.runtime.type.util.ListUtil;
 public class MavenUtil {
 	private static Map<String, String> sysprops;
 	private static Object token = new SerializableObject();
+
+	private static final RequestConfig DEFAULT_REQUEST_CONFIG;
+	public static final int CONNECTION_TIMEOUT = 5000;
+	public static final int READ_TIMEOUT_HEAD = 5000;
+	public static final int READ_TIMEOUT_GET = 5000;
+
+	// Static initialization block
+	static {
+		DEFAULT_REQUEST_CONFIG = RequestConfig.custom()
+
+				.setRedirectsEnabled(true) // allow redirect
+				.setMaxRedirects(5) // max 5 redirects
+				.setSocketTimeout(10000) // The maximum period of inactivity between data packets once the connection is established.
+				.setConnectTimeout(5000) // The time it takes to establish a TCP connection to the server (the initial handshake).
+				.setConnectionRequestTimeout(5000) // The time to wait for a connection from the connection manager/pool.
+				.build();
+	}
 
 	public static Map<String, String> getProperties(Map<String, String> rawProperties, POM parent) throws IOException {
 		Map<String, String> properties = parent != null ? parent.getProperties() : new LinkedHashMap<>();
@@ -118,7 +140,6 @@ public class MavenUtil {
 				repositories.put(r.getUrl(), r);
 			}
 		}
-
 		return repositories.values();
 
 	}
@@ -430,42 +451,89 @@ public class MavenUtil {
 		return str != null && str.indexOf("${") != -1;
 	}
 
+	private static Map<Repository, AtomicInteger> ranking = new ConcurrentHashMap<>();
+
+	public static void downloadAsync(POM pom, Collection<Repository> repositories, String type, Log log) {
+		ThreadUtil.getThread(() -> {
+			try {
+				download(pom, repositories, type, log);
+			}
+			catch (IOException e) {
+			}
+		}, true).start();
+	}
+
 	public static void download(POM pom, Collection<Repository> repositories, String type, Log log) throws IOException {
 		Resource res = pom.getArtifact(type);
+		if ("jar".equals(type)) print.ds();
 		if (!res.isFile()) {
 			synchronized (SystemUtil.createToken("mvn", res.getAbsolutePath())) {
 				if (!res.isFile()) {
-					URL url = null;
+
 					try {
-						url = pom.getArtifact(type, repositories);
-						if (log != null) log.info("maven", "download [" + url + "]");
-						try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-							HttpGet request = new HttpGet(url.toExternalForm());
-							HttpResponse response = httpClient.execute(request);
-							HttpEntity entity = response.getEntity();
-							int sc = response.getStatusLine().getStatusCode();
-							if (sc == 200) {
-								if (entity != null) {
-									Exception ex = null;
-									InputStream is = null;
-									Resource tmp = SystemUtil.getTempFile(type, false);
-									try {
-										is = entity.getContent();
-										IOUtil.copy(is, tmp, false);
-									}
-									catch (IOException e) {
-										ex = e;
-									}
-									finally {
-										IOUtil.closeEL(is);
-										HTTPUtil.validateDownload(url, response, tmp, pom.getChecksum(), true, ex);
-										tmp.moveTo(res);
+
+						if (repositories == null || repositories.isEmpty()) repositories = pom.getRepositories();
+
+						String scriptName = pom.getGroupId().replace('.', '/') + "/" + pom.getArtifactId() + "/" + pom.getVersion() + "/" + pom.getArtifactId() + "-"
+								+ pom.getVersion() + "." + type;
+
+						if (repositories == null || repositories.size() == 0) {
+							IOException ioe = new IOException("Failed to download java artifact [" + pom.toString() + "] for type [" + type + "]");
+							// "Failed to download java artifact [" + pom.toString() + "] for type [" + type + "], attempted
+							// endpoint(s): [" + sb + "]");
+							// if (cause != null) ExceptionUtil.initCauseEL(ioe, cause);
+							throw ioe;
+						}
+
+						// url = pom.getArtifact(type, repositories);
+						//////// if (log != null) log.info("maven", "download [" + url + "]");
+						URL url;
+						for (Repository r: sort(repositories)) {
+							url = new URL(r.getUrl() + scriptName);
+
+							CloseableHttpClient httpClient = HttpClients.createDefault();
+							try {
+								HttpGet request = new HttpGet(url.toExternalForm());
+								request.setConfig(DEFAULT_REQUEST_CONFIG);
+								HttpResponse response = httpClient.execute(request);
+								HttpEntity entity = response.getEntity();
+								int sc = response.getStatusLine().getStatusCode();
+								print.e(type + " >> " + url + " >> " + sc);
+								if (sc == 200) {
+									if (entity != null) {
+										Exception ex = null;
+										InputStream is = null;
+										Resource tmp = SystemUtil.getTempFile(type, false);
+										try {
+											is = entity.getContent();
+											IOUtil.copy(is, tmp, false);
+										}
+										catch (IOException e) {
+											ex = e;
+										}
+										finally {
+											IOUtil.closeEL(is);
+											HTTPUtil.validateDownload(url, response, tmp, pom.getChecksum(), true, ex);
+											tmp.moveTo(res);
+										}
+
+										AtomicInteger rank = ranking.get(r);
+										if (rank != null) rank.incrementAndGet();
+										else {
+											rank = new AtomicInteger(1);
+											ranking.put(r, rank);
+										}
+										return;
 									}
 								}
+								else {
+									EntityUtils.consume(entity); // Ensure the response entity is fully consumed
+									// throw new IOException("Failed to download: " + url + " for [" + pom + "] - " +
+									// response.getStatusLine().getStatusCode());
+								}
 							}
-							else {
-								EntityUtils.consume(entity); // Ensure the response entity is fully consumed
-								throw new IOException("Failed to download: " + url + " for [" + pom + "] - " + response.getStatusLine().getStatusCode());
+							finally {
+								httpClient.close();
 							}
 						}
 					}
@@ -477,7 +545,26 @@ public class MavenUtil {
 					}
 				}
 			}
-		} // TODO handle not 200
+		}
+
+		throw new IOException("Failed to download [" + pom + "] ");
+	}
+
+	private static Repository[] sort(Collection<Repository> repositories) {
+		// Convert collection to array for sorting
+		Repository[] result = repositories.toArray(new Repository[0]);
+		AtomicInteger defaultValue = new AtomicInteger(0);
+		// Sort the array based on the ranking map
+		Arrays.sort(result, (repo1, repo2) -> {
+			// Get the count for each repository, defaulting to 0 if not in the map
+			int count1 = ranking.getOrDefault(repo1, defaultValue).get();
+			int count2 = ranking.getOrDefault(repo2, defaultValue).get();
+
+			// Sort in descending order (highest count first)
+			return Integer.compare(count2, count1);
+		});
+
+		return result;
 	}
 
 	public static POM toPOM(Resource localDirectory, Collection<Repository> repositories, POMReader.Dependency dependency, Map<String, String> properties, int dependencyScope,
