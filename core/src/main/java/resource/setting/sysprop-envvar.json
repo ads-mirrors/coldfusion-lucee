@@ -428,5 +428,10 @@
         "sysprop": "lucee.inspect.template",
         "envvar": "LUCEE_INSPECT_TEMPLATE",
         "desc": "Controls how often Lucee checks to see if a template has changed"
+    },
+    {
+        "sysprop": "lucee.maven.default.repository",
+        "envvar": "LUCEE_MAVEN_DEFAULT_REPOSITORY",
+        "desc": "Configure which default endpoint Lucee uses to resolve maven dependencies, default is maven, supported options are [ maven, jcenter, google, sonatype, apache, spring, aliyun ]"
     }
 ]
