@@ -24,6 +24,11 @@ jobs:
       with:
         path: ~/.m2
         key: lucee-script-runner-maven-cache
+    - name: Cache Lucee files
+      uses: actions/cache@v4
+      with:
+        path: ~/work/_actions/lucee/script-runner/main/lucee-download-cache
+        key: lucee-downloads
     - name: Trigger Lucee Update Providers
       uses: lucee/script-runner@main
       with:
