@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -20,7 +19,6 @@ import lucee.commons.digest.HashUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.res.Resource;
-import lucee.commons.io.res.ResourcesImpl;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.Pair;
 import lucee.commons.lang.SerializableObject;
@@ -32,39 +30,41 @@ import lucee.runtime.thread.ThreadUtil;
 
 public class POM {
 
-	public static final Map<String, Repository> REPOSITORIES = new ConcurrentHashMap<>();
+	public static final List<Repository> REPOSITORIES = new ArrayList<>();
 
 	public static final Repository REPOSITORY_MAVEN_CENTRAL = new Repository("maven-central", "Maven Central", "https://repo1.maven.org/maven2/");
-	public static final Repository REPOSITORY_JCENTER = new Repository("jcenter", "JCenter", "https://jcenter.bintray.com/");
-	public static final Repository REPOSITORY_GOOGLE = new Repository("google", "Google Maven", "https://maven.google.com/");
 	public static final Repository REPOSITORY_SONATYPE = new Repository("sonatype", "Sonatype", "https://oss.sonatype.org/content/repositories/releases/");
+	public static final Repository REPOSITORY_JCENTER = new Repository("jcenter", "JCenter", "https://jcenter.bintray.com/");
+
+	// only google specific stuff
+	public static final Repository REPOSITORY_GOOGLE = new Repository("google", "Google Maven", "https://maven.google.com/");
+	// only apache specific stuff
 	public static final Repository REPOSITORY_APACHE = new Repository("apache", "Apache Repository", "https://repository.apache.org/content/repositories/releases/");
+	// only spring specific stuff
 	public static final Repository REPOSITORY_SPRING = new Repository("spring", "Spring Repository", "https://repo.spring.io/release/");
-	public static final Repository REPOSITORY_ALIYUN = new Repository("aliyun", "Aliyun Maven Mirror", "https://maven.aliyun.com/repository/public/");
-	public static final Repository DEFAULT_REPOSITORY;
+	// currently not supported
+	// public static final Repository REPOSITORY_ALIYUN = new Repository("aliyun", "Aliyun Maven
+	// Mirror", "https://maven.aliyun.com/repository/public");
+
+	// public static final Repository DEFAULT_REPOSITORY;
 
 	static {
-		REPOSITORIES.put("maven", REPOSITORY_MAVEN_CENTRAL);
-		REPOSITORIES.put("jcenter", REPOSITORY_JCENTER);
-		REPOSITORIES.put("google", REPOSITORY_GOOGLE);
-		REPOSITORIES.put("sonatype", REPOSITORY_SONATYPE);
-		REPOSITORIES.put("apache", REPOSITORY_APACHE);
-		REPOSITORIES.put("spring", REPOSITORY_SPRING);
-		REPOSITORIES.put("aliyun", REPOSITORY_ALIYUN);
+		REPOSITORIES.add(REPOSITORY_MAVEN_CENTRAL);
+		REPOSITORIES.add(REPOSITORY_SONATYPE);
+		REPOSITORIES.add(REPOSITORY_JCENTER);
+		// REPOSITORIES.add(REPOSITORY_APACHE);
+		// REPOSITORIES.add(REPOSITORY_GOOGLE);
+		// REPOSITORIES.add(REPOSITORY_SPRING);
+		// REPOSITORIES.add(REPOSITORY_ALIYUN);
 
 		// set default repository
-		String strRep = SystemUtil.getSystemPropOrEnvVar("lucee.maven.default.repository", null);
-		Repository rep = null;
-		if (!StringUtil.isEmpty(strRep, true)) {
-			rep = REPOSITORIES.get(strRep.toLowerCase().trim());
-		}
-		DEFAULT_REPOSITORY = rep == null ? REPOSITORY_MAVEN_CENTRAL : rep;
+		// String strRep = SystemUtil.getSystemPropOrEnvVar("lucee.maven.default.repository", null);
 
 	}
 
-	public static final int CONNECTION_TIMEOUT = 50000;
-	public static final int READ_TIMEOUT_HEAD = 20000;
-	public static final int READ_TIMEOUT_GET = 20000;
+	public static final int CONNECTION_TIMEOUT = 10000;
+	public static final int READ_TIMEOUT_HEAD = 10000;
+	public static final int READ_TIMEOUT_GET = 10000;
 
 	public static final int SCOPE_COMPILE = 1;
 	public static final int SCOPE_TEST = 2;
@@ -123,12 +123,6 @@ public class POM {
 		return getInstance(localDirectory, null, groupId, artifactId, version, null, null, null, dependencyScope, SCOPE_ALL, log);
 	}
 
-	public static void main(String[] args) throws IOException {
-		Resource dir = ResourcesImpl.getFileResourceProvider().getResource("/Users/mic/tmp9/mvn/");
-		POM pom = getInstance(dir, "org.apache.maven", "maven-core", "3.8.1", SCOPE_COMPILE, null);
-		pom.getJars();
-	}
-
 	public static POM getInstance(Resource localDirectory, Collection<Repository> repositories, String groupId, String artifactId, String version, int dependencyScope,
 			int dependencyScopeManagement, Log log) {
 		return getInstance(localDirectory, null, groupId, artifactId, version, null, null, null, dependencyScope, dependencyScopeManagement, log);
@@ -163,7 +157,9 @@ public class POM {
 		this.checksum = checksum;
 		if (repositories == null) {
 			this.initRepositories = new ArrayList<>();
-			this.initRepositories.add(DEFAULT_REPOSITORY);
+			for (Repository r: REPOSITORIES) {
+				this.initRepositories.add(r);
+			}
 		}
 		else this.initRepositories = repositories;
 		this.groupId = groupId.trim();
@@ -262,7 +258,7 @@ public class POM {
 		isInitRepositories = true;
 		if (log != null) log.debug("maven", "int repositories for " + this);
 		initProperties();
-		childRepositories = MavenUtil.getRepositories(reader.getRepositories(), this, parent, properties, DEFAULT_REPOSITORY);
+		childRepositories = MavenUtil.getRepositories(reader.getRepositories(), this, parent, properties, initRepositories);
 	}
 
 	private void initDependencies() throws IOException {
@@ -451,41 +447,69 @@ public class POM {
 	}
 
 	public URL getArtifact(String type, Collection<Repository> repositories) throws IOException {
-		// TODO type check
 		StringBuilder sb = null;
 		URL url;
 		if (repositories == null || repositories.isEmpty()) repositories = getRepositories();
+
+		String scriptName = groupId.replace('.', '/') + "/" + artifactId + "/" + version + "/" + artifactId + "-" + version + "." + type;
+
+		Exception cause = null;
 		for (Repository r: repositories) {
-			url = new URL(r.getUrl() + groupId.replace('.', '/') + "/" + artifactId + "/" + version + "/" + artifactId + "-" + version + "." + type);
+			url = new URL(r.getUrl() + scriptName);
+
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			connection.setRequestMethod("HEAD");
-			connection.setConnectTimeout(CONNECTION_TIMEOUT);
-			connection.setReadTimeout(READ_TIMEOUT_HEAD);
-			int responseCode = connection.getResponseCode();
-			if (responseCode == 200) {
+			int responseCode = 0;
+			try {
+				// Use GET instead of HEAD, but request zero bytes
+				connection.setRequestMethod("GET");
+				connection.setRequestProperty("Range", "bytes=0-0"); // Request just the first byte
+				connection.setConnectTimeout(CONNECTION_TIMEOUT);
+				connection.setReadTimeout(READ_TIMEOUT_HEAD);
+				responseCode = connection.getResponseCode();
+			}
+			catch (Exception e) {
+				cause = e;
+
+				if (sb == null) sb = new StringBuilder();
+				else sb.append(", ");
+				sb.append(url.toExternalForm());
+				continue;
+			}
+			// Close the connection immediately to avoid downloading content
+			connection.disconnect();
+
+			if (responseCode == 200 || responseCode == 206) { // 206 is Partial Content response
 				return url;
 			}
-			// TODO handle having more than one redirect
-			else if (responseCode == 301 || responseCode == 302) {
+			int max = 3;
+			while ((responseCode == 301 || responseCode == 302) && --max > 0) {
+
 				String newUrl = connection.getHeaderField("Location");
 
 				if (!StringUtil.isEmpty(newUrl, true)) {
 					url = new URL(newUrl);
 					connection = (HttpURLConnection) url.openConnection();
-					connection.setRequestMethod("HEAD");
+					connection.setRequestMethod("GET");
+					connection.setRequestProperty("Range", "bytes=0-0");
 					connection.setConnectTimeout(CONNECTION_TIMEOUT);
 					connection.setReadTimeout(READ_TIMEOUT_HEAD);
 					responseCode = connection.getResponseCode();
-					if (responseCode == 200) {
+					connection.disconnect();
+
+					if (responseCode == 200 || responseCode == 206) {
 						return url;
 					}
 				}
 			}
+
 			if (sb == null) sb = new StringBuilder();
 			else sb.append(", ");
 			sb.append(url.toExternalForm());
 		}
-		throw new IOException("Failed to download java artifact [" + toString() + "] for type [" + type + "], attempted endpoint(s): [" + sb + "]");
+
+		IOException ioe = new IOException("Failed to download java artifact [" + toString() + "] for type [" + type + "], attempted endpoint(s): [" + sb + "]");
+		if (cause != null) ExceptionUtil.initCauseEL(ioe, cause);
+		throw ioe;
 	}
 
 	@Override
