@@ -31,7 +31,9 @@ import lucee.runtime.thread.ThreadUtil;
 
 public class POM {
 
-	public static final Repository DEFAULT_REPOSITORY = new Repository("maven-central", "Maven Central", "https://repo1.maven.org/maven2/");
+	// public static final Repository DEFAULT_REPOSITORY = new Repository("maven-central", "Maven
+	// Central", "https://repo1.maven.org/maven2/");
+	public static final Repository DEFAULT_REPOSITORY = new Repository("maven-central", "Sonatype", "https://oss.sonatype.org/service/local/staging/deploy/maven2/");
 
 	public static final int CONNECTION_TIMEOUT = 50000;
 	public static final int READ_TIMEOUT_HEAD = 20000;
