@@ -104,7 +104,7 @@
 		action="getRHExtensionProviders"
 		type="#request.adminType#"
 		password="#session["password"&request.adminType]#"
-		returnVariable="providers">
+		returnVariable="local.providers">
 		<cfreturn providers/>
 </cffunction>
 <cfset providers = getProvider()/>
