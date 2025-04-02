@@ -55,7 +55,7 @@ public class MavenUtil {
 	public static final int CONNECTION_TIMEOUT = 5000;
 	public static final int READ_TIMEOUT_HEAD = 5000;
 	public static final int READ_TIMEOUT_GET = 5000;
-	public static final long ARTIFACT_UNAVAILABLE_CACHE_DURATION = Caster.toLongValue(SystemUtil.getSystemPropOrEnvVar("lucee.maven.negative.cache.duration", null), 60000L * 10L);
+	public static final long ARTIFACT_UNAVAILABLE_CACHE_DURATION = Caster.toLongValue(SystemUtil.getSystemPropOrEnvVar("lucee.maven.negative.cache.duration", null), 60000L * 15L);
 
 	private static final DateTimeFormatter MAVEN_DATE_FORMATTER = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
 
@@ -506,11 +506,14 @@ public class MavenUtil {
 						// url = pom.getArtifact(type, repositories);
 						//////// if (log != null) log.info("maven", "download [" + url + "]");
 						URL url;
+						CloseableHttpClient httpClient;
 						for (Repository r: sort(repositories)) {
-							url = new URL(r.getUrl() + scriptName);
-
-							CloseableHttpClient httpClient = HttpClients.createDefault();
+							url = null;
+							httpClient = null;
 							try {
+								url = new URL(r.getUrl() + scriptName);
+								httpClient = HttpClients.createDefault();
+
 								HttpGet request = new HttpGet(url.toExternalForm());
 								request.setConfig(DEFAULT_REQUEST_CONFIG);
 								HttpResponse response = httpClient.execute(request);
@@ -534,7 +537,7 @@ public class MavenUtil {
 											HTTPUtil.validateDownload(url, response, tmp, pom.getChecksum(), true, ex);
 											tmp.moveTo(res);
 										}
-
+										deleteLastUpdated(res);
 										AtomicInteger rank = ranking.get(r);
 										if (rank != null) rank.incrementAndGet();
 										else {
@@ -559,7 +562,7 @@ public class MavenUtil {
 								info.append(r).append(".lastUpdated=").append(System.currentTimeMillis()).append('\n');
 							}
 							finally {
-								httpClient.close();
+								if (httpClient != null) httpClient.close();
 							}
 						}
 					}
@@ -588,6 +591,11 @@ public class MavenUtil {
 		// print.e(lastUpdated);
 		// print.e(info);
 		IOUtil.write(lastUpdated, info.toString(), CharsetUtil.UTF8, false);
+	}
+
+	private static void deleteLastUpdated(Resource res) {
+		Resource lastUpdated = res.getParentResource().getRealResource(res.getName() + ".lastUpdated");
+		lastUpdated.delete();
 	}
 
 	private static Repository[] sort(Collection<Repository> repositories) {
