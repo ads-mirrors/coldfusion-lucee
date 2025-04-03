@@ -174,6 +174,7 @@ public abstract class ConfigFactory {
 		}
 		catch (Exception e) {
 			if (log != null) log.error("required-extension", e);
+			else LogUtil.logGlobal(engine.getCFMLEngineFactory(), "required-extension", e);
 		}
 	}
 
@@ -189,6 +190,7 @@ public abstract class ConfigFactory {
 		}
 		catch (Exception e) {
 			if (log != null) log.error("required-extension", e);
+			else LogUtil.logGlobal(engine.getCFMLEngineFactory(), "required-extension", e);
 		}
 		return false;
 	}

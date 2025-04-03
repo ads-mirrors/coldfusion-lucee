@@ -46,6 +46,7 @@ import lucee.commons.net.http.HTTPResponse;
 import lucee.commons.net.http.Header;
 import lucee.commons.net.http.httpclient.HTTPEngine4Impl;
 import lucee.commons.net.http.httpclient.HeaderImpl;
+import lucee.loader.engine.CFMLEngineFactory;
 import lucee.runtime.engine.CFMLEngineImpl;
 import lucee.runtime.engine.ThreadQueuePro;
 import lucee.runtime.exp.ApplicationException;
@@ -65,7 +66,7 @@ import lucee.runtime.type.util.ListUtil;
 public class DeployHandler {
 
 	private static final ResourceFilter ALL_EXT = new ExtensionResourceFilter(new String[] { ".lex", ".lar", ".lco", ".json" });
-	private static final ResourceFilter UNSUPPORTED_EXT = new NotResourceFilter(ALL_EXT);	
+	private static final ResourceFilter UNSUPPORTED_EXT = new NotResourceFilter(ALL_EXT);
 
 	/**
 	 * deploys all files found
@@ -76,7 +77,7 @@ public class DeployHandler {
 		if (!contextIsValid(config)) return;
 
 		synchronized (config) {
-			Resource dir = config.getDeployDirectory();	
+			Resource dir = config.getDeployDirectory();
 			if (!dir.exists()) dir.mkdirs();
 
 			// check deploy directory
@@ -102,22 +103,22 @@ public class DeployHandler {
 							else if ("lex".equalsIgnoreCase(ext)) ConfigAdmin._updateRHExtension((ConfigPro) config, child, true, force, RHExtension.ACTION_MOVE);
 
 							// Lucee core
-							else if ("lco".equalsIgnoreCase(ext)){
+							else if ("lco".equalsIgnoreCase(ext)) {
 								if (config instanceof ConfigServer) ConfigAdmin.updateCore((ConfigServerImpl) config, child, true);
 								else log.log(Log.LEVEL_ERROR, "deploy handler", "Deploy, config was instanceof " + config.getClass().getName());
-							} 
+							}
 							// CFConfig
 							else if ("json".equalsIgnoreCase(ext)) {
 								try {
-									if (ConfigServerFactory.isConfigFileName(child.getName())){
+									if (ConfigServerFactory.isConfigFileName(child.getName())) {
 										log.log(Log.LEVEL_INFO, "deploy handler", "Importing config file [" + child.getName() + "]");
 										CFConfigImport ci = new CFConfigImport(config, child, config.getResourceCharset(), null, "server", null, false, false, false);
 										ci.execute(true);
-										child.delete();	
+										child.delete();
 									}
 									else {
-										log.log(Log.LEVEL_ERROR, "deploy handler", "Deploy, unsupported json file [" + child.getName()
-											+ "], supported files are [" + Arrays.toString(ConfigServerFactory.CONFIG_FILE_NAMES) + "]");
+										log.log(Log.LEVEL_ERROR, "deploy handler", "Deploy, unsupported json file [" + child.getName() + "], supported files are ["
+												+ Arrays.toString(ConfigServerFactory.CONFIG_FILE_NAMES) + "]");
 										DeployHandler.moveToFailedFolder(config.getDeployDirectory(), child);
 									}
 								}
@@ -150,7 +151,7 @@ public class DeployHandler {
 						try {
 							log.log(Log.LEVEL_ERROR, "deploy handler", "Deploy, unsupported file type [" + child.getName() + "]");
 							DeployHandler.moveToFailedFolder(config.getDeployDirectory(), child);
-						} 
+						}
 						catch (Exception e) {
 							log.log(Log.LEVEL_ERROR, "deploy handler", e);
 						}
@@ -243,7 +244,7 @@ public class DeployHandler {
 					results.put(ed, Boolean.FALSE);
 
 					if (log != null) log.error("deploy-extension", e);
-					else LogUtil.log("deploy-extension", e);
+					else LogUtil.logGlobal(CFMLEngineFactory.getInstance().getCFMLEngineFactory(), "required-extension", e);
 				}
 
 			}
