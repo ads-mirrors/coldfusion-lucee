@@ -291,8 +291,9 @@ public final class CFMLEngineImpl implements CFMLEngine {
 		}
 		CFMLEngineFactory.registerInstance((this));// patch, not really good but it works
 		ConfigServerImpl cs = getConfigServerImpl(null, quick = true, false);
+		Log deployLog = LogUtil.getLog(cs, "deploy");
 
-		boolean isRe = configDir == null ? false : ConfigFactory.isRequiredExtension(this, configDir, null);
+		boolean isRe = configDir == null ? false : ConfigFactory.isRequiredExtension(this, configDir, deployLog);
 		boolean installExtensions = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.extensions.install", null), true);
 
 		// copy bundled extension to local extension directory (if never done before)
@@ -384,7 +385,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 			StringBuilder failedSB = new StringBuilder();
 			boolean sucess = true;
 			try {
-				results = DeployHandler.deployExtensions(cs, extensions.toArray(new ExtensionDefintion[extensions.size()]), null, true, false);
+				results = DeployHandler.deployExtensions(cs, extensions.toArray(new ExtensionDefintion[extensions.size()]), deployLog, true, false);
 				for (Entry<ExtensionDefintion, Boolean> e: results.entrySet()) {
 					// failed
 					if (!Boolean.TRUE.equals(e.getValue())) {
@@ -404,11 +405,11 @@ public final class CFMLEngineImpl implements CFMLEngine {
 				LogUtil.log("deploy", "controller", e);
 				sucess = false;
 			}
-			if (sucess && configDir != null) ConfigFactory.updateRequiredExtension(this, configDir, null);
+			if (sucess && configDir != null) ConfigFactory.updateRequiredExtension(this, configDir, deployLog);
 			if (successSB.length() > 0) LogUtil.log(Log.LEVEL_INFO, "deploy", "controller", "Successfully installed the following extensions: " + successSB);
 			if (failedSB.length() > 0) LogUtil.log(Log.LEVEL_INFO, "deploy", "controller", "Failed to install the following extensions: " + failedSB);
 		}
-		else if (configDir != null) ConfigFactory.updateRequiredExtension(this, configDir, null);
+		else if (configDir != null) ConfigFactory.updateRequiredExtension(this, configDir, deployLog);
 
 		// extension to remove (we only have to remove in case we did not install an other version)
 
@@ -422,7 +423,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 						+ lucee.runtime.type.util.ListUtil.toList(extensionsToRemove, ", ") + "] because they are not supported for the current Lucee version.");
 				try {
 					ConfigAdmin.removeRHExtensions(null, null, lucee.runtime.type.util.ListUtil.toStringArray(extensionsToRemove), false);
-					if (configDir != null) ConfigFactory.updateRequiredExtension(this, configDir, null);
+					if (configDir != null) ConfigFactory.updateRequiredExtension(this, configDir, deployLog);
 				}
 				catch (Exception e) {
 					LogUtil.log("debug", ConfigWebFactory.class.getName(), e);
