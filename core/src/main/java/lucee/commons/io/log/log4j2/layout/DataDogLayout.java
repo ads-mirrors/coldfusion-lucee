@@ -206,7 +206,7 @@ public class DataDogLayout extends AbstractStringLayout {
 		catch (Exception e) {
 			// we cannot send this to a logger, because that could cause an infiniti loop
 			try {
-				LogUtil.logGlobal(null, "datadog", e);
+				LogUtil.logGlobal(CFMLEngineFactory.getInstance().getCFMLEngineFactory(), "datadog", e);
 			}
 			catch (Exception ee) {
 				e.printStackTrace();
