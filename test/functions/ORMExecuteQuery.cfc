@@ -1,9 +1,9 @@
 component extends = "org.lucee.cfml.test.LuceeTestCase" {
 
-	variables.isModernHibernate=left(bundleInfo(createObject("java","org.lucee.extension.orm.hibernate.HibernateORMEngine")).version,1)>=5;
-
-
-
+	function beforeAll(){
+		variables.isModernHibernate=left(bundleInfo(createObject("java","org.lucee.extension.orm.hibernate.HibernateORMEngine")).version,1)>=5;	
+	}
+	
 	function run( testResults , testBox ) {
 
 		var uri=createURI("ORMExecuteQuery");
