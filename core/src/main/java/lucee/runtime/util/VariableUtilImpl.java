@@ -486,10 +486,6 @@ public final class VariableUtilImpl implements VariableUtil {
 		throw new ExpressionException("Can't assign value to an Object of this type [" + Type.getName(coll) + "] with key [" + key.getString() + "]");
 	}
 
-	/**
-	 * @see lucee.runtime.util.VariableUtil#set(lucee.runtime.PageContext, java.lang.Object,
-	 *      java.lang.String, java.lang.Object)
-	 */
 	@Override
 	public Object set(PageContext pc, Object coll, String key, Object value) throws PageException {
 		// Objects
@@ -549,11 +545,6 @@ public final class VariableUtilImpl implements VariableUtil {
 		throw new ExpressionException("Can't assign value to an Object of this type [" + Type.getName(coll) + "] with key [" + key + "]");
 	}
 
-	/**
-	 *
-	 * @see lucee.runtime.util.VariableUtil#setEL(lucee.runtime.PageContext, java.lang.Object,
-	 *      java.lang.String, java.lang.Object)
-	 */
 	@Override
 	public Object setEL(PageContext pc, Object coll, String key, Object value) {
 		// Objects
@@ -608,10 +599,6 @@ public final class VariableUtilImpl implements VariableUtil {
 		return null;
 	}
 
-	/**
-	 * @see lucee.runtime.util.VariableUtil#setEL(lucee.runtime.PageContext, java.lang.Object,
-	 *      lucee.runtime.type.Collection.Key, java.lang.Object)
-	 */
 	@Override
 	public Object setEL(PageContext pc, Object coll, Collection.Key key, Object value) {
 		// Objects
@@ -708,9 +695,6 @@ public final class VariableUtilImpl implements VariableUtil {
 		return null;
 	}
 
-	/**
-	 * @see lucee.runtime.util.VariableUtil#remove(java.lang.Object, java.lang.String)
-	 */
 	@Override
 	public Object remove(Object coll, String key) throws PageException {
 		// Collection
@@ -771,20 +755,12 @@ public final class VariableUtilImpl implements VariableUtil {
 		throw new ExpressionException("Can't remove key [" + key + "] from Object of type [" + Caster.toTypeName(coll) + "]");
 	}
 
-	/**
-	 * @see lucee.runtime.util.VariableUtil#callFunction(lucee.runtime.PageContext, java.lang.Object,
-	 *      java.lang.String, java.lang.Object[])
-	 */
 	@Override
 	public Object callFunction(PageContext pc, Object coll, String key, Object[] args) throws PageException {
 		if (args.length > 0 && args[0] instanceof FunctionValue) return callFunctionWithNamedValues(pc, coll, key, args);
 		return callFunctionWithoutNamedValues(pc, coll, key, args);
 	}
 
-	/**
-	 * @see lucee.runtime.util.VariableUtil#callFunctionWithoutNamedValues(lucee.runtime.PageContext,
-	 *      java.lang.Object, java.lang.String, java.lang.Object[])
-	 */
 	@Override
 	public Object callFunctionWithoutNamedValues(PageContext pc, Object coll, String key, Object[] args) throws PageException {
 		return callFunctionWithoutNamedValues(pc, coll, KeyImpl.init(key), args);
@@ -826,6 +802,11 @@ public final class VariableUtilImpl implements VariableUtil {
 		if (coll instanceof Number) {
 			return MemberUtil.call(pc, coll, key, args, new short[] { CFTypes.TYPE_NUMERIC }, new String[] { "numeric" });
 		}
+		// null
+		if (coll == null) {
+			throw new ExpressionException("Cannot call Method/Function [" + key.getString() + "(" + Reflector.getDspMethods(Reflector.getClasses(args))
+					+ ")] because the value is null. " + "An object instance is required to call this method.");
+		}
 		// Locale
 		if (coll instanceof Locale) {
 			return MemberUtil.call(pc, coll, key, args, new short[] { CFTypes.TYPE_LOCALE }, new String[] { "locale" });
@@ -844,8 +825,9 @@ public final class VariableUtilImpl implements VariableUtil {
 				// return Reflector.callMethod(coll, key, args, false);
 			}
 		}
-		throw new ExpressionException("No matching Method/Function for " + key + "(" + Reflector.getDspMethods(Reflector.getClasses(args)) + ")");
 
+		throw new ExpressionException("No matching Method/Function [" + key.getString() + "(" + Reflector.getDspMethods(Reflector.getClasses(args))
+				+ ")] found for object of type [" + Caster.toTypeName(coll) + "]. " + "Verify the method name and parameter types are correct and the method is accessible.");
 	}
 
 	// FUTURE add to interface
@@ -864,10 +846,6 @@ public final class VariableUtilImpl implements VariableUtil {
 
 	}
 
-	/**
-	 * @see lucee.runtime.util.VariableUtil#callFunctionWithNamedValues(lucee.runtime.PageContext,
-	 *      java.lang.Object, java.lang.String, java.lang.Object[])
-	 */
 	@Override
 	public Object callFunctionWithNamedValues(PageContext pc, Object coll, String key, Object[] args) throws PageException {
 		return callFunctionWithNamedValues(pc, coll, KeyImpl.init(key), args);
@@ -888,6 +866,10 @@ public final class VariableUtilImpl implements VariableUtil {
 		// Strings
 		if (coll instanceof String) {
 			return MemberUtil.callWithNamedValues(pc, coll, key, Caster.toFunctionValues(args), CFTypes.TYPE_STRING, "string");
+		}
+		// null
+		if (coll == null) {
+			throw new ExpressionException("Cannot call Method/Function [" + key.getString() + "] because the value is null. An object instance is required to call this method.");
 		}
 
 		throw new ExpressionException("No matching Method/Function [" + key + "] for call with named arguments found ");
@@ -917,6 +899,10 @@ public final class VariableUtilImpl implements VariableUtil {
 		Object prop = getLight(pc, coll, key, null);
 		if (prop instanceof UDF) {
 			return ((UDF) prop).callWithNamedValues(pc, key, args, false);
+		}
+		// null
+		if (coll == null) {
+			throw new ExpressionException("Cannot call Method/Function [" + key.getString() + "] because the value is null. An object instance is required to call this method.");
 		}
 		throw new ExpressionException("No matching Method/Function for call with named arguments found");
 	}
