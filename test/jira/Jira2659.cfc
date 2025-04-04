@@ -19,14 +19,14 @@
 	
 	<cffunction name="testTagLoopTagBreak">
 		<cfsavecontent variable="local.c" trim="true">
-		<cfloop from="1" to="2" index="o" label="outer">outer<cfloop index="i" from="1" to="2" label="inner">inner<cfbreak "outer"></cfloop></cfloop>
+		<cfloop from="1" to="2" index="local.o" label="outer">outer<cfloop index="local.i" from="1" to="2" label="inner">inner<cfbreak "outer"></cfloop></cfloop>
 		</cfsavecontent>
 		<cfset assertEquals("outerinner",c)>
 	</cffunction>
 	
 	<cffunction name="testTagLoopTagContinue">
 		<cfsavecontent variable="local.c" trim="true">
-		<cfloop index="o" from="1" to="4" label="outer">outer<cfloop index="i" from="1" to="4" label="inner">inner<cfcontinue "outer"></cfloop></cfloop>
+		<cfloop index="local.o" from="1" to="4" label="outer">outer<cfloop index="local.i" from="1" to="4" label="inner">inner<cfcontinue "outer"></cfloop></cfloop>
 		</cfsavecontent>
 		<cfset assertEquals("outerinnerouterinnerouterinnerouterinner",c)>
 	</cffunction> 

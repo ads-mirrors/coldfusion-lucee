@@ -11,7 +11,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 	function run( testResults , testBox ) {
 		describe( "simple test inline component", function() {
 			it(title="test inline component", body=function() {
-				inline=new component {   
+				var inline=new component {   
 					function subTest() {
 						return "inline"; 
 					}  
@@ -30,7 +30,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					return "a";
 				}
 				
-				inline=new component {   
+				var inline=new component {   
 					function b(){
 						return "b";
 					}  
@@ -71,7 +71,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 			});
 			it(title="test inline component inside inline component", body=function() {
 				
-				outer=new component {
+				var outer=new component {
 
 					variables.inner=new component {   
 						function i() {

@@ -3,7 +3,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="pdf" {
 		describe( title="Testcase for isPDFObject() function", body=function() {
 			it(title="Checking the isPDFObject() function", body=function( currentSpec ) {
 				```
-					<cfdocument name="test" format="pdf">
+					<cfdocument name="local.test" format="pdf">
 						<h1>Welcome to Lucee</h1>
 					</cfdocument>
 				```

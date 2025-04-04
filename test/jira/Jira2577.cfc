@@ -24,11 +24,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 		Randomize( getTickCount() );
 
 		var series1 = [];
-		for ( i=0; i<5; i++ )
+		for (var i=0; i<5; i++ )
 			series1.append( RandRange( 1000, 2000 ) );
 
 		var series2 = [];
-		for ( i=0; i<5; i++ )
+		for (var i=0; i<5; i++ )
 			series2.append( RandRange( 1000, 2000 ) );
 
 		assertNotEquals( series1.toList(), series2.toList() );		

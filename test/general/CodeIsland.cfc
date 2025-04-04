@@ -40,7 +40,7 @@
 
 ```
 <cfoutput>#x#<!---
----><cfloop from=1 to=3 index="i">#i#</cfloop></cfoutput>
+---><cfloop from=1 to=3 index="local.i">#i#</cfloop></cfoutput>
 ```
 		}
 

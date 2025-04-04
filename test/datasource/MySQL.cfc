@@ -56,7 +56,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"  labels="mysql" 	{
 	/**
 	 * Verify that the MySQL JDBC driver correctly handles, stores, and retrieves emojis in a MySQL database.
 	 */
-	private void function testEmojis(version="") {
+	private void function testEmojis(version="") localmode=true {
 		if(!variables.has) return;
 
 			var datasourceName="ds"&createUniqueID();
@@ -117,7 +117,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"  labels="mysql" 	{
 	/**
 	 * test types
 	 */
-	private void function testTypes(version="") {
+	private void function testTypes(version="") localmode=true {
 		if(!variables.has) return;
 
 			var datasourceName="ds"&createUniqueID();
@@ -242,7 +242,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"  labels="mysql" 	{
 	}
 
 
-	public void function testMySQLWithBSTTimezone(){
+	public void function testMySQLWithBSTTimezone() localmode=true {
 		if(!variables.has) return;
 		
 		var tz1=getApplicationSettings().timezone;
@@ -262,7 +262,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"  labels="mysql" 	{
 		//assertEquals("","");		
 	}
 
-	public void function testTransactionCommit(){
+	public void function testTransactionCommit() localmode=true {
 		if(!variables.has) return;
 		
 			try {
@@ -303,7 +303,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"  labels="mysql" 	{
 			}
 	}
 
-	public void function testTransactionRollback(){
+	public void function testTransactionRollback() localmode=true {
 		if(!variables.has) return;
 		
 			try {
@@ -383,7 +383,7 @@ END
 		
 	}
 
-	public void function testStoredProcOut(){
+	public void function testStoredProcOut() localmode=true {
 		if(!variables.has) return;
 		
 		query {
@@ -432,7 +432,7 @@ END
 		
 	}
 
-	public void function testType(){
+	public void function testType() localmode=true {
 		if(!defineDatasource("","x")) return;
 		
 		query datasource="x" { 
@@ -441,7 +441,7 @@ END
 		
 	}
 
-	function testExceptionOnAccessDenied(){
+	function testExceptionOnAccessDenied() localmode=true {
 		// test mysql user cannot access or drop other databases
 		if(!variables.has) return;
 		expect(function(){
@@ -451,7 +451,7 @@ END
 		}).toThrow();
 	}
 
-	private boolean function defineDatasource(version="",datasourceName=""){
+	private boolean function defineDatasource(version="",datasourceName="") localmode=true {
 		var sct=getDatasource(arguments.version);
 		if(sct.count()==0) return false;
 
@@ -470,7 +470,7 @@ END
 		
 	}
 
-	private struct function getDatasource(version="", useUnicode="") {
+	private struct function getDatasource(version="", useUnicode="") localmode=true {
 		var data = server.getDatasource("mysql");
 		
 		// let's inject a specific version

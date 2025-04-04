@@ -1,7 +1,7 @@
 component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 	function run( testResults, testBox ) {
-		mylist="hoo,beep";
+		var mylist="hoo,beep";
 		describe( title="Test suite for listPrepend", body=function() {
 			it( title='Checked with listPrepend()',body=function( currentSpec ) {
 				assertEquals('"aaa,,John,aaa||||%%%%!||,,&&||||||*(*()$$$&&&&Ringo,AAA,AA|,,,|||hoo,beep"',serialize(listPrepend(mylist,"aaa,,John,aaa||||%%%%!||,,&&||||||*(*()$$$&&&&Ringo,AAA,AA|,,,||","|,&")));

@@ -16,7 +16,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 		describe( "Test suite for LDEV-1182", function() {
 			it( title='checking UDF', body=function( currentSpec ) {
 				
-				result=udf2();  
+				var result=udf2();  
 				expect(isCustomFunction(result)).toBe(true);
 
 				result=udf2()();  
@@ -24,7 +24,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			});
 			it( title='checking UDF on multiple levels', body=function( currentSpec ) {
 				
-				result=udf4();  
+				var result=udf4();  
 				expect(isCustomFunction(result)).toBe(true);
 
 				result=udf4()()()();  
@@ -32,7 +32,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			});
 
 			it( title='Checking Closure', body=function( currentSpec ) {
-				result=function(){return udf1;}()();
+				var result=function(){return udf1;}()();
 				expect(result).toBe('inner');
 			});
 

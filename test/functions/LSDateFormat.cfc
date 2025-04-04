@@ -36,9 +36,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function run( testResults , testBox ) {
 		describe( "test case for LSDateFormat", function() {
 			it(title = "Checking with LSDateFormat", body = function( currentSpec ) {
-				orgLocale=getLocale();
+				var orgLocale=getLocale();
 				setLocale("German (Swiss)");
-				dt=CreateDateTime(2004,1,2,4,5,6);
+				var dt=CreateDateTime(2004,1,2,4,5,6);
 
 				assertEquals("02.01.2004", "#lsdateFormat(dt)#");
 				assertEquals("02.01.04x", "#lsdateFormat(dt,"short")#x");
@@ -68,7 +68,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				setLocale(orgLocale);
 				assertEquals("31","#LSDateFormat(1,"dd")#");
 						
-				d=CreateDateTime(2008,4,6,1,2,3);
+				var d=CreateDateTime(2008,4,6,1,2,3);
 					
 				setlocale('German (swiss)');
 				assertEquals("06.04.08", "#lsDateFormat(d,'short')#");
@@ -191,7 +191,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				assertEquals("Sunday, 6 April 2008", "#lsDateFormat('06 April 2008','full')#");
 				assertEquals("Sunday, 6 April 2008", "#lsDateFormat('Sunday, 6 April 2008','full')#");
 
-				testDate = "2009-06-13 17:04:06";
+				var testDate = "2009-06-13 17:04:06";
 				setLocale("Dutch (Standard)");
 				assertEquals("zaterdag 13 juni 2009", "#lsDateFormat(testDate, 'dddd d mmmm yyyy')#");
 				assertEquals("zaterdag 13 juni 2009", "#lsDateFormat(parseDateTime(testDate), 'dddd d mmmm yyyy')#");

@@ -21,7 +21,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 		describe(title="Test suite for structValueArray", body=function() {
 
 			it(title="Test function structValueArray()", body=function(currentSpec) {
-                values = structValueArray(animals);
+                var values = structValueArray(animals);
                 assertTrue(isArray(values));
 				assertEquals(3, arrayLen(values));
 				assertTrue(arrayContains(values, "moo"));
@@ -30,7 +30,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 			});
 
 			it(title="Test method struct.valueArray()", body=function(currentSpec) {
-				values = animals.valueArray();
+				var values = animals.valueArray();
                 assertTrue(isArray(values));
 				assertEquals(3, arrayLen(values));
 				assertTrue(arrayContains(values, "moo"));
@@ -41,7 +41,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 			it(title="Test function structValueArray() on Ordered Struct", body=function(currentSpec) {
 				orderedValues = orderedStruct.valueArray();
                 assertEquals(7, arrayLen(orderedValues));
-				loop array=orderedValues index="ix" item="el" {
+				loop array=orderedValues index="local.ix" item="local.el" {
                     assertEquals(ix, el);
                 }
 			});

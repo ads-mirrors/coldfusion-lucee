@@ -69,7 +69,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 	}
 
 	public void function testUnaryUnscopedSingle(){
-		variables.value1=1;
+		local.value1=1;
 		assertEquals(0,--value1);
 		assertEquals(1,++value1);
 		

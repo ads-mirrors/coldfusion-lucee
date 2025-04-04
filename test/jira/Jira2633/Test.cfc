@@ -69,7 +69,7 @@ component {
 	function getSisterUndefined(){
 		return function(){
 			
-			rtn.a=function(){
+			local.rtn.a=function(){
 				jira2633 = "2633";
 			};
 			

@@ -11,14 +11,14 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="image" {
 		describe( "test case for ImageDrawPoint", function() {
 
 			it(title = "Checking with ImageDrawOval", body = function( currentSpec ){
-				imgOne = imageNew("",200,200,"rgb","red");
+				var imgOne = imageNew("",200,200,"rgb","red");
 				imageDrawPoint(imgOne,90,90);
 				cfimage(action = "write", source = imgOne, destination = path&'imgDrawovalOne.jpg',overwrite = "yes");
 				expect(fileexists(path&'imgDrawovalOne.jpg')).tobe("true");
 			});
 
 			it(title = "Checking with image.drawOval()", body = function( currentSpec ){
-				imgTwo = imageNew("",200,200,"rgb","blue");
+				var imgTwo = imageNew("",200,200,"rgb","blue");
 				imgTwo.DrawPoint(100,130);
 				cfimage(action = "write", source = imgTwo, destination = path&'drawovalObjone.jpg',overwrite = "yes");
 				expect(fileexists(path&'drawovalObjone.jpg')).tobe("true");
