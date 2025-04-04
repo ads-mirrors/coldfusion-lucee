@@ -515,7 +515,7 @@
 				action="getAPIKey"
 				type="#request.adminType#"
 				password="#session["password"&request.adminType]#"
-				returnVariable="apiKey";
+				returnVariable="local.apiKey";
 
 			var start=getTickCount();
 
