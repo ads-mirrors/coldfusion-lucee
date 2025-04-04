@@ -9905,8 +9905,8 @@ The following things are considered to be empty:
 			<type>struct</type>
 		</return>
 	</function>
+	
 	<!-- MavenInfo -->
-<!-- MavenInfo -->
 	<function>
 		<name>MavenInfo</name>
 		<class>lucee.runtime.functions.mvn.MavenInfo</class>
@@ -9961,6 +9961,15 @@ The following things are considered to be empty:
 			<default>true</default>
 			<required>No</required>
 			<description>If true, includes optional dependencies in the results. If false, excludes dependencies marked as optional from the query results.</description>
+		</argument>
+		<argument>
+			<name>validateURL</name>
+			<alias>validate</alias>
+			<type>boolean</type>
+			<default>false</default>
+			<required>No</required>
+			<description>A Maven artifact can be provided from different repositories, not all repositories provide all artifacts. if set to false, Lucee simply picks the most likely repository. 
+			If set to true, Lucee checks all possibilities, what can take a while, so only set to true, if really neded.</description>
 		</argument>
 		<return>
 			<description>Returns a query object containing information about the specified Maven artifact and all its dependencies. Each row represents one artifact, with the first row being the requested artifact itself.</description>

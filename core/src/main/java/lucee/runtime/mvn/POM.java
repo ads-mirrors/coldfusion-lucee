@@ -461,14 +461,22 @@ public final class POM {
 		return parent.getRealResource(artifactId + "-" + version + "." + extension);
 	}
 
-	public URL getArtifact(String type, Collection<Repository> repositories) throws IOException {
+	public URL getArtifactAsURL(String type, Collection<Repository> repositories, boolean validate) throws IOException {
 		if (repositories == null || repositories.isEmpty()) repositories = getRepositories();
+
+		Repository[] repos = MavenUtil.sort(repositories);
 
 		StringBuilder sb = null;
 		String scriptName = groupId.replace('.', '/') + "/" + artifactId + "/" + version + "/" + artifactId + "-" + version + "." + type;
+
+		// without validation, we simply use the first repo from the array
+		if (!validate) {
+			return new URL(repos[0].getUrl() + scriptName);
+		}
+
 		URL url = null;
 		Exception cause = null;
-		for (Repository r: repositories) {
+		for (Repository r: repos) {
 			HttpURLConnection connection = null;
 			int responseCode = 0;
 			try {

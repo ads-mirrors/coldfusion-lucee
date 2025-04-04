@@ -27,18 +27,22 @@ public class MavenInfo implements Function {
 	private static final long serialVersionUID = -3515451010781896377L;
 
 	public static Query call(PageContext pc, String groupId, String artifactId) throws PageException {
-		return call(pc, groupId, artifactId, null, null, true);
+		return call(pc, groupId, artifactId, null, null, true, false);
 	}
 
 	public static Query call(PageContext pc, String groupId, String artifactId, String version) throws PageException {
-		return call(pc, groupId, artifactId, version, null, true);
+		return call(pc, groupId, artifactId, version, null, true, false);
 	}
 
 	public static Query call(PageContext pc, String groupId, String artifactId, String version, Array arrScopes) throws PageException {
-		return call(pc, groupId, artifactId, version, arrScopes, true);
+		return call(pc, groupId, artifactId, version, arrScopes, true, false);
 	}
 
 	public static Query call(PageContext pc, String groupId, String artifactId, String version, Array arrScopes, boolean includeOptional) throws PageException {
+		return call(pc, groupId, artifactId, version, arrScopes, includeOptional, false);
+	}
+
+	public static Query call(PageContext pc, String groupId, String artifactId, String version, Array arrScopes, boolean includeOptional, boolean validate) throws PageException {
 
 		// validate groupId
 		if (!StringUtil.isEmpty(groupId, true)) groupId = groupId.trim();
@@ -83,9 +87,9 @@ public class MavenInfo implements Function {
 			List<POM> deps = root.getAllDependencies(includeOptional);
 			Query qry = new QueryImpl(new Key[] { KeyConstants._groupId, KeyConstants._artifactId, KeyConstants._version, KeyConstants._scope, KeyConstants._optional,
 					KeyConstants._checksum, KeyConstants._url, KeyConstants._path }, 0, "dependencies");
-			addRow(qry, root, false);
+			addRow(qry, root, false, validate, includeOptional);
 			for (POM pom: deps) {
-				addRow(qry, pom, true); // depencies are "compile" by default
+				addRow(qry, pom, true, validate, includeOptional); // depencies are "compile" by default
 			}
 			return qry;
 
@@ -103,10 +107,9 @@ public class MavenInfo implements Function {
 		}
 	}
 
-	private static void addRow(Query qry, POM pom, boolean dependency) throws PageException, IOException {
+	private static void addRow(Query qry, POM pom, boolean dependency, boolean validate, boolean includeOptional) throws PageException, IOException {
 
 		if (!pom.getPackaging().equals("jar")) return;
-		int row = qry.addRow();
 
 		// scope
 		String scope = pom.getScopeAsString();
@@ -123,7 +126,7 @@ public class MavenInfo implements Function {
 		else {
 			optional = Caster.toBoolean(strOptional);
 		}
-
+		if (!includeOptional && Boolean.TRUE.equals(optional)) return;
 		// local resource
 		Resource jar = pom.getArtifact("jar");
 
@@ -133,13 +136,14 @@ public class MavenInfo implements Function {
 			checksum = jar.isFile() ? MavenUtil.createChecksum(jar, "md5") : "";
 		}
 
+		int row = qry.addRow();
 		qry.setAt(KeyConstants._groupId, row, pom.getGroupId());
 		qry.setAt(KeyConstants._artifactId, row, pom.getArtifactId());
 		qry.setAt(KeyConstants._version, row, pom.getVersion());
 		qry.setAt(KeyConstants._scope, row, scope);
 		qry.setAt(KeyConstants._optional, row, optional);
 		qry.setAt(KeyConstants._checksum, row, checksum);
-		qry.setAt(KeyConstants._url, row, pom.getArtifact("jar", null).toExternalForm());
+		qry.setAt(KeyConstants._url, row, pom.getArtifactAsURL("jar", null, validate).toExternalForm());
 		qry.setAt(KeyConstants._path, row, jar.toString());
 	}
 }

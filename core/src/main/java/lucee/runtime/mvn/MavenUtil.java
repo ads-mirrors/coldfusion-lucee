@@ -124,18 +124,9 @@ public final class MavenUtil {
 
 		Map<String, Repository> repositories = new LinkedHashMap<>();// linked so we keep the order
 
-		// repos defined in POM
-		if (rawRepositories != null) {
-			for (POMReader.Repository rep: rawRepositories) {
-				Repository r = new Repository(
-
-						resolvePlaceholders(current, rep.id, properties),
-
-						resolvePlaceholders(current, rep.name, properties),
-
-						resolvePlaceholders(current, rep.url, properties)
-
-				);
+		// add default repos
+		if (initRepositories != null) {
+			for (Repository r: initRepositories) {
 				repositories.put(r.getUrl(), r);
 			}
 		}
@@ -149,9 +140,18 @@ public final class MavenUtil {
 				}
 			}
 		}
-		// add default repos
-		else if (initRepositories != null) {
-			for (Repository r: initRepositories) {
+		// repos defined in POM
+		if (rawRepositories != null) {
+			for (POMReader.Repository rep: rawRepositories) {
+				Repository r = new Repository(
+
+						resolvePlaceholders(current, rep.id, properties),
+
+						resolvePlaceholders(current, rep.name, properties),
+
+						resolvePlaceholders(current, rep.url, properties)
+
+				);
 				repositories.put(r.getUrl(), r);
 			}
 		}
@@ -251,7 +251,7 @@ public final class MavenUtil {
 				o = pdm.getOptionalAsString();
 			}
 		}
-		if (o != null) s = resolvePlaceholders(current, o, properties);
+		if (o != null) o = resolvePlaceholders(current, o, properties);
 		return new GAVSO(g, a, v, s, o, null);
 		// p = POM.getInstance(localDirectory, g, a, v, s, o, current.getDependencyScope(),
 		// current.getDependencyScopeManagement());
@@ -662,20 +662,22 @@ public final class MavenUtil {
 		lastUpdated.delete();
 	}
 
-	private static Repository[] sort(Collection<Repository> repositories) {
+	public static Repository[] sort(Collection<Repository> repositories) {
+
 		// Convert collection to array for sorting
 		Repository[] result = repositories.toArray(new Repository[0]);
-		AtomicInteger defaultValue = new AtomicInteger(0);
-		// Sort the array based on the ranking map
-		Arrays.sort(result, (repo1, repo2) -> {
-			// Get the count for each repository, defaulting to 0 if not in the map
-			int count1 = ranking.getOrDefault(repo1, defaultValue).get();
-			int count2 = ranking.getOrDefault(repo2, defaultValue).get();
+		if (ranking.size() > 0) {
+			AtomicInteger defaultValue = new AtomicInteger(0);
+			// Sort the array based on the ranking map
+			Arrays.sort(result, (repo1, repo2) -> {
+				// Get the count for each repository, defaulting to 0 if not in the map
+				int count1 = ranking.getOrDefault(repo1, defaultValue).get();
+				int count2 = ranking.getOrDefault(repo2, defaultValue).get();
 
-			// Sort in descending order (highest count first)
-			return Integer.compare(count2, count1);
-		});
-
+				// Sort in descending order (highest count first)
+				return Integer.compare(count2, count1);
+			});
+		}
 		return result;
 	}
 
