@@ -413,7 +413,7 @@ public class JavaObject implements Objects, ObjectWrap {
 
 	@Override
 	public Object getEmbededObject(Object def) {
-		if (object == null) init(EMPTY, def);
+		if (object == null) return init(EMPTY, def);
 		return object;
 	}
 
