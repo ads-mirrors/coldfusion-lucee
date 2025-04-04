@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -31,6 +32,8 @@ import lucee.runtime.thread.ThreadUtil;
 
 public final class POM {
 
+	public static final Map<String, Repository> REPOSITORIES = new ConcurrentHashMap<>();
+
 	public static final Repository REPOSITORY_MAVEN_CENTRAL = new Repository("maven-central", "Maven Central", "https://repo1.maven.org/maven2/");
 	public static final Repository REPOSITORY_JCENTER = new Repository("jcenter", "JCenter", "https://jcenter.bintray.com/");
 	public static final Repository REPOSITORY_GOOGLE = new Repository("google", "Google Maven", "https://maven.google.com/");
@@ -38,7 +41,26 @@ public final class POM {
 	public static final Repository REPOSITORY_APACHE = new Repository("apache", "Apache Repository", "https://repository.apache.org/content/repositories/releases/");
 	public static final Repository REPOSITORY_SPRING = new Repository("spring", "Spring Repository", "https://repo.spring.io/release/");
 	public static final Repository REPOSITORY_ALIYUN = new Repository("aliyun", "Aliyun Maven Mirror", "https://maven.aliyun.com/repository/public/");
-	public static final Repository DEFAULT_REPOSITORY = REPOSITORY_SONATYPE;
+	public static final Repository DEFAULT_REPOSITORY;
+
+	static {
+		REPOSITORIES.put("maven", REPOSITORY_MAVEN_CENTRAL);
+		REPOSITORIES.put("jcenter", REPOSITORY_JCENTER);
+		REPOSITORIES.put("google", REPOSITORY_GOOGLE);
+		REPOSITORIES.put("sonatype", REPOSITORY_SONATYPE);
+		REPOSITORIES.put("apache", REPOSITORY_APACHE);
+		REPOSITORIES.put("spring", REPOSITORY_SPRING);
+		REPOSITORIES.put("aliyun", REPOSITORY_ALIYUN);
+
+		// set default repository
+		String strRep = SystemUtil.getSystemPropOrEnvVar("lucee.maven.default.repository", null);
+		Repository rep = null;
+		if (!StringUtil.isEmpty(strRep, true)) {
+			rep = REPOSITORIES.get(strRep.toLowerCase().trim());
+		}
+		DEFAULT_REPOSITORY = rep == null ? REPOSITORY_MAVEN_CENTRAL : rep;
+
+	}
 
 	public static final int CONNECTION_TIMEOUT = 50000;
 	public static final int READ_TIMEOUT_HEAD = 20000;

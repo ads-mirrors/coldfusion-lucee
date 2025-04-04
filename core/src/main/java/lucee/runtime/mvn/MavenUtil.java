@@ -470,8 +470,9 @@ public final class MavenUtil {
 		if (!res.isFile()) {
 			synchronized (SystemUtil.createToken("mvn", res.getAbsolutePath())) {
 				if (!res.isFile()) {
+					URL url = null;
 					try {
-						URL url = pom.getArtifactAsURL(type, repositories);
+						url = pom.getArtifactAsURL(type, repositories);
 						if (log != null) log.info("maven", "download [" + url + "]");
 						try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
 							HttpGet request = new HttpGet(url.toExternalForm());
@@ -504,7 +505,7 @@ public final class MavenUtil {
 						}
 					}
 					catch (IOException ioe) {
-						IOException ex = new IOException("Failed to download [" + type + "], because no local copy found at [" + res + "].");
+						IOException ex = new IOException("Failed to download " + (url != null ? url : type) + " , because no local copy found at [" + res + "].");
 						ExceptionUtil.initCauseEL(ex, ioe);
 						// MUST add again ResourceUtil.deleteEmptyFoldersInside(pom.getLocalDirectory());
 						throw ex;
