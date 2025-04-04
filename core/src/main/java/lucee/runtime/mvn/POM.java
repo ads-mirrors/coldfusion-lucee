@@ -28,7 +28,7 @@ import lucee.runtime.mvn.POMReader.Dependency;
 import lucee.runtime.op.Caster;
 import lucee.runtime.thread.ThreadUtil;
 
-public class POM {
+public final class POM {
 
 	public static final List<Repository> REPOSITORIES = new ArrayList<>();
 
