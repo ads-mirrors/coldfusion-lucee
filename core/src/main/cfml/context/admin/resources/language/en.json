@@ -461,7 +461,8 @@
       "upDown": "Update / Downgrade / Uninstall",
       "upDownDesc": "Update or downgrade your already installed version.",
       "upload": "upload",
-      "uploadextension": "Upload new extension (experimental)",
+      "uploadextension": "Upload new extension
+      ",
       "uploadextensiondesc": "If you downloaded an extension, you can add the extension here.",
       "version": "Version",
       "viewdetails": "View details"
@@ -747,7 +748,7 @@
         "certificates": "SSL Certificates",
         "datasource": "Datasource",
         "gateway": "Event Gateway",
-        "ai": "AI (experimental)",
+        "ai": "AI",
         "label": "Services",
         "mail": "Mail",
         "orm": "ORM",

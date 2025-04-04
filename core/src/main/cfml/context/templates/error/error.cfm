@@ -213,7 +213,7 @@ function luceeCatchToString() {try{
 	<!--- AI --->
 	<tr>
 		<td class="label">
-			AI (Experimental)
+			AI
 		</td>
 		<td id="ai-response-cell" class="mono">
 			<cftry>

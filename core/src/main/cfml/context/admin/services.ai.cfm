@@ -71,12 +71,6 @@
 		returnVariable="access"
 		secType="cache";
 	</cfscript>
-		<div class="warning nofocus">
-			This feature is experimental and may be subject to change.
-			If you encounter any issues while using this functionality, 
-			please report bugs and errors in our 
-			<a href="https://issues.lucee.org" target="_blank">bug tracking system</a>.
-		</div>
 <cfscript>
 
 	if("list"==url.action2)  include "services.ai.list.cfm";

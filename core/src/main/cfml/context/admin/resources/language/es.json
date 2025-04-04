@@ -450,7 +450,7 @@
 			"upDown": "Actualizar / Revertir / Desinstalar",
 			"upDownDesc": "Actualizar o revertir tu versión ya instalada.",
 			"upload": "subir",
-			"uploadextension": "Subir nueva extensión (experimental)",
+			"uploadextension": "Subir nueva extensión",
 			"uploadextensiondesc": "Si has descargado una extensión, puedes añadirla aquí.",
 			"version": "Versión",
 			"viewdetails": "Ver detalles"
