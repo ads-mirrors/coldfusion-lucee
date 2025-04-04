@@ -34,7 +34,7 @@ public final class POM {
 	public static final Repository DEFAULT_REPOSITORY = new Repository("maven-central", "Maven Central", "https://repo1.maven.org/maven2/");
 
 	public static final int CONNECTION_TIMEOUT = 50000;
-	public static final int READ_TIMEOUT_HEAD = 5000;
+	public static final int READ_TIMEOUT_HEAD = 20000;
 	public static final int READ_TIMEOUT_GET = 20000;
 
 	public static final int SCOPE_COMPILE = 1;
