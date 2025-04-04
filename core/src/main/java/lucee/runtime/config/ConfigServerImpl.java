@@ -36,6 +36,7 @@ import lucee.commons.collection.MapFactory;
 import lucee.commons.digest.Hash;
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.SystemUtil;
+import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.ResourcesImpl;
@@ -886,9 +887,32 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		if (mvnDir == null) {
 			synchronized (this) {
 				if (mvnDir == null) {
-					mvnDir = ResourceUtil.getCanonicalResourceEL(getConfigDir().getRealResource("../mvn/"));
+					String repoDir = SystemUtil.getSystemPropOrEnvVar("lucee.maven.local.repository", null);
+					Resource tmp = null;
+					if (!StringUtil.isEmpty(repoDir, true)) {
+						tmp = getResource(repoDir);
+						// at least the grand parent need to exist
+						if (ResourceUtil.doesGrandParentExists(tmp)) {
+							try {
+								tmp.createDirectory(true);
+							}
+							catch (IOException e) {
+								tmp = null;
+								LogUtil.log(this, "maven", e);
+							}
+						}
+						else {
+							tmp = null;
+							LogUtil.log(this, Log.LEVEL_ERROR, "maven",
+									"Cannot use directory [" + repoDir + "] because the directory structure two levels above it does not exist");
+						}
+					}
+					if (tmp == null) {
+						tmp = ResourceUtil.getCanonicalResourceEL(getConfigDir().getRealResource("../mvn/"));
+						tmp.mkdirs();
 
-					mvnDir.mkdirs();
+					}
+					mvnDir = tmp;
 				}
 			}
 		}
