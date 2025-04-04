@@ -4,13 +4,14 @@
 		field("Server","server","",true,"the pop server to access","text")
 		,field(displayName="Mail Server Type", name="ServerType", defaultValue="pop3", required=true,
 			description="Mail Server Type", type="select", values="pop3,imap")
-		,field("Port","port","110",true,"Port of the server, i.e. 110 for pop3, 143 for imap ","text")
+		,field("Port","port","110",true,"Port of the server, i.e. 110 for POP3, 143 for IMAP ","text")
 		,field(displayName="Secure", name="secure", defaultValue="true", required=true,
 			description="Use a secure connection", type="checkbox")
 		,field("User Name","username","",false,"the username to access the server","text")
 		,field("Password","password","",false,"the password to access the server","password")
 		,field("Attachment path","attachmentpath",expandPath('{temp-directory}/mailwatcher-attachments'),false,"a directory in which to save any attachments","text")
 		,field("Interval (ms)","interval","60000",true,"The interval between checks, in milliseconds","text")
+		,field("IMAP folder","folder","inbox",false,"the imap folder to poll","text")
 		,field(displayName="Delete", name="deleteAfterFetch", defaultValue="false", required=true,
 			description="Delete the mail after fetching", type="checkbox", values="true")
 		,field(displayName="Process backlog", name="processBacklog", defaultValue="false", required=true,
@@ -22,7 +23,7 @@
 
 
 		,field("Function Name","functionName","invoke",false,"function to call when there is a new mail","text")
-		,field("Function Name","functionFetch","fetch",false,
+		,field("Function Name","functionFetch","",false,
 			"custom function to handle fetching mail, called with function(config, last) returning a query of mail(s)","text")
 
 	)>

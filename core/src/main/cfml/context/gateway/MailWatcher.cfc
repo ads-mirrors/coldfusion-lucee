@@ -56,7 +56,8 @@
 						mails = variables.listener[ config.functionFetch ]( config, last );
 					} else {
 						mails = getMailsNewerThan( server=config.server, port=config.port, secure=config.secure?:false,
-							user=config.username, pass=config.password, attachmentPath=config.attachmentPath, newerThan=last);
+							user=config.username, pass=config.password, attachmentPath=config.attachmentPath,
+							folder=config.folder, newerThan=last);
 					}
 					for ( var el in mails ) {
 						if ( len( trim( config.functionName ) ) ) {
@@ -78,7 +79,9 @@
 	}
 
 	public array function getMailsNewerThan( required string server, required numeric port, required boolean secure,
-			required string user, required string pass, required string attachmentPath, required date newerThan) output=true {
+			required string user, required string pass,
+			required string attachmentPath, required string folder,
+			required date newerThan) output=true {
 		var mails="";
 		var arr=[];
 		var startTime = getTickCount();
@@ -131,6 +134,7 @@
 								secure=arguments.secure,
 								username=arguments.user,
 								password=arguments.pass,
+								folder=arguments.folder,
 								action="delete",
 								messagenumber=mails.messageNumber
 							);
@@ -139,6 +143,7 @@
 							cfimap(server=arguments.server,
 								port=arguments.port,
 								secure=arguments.secure,
+								folder=arguments.folder,
 								username=arguments.user,
 								password=arguments.pass,
 								action="markread",
@@ -197,17 +202,20 @@
 			port=arguments.config.port,
 			secure=arguments.config.secure,
 			password=arguments.config.pass,
-			username=arguments.config.user
+			username=arguments.config.user,
 			name="local.folders",
 			action="listallfolders"
 		);
 
-		local.folders = queryToStruct(folders, "name" );
-		if ( structKeyExists( folders, "inbox" ) ) {
-			if ( folders.inbox.unread eq 0 and folders.inbox.new eq 0 ){
-				logger(text="Imap INBOX had 0 new and 0 unread messages, skip reading", type="TRACE");
+		local.folders = queryToStruct( folders, "name" );
+		if ( structKeyExists( folders, arguments.config.folder ) ) {
+			if ( folders[ arguments.config.folder ].unread eq 0 
+					and folders[ arguments.config.folder ].new eq 0 ){
+				logger(text="Imap folder [#arguments.config.folder#] had 0 new and 0 unread messages, skip reading", type="TRACE");
 				return queryNew("empty");
 			}
+		} else {
+			logger(text="Imap folder [#arguments.config.folder#] doesn't exist on server?", type="TRACE");
 		}
 
 		cfimap( attachmentPath=arguments.config.attachmentPath,
@@ -216,7 +224,8 @@
 			secure=arguments.config.secure,
 			generateUniqueFilenames=true,
 			password=arguments.config.pass,
-			username=arguments.config.user
+			username=arguments.config.user,
+			folder=arguments.config.folder,
 			name="local.mail_headers",
 			action="getHeaderOnly"
 		);
@@ -245,7 +254,8 @@
 			secure=arguments.config.secure,
 			generateUniqueFilenames=true,
 			password=arguments.config.pass,
-			username=arguments.config.user
+			username=arguments.config.user,
+			folder=arguments.config.folder,
 			name="local.mails",
 			uid="#messages.toList()#"
 			action="getAll"
