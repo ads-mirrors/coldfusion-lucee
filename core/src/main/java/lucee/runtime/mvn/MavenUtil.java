@@ -29,7 +29,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
-import lucee.print;
 import lucee.commons.digest.Hash;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.IOUtil;
@@ -54,7 +53,7 @@ import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 
-public class MavenUtil {
+public final class MavenUtil {
 	private static Map<String, String> sysprops;
 	private static Object token = new SerializableObject();
 
@@ -535,11 +534,9 @@ public class MavenUtil {
 					Resource localRepo = getLocalRepository();
 					if (localRepo != null) {
 						Resource tmp = pom.getArtifact(localRepo, type);
-						print.e("->" + tmp);
 						// found one in local maven
 						if (tmp.isFile()) {
 							tmp.copyTo(res, false);
-							print.e("=>" + tmp);
 							return;
 						}
 					}
