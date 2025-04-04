@@ -26,6 +26,7 @@ import lucee.runtime.converter.ConverterException;
 import lucee.runtime.converter.ScriptConverter;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.PageException;
+import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Duplicator;
 import lucee.runtime.type.Struct;
@@ -45,7 +46,7 @@ public final class PropertyImpl extends MemberSupport implements Property, ASMPr
 	private boolean setter = true;
 	private boolean getter = true;
 
-	private String _default;
+	private Object _default;
 	private String displayname = "";
 	private String hint = "";
 	private Struct dynAttrs = new StructImpl();
@@ -57,18 +58,24 @@ public final class PropertyImpl extends MemberSupport implements Property, ASMPr
 		super(Component.ACCESS_REMOTE);
 	}
 
-	/**
-	 * @return the _default
-	 */
 	@Override
 	public String getDefault() {
+		try {
+			return Caster.toString(_default);
+		}
+		catch (PageException e) {
+			throw new PageRuntimeException(e);
+		}
+	}
+
+	public Object getDefaultAsObject() {
 		return _default;
 	}
 
 	/**
 	 * @param _default the _default to set
 	 */
-	public void setDefault(String _default) {
+	public void setDefault(Object _default) {
 		this._default = _default;
 	}
 
@@ -274,4 +281,5 @@ public final class PropertyImpl extends MemberSupport implements Property, ASMPr
 
 		return other;
 	}
+
 }

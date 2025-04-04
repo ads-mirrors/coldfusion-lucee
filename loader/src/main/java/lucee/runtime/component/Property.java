@@ -24,10 +24,10 @@ import lucee.runtime.type.Struct;
 
 public interface Property extends Serializable, Member {
 
-	/**
-	 * @return the _default
-	 */
+	@Deprecated
 	public String getDefault();
+
+	public Object getDefaultAsObject();
 
 	/**
 	 * @return the displayname

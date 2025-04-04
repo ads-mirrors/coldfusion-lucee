@@ -4664,212 +4664,71 @@ Lucee uses the number of characters in the file.</description>
 		<!-- ttt-class>lucee.transformer.bytecode.statement.tag.TagProperty</ttt-class -->
 		<body-content>empty</body-content>
 		<body-rtexprvalue>false</body-rtexprvalue>
-		<description>Defines components as complex types that are used for web services authoring. The attributes of this tag are exposed as component metadata and are subject to inheritance rules. </description>
+		<description>Defines properties within components that can be used for web services, ORM mapping, and accessor method generation. Properties are exposed as component metadata and follow component inheritance rules.</description>
 		<attribute-type>mixed</attribute-type>
 		<attribute>
 			<type>string</type>
 			<name>name</name>
 			<required>true</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>A string; a property name. Must be a static value.</description>
+			<description>The unique identifier for the property. Must be a valid variable name and cannot contain spaces or special characters except for underscore.</description>
 		</attribute>
 		<attribute>
 			<type>string</type>
 			<name>type</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>A string; a property type name; data type.</description>
+			<description>Specifies the data type of the property. Can be any valid CFML type (any, array, binary, boolean, date, guid, numeric, query, string, struct, uuid) or a component path for complex types.</description>
 		</attribute>
 		<attribute>
 			<type>boolean</type>
 			<name>required</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Whether the parameter is required</description>
+			<description>Indicates whether the property must have a non-null value. When true, validation will be performed during setter calls and object creation.</description>
 		</attribute>
 		<attribute>
-			<type>string</type>
+			<type>any</type>
 			<name>default</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>This sets the default value on the property when the object is created.</description>
+			<description>Sets the initial value for the property when an instance of the component is created. Can be any valid CFML value appropriate for the property's type.</description>
 		</attribute>
 		<attribute>
 			<type>string</type>
 			<name>displayName</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>A value to be displayed when using introspection to show
-			information about the CFC. The value appears in parentheses
-			following the property name.</description>
+			<description>A human-readable label for the property that appears in parentheses following the property name when using introspection tools or documentation generators.</description>
 		</attribute>
 		<attribute>
 			<type>string</type>
 			<name>hint</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Text to be displayed when using introspection to show
-			information about the CFC. This attribute can be useful
-			for describing the purpose of the parameter.</description>
+			<description>Descriptive text that explains the purpose and usage of the property. This information is displayed when using introspection tools or documentation generators.</description>
 		</attribute>
 		<attribute>
 			<type>string</type>
 			<name>access</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>The client security context from which the method can be invoked</description>
+			<description>Controls the visibility scope of generated accessor methods. Valid values are: public, private, package, or remote.</description>
 		</attribute>
 		<attribute>
 			<type>boolean</type>
 			<name>getter</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Specifies whether to generate getter methods or not</description>
+			<description>Determines whether to automatically generate a getter method for this property. Default is true.</description>
 		</attribute>
 		<attribute>
 			<type>boolean</type>
 			<name>setter</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Specifies whether to generate setter methods or not</description>
+			<description>Determines whether to automatically generate a setter method for this property. Default is true.</description>
 		</attribute>
-
-<!--
-		<attribute>
-			<type>number</type>
-			<name>batchSize</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description></description>
-		</attribute>
-		<attribute>
-			<type>string</type>
-			<name>cascade</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description></description>
-		</attribute>
-		<attribute>
-			<type>string</type>
-			<name>catalog</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description></description>
-		</attribute>
-		<attribute>
-			<type>string</type>
-			<name>cfc</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description></description>
-		</attribute>
-		<attribute>
-			<type>string</type>
-			<name>collectionType</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description></description>
-		</attribute>
-		<attribute>
-			<type>string</type>
-			<name>column</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description></description>
-		</attribute>
-		<attribute>
-			<type>boolean</type>
-			<name>constrained</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description></description>
-		</attribute>
-		<attribute>
-			<type>string</type>
-			<name>datatype</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description></description>
-		</attribute>
-		<attribute>
-			<type>boolean</type>
-			<name>dynamicInsert</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description></description>
-		</attribute>
-		<attribute>
-			<type>boolean</type>
-			<name>dynamicUpdate</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description></description>
-		</attribute>
-		<attribute>
-			<type>string</type>
-			<name>elementColumn</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description></description>
-		</attribute>
-		<attribute>
-			<type>string</type>
-			<name>elementType</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description></description>
-		</attribute>
-		<attribute>
-			<type>string</type>
-			<name>entityName</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description></description>
-		</attribute>
-		<attribute>
-			<type>number</type>
-			<name>fetchBatchSize</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description></description>
-		</attribute>
-		<attribute>
-			<type>string</type>
-			<name>fieldType</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description></description>
-		</attribute>
-		<attribute>
-			<type>string</type>
-			<name>fkColumn</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description></description>
-		</attribute>
-		<attribute>
-			<type>string</type>
-			<name>formula</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description></description>
-		</attribute>
-		<attribute>
-			<type>string</type>
-			<name>generator</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description></description>
-		</attribute>
-		<attribute>
-			<type>boolean</type>
-			<name>getter</name>
-			<required>false</required>
-			<rtexprvalue>true</rtexprvalue>
-			<description></description>
-		</attribute>
- -->
-
 	</tag>
 
 	<!-- Query -->
