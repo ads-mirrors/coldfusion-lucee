@@ -86,17 +86,11 @@ public final class MavenUtil {
 	}
 
 	public static Collection<Repository> getRepositories(List<POMReader.Repository> rawRepositories, POM current, POM parent, Map<String, String> properties,
-			Repository defaultRepository) throws IOException {
-		Map<String, Repository> repositories = new LinkedHashMap<>();
-		repositories.put(defaultRepository.getUrl(), defaultRepository);
-		if (parent != null) {
-			Collection<Repository> reps = parent.getRepositories();
-			if (reps != null) {
-				for (Repository r: reps) {
-					repositories.put(r.getUrl(), r); // TODO clone?
-				}
-			}
-		}
+			Collection<Repository> initRepositories) throws IOException {
+
+		Map<String, Repository> repositories = new LinkedHashMap<>();// linked so we keep the order
+
+		// repos defined in POM
 		if (rawRepositories != null) {
 			for (POMReader.Repository rep: rawRepositories) {
 				Repository r = new Repository(
@@ -111,6 +105,23 @@ public final class MavenUtil {
 				repositories.put(r.getUrl(), r);
 			}
 		}
+
+		// get parent repos
+		if (parent != null) {
+			Collection<Repository> reps = parent.getRepositories();
+			if (reps != null) {
+				for (Repository r: reps) {
+					repositories.put(r.getUrl(), r); // TODO clone?
+				}
+			}
+		}
+		// add default repos
+		else if (initRepositories != null) {
+			for (Repository r: initRepositories) {
+				repositories.put(r.getUrl(), r);
+			}
+		}
+
 		return repositories.values();
 
 	}
@@ -505,7 +516,7 @@ public final class MavenUtil {
 						}
 					}
 					catch (IOException ioe) {
-						IOException ex = new IOException("Failed to download " + (url != null ? url : type) + " , because no local copy found at [" + res + "].");
+						IOException ex = new IOException("Failed to download: " + pom + "");
 						ExceptionUtil.initCauseEL(ex, ioe);
 						// MUST add again ResourceUtil.deleteEmptyFoldersInside(pom.getLocalDirectory());
 						throw ex;

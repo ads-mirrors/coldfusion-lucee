@@ -42,11 +42,17 @@ public final class Test {
 
 		};
 
-		arr = new GAVSO[] { new GAVSO("commons-beanutils", "commons-beanutils", "1.9.4", null, null, "sha1:d52b9abcd97f38c81342bb7e7ae1eee9b73cba51")
+		arr = new GAVSO[] {
+
+				// new GAVSO("org.jboss.ejb3", "jboss-ejb3-api", "3.1.0")
+				new GAVSO("org.eclipse.sisu", "org.eclipse.sisu.plexus", "0.3.4")
+				// new GAVSO("commons-beanutils", "commons-beanutils", "1.9.4", null, null,
+				// "sha1:d52b9abcd97f38c81342bb7e7ae1eee9b73cba51")
 				// new GAVSO("org.apache.commons", "commons-jexl3", "3.4.0")
 
 		};
-
+		// groupID:org.jboss.ejb3;artifactId:jboss-ejb3-api;version:3.1.0
+		// groupID:org.eclipse.sisu;artifactId:org.eclipse.sisu.plexus;version:0.3.4
 		/*
 		 * new Artifact("org.hibernate.orm", "hibernate-core", "6.5.2.Final"), new Artifact("com.amazonaws",
 		 * "aws-java-sdk-s3", "1.12.756"),
