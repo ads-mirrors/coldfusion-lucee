@@ -79,6 +79,11 @@ public final class PropertyImpl extends MemberSupport implements Property, ASMPr
 		this._default = _default;
 	}
 
+	// FUTURE remove, exists for archives point to this
+	public void setDefault(String _default) {
+		this._default = _default;
+	}
+
 	/**
 	 * @return the displayname
 	 */
