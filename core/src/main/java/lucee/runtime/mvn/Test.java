@@ -1,5 +1,7 @@
 package lucee.runtime.mvn;
 
+import java.util.Map.Entry;
+
 import lucee.print;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.ResourcesImpl;
@@ -7,6 +9,11 @@ import lucee.runtime.mvn.MavenUtil.GAVSO;
 
 public class Test {
 	public static void main(String[] args) throws Exception {
+
+		for (Entry<Object, Object> e: System.getProperties().entrySet()) {
+			print.e(e.getKey() + ":" + e.getValue());
+		}
+
 		Resource dir = ResourcesImpl.getFileResourceProvider().getResource("/Users/mic/Tmp3/www");
 		GAVSO[] arr = new GAVSO[] {
 
@@ -38,14 +45,48 @@ public class Test {
 
 				new GAVSO("jakarta.enterprise", "jakarta.enterprise.cdi-api", "4.0.1"),
 
-				new GAVSO("org.lucee", "lucee", "6.1.0.235-RC")
+				new GAVSO("org.lucee", "lucee", "6.1.0.235-RC"),
+
+				new GAVSO("com.github.tjake", "jlama-core", "0.7.0"),
+
+				new GAVSO("org.jboss.ejb3", "jboss-ejb3-api", "3.1.0"),
+
+				new GAVSO("org.eclipse.sisu", "org.eclipse.sisu.plexus", "0.3.4"),
+
+				new GAVSO("org.apache.commons", "commons-jexl3", "3.4.0"),
+
+				new GAVSO("commons-beanutils", "commons-beanutils", "1.9.4")
 
 		};
 
 		arr = new GAVSO[] {
+				// groupID:com.github.tjake;artifactId:jlama-core;version:0.7.0
 
+				// new GAVSO("com.github.tjake", "jlama-core", "0.7.0")
 				// new GAVSO("org.jboss.ejb3", "jboss-ejb3-api", "3.1.0")
 				new GAVSO("org.eclipse.sisu", "org.eclipse.sisu.plexus", "0.3.4")
+				// new GAVSO("commons-beanutils", "commons-beanutils", "1.9.4", null, null,
+				// "sha1:d52b9abcd97f38c81342bb7e7ae1eee9b73cba51")
+				// new GAVSO("org.apache.commons", "commons-jexl3", "3.4.0")
+
+		};
+		arr = new GAVSO[] {
+				// groupID:com.github.tjake;artifactId:jlama-core;version:0.7.0
+
+				// new GAVSO("com.github.tjake", "jlama-core", "0.7.0")
+				// new GAVSO("org.jboss.ejb3", "jboss-ejb3-api", "3.1.0")
+				new GAVSO("com.github.tjake", "jlama-core", "0.7.0")
+				// new GAVSO("commons-beanutils", "commons-beanutils", "1.9.4", null, null,
+				// "sha1:d52b9abcd97f38c81342bb7e7ae1eee9b73cba51")
+				// new GAVSO("org.apache.commons", "commons-jexl3", "3.4.0")
+
+		};
+		arr = new GAVSO[] {
+				// groupID:com.github.tjake;artifactId:jlama-core;version:0.7.0
+
+				// new GAVSO("com.github.tjake", "jlama-core", "0.7.0")
+				// new GAVSO("org.jboss.ejb3", "jboss-ejb3-api", "3.1.0")
+				new GAVSO("com.google.guava", "guava", "25.0-jre")
 				// new GAVSO("commons-beanutils", "commons-beanutils", "1.9.4", null, null,
 				// "sha1:d52b9abcd97f38c81342bb7e7ae1eee9b73cba51")
 				// new GAVSO("org.apache.commons", "commons-jexl3", "3.4.0")
@@ -86,6 +127,7 @@ public class Test {
 		 * a.artifactId, a.version, true, false)); }
 		 */
 		long start = System.currentTimeMillis();
+		// ResourceUtil.deleteContent(dir, null);
 		for (GAVSO gav: arr) {
 			POM pom = POM.getInstance(dir, null, gav.g, gav.a, gav.v, null, null, gav.c, POM.SCOPE_NOT_TEST, POM.SCOPE_ALL, null);
 
@@ -125,7 +167,7 @@ public class Test {
 
 			print.e("--- dependencies ---");
 			// print.e(getDependenciesAsTrees(pom, true));
-			print.e(pom.getAllDependencies());
+			print.e(pom.getAllDependencies(true));
 
 			print.e("--- jars ---");
 			// print.e(getDependenciesAsTrees(pom, true));
