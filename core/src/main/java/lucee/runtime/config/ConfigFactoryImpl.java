@@ -44,6 +44,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -3266,50 +3267,85 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 				log(config, t);
 			}
 
-			String strBundles;
 			List<RHExtension> extensions = new ArrayList<RHExtension>();
-			RHExtension rhe;
-
-			Iterator<Object> it = children.valueIterator();
-			Entry<Key, Object> e;
-			Struct child;
-			String id;
 			Set<Resource> installedFiles = new HashSet<>();
 			Set<String> installedIds = new HashSet<>();
-			// load and install extension if necessary
-			while (it.hasNext()) {
-				child = Caster.toStruct(it.next(), null);
-				if (child == null) continue;
-				id = Caster.toString(child.get(KeyConstants._id, null), null);
-				BundleInfo[] bfsq;
+			{
+				String strBundles;
+				RHExtension rhe;
+				Iterator<Object> it = children.valueIterator();
+				Entry<Key, Object> e;
+				Struct child;
+				String id;
+				// load and install extension if necessary
+				while (it.hasNext()) {
+					child = Caster.toStruct(it.next(), null);
+					if (child == null) continue;
+					id = Caster.toString(child.get(KeyConstants._id, null), null);
+					BundleInfo[] bfsq;
+					try {
+						String res = Caster.toString(child.get(KeyConstants._resource, null), null);
+						if (StringUtil.isEmpty(res)) res = Caster.toString(child.get(KeyConstants._path, null), null);
+						if (StringUtil.isEmpty(res)) res = Caster.toString(child.get(KeyConstants._url, null), null);
+
+						if (StringUtil.isEmpty(id) && StringUtil.isEmpty(res)) continue;
+
+						rhe = RHExtension.installExtension(config, id, Caster.toString(child.get(KeyConstants._version, null), null), res, false);
+						// startBundles(config, rhe, firstLoad);
+						extensions.add(rhe);
+						// installedFiles.add(rhe.getExtensionFile());
+						// installedIds.add(rhe.getId());
+					}
+					catch (Throwable t) {
+						ExceptionUtil.rethrowIfNecessary(t);
+						log(config, t);
+						continue;
+					}
+				}
+			}
+
+			// start bundles in parallel but wait for them to finish
+			CountDownLatch latch = new CountDownLatch(extensions.size());
+			ExecutorService executor = ThreadUtil.createExecutorService();
+			try {
+
+				for (RHExtension ext: extensions) {
+					executor.submit(() -> {
+						try {
+							// Add extension info to thread-safe collections
+							installedFiles.add(ext.getExtensionFile());
+							installedIds.add(ext.getId());
+
+							// Call the startBundles method for each extension
+							startBundles(config, ext, firstLoad);
+						}
+						catch (Exception e) {
+							if (deployLog != null) deployLog.error("start-bundles", e);
+						}
+						finally {
+							// Count down the latch regardless of success or failure
+							latch.countDown();
+						}
+					});
+				}
+
+				// Wait for all virtual threads to complete
 				try {
-					String res = Caster.toString(child.get(KeyConstants._resource, null), null);
-					if (StringUtil.isEmpty(res)) res = Caster.toString(child.get(KeyConstants._path, null), null);
-					if (StringUtil.isEmpty(res)) res = Caster.toString(child.get(KeyConstants._url, null), null);
-
-					if (StringUtil.isEmpty(id) && StringUtil.isEmpty(res)) continue;
-
-					// we force a new installation if we have switched from single to multi mode, because extension can
-					// act completely different if that is the case
-					rhe = RHExtension.installExtension(config, id, Caster.toString(child.get(KeyConstants._version, null), null), res, false);
-					// startBundles(config, rhe, firstLoad);
-					extensions.add(rhe);
-					// installedFiles.add(rhe.getExtensionFile());
-					// installedIds.add(rhe.getId());
+					latch.await();
 				}
-				catch (Throwable t) {
-					ExceptionUtil.rethrowIfNecessary(t);
-					log(config, t);
-					continue;
+				catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					throw new RuntimeException("Interrupted while waiting for extension processing", e);
 				}
 			}
-
-			// start bundles
-			for (RHExtension ext: extensions) {
-				installedFiles.add(ext.getExtensionFile());
-				installedIds.add(ext.getId());
-				startBundles(config, ext, firstLoad);
+			finally {
+				ThreadUtil.close(executor);
 			}
+
+			/*
+			 * for (RHExtension ext: extensions) { installedFiles.add(ext.getExtensionFile());
+			 * installedIds.add(ext.getId()); startBundles(config, ext, firstLoad); }
+			 */
 
 			// uninstall extensions no longer used
 			Resource[] installed = RHExtension.getExtensionInstalledDir(config).listResources(new ExtensionResourceFilter("lex"));

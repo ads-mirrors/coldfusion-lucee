@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -269,6 +270,48 @@ public final class ThreadUtil {
 			}
 		}
 		return Executors.newSingleThreadExecutor();
+	}
+
+	/**
+	 * Closes an ExecutorService, mimicking the behavior of ExecutorService.close() from Java 21.
+	 * <p>
+	 * This utility method provides backward compatibility for Java 11 environments by:
+	 * <ul>
+	 * <li>Using AutoCloseable.close() if the executor implements it (for future compatibility)
+	 * <li>Otherwise performing a graceful shutdown, waiting indefinitely for tasks to complete
+	 * <li>Handling interruptions by initiating an immediate shutdown
+	 * <li>Preserving the interrupted status of the current thread if interruption occurred
+	 * </ul>
+	 * </p>
+	 *
+	 * @param executor the ExecutorService to close
+	 * @throws Exception if an exception occurs during the close operation
+	 */
+	public static void close(ExecutorService executor) throws Exception {
+		if (executor instanceof AutoCloseable) {
+			((AutoCloseable) executor).close();
+		}
+		else {
+			boolean terminated = executor.isTerminated();
+			if (!terminated) {
+				executor.shutdown();
+				boolean interrupted = false;
+				while (!terminated) {
+					try {
+						terminated = executor.awaitTermination(1L, TimeUnit.DAYS);
+					}
+					catch (InterruptedException e) {
+						if (!interrupted) {
+							executor.shutdownNow();
+							interrupted = true;
+						}
+					}
+				}
+				if (interrupted) {
+					Thread.currentThread().interrupt();
+				}
+			}
+		}
 	}
 
 }
