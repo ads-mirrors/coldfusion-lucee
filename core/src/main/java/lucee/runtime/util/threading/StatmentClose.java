@@ -24,7 +24,7 @@ public final class StatmentClose implements CloserJob {
 
 	@Override
 	public String getLablel() {
-		return "closing datasource connection resultset";
+		return "Closing datasource connection resultset";
 	}
 
 	@Override
@@ -34,10 +34,10 @@ public final class StatmentClose implements CloserJob {
 			try {
 				DBUtil.closeEL(stat);
 				manager.releaseConnection(null, dc);
-				if (log != null) log.debug("StatmentClose", "sucessfully closed resultset");
+				if (log != null) log.debug("StatementClose", "Successfully closed resultset");
 			}
 			catch (Exception e) {
-				if (log != null) log.error("StatmentClose", e);
+				if (log != null) log.error("StatementClose", e);
 			}
 		}).start();
 	}

@@ -1443,14 +1443,14 @@ public final class SystemUtil {
 		// a request still will create the error template output, so it can take some time to finish
 		for (int i = 0; i < 100; i++) {
 			if (!isInLucee(thread)) {
-				if (log != null) log.info("thread", "sucessfully " + (force ? "stop" : "interrupt") + " thread.");
+				if (log != null) log.info("thread", "Successfully " + (force ? "stopped" : "interrupted") + " thread.");
 				return true;
 			}
 			SystemUtil.sleep(10);
 		}
 		if (log != null) {
 
-			log.log(force ? Log.LEVEL_ERROR : Log.LEVEL_WARN, "thread", "failed to " + (force ? "stop" : "interrupt") + " thread." + "\n",
+			log.log(force ? Log.LEVEL_ERROR : Log.LEVEL_WARN, "thread", "Failed to " + (force ? "stop" : "interrupt") + " thread." + "\n",
 					ExceptionUtil.toThrowable(thread.getStackTrace()));
 		}
 		return false;
