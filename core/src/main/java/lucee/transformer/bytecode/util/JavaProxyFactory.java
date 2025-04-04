@@ -68,6 +68,9 @@ import lucee.transformer.bytecode.visitor.ArrayVisitor;
  */
 public final class JavaProxyFactory {
 
+	// !!! for every change in terfaces this version need to be updated TODO generate automatically
+	private static final int VERSION = 2;
+
 	private static final short TYPE_CFC = 1;
 	private static final short TYPE_UDF = 2;
 
@@ -765,9 +768,7 @@ public final class JavaProxyFactory {
 			sb.append(lucee.runtime.type.util.ListUtil.arrayToList(arr, ";"));
 		}
 
-		sb.append(appendix).append(';')
-		// .append(resource.getAbsolutePath()).append(';')
-		;
+		sb.append(appendix).append(';').append(VERSION);
 
 		StringBuilder name = new StringBuilder().append(appendix.charAt(0)).append(HashUtil.create64BitHashAsString(sb.toString(), Character.MAX_RADIX).toLowerCase());
 		if (cfc != null && !StringUtil.isEmpty(cfc.getAbsName())) {

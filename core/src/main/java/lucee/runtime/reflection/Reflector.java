@@ -565,6 +565,7 @@ public final class Reflector {
 		JavaAnnotation ja = null;
 		if (md != null && (str = Caster.toString(md.get(KeyConstants._java, null), null)) != null) {
 			Struct sct = null;
+			if (StringUtil.isEmpty(str, true)) return null;
 			try {
 				sct = Caster.toStruct(DeserializeJSON.call(pc, str), null);
 			}
