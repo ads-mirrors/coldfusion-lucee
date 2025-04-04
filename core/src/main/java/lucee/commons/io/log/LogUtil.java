@@ -36,6 +36,7 @@ import lucee.runtime.PageContextImpl;
 import lucee.runtime.PageSource;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigUtil;
+import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.engine.ThreadLocalPageContext;
 
 /**
@@ -228,8 +229,11 @@ public final class LogUtil {
 	}
 
 	public static void logGlobal(Config config, int level, String type, String msg) {
+		logGlobal(ConfigUtil.getCFMLEngineFactory(config), level, type, msg);
+	}
+
+	public static void logGlobal(CFMLEngineFactory factory, int level, String type, String msg) {
 		try {
-			CFMLEngineFactory factory = ConfigUtil.getCFMLEngineFactory(config);
 			Resource log;
 			boolean check = false;
 			if (level > Log.LEVEL_DEBUG) {
@@ -264,8 +268,12 @@ public final class LogUtil {
 			ERR = null;
 			OUT = null;
 			aprint.e(type + ":" + msg);
-			aprint.e(e);
+			if (factory != null) aprint.e(e); // in case there is no factory, we expect an error and are fine to simply write to the console
 		}
+	}
+
+	public static void logGlobal(CFMLEngineFactory factory, String type, Throwable t) {
+		logGlobal(factory, Log.LEVEL_ERROR, type, ExceptionUtil.getStacktrace(t, true));
 	}
 
 	public static void logGlobal(Config config, String type, Throwable t) {
@@ -320,7 +328,7 @@ public final class LogUtil {
 
 	private static String abs(PageContext pc, String template) {
 		try {
-			Config config = pc.getConfig();
+			ConfigWeb config = pc.getConfig();
 			Resource res = config.getResource(template);
 			if (res.exists()) return template;
 			String tmp;

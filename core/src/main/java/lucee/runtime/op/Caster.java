@@ -3671,6 +3671,13 @@ public final class Caster {
 		return clazz.getName();
 	}
 
+	// do not remove, the Axis extension has a direct reference to this method via reflection
+	@Deprecated
+	public static Class cfTypeToClass(String type) throws PageException {
+		// no need to load pc at this point, the method will do when needed
+		return cfTypeToClass(null, type);
+	}
+
 	public static Class cfTypeToClass(PageContext pc, String type) throws PageException {
 		// TODO weitere typen siehe bytecode.cast.Cast
 
@@ -4235,6 +4242,7 @@ public final class Caster {
 		throw new CasterException(o, strType);
 	}
 
+	// do not remove, the Axis extension has a direct reference to this method via reflection
 	public static Component toComponent(PageContext pc, Pojo pojo, String compPath, Component defaultValue) {
 		try {
 			Component cfc = pc.loadComponent(compPath);

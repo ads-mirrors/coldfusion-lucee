@@ -70,6 +70,8 @@ public abstract class ConfigFactory {
 	public static final int NEW_FRESH = 2;
 	public static final int NEW_FROM4 = 3;
 
+	public static final String[] CONFIG_FILE_NAMES = new String[] { ".CFConfig.json", "config.json" };
+
 	public static UpdateInfo getNew(CFMLEngine engine, Resource contextDir, final boolean readOnly, UpdateInfo defaultValue) {
 		try {
 			return getNew(engine, contextDir, readOnly);
@@ -172,6 +174,7 @@ public abstract class ConfigFactory {
 		}
 		catch (Exception e) {
 			if (log != null) log.error("required-extension", e);
+			else LogUtil.logGlobal(engine.getCFMLEngineFactory(), "required-extension", e);
 		}
 	}
 
@@ -187,6 +190,7 @@ public abstract class ConfigFactory {
 		}
 		catch (Exception e) {
 			if (log != null) log.error("required-extension", e);
+			else LogUtil.logGlobal(engine.getCFMLEngineFactory(), "required-extension", e);
 		}
 		return false;
 	}
@@ -1124,6 +1128,13 @@ public abstract class ConfigFactory {
 			f.delete();
 		}
 
+	}
+
+	public static boolean isConfigFileName(String fileName) {
+		for (String fn: CONFIG_FILE_NAMES) {
+			if (fn.equalsIgnoreCase(fileName)) return true;
+		}
+		return false;
 	}
 
 }

@@ -139,7 +139,7 @@ public class MavenInfo implements Function {
 		qry.setAt(KeyConstants._scope, row, scope);
 		qry.setAt(KeyConstants._optional, row, optional);
 		qry.setAt(KeyConstants._checksum, row, checksum);
-		qry.setAt(KeyConstants._url, row, pom.getArtifactAsURL("jar").toExternalForm());
+		qry.setAt(KeyConstants._url, row, pom.getArtifact("jar", null).toExternalForm());
 		qry.setAt(KeyConstants._path, row, jar.toString());
 	}
 }

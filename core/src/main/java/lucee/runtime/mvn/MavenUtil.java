@@ -4,30 +4,41 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URL;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
+import lucee.print;
 import lucee.commons.digest.Hash;
+import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
+import lucee.commons.io.res.ResourceProvider;
+import lucee.commons.io.res.ResourcesImpl;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.SerializableObject;
 import lucee.commons.lang.StringUtil;
@@ -43,15 +54,39 @@ import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 
-public final class MavenUtil {
+public class MavenUtil {
 	private static Map<String, String> sysprops;
 	private static Object token = new SerializableObject();
+
+	private static final RequestConfig DEFAULT_REQUEST_CONFIG;
+	public static final int CONNECTION_TIMEOUT = 5000;
+	public static final int READ_TIMEOUT_HEAD = 5000;
+	public static final int READ_TIMEOUT_GET = 5000;
+	public static final long ARTIFACT_UNAVAILABLE_CACHE_DURATION = Caster.toLongValue(SystemUtil.getSystemPropOrEnvVar("lucee.maven.negative.cache.duration", null), 60000L * 15L);
+
+	private static final DateTimeFormatter MAVEN_DATE_FORMATTER = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
+
+	// Static initialization block
+	static {
+		DEFAULT_REQUEST_CONFIG = RequestConfig.custom()
+
+				.setRedirectsEnabled(true) // allow redirect
+				.setMaxRedirects(5) // max 5 redirects
+				.setSocketTimeout(10000) // The maximum period of inactivity between data packets once the connection is established.
+				.setConnectTimeout(5000) // The time it takes to establish a TCP connection to the server (the initial handshake).
+				.setConnectionRequestTimeout(5000) // The time to wait for a connection from the connection manager/pool.
+				.build();
+	}
+	private static Map<Repository, AtomicInteger> ranking = new ConcurrentHashMap<>();
+	private static boolean initLocalRepository;
+	private static Resource localRepository;
 
 	public static Map<String, String> getProperties(Map<String, String> rawProperties, POM parent) throws IOException {
 		Map<String, String> properties = parent != null ? parent.getProperties() : new LinkedHashMap<>();
 
 		int size = properties == null ? 0 : properties.size();
 		if (rawProperties != null) size += rawProperties.size();
+
 		Map<String, String> newProperties = new HashMap<>(size);
 
 		// copy data from parent
@@ -121,7 +156,6 @@ public final class MavenUtil {
 				repositories.put(r.getUrl(), r);
 			}
 		}
-
 		return repositories.values();
 
 	}
@@ -203,6 +237,7 @@ public final class MavenUtil {
 				throw new IOException("could not find version for dependency [" + g + ":" + a + "] in [" + current + "]");
 			}
 		}
+
 		v = resolvePlaceholders(current, v, properties);
 		// PATCH TODO better solution for this
 		if (v != null && v.startsWith("[")) {
@@ -217,8 +252,8 @@ public final class MavenUtil {
 				o = pdm.getOptionalAsString();
 			}
 		}
-		if (o != null) o = resolvePlaceholders(current, o, properties);
-		return new GAVSO(g, a, v, s, o, null).setDependency(GAVSO.ORIGIN_DEPENDENCY);
+		if (o != null) s = resolvePlaceholders(current, o, properties);
+		return new GAVSO(g, a, v, s, o, null);
 		// p = POM.getInstance(localDirectory, g, a, v, s, o, current.getDependencyScope(),
 		// current.getDependencyScopeManagement());
 
@@ -246,15 +281,6 @@ public final class MavenUtil {
 			this.c = null;
 		}
 
-		public GAVSO setDependency(int d) {
-			this.d = d;
-			return this;
-		}
-
-		public int getDependency() {
-			return d;
-		}
-
 		public GAVSO(String g, String a, String v, String s, String o, String c) {
 			this.g = g;
 			this.a = a;
@@ -262,6 +288,15 @@ public final class MavenUtil {
 			this.s = s;
 			this.o = o;
 			this.c = c;
+		}
+
+		public GAVSO setDependency(int d) {
+			this.d = d;
+			return this;
+		}
+
+		public int getDependency() {
+			return d;
 		}
 
 		@Override
@@ -290,6 +325,7 @@ public final class MavenUtil {
 
 		private String toGAV() {
 			StringBuilder sb = new StringBuilder();
+
 			if (!StringUtil.isEmpty(g, true)) sb.append(g);
 			if (!StringUtil.isEmpty(a, true)) {
 				if (sb.length() > 0) sb.append(':');
@@ -304,6 +340,7 @@ public final class MavenUtil {
 
 		private String toGA() {
 			StringBuilder sb = new StringBuilder();
+
 			if (!StringUtil.isEmpty(g, true)) sb.append(g);
 			if (!StringUtil.isEmpty(a, true)) {
 				if (sb.length() > 0) sb.append(':');
@@ -476,54 +513,173 @@ public final class MavenUtil {
 		return str != null && str.indexOf("${") != -1;
 	}
 
+	public static void downloadAsync(POM pom, Collection<Repository> repositories, String type, Log log) {
+		ThreadUtil.getThread(() -> {
+			try {
+				download(pom, repositories, type, log);
+			}
+			catch (IOException e) {
+			}
+		}, true).start();
+	}
+
 	public static void download(POM pom, Collection<Repository> repositories, String type, Log log) throws IOException {
 		Resource res = pom.getArtifact(type);
+
+		// file is empty or does not exist
 		if (!res.isFile()) {
 			synchronized (SystemUtil.createToken("mvn", res.getAbsolutePath())) {
+				// file is empty or does not exist
 				if (!res.isFile()) {
-					URL url = null;
+
+					Resource localRepo = getLocalRepository();
+					if (localRepo != null) {
+						Resource tmp = pom.getArtifact(localRepo, type);
+						print.e("->" + tmp);
+						// found one in local maven
+						if (tmp.isFile()) {
+							tmp.copyTo(res, false);
+							print.e("=>" + tmp);
+							return;
+						}
+					}
+
+					// it did already check for file, but it was not found
+					Resource lastUpdated = res.getParentResource().getRealResource(res.getName() + ".lastUpdated");
+					if (lastUpdated.isFile()) {
+
+						// try again? TODO read lastModified from file, there is an entry for every single endpoint
+						if ((lastUpdated.lastModified() + ARTIFACT_UNAVAILABLE_CACHE_DURATION) < System.currentTimeMillis()) {
+							lastUpdated.remove(true);
+							download(pom, repositories, type, log);
+							return;
+						}
+						throw new IOException("Failed to download [" + pom + "] ");
+					}
+
+					String scriptName = pom.getGroupId().replace('.', '/') + "/" + pom.getArtifactId() + "/" + pom.getVersion() + "/" + pom.getArtifactId() + "-" + pom.getVersion()
+							+ "." + type;
+					StringBuilder info = null;
 					try {
-						url = pom.getArtifactAsURL(type, repositories);
-						if (log != null) log.info("maven", "download [" + url + "]");
-						try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-							HttpGet request = new HttpGet(url.toExternalForm());
-							HttpResponse response = httpClient.execute(request);
-							HttpEntity entity = response.getEntity();
-							int sc = response.getStatusLine().getStatusCode();
-							if (sc == 200) {
-								if (entity != null) {
-									Exception ex = null;
-									InputStream is = null;
-									Resource tmp = SystemUtil.getTempFile(type, false);
-									try {
-										is = entity.getContent();
-										IOUtil.copy(is, tmp, false);
-									}
-									catch (IOException e) {
-										ex = e;
-									}
-									finally {
-										IOUtil.closeEL(is);
-										HTTPUtil.validateDownload(url, response, tmp, pom.getChecksum(), true, ex);
-										tmp.moveTo(res);
+						if (repositories == null || repositories.isEmpty()) repositories = pom.getRepositories();
+
+						if (repositories == null || repositories.size() == 0) {
+							IOException ioe = new IOException("Failed to download java artifact [" + pom.toString() + "] for type [" + type + "]");
+							// "Failed to download java artifact [" + pom.toString() + "] for type [" + type + "], attempted
+							// endpoint(s): [" + sb + "]");
+							// if (cause != null) ExceptionUtil.initCauseEL(ioe, cause);
+							throw ioe;
+						}
+						// url = pom.getArtifact(type, repositories);
+						//////// if (log != null) log.info("maven", "download [" + url + "]");
+						URL url;
+						CloseableHttpClient httpClient;
+						for (Repository r: sort(repositories)) {
+							url = null;
+							httpClient = null;
+							try {
+								url = new URL(r.getUrl() + scriptName);
+								httpClient = HttpClients.createDefault();
+
+								HttpGet request = new HttpGet(url.toExternalForm());
+								request.setConfig(DEFAULT_REQUEST_CONFIG);
+								HttpResponse response = httpClient.execute(request);
+								HttpEntity entity = response.getEntity();
+								int sc = response.getStatusLine().getStatusCode();
+								// print.e(type + " >> " + url + " >> " + sc);
+								if (sc == 200) {
+									if (entity != null) {
+										Exception ex = null;
+										InputStream is = null;
+										Resource tmp = SystemUtil.getTempFile(type, false);
+										try {
+											is = entity.getContent();
+											IOUtil.copy(is, tmp, false);
+										}
+										catch (IOException e) {
+											ex = e;
+										}
+										finally {
+											IOUtil.closeEL(is);
+											HTTPUtil.validateDownload(url, response, tmp, pom.getChecksum(), true, ex);
+											tmp.moveTo(res);
+										}
+										deleteLastUpdated(res);
+										AtomicInteger rank = ranking.get(r);
+										if (rank != null) rank.incrementAndGet();
+										else {
+											rank = new AtomicInteger(1);
+											ranking.put(r, rank);
+										}
+										return;
 									}
 								}
+								else {
+									if (info == null) info = createInfo();
+									info.append(r).append(".error=").append('\n');
+									info.append(r).append(".lastUpdated=").append(System.currentTimeMillis()).append('\n');
+									EntityUtils.consume(entity); // Ensure the response entity is fully consumed
+									// throw new IOException("Failed to download: " + url + " for [" + pom + "] - " +
+									// response.getStatusLine().getStatusCode());
+								}
 							}
-							else {
-								EntityUtils.consume(entity); // Ensure the response entity is fully consumed
-								throw new IOException("Failed to download: " + url + " for [" + pom + "] - " + response.getStatusLine().getStatusCode());
+							catch (Exception e) {
+								if (info == null) info = createInfo();
+								info.append(r).append(".error=").append('\n');
+								info.append(r).append(".lastUpdated=").append(System.currentTimeMillis()).append('\n');
+							}
+							finally {
+								if (httpClient != null) httpClient.close();
 							}
 						}
 					}
 					catch (IOException ioe) {
+						createLastUpdated(res, info);
 						IOException ex = new IOException("Failed to download: " + pom + "");
 						ExceptionUtil.initCauseEL(ex, ioe);
 						// MUST add again ResourceUtil.deleteEmptyFoldersInside(pom.getLocalDirectory());
 						throw ex;
 					}
+
+					createLastUpdated(res, info);
+					throw new IOException("Failed to download [" + pom + "] ");
 				}
 			}
-		} // TODO handle not 200
+		}
+	}
+
+	private static StringBuilder createInfo() {
+		return new StringBuilder("#NOTE: This is a Maven Resolver internal implementation file (created by Lucee), its format can be changed without prior notice.\n#")
+				.append(ZonedDateTime.now().format(MAVEN_DATE_FORMATTER)).append('\n');
+	}
+
+	private static void createLastUpdated(Resource res, StringBuilder info) throws IOException {
+		Resource lastUpdated = res.getParentResource().getRealResource(res.getName() + ".lastUpdated");
+		// print.e(lastUpdated);
+		// print.e(info);
+		IOUtil.write(lastUpdated, info.toString(), CharsetUtil.UTF8, false);
+	}
+
+	private static void deleteLastUpdated(Resource res) {
+		Resource lastUpdated = res.getParentResource().getRealResource(res.getName() + ".lastUpdated");
+		lastUpdated.delete();
+	}
+
+	private static Repository[] sort(Collection<Repository> repositories) {
+		// Convert collection to array for sorting
+		Repository[] result = repositories.toArray(new Repository[0]);
+		AtomicInteger defaultValue = new AtomicInteger(0);
+		// Sort the array based on the ranking map
+		Arrays.sort(result, (repo1, repo2) -> {
+			// Get the count for each repository, defaulting to 0 if not in the map
+			int count1 = ranking.getOrDefault(repo1, defaultValue).get();
+			int count2 = ranking.getOrDefault(repo2, defaultValue).get();
+
+			// Sort in descending order (highest count first)
+			return Integer.compare(count2, count1);
+		});
+
+		return result;
 	}
 
 	public static POM toPOM(Resource localDirectory, Collection<Repository> repositories, POMReader.Dependency dependency, Map<String, String> properties, int dependencyScope,
@@ -546,23 +702,6 @@ public final class MavenUtil {
 		);
 	}
 
-	public static int toScopes(String scopes, int defaultValue) {
-		if (StringUtil.isEmpty(scopes, true)) return defaultValue;
-		return toScopes(ListUtil.listToStringArray(scopes, ','), defaultValue);
-	}
-
-	public static int toScopes(String[] scopes, int defaultValue) {
-		if (scopes.length == 0) return defaultValue;
-
-		int rtn = 0;
-		for (String scope: scopes) {
-			rtn += toScope(scope, 0);
-		}
-		if (rtn > 0) return rtn;
-
-		return defaultValue;
-	}
-
 	public static int toScopes(String scopes) throws IOException {
 		if (StringUtil.isEmpty(scopes, true)) throw new IOException("there is no scope defined");
 		return toScopes(ListUtil.listToStringArray(scopes, ','));
@@ -578,6 +717,18 @@ public final class MavenUtil {
 			rtn += tmp;
 		}
 		return rtn;
+	}
+
+	public static int toScopes(String scopes, int defaultValue) {
+		if (StringUtil.isEmpty(scopes, true)) return defaultValue;
+
+		int rtn = 0;
+		for (String scope: ListUtil.listToStringArray(scopes, ',')) {
+			rtn += toScope(scope, 0);
+		}
+		if (rtn > 0) return rtn;
+
+		return defaultValue;
 	}
 
 	public static int toScope(String scope, int defaultValue) {
@@ -671,7 +822,7 @@ public final class MavenUtil {
 	}
 
 	public static GAVSO toGAVSO(Object obj, GAVSO defaultValue) {
-		Struct el = Caster.toStruct(obj, null);
+		Struct el = Caster.toStruct(obj, null, false);
 		if (el != null) {
 			String g = Caster.toString(el.get(KeyConstants._groupId, null), null);
 			if (StringUtil.isEmpty(g)) g = Caster.toString(el.get(KeyConstants._g, null), null);
@@ -801,6 +952,20 @@ public final class MavenUtil {
 				"$";
 
 		return version.matches(versionPattern);
+	}
+
+	public static Resource getLocalRepository() {
+		if (!initLocalRepository) {
+			String userHome = System.getProperty("user.home");
+
+			if (!StringUtil.isEmpty(userHome, true)) {
+				ResourceProvider frp = ResourcesImpl.getFileResourceProvider();
+				Resource rep = frp.getResource(userHome).getRealResource(".m2/repository");
+				if (rep.isDirectory()) localRepository = rep;
+			}
+			initLocalRepository = true;
+		}
+		return localRepository;
 	}
 
 	public static String createChecksum(Resource res, String algorithm) throws IOException {

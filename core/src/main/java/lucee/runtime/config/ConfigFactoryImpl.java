@@ -285,9 +285,10 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 			boolean hasConfigNew = configFileNew.exists() && configFileNew.length() > 0;
 
 			if (!hasConfigNew) {
-				LogUtil.logGlobal(null, Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(), "has no json server context config [" + configFileNew + "]");
+				LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(),
+						"has no json server context config [" + configFileNew + "]");
 				hasConfigOld = configFileOld.exists() && configFileOld.length() > 0;
-				LogUtil.logGlobal(null, Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(),
+				LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(),
 						"has " + (hasConfigOld ? "" : "no ") + "xml server context config [" + configFileOld + "]");
 			}
 			ConfigServerImpl config = existing != null ? existing : new ConfigServerImpl(engine, initContextes, contextes, configDir, configFileNew, ui, essentialOnly, doNew);
@@ -295,7 +296,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 			// translate to new
 			if (!hasConfigNew) {
 				if (hasConfigOld) {
-					LogUtil.logGlobal(null, Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(), "convert server context xml config to json");
+					LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(), "convert server context xml config to json");
 					try {
 						translateConfigFile(config, configFileOld, configFileNew, "multi", true);
 					}

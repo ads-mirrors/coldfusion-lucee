@@ -1,8 +1,8 @@
 component extends = "org.lucee.cfml.test.LuceeTestCase" {
 
-	variables.isModernHibernate=left(bundleInfo(createObject("java","org.lucee.extension.orm.hibernate.HibernateORMEngine")).version,1)>=5;
-
-
+	function isModernHibernate(){		
+		return (left(bundleInfo(createObject("java","org.lucee.extension.orm.hibernate.HibernateORMEngine")).version,1)>=5);
+	}
 
 	function run( testResults , testBox ) {
 
@@ -29,8 +29,8 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" {
 			});
 
 			// this only works for Hibernate >=5
-			it(title="test array parameter", skip=!variables.isModernHibernate, body=function( currentSpec ) {
-				if(!variables.isModernHibernate) return;
+			it(title="test array parameter",body=function( currentSpec ) {
+				if( !isModernHibernate() ) return;
 				local.result = _InternalRequest(
 					template : "#uri#/index.cfm",
 					forms : {Scene = "array"}

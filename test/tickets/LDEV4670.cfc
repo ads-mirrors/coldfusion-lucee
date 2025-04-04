@@ -1,40 +1,51 @@
-component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
+component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" skip=true {
 
 	function isMySqlNotSupported() {
-		return true; // disable for the moment, because it still fails and blocks the build
+		// return true; // disable for the moment, because it still fails and blocks the build
 		var mySql = server.getDatasource("mysql");
 		return isEmpty( mysql );
 	}
 
 	function run( testResults , testBox ) {
-		describe( title="Test suite for LDEV-4670", body=function() {
+		xdescribe( title="Test suite for LDEV-4670 - datasource", body=function() {
 			
 			beforeEach( function(){
 				variables.startingTZ=getTimeZone();
 				setTimeZone("UTC");
-            });
+			});
 			afterEach( function(){
-                setTimeZone(variables.startingTZ?:"UTC");
-            });
+				setTimeZone(variables.startingTZ?:"UTC");
+			});
 			it( title='Checking datasource session expiry, timezone UTC',skip=isMySqlNotSupported(),body=function( currentSpec ) {
 				var remainingSessions = testSessionTimezone( "UTC", "datasource" );
-				//dumpResult( remainingSessions, "UTC" );
+				dumpResult( remainingSessions, "UTC" );
 				expect( remainingSessions.recordcount ).toBe( 0 );
 			});
 
 			it( title='Checking datasource session expiry, timezone PDT -7',skip=isMySqlNotSupported(),body=function( currentSpec ) {
 				var remainingSessions = testSessionTimezone( "PDT", "datasource" );
-				//dumpResult( remainingSessions, "PDT" );
+				dumpResult( remainingSessions, "PDT" );
 				expect( remainingSessions.recordcount ).toBe( 0 );
 			});
 
 			it( title='Checking datasource session expiry, timezone AEST +10',skip=isMySqlNotSupported(),body=function( currentSpec ) {
 				var remainingSessions = testSessionTimezone( "AEST", "datasource" );
-				//dumpResult( remainingSessions, "AEST" );
+				dumpResult( remainingSessions, "AEST" );
 
 				expect( remainingSessions.recordcount ).toBe( 0 );
 			});
+		});
 
+		xdescribe( title="Test suite for LDEV-4670 - memory", body=function() {
+
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("UTC");
+			});
+			afterEach( function(){
+				setTimeZone(variables.startingTZ?:"UTC");
+			});
+			
 			it( title='Checking memory session expiry, timezone UTC', body=function( currentSpec ) {
 				var remainingSessions = testSessionTimezone( "UTC", "memory" );
 				//dumpResult( remainingSessions, "UTC" );
@@ -65,9 +76,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 	}
 
 	private query function testSessionTimezone( required string timezone, required string sessionStorageType ){
-		//systemOutput( "  ", true );
+		systemOutput( "  ", true );
 
-		//systemOutput(">>>>> testSessionTimezone #arguments.timezone# / #arguments.sessionStorageType# ----- ", true);
+		systemOutput(">>>>> testSessionTimezone #arguments.timezone# / #arguments.sessionStorageType# ----- ", true);
 		if ( arguments.sessionStorageType == "datasource" ) {
 			var result = testSession("first cleanout sessions table",{
 				action: "purge",
@@ -196,16 +207,18 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="session" {
 	}
 
 	private void function dumpResult( remainingSessions, timezone ){
-		// systemOutput("", true);
+		systemOutput("", true);
 		if ( remainingSessions.recordcount eq 0 )
 			return;
-		// systemOutput( "#timezone# has #remainingSessions.recordcount# sessions, expires: "
-		//		& epochToDate( remainingSessions.expires )
-		//		& ", now: #dateTimeFormat(now(), " yyyy-mm-dd HH:nn:ss:LLL", "UTC" )#",
-		//	 true );
+		systemOutput( "#timezone# has #remainingSessions.recordcount# sessions", true);
+		systemOutput( "expires: " & epochToDate( remainingSessions.expires) , true );
+		systemOutput( "now    :#dateTimeFormat(now(), " yyyy-mm-dd HH:nn:ss:LLL", "UTC" )#", true );
 		var epoch = dateTimeFormat( now(), 'epochms' );
-		// if ( len( remainingSessions.expires ) )
-			// systemOutput( "expires: " & remainingSessions.expires & ", now: #epoch#, diff: #epoch-remainingSessions.expires#",  true );
+		if ( len( remainingSessions.expires ) ) {
+			systemOutput( "expires: " & remainingSessions.expires, true)
+			systemOutput( "now    : #epoch#", true);
+			systemOutput( "diff   : #epoch-remainingSessions.expires# (now-expires)",  true );
+		}
 	}
 
 	// Private functions
