@@ -404,6 +404,10 @@ public class POM {
 		return local(localDirectory, type);
 	}
 
+	Resource getArtifact(Resource directory, String type) {
+		return local(directory, type);
+	}
+
 	public Resource getArtifact() throws IOException {
 		initXML();
 		if (artifactExtension == null) return null;

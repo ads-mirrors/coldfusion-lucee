@@ -29,12 +29,15 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
+import lucee.print;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
+import lucee.commons.io.res.ResourceProvider;
+import lucee.commons.io.res.ResourcesImpl;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.SerializableObject;
 import lucee.commons.lang.StringUtil;
@@ -70,6 +73,9 @@ public class MavenUtil {
 				.setConnectionRequestTimeout(5000) // The time to wait for a connection from the connection manager/pool.
 				.build();
 	}
+	private static Map<Repository, AtomicInteger> ranking = new ConcurrentHashMap<>();
+	private static boolean initLocalRepository;
+	private static Resource localRepository;
 
 	public static Map<String, String> getProperties(Map<String, String> rawProperties, POM parent) throws IOException {
 		Map<String, String> properties = parent != null ? parent.getProperties() : new LinkedHashMap<>();
@@ -457,8 +463,6 @@ public class MavenUtil {
 		return str != null && str.indexOf("${") != -1;
 	}
 
-	private static Map<Repository, AtomicInteger> ranking = new ConcurrentHashMap<>();
-
 	public static void downloadAsync(POM pom, Collection<Repository> repositories, String type, Log log) {
 		ThreadUtil.getThread(() -> {
 			try {
@@ -477,6 +481,19 @@ public class MavenUtil {
 			synchronized (SystemUtil.createToken("mvn", res.getAbsolutePath())) {
 				// file is empty or does not exist
 				if (!res.isFile()) {
+
+					Resource localRepo = getLocalRepository();
+					if (localRepo != null) {
+						Resource tmp = pom.getArtifact(localRepo, type);
+						print.e("->" + tmp);
+						// found one in local maven
+						if (tmp.isFile()) {
+							tmp.copyTo(res, false);
+							print.e("=>" + tmp);
+							return;
+						}
+					}
+
 					// it did already check for file, but it was not found
 					Resource lastUpdated = res.getParentResource().getRealResource(res.getName() + ".lastUpdated");
 					if (lastUpdated.isFile()) {
@@ -868,6 +885,24 @@ public class MavenUtil {
 				"$";
 
 		return version.matches(versionPattern);
+	}
+
+	public static Resource getLocalRepository() {
+		if (!initLocalRepository) {
+			String userHome = System.getProperty("user.home");
+
+			if (!StringUtil.isEmpty(userHome, true)) {
+				ResourceProvider frp = ResourcesImpl.getFileResourceProvider();
+				Resource rep = frp.getResource(userHome).getRealResource(".m2/repository");
+				if (rep.isDirectory()) localRepository = rep;
+			}
+			initLocalRepository = true;
+		}
+		return localRepository;
+	}
+
+	public static void main(String[] args) {
+		print.e(getLocalRepository());
 	}
 
 }
