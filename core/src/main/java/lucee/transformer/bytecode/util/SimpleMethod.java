@@ -8,4 +8,6 @@ public interface SimpleMethod {
 	public Class[] getParameterTypes() throws IOException;
 
 	public Class getReturnType() throws IOException;
+
+	public String hash();
 }

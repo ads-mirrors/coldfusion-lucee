@@ -416,9 +416,9 @@ public class JavaProxyFactory {
 				for (int i = 0; i < interfaces.length; i++) {
 					_createProxy(cw, cDone, mDone, cfc, interfaces[i], classPath);
 				}
-				if (!hasTemplates) {
-					createProxyFromComponentInterface(cw, cDone, mDone, cfc, classPath);
-				}
+				// if (!hasTemplates) {
+				createProxyFromComponentInterface(cw, cDone, mDone, cfc, classPath);
+				// }
 				cw.visitEnd();
 
 				// create class file
@@ -535,7 +535,7 @@ public class JavaProxyFactory {
 		}
 	}
 
-	private static class SimpleMethodReflect implements SimpleMethod {
+	private static class SimpleMethodReflect extends SimpleMethodSupport {
 		private Method method;
 
 		public SimpleMethodReflect(Method method) {
@@ -558,7 +558,7 @@ public class JavaProxyFactory {
 		}
 	}
 
-	private static class SimpleMethodProvided implements SimpleMethod {
+	private static class SimpleMethodProvided extends SimpleMethodSupport {
 
 		private String name;
 		private Class[] parameterTypes;
@@ -593,7 +593,8 @@ public class JavaProxyFactory {
 		String str = src.getName() + "(" + Reflector.getDspMethods(classArgs) + ")";
 		Class rtnClass = mDone.get(str);
 		if (rtnClass != null) {
-			if (rtnClass != classRtn) throw new IOException("there is a conflict with method [" + str + "], this method is declared more than once with different return types.");
+			// if (rtnClass != classRtn) throw new IOException("there is a conflict with method [" + str + "],
+			// this method is declared more than once with different return types.");
 			return;
 		}
 		mDone.put(str, classRtn);

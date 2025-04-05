@@ -3774,7 +3774,7 @@ public final class Caster {
 					return Object.class;
 				}
 				if (lcType.equals("void")) {
-					return Object.class;
+					return void.class;
 				}
 				break;
 			case 'x':

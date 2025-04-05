@@ -21,7 +21,6 @@ package lucee.runtime.type;
 import java.security.NoSuchAlgorithmException;
 
 import lucee.commons.digest.Hash;
-import lucee.commons.lang.CFTypes;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.Component;
 import lucee.runtime.ComponentScope;
@@ -185,7 +184,7 @@ public abstract class UDFGSProperty extends MemberSupport implements UDFPlus {
 
 	@Override
 	public int getReturnType() {
-		return CFTypes.toShortStrict(getReturnTypeAsString(), CFTypes.TYPE_UNKNOW);
+		return properties.getReturnType();// CFTypes.toShortStrict(getReturnTypeAsString(), CFTypes.TYPE_UNKNOW);
 	}
 
 	@Override
