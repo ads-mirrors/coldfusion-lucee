@@ -128,7 +128,7 @@ public final class ThreadTag extends BodyTagImpl implements DynamicAttributes {
 		else if ("terminate".equals(lcAction)) this.action = ACTION_TERMINATE;
 		else if ("interrupt".equals(lcAction)) this.action = ACTION_INTERRUPT;
 		else throw new ApplicationException("Invalid value [" + strAction + "] for attribute [action]",
-				"values for attribute action are: [interrupt, join, run, sleep, terminate]");
+				"Supported values are: [interrupt, join, run, sleep, terminate]");
 	}
 
 	/**
@@ -154,7 +154,7 @@ public final class ThreadTag extends BodyTagImpl implements DynamicAttributes {
 	 * @param throwonerror value to set
 	 **/
 	public void setThrowonerror(boolean throwonerror) throws ApplicationException {
-		if (this.action != ACTION_JOIN && throwonerror) throw new ApplicationException("Attribute [throwonerror] is only supported for action [join]");
+		if (this.action != ACTION_JOIN && throwonerror) throw new ApplicationException("Attribute [throwOnError] is only supported for action [join]");
 		this.throwonerror = throwonerror;
 	}
 
@@ -204,7 +204,7 @@ public final class ThreadTag extends BodyTagImpl implements DynamicAttributes {
 			type = TYPE_DAEMON;
 		}
 		else {
-			throw new ApplicationException("Invalid value [" + strType + "] for attribute [type]", "Supported values for attribute [type] are: [task,daemon (default)]");
+			throw new ApplicationException("Invalid value [" + strType + "] for attribute [type]", "Supported values for attribute [type] are: [task, daemon (default)]");
 		}
 	}
 
@@ -237,17 +237,17 @@ public final class ThreadTag extends BodyTagImpl implements DynamicAttributes {
 
 			// tries
 			Object oTries = sct.get(KeyConstants._tries, null);
-			if (oTries == null) throw new ExpressionException("Missing key tries inside struct");
+			if (oTries == null) throw new ExpressionException("Missing key [tries] inside struct");
 			int tries = Caster.toIntValue(oTries);
-			if (tries < 0) throw new ExpressionException("Tries must contain a none negative value");
+			if (tries < 0) throw new ExpressionException("[Tries] must be a non negative value");
 
 			// interval
 			Object oInterval = sct.get(KeyConstants._interval, null);
 			if (oInterval == null) oInterval = sct.get(KeyConstants._intervall, null);
 
-			if (oInterval == null) throw new ExpressionException("Missing key interval inside struct");
+			if (oInterval == null) throw new ExpressionException("Missing key [interval] inside struct");
 			int interval = toSeconds(oInterval);
-			if (interval < 0) throw new ExpressionException("Interval should contain a positive value or 0");
+			if (interval < 0) throw new ExpressionException("[Interval] should contain a positive value or 0");
 
 			return new ExecutionPlanImpl(tries + plus, interval);
 		}
@@ -323,7 +323,7 @@ public final class ThreadTag extends BodyTagImpl implements DynamicAttributes {
 			Threads ts = ThreadTag.getThreadScope(pc, name); // pc.getThreadScope(name);
 
 			if (type == TYPE_DAEMON) {
-				if (ts != null) throw new ApplicationException("Could not create a thread with the name [" + name.getString() + "]. name must be unique within a request");
+				if (ts != null) throw new ApplicationException("Unable to create thread [" + name.getString() + "], as a thread with this name already exists, threads names must be unique within a request");
 				ChildThreadImpl ct = new ChildThreadImpl((PageContextImpl) pc, currentPage, name.getString(), threadIndex, attrs, false, separateScopes);
 				ThreadsImpl t = new ThreadsImpl(ct);
 				PageContextImpl root = (PageContextImpl) getRootPageContext(pc);
@@ -423,7 +423,7 @@ public final class ThreadTag extends BodyTagImpl implements DynamicAttributes {
 		if (duration >= 0) {
 			SystemUtil.sleep(duration);
 		}
-		else throw new ExpressionException("The attribute duration must be greater or equal than 0, now [" + duration + "]");
+		else throw new ExpressionException("The attribute [duration] must be greater or equal than 0, was [" + duration + "]");
 
 	}
 
@@ -449,7 +449,8 @@ public final class ThreadTag extends BodyTagImpl implements DynamicAttributes {
 			if (ts == null) {
 				if (all == null) all = ThreadTag.getTagNames(ThreadTag.getAllNoneAncestorThreads(pc));
 
-				throw new ApplicationException("There is no thread running with the name [" + n + "], " + "only the following threads existing [" + ListUtil.listToListEL(all, ", ")
+				throw new ApplicationException("There is no thread running with the name [" + n + "], ",
+					 "The existing threads are [" + ListUtil.listToListEL(all, ", ")
 						+ "] ->" + ListUtil.toList(all, ", "));
 			}
 			ct = ts.getChildThread();
@@ -477,7 +478,7 @@ public final class ThreadTag extends BodyTagImpl implements DynamicAttributes {
 	private void doTerminate() throws ApplicationException {
 		Threads ts = ThreadTag.getThreadScope(pc, KeyImpl.init(nameAsString(false))); // , ThreadTag.LEVEL_CURRENT + ThreadTag.LEVEL_KIDS
 
-		if (ts == null) throw new ApplicationException("There is no thread running with the name [" + nameAsString(false) + "]");
+		if (ts == null) throw new ApplicationException("Terminate thread failed, there is no thread running with the name [" + nameAsString(false) + "]");
 		ChildThread ct = ts.getChildThread();
 
 		if (ct.isAlive()) {
@@ -497,7 +498,7 @@ public final class ThreadTag extends BodyTagImpl implements DynamicAttributes {
 
 		// interrupt thread by name
 		Threads ts = ThreadTag.getThreadScope(pc, name);
-		if (ts == null) throw new ApplicationException("There is no thread running with the name [" + nameAsString(false) + "]");
+		if (ts == null) throw new ApplicationException("Interrupt thread failed, there is no thread running with the name [" + nameAsString(false) + "]");
 		ChildThread ct = ts.getChildThread();
 		if (ct.isAlive()) {
 			ct.interrupt();
