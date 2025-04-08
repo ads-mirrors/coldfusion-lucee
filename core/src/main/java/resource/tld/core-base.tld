@@ -2661,21 +2661,21 @@ To use cached data, the tag must be called with the exact same arguments.</descr
 			<name>folder</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description></description>
+			<description>Folder for action, default is INBOX</description>
 		</attribute>
 		<attribute>
 			<type>string</type>
 			<name>newFolder</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description></description>
+			<description>Name of new folder, used by action renameFolder and moveMail</description>
 		</attribute>
 		<attribute>
 			<type>boolean</type>
 			<name>recurse</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description></description>
+			<description>Used for action listAllFolders</description>
 		</attribute>
 		<attribute>
 			<type>string</type>
