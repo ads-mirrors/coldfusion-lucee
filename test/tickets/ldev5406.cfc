@@ -6,7 +6,7 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" {
                 var result = _InternalRequest(
 					template:"#uri#\ldev5406.cfm"
 				);
-                expect( trim(result.fileContent) ).tobe( 'true' );
+                expect( trim(result.fileContent) ).notToBe('param [reqId] may not be empty');
             });
         });
     }
