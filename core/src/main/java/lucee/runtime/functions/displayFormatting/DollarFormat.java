@@ -40,9 +40,15 @@ public final class DollarFormat extends BIF {
 		return LSCurrencyFormat.call(pc, strDollar, "local", Locale.US);
 	}
 
+	public static String call(PageContext pc, String strDollar, boolean noBrackets) throws PageException {
+		if (StringUtil.isEmpty(strDollar)) strDollar = "0";// "$0,00";
+		return LSCurrencyFormat.call(pc, strDollar, "local", Locale.US, noBrackets);
+	}
+
 	@Override
 	public Object invoke(PageContext pc, Object[] args) throws PageException {
-		if (args.length == 1) return call(pc, Caster.toString(args[0]));
-		throw new FunctionException(pc, "DollarFormat", 1, 1, args.length);
+		if (args.length == 1) return call(pc, Caster.toString(args[0]), Caster.toBoolean(args[1]));
+		if (args.length == 2) return call(pc, Caster.toString(args[0]));
+		throw new FunctionException(pc, "DollarFormat", 1, 2, args.length);
 	}
 }

@@ -38,19 +38,24 @@ public final class LSCurrencyFormat extends BIF {
 	private static final long serialVersionUID = -3173006221339130136L;
 
 	public static String call(PageContext pc, Object number) throws PageException {
-		return format(toDouble(number), "local", pc.getLocale());
+		return format(toDouble(number), "local", pc.getLocale(), false);
 	}
 
 	public static String call(PageContext pc, Object number, String type) throws PageException {
-		return format(toDouble(number), type, pc.getLocale());
+		return format(toDouble(number), type, pc.getLocale(), false);
 	}
 
 	public static String call(PageContext pc, Object number, String type, Locale locale) throws PageException {
-		return format(toDouble(number), type, locale == null ? pc.getLocale() : locale);
+		return format(toDouble(number), type, locale == null ? pc.getLocale() : locale, false);
+	}
+
+	public static String call(PageContext pc, Object number, String type, Locale locale, boolean noBrackets) throws PageException {
+		return format(toDouble(number), type, locale == null ? pc.getLocale() : locale, noBrackets);
 	}
 
 	@Override
 	public Object invoke(PageContext pc, Object[] args) throws PageException {
+		if (args.length == 4) return call(pc, args[0], Caster.toString(args[1]), Caster.toLocale(args[2]), Caster.toBoolean(args[3]));
 		if (args.length == 3) return call(pc, args[0], Caster.toString(args[1]), Caster.toLocale(args[2]));
 		if (args.length == 2) return call(pc, args[0], Caster.toString(args[1]));
 		if (args.length == 1) return call(pc, args[0]);
@@ -58,40 +63,42 @@ public final class LSCurrencyFormat extends BIF {
 		throw new FunctionException(pc, "LSCurrencyFormat", 1, 3, args.length);
 	}
 
-	public static String format(double number, String type, Locale locale) throws ExpressionException {
-		if (StringUtil.isEmpty(type)) return local(locale, number);
+	public static String format(double number, String type, Locale locale, boolean noBrackets) throws ExpressionException {
+		if (StringUtil.isEmpty(type)) return local(locale, number, noBrackets);
 		type = type.trim().toLowerCase();
 
-		if (type.equals("none")) return none(locale, number);
-		else if (type.equals("local")) return local(locale, number);
-		else if (type.equals("international")) return international(locale, number);
+		if (type.equals("none")) return none(locale, number, noBrackets);
+		else if (type.equals("local")) return local(locale, number, noBrackets);
+		else if (type.equals("international")) return international(locale, number, noBrackets);
 		else {
-			throw new ExpressionException("invalid type for function lsCurrencyFormat", "types are: local, international or none");
+			throw new ExpressionException("invalid type for function lsCurrencyFormat", "types are: [local, international or none]");
 		}
 
 	}
 
-	public static String none(Locale locale, double number) {
+	public static String none(Locale locale, double number, boolean noBrackets) {
 		NumberFormat nf = NumberFormat.getCurrencyInstance(locale);
-		return clean(StringUtil.replace(nf.format(number), nf.getCurrency().getSymbol(locale), "", false), number);
+		return clean(StringUtil.replace(nf.format(number), 
+			nf.getCurrency().getSymbol(locale), "", false), number, noBrackets);
 	}
 
-	public static String local(Locale locale, double number) {
-		return clean(NumberFormat.getCurrencyInstance(locale).format(number), number);
+	public static String local(Locale locale, double number, boolean noBrackets) {
+		return clean(NumberFormat.getCurrencyInstance(locale).format(number), number, noBrackets);
 	}
 
-	public static String international(Locale locale, double number) {
+	public static String international(Locale locale, double number, boolean noBrackets) {
 		NumberFormat nf = NumberFormat.getCurrencyInstance(locale);
 		Currency currency = nf.getCurrency();
-		String str = clean(StringUtil.replace(nf.format(number), nf.getCurrency().getSymbol(locale), "", false), number);
+		String str = clean(StringUtil.replace(nf.format(number), nf.getCurrency().getSymbol(locale), "", false), number, noBrackets);
 		return currency.getCurrencyCode() + " " + str;
 	}
 
-	private static String clean(String str, double number) {
+	private static String clean(String str, double number, boolean noBrackets) {
 		// Java 10 returns nbsp instead of a regular space
 		if (number < 0 && str.length() > 1 && str.charAt(0) == '-') {
 			// java 11 returns -$1.00, instead of ($1.00), java 14 reverts this change
 			char[] chars = str.replace(NBSP, ' ').trim().toCharArray();
+			if (noBrackets) return String.valueOf(chars);
 			chars[0] = '(';
 			return String.valueOf(chars) + ')';
 		}
