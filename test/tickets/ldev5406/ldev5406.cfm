@@ -16,7 +16,7 @@
         query name="result" sql=sqlStmt params=params returnType="array";
         result=true;
     } catch (any msg) {
-        result=false;
+        result=msg.Message;
     }
     writeOutput(result);
 </cfscript>
