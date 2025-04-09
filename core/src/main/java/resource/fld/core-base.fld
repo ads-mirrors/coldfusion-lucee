@@ -16808,6 +16808,7 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 		</argument>
 		<argument>
 			<name>noBrackets</name>
+			<introduced>7.0.0.177</introduced>
 			<type>boolean</type>
 			<required>No</required>
 			<default>false</default>
@@ -17258,6 +17259,7 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 		</argument>
 		<argument>
 			<name>noBrackets</name>
+			<introduced>7.0.0.177</introduced>
 			<type>boolean</type>
 			<required>No</required>
 			<default>false</default>
@@ -17371,6 +17373,7 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 		</argument>
 		<argument>
 			<name>noBrackets</name>
+			<introduced>7.0.0.177</introduced>
 			<type>boolean</type>
 			<required>No</required>
 			<default>false</default>
