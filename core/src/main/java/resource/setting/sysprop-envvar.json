@@ -433,5 +433,10 @@
         "sysprop": "lucee.maven.default.repositories",
         "envvar": "LUCEE_MAVEN_DEFAULT_REPOSITORIES",
         "desc": "Specifies a comma-separated list of Maven repository URLs to use before the default repositories (Maven Central, Sonatype, JCenter). This allows customizing the Maven repositories used by Lucee for downloading dependencies. URL must include a trailing /"
+    },
+    {
+        "sysprop": "lucee.compiler.block.bytecode",
+        "envvar": "LUCEE_COMPILER_BLOCK_BYTECODE",
+        "desc": "Boolean which wontrols whether Lucee allows cfml files to be bytecode, disabled by default in Lucee 7"
     }
 ]
