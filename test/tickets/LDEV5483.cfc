@@ -13,18 +13,18 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="currency" {
 
 	function run( testResults , testBox ) {
 
-		describe( title='LDEV-5483 dollarformat, noBrackets' , body=function(){
+		describe( title='LDEV-5483 dollarformat, useBrackets' , body=function(){
 
 			it( title='dollarFormat negative values', body=function() {
 				loop array="#variables.testNumbers#" item="local.n" {
 					var positive = dollarFormat( abs(n) );
 					expect( dollarFormat(n) ).toBe( "(" & positive & ")" );
-					expect( dollarFormat(number=n, noBrackets=true ) ).toBe( "-" & positive );
+					expect( dollarFormat(number=n, useBrackets=false ) ).toBe( "-" & positive );
 				}
 			});
 		});
 
-		describe( title='LDEV-5483 lsCurrencyFormat, noBrackets', body=function(){
+		describe( title='LDEV-5483 lsCurrencyFormat, useBrackets', body=function(){
 			it( title='lsCurrencyFormat negative values', body=function() {
 				loop array="#variables.testLocales#" item="local.locale" {
 					setLocale( locale );
@@ -36,8 +36,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="currency" {
 						expect( negative ).toBe( "(" & positive & ")" );
 						expect( negative ).toInclude( symbol );
 
-						var noBrackets = LSCurrencyFormat(number=n,locale=locale, noBrackets=true);
-						expect( noBrackets ).tobe( "-" & positive );
+						var useBrackets = LSCurrencyFormat(number=n,locale=locale, useBrackets=false);
+						expect( useBrackets ).tobe( "-" & positive );
 					}
 				}
 			});
@@ -53,8 +53,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="currency" {
 						expect( negative ).toBe( "(" & positive & ")" );
 						expect( negative ).toInclude( symbol );
 
-						var noBrackets = LSEuroCurrencyFormat(number=n,locale=locale, noBrackets=true);
-						expect( noBrackets ).tobe( "-" & positive );
+						var useBrackets = LSEuroCurrencyFormat(number=n,locale=locale, useBrackets=false);
+						expect( useBrackets ).tobe( "-" & positive );
 					}
 				}
 			});

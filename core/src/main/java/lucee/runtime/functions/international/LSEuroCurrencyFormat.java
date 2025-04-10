@@ -43,7 +43,7 @@ public final class LSEuroCurrencyFormat implements Function {
 		return LSCurrencyFormat.call(pc, number, type, locale);
 	}
 
-	public static String call(PageContext pc, Object number, String type, Locale locale, boolean noBrackets) throws PageException {
-		return LSCurrencyFormat.call(pc, number, type, locale, noBrackets);
+	public static String call(PageContext pc, Object number, String type, Locale locale, boolean useBrackets) throws PageException {
+		return LSCurrencyFormat.call(pc, number, type, locale, useBrackets);
 	}
 }

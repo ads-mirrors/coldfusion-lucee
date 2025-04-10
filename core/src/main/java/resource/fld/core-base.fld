@@ -16807,11 +16807,11 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<description>Number to format</description>
 		</argument>
 		<argument>
-			<name>noBrackets</name>
+			<name>useBrackets</name>
 			<introduced>7.0.0.177</introduced>
 			<type>boolean</type>
 			<required>No</required>
-			<default>false</default>
+			<default>true</default>
 			<description>When a number is negative, by default, it is wrapped in brackets</description>
 		</argument>
 		<return>
@@ -17258,11 +17258,11 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<description>Locale to use instead of the locale of the page when processing the function</description>
 		</argument>
 		<argument>
-			<name>noBrackets</name>
+			<name>useBrackets</name>
 			<introduced>7.0.0.177</introduced>
 			<type>boolean</type>
 			<required>No</required>
-			<default>false</default>
+			<default>true</default>
 			<description>When a number is negative, by default, it is wrapped in brackets</description>
 		</argument>
 		<return>
@@ -17372,11 +17372,11 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<description>Locale to use instead of the locale of the page when processing the function</description>
 		</argument>
 		<argument>
-			<name>noBrackets</name>
+			<name>useBrackets</name>
 			<introduced>7.0.0.177</introduced>
 			<type>boolean</type>
 			<required>No</required>
-			<default>false</default>
+			<default>true</default>
 			<description>When a number is negative, by default, it is wrapped in brackets</description>
 		</argument>
 		<return>
