@@ -69,7 +69,7 @@ public final class DBUtil {
 		}
 		if ("mysql".equals(type)) {
 			if (MYSQL == null) {
-				JDBCDriver jdbc = getJDBCDriver(config, "mysql", "com.mysql.cj.jdbc.Driver", "com.mysql.cj", "9.1.0", "jdbc:mysql://{host}:{port}/{database}");
+				JDBCDriver jdbc = getJDBCDriver(config, "mysql", "com.mysql.cj.jdbc.Driver", "com.mysql.cj", "9.2.0", "jdbc:mysql://{host}:{port}/{database}");
 				MYSQL = new DataSourceDefintion(jdbc.cd, jdbc.connStr, 3306);
 			}
 			return MYSQL;
@@ -83,7 +83,7 @@ public final class DBUtil {
 		}
 		if ("postgresql".equals(type) || "postgre".equals(type)) {
 			if (POSTGRESQL == null) {
-				JDBCDriver jdbc = getJDBCDriver(config, "postgresql", "org.postgresql.Driver", "org.postgresql.jdbc", "42.7.4", "jdbc:postgresql://{host}:{port}/{database}");
+				JDBCDriver jdbc = getJDBCDriver(config, "postgresql", "org.postgresql.Driver", "org.postgresql.jdbc", "42.7.5", "jdbc:postgresql://{host}:{port}/{database}");
 				POSTGRESQL = new DataSourceDefintion(jdbc.cd, jdbc.connStr, 5432);
 			}
 			return POSTGRESQL;
