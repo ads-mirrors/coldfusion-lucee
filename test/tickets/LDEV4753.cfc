@@ -63,6 +63,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="mssql" {
 
 	private boolean function isNotSupported() {
 		var cred=getCredentials();
+		if ( !server.checkVersionGTE( server.lucee.version, 6, 2, 1, 25 ) ){
+			return true;
+		}
 		return isNull(cred) || structCount(cred)==0;
 	}
 

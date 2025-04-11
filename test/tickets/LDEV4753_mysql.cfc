@@ -54,7 +54,6 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="mysql" {
 		query name="local.q" datasource=variables.datasource params=params {
 			echo("select * from LDEV4753 where id = :id");
 		}
-		systemOutput( q, true );
 		loop list="id,myvalue,seqno" item="local.c"{
 			expect( q[ c ] ).toBe( form[ c ] );
 		}
@@ -62,6 +61,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="mysql" {
 
 	private boolean function isNotSupported() {
 		var cred=getCredentials();
+		if ( !server.checkVersionGTE( server.lucee.version, 6, 2, 1, 25 ) ){
+			return true;
+		}
 		return isNull(cred) || structCount(cred)==0;
 	}
 
