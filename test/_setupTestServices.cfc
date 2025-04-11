@@ -534,6 +534,7 @@ component {
 		// TODO hmmmf closures and this scope!
 		server.getDefaultBundleVersion = getDefaultBundleVersion;  
 		server.getBundleVersions = getBundleVersions;
+		server.checkVersionGTE = checkVersionGTE;
 	}
 	public struct function getTestService( required string service, 
 			string dbFile="", 
@@ -774,5 +775,31 @@ component {
 			return false;
 		}
 	}
+
+	/* 
+		used to filter out tests which have a specific fix version 
+		when running against older versions of lucee, i.e with extension ci
+	*/
+	private function checkVersionGTE( version, major, minor, patch="", build="" ){
+		var v = listToArray( arguments.version, "." );
+		if ( arguments.major gt v[ 1 ]
+				|| (arguments.major eq v[ 1 ] && len( arguments.minor ) eq 0 ) ) {
+			return true;
+		} else if ( arguments.major eq v[ 1 ] && arguments.minor gte v[ 2 ] ) {
+			if ( len( arguments.patch ) ){
+				if ( len( arguments.build ) ){
+					if ( arguments.patch gte v[ 3 ] ){
+						return arguments.build gte v[ 4 ];
+					}
+				} else {
+					return arguments.patch gte v[ 3 ];
+				}
+			} else {
+				return true;
+			}
+		}
+		return false;
+	}
+
 }
 
