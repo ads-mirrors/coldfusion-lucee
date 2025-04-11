@@ -780,25 +780,29 @@ component {
 		used to filter out tests which have a specific fix version 
 		when running against older versions of lucee, i.e with extension ci
 	*/
-	private function checkVersionGTE( version, major, minor, patch="", build="" ){
-		var v = listToArray( arguments.version, "." );
-		if ( arguments.major gt v[ 1 ]
-				|| (arguments.major eq v[ 1 ] && len( arguments.minor ) eq 0 ) ) {
-			return true;
-		} else if ( arguments.major eq v[ 1 ] && arguments.minor gte v[ 2 ] ) {
-			if ( len( arguments.patch ) ){
-				if ( len( arguments.build ) ){
-					if ( arguments.patch gte v[ 3 ] ){
-						return arguments.build gte v[ 4 ];
-					}
-				} else {
-					return arguments.patch gte v[ 3 ];
-				}
-			} else {
-				return true;
-			}
-		}
-		return false;
+	private function checkVersionGTE(version, major, minor="", patch="", build="") {
+		var v = listToArray(arguments.version, ".");
+		while (v.len() < 4) v.append(0); // Normalize to 4 components
+		/*
+		var args = [];
+		for (var i=2; i < len(arguments); i++)
+			arrayAppend(args, arguments[i]);
+		dump("version " & v.toJson());
+		dump("minimum " & args.toJson());
+		*/
+		if (v[1] > arguments.major) return false //"fail major gt";
+		if (v[1] < arguments.major) return false //"fail major lt";
+	
+		if (len(arguments.minor) == 0) return true;//"true no minor";
+		if (v[2] < arguments.minor) return false;//"fail minor lt";
+		if (v[2] > arguments.minor) return false;//"fail minor gt";
+	
+		if (len(arguments.patch) == 0) return true;//"true no patch";
+		if (v[3] > arguments.patch) return false;//"fail patch #v[3]# < #patch#";
+		if (v[3] < arguments.patch) return false;//"fail patch #v[3]# < #patch#";
+	
+		if (len(arguments.build) == 0) return true;//"true no build";
+		return (v[4] <= arguments.build);// & " build";
 	}
 
 }
