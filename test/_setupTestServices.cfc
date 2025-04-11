@@ -780,7 +780,7 @@ component {
 		used to filter out tests which have a specific fix version 
 		when running against older versions of lucee, i.e with extension ci
 	*/
-	private function checkVersionGTE(version, major, minor="", patch="", build="") {
+	public function checkVersionGTE(version, major, minor="", patch="", build="") {
 		var v = listToArray(arguments.version, ".");
 		while (v.len() < 4) v.append(0); // Normalize to 4 components
 		/*
