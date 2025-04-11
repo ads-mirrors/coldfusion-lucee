@@ -405,7 +405,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 			}
 			if (sucess && configDir != null) ConfigFactory.updateRequiredExtension(this, configDir, null);
 			if (successSB.length() > 0) LogUtil.log(Log.LEVEL_INFO, "deploy", "controller", "Successfully installed the following extensions: " + successSB);
-			if (failedSB.length() > 0) LogUtil.log(Log.LEVEL_INFO, "deploy", "controller", "Failed to install the following extensions: " + failedSB);
+			if (failedSB.length() > 0) LogUtil.log(Log.LEVEL_ERROR, "deploy", "controller", "Failed to install the following extensions: " + failedSB);
 		}
 		else if (configDir != null) ConfigFactory.updateRequiredExtension(this, configDir, null);
 
