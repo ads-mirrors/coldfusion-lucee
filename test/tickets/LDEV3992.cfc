@@ -1,4 +1,4 @@
-component extends="org.lucee.cfml.test.LuceeTestCase" skip=true {
+component extends="org.lucee.cfml.test.LuceeTestCase" skip="true" labels="syntax" {
 
 	function run( testResults , testBox ) {
 		describe( "test case for LDEV-3992", function() {
@@ -9,7 +9,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip=true {
 					).filecontent;
 				}
 				catch(any e) {
-					var result = e.message; 
+					var result = e.stacktrace; 
 				}
 				expect(trim(result)).toBe("success");
 			});
