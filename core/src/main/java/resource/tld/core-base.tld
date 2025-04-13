@@ -1176,6 +1176,22 @@ Example:
 			<description>An array of key value pairs</description>
 			<introduced>7.0.0.185</introduced>
 		</attribute>
+		<attribute>
+			<type>string</type>
+			<name>result</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>The name of a variable to place the return struct, containing [ output, error, exitCode ]</description>
+			<introduced>7.0.0.186</introduced>
+		</attribute>
+		<attribute>
+			<type>string</type>
+			<name>exitCodeVariable</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Variable in which to put the exit code value.</description>
+			<introduced>7.0.0.186</introduced>
+		</attribute>
 	</tag>
 	<!-- Exit -->
 	<tag>

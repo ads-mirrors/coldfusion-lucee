@@ -72,6 +72,8 @@ public final class Execute extends BodyTagImpl {
 
 	private String variable;
 	private String errorVariable;
+	private String exitCodeVariable;
+	private String result;
 
 	private String body;
 	private String directory;
@@ -89,6 +91,7 @@ public final class Execute extends BodyTagImpl {
 		errorFile = null;
 		variable = null;
 		errorVariable = null;
+		result = null;
 		body = null;
 		terminateOnTimeout = false;
 		directory = null;
@@ -117,7 +120,7 @@ public final class Execute extends BodyTagImpl {
 
 	public static void main(String[] args) throws Exception {
 		CommandResult cr = Command.execute("curl https://update.lucee.org/rest/update/provider/echoGet", true);
-		_Execute e = new _Execute(null, null, new String[] { "curl", "https://update.lucee.org/rest/update/provider/echoGet" }, null, null, null, null, null, null);
+		_Execute e = new _Execute(null, null, new String[] { "curl", "https://update.lucee.org/rest/update/provider/echoGet" }, null, null, null, null, null, null, null, null);
 		e._run(null);
 	}
 
@@ -164,6 +167,28 @@ public final class Execute extends BodyTagImpl {
 	public void setErrorvariable(String errorVariable) throws PageException {
 		this.errorVariable = errorVariable;
 		pageContext.setVariable(errorVariable, "");
+	}
+
+	/**
+	 * define name of variable where result structure is written to
+	 * 
+	 * @param result
+	 * @throws PageException
+	 */
+	public void setResult(String result) throws PageException {
+		this.result = result;
+		pageContext.setVariable(result, "");
+	}
+
+	/**
+	 * define name of variable where the process exit code value is written to
+	 * 
+	 * @param exitCodeVariable
+	 * @throws PageException
+	 */
+	public void setExitcodevariable(String exitCodeVariable) throws PageException {
+		this.exitCodeVariable = exitCodeVariable;
+		pageContext.setVariable(exitCodeVariable, "");
 	}
 
 	/**
@@ -251,7 +276,7 @@ public final class Execute extends BodyTagImpl {
 			arguments.add(0, name);
 		}
 
-		_Execute execute = new _Execute(pageContext, monitor, arguments.toArray(new String[arguments.size()]), outputfile, variable, errorFile, errorVariable, directory, environment);
+		_Execute execute = new _Execute(pageContext, monitor, arguments.toArray(new String[arguments.size()]), outputfile, variable, errorFile, errorVariable, directory, environment, result, exitCodeVariable);
 
 		// if(timeout<=0)execute._run();
 		// else {
@@ -277,6 +302,7 @@ public final class Execute extends BodyTagImpl {
 			throw pe;
 		}
 		catch (Exception e) {
+			lucee.aprint.o(e);
 			throw new ApplicationException("Error invoking external process", e.getMessage());
 		}
 		return EVAL_PAGE;

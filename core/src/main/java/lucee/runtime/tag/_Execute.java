@@ -26,6 +26,9 @@ import lucee.commons.io.SystemUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.PageContextThread;
 import lucee.runtime.PageContext;
+import lucee.runtime.op.Caster;
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
 
 /*
  * Execute external processes
@@ -36,6 +39,9 @@ public final class _Execute extends PageContextThread {
 	private Resource errorFile;
 	private String variable;
 	private String errorVariable;
+	private String resultVariable;
+	private String exitCodeVariable;
+
 	private boolean aborted;
 	private String[] commands;
 	// private static final int BLOCK_SIZE=4096;
@@ -60,13 +66,17 @@ public final class _Execute extends PageContextThread {
 	 * @param errorVariable
 	 * @param directory
 	 * @param environment
+	 * @param resultVariable
+	 * @param exitCodeVariable
 	 */
-	public _Execute(PageContext pageContext, Object monitor, String[] commands, Resource outputfile, String variable, Resource errorFile, String errorVariable, String directory, String[] environment) {
+	public _Execute(PageContext pageContext, Object monitor, String[] commands, Resource outputfile, String variable, Resource errorFile, String errorVariable, String directory, String[] environment, String resultVariable, String exitCodeVariable) {
 		super(pageContext);
 		this.monitor = monitor;
 		this.commands = commands;
 		this.outputfile = outputfile;
 		this.variable = variable;
+		this.resultVariable = resultVariable;
+		this.exitCodeVariable = exitCodeVariable;
 
 		this.errorFile = errorFile;
 		this.errorVariable = errorVariable;
@@ -95,11 +105,20 @@ public final class _Execute extends PageContextThread {
 			String rst = result.getOutput();
 			finished = true;
 			if (!aborted) {
-				if (outputfile == null && variable == null) pc.write(rst);
+				if (outputfile == null && variable == null
+						&& resultVariable == null && exitCodeVariable == null) pc.write(rst);
+				else if (resultVariable != null){
+					Struct sct = new StructImpl();
+					sct.setEL(Caster.toKey("output"), result.getOutput());
+					sct.setEL(Caster.toKey("error"), result.getError());
+					sct.setEL(Caster.toKey("exitCode"), result.getExitCode());
+					pc.setVariable(resultVariable, sct);
+				}
 				else {
 					if (outputfile != null) IOUtil.write(outputfile, rst, SystemUtil.getCharset(), false);
 					if (variable != null) pc.setVariable(variable, rst);
 				}
+				if (exitCodeVariable != null) pc.setVariable(exitCodeVariable, result.getExitCode());
 
 				if (errorFile != null) IOUtil.write(errorFile, result.getError(), SystemUtil.getCharset(), false);
 				if (errorVariable != null) pc.setVariable(errorVariable, result.getError());
