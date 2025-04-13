@@ -46,6 +46,7 @@ public final class _Execute extends PageContextThread {
 	private Process process;
 
 	private String directory;
+	private String[] environment;
 
 	/**
 	 * Constructor: Execute external processes
@@ -58,8 +59,9 @@ public final class _Execute extends PageContextThread {
 	 * @param errorFile
 	 * @param errorVariable
 	 * @param directory
+	 * @param environment
 	 */
-	public _Execute(PageContext pageContext, Object monitor, String[] commands, Resource outputfile, String variable, Resource errorFile, String errorVariable, String directory) {
+	public _Execute(PageContext pageContext, Object monitor, String[] commands, Resource outputfile, String variable, Resource errorFile, String errorVariable, String directory, String[] environment) {
 		super(pageContext);
 		this.monitor = monitor;
 		this.commands = commands;
@@ -71,6 +73,7 @@ public final class _Execute extends PageContextThread {
 		// this.body=body;
 
 		this.directory = directory;
+		this.environment = environment;
 	}
 
 	@Override
@@ -86,7 +89,7 @@ public final class _Execute extends PageContextThread {
 	void _run(PageContext pc) {
 		try {
 
-			process = Command.createProcess(pc, commands, directory);
+			process = Command.createProcess(pc, commands, directory, environment);
 
 			CommandResult result = Command.execute(process);
 			String rst = result.getOutput();

@@ -35,6 +35,7 @@ import lucee.runtime.ext.tag.BodyTagImpl;
 import lucee.runtime.op.Caster;
 import lucee.runtime.security.SecurityManager;
 import lucee.runtime.type.util.ListUtil;
+import lucee.runtime.type.Array;
 
 /**
  * Enables CFML developers to execute a process on a server computer.
@@ -74,6 +75,7 @@ public final class Execute extends BodyTagImpl {
 
 	private String body;
 	private String directory;
+	private String[] environment;
 
 	private boolean terminateOnTimeout = false;
 
@@ -90,6 +92,7 @@ public final class Execute extends BodyTagImpl {
 		body = null;
 		terminateOnTimeout = false;
 		directory = null;
+		environment = null;
 	}
 
 	/**
@@ -114,7 +117,7 @@ public final class Execute extends BodyTagImpl {
 
 	public static void main(String[] args) throws Exception {
 		CommandResult cr = Command.execute("curl https://update.lucee.org/rest/update/provider/echoGet", true);
-		_Execute e = new _Execute(null, null, new String[] { "curl", "https://update.lucee.org/rest/update/provider/echoGet" }, null, null, null, null, null);
+		_Execute e = new _Execute(null, null, new String[] { "curl", "https://update.lucee.org/rest/update/provider/echoGet" }, null, null, null, null, null, null);
 		e._run(null);
 	}
 
@@ -212,6 +215,19 @@ public final class Execute extends BodyTagImpl {
 		this.directory = directory;
 	}
 
+	public void setEnvironment(Array environment) throws PageException {
+		if (environment != null && environment.size() > 0) {
+			String[] env = new String[environment.size()];
+			Iterator<Object> it = environment.valueIterator();
+			int i = 0;
+			while (it.hasNext()) {
+				env[ i ] = Caster.toString(it.next());
+				i++;
+			}
+			this.environment = env;
+		}
+	}
+
 	@Override
 	public int doStartTag() throws PageException {
 		return EVAL_BODY_BUFFERED;
@@ -235,7 +251,7 @@ public final class Execute extends BodyTagImpl {
 			arguments.add(0, name);
 		}
 
-		_Execute execute = new _Execute(pageContext, monitor, arguments.toArray(new String[arguments.size()]), outputfile, variable, errorFile, errorVariable, directory);
+		_Execute execute = new _Execute(pageContext, monitor, arguments.toArray(new String[arguments.size()]), outputfile, variable, errorFile, errorVariable, directory, environment);
 
 		// if(timeout<=0)execute._run();
 		// else {

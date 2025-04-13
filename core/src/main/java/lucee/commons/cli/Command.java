@@ -32,6 +32,7 @@ import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.ExpressionException;
+import lucee.runtime.type.Array;
 
 public final class Command {
 
@@ -40,7 +41,7 @@ public final class Command {
 		return Runtime.getRuntime().exec(toArray(cmdline));
 	}
 
-	public static Process createProcess(PageContext pc, String[] commands, String workingDir) throws IOException, ExpressionException {
+	public static Process createProcess(PageContext pc, String[] commands, String workingDir, String[] environment) throws IOException, ExpressionException {
 		pc = ThreadLocalPageContext.get(pc);
 		FileResource dir = null;
 		if (!StringUtil.isEmpty(workingDir, true)) {
@@ -50,11 +51,11 @@ public final class Command {
 			else throw new IOException(
 					"CFEXECUTE directory [" + workingDir + "] must be a local directory, scheme [" + res.getResourceProvider().getScheme() + "] is not supported in this context.");
 		}
-		return Runtime.getRuntime().exec(commands, null, dir);
+		return Runtime.getRuntime().exec(commands, environment, dir);
 	}
 
 	public static Process createProcess(PageContext pc, String[] commands) throws IOException, ExpressionException {
-		return createProcess(pc, commands, null);
+		return createProcess(pc, commands, null, null);
 	}
 
 	/**
