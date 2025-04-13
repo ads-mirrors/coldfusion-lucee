@@ -5954,6 +5954,7 @@ Example Values:
 		<description>Generates a secure keys (private and public) for use in the encrypt function with the RSA algorithm.</description>
 		<argument>
 			<name>key_size</name>
+			<introduced>6.2.0.55</introduced>
 			<type>number</type>
 			<required>no</required>
 			<default>1024</default>
@@ -14927,6 +14928,7 @@ _- asc (default): ascending (a to z) sort order
 	<function>
 		<name>structToSorted</name>
 		<class>lucee.runtime.functions.struct.StructToSorted</class>
+		<introduced>6.2.16</introduced>
 		<member-name>toSorted</member-name>
 		<keywords>struct,sort</keywords>
 		<description>Returns a struct sorted by the top level keys in a structure.
