@@ -91,7 +91,8 @@ public final class Command {
 			StreamGobbler err = new StreamGobbler(es = p.getErrorStream());
 			in.start();
 			err.start();
-			if (p.waitFor() != 0) {
+			int exitCode = p.waitFor();
+			if (exitCode != 0) {
 				err.join();
 				if ((ioe = err.getException()) != null) throw new IOException(ioe);
 				String str = err.getString();
@@ -100,7 +101,7 @@ public final class Command {
 			in.join();
 			if ((ioe = in.getException()) != null) throw new IOException(ioe);
 
-			return new CommandResult(in.getString(), err.getString());
+			return new CommandResult(in.getString(), err.getString(), exitCode);
 		}
 		finally {
 			IOUtil.close(is, es);
