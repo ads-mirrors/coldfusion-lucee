@@ -1109,7 +1109,10 @@ Example:
 			<name>arguments</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Command-line arguments passed to the application.</description>
+			<description>Command-line arguments passed to the application.
+- arguments as a string
+- arguments as an Array
+			</description>
 		</attribute>
 		<attribute>
 			<type>string</type>
