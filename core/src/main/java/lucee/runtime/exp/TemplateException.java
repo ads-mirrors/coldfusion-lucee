@@ -112,9 +112,9 @@ public class TemplateException extends PageExceptionImpl {
 
 	private static String addContext(String msg, PageSource ps, int line, int column) {
 		if (ps != null) {
-			msg += "; Failed in " + ps.getDisplayPath() + ":" + line;
+			msg += "; Failed at [" + ps.getDisplayPath() + ":" + line + "]";
 		} else {
-			msg += "; Failed at line: " + line + ", column: " + column;
+			msg += "; Failed at line: [" + line + "], column: [" + column + "]";
 		}
 		return msg;
 	}
