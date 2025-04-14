@@ -27,8 +27,10 @@ import lucee.commons.io.res.Resource;
 import lucee.commons.lang.PageContextThread;
 import lucee.runtime.PageContext;
 import lucee.runtime.op.Caster;
+import lucee.runtime.process.UDFProcessListener;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.UDF;
 
 /*
  * Execute external processes
@@ -54,6 +56,10 @@ public final class _Execute extends PageContextThread {
 	private String directory;
 	private Struct environment;
 
+	private UDF onError;
+	private UDF onProgress;
+	private long timeout;
+
 	/**
 	 * Constructor: Execute external processes
 	 * 
@@ -68,8 +74,11 @@ public final class _Execute extends PageContextThread {
 	 * @param environment
 	 * @param resultVariable
 	 * @param exitCodeVariable
+	 * @param timeout
 	 */
-	public _Execute(PageContext pageContext, Object monitor, String[] commands, Resource outputfile, String variable, Resource errorFile, String errorVariable, String directory, Struct environment, String resultVariable, String exitCodeVariable) {
+	public _Execute(PageContext pageContext, Object monitor, String[] commands, Resource outputfile, String variable, Resource errorFile,
+			String errorVariable, String directory, Struct environment, String resultVariable, 
+			String exitCodeVariable, UDF onProgress, UDF onError, long timeout) {
 		super(pageContext);
 		this.monitor = monitor;
 		this.commands = commands;
@@ -84,6 +93,10 @@ public final class _Execute extends PageContextThread {
 
 		this.directory = directory;
 		this.environment = environment;
+
+		this.onProgress = onProgress;
+		this.onError = onError;
+		this.timeout = timeout;
 	}
 
 	@Override
@@ -98,10 +111,20 @@ public final class _Execute extends PageContextThread {
 
 	void _run(PageContext pc) {
 		try {
-
-			process = Command.createProcess(pc, commands, directory, environment);
-
-			CommandResult result = Command.execute(process);
+			CommandResult result;
+			boolean redirectErrorStream = false;
+			if (onProgress != null ){
+				UDFProcessListener progress = new UDFProcessListener(pc, onProgress);
+				UDFProcessListener error = null;
+				if (onError != null ) error = new UDFProcessListener(pc, onError);
+				else redirectErrorStream = true;
+				process = Command.createProcess(pc, commands, directory, environment, redirectErrorStream);
+				result = Command.execute(pc, process, timeout, progress, error);
+			} else {
+				process = Command.createProcess(pc, commands, directory, environment, redirectErrorStream);
+				result = Command.execute(process);
+			}
+			
 			String rst = result.getOutput();
 			finished = true;
 			if (!aborted) {
