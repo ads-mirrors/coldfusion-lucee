@@ -1172,11 +1172,11 @@ Example:
 			<introduced>5.3.8.1</introduced>
 		</attribute>
 		<attribute>
-			<type>array</type>
+			<type>struct</type>
 			<name>environment</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>An array of key value pairs</description>
+			<description>An struct of environment variables</description>
 			<introduced>7.0.0.185</introduced>
 		</attribute>
 		<attribute>

@@ -52,7 +52,7 @@ public final class _Execute extends PageContextThread {
 	private Process process;
 
 	private String directory;
-	private String[] environment;
+	private Struct environment;
 
 	/**
 	 * Constructor: Execute external processes
@@ -69,7 +69,7 @@ public final class _Execute extends PageContextThread {
 	 * @param resultVariable
 	 * @param exitCodeVariable
 	 */
-	public _Execute(PageContext pageContext, Object monitor, String[] commands, Resource outputfile, String variable, Resource errorFile, String errorVariable, String directory, String[] environment, String resultVariable, String exitCodeVariable) {
+	public _Execute(PageContext pageContext, Object monitor, String[] commands, Resource outputfile, String variable, Resource errorFile, String errorVariable, String directory, Struct environment, String resultVariable, String exitCodeVariable) {
 		super(pageContext);
 		this.monitor = monitor;
 		this.commands = commands;

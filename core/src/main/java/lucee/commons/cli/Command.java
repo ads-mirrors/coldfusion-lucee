@@ -21,7 +21,10 @@ package lucee.commons.cli;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
@@ -32,16 +35,19 @@ import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.ExpressionException;
+import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.Array;
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.util.StructUtil;
 
 public final class Command {
 
 	public static Process createProcess(String cmdline, boolean translate) throws IOException {
-		if (!translate) return Runtime.getRuntime().exec(cmdline);
-		return Runtime.getRuntime().exec(toArray(cmdline));
+		if (!translate)	return new ProcessBuilder(cmdline.split(" ")).start();
+		return new ProcessBuilder(toArray(cmdline)).start();
 	}
 
-	public static Process createProcess(PageContext pc, String[] commands, String workingDir, String[] environment) throws IOException, ExpressionException {
+	public static Process createProcess(PageContext pc, String[] commands, String workingDir, Struct environment) throws IOException, ExpressionException {
 		pc = ThreadLocalPageContext.get(pc);
 		FileResource dir = null;
 		if (!StringUtil.isEmpty(workingDir, true)) {
@@ -51,7 +57,19 @@ public final class Command {
 			else throw new IOException(
 					"CFEXECUTE directory [" + workingDir + "] must be a local directory, scheme [" + res.getResourceProvider().getScheme() + "] is not supported in this context.");
 		}
-		return Runtime.getRuntime().exec(commands, environment, dir);
+		ProcessBuilder processBuilder = new ProcessBuilder(commands);
+		if (dir != null) processBuilder.directory(dir);
+	
+		if (environment != null) {
+			Map<String, String> env = processBuilder.environment();
+			Iterator<Entry<Key, Object>> it = environment.entryIterator();
+			Entry<Key, Object> e;
+			while (it.hasNext()) {
+				e = it.next();
+				env.put(e.getKey().toString(), e.getValue().toString());
+			}
+		}
+		return processBuilder.start();
 	}
 
 	public static Process createProcess(PageContext pc, String[] commands) throws IOException, ExpressionException {
@@ -67,15 +85,15 @@ public final class Command {
 	 */
 	public static CommandResult execute(String cmdline, boolean translate) throws IOException, InterruptedException {
 		if (!translate) return execute(Runtime.getRuntime().exec(cmdline));
-		return execute(Runtime.getRuntime().exec(toArray(cmdline)));
+		return execute(new ProcessBuilder(toArray(cmdline)).start());
 	}
 
 	public static CommandResult execute(String[] cmdline) throws IOException, InterruptedException {
-		return execute(Runtime.getRuntime().exec(cmdline));
+		return execute(new ProcessBuilder(cmdline).start());
 	}
 
 	public static CommandResult execute(List<String> cmdline) throws IOException, InterruptedException {
-		return execute(Runtime.getRuntime().exec(cmdline.toArray(new String[cmdline.size()])));
+		return execute(new ProcessBuilder(cmdline.toArray(new String[cmdline.size()])).start());
 	}
 
 	public static CommandResult execute(String cmd, String[] args) throws IOException, InterruptedException {

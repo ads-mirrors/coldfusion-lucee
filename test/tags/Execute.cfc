@@ -1,5 +1,5 @@
 <cfscript>
-component extends="org.lucee.cfml.test.LuceeTestCase"	{
+component extends="org.lucee.cfml.test.LuceeTestCase" labels="execute" {
 	
 	
 	variables.updateProvider = server.getTestService("updateProvider").url;

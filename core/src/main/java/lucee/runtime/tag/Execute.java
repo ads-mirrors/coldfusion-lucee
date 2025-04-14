@@ -36,6 +36,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.security.SecurityManager;
 import lucee.runtime.type.util.ListUtil;
 import lucee.runtime.type.Array;
+import lucee.runtime.type.Struct;
 
 /**
  * Enables CFML developers to execute a process on a server computer.
@@ -77,7 +78,7 @@ public final class Execute extends BodyTagImpl {
 
 	private String body;
 	private String directory;
-	private String[] environment;
+	private Struct environment;
 
 	private boolean terminateOnTimeout = false;
 
@@ -240,16 +241,9 @@ public final class Execute extends BodyTagImpl {
 		this.directory = directory;
 	}
 
-	public void setEnvironment(Array environment) throws PageException {
+	public void setEnvironment(Struct environment) throws PageException {
 		if (environment != null && environment.size() > 0) {
-			String[] env = new String[environment.size()];
-			Iterator<Object> it = environment.valueIterator();
-			int i = 0;
-			while (it.hasNext()) {
-				env[ i ] = Caster.toString(it.next());
-				i++;
-			}
-			this.environment = env;
+			this.environment = environment;
 		}
 	}
 
