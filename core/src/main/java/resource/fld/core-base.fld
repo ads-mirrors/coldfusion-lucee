@@ -10597,20 +10597,27 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 	<function>
 		<name>ObjectEquals</name>
 		<class>lucee.runtime.functions.other.ObjectEquals</class>
-		<description>compares simply and complex objects for equality, attention string comparison is case sensitive</description>
+		<description>compares simply and complex objects for equality, by default, string comparison is not case sensitive</description>
 		<argument>
 			<name>left</name>
 			<alias>param1,clientObject</alias>
 			<type>any</type>
 			<required>yes</required>
 			<description>left operant</description>
-   		</argument>
+		</argument>
 		<argument>
 			<name>right</name>
 			<alias>param2,originalObject</alias>
 			<type>any</type>
 			<required>yes</required>
 			<description>right operant</description>
+		</argument>
+		<argument>
+			<name>caseSensitive</name>
+			<type>boolean</type>
+			<default>false</default>
+			<required>no</required>
+			<description>Use case sensitive string comparison</description>
    		</argument>
 		<return>
 			<type>boolean</type>
