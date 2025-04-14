@@ -386,7 +386,7 @@ function _byteFormatShort(numeric left,numeric right,string suffix){
 
 <cffunction name="renderEditButton" output="true">
 	<cfargument name="href"   default="">
-	<a href="#arguments.href#"><span>Edit</span></a>
+	<a class="editIcon" href="#arguments.href#"></a>
 </cffunction>
 
 <cffunction name="renderMailButton" output="true">
