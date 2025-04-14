@@ -23,7 +23,7 @@
 <html>
 <head>
 	<title>#attributes.title# - Lucee #ucFirst(request.adminType)# Administrator</title>
-	<link rel="stylesheet" href="../res/css/admin6.css.cfm" type="text/css">
+	<link rel="stylesheet" href="../res/css/admin.css.cfm" type="text/css">
 	<meta name="robots" content="noindex,nofollow">
 	<cfhtmlhead action="flush">
 </head>
@@ -39,7 +39,7 @@
 						<div id="header">
 								<a id="logo" <!--- class="scale-up" ---> href="#home#"></a>
 								
-						</div>	<!--- #header !---><h5 style="margin-top:-30px;margin-left:50px">#server.lucee.version#</h5>
+						</div>	<!--- #header !---><div class="version-number">#server.lucee.version#</div>
 					</td>
 				</tr>
 				<tr>
@@ -97,6 +97,8 @@
 	<script src="../res/js/admin.js.cfm" type="text/javascript"></script>
 	<script src="../res/js/util.min.js.cfm"></script>
 	<cfinclude template="navigation.cfm">
+	<!--- TODO cache --->
+	<cfset darkmodeCSS=fileRead("../res/css/darkmode.css")>
 	<script>
 		$(function(){
 
@@ -126,9 +128,127 @@
 				}
 			});
 		});
+	
+document.addEventListener('DOMContentLoaded', function() {
+  // First, inject our dark mode CSS
+  const darkModeStyle = document.createElement('style');
+  darkModeStyle.id = 'dark-mode-styles';
+  
+  // CSS content will be inserted here from the CSS artifact
+  darkModeStyle.textContent = `#darkmodeCSS#`;
+  
+  document.head.appendChild(darkModeStyle);
+  
+  // Create toggle button
+  const toggleButton = document.createElement('button');
+  toggleButton.classList.add('dark-mode-toggle');
+  toggleButton.textContent = '☽';
+  document.body.appendChild(toggleButton);
+  
+  // Check for saved preference
+  const darkModeEnabled = localStorage.getItem('darkMode') === 'enabled';
+  
+  // Apply dark mode if previously enabled
+  if (darkModeEnabled) {
+    document.body.classList.add('dark-mode');
+    toggleButton.textContent = '☀';
+    
+    // Force reload charts if they exist
+    refreshCharts();
+  }
+  
+  // Add click event
+  toggleButton.addEventListener('click', function() {
+    // Toggle dark mode class on body
+    document.body.classList.toggle('dark-mode');
+    
+    // Save preference to localStorage
+    if (document.body.classList.contains('dark-mode')) {
+      localStorage.setItem('darkMode', 'enabled');
+      toggleButton.textContent = '☀';
+    } else {
+      localStorage.setItem('darkMode', 'disabled');
+      toggleButton.textContent = '☽';
+    }
+    
+    // Force reload charts if they exist
+    refreshCharts();
+  });
+  
+  // Add keyboard shortcut (Alt+D)
+  document.addEventListener('keydown', function(e) {
+    if (e.altKey && e.key === 'd') {
+      toggleButton.click();
+    }
+  });
+  
+  // Helper function to refresh charts when dark mode changes
+  function refreshCharts() {
+    // Check if echarts is available and charts exist
+    if (typeof echarts !== 'undefined') {
+      const charts = ['heap', 'nonheap', 'cpuSystem'];
+      charts.forEach(chartId => {
+        const chartElement = document.getElementById(chartId);
+        if (chartElement && window[chartId]) {
+          // Update chart background color
+          const isDarkMode = document.body.classList.contains('dark-mode');
+          const chartInstance = window[chartId];
+          
+          // Get the chart options
+          let chartOptions;
+          if (chartId === 'cpuSystem') {
+            chartOptions = cpuSystemChartOption;
+          } else {
+            chartOptions = window[chartId + 'Chart'];
+          }
+          
+          // Update background color
+          if (chartOptions) {
+            chartOptions.backgroundColor = isDarkMode ? '##333' : '##ffffff';
+            
+            // For CPU chart, also update text colors
+            if (chartId === 'cpuSystem') {
+              if (chartOptions.legend) {
+                chartOptions.legend.textStyle = {
+                  color: isDarkMode ? '##ddd' : '##333'
+                };
+              }
+              
+              if (chartOptions.xAxis && chartOptions.xAxis[0]) {
+                chartOptions.xAxis[0].axisLabel = {
+                  textStyle: {
+                    color: isDarkMode ? '##aaa' : '##666'
+                  }
+                };
+              }
+              
+              if (chartOptions.yAxis && chartOptions.yAxis[0]) {
+                chartOptions.yAxis[0].axisLabel = {
+                  textStyle: {
+                    color: isDarkMode ? '##aaa' : '##666'
+                  }
+                };
+              }
+            }
+            
+            // Apply updated options
+            chartInstance.setOption(chartOptions);
+          }
+        }
+      });
+    }
+  }
+});
+
+
+
 	</script>
 
 	<cfhtmlbody action="flush">
+
+
+
+
 </body>
 </html>
 </cfoutput>

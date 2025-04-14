@@ -136,7 +136,7 @@
 							</td>
 
 							<!--- state --->
-							<td style="#csss[bundles.state]#" nowrap="nowrap">
+							<td class="#bundles.state#" nowrap="nowrap">
 								#stText.info.bundles.states[bundles.state]?:bundles.state#
 							</td>
 							<!--- edit --->

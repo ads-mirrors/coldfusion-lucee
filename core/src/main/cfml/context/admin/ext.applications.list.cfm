@@ -67,7 +67,7 @@
 		<cfloop list="#request.adminType=="web"?"server,web":"web"#" item="_type">
 			<cfset _extensions=_type=="web"?extensions:serverExtensions>
 		<cfif _type=="server">
-		<div style="text-align:center;background: ##fff;margin:10px 0px 0px 0px;border-radius: 10px;border:1px solid ##bf4f36;">
+		<div style="text-align:center;margin:10px 0px 0px 0px;border-radius: 10px;border:1px solid ##bf4f36;">
 				<h3 style="color:##bf4f36;margin-top:5px">#stText.ext.installedInServer#</h3>
 		</cfif>
 		<cfset spev=[]>
@@ -300,7 +300,6 @@ Latest version: #latest.v#</cfif>"><cfif hasUpdates>
 								<a <cfif not lasProvider> style="border-color: ###(lasProvider?'9C9':'FC6')#;"</cfif> href="#link#" title="#stText.ext.viewdetails#">
 									<div class="extimg">
 										<cfif len(dn)>
-
 											 <img src="#dn#" style="max-width:130px;max-height:50px"  alt="#stText.ext.extThumbnail#" />
 										</cfif>
 									</div>
@@ -329,7 +328,7 @@ Latest version: #latest.v#</cfif>"><cfif hasUpdates>
 	</cfif>
 
 <cfif noneLasCounter>
-	<div class="message" style="border-color: ##FC6;color:##C93;">
+	<div class="warning focus">
 		Extensions with a yellow border are not provided by the Lucee Association Switzerland and do not neccessarily follow our guidelines. These extensions are not reviewed by the Lucee Association Switzerland.
 	</div>
 </cfif>

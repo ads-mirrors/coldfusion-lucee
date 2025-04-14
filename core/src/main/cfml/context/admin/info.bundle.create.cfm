@@ -38,9 +38,9 @@
 					<th scope="row">#stText.info.bundles.vendor#</th>
 					<td><cfif !isNull(bundle.vendor)>#bundle.vendor#</cfif></td>
 				</tr>
-				<tr style="#csss[bundle.state]#">
+				<tr>
 					<th scope="row">#stText.info.bundles.State#</th>
-					<td>#stText.info.bundles.states[bundle.state]?:bundle.state#</td>
+					<td class="#bundle.state#">#stText.info.bundles.states[bundle.state]?:bundle.state#</td>
 				</tr>
 				<cfif !isNull(bundle.usedBy)><tr>
 					<th scope="row">#stText.info.bundles.usedBy#</th>

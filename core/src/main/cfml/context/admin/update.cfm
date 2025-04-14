@@ -125,7 +125,7 @@
 						link="?action=ext.applications&action2=detail&id=#uid#";
 					</cfscript>
 					<cfoutput>
-						<a href="#link#" style="color:red;text-decoration:none;">- #extensions.name# - <b>#updateVersion#</b> ( #sct.version# ) </a><br>
+						<a href="#link#">- #extensions.name# - <b>#updateVersion#</b> ( #sct.version# ) </a><br>
 					</cfoutput>
 				</cfloop>
 			</cfsavecontent>
@@ -173,7 +173,7 @@
 				<!--- Core --->
 				<cfif adminType == "server" and hasUpdate>
 					<div class="error">
-						<a href="?action=services.update" style="color:red;text-decoration:none;">
+						<a href="?action=services.update">
 							#replace( stText.services.update.update, { '{available}': available, '{current}': server.lucee.version } )#
 						</a>
 					</div>
@@ -182,7 +182,7 @@
 				<!--- Extension --->
 				<cfif extensions.recordcount and len(ext)>
 				<div class="error">
-					<a href="?action=ext.applications" style="color:red;text-decoration:none;">
+					<a href="?action=ext.applications">
 						There are updates available for your installed Extension(s).<br>
 						#ext#
 					</a>
