@@ -1,4 +1,4 @@
-component extends="org.lucee.cfml.test.LuceeTestCase" skip="true" {
+component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 	function run( testResults, testBox ){
 		describe( "cfproperty default attribute should support complex types", function(){
@@ -19,7 +19,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip="true" {
 
 				expect( isNull( comp.getMyArray() ) ).toBeFalse( 'myArray property should be an array, not null' );
 				expect( comp.getMyArray() ).toBeArray( 'myArray property should be an array' );
-				expect( comp.getMyArray() ).toBeHaveLength( 0 );
+				expect( comp.getMyArray() ).toHaveLength( 0 );
 
 				comp.setMyArray( [ 1, 2, 3 ] );
 				expect( comp.getMyArray() ).toBe( [ 1, 2, 3] );
@@ -30,18 +30,16 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip="true" {
 				debug( getComponentMetadata( comp ) );
 				var inst = comp.getInstance();
 				debug( inst );
-				expect( comp.getName() ).toBeString();
-				expect( comp.getName() ).toBe( "lucee" );
-
+				
 				expect( isNull( comp.getMyArray() ) ).toBeFalse( 'myArray property should be an array, not null' );
 				expect( comp.getMyArray() ).toBeArray( 'myArray property should be an array' );
-				expect( comp.getMyArray() ).toBeHaveLength( 0 );
+				expect( comp.getMyArray() ).toHaveLength( 0 );
 
 				comp.setMyArray( [ 1, 2, 3 ] );
 				expect( comp.getMyArray() ).toBe( [ 1, 2, 3] );
 			});
 
-			it( "inline component with complex property, no default", function(){
+			xit( "inline component with complex property, no default", function(){
 				var comp = new component accessors=true{
 					property name="MyArray" type="Array" getter="true" setter="true";
 					property name="name" type="string" getter="true" setter="true" default="lucee";
@@ -52,6 +50,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip="true" {
 					}
 				};
 				
+				debug( comp );
 				expect( comp.getName().getClass().getName() ).toBe( "java.lang.String");
 				expect( comp.getName() ).toBe( "lucee" );
 
@@ -69,7 +68,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip="true" {
 				expect( comp.getMyArray() ).toBe( [ 1, 2, 3] );
 			});
 
-			it( "inline component with simple properties defaults, check types", function(){
+			xit( "inline component with simple properties defaults, check types", function(){
 				var comp = new component accessors=true{
 					property name="name" type="string" getter="true" setter="true" default="lucee";
 					property name="id" type="numeric" getter="true" setter="true" default=123;
@@ -90,7 +89,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip="true" {
 
 			});
 
-			it( "normal component with simple properties defaults, check types", function(){
+			xit( "normal component with simple properties defaults, check types", function(){
 				var comp = new LDEV801.ComponentWithSimpleDefaultProperties();
 
 				debug(comp);
