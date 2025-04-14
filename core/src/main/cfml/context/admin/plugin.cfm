@@ -42,7 +42,7 @@
 	<cfset plugin.language=application.pluginLanguage[session.lucee_admin_lang][url.plugin]>
 </cflock>
 
-<cfoutput><cfif not request.disableFrame and structKeyExists(plugin.language,'text') and len(trim(plugin.language.text))>#plugin.language.text#<br /><br /></cfif></cfoutput>
+<cfoutput><cfif not request.disableFrame and structKeyExists(plugin.language,'text') and len(trim(plugin.language.text))><b>#plugin.language.text#</b><br /><br /></cfif></cfoutput>
 
 <!--- create scopes --->
 <cfset req=duplicate(url)>

@@ -212,6 +212,7 @@
 		<cfif isDefined('xml.xmlRoot.XmlAttributes.action')>
 			<cfset language.__action=trim(xml.xmlRoot.XmlAttributes.action)>
 			<cfset language.__position=structKeyExists(xml.xmlRoot.XmlAttributes,"position")?xml.xmlRoot.XmlAttributes.position:0>
+			<cfset language.__index=structKeyExists(xml.xmlRoot.XmlAttributes,"index")?xml.xmlRoot.XmlAttributes.index:0>
 		</cfif>
 		<cftry>
 			<cfset xml = XmlSearch(xml, "/languages/language[@key='#lCase(trim(arguments.lang))#']")[1]>
@@ -233,6 +234,9 @@
 	</cfif>
 	<cfreturn language>
 </cffunction>
+
+
+
 <cfset navigation = stText.MenuStruct[request.adminType]>
 
 <cfset plugins = []>
@@ -295,6 +299,7 @@
 		</cfloop>
 		<cfloop list=#mappings.keyList()# item="_pluginDir">
 			<cfdirectory directory="#_plugindir#" action="list" name="plugindirs" recurse="no">
+			
 			<cfloop query="plugindirs">
 				<cfif plugindirs.type == "dir">
 					<cfset _lang=loadPluginLanguage(_pluginDir,plugindirs.name)>
@@ -304,6 +309,7 @@
 					<cfset _act=_lang.__action>
 					<cfset _group=_lang.__group>
 					<cfset _pos=_lang.__position>
+					<cfset _idx=_lang.__index?:0>
 					<cfset structDelete(_lang,"__action",false)>
 
 					<cfset application.pluginLanguage[session.lucee_admin_lang][plugindirs.name]=_lang>
@@ -330,19 +336,22 @@
 						<cfelse>
 							<cfset navigation[arrayLen(navigation)+1]=sctNav[_act]>
 						</cfif>
-
 					</cfif>
 
 					<cfset children=sctNav[_act].children>
 					<cfset isUpdate=false>
 					<cfloop from="1" to="#arrayLen(children)#" index="i">
-						<cfif children[i].action == item.action>
+						<cfif !isNull(children[i].action) && children[i].action == item.action>
 							<cfset children[i]=item>
 							<cfset isUpdate=true>
 						</cfif>
 					</cfloop>
 					<cfif !isUpdate>
-						<cfset children[arrayLen(children) + 1] = item>
+						<cfif _idx GT 0>
+							<cfset children[_idx] = item>
+						<cfelse>
+							<cfset children[arrayLen(children) + 1] = item>
+						</cfif>
 					</cfif>
 				</cfif>
 			</cfloop>

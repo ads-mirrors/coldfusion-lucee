@@ -164,6 +164,7 @@ h5 {
 }
 
 h1 {
+    font-size: 32px;
     padding-bottom: 10px
 }
 
@@ -877,10 +878,10 @@ div.error,
 div.warning,
 div.warningops,
 div.message {
-    border: 1px solid red;
+    border: 1px solid red !important;
     padding: 5px;
     margin: 10px 0px;
-    color: red;
+    color: red !important;
     border-radius: 5px;
 }
 
@@ -894,8 +895,8 @@ div.message a {
 
 div.warning,
 div.warningops {
-    border-color: #FC6;
-    color: #C93;
+    border: 1px solid #FC6 !important;
+    color: #C93 !important;
 }
 
 div.message {
@@ -997,13 +998,7 @@ div.whitePanel {
     display: block;
 }
 
-.box {
-    font-weight: normal;
-    font-family: Lato, Arial, Helvetica, sans-serif;
-    font-size: 32px;
-    color: var(--primary-color);
-    padding-top: 0px;
-}
+
 
 div.hr {
     border-color: #dcdad3;
@@ -1015,10 +1010,6 @@ div.hr {
 .linkContext a {
     color: var(--primary-color);
     text-decoration: none;
-}
-
-#maintitle span.box {
-    line-height: 30px;
 }
 
 #maintitle a.navsub {
