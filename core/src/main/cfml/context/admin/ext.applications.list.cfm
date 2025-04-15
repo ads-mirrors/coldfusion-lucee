@@ -90,7 +90,7 @@
 					or doFilter(session.extFilter.installed,arrayToList(cat),false)
 					or doFilter(session.extFilter.installed,provTitle,false)
 				><cfscript>
-					arrayAppend(spev, _extensions.id&";bundle-version="&_extensions.version);
+					arrayAppend(spev, _extensions.id&";version="&_extensions.version);
 					latest=getLatestVersion(_extensions.id);
 					hasUpdates=latest.vs GT toVersionSortable(_extensions.version);
 					link="#request.self#?action=#url.action#&action2=detail&id=#_extensions.id#";
