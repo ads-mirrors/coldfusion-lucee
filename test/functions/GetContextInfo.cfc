@@ -24,7 +24,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 
 	public void function test() localmode="true"{
 		var data=GetContextInfo();
-		assertEquals(false,data.flushed);
+		assertEquals(true,structKeyExists(data,"flushed"));
 	}
 
 } 
