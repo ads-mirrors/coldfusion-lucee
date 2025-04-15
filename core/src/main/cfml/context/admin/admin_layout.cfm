@@ -17,6 +17,11 @@
 		homeQS = URL.keyExists("action") ? "?action=" & url.action : "";
 		request.mode = "full";
 		resNameAppendix = hash(server.lucee.version & server.lucee["release-date"], "quick");
+		
+		// load darkmode css
+		if(!structKeyExists(application,"darkmodeCSS") or session.alwaysNew?:false) {
+			application.darkmodeCSS=fileRead("resources/css/darkmode.css");
+		}
 	</cfscript>
 <cfcontent reset="yes"><!DOCTYPE html>
 <cfoutput>
@@ -96,8 +101,6 @@
 	<script src="../res/js/admin.js.cfm" type="text/javascript"></script>
 	<script src="../res/js/util.min.js.cfm"></script>
 	<cfinclude template="navigation.cfm">
-	<!--- TODO cache --->
-	<cfset darkmodeCSS=fileRead("../res/css/darkmode.css")>
 	<script>
 		$(function(){
 
@@ -134,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
   darkModeStyle.id = 'dark-mode-styles';
   
   // CSS content will be inserted here from the CSS artifact
-  darkModeStyle.textContent = `#darkmodeCSS#`;
+  darkModeStyle.textContent = `#application.darkmodeCSS#`;
   
   document.head.appendChild(darkModeStyle);
   
