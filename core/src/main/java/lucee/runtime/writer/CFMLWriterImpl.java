@@ -210,14 +210,14 @@ public class CFMLWriterImpl extends CFMLWriter {
 	@Override
 	public void flush() throws IOException {
 		flushBuffer(true);
-		// weil flushbuffer das out erstellt muss ich nicht mehr checken
 		out.flush();
+		response.flushBuffer();
 	}
 
 	private void _flush(boolean closeConn) throws IOException {
 		flushBuffer(closeConn);
-		// weil flushbuffer das out erstellt muss ich nicht mehr checken
 		out.flush();
+		response.flushBuffer();
 
 	}
 
