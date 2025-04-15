@@ -11,7 +11,7 @@
 		</cfquery>
 		#result.recordcount#
 		<cfcatch type="any">
-			#cfcatch.message#
+			#cfcatch.stacktrace#
 		</cfcatch>
 	</cftry>
 </cfoutput>
