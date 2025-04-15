@@ -40,6 +40,8 @@ public final class AIEngineFactory {
 
 				.append(name).append(';')
 
+				.append(_default).append(';')
+
 				.append(cd.toString()).append(';');
 
 		for (Key k: keys) {
