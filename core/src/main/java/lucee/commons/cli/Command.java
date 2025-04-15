@@ -225,7 +225,7 @@ public final class Command {
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
-				Object result = listener.listen(line);
+				Object result = listener.listen(line, p);
 				if (!Caster.toBooleanValue(result,true)){
 					p.destroy();
 					break;
