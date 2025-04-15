@@ -2,7 +2,7 @@
 	<cfscript>
 	setting show=false;
 	develop=false;
-	collectionName="lucee-recipes";
+	collectionName="lucee-documentation";
 
 	minmax="It must have at least {min} arguments but a maximum of {max}.";
 	min="It must have at least {min} arguments.";
@@ -294,6 +294,62 @@
 		return major>=3;
 	}
 
+	function getFunctionDataAll() {
+		var qry=queryNew(["title","body","url"]);
+		loop array=structKeyArray(getFunctionList()) item="local.name" {
+			var row=queryAddRow(qry);
+			var data=getFunctionData(name);
+			
+	
+	// put the string together
+			var str=trim("
+	## Function #name#
+	
+	Json function library descriptor for the function #name#
+	
+	documentation: https://docs.lucee.org/reference/functions/#name#.html
+	
+	```json
+	#serializeJson(var:data,compact:false)#
+	```
+	");
+			querySetCell(qry,"title",name,row);    
+			querySetCell(qry,"body",str,row);              
+			querySetCell(qry,"url","https://docs.lucee.org/reference/functions/#name#.html",row);            
+			// echo(markdownToHTML(str));
+			// echo("<hr>");
+		}
+		return qry;
+	}
+	
+	function getTagDataAll() {
+		var qry=queryNew(["title","body","url"]);
+		loop struct=getTagList() index="local.prefix" item="local.tags" {
+			loop array=StructKeyArray(tags) item="local.name" {
+				var data=getTagData(prefix,name);
+				var row=queryAddRow(qry);
+				var str=trim("
+	## Tag #prefix##name#
+	
+	Json tag library descriptor for the tag #prefix##name#
+	
+	documentation: https://docs.lucee.org/reference/tags/#name#.html
+	
+	```json
+	#serializeJson(var:data,compact:false)#
+	```
+	");         querySetCell(qry,"title","#prefix##name#",row);    
+				querySetCell(qry,"body",str,row);              
+				querySetCell(qry,"url","https://docs.lucee.org/reference/tags/#name#.html",row);            
+				//echo(markdownToHTML(str));
+				
+			}
+		} 
+		return qry;
+		//
+	}
+	
+
 
 	function createCollection() {
 		if(!searchSupported()) return;
@@ -310,7 +366,7 @@
 		if(!hasColl) {
 			// collection directory
 			try {
-				var collDirectory=expandPath("{lucee-config-dir}/recipes/search");
+				var collDirectory=expandPath("{lucee-config-dir}/doc/search");
 				if(!directoryExists(collDirectory)) {
 					directoryCreate(collDirectory,true);
 				}
@@ -320,7 +376,7 @@
 				var collDirectory=expandPath("{temp-directory}");
 			}
 			// create collection
-			collection action= "Create" collection=name path=collDirectory;
+			collection action= "Create" collection=collectionName path=collDirectory;
 			
 		}	
 	}
@@ -348,6 +404,7 @@
 		// index collection
 		if(update) {
 			var qryRecipes=recipesAsQuery(importRecipes(true));
+			// index recipes
 			index action="update" 
 				type="custom"
 				collection=collectionName 
@@ -359,6 +416,27 @@
 				custom3="local"
 				custom4="recipe-hash:"&indexHash
 				query="qryRecipes";
+
+			// index functions
+			var qryFunctions=getFunctionDataAll();
+			index action="update" 
+				type="custom"
+				collection=collectionName 
+				key="url"
+				title="title"
+				body="body"
+				query="qryFunctions";
+			
+			// index tags
+			var qryTags=getTagDataAll();
+			index action="update" 
+				type="custom"
+				collection=collectionName 
+				key="url"
+				title="title"
+				body="body"
+				query="qryTags";
+			
 		}
 	}
 
