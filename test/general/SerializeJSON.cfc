@@ -43,13 +43,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				expect(local.tmpData).toBeTypeOf("Array");
 				expect(arrayLen(local.tmpData)).toBe("3");
 			});
-			
+
 
 			it(title="Checking serializeJSON() with preserve case for structkey(preservecaseforstructkey) Eq to TRUE", body=function(){
 				var serSettings =  getApplicationSettings().serialization;
 				serSettings.preserveCaseForStructKey = true;
 				application action="update" SerializationSettings=serSettings;
-				
+
 				var myStruct = {
 					 "id"          : 1
 					,"Name"        : "POTHYS"
@@ -65,7 +65,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				var serSettings =  getApplicationSettings().serialization;
 				serSettings.preserveCaseForStructKey = false;
 				application action="update" SerializationSettings=serSettings;
-				
+
 				var myStruct = {
 					 "id"          : 1
 					,"Name"        : "POTHYS"
@@ -111,5 +111,76 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				expect(find("ID", jsonObject)).toBeGT(0);
 			});
 		});
+
+		describe( "test suite for this.serialization via application.cfc", function() {
+			it (title="Checking serializeJSON() with preserveCaseForQueryColumn is true", body=function(){
+				var uri=createURI("serializeJson/preserveCaseForQueryColumn.cfm");
+				var res=_InternalRequest(
+					template:uri,
+					url: {
+						preserveCaseForQueryColumn: true,
+						prop: "serialization"
+					}
+				);
+				expect(isJson(res.filecontent)).toBeTrue();
+				var json = res.filecontent;
+				expect(find("DateJoined", json)).toBeGT( 0 );
+				expect(find("Id", json)).toBeGT( 0 );
+			});
+
+			it(title="Checking serializeJSON() with preserveCaseForQueryColumn is false", body=function(){
+				var uri=createURI("serializeJson/preserveCaseForQueryColumn.cfm");
+				var res=_InternalRequest(
+					template:uri,
+					url:{
+						preserveCaseForQueryColumn: false,
+						prop: "serialization"
+					}
+				);
+				expect(isJson(res.filecontent)).toBeTrue();
+				var json = res.filecontent;
+				expect(find("DateJoined", json)).toBe( 0 );
+				expect(find("Id", json)).toBe( 0 );
+			});
+		});
+
+		describe( "test suite for this.serializationSettings via application.cfc", function() {
+			it (title="Checking serializeJSON() with preserveCaseForQueryColumn is true", body=function(){
+				var uri=createURI("serializeJson/preserveCaseForQueryColumn.cfm");
+				var res=_InternalRequest(
+					template:uri,
+					url: {
+						preserveCaseForQueryColumn: true,
+						prop: "serializationSettings"
+					}
+				);
+				expect(isJson(res.filecontent)).toBeTrue();
+				var json = res.filecontent;
+				expect(find("DateJoined", json)).toBeGT( 0 );
+				expect(find("Id", json)).toBeGT( 0 );
+			});
+
+			it(title="Checking serializeJSON() with preserveCaseForQueryColumn is false", body=function(){
+				var uri=createURI("serializeJson/preserveCaseForQueryColumn.cfm");
+				var res=_InternalRequest(
+					template:uri,
+					url:{
+						preserveCaseForQueryColumn: false,
+						prop: "serializationSettings"
+					}
+				);
+				expect(isJson(res.filecontent)).toBeTrue();
+				var json = res.filecontent;
+				expect(find("DateJoined", json)).toBe( 0 );
+				expect(find("Id", json)).toBe( 0 );
+			});
+		});
 	}
+
+	private string function createURI(string calledName){
+		var baseURI="/test/#listLast(getDirectoryFromPath(getCurrenttemplatepath()),"\/")#/";
+		return baseURI&""&calledName;
+	}
+
+
 }
