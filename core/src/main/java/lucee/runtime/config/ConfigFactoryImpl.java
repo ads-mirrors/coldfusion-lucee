@@ -175,6 +175,8 @@ import lucee.runtime.regex.Regex;
 import lucee.runtime.regex.RegexFactory;
 import lucee.runtime.search.DummySearchEngine;
 import lucee.runtime.search.SearchEngine;
+import lucee.runtime.security.SecretProvider;
+import lucee.runtime.security.SecretProviderFactory;
 import lucee.runtime.security.SecurityManager;
 import lucee.runtime.security.SecurityManagerImpl;
 import lucee.runtime.tag.listener.TagListener;
@@ -751,6 +753,45 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 			}
 		}
 		return engines;
+	}
+
+	public static Map<String, SecretProvider> loadSecretProviders(ConfigImpl config, Struct root, Map<String, SecretProvider> defaultValue) {
+		try {
+			// we only load this for the server context
+			Struct secretProvider = ConfigUtil.getAsStruct(root, false, "secretProvider");
+			if (secretProvider != null) {
+				return _loadSecretProviders(config, secretProvider);
+			}
+		}
+		catch (Exception ex) {
+			log(config, ex);
+		}
+		return defaultValue;
+	}
+
+	public static Map<String, SecretProvider> _loadSecretProviders(Config config, Struct secretProvider) {
+		String strId;
+		Iterator<Entry<Key, Object>> it = secretProvider.entryIterator();
+		Entry<Key, Object> entry;
+		Struct data;
+		Map<String, SecretProvider> providers = new HashMap<>();
+
+		while (it.hasNext()) {
+			try {
+				entry = it.next();
+				data = Caster.toStruct(entry.getValue(), null);
+				if (data == null) continue;
+				strId = entry.getKey().getString();
+				if (!StringUtil.isEmpty(strId)) {
+					strId = strId.trim().toLowerCase();
+					providers.put(strId.toLowerCase(), SecretProviderFactory.getInstance(config, strId, data));
+				}
+			}
+			catch (Exception e) {
+				log(config, e);
+			}
+		}
+		return providers;
 	}
 
 	public static DumpWriterEntry[] loadDumpWriter(ConfigImpl config, Struct root, DumpWriterEntry[] defaultValue) {

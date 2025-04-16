@@ -64,6 +64,7 @@ import lucee.runtime.dump.DumpWriter;
 import lucee.runtime.dump.DumpWriterEntry;
 import lucee.runtime.engine.ExecutionLogFactory;
 import lucee.runtime.engine.ThreadQueue;
+import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.DatabaseException;
 import lucee.runtime.exp.DeprecatedException;
 import lucee.runtime.exp.ExpressionException;
@@ -97,6 +98,7 @@ import lucee.runtime.regex.Regex;
 import lucee.runtime.rest.RestSettings;
 import lucee.runtime.schedule.Scheduler;
 import lucee.runtime.search.SearchEngine;
+import lucee.runtime.security.SecretProvider;
 import lucee.runtime.security.SecurityManager;
 import lucee.runtime.spooler.SpoolerEngine;
 import lucee.runtime.tag.TagHandlerPool;
@@ -2033,5 +2035,15 @@ public final class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	@Override
 	public boolean hasORMEngine() {
 		return cs.hasORMEngine();
+	}
+
+	@Override
+	public SecretProvider getSecretProvider(String name) throws ApplicationException {
+		return cs.getSecretProvider(name);
+	}
+
+	@Override
+	public Map<String, SecretProvider> getSecretProviders() {
+		return cs.getSecretProviders();
 	}
 }

@@ -6507,6 +6507,35 @@ The returned number of unallocated bytes is a hint, but not a guarantee, that it
 			<type>struct</type>
 		</return>
 	</function>
+	<!-- GetSecret -->
+	<function>
+		<name>GetSecret</name>
+		<class>lucee.runtime.functions.security.GetSecret</class>
+		<description>
+Returns a reference to a secret value stored in a configured Secret Provider. The function doesn't immediately return the actual value, but rather a value object that can be handled by Lucee like a simple value.
+
+This reference is automatically resolved to its actual value when:
+- It's converted to a real simple value (string, boolean, number, date)
+- It's used in operations requiring a simple value
+
+When used, the function automatically validates that the secret exists and throws an exception if not found.
+		</description>
+		<argument>
+			<name>key</name>
+			<type>string</type>
+			<required>Yes</required>
+			<description>Key to read from the Secret Provider (e.g., "database.password", "api.key")</description>
+		</argument>
+		<argument>
+			<name>name</name>
+			<type>string</type>
+			<required>No</required>
+			<description>Name of the Secret Provider to read from, as configured in .CFConfig.json. If not defined, the function checks all configured providers in the order they are defined in .CFConfig.json until it finds the secret.</description>
+		</argument>
+		<return>
+			<type>any</type>
+		</return>
+	</function>
 	
 	<!-- getTagData-->
 	<function>
@@ -10371,6 +10400,13 @@ Use `LoadAISession()` to restore a serialized session.
 			<type>any</type>
 			<required>yes</required>
 			<description>The AI session object returned by LuceeCreateAISession(). This session maintains the conversation history and configuration settings like temperature and system message.</description>
+		</argument>
+		<argument>
+			<name>condense</name>
+			<alias>summarize</alias>
+			<type>boolean</type>
+			<required>no</required>
+			<description>Controls whether the conversation history should be condensed before serialization. When set to true, the function will intelligently summarize older parts of the conversation while preserving essential context. This reduces the overall token count and storage requirements while maintaining the important elements of the conversation history. Default is false, which preserves the complete conversation history.</description>
 		</argument>
 		<return>
 			<type>String</type>

@@ -33,6 +33,7 @@ import lucee.runtime.db.ClassDefinition;
 import lucee.runtime.db.DataSource;
 import lucee.runtime.db.JDBCDriver;
 import lucee.runtime.engine.ExecutionLogFactory;
+import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.exp.TemplateException;
 import lucee.runtime.extension.ExtensionDefintion;
@@ -43,6 +44,7 @@ import lucee.runtime.orm.ORMConfiguration;
 import lucee.runtime.orm.ORMEngine;
 import lucee.runtime.osgi.OSGiUtil.BundleDefinition;
 import lucee.runtime.regex.Regex;
+import lucee.runtime.security.SecretProvider;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.UDF;
@@ -406,6 +408,10 @@ public interface ConfigPro extends Config {
 	public Collection<String> getAIEngineNames();
 
 	public AIEngine getAIEngine(String name);
+
+	public SecretProvider getSecretProvider(String name) throws ApplicationException;
+
+	public Map<String, SecretProvider> getSecretProviders();
 
 	public AIEnginePool getAIEnginePool();
 

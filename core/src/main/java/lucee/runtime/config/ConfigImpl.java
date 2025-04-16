@@ -142,6 +142,7 @@ import lucee.runtime.rest.RestSettings;
 import lucee.runtime.schedule.Scheduler;
 import lucee.runtime.schedule.SchedulerImpl;
 import lucee.runtime.search.SearchEngine;
+import lucee.runtime.security.SecretProvider;
 import lucee.runtime.security.SecurityManager;
 import lucee.runtime.spooler.SpoolerEngine;
 import lucee.runtime.spooler.SpoolerEngineImpl;
@@ -438,6 +439,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private Resource extAvailable;
 
 	protected Map<String, AIEngine> aiEngines;
+
+	protected Map<String, SecretProvider> secretProviders;
 
 	private Map<String, ClassDefinition> cacheDefinitions;
 
@@ -2122,6 +2125,36 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getAIEngineFactories")) {
 				if (aiEngines != null) {
 					aiEngines = null;
+				}
+			}
+		}
+		return this;
+	}
+
+	@Override
+	public SecretProvider getSecretProvider(String name) throws ApplicationException {
+		SecretProvider sp = getSecretProviders().get(name.toLowerCase().trim());
+		if (sp != null) return sp;
+		throw new ApplicationException("there is no secret provider for the name [" + name + "]");
+	}
+
+	@Override
+	public Map<String, SecretProvider> getSecretProviders() {
+		if (secretProviders == null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getSecretProviders")) {
+				if (secretProviders == null) {
+					secretProviders = ConfigFactoryImpl.loadSecretProviders(this, root, null);
+				}
+			}
+		}
+		return secretProviders;
+	}
+
+	public ConfigImpl resetSecretProviders() {
+		if (secretProviders != null) {
+			synchronized (SystemUtil.createToken("ConfigImpl", "getSecretProviders")) {
+				if (secretProviders != null) {
+					secretProviders = null;
 				}
 			}
 		}
