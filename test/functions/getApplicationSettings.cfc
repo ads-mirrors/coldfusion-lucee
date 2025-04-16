@@ -71,6 +71,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect( as ).toHaveKey("searchResults");
 				expect( as ).toHaveKey("preciseMath");
 			});
+
+			it( title="getApplicationSettings() component settings", body=function( currentSpec ) {
+				var as = getApplicationSettings(onlySupported=true);
+				expect( as ).toHaveKey("componentPathCache");
+				expect( as ).toHaveKey("componentLocalSearch");
+				expect( as ).toHaveKey("componentDeepSearch");
+			});
 		});
 	}
 
