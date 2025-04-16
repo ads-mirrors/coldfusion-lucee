@@ -43,18 +43,17 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.process.UDFProcessListener;
 import lucee.runtime.thread.ThreadUtil;
 import lucee.runtime.type.Collection.Key;
-import lucee.runtime.type.Array;
 import lucee.runtime.type.Struct;
-import lucee.runtime.type.util.StructUtil;
 
 public final class Command {
 
 	public static Process createProcess(String cmdline, boolean translate) throws IOException {
-		if (!translate)	return new ProcessBuilder(cmdline.split(" ")).start();
+		if (!translate) return new ProcessBuilder(cmdline.split(" ")).start();
 		return new ProcessBuilder(toArray(cmdline)).start();
 	}
 
-	public static Process createProcess(PageContext pc, String[] commands, String workingDir, Struct environment, boolean redirectErrorStream) throws IOException, ExpressionException {
+	public static Process createProcess(PageContext pc, String[] commands, String workingDir, Struct environment, boolean redirectErrorStream)
+			throws IOException, ExpressionException {
 		pc = ThreadLocalPageContext.get(pc);
 		FileResource dir = null;
 		if (!StringUtil.isEmpty(workingDir, true)) {
@@ -134,11 +133,11 @@ public final class Command {
 		}
 	}
 
-	public static CommandResult execute(PageContext pc, Process p, long timeout, UDFProcessListener onProgress, UDFProcessListener onError ) throws IOException, InterruptedException {
+	public static CommandResult execute(PageContext pc, Process p, long timeout, UDFProcessListener onProgress, UDFProcessListener onError) throws InterruptedException {
 		IOException ioe;
 		ExecutorService executorService = ThreadUtil.createExecutorService(2);
-		executorService.execute(() -> handleStream(pc, p, p.getInputStream(), onProgress) );
-		if (onError!= null) {
+		executorService.execute(() -> handleStream(pc, p, p.getInputStream(), onProgress));
+		if (onError != null) {
 			executorService.execute(() -> handleStream(pc, p, p.getErrorStream(), onError));
 		}
 		int exitCode = p.waitFor();
@@ -146,13 +145,10 @@ public final class Command {
 		executorService.shutdown();
 		executorService.awaitTermination(timeout, TimeUnit.SECONDS);
 		/*
-		if (exitCode != 0) {
-			err.join();
-			if ((ioe = err.getException()) != null) throw new IOException(ioe);
-			String str = err.getString();
-			if (!StringUtil.isEmpty(str)) throw new CommandException(str);
-		}
-		*/
+		 * if (exitCode != 0) { err.join(); if ((ioe = err.getException()) != null) throw new
+		 * IOException(ioe); String str = err.getString(); if (!StringUtil.isEmpty(str)) throw new
+		 * CommandException(str); }
+		 */
 
 		return new CommandResult(null, null, exitCode);
 	}
@@ -226,12 +222,13 @@ public final class Command {
 			String line;
 			while ((line = reader.readLine()) != null) {
 				Object result = listener.listen(line);
-				if (!Caster.toBooleanValue(result,true)){
+				if (!Caster.toBooleanValue(result, true)) {
 					p.destroy();
 					break;
 				}
 			}
-		} catch (Exception e) {
+		}
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
