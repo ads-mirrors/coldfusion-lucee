@@ -97,11 +97,18 @@ public final class GetApplicationSettings extends BIF {
 		if (ac instanceof ModernApplicationContext) cfc = ((ModernApplicationContext) ac).getComponent();
 
 		Struct sct = new StructImpl(Struct.TYPE_LINKED);
+		sct.setEL(KeyConstants._name, ac.getName());		// adminMode
+		sct.setEL("singleContext", Boolean.TRUE);
 		sct.setEL("applicationTimeout", ac.getApplicationTimeout());
-		sct.setEL("blockedExtForFileUpload", acs.getBlockedExtForFileUpload());
-		sct.setEL("clientManagement", Caster.toBoolean(ac.isSetClientManagement()));
-		sct.setEL("clientStorage", ac.getClientstorage());
+
+
+		sct.setEL("sessionCluster", Caster.toBoolean(ac.getSessionCluster()));
+		sct.setEL("sessionManagement", Caster.toBoolean(ac.isSetSessionManagement()));
 		sct.setEL("sessionStorage", ac.getSessionstorage());
+		sct.setEL("sessionType", AppListenerUtil.toSessionType(((PageContextImpl) pc).getSessionType(), "application"));
+		sct.setEL("sessionTimeout", ac.getSessionTimeout());
+		sct.setEL("setDomainCookies", Caster.toBoolean(ac.isSetDomainCookies()));
+		sct.setEL("loginStorage", AppListenerUtil.translateLoginStorage(ac.getLoginStorage()));
 
 		SessionCookieData sessionCookieData = acs.getSessionCookie();
 		if (sessionCookieData != null) {
@@ -116,6 +123,12 @@ public final class GetApplicationSettings extends BIF {
 			sc.setEL("partitioned", sessionCookieData.isPartitioned());
 			sct.setEL("sessionCookie", sc);
 		}
+		sct.setEL("clientCluster", Caster.toBoolean(ac.getClientCluster()));
+		sct.setEL("clientManagement", Caster.toBoolean(ac.isSetClientManagement()));
+		sct.setEL("clientStorage", ac.getClientstorage());
+		sct.setEL("clientTimeout", ac.getClientTimeout());
+		sct.setEL("setClientCookies", Caster.toBoolean(ac.isSetClientCookies()));
+		
 		ProxyData ProxyData = acs.getProxyData();
 		if (ProxyData != null) {
 			Struct sc = new StructImpl(Struct.TYPE_LINKED);
@@ -173,22 +186,29 @@ public final class GetApplicationSettings extends BIF {
 
 		sct.setEL("customTagPaths", toArray(ac.getCustomTagMappings()));
 		sct.setEL("componentPaths", toArray(ac.getComponentMappings()));
-		sct.setEL("loginStorage", AppListenerUtil.translateLoginStorage(ac.getLoginStorage()));
+		
+		sct.setEL("componentPathCache", Caster.toBoolean(((ConfigPro) pc.getConfig()).useComponentPathCache()));
+		sct.setEL("componentLocalSearch", Caster.toBoolean(((ConfigPro) pc.getConfig()).getComponentLocalSearch()));
+		sct.setEL("componentDeepSearch", Caster.toBoolean(((ConfigPro) pc.getConfig()).doComponentDeepSearch()));		
 		sct.setEL("componentDataMemberAccess", ComponentUtil.toStringAccess((pc.getConfig()).getComponentDataMemberDefaultAccess()));
+		sct.setEL("invokeImplicitAccessor", Caster.toBoolean(ac.getTriggerComponentDataMember()));
+		sct.setEL("triggerDataMember", Caster.toBoolean(ac.getTriggerComponentDataMember()));
+
 		sct.setEL(KeyConstants._mappings, toStruct(ac.getMappings()));
-		sct.setEL(KeyConstants._name, ac.getName());
+
+		sct.setEL("blockedExtForFileUpload", acs.getBlockedExtForFileUpload());
+		sct.setEL("CGIReadOnly", Caster.toBoolean(ac.getCGIScopeReadonly()));
+		sct.setEL("dotNotationUpperCase", Caster.toBoolean(((ConfigPro) pc.getConfig()).getDotNotationUpperCase()));
+		sct.setEL("formUrlAsStruct", Caster.toBoolean(acs.getFormUrlAsStruct()));
+		sct.setEL("preciseMath", Caster.toBoolean(acs.getPreciseMath()));
+		sct.setEL("sameFormFieldsAsArray", Caster.toBoolean(ac.getSameFieldAsArray(Scope.SCOPE_FORM)));
+		sct.setEL("sameUrlFieldsAsArray", Caster.toBoolean(ac.getSameFieldAsArray(Scope.SCOPE_URL)));
 		sct.setEL("scriptProtect", AppListenerUtil.translateScriptProtect(ac.getScriptProtect()));
 		sct.setEL("secureJson", Caster.toBoolean(ac.getSecureJson()));
-		sct.setEL("CGIReadOnly", Caster.toBoolean(ac.getCGIScopeReadonly()));
-		sct.setEL("typeChecking", Caster.toBoolean(ac.getTypeChecking()));
 		sct.setEL("secureJsonPrefix", ac.getSecureJsonPrefix());
-		sct.setEL("sessionManagement", Caster.toBoolean(ac.isSetSessionManagement()));
-		sct.setEL("sessionTimeout", ac.getSessionTimeout());
-		sct.setEL("clientTimeout", ac.getClientTimeout());
-		sct.setEL("setClientCookies", Caster.toBoolean(ac.isSetClientCookies()));
-		sct.setEL("setDomainCookies", Caster.toBoolean(ac.isSetDomainCookies()));
-		sct.setEL(KeyConstants._name, ac.getName());
-		sct.setEL("localMode", ac.getLocalMode() == Undefined.MODE_LOCAL_OR_ARGUMENTS_ALWAYS ? Boolean.TRUE : Boolean.FALSE);
+		sct.setEL("serverSideFormValidation", Boolean.FALSE); // TODO impl
+		sct.setEL("typeChecking", Caster.toBoolean(ac.getTypeChecking()));
+		
 		sct.setEL(KeyConstants._locale, LocaleFactory.toString(ThreadLocalPageContext.getLocale(pc)));
 		sct.setEL(KeyConstants._timezone, TimeZoneUtil.toString(ThreadLocalPageContext.getTimeZone(pc)));
 		// sct.setEL(KeyConstants._timeout,TimeZoneUtil.toString(pc.getRequestTimeout()));
@@ -196,21 +216,17 @@ public final class GetApplicationSettings extends BIF {
 		sct.setEL("bufferOutput", Caster.toBoolean(ac.getBufferOutput()));
 		sct.setEL("suppressContent", Caster.toBoolean(ac.getSuppressContent()));
 
-		sct.setEL("nullSupport", ac.getFullNullSupport());
 		sct.setEL("enableNullSupport", ac.getFullNullSupport());
+		sct.setEL("nullSupport", ac.getFullNullSupport());
 
 		// scope cascading
+		sct.setEL("localMode", ac.getLocalMode() == Undefined.MODE_LOCAL_OR_ARGUMENTS_ALWAYS ? Boolean.TRUE : Boolean.FALSE);
 		sct.setEL("scopeCascading", ConfigUtil.toScopeCascading(ac.getScopeCascading(), null));
-
+		
 		if (ac.getScopeCascading() != Config.SCOPE_SMALL) {
 			sct.setEL("searchImplicitScopes", ac.getScopeCascading() == Config.SCOPE_STANDARD);
 		}
 		sct.setEL("searchResults", Caster.toBoolean(acs.getAllowImplicidQueryCall()));
-		sct.setEL("preciseMath", Caster.toBoolean(acs.getPreciseMath()));
-
-		sct.setEL("dotNotationUpperCase", Caster.toBoolean(((ConfigPro) pc.getConfig()).getDotNotationUpperCase()));
-		// adminMode
-		sct.setEL("singleContext", Boolean.TRUE);
 
 		ApplicationListener appListener = pc.getConfig().getApplicationListener();
 		sct.setEL("listenerType", AppListenerUtil.toStringType(appListener));
@@ -221,23 +237,10 @@ public final class GetApplicationSettings extends BIF {
 		cs.setEL("resource", ((PageContextImpl) pc).getResourceCharset().name());
 		sct.setEL("charset", cs);
 
-		sct.setEL("sessionType", AppListenerUtil.toSessionType(((PageContextImpl) pc).getSessionType(), "application"));
-
-		Struct rt = new StructImpl(Struct.TYPE_LINKED);
-		if (ac instanceof ModernApplicationContext) rt.setEL("type", ((ModernApplicationContext) ac).getRegex().getTypeName());
-		sct.setEL("regex", rt);
-
-		sct.setEL("serverSideFormValidation", Boolean.FALSE); // TODO impl
-
-		sct.setEL("clientCluster", Caster.toBoolean(ac.getClientCluster()));
-		sct.setEL("sessionCluster", Caster.toBoolean(ac.getSessionCluster()));
-
-		sct.setEL("invokeImplicitAccessor", Caster.toBoolean(ac.getTriggerComponentDataMember()));
-		sct.setEL("triggerDataMember", Caster.toBoolean(ac.getTriggerComponentDataMember()));
-		sct.setEL("sameformfieldsasarray", Caster.toBoolean(ac.getSameFieldAsArray(Scope.SCOPE_FORM)));
-		sct.setEL("sameurlfieldsasarray", Caster.toBoolean(ac.getSameFieldAsArray(Scope.SCOPE_URL)));
-		sct.setEL("formUrlAsStruct", Caster.toBoolean(acs.getFormUrlAsStruct()));
-
+		Struct re = new StructImpl(Struct.TYPE_LINKED);
+		if (ac instanceof ModernApplicationContext) re.setEL("type", ((ModernApplicationContext) ac).getRegex().getTypeName());
+		sct.setEL("regex", re);
+		
 		Object ds = ac.getDefDataSource();
 		if (ds instanceof DataSource) ds = _call((DataSource) ds);
 		else ds = Caster.toString(ds, null);

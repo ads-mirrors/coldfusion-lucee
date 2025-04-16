@@ -10713,6 +10713,7 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<default>false</default>
 			<required>no</required>
 			<description>Use case sensitive string comparison</description>
+			<introduced>7.0.0.190</introduced>
    		</argument>
 		<return>
 			<type>boolean</type>
