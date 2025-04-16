@@ -12,7 +12,7 @@ public abstract class AISessionSupport implements AISession {
 
 	private String id;
 	private AIEngine engine;
-	List<Conversation> history = new ArrayList<>();
+	final List<Conversation> history = new ArrayList<>();
 
 	private int socketTimeout;
 	private int connectTimeout;
@@ -20,7 +20,7 @@ public abstract class AISessionSupport implements AISession {
 	private int limit;
 	private Double temp;
 
-	public AISessionSupport(AIEngine engine, int limit, double temp, int connectTimeout, int socketTimeout) {
+	public AISessionSupport(AIEngine engine, Conversation[] history, int limit, double temp, int connectTimeout, int socketTimeout) {
 		this.engine = engine;
 
 		if (socketTimeout < 0) this.socketTimeout = engine.getSocketTimeout();
@@ -34,6 +34,12 @@ public abstract class AISessionSupport implements AISession {
 
 		if (temp <= 0D) this.temp = engine.getTemperature();
 		else this.temp = temp;
+
+		if (history != null && history.length > 0) {
+			for (Conversation c: history) {
+				this.history.add(c);
+			}
+		}
 
 	}
 
@@ -109,4 +115,7 @@ public abstract class AISessionSupport implements AISession {
 		;
 		return builder;
 	}
+
+	// TODO add to interface
+	public abstract String getSystemMessage();
 }

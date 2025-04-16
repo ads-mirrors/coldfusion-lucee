@@ -81,6 +81,7 @@ import lucee.loader.engine.CFMLEngine;
 import lucee.runtime.ai.AIEngine;
 import lucee.runtime.ai.AIEngineFactory;
 import lucee.runtime.ai.AISession;
+import lucee.runtime.ai.Conversation;
 import lucee.runtime.cache.CacheConnection;
 import lucee.runtime.cache.CacheUtil;
 import lucee.runtime.cache.tag.CacheHandler;
@@ -4288,14 +4289,16 @@ public final class PageContextImpl extends PageContext {
 		return getAIEngine(nameAI).createSession(systemMessage, null, -1, -1D, -1, -1);
 	}
 
-	public AISession createAISession(String nameAI, String systemMessage, int limit, double temp, int connectTimeout, int socketTimeout) throws PageException {
-		return getAIEngine(nameAI).createSession(systemMessage, null, limit, temp, connectTimeout, socketTimeout);
+	public AISession createAISession(String nameAI, String systemMessage, Conversation[] history, int limit, double temp, int connectTimeout, int socketTimeout)
+			throws PageException {
+		return getAIEngine(nameAI).createSession(systemMessage, history, limit, temp, connectTimeout, socketTimeout);
 	}
 
-	public AISession createAISessionById(String id, String systemMessage, int limit, double temp, int connectTimeout, int socketTimeout) throws PageException {
+	public AISession createAISessionById(String id, String systemMessage, Conversation[] history, int limit, double temp, int connectTimeout, int socketTimeout)
+			throws PageException {
 		AIEngine aie = AIEngineFactory.getExistingInstance(id, null);
 		if (aie == null) throw new ApplicationException("there is no AIEngine stored with id [" + id + "]");
-		return aie.createSession(systemMessage, null, limit, temp, connectTimeout, socketTimeout);
+		return aie.createSession(systemMessage, history, limit, temp, connectTimeout, socketTimeout);
 	}
 
 	public String getNameFromDefault(String defaultName) throws PageException {

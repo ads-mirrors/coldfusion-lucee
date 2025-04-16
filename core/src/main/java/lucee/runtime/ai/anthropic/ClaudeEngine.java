@@ -96,9 +96,7 @@ public final class ClaudeEngine extends AIEngineSupport {
 
 	@Override
 	public AISession createSession(String initialMessage, Conversation[] history, int limit, double temp, int connectTimeout, int socketTimeout) {
-		// TODO add support for history LDEV-5453
-		if (history != null && history.length > 0) throw new RuntimeException("history not supported yet");
-		return new ClaudeSession(this, StringUtil.isEmpty(initialMessage, true) ? systemMessage : initialMessage.trim(), limit, temp, connectTimeout, socketTimeout);
+		return new ClaudeSession(this, StringUtil.isEmpty(initialMessage, true) ? systemMessage : initialMessage.trim(), history, limit, temp, connectTimeout, socketTimeout);
 	}
 
 	@Override

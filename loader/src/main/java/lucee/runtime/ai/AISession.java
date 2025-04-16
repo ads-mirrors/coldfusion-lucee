@@ -38,6 +38,8 @@ public interface AISession {
 	 */
 	public Response inquiry(String message, AIResponseListener listener) throws PageException;
 
+	public String getSystemMessage();
+
 	/**
 	 * Retrieves the full conversation history for this session.
 	 * <p>

@@ -237,9 +237,7 @@ public final class OpenAIEngine extends AIEngineSupport implements AIEngineFile 
 
 	@Override
 	public AISession createSession(String inialMessage, Conversation[] history, int limit, double temp, int connectTimeout, int socketTimeout) {
-		// TODO add support for history LDEV-5453
-		if (history != null && history.length > 0) throw new RuntimeException("history not supported yet");
-		return new OpenAISession(this, StringUtil.isEmpty(inialMessage, true) ? systemMessage : inialMessage.trim(), limit, temp, connectTimeout, socketTimeout);
+		return new OpenAISession(this, StringUtil.isEmpty(inialMessage, true) ? systemMessage : inialMessage.trim(), history, limit, temp, connectTimeout, socketTimeout);
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package lucee.runtime.ai;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.http.StatusLine;
@@ -10,10 +11,13 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import lucee.commons.io.res.ContentType;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.net.http.HTTPResponse;
+import lucee.loader.engine.CFMLEngineFactory;
 import lucee.runtime.PageContext;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
+import lucee.runtime.op.Caster;
+import lucee.runtime.type.Array;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.Query;
@@ -235,5 +239,55 @@ public final class AIUtil {
 			return AIUtil.getAnswersFromAnswer(rsp);
 		}
 
+	}
+
+	public static String serialize(AISession ais) throws PageException {
+		Struct data = new StructImpl(StructImpl.TYPE_LINKED);
+
+		data.setEL(KeyConstants._temperature, ais.getTemperature());
+		data.setEL(KeyConstants._limit, ais.getConversationSizeLimit());
+		data.setEL(KeyConstants._connectionTimeout, ais.getConnectTimeout());
+		data.setEL("socketTimeout", ais.getSocketTimeout());
+		if (ais instanceof AISessionSupport) data.setEL("systemMessage", ((AISessionSupport) ais).getSystemMessage()); // TODO add to interface
+		Request req;
+		Response rsp;
+		Struct sct;
+		Array arr = CFMLEngineFactory.getInstance().getCreationUtil().createArray();
+		data.setEL(KeyConstants._history, arr);
+
+		for (Conversation c: ais.getHistory()) {
+			sct = new StructImpl(StructImpl.TYPE_LINKED);
+			arr.append(sct);
+
+			// request
+			req = c.getRequest();
+			if (req.isMultiPart()) throw new ApplicationException("serialising multi part request is not supported yet");
+			sct.set(KeyConstants._question, req.getQuestion());
+
+			// response
+			rsp = c.getResponse();
+			if (rsp.isMultiPart()) throw new ApplicationException("serialising multi part response is not supported yet");
+			sct.set(KeyConstants._answer, rsp.getAnswer());
+		}
+
+		return CFMLEngineFactory.getInstance().getCastUtil().fromStructToJsonString(data, false);
+	}
+
+	public static Conversation[] toConversations(Array raw) throws PageException {
+		Iterator<Object> it = raw.valueIterator();
+		Struct sct;
+		Conversation[] conversations = new Conversation[raw.size()];
+		int index = 0;
+		while (it.hasNext()) {
+			sct = Caster.toStruct(it.next());
+			conversations[index++] = new ConversationImpl(
+
+					new RequestSupport(Caster.toString(sct.get(KeyConstants._question))),
+
+					new SimpleResponse(Caster.toString(sct.get(KeyConstants._answer)))
+
+			);
+		}
+		return conversations;
 	}
 }

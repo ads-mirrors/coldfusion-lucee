@@ -42,8 +42,8 @@ public final class ClaudeSession extends AISessionSupport {
 	private ClaudeEngine engine;
 	private String systemMessage;
 
-	public ClaudeSession(ClaudeEngine engine, String systemMessage, int limit, double temp, int connectTimeout, int socketTimeout) {
-		super(engine, limit, temp, connectTimeout, socketTimeout);
+	public ClaudeSession(ClaudeEngine engine, String systemMessage, Conversation[] history, int limit, double temp, int connectTimeout, int socketTimeout) {
+		super(engine, history, limit, temp, connectTimeout, socketTimeout);
 		this.engine = engine;
 		this.systemMessage = systemMessage;
 	}
@@ -178,5 +178,10 @@ public final class ClaudeSession extends AISessionSupport {
 	public void release() throws PageException {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public String getSystemMessage() {
+		return systemMessage;
 	}
 }

@@ -3054,6 +3054,8 @@ public final class KeyConstants {
 	public static final Key _monitor = KeyImpl._const("monitor");
 	public static final Key _jdbc = KeyImpl._const("jdbc");
 	public static final Key _jars = KeyImpl._const("jars");
+	public static final Key _limit = KeyImpl._const("limit");
+	public static final Key _question = KeyImpl._const("question");
 
 	private static Map<String, Key> _____keys;
 

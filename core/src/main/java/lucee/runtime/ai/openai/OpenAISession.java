@@ -49,8 +49,8 @@ public final class OpenAISession extends AISessionSupport {
 	private OpenAIEngine openaiEngine;
 	private String systemMessage;
 
-	public OpenAISession(OpenAIEngine engine, String systemMessage, int limit, double temp, int connectTimeout, int socketTimeout) {
-		super(engine, limit, temp, connectTimeout, socketTimeout);
+	public OpenAISession(OpenAIEngine engine, String systemMessage, Conversation[] history, int limit, double temp, int connectTimeout, int socketTimeout) {
+		super(engine, history, limit, temp, connectTimeout, socketTimeout);
 		this.openaiEngine = engine;
 		this.systemMessage = systemMessage;
 
@@ -246,6 +246,11 @@ public final class OpenAISession extends AISessionSupport {
 	@Override
 	public void release() {
 		// nothing to give up
+	}
+
+	@Override
+	public String getSystemMessage() {
+		return systemMessage;
 	}
 
 }
