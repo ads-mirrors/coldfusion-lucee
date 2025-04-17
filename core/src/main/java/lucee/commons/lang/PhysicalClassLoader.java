@@ -116,6 +116,11 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 			synchronized (SystemUtil.createToken("PhysicalClassLoader", key)) {
 				rpccl = reload ? null : classLoaders.get(key);
 				if (rpccl == null) {
+					// if we have a reload, clear the existing before set a new one
+					if (reload) {
+						PhysicalClassLoader existing = classLoaders.get(key);
+						if (existing != null) existing.clear();
+					}
 					classLoaders.put(key, rpccl = new PhysicalClassLoader(c, new ArrayList<Resource>(), directory, SystemUtil.getCombinedClassLoader(), null, null, false));
 				}
 			}
@@ -132,6 +137,11 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 			synchronized (SystemUtil.createToken("PhysicalClassLoader", key)) {
 				rpccl = reload ? null : classLoaders.get(key);
 				if (rpccl == null) {
+					// if we have a reload, clear the existing before set a new one
+					if (reload) {
+						PhysicalClassLoader existing = classLoaders.get(key);
+						if (existing != null) existing.clear();
+					}
 					List<Resource> resources;
 					if (js == null) {
 						resources = new ArrayList<Resource>();
@@ -155,6 +165,11 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 			synchronized (SystemUtil.createToken("PhysicalClassLoader", key)) {
 				rpccl = reload ? null : classLoaders.get(key);
 				if (rpccl == null) {
+					// if we have a reload, clear the existing before set a new one
+					if (reload) {
+						PhysicalClassLoader existing = classLoaders.get(key);
+						if (existing != null) existing.clear();
+					}
 					Resource dir = c.getClassDirectory().getRealResource("RPC/" + key);
 					if (!dir.exists()) ResourceUtil.createDirectoryEL(dir, true);
 					// (Config config, String key, JavaSettings js, Collection<Resource> _resources)
