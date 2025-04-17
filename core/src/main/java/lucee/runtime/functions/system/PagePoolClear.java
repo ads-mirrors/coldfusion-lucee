@@ -43,6 +43,14 @@ public final class PagePoolClear extends BIF implements Function {
 	private static final long serialVersionUID = -2777306151061026079L;
 
 	public static boolean call(PageContext pc) {
+		return call(pc, false);
+	}
+
+	public static boolean call(PageContext pc, boolean force) {
+		if (!force) {
+			return InspectTemplates.call(pc);
+		}
+
 		clear(pc, null, false);
 		return true;
 	}
