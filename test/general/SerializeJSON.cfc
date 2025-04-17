@@ -144,6 +144,42 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			});
 		});
 
+		describe( "test suite for this.serialization via application.cfc, remote cfc", function() {
+			it (title="Checking serializeJSON() with preserveCaseForQueryColumn is true", body=function(){
+				var uri=createURI("serializeJson/remoteQuery.cfc");
+				var res=_InternalRequest(
+					template:uri,
+					url: {
+						preserveCaseForQueryColumn: true,
+						prop: "serialization",
+						method: "test"
+					}
+				);
+				expect(isJson(res.filecontent)).toBeTrue();
+				var json = res.filecontent;
+				debug(json);
+				expect(find("Name", json)).toBeGT( 0 );
+				expect(find("Id", json)).toBeGT( 0 );
+			});
+
+			xit(title="Checking serializeJSON() with preserveCaseForQueryColumn is false", body=function(){
+				var uri=createURI("serializeJson/remoteQuery.cfc");
+				var res=_InternalRequest(
+					template:uri,
+					url:{
+						preserveCaseForQueryColumn: false,
+						prop: "serialization",
+						method: "test"
+					}
+				);
+				expect(isJson(res.filecontent)).toBeTrue();
+				var json = res.filecontent;
+				debug(json);
+				expect(find("Name", json)).toBe( 0 );
+				expect(find("Id", json)).toBe( 0 );
+			});
+		});
+
 		describe( "test suite for this.serializationSettings via application.cfc", function() {
 			it (title="Checking serializeJSON() with preserveCaseForQueryColumn is true", body=function(){
 				var uri=createURI("serializeJson/preserveCaseForQueryColumn.cfm");
