@@ -42,12 +42,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					structEach( vv, function( tk, tv ){
 						var args = ListToArray (tk, "." );
 						arrayPrepend( args, vk) ;
-						var result = checkVersionGTE( argumentCollection=args );
+						var result = server.checkVersionGTE( argumentCollection=args );
 						expect( result ).toBe( tv, args.toJson() );
 					});
 				});
 
-				expect(checkVersionGTE( "5.4.7.3", 6, 2, 1, 25 )).toBeFalse();
+				expect(server.checkVersionGTE( "5.4.7.3", 6, 2, 1, 25 )).toBeFalse();
 			});
 		});
 	}
