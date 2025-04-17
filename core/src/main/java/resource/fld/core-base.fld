@@ -10402,6 +10402,13 @@ Use `LoadAISession()` to restore a serialized session.
 			<description>The AI session object returned by LuceeCreateAISession(). This session maintains the conversation history and configuration settings like temperature and system message.</description>
 		</argument>
 		<argument>
+			<name>maxlength</name>
+			<alias>length</alias>
+			<type>numeric</type>
+			<required>no</required>
+			<description>Maximal length of the conversation history, it will keep the ending part of the conversation.</description>
+		</argument>
+		<argument>
 			<name>condense</name>
 			<alias>summarize</alias>
 			<type>boolean</type>

@@ -8,6 +8,7 @@ import java.util.List;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
 
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.ContentType;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.net.http.HTTPResponse;
@@ -241,7 +242,7 @@ public final class AIUtil {
 
 	}
 
-	public static String serialize(AISession ais) throws PageException {
+	public static String serialize(AISession ais, int maxLength, boolean condense) throws PageException {
 		Struct data = new StructImpl(StructImpl.TYPE_LINKED);
 
 		data.setEL(KeyConstants._temperature, ais.getTemperature());
@@ -253,9 +254,10 @@ public final class AIUtil {
 		Response rsp;
 		Struct sct;
 		Array arr = CFMLEngineFactory.getInstance().getCreationUtil().createArray();
-		data.setEL(KeyConstants._history, arr);
-
-		for (Conversation c: ais.getHistory()) {
+		Conversation[] history = ais.getHistory();
+		Conversation c;
+		for (int i = maxLength == -1 || maxLength >= history.length ? 0 : (history.length - maxLength); i < history.length; i++) {
+			c = history[i];
 			sct = new StructImpl(StructImpl.TYPE_LINKED);
 			arr.append(sct);
 
@@ -268,6 +270,57 @@ public final class AIUtil {
 			rsp = c.getResponse();
 			if (rsp.isMultiPart()) throw new ApplicationException("serialising multi part response is not supported yet");
 			sct.set(KeyConstants._answer, rsp.getAnswer());
+		}
+		data.setEL(KeyConstants._history, arr);
+
+		if (condense) {
+
+			String systemMessage = "You are analyzing a conversation history between a human and an AI. \n"
+
+					+ "Your task is to create a concise summary of the earlier parts of this conversation that:\n"
+
+					+ "1. Reduce it to the absolute minimum\n"
+
+					+ "2. Only preserves essential information, key facts, and critical context\n"
+
+					+ "3. Maintains the flow and logical progression of important topics\n"
+
+					+ "4. Captures any decisions or conclusions reached\n"
+
+					+ "5. Omits all pleasantries, repetitive content, and non-essential text\n"
+
+					+ "6. remove all conversation you know the answer";
+
+			String message = "Here is the conversation history to summarize:\n"
+
+					+ "\n"
+
+					+ "CONVERSATION HISTORY:\n"
+
+					+ CFMLEngineFactory.getInstance().getCastUtil().fromStructToJsonString(data, true)
+
+					+ "\n\n"
+
+					+ "FORMAT YOUR RESPONSE AS:\n"
+
+					+ "[Condensed representation of the conversation with only the most important in the exact same json format as provided with no leading ``` or anything]\n"
+
+					+ "\";";
+
+			// validate
+			// TODO iterate in case the result is not good with further instructions for the AI
+			try {
+				AISession session = ais.getEngine().createSession(systemMessage, null, -1, -1D, -1, -1);
+				rsp = session.inquiry(message);
+				Struct condensed = CFMLEngineFactory.getInstance().getCastUtil().fromJsonStringToStruct(rsp.getAnswer());
+				Array tmp = Caster.toArray(condensed.get(KeyConstants._history));
+				// test if we can load it
+				toConversations(tmp);
+				data.setEL(KeyConstants._history, tmp);
+			}
+			catch (Exception e) {
+				LogUtil.log("ai", e);
+			}
 		}
 
 		return CFMLEngineFactory.getInstance().getCastUtil().fromStructToJsonString(data, false);
