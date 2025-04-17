@@ -45,7 +45,7 @@ public final class SystemCacheClear implements Function {
 	public static String call(PageContext pc, String cacheName) throws PageException {
 
 		if (StringUtil.isEmpty(cacheName, true) || "all".equals(cacheName = cacheName.trim().toLowerCase())) {
-			PagePoolClear.call(pc);
+			InspectTemplates.call(pc);
 			ComponentCacheClear.call(pc);
 			CTCacheClear.call(pc);
 			queryCache(pc);
@@ -53,7 +53,7 @@ public final class SystemCacheClear implements Function {
 			functionCache(pc);
 		}
 		else if ("template".equals(cacheName) || "page".equals(cacheName)) {
-			PagePoolClear.call(pc);
+			InspectTemplates.call(pc);
 		}
 		else if ("component".equals(cacheName) || "cfc".equals(cacheName) || "class".equals(cacheName)) {
 			ComponentCacheClear.call(pc);
@@ -87,15 +87,15 @@ public final class SystemCacheClear implements Function {
 
 	private static void tagCache(PageContext pc) {
 		ConfigWebPro config = (ConfigWebPro) pc.getConfig();
-		PagePoolClear.clear(config, config.getServerTagMappings(), false);
-		PagePoolClear.clear(config, config.getTagMappings(), false);
+		InspectTemplates.reset(config, config.getServerTagMappings());
+		InspectTemplates.reset(config, config.getTagMappings());
 	}
 
 	private static void functionCache(PageContext pc) {
 		ConfigWebPro config = (ConfigWebPro) pc.getConfig();
 		config.clearFunctionCache();
-		PagePoolClear.clear(config, config.getServerFunctionMappings(), false);
-		PagePoolClear.clear(config, config.getFunctionMappings(), false);
+		InspectTemplates.reset(config, config.getServerFunctionMappings());
+		InspectTemplates.reset(config, config.getFunctionMappings());
 
 	}
 }
