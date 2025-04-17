@@ -60,6 +60,7 @@ public final class FunctionLibFunction {
 
 	private FunctionLib functionLib;
 	private String name;
+	private String nameWithCase;
 	private String alias;
 	private ArrayList<FunctionLibFunctionArg> argument = new ArrayList<FunctionLibFunctionArg>();
 
@@ -104,6 +105,7 @@ public final class FunctionLibFunction {
 
 		dbl.functionLib = functionLib;
 		dbl.name = name;
+		dbl.nameWithCase = nameWithCase;
 		dbl.alias = alias;
 
 		dbl.argMin = argMin;
@@ -139,6 +141,15 @@ public final class FunctionLibFunction {
 	 */
 	public String getName() {
 		return name;
+	}
+
+	/**
+	 * Returns the name of the function, without forcing to lowercase.
+	 * 
+	 * @return the name of the Function
+	 */
+	public String getNameWithCase() {
+		return nameWithCase;
 	}
 
 	public String getAlias() {
@@ -256,6 +267,7 @@ public final class FunctionLibFunction {
 	 */
 	public void setName(String name) {
 		this.name = name.toLowerCase();
+		this.nameWithCase = name;
 	}
 
 	/**

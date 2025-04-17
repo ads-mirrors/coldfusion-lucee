@@ -81,6 +81,7 @@ public final class TagLibTag {
 
 	private int attributeType;
 	private String name;
+	private String nameWithCase;
 	private boolean hasBody = true;
 
 	private boolean isBodyReq = false;
@@ -127,6 +128,7 @@ public final class TagLibTag {
 
 		tlt.attributeType = attributeType;
 		tlt.name = name;
+		tlt.nameWithCase = nameWithCase;
 		tlt.hasBody = hasBody;
 		tlt.isBodyReq = isBodyReq;
 		tlt.isTagDependent = isTagDependent;
@@ -264,6 +266,15 @@ public final class TagLibTag {
 	 */
 	public String getName() {
 		return name;
+	}
+
+	/**
+	 * Returns the name of the tag, without forcing it to lower case
+	 * 
+	 * @return String Name of the the Tag.
+	 */
+	public String getNameWithCase() {
+		return nameWithCase;
 	}
 
 	/**
@@ -565,6 +576,7 @@ public final class TagLibTag {
 	 */
 	public void setName(String name) {
 		this.name = name.toLowerCase();
+		this.nameWithCase = name;
 	}
 
 	public void setBundleName(String bundleName) {

@@ -49,6 +49,7 @@ public final class TagLibTagAttr {
 	public static final short SCRIPT_SUPPORT_REQUIRED = 2;
 
 	private String name = "noname";
+	private String nameWithCase = "noname";
 	private String[] alias = null;
 
 	private String type;
@@ -71,6 +72,7 @@ public final class TagLibTagAttr {
 	public TagLibTagAttr duplicate(TagLibTag tag) {
 		TagLibTagAttr tlta = new TagLibTagAttr(tag);
 		tlta.name = name;
+		tlta.nameWithCase = nameWithCase;
 		tlta.alias = alias;
 		tlta.type = type;
 		tlta.description = description;
@@ -118,6 +120,15 @@ public final class TagLibTagAttr {
 	 */
 	public String getName() {
 		return name;
+	}
+
+	/**
+	 * Returns the name of the attribute, without forcing it to lowercase
+	 * 
+	 * @return Name of the Attribute.
+	 */
+	public String getNameWithCase() {
+		return nameWithCase;
 	}
 
 	public TagLibTag getTag() {
@@ -193,6 +204,7 @@ public final class TagLibTagAttr {
 	 * @param name Name des Attribut.
 	 */
 	public void setName(String name) {
+		this.nameWithCase = name;
 		this.name = name.toLowerCase();
 	}
 

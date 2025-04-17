@@ -14,6 +14,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect(functionData.arguments[1].name).toBe("date1");
 				expect(functionData.arguments[1]).toHaveKey("required");
 			});
+
+			it(title="checking getFunctionData() camel case", body=function( currentSpec ) {
+				var functionData = getFunctionData("dateCompare");
+				expect(functionData).toHaveKey("nameWithCase");
+				expect(functionData.nameWithCase).toMatchWithCase("dateCompare");
+				expect(functionData.arguments[3].nameWithCase).toMatchWithCase("datePart");
+			});
 		});
 	}
 }
