@@ -1060,21 +1060,6 @@ public class CFMLExpressionInterpreter {
 		if (cfml.isAfterLast() && cfml.toString().trim().length() == 0) return new LString("");
 
 		// else Error
-		String str = cfml.toString();
-		int pos = cfml.getPos();
-		if (str.length() > 100) {
-			// Failure is in the beginning
-			if (pos <= 10) {
-				str = str.substring(0, 20) + " ...";
-			}
-			// Failure is in the end
-			else if ((str.length() - pos) <= 10) {
-				str = "... " + str.substring(str.length() - 20, str.length());
-			}
-			else {
-				str = "... " + str.substring(pos - 10, pos + 10) + " ...";
-			}
-		}
 		throw createSyntaxException("Syntax Error, Invalid Construct", cfml);
 	}
 
