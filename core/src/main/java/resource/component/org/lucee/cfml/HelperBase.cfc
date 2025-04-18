@@ -150,8 +150,8 @@
 			<!--- cfhttp --->
 			<cfcase value="http">
 
-				<cfhttp attributeCollection="#tagAttributes#" result="tagResult">
-					<cfloop array="#tagParams#" index="param">
+				<cfhttp attributeCollection="#tagAttributes#" result="local.tagResult">
+					<cfloop array="#tagParams#" index="local.param">
 						<cfhttpParam attributeCollection="#param#">
 					</cfloop>
 				</cfhttp>
@@ -171,11 +171,11 @@
 					<cfset Structdelete(tagAttributes, "body")>
 				</cfif>
 				<cfmail attributeCollection="#tagAttributes#">#body#<!---
-				---><cfloop array="#tagParams#" index="param"><!---
+				---><cfloop array="#tagParams#" index="local.param"><!---
                         ---><cfmailparam attributeCollection="#param#"><!---
                   ---></cfloop><!---
 
-				---><cfloop array="#variables.parts#" index="part"><!---
+				---><cfloop array="#variables.parts#" index="local.part"><!---
 					---><cfset partbody = ""><!---
                         ---><cfif structkeyexists(part,"body")><!---
                              ---><cfset partbody = part["body"]><!---
