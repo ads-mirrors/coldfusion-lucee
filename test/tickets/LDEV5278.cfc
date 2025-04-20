@@ -101,6 +101,14 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect( IsDate( "March, 04 2025 09:20:38" ) ).toBeTrue();
 			});
 
+			it( "isDate fails on December, 18 2023 00:00:00 -0600", function(){
+				expect( IsDate( "December, 18 2023 00:00:00 -0600" ) ).toBeTrue();
+			});
+
+			it( "isDate fails on Thu Apr 10 2025 16:00:15 GMT-0500 (Central Daylight Time)", function(){
+				expect( IsDate( "Thu Apr 10 2025 16:00:15 GMT-0500 (Central Daylight Time)" ) ).toBeTrue();
+			});
+
 		} );
 	}
 }

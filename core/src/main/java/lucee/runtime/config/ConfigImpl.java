@@ -296,7 +296,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	private CharSet mailDefaultCharset;
 
-	private Resources resources = new ResourcesImpl();
+	private final Resources resources = new ResourcesImpl();
 	private boolean initResource = true;
 	private Map<String, Class<CacheHandler>> cacheHandlerClasses;
 
@@ -321,7 +321,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private PrintWriter out;
 	private PrintWriter err;
 
-	private Map<String, DatasourceConnPool> pools = new HashMap<>();
+	private final Map<String, DatasourceConnPool> pools = new HashMap<>();
 
 	private Boolean doCustomTagDeepSearch = null;
 	private Boolean doComponentTagDeepSearch;
@@ -366,16 +366,16 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	// private Resource tagDirectory;
 	protected Mapping defaultFunctionMapping;
-	protected Map<String, Mapping> functionMappings = new ConcurrentHashMap<String, Mapping>();
+	protected final Map<String, Mapping> functionMappings = new ConcurrentHashMap<String, Mapping>();
 
 	protected Mapping defaultTagMapping;
-	protected Map<String, Mapping> tagMappings = new ConcurrentHashMap<String, Mapping>();
+	protected final Map<String, Mapping> tagMappings = new ConcurrentHashMap<String, Mapping>();
 
 	private Boolean typeChecking;
 
 	private Boolean executionLogEnabled;
 	private ExecutionLogFactory executionLogFactory;
-	private Map<String, ORMEngine> ormengines = new HashMap<String, ORMEngine>();
+	private final Map<String, ORMEngine> ormengines = new HashMap<String, ORMEngine>();
 	private ClassDefinition<? extends ORMEngine> cdORMEngine;
 	private ORMConfiguration ormConfig;
 
@@ -391,8 +391,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private Boolean checkForChangesInConfigFile;
 	// protected String apiKey=null;
 
-	private List consoleLayouts = new ArrayList();
-	private List resourceLayouts = new ArrayList();
+	private List<Object> consoleLayouts = new ArrayList<>();
+	private List<Object> resourceLayouts = new ArrayList<>();
 
 	private Map<Key, Map<Key, Object>> tagDefaultAttributeValues;
 	private Boolean handleUnQuotedAttrValueAsString;
@@ -431,7 +431,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private Boolean showTest;
 
 	private JavaSettings javaSettings;
-	private Map<String, JavaSettings> javaSettingsInstances = new ConcurrentHashMap<>();
+	private final Map<String, JavaSettings> javaSettingsInstances = new ConcurrentHashMap<>();
 
 	private Boolean fullNullSupport;
 

@@ -125,7 +125,7 @@ Defaults --->
 				<cfset ctCacheClear()>
 			</cfcase>
 			<cfcase value="#btnClearTemplateCache#">
-				<cfset pagePoolClear()>
+				<cfset inspectTemplates()>
 			</cfcase>
 			<cfcase value="#clearButton['function']#">
 				<cfobjectcache type="function" action="clear">
@@ -339,7 +339,7 @@ Create Datasource --->
 
 
 						<cfsavecontent variable="codeSample">
-							pagePoolClear();
+							inspectTemplates();
 						</cfsavecontent>
 						<cfset renderCodingTip( codeSample, stText.settings.codetip )>
 					</td>

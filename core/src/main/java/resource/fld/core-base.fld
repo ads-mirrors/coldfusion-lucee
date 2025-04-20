@@ -17935,17 +17935,27 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 		<name>inspectTemplates</name>
 		<class>lucee.runtime.functions.system.InspectTemplates</class>
 		<introduced>5.3.6.2</introduced>
-		<description>reset pages in pools, so they are checked again for changes, used when inspectTemplates is set to never</description>
+		<description>Forces Lucee to check all pages in memory pools for changes. Use this function when the inspectTemplate setting is set to "never" but you need to refresh template caches on demand.</description>
 		<return>
 			<type>boolean</type>
 		</return>
 	</function>
 	
-	<!-- pagePoolClear -->
+<!-- pagePoolClear -->
 	<function>
 		<name>pagePoolClear</name>
 		<class>lucee.runtime.functions.system.PagePoolClear</class>
-		<description>clear pages in pools</description>
+		<description>Clears all pages from memory pools. This function is deprecated; use inspectTemplates() instead. As of Lucee 6.2.1, 
+		the default behavior has been changed to match inspectTemplates() since forcibly clearing all pages from the pool is inefficient and provides no benefits.</description>
+		
+		<status>hidden</status>
+		<argument>
+			<name>force</name>
+			<type>booean</type>
+			<required>No</required>
+			<description>When set to false (default in Lucee 6.2.1+), this function behaves like inspectTemplates(), which only reloads changed pages. 
+			When set to true, it reverts to the original behavior of forcibly clearing all pages from memory pools, causing unnecessary reloading of unchanged pages.</description>
+		</argument>
 		<return>
 			<type>boolean</type>
 		</return>

@@ -2,6 +2,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="mssql" {
 
 	function isMsSqlNotSupported() {
 		var msSql = msSqlCredentials();
+		if ( !server.checkVersionGTE( server.lucee.version, 6, 0, 0, 0 ) ){
+			return true; // index naming has changed, needed for jdbc ci
+		}
 		return isEmpty(msSql);
 	}
 

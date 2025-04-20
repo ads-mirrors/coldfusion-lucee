@@ -241,10 +241,10 @@ public final class PageContextImpl extends PageContext {
 	/**
 	 * Field <code>pathList</code>
 	 */
-	private LinkedList<UDF> udfs = new LinkedList<UDF>();
-	private LinkedList<PageSource> pathList = new LinkedList<PageSource>();
-	private LinkedList<PageSource> includePathList = new LinkedList<PageSource>();
-	private Set<PageSource> includeOnce = new HashSet<PageSource>();
+	private final LinkedList<UDF> udfs = new LinkedList<UDF>();
+	private final LinkedList<PageSource> pathList = new LinkedList<PageSource>();
+	private final LinkedList<PageSource> includePathList = new LinkedList<PageSource>();
+	private final Set<PageSource> includeOnce = new HashSet<PageSource>();
 
 	/**
 	 * Field <code>executionTime</code>
@@ -290,7 +290,7 @@ public final class PageContextImpl extends PageContext {
 	private Client client;
 	private Application application;
 
-	private DebuggerImpl debugger = new DebuggerImpl();
+	private final DebuggerImpl debugger = new DebuggerImpl();
 	private long requestTimeout = -1;
 	private short enablecfoutputonly = 0;
 	private int outputState;
@@ -305,7 +305,7 @@ public final class PageContextImpl extends PageContext {
 	private TimeZone timeZone;
 
 	// Pools
-	private ErrorPagePool errorPagePool = new ErrorPagePool();
+	private final ErrorPagePool errorPagePool = new ErrorPagePool();
 	private TagHandlerPool tagHandlerPool;
 	private FTPPoolImpl ftpPool;
 
@@ -316,7 +316,7 @@ public final class PageContextImpl extends PageContext {
 
 	private Credential remoteUser;
 
-	protected VariableUtilImpl variableUtil = new VariableUtilImpl();
+	protected final VariableUtilImpl variableUtil = new VariableUtilImpl();
 
 	private PageException exception;
 	private PageSource base;
@@ -324,7 +324,7 @@ public final class PageContextImpl extends PageContext {
 	private ApplicationContextSupport applicationContext;
 	private final ApplicationContextSupport initApplicationContext;
 
-	private ScopeFactory scopeFactory = new ScopeFactory();
+	private final ScopeFactory scopeFactory = new ScopeFactory();
 
 	private Tag parentTag = null;
 	private Tag currentTag = null;
@@ -369,7 +369,7 @@ public final class PageContextImpl extends PageContext {
 	private static final boolean READ_CFID_FROM_URL;
 	private static final String READ_CFID_FROM_URL_LOG;
 	private static final boolean INHERIT_JAVA_SETTINGS = false;
-	private static AtomicInteger _idCounter = new AtomicInteger(1);
+	private static final AtomicInteger _idCounter = new AtomicInteger(1);
 	private long lastTimeoutNoAction;
 
 	static {

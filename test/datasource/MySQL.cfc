@@ -22,7 +22,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase"  labels="mysql" 	{
 	processingdirective pageEncoding="UTF-8";
 
 	function beforeAll(){
-		variables.preciseMath = getApplicationSettings().preciseMath;	
+		var settings = getApplicationSettings();
+		variables.preciseMath = settings.preciseMath ?: ""; // keep 5.4 CI happy
 	};
 
 	public function beforeTests(){
@@ -210,28 +211,36 @@ component extends="org.lucee.cfml.test.LuceeTestCase"  labels="mysql" 	{
 				
 				assertEquals("java.lang.Double",qry.MinDouble[1].getClass().getName());
 				assertEquals(MinDouble,qry.MinDouble);
-				if ( variables.preciseMath )
+				if ( variables.preciseMath eq ""){
+					// skip for 5.4
+				} else if ( variables.preciseMath )
 					assertEquals(MinDouble,""&qry.MinDouble);
 				else
 					assertEquals(toNumeric(MinDouble),""&qry.MinDouble);
 
 				assertEquals("java.lang.Double",qry.MaxDouble[1].getClass().getName());
 				assertEquals(MaxDouble,qry.MaxDouble);
-				if ( variables.preciseMath )
+				if ( variables.preciseMath eq ""){
+					// skip for 5.4 CI
+				} else if ( variables.preciseMath )
 					assertEquals(MaxDouble,""&qry.MaxDouble);
 				else
 					assertEquals(toNumeric(MaxDouble),""&qry.MaxDouble);
 				
 				assertEquals("java.math.BigDecimal",qry.MinDecimal[1].getClass().getName());
 				assertEquals(MinDecimal,qry.MinDecimal);
-				if ( variables.preciseMath )
+				if ( variables.preciseMath eq ""){
+					// skip for 5.4 CI
+				} else if ( variables.preciseMath )
 					assertEquals(MinDecimal,""&qry.MinDecimal);
 				else
 					assertEquals(toNumeric(MinDecimal),""&qry.MinDecimal);
 				
 				assertEquals("java.math.BigDecimal",qry.MaxDecimal[1].getClass().getName());
 				assertEquals(MaxDecimal,qry.MaxDecimal);
-				if ( variables.preciseMath )
+				if ( variables.preciseMath eq ""){
+					// skip for 5.4 CI
+				} else if ( variables.preciseMath )
 					assertEquals(MaxDecimal,""&qry.MaxDecimal);
 				else
 					assertEquals(toNumeric(MaxDecimal),""&qry.MaxDecimal);
