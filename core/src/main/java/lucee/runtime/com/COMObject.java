@@ -79,7 +79,7 @@ public final class COMObject implements Objects, Iteratorable {
 	 * @param dispatch
 	 */
 	public COMObject(Config config, String dispatch) {
-		this(config, null, new Dispatch(dispatch), dispatch);
+		this(config, null, null, dispatch);
 	}
 
 	/**
@@ -92,7 +92,6 @@ public final class COMObject implements Objects, Iteratorable {
 	COMObject(Config config, Variant parent, Dispatch dispatch, String name) {
 		this.parent = parent;
 		this.name = name;
-		this.dispatch = dispatch;
 
 		if (!setup) {
 			synchronized (SystemUtil.createToken("COMObject", "windll")) {
@@ -101,7 +100,8 @@ public final class COMObject implements Objects, Iteratorable {
 				}
 			}
 		}
-
+		if (dispatch != null) this.dispatch = dispatch;
+		else this.dispatch = new Dispatch(name);
 	}
 
 	/*
