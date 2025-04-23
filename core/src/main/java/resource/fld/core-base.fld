@@ -12069,6 +12069,7 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 		<member-position>1</member-position>
 		<keywords>string,regex</keywords>
 		<description>Escapes regular expression control characters within a string.</description>
+		<introduced>6.2.1.9</introduced>
 		<argument>
 			<name>string</name>
 			<type>string</type>
