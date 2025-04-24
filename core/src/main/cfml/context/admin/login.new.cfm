@@ -14,14 +14,20 @@ catch(e) {
 <cfoutput><table cellpadding="0" cellspacing="0" border="0" width="500" height="120">
 		<tr>
 			<td align="left">
-				For security reasons it is no longer possible to set the inital password here directly.<br>
-	<cfif request.adminType == "server">
-		You will need to configure a password before you can access the Server Administrator.
-		<ul>
-		<li>create a file with name <b>password.txt</b> containing your new password under the root Lucee server directory ( /lucee-server/context/password.txt ).</li>
-		<li>click "import file", Lucee will then read and configure your new password, afterwards Lucee will automatically delete that file</ul>
-
-		
+				For security reasons it is not possible to set the initial password directly through this interface.<br>
+	<cfif request.adminType EQ "server">
+		You will need to configure a password before you can access the Administrator.
+    	You can do that in 2 ways.
+    
+	    <p><b>Using a password file</b></p>
+	    <ul>
+	    <li>create a file with name <b>password.txt</b> containing your new password under the root Lucee server directory ( /lucee-server/context/password.txt ).</li>
+	    <li>click "import file", Lucee will then read and configure your new password, afterwards Lucee will automatically delete that file</li>
+	    </ul>
+	    
+	    <p><b>Using environment variable or system property</b></p>
+    <p>Set your admin password by defining either the environment variable <code>LUCEE_ADMIN_PASSWORD</code> or the system property <code>lucee.admin.password</code> (passed as <code>-Dlucee.admin.password</code> to the JVM). This password will be used for the Lucee Administrator interface.</p>
+   
 	<cfelse>
 		Please set a password for the <a href="server.cfm">Server Administrator</a> and then this password can be used to log into this Web Administrator as well. After that you can set a custom password inside Web Administrator, if you wish.
 	</cfif></td>
