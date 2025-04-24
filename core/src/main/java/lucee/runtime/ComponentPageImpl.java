@@ -77,6 +77,7 @@ import lucee.runtime.type.Collection;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.FunctionArgument;
 import lucee.runtime.type.KeyImpl;
+import lucee.runtime.type.QueryImpl;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.UDF;
@@ -938,7 +939,14 @@ public abstract class ComponentPageImpl extends ComponentPage implements PagePro
 				prefix = pc.getApplicationContext().getSecureJsonPrefix();
 				if (prefix == null) prefix = "";
 			}
-			pc.forceWrite(prefix + converter.serialize(pc, rtn, qf, true));
+
+			// If rtn is a query or struct, set preserveCase to null to allow SerializationSettings
+			// to determine case preservation in JSONConverter. Otherwise set preserveCase to true.
+			Boolean preserveCase = (rtn instanceof QueryImpl || rtn instanceof StructImpl) ? null : true;
+			if (rtn instanceof QueryImpl || rtn instanceof StructImpl) {
+				preserveCase = null;
+			}
+			pc.forceWrite(prefix + converter.serialize(pc, rtn, qf, preserveCase));
 		}
 		// CFML
 		else if (UDF.RETURN_FORMAT_SERIALIZE == props.format) {

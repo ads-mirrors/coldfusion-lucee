@@ -59,6 +59,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				var jsonObject = serializeJSON( mystruct );
 				expect(find("Name", jsonObject)).toBeGT(0);
 				expect(find("id", jsonObject)).toBeGT(0);
+				expect(find("NAME", jsonObject)).toBe(0);
+				expect(find("ID", jsonObject)).toBe(0);
 			});
 
 			it(title="Checking serializeJSON() with preserve case for structkey(preservecaseforstructkey) Eq to false", body=function(){
@@ -87,6 +89,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				var jsonObject = serializeJSON( data );
 				expect(find("DateJoined", jsonObject)).toBeGT(0);
 				expect(find("ID", jsonObject)).toBeGT(0);
+				expect(find("DATEJOINED", jsonObject)).toBe(0);
 			});
 
 			it(title="Checking serializeJSON() with preserveCaseForQueryColumn is false", body=function(){
@@ -97,6 +100,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				var jsonObject = serializeJSON( data );
 				expect(find("DATEJOINED", jsonObject)).toBeGT(0);
 				expect(find("ID", jsonObject)).toBeGT(0);
+				expect(find("DateJoined", jsonObject)).toBe(0);
 			});
 			// if we serializeQueryAs struct with preserveCaseForQueryColumn true lucee fails to maintain preserveCase for query column
 			xit(title="Checking serializeJSON() with preserveCaseForQueryColumn is true & serializeQueryAs struct", body=function(){
@@ -109,6 +113,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				var jsonObject = serializeJSON( data );
 				expect(find("DateJoined", jsonObject)).toBeGT(0);
 				expect(find("ID", jsonObject)).toBeGT(0);
+				expect(find("DATEJOINED", jsonObject)).toBe(0);
 			});
 		});
 
@@ -126,6 +131,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				var json = res.filecontent;
 				expect(find("DateJoined", json)).toBeGT( 0 );
 				expect(find("Id", json)).toBeGT( 0 );
+				expect(find("DATEJOINED", json)).toBe( 0 );
+				expect(find("ID", json)).toBe( 0 );
 			});
 
 			it(title="Checking serializeJSON() with preserveCaseForQueryColumn is false", body=function(){
@@ -139,6 +146,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				);
 				expect(isJson(res.filecontent)).toBeTrue();
 				var json = res.filecontent;
+				expect(find("DATEJOINED", json)).toBeGT( 0 );
+				expect(find("ID", json)).toBeGT( 0 );
 				expect(find("DateJoined", json)).toBe( 0 );
 				expect(find("Id", json)).toBe( 0 );
 			});
@@ -160,9 +169,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				debug(json);
 				expect(find("Name", json)).toBeGT( 0 );
 				expect(find("Id", json)).toBeGT( 0 );
+				expect(find("NAME", json)).toBe( 0 );
+				expect(find("ID", json)).toBe( 0 );
 			});
 
-			xit(title="Checking serializeJSON() with preserveCaseForQueryColumn is false", body=function(){
+			it(title="Checking serializeJSON() with preserveCaseForQueryColumn is false", body=function(){
 				var uri=createURI("serializeJson/remoteQuery.cfc");
 				var res=_InternalRequest(
 					template:uri,
@@ -175,6 +186,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				expect(isJson(res.filecontent)).toBeTrue();
 				var json = res.filecontent;
 				debug(json);
+				expect(find("NAME", json)).toBeGT( 0 );
+				expect(find("ID", json)).toBeGT( 0 );
 				expect(find("Name", json)).toBe( 0 );
 				expect(find("Id", json)).toBe( 0 );
 			});
@@ -194,6 +207,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				var json = res.filecontent;
 				expect(find("DateJoined", json)).toBeGT( 0 );
 				expect(find("Id", json)).toBeGT( 0 );
+				expect(find("DATEJOINED", json)).toBe( 0 );
+				expect(find("ID", json)).toBe( 0 );
 			});
 
 			it(title="Checking serializeJSON() with preserveCaseForQueryColumn is false", body=function(){
@@ -207,6 +222,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				);
 				expect(isJson(res.filecontent)).toBeTrue();
 				var json = res.filecontent;
+				expect(find("DATEJOINED", json)).toBeGT( 0 );
+				expect(find("ID", json)).toBeGT( 0 );
 				expect(find("DateJoined", json)).toBe( 0 );
 				expect(find("Id", json)).toBe( 0 );
 			});
