@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.Vector;
 
+import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.ClassUtil;
@@ -71,6 +72,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.UDF;
 import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.type.util.CollectionUtil;
+import lucee.runtime.type.util.ComponentUtil;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 import lucee.runtime.type.util.Type;
@@ -471,13 +473,17 @@ public final class Reflector {
 		throw new ApplicationException("can't convert [" + Caster.toClassName(src) + "] to [" + Caster.toClassName(trgClass) + "]");
 	}
 
+	public static Object componentToClass(PageContext pc, Component src) throws PageException {
+		return componentToClass(pc, src, null, null);
+	}
+
 	public static Object componentToClass(PageContext pc, Component src, Class trgClass) throws PageException {
 		return componentToClass(pc, src, trgClass, null);
 	}
 
 	private static Object componentToClass(PageContext pc, Component src, Class trgClass, RefInteger rating) throws PageException {
 		try {
-			JavaAnnotation ja = getJavaAnnotation(pc, trgClass.getClassLoader(), src);
+			JavaAnnotation ja = getJavaAnnotation(pc, trgClass != null ? trgClass.getClassLoader() : SystemUtil.getCombinedClassLoader(), src);
 			Class<?> _extends = ja != null && ja.extend != null ? ja.extend : null;
 			return JavaProxyFactory.createProxy(pc, src, _extends, extractImplements(pc, src, ja, trgClass, rating));
 		}
@@ -491,30 +497,45 @@ public final class Reflector {
 		Object implementsjavaObj = md.get(KeyConstants._implementsjava, null);
 		Class<?>[] implementsjava = null;
 		if (implementsjavaObj != null) {
-			Object[] arr = null;
+			Object[] arrImplements = null;
 			if (Decision.isArray(implementsjavaObj)) {
-				arr = Caster.toNativeArray(implementsjavaObj);
+				arrImplements = Caster.toNativeArray(implementsjavaObj);
 			}
 			else if (Decision.isCastableToString(implementsjavaObj)) {
-				arr = ListUtil.listToStringArray(Caster.toString(md.get(KeyConstants._implementsjava), null), ',');
+				arrImplements = ListUtil.listToStringArray(Caster.toString(implementsjavaObj, null), ',');
 			}
+
 			if (ratings != null) ratings.plus(0);
-			if (arr != null) {
-				List<Class<?>> list = new ArrayList<Class<?>>();
-				Class<?> tmp;
-				for (int i = 0; i < arr.length; i++) {
-					tmp = ClassUtil.loadClass(Caster.toString(md.get(KeyConstants._implementsjava), null), null);
-					if (tmp != null) {
-						list.add(tmp);
-						if (ratings != null && isInstaneOf(tmp, trgClass, true)) ratings.plus(6);
-						else if (ratings != null && isInstaneOf(tmp, trgClass, false)) ratings.plus(5);
+			if (arrImplements != null) {
+				List<Class<?>> list = new ArrayList<>();
+
+				ClassLoader cl = ComponentUtil.getClassLoader(pc, cfc, SystemUtil.getCombinedClassLoader());
+				Class clazz;
+				for (Object o: arrImplements) {
+					String str = Caster.toString(o, null);
+					if (StringUtil.isEmpty(str)) continue;
+					clazz = ClassUtil.loadClass(cl, str, null);
+					if (clazz != null) {
+						list.add(clazz);
+						if (ratings != null && trgClass != null) {
+							if (isInstaneOf(clazz, trgClass, true)) ratings.plus(6);
+							else if (isInstaneOf(clazz, trgClass, false)) ratings.plus(5);
+						}
 					}
 				}
-				implementsjava = list.toArray(new Class[list.size()]);
+				implementsjava = list.toArray(new Class<?>[list.size()]);
 			}
 		}
 
-		Class<?>[] _implements = ja != null && ja.interfaces != null ? ja.interfaces : new Class[] { trgClass };
+		Class<?>[] _implements;
+		if (ja != null && ja.interfaces != null) {
+			_implements = ja.interfaces;
+		}
+		else {
+			if (trgClass != null && trgClass.isInterface()) _implements = new Class<?>[] { trgClass };
+			else _implements = new Class<?>[] {};
+		}
+
 		if (implementsjava != null) {
 			_implements = merge(_implements, implementsjava);
 		}

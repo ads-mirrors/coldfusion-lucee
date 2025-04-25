@@ -485,4 +485,49 @@ public final class Types {
 		return ClassUtil.loadClass(ASMUtil.getClassName(type));
 	}
 
+	public static Type classNameToType(String className, Type defaultValue) {
+		if (StringUtil.isEmpty(className, true)) return defaultValue;
+		className = className.trim();
+
+		if (className.endsWith(";")) return Type.getType(className.replace('.', '/'));
+
+		char first = StringUtil.toLowerCase(className).charAt(0);
+
+		switch (first) {
+		case 'b':
+			if ("boolean".equals(className)) return BOOLEAN_VALUE;
+			break;
+		case 'c':
+			if ("char".equals(className)) return CHAR;
+			break;
+		case 'd':
+			if ("double".equals(className)) return DOUBLE_VALUE;
+			break;
+		case 'f':
+			if ("float".equals(className)) return FLOAT_VALUE;
+			break;
+		case 'i':
+			if ("int".equals(className)) return INT_VALUE;
+			break;
+		case 'l':
+			if ("long".equals(className)) return LONG_VALUE;
+			break;
+		case 's':
+			if ("short".equals(className)) return SHORT_VALUE;
+			break;
+		case 'v':
+			if ("void".equals(className)) return VOID;
+			break;
+
+		}
+
+		StringBuilder sb = new StringBuilder();
+		while (className.endsWith("[]")) {
+			sb.append('[');
+			className = className.substring(0, className.length() - 2);
+		}
+		// non-array types
+		return Type.getType(sb.append('L').append(className.replace('.', '/')).append(';').toString());
+
+	}
 }

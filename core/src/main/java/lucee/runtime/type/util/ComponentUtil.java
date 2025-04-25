@@ -46,6 +46,7 @@ import lucee.commons.lang.PhysicalClassLoader;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.lang.types.RefBoolean;
 import lucee.runtime.Component;
+import lucee.runtime.ComponentImpl;
 import lucee.runtime.ComponentSpecificAccess;
 import lucee.runtime.Mapping;
 import lucee.runtime.Page;
@@ -70,6 +71,7 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.listener.AppListenerUtil;
 import lucee.runtime.listener.ApplicationContext;
 import lucee.runtime.listener.ApplicationContextSupport;
+import lucee.runtime.listener.JavaSettings;
 import lucee.runtime.net.rpc.server.WSServer;
 import lucee.runtime.net.rpc.server.WSUtil;
 import lucee.runtime.op.Castable;
@@ -1042,4 +1044,21 @@ public final class ComponentUtil {
 			return DumpUtil.toDumpData(toString(), pageContext, maxlevel, properties);
 		}
 	}
+
+	public static ClassLoader getClassLoader(PageContext pc, Component cfc, ClassLoader defaultValue) {
+		if (cfc instanceof ComponentImpl) {
+			try {
+				JavaSettings js = ((ComponentImpl) cfc).getJavaSettings(pc);
+				if (js != null) {
+					return ((ConfigPro) pc.getConfig()).getRPCClassLoader(false, js, null);
+				}
+			}
+			catch (IOException e) {
+				return defaultValue;
+			}
+
+		}
+		return defaultValue;
+	}
+
 }

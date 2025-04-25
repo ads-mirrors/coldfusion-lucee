@@ -28,6 +28,7 @@ import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.text.xml.XMLUtil;
+import lucee.transformer.library.ClassDefinitionImpl;
 
 public final class EnvClassLoader extends URLClassLoader {
 
@@ -302,6 +303,14 @@ public final class EnvClassLoader extends URLClassLoader {
 
 	@Override
 	protected Class<?> findClass(String name) throws ClassNotFoundException {
+		if (name.startsWith("c")) {
+			int index = name.indexOf('.');
+			if (index > 10) {
+				Class<? extends Object> clazz = ClassDefinitionImpl.cfmlToClass(name.substring(index + 1));
+				if (clazz != null) return clazz;
+			}
+		}
+
 		throw new ClassNotFoundException("class " + name + " not found in the core, the loader and all the extension bundles");
 	}
 

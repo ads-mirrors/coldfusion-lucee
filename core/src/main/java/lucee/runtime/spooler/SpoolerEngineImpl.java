@@ -117,7 +117,12 @@ public final class SpoolerEngineImpl implements SpoolerEngine {
 	@Override
 
 	public synchronized void add(SpoolerTask task) {
-		add(ConfigUtil.toConfigWeb(ThreadLocalPageContext.getConfig()), task);
+		try {
+			add(ConfigUtil.toConfigWeb(ThreadLocalPageContext.getConfig()), task);
+		}
+		catch (PageException e) {
+			throw Caster.toPageRuntimeException(e);
+		}
 	}
 
 	public synchronized void add(ConfigWeb config, SpoolerTask task) {
@@ -555,8 +560,12 @@ public final class SpoolerEngineImpl implements SpoolerEngine {
 	 */
 	@Override
 	public void remove(SpoolerTask task) {
-		unstore(ConfigUtil.toConfigWeb(ThreadLocalPageContext.getConfig()), task);
-		// if(!openTasks.remove(task))closedTasks.remove(task);
+		try {
+			unstore(ConfigUtil.toConfigWeb(ThreadLocalPageContext.getConfig()), task);
+		}
+		catch (PageException e) {
+			throw Caster.toPageRuntimeException(e);
+		}
 	}
 
 	public void remove(ConfigWeb config, SpoolerTask task) {
@@ -606,7 +615,12 @@ public final class SpoolerEngineImpl implements SpoolerEngine {
 
 	@Override
 	public PageException execute(SpoolerTask task) {
-		return execute(ConfigUtil.toConfigWeb(ThreadLocalPageContext.getConfig()), task);
+		try {
+			return execute(ConfigUtil.toConfigWeb(ThreadLocalPageContext.getConfig()), task);
+		}
+		catch (PageException e) {
+			throw Caster.toPageRuntimeException(e);
+		}
 	}
 
 	public PageException execute(ConfigWeb config, SpoolerTask task) {

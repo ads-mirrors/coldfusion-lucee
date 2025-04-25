@@ -60,7 +60,6 @@ import lucee.runtime.interpreter.CFMLExpressionInterpreter;
 import lucee.runtime.interpreter.JSONExpressionInterpreter;
 import lucee.runtime.listener.ApplicationContextSupport;
 import lucee.runtime.listener.JavaSettings;
-import lucee.runtime.listener.JavaSettingsImpl;
 import lucee.runtime.listener.SerializationSettings;
 import lucee.runtime.net.http.ReqRspUtil;
 import lucee.runtime.op.Caster;
@@ -1162,36 +1161,19 @@ public abstract class ComponentPageImpl extends ComponentPage {
 		this.index = staticScope.index();
 	}
 
-	public JavaSettings getJavaSettings(PageContext pc, ComponentProperties properties) throws IOException {
-		if (!initJS) {
-			synchronized (properties) {
-				if (!initJS) {
-					// TODO cache
-					String json = properties.meta == null ? null : Caster.toString(properties.meta.get(KeyConstants._javasettings, null), null);
-					if (!StringUtil.isEmpty(json, true)) {
-						json = json.trim();
-						try {
-							if (StringUtil.endsWithIgnoreCase(json, ".json")) {
-								pc = ThreadLocalPageContext.get(pc);
-								if (pc != null) json = IOUtil.toString(ResourceUtil.toResourceExisting(pc, json), CharsetUtil.UTF8);
-								else json = IOUtil.toString(ResourceUtil.toResourceExisting(ThreadLocalPageContext.getConfig(), json), CharsetUtil.UTF8);
-							}
+	public boolean isJavaSettingsInitialized() {
+		return initJS;
+	}
 
-							Struct sct = Caster.toStruct(new JSONExpressionInterpreter().interpret(null, json));
-							js = JavaSettingsImpl.getInstance(ThreadLocalPageContext.getConfig(pc), sct, null);
-						}
-						catch (Exception e) {
-							// LogUtil.log("component", e);
-							throw ExceptionUtil.toIOException(e);
-						}
-					}
-					initJS = true;
-				}
-			}
-		}
+	public JavaSettings getJavaSettings() {
 		return js;
 	}
 
+	public JavaSettings setJavaSettings(JavaSettings js) {
+		this.initJS = true;
+		this.js = js;
+		return js;
+	}
 }
 
 class Props {

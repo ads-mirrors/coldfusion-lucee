@@ -64,12 +64,13 @@ public final class InterfaceImpl implements Interface {
 	private static final InterfaceImpl[] EMPTY = new InterfaceImpl[] {};
 
 	private PageSource pageSource;
+	InterfacePageImpl ip;
 	private String strExtend;
 	private String hint;
 	private String dspName;
 	private String callPath;
 	private boolean realPath;
-	private Map meta;
+	Map meta;
 	boolean initialized;
 
 	private List<InterfaceImpl> extend;
@@ -81,6 +82,7 @@ public final class InterfaceImpl implements Interface {
 		// print.ds("Interface::Constructor:"+page.getPageSource().getDisplayPath());
 
 		pc = ThreadLocalPageContext.get(pc);
+		this.ip = page;
 		this.pageSource = page.getPageSource();
 		this.strExtend = strExtend;
 		this.hint = hint;

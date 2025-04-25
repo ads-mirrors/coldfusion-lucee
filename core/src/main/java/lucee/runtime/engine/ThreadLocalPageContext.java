@@ -29,6 +29,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.PageContextImpl;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
+import lucee.runtime.config.ConfigServerImpl;
 import lucee.runtime.thread.ThreadUtil;
 
 /**
@@ -99,8 +100,10 @@ public final class ThreadLocalPageContext {
 		if (pc != null) {
 			return pc.getConfig();
 		}
-		return ThreadLocalConfig.get();
+		Config c = ThreadLocalConfig.get();
+		if (c != null) return c;
 
+		return ConfigServerImpl.instance;
 	}
 
 	/**

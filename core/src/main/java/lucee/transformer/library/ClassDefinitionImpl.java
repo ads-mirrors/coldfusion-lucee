@@ -30,11 +30,16 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
 import lucee.commons.digest.HashUtil;
+import lucee.commons.io.DevNullOutputStream;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.ClassException;
 import lucee.commons.lang.ClassUtil;
 import lucee.commons.lang.ExceptionUtil;
+import lucee.commons.lang.Pair;
 import lucee.commons.lang.StringUtil;
+import lucee.runtime.PageContext;
 import lucee.runtime.config.ConfigPro;
+import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.config.Identification;
 import lucee.runtime.db.ClassDefinition;
 import lucee.runtime.engine.ThreadLocalPageContext;
@@ -44,8 +49,11 @@ import lucee.runtime.mvn.MavenUtil;
 import lucee.runtime.mvn.MavenUtil.GAVSO;
 import lucee.runtime.op.Caster;
 import lucee.runtime.osgi.OSGiUtil;
+import lucee.runtime.reflection.Reflector;
+import lucee.runtime.thread.ThreadUtil;
 import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.wrap.MapAsStruct;
 
@@ -120,6 +128,14 @@ public final class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externa
 			return new ClassDefinitionImpl(cl, maven);
 		}
 
+		// Component?
+		if (cl == null) {
+			Class<? extends Object> proxyClass = cfmlToClass(sct, prefix);
+			if (proxyClass != null) {
+				return new ClassDefinitionImpl(proxyClass);
+			}
+		}
+
 		return new ClassDefinitionImpl(cl, null, null, id);
 	}
 
@@ -155,6 +171,38 @@ public final class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externa
 		String maven = Caster.toString(sct.get(prefix != null ? KeyImpl.init(prefix + "maven") : KeyConstants._maven, null), null);
 		if (StringUtil.isEmpty(maven)) return null;
 		return maven;
+	}
+
+	public static Class<? extends Object> cfmlToClass(Struct sct, String prefix) {
+		if (sct == null) return null;
+		prefix = improvePrefix(prefix);
+
+		// component path
+		String cfcName = Caster.toString(sct.get(prefix != null ? KeyImpl.init(prefix + "component") : KeyConstants._component, null), null);
+		if (StringUtil.isEmpty(cfcName)) return null;
+		return cfmlToClass(cfcName);
+	}
+
+	public static Class<? extends Object> cfmlToClass(String cfcName) {
+		try {
+
+			// component path
+			if (StringUtil.isEmpty(cfcName)) return null;
+
+			// load component
+			PageContext pc = ThreadLocalPageContext.get(true);
+			if (pc == null) {
+				pc = ThreadUtil.createPageContext(ConfigUtil.toConfigWeb(ThreadLocalPageContext.getConfig()), DevNullOutputStream.DEV_NULL_OUTPUT_STREAM, "localhost", "/", "",
+						null, new Pair[0], null, new Pair[0], new StructImpl(), false, -1, null, null);
+			}
+			Object obj = Reflector.componentToClass(pc, pc.loadComponent(cfcName));
+			return obj.getClass();
+
+		}
+		catch (Exception ex) {
+			LogUtil.log("class-loading", ex);
+		}
+		return null;
 	}
 
 	public static String toBundleName(Struct sct, String prefix, boolean strict) {

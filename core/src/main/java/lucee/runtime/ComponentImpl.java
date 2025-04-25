@@ -81,6 +81,7 @@ import lucee.runtime.functions.dynamicEvaluation.EvaluateComponent;
 import lucee.runtime.functions.system.ContractPath;
 import lucee.runtime.interpreter.CFMLExpressionInterpreter;
 import lucee.runtime.listener.JavaSettings;
+import lucee.runtime.listener.JavaSettingsImpl;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Duplicator;
 import lucee.runtime.op.ThreadLocalDuplication;
@@ -212,7 +213,41 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 	}
 
 	public JavaSettings getJavaSettings(PageContext pc) throws IOException {
-		return this.cp.getJavaSettings(pc, properties);
+
+		boolean is = this.cp.isJavaSettingsInitialized();
+		if (!is) {
+			synchronized (cp) {
+				is = this.cp.isJavaSettingsInitialized();
+				if (!is) {
+					JavaSettings js = null;
+
+					// implements
+					if (absFin != null && absFin.hasInterfaces()) {
+						Iterator<InterfaceImpl> it = absFin.getInterfaceIt();
+						InterfaceImpl i;
+						while (it.hasNext()) {
+							i = it.next();
+							try {
+								js = JavaSettingsImpl.merge(pc.getConfig(), js, JavaSettingsImpl.readJavaSettings(pc, Caster.toStruct(i.meta, false)));
+							}
+							catch (PageException e) {
+								throw ExceptionUtil.toIOException(e);
+							}
+						}
+					}
+
+					// extends
+					if (base != null) {
+						js = JavaSettingsImpl.merge(pc.getConfig(), js, base.getJavaSettings(pc));
+					}
+
+					// current
+					js = JavaSettingsImpl.merge(pc.getConfig(), js, JavaSettingsImpl.readJavaSettings(pc, properties.meta));
+					return this.cp.setJavaSettings(js);
+				}
+			}
+		}
+		return this.cp.getJavaSettings();
 	}
 
 	@Override

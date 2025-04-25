@@ -19,6 +19,8 @@
 package lucee.runtime.listener;
 
 import java.io.IOException;
+import java.lang.ref.Reference;
+import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,21 +28,26 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.osgi.framework.BundleException;
 
 import lucee.commons.digest.HashUtil;
+import lucee.commons.io.CharsetUtil;
+import lucee.commons.io.IOUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.filter.ExtensionResourceFilter;
 import lucee.commons.io.res.util.ResourceUtil;
+import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.PageException;
+import lucee.runtime.interpreter.JSONExpressionInterpreter;
 import lucee.runtime.mvn.MavenUtil;
 import lucee.runtime.mvn.MavenUtil.GAVSO;
 import lucee.runtime.mvn.POM;
@@ -77,6 +84,7 @@ public final class JavaSettingsImpl implements JavaSettings {
 	private Config config;
 
 	private String id;
+	private static Map<String, Reference<JavaSettings>> settings = new ConcurrentHashMap<>();
 
 	private JavaSettingsImpl(String id, Config config, Collection<POM> poms, Collection<BD> osgis, Resource[] resources, Resource[] bundles, Boolean loadCFMLClassPath,
 			boolean reloadOnChange, int watchInterval, String[] watchedExtensions) {
@@ -95,60 +103,131 @@ public final class JavaSettingsImpl implements JavaSettings {
 
 	}
 
-	/*
-	 * private static JavaSettings merge(Config config, JavaSettings l, JavaSettings r) { if (l == null)
-	 * return r; if (r == null) return l;
-	 * 
-	 * JavaSettingsImpl li = (JavaSettingsImpl) l; JavaSettingsImpl ri = (JavaSettingsImpl) r;
-	 * 
-	 * String fid = HashUtil.create64BitHashAsString(li.id + ":" + ri.id);
-	 * 
-	 * JavaSettings js = ((ConfigPro) config).getJavaSettings(fid); if (js != null) { return js; }
-	 * List<String> names = new ArrayList<>();
-	 * 
-	 * boolean lEmpty = true; boolean rEmpty = true; // poms Map<String, POM> mapPOMs = new HashMap<>();
-	 * if (ri.getPoms() != null) { for (POM pom: ri.getPoms()) { mapPOMs.put(pom.id(), pom); rEmpty =
-	 * false; } } if (li.getPoms() != null) { for (POM pom: li.getPoms()) { mapPOMs.put(pom.id(), pom);
-	 * lEmpty = false; } } for (POM pom: mapPOMs.values()) { names.add("maven:" + pom.getGroupId() + ":"
-	 * + pom.getArtifactId() + ":" + pom.getVersion()); }
-	 * 
-	 * // osgis Map<String, BD> mapOSGIs = new HashMap<>(); if (ri.osgis != null) { for (BD bd:
-	 * ri.osgis) { mapOSGIs.put(bd.toString(), bd); rEmpty = false; } } if (li.osgis != null) { for (BD
-	 * bd: li.osgis) { mapOSGIs.put(bd.toString(), bd); lEmpty = false; } } for (BD bd:
-	 * mapOSGIs.values()) { names.add("osgi:" + bd.name + ":" + bd.version); }
-	 * 
-	 * // resources Map<String, Resource> mapResources = new HashMap<>(); for (Resource res:
-	 * ri.getResources()) { mapResources.put(res.getAbsolutePath(), res); rEmpty = false; } for
-	 * (Resource res: li.getResources()) { mapResources.put(res.getAbsolutePath(), res); lEmpty = false;
-	 * } for (Resource res: mapResources.values()) { names.add("paths:" + res.getAbsolutePath()); }
-	 * 
-	 * // bundles Map<String, Resource> mapBundles = new HashMap<>(); for (Resource res:
-	 * ri.getBundles()) { mapBundles.put(res.getAbsolutePath(), res); rEmpty = false; } for (Resource
-	 * res: li.getBundles()) { mapBundles.put(res.getAbsolutePath(), res); lEmpty = false; } for
-	 * (Resource res: mapBundles.values()) { names.add("bundles:" + res.getAbsolutePath()); }
-	 * 
-	 * // watched extensions Map<String, String> mapWatched = new HashMap<>(); if (ri.watchedExtensions
-	 * != null) { for (String str: ri.watchedExtensions) { mapWatched.put(str, ""); } } if
-	 * (li.watchedExtensions != null) { for (String str: li.watchedExtensions) { mapWatched.put(str,
-	 * ""); } } for (String ext: mapWatched.keySet()) { names.add("ext:" + ext); }
-	 * 
-	 * if (lEmpty) { ((ConfigPro) config).setJavaSettings(fid, r); return r; } if (rEmpty) {
-	 * ((ConfigPro) config).setJavaSettings(fid, l); return l; }
-	 * 
-	 * names.add("loadCFMLClassPath:" + ri.loadCFMLClassPath); names.add("reloadOnChange:" +
-	 * ri.reloadOnChange); names.add("watchInterval:" + ri.watchInterval);
-	 * 
-	 * Collections.sort(names); String id = HashUtil.create64BitHashAsString(names.toString());
-	 * 
-	 * js = ((ConfigPro) config).getJavaSettings(id); if (js != null) { return js; } js = new
-	 * JavaSettingsImpl(id, config, mapPOMs.values(), mapOSGIs.values(),
-	 * mapResources.values().toArray(new Resource[mapResources.size()]), mapBundles.values().toArray(new
-	 * Resource[mapBundles.size()]), ri.loadCFMLClassPath, ri.reloadOnChange, ri.watchInterval,
-	 * mapWatched.keySet().toArray(new String[mapWatched.size()]));
-	 * 
-	 * ((ConfigPro) config).setJavaSettings(fid, js); ((ConfigPro) config).setJavaSettings(id, js);
-	 * return js; }
-	 */
+	public static JavaSettings merge(Config config, JavaSettings l, JavaSettings r) {
+		if (l == null) return r;
+		if (r == null) return l;
+
+		JavaSettingsImpl li = (JavaSettingsImpl) l;
+		JavaSettingsImpl ri = (JavaSettingsImpl) r;
+
+		String fid = HashUtil.create64BitHashAsString(li.id + ":" + ri.id);
+
+		JavaSettings js = ((ConfigPro) config).getJavaSettings(fid);
+		if (js != null) {
+			return js;
+		}
+		List<String> names = new ArrayList<>();
+
+		boolean lEmpty = true;
+		boolean rEmpty = true;
+		// poms
+		Map<String, POM> mapPOMs = new HashMap<>();
+		if (ri.getPoms() != null) {
+			for (POM pom: ri.getPoms()) {
+				mapPOMs.put(pom.id(), pom);
+				rEmpty = false;
+			}
+		}
+		if (li.getPoms() != null) {
+			for (POM pom: li.getPoms()) {
+				mapPOMs.put(pom.id(), pom);
+				lEmpty = false;
+			}
+		}
+		for (POM pom: mapPOMs.values()) {
+			names.add("maven:" + pom.getGroupId() + ":" + pom.getArtifactId() + ":" + pom.getVersion());
+		}
+
+		// osgis
+		Map<String, BD> mapOSGIs = new HashMap<>();
+		if (ri.osgis != null) {
+			for (BD bd: ri.osgis) {
+				mapOSGIs.put(bd.toString(), bd);
+				rEmpty = false;
+			}
+		}
+		if (li.osgis != null) {
+			for (BD bd: li.osgis) {
+				mapOSGIs.put(bd.toString(), bd);
+				lEmpty = false;
+			}
+		}
+		for (BD bd: mapOSGIs.values()) {
+			names.add("osgi:" + bd.name + ":" + bd.version);
+		}
+
+		// resources
+		Map<String, Resource> mapResources = new HashMap<>();
+		for (Resource res: ri.getResources()) {
+			mapResources.put(res.getAbsolutePath(), res);
+			rEmpty = false;
+		}
+		for (Resource res: li.getResources()) {
+			mapResources.put(res.getAbsolutePath(), res);
+			lEmpty = false;
+		}
+		for (Resource res: mapResources.values()) {
+			names.add("paths:" + res.getAbsolutePath());
+		}
+
+		// bundles
+		Map<String, Resource> mapBundles = new HashMap<>();
+		for (Resource res: ri.getBundles()) {
+			mapBundles.put(res.getAbsolutePath(), res);
+			rEmpty = false;
+		}
+		for (Resource res: li.getBundles()) {
+			mapBundles.put(res.getAbsolutePath(), res);
+			lEmpty = false;
+		}
+		for (Resource res: mapBundles.values()) {
+			names.add("bundles:" + res.getAbsolutePath());
+		}
+
+		// watched extensions
+		Map<String, String> mapWatched = new HashMap<>();
+		if (ri.watchedExtensions != null) {
+			for (String str: ri.watchedExtensions) {
+				mapWatched.put(str, "");
+			}
+		}
+		if (li.watchedExtensions != null) {
+			for (String str: li.watchedExtensions) {
+				mapWatched.put(str, "");
+			}
+		}
+		for (String ext: mapWatched.keySet()) {
+			names.add("ext:" + ext);
+		}
+
+		if (lEmpty) {
+			((ConfigPro) config).setJavaSettings(fid, r);
+			return r;
+		}
+		if (rEmpty) {
+			((ConfigPro) config).setJavaSettings(fid, l);
+			return l;
+		}
+
+		names.add("loadCFMLClassPath:" + ri.loadCFMLClassPath);
+		names.add("reloadOnChange:" + ri.reloadOnChange);
+		names.add("watchInterval:" + ri.watchInterval);
+
+		Collections.sort(names);
+		String id = HashUtil.create64BitHashAsString(names.toString());
+
+		js = ((ConfigPro) config).getJavaSettings(id);
+		if (js != null) {
+			return js;
+		}
+		js = new JavaSettingsImpl(id, config, mapPOMs.values(), mapOSGIs.values(), mapResources.values().toArray(new Resource[mapResources.size()]),
+				mapBundles.values().toArray(new Resource[mapBundles.size()]), ri.loadCFMLClassPath, ri.reloadOnChange, ri.watchInterval,
+				mapWatched.keySet().toArray(new String[mapWatched.size()]));
+
+		((ConfigPro) config).setJavaSettings(fid, js);
+		((ConfigPro) config).setJavaSettings(id, js);
+		return js;
+	}
 
 	public boolean hasPoms() {
 		return poms != null && poms.size() > 0;
@@ -571,6 +650,38 @@ public final class JavaSettingsImpl implements JavaSettings {
 
 		((ConfigPro) config).setJavaSettings(id, js);
 		return js;
+	}
+
+	public static JavaSettings readJavaSettings(PageContext pc, Struct meta) throws IOException {
+		// TODO cache
+		String json = meta == null ? null : Caster.toString(meta.get(KeyConstants._javasettings, null), null);
+		if (!StringUtil.isEmpty(json, true)) {
+			json = json.trim();
+			String key = HashUtil.create64BitHashAsString(json, 16);
+			Reference<JavaSettings> ref = settings.get(key);
+			if (ref != null) {
+				JavaSettings val = ref.get();
+				if (val != null) {
+					return val;
+				}
+			}
+			try {
+				if (StringUtil.endsWithIgnoreCase(json, ".json")) {
+					pc = ThreadLocalPageContext.get(pc);
+					if (pc != null) json = IOUtil.toString(ResourceUtil.toResourceExisting(pc, json), CharsetUtil.UTF8);
+					else json = IOUtil.toString(ResourceUtil.toResourceExisting(ThreadLocalPageContext.getConfig(), json), CharsetUtil.UTF8);
+				}
+				Struct sct = Caster.toStruct(new JSONExpressionInterpreter().interpret(null, json));
+				JavaSettings val = JavaSettingsImpl.getInstance(ThreadLocalPageContext.getConfig(pc), sct, null);
+				settings.put(key, new SoftReference<JavaSettings>(val));
+				return val;
+			}
+			catch (Exception e) {
+				// LogUtil.log("component", e);
+				throw ExceptionUtil.toIOException(e);
+			}
+		}
+		return null;
 	}
 
 	private static java.util.List<Resource> loadPaths(PageContext pc, Object obj) {

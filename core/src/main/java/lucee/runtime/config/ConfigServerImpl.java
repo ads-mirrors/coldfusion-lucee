@@ -100,6 +100,8 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 
 	private static final long FIVE_SECONDS = 5000;
 
+	public static Config instance;
+
 	private final CFMLEngineImpl engine;
 	private Map<String, CFMLFactory> initContextes;
 	// private Map contextes;
@@ -174,6 +176,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		this.rootDir = configDir;
 		// instance=this;
 		this.updateInfo = updateInfo;
+		instance = this;
 	}
 
 	FunctionLib getCoreFLDs() throws FunctionLibException {

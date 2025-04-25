@@ -559,6 +559,13 @@ A return value from the CreateTimeSpan function, for example, "#CreateTimeSpan(0
 			<status>unimplemented</status>
 			<description>Indicates whether the component acts as a mapped superclass. A mapped superclass serves as a base class for other components to extend but does not itself represent a database entity.</description>
 		</attribute>
+		<attribute>
+			<type>string</type>
+			<name>javasettings</name>
+			<required>no</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Specifies custom JavaSettings for this component. When provided, these settings override any environment-level JavaSettings that would otherwise be applied.</description>
+		</attribute>
 	</tag>
 	
 	
@@ -2800,7 +2807,7 @@ If you import a CFML custom tag directory and specify an empty value, "", for th
 		</script>
 		<description>Defines an interface that consists of a set of signatures for functions.
 		The interface does not include the full function definitions; instead, you implement the functions in a Component. The interfaces that you define by using this tag can make up the structure of a reusable application framework.</description>
-		<attribute-type>fixed</attribute-type>
+		<attribute-type>mixed</attribute-type>
 		<attribute>
 			<type>string</type>
 			<name>displayName</name>
@@ -2827,6 +2834,13 @@ both functions must have the same attributes; otherwise
 			<rtexprvalue>true</rtexprvalue>
 			<description>Text to be displayed when using introspection to show information about the interface.
 			The hint attribute value follows the syntax line in the function description. </description>
+		</attribute>
+		<attribute>
+			<type>string</type>
+			<name>javasettings</name>
+			<required>no</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Specifies custom JavaSettings for this component. When provided, these settings override any environment-level JavaSettings that would otherwise be applied.</description>
 		</attribute>
 	</tag>
 	<!-- Include -->

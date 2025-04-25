@@ -2,7 +2,7 @@ package lucee.runtime.mvn;
 
 import java.util.Map.Entry;
 
-import lucee.print;
+import lucee.aprint;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.ResourcesImpl;
 import lucee.runtime.mvn.MavenUtil.GAVSO;
@@ -11,7 +11,7 @@ public final class Test {
 	public static void main(String[] args) throws Exception {
 
 		for (Entry<Object, Object> e: System.getProperties().entrySet()) {
-			print.e(e.getKey() + ":" + e.getValue());
+			aprint.e(e.getKey() + ":" + e.getValue());
 		}
 
 		Resource dir = ResourcesImpl.getFileResourceProvider().getResource("/Users/mic/Tmp3/www");
@@ -131,48 +131,48 @@ public final class Test {
 		for (GAVSO gav: arr) {
 			POM pom = POM.getInstance(dir, null, gav.g, gav.a, gav.v, null, null, gav.c, POM.SCOPE_NOT_TEST, POM.SCOPE_ALL, null);
 
-			print.e("==========================================");
-			print.e(pom.getName());
-			print.e(pom.getChecksum());
-			print.e(pom);
-			print.e("==========================================");
+			aprint.e("==========================================");
+			aprint.e(pom.getName());
+			aprint.e(pom.getChecksum());
+			aprint.e(pom);
+			aprint.e("==========================================");
 
 			// print.e("--- properties ---");
 			// print.e(pom.getAllParentsAsTree());
 			// print.e(pom.getProperties());
-			print.e("--- packaging ---");
-			print.e(pom.getPackaging());
+			aprint.e("--- packaging ---");
+			aprint.e(pom.getPackaging());
 
-			print.e("--- path ---");
-			print.e(pom.getPath());
-			print.e("--- hash ---");
-			print.e(pom.hash());
+			aprint.e("--- path ---");
+			aprint.e(pom.getPath());
+			aprint.e("--- hash ---");
+			aprint.e(pom.hash());
 
-			print.e("--- artifact ---");
-			print.e(pom.getArtifact());
+			aprint.e("--- artifact ---");
+			aprint.e(pom.getArtifact());
 
-			print.e("--- parents ---");
+			aprint.e("--- parents ---");
 			// print.e(pom.getAllParentsAsTree());
-			print.e(pom.getAllParents());
+			aprint.e(pom.getAllParents());
 
-			print.e("--- repositories ---");
+			aprint.e("--- repositories ---");
 			// print.e(pom.getAllParentsAsTree());
-			print.e(pom.getRepositories());
+			aprint.e(pom.getRepositories());
 
-			print.e("--- dependencies management ---");
-			print.e(pom.getDependencyManagement());
+			aprint.e("--- dependencies management ---");
+			aprint.e(pom.getDependencyManagement());
 
-			print.e("--- all dependencies management ---");
-			print.e(pom.getAllDependencyManagement());
+			aprint.e("--- all dependencies management ---");
+			aprint.e(pom.getAllDependencyManagement());
 
-			print.e("--- dependencies ---");
+			aprint.e("--- dependencies ---");
 			// print.e(getDependenciesAsTrees(pom, true));
-			print.e(pom.getAllDependencies(true));
+			aprint.e(pom.getAllDependencies(true));
 
-			print.e("--- jars ---");
+			aprint.e("--- jars ---");
 			// print.e(getDependenciesAsTrees(pom, true));
-			print.e(pom.getJars());
-			print.e(System.currentTimeMillis() - start);
+			aprint.e(pom.getJars());
+			aprint.e(System.currentTimeMillis() - start);
 
 			// pom.getScope();
 			// print.e(pom.getDependencyManagement());

@@ -69,7 +69,7 @@ import lucee.transformer.bytecode.visitor.ArrayVisitor;
 public final class JavaProxyFactory {
 
 	// !!! for every change in terfaces this version need to be updated TODO generate automatically
-	private static final int VERSION = 2;
+	private static final int VERSION = 3;
 
 	private static final short TYPE_CFC = 1;
 	private static final short TYPE_UDF = 2;
@@ -238,8 +238,8 @@ public final class JavaProxyFactory {
 	public static Object createProxy(PageContext pc, final Component cfc, Class extendz, Class... interfaces) throws PageException, IOException {
 		PageContextImpl pci = (PageContextImpl) pc;
 		PhysicalClassLoader pcl = getRPCClassLoaderFromClasses(pc, extendz, interfaces);
-
 		if (pcl == null) pcl = (PhysicalClassLoader) pci.getRPCClassLoader();
+
 		boolean hasTemplates = false;
 		if (extendz == null) extendz = Object.class;
 		else hasTemplates = true;
@@ -769,7 +769,6 @@ public final class JavaProxyFactory {
 		}
 
 		sb.append(appendix).append(';').append(VERSION);
-
 		StringBuilder name = new StringBuilder().append(appendix.charAt(0)).append(HashUtil.create64BitHashAsString(sb.toString(), Character.MAX_RADIX).toLowerCase());
 		if (cfc != null && !StringUtil.isEmpty(cfc.getAbsName())) {
 			name.append('.').append(cfc.getAbsName());

@@ -44,6 +44,7 @@ import lucee.commons.lang.StringUtil;
 import lucee.commons.net.URLDecoder;
 import lucee.loader.engine.CFMLEngine;
 import lucee.loader.engine.CFMLEngineFactory;
+import lucee.runtime.CFMLFactoryImpl;
 import lucee.runtime.Mapping;
 import lucee.runtime.MappingImpl;
 import lucee.runtime.PageContext;
@@ -53,6 +54,7 @@ import lucee.runtime.PageSourceImpl;
 import lucee.runtime.crypt.BlowfishEasy;
 import lucee.runtime.engine.CFMLEngineImpl;
 import lucee.runtime.engine.ThreadLocalPageContext;
+import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.exp.SecurityException;
 import lucee.runtime.listener.ApplicationContext;
@@ -63,6 +65,8 @@ import lucee.runtime.listener.ModernAppListener;
 import lucee.runtime.listener.NoneAppListener;
 import lucee.runtime.monitor.Monitor;
 import lucee.runtime.net.http.ReqRspUtil;
+import lucee.runtime.net.http.ServletConfigDummy;
+import lucee.runtime.net.http.ServletContextDummy;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
 import lucee.runtime.security.SecurityManager;
@@ -80,6 +84,8 @@ import lucee.transformer.library.tag.TagLib;
 public final class ConfigUtil {
 
 	private static String enckey;
+
+	private static ConfigWebImpl dummyConfigWeb;
 
 	/**
 	 * default encryption for configuration (not very secure)
@@ -1522,13 +1528,35 @@ public final class ConfigUtil {
 		return results;
 	}
 
-	public static ConfigWeb toConfigWeb(Config config) {
+	public static ConfigWeb toConfigWeb(Config config) throws PageException {
 		if (config instanceof ConfigWeb) return (ConfigWeb) config;
+
+		// do we have a config web in context
 		Config c = ThreadLocalPageContext.getConfig();
 		if (c instanceof ConfigWeb) return (ConfigWeb) config;
+		if (config == null) config = c;
 
-		// TODO config.getServerConfigWeb();
-		return (ConfigWeb) config;
+		// TODO better solution for this
+		// pick one
+		if (config instanceof ConfigServer) {
+			ConfigWeb[] webs = ((ConfigServerImpl) c).getConfigWebs();
+			if (webs != null && webs.length > 0) return webs[0];
+			return getDummyConfigWeb((ConfigServer) config);
+		}
+
+		throw new ApplicationException("could not provide a ConfigWeb based on the given [" + config.getClass().getName() + "]");
+		// Config config, Resource root, Struct attributes, Struct parameters, int majorVersion, int
+		// minorVersion
+
+	}
+
+	public static ConfigWeb getDummyConfigWeb(ConfigServer cs) throws PageException {
+		if (dummyConfigWeb == null) {
+			ServletConfigDummy sc = new ServletConfigDummy(new ServletContextDummy(cs, SystemUtil.getSystemDirectory(), new StructImpl(), new StructImpl(), 0, 0), "dummy");
+			CFMLFactoryImpl factory = new CFMLFactoryImpl((CFMLEngineImpl) cs.getEngine(), sc);
+			dummyConfigWeb = new ConfigWebImpl(factory, (ConfigServerImpl) cs, sc);
+		}
+		return dummyConfigWeb;
 	}
 
 	public static class CacheElement {
