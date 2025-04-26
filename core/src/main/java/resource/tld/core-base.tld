@@ -2361,7 +2361,7 @@ Use POST to send information to a server page or a CGI program for processing. P
 </description>
 		</attribute>
 		<attribute>
-			<type>boolean</type>
+			<type>string</type>
 			<name>redirect</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -2370,7 +2370,10 @@ Use POST to send information to a server page or a CGI program for processing. P
 	error message are returned in the variable cfhttp.statusCode. To see where execution would have been
 	redirected, use the variable cfhttp.responseHeader[LOCATION]. The key LOCATION identifies the path of
 	redirection. Lucee will follow up to five redirections on a request. if this limit is exceeded,
-	Lucee behaves as if redirect = "no".</description>
+	Lucee behaves as if redirect = "no".
+
+	If set to "Lax", filecontent for redirects for POST and DELETE requests will be returned, since 7.0.0.208
+</description>
 		</attribute>
 		<attribute>
 			<type>any</type>

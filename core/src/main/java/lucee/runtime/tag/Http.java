@@ -59,10 +59,8 @@ import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 
 import lucee.commons.io.CharsetUtil;
@@ -108,6 +106,7 @@ import lucee.runtime.net.http.ReqRspUtil;
 import lucee.runtime.net.proxy.ProxyData;
 import lucee.runtime.net.proxy.ProxyDataImpl;
 import lucee.runtime.op.Caster;
+import lucee.runtime.op.Decision;
 import lucee.runtime.text.csv.CSVParser;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.ArrayImpl;
@@ -282,8 +281,8 @@ public final class Http extends BodyTagImpl {
 	 */
 	private String url;
 
-	/** Boolean indicating whether to redirect execution or stop execution. */
-	private boolean redirect = true;
+	/** Boolean or Lax indicating whether to redirect execution or stop execution. */
+	private String redirect = "true";
 
 	/** The name to assign to a query if the a query is constructed from a file. */
 	private String name;
@@ -349,7 +348,7 @@ public final class Http extends BodyTagImpl {
 		textqualifier = '"';
 		username = null;
 		url = null;
-		redirect = true;
+		redirect = "true";
 		strPath = null;
 		name = null;
 		method = METHOD_GET;
@@ -579,12 +578,14 @@ public final class Http extends BodyTagImpl {
 	}
 
 	/**
-	 * set the value redirect
+	 * set the value redirect, boolean or lax
 	 * 
 	 * @param redirect value to set
 	 **/
-	public void setRedirect(boolean redirect) {
-		this.redirect = redirect;
+	public void setRedirect(String redirect) throws ExpressionException {
+		if ("lax".equalsIgnoreCase(redirect)) this.redirect = redirect;
+		else if (Decision.isBoolean(redirect)) this.redirect = redirect;
+		else throw new ExpressionException("Invalid value [" + redirect + "] for attribute [redirect], value must be one of the following [ true, false, lax ]");
 	}
 
 	/**
@@ -612,7 +613,7 @@ public final class Http extends BodyTagImpl {
 		strAuthType = strAuthType.trim();
 		if ("basic".equalsIgnoreCase(strAuthType)) authType = AUTH_TYPE_BASIC;
 		else if ("ntlm".equalsIgnoreCase(strAuthType)) authType = AUTH_TYPE_NTLM;
-		else throw new ExpressionException("invalid value [" + strAuthType + "] for attribute authType, value must be one of the following [basic,ntlm]");
+		else throw new ExpressionException("invalid value [" + strAuthType + "] for attribute [authType], value must be one of the following [ basic, ntlm ]");
 	}
 
 	public void setWorkstation(String workStation) {
@@ -708,11 +709,7 @@ public final class Http extends BodyTagImpl {
 		long start = System.nanoTime();
 		boolean safeToMemory = !StringUtil.isEmpty(result, true);
 
-		HttpClientBuilder builder = HTTPEngine4Impl.getHttpClientBuilder(this.usePool, this.clientCert, this.clientCertPassword);
-
-		// redirect
-		if (redirect) builder.setRedirectStrategy(DefaultRedirectStrategy.INSTANCE);
-		else builder.disableRedirectHandling();
+		HttpClientBuilder builder = HTTPEngine4Impl.getHttpClientBuilder(this.usePool, this.clientCert, this.clientCertPassword, this.redirect);
 
 		// cookies
 		BasicCookieStore cookieStore = new BasicCookieStore();
@@ -1892,7 +1889,7 @@ class Executor4 extends PageContextThread {
 
 	final Http http;
 	private final CloseableHttpClient client;
-	final boolean redirect;
+	final String redirect;
 	Throwable t;
 	boolean done;
 	// URL redirectURL;
@@ -1900,7 +1897,7 @@ class Executor4 extends PageContextThread {
 	private HttpRequestBase req;
 	private HttpContext context;
 
-	public Executor4(PageContext pc, Http http, CloseableHttpClient client, HttpContext context, HttpRequestBase req, boolean redirect) {
+	public Executor4(PageContext pc, Http http, CloseableHttpClient client, HttpContext context, HttpRequestBase req, String redirect) {
 		super(pc);
 		this.http = http;
 		this.client = client;

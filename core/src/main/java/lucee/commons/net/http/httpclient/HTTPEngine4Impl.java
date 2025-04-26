@@ -83,6 +83,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultClientConnectionReuseStrategy;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
+import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
@@ -271,14 +272,15 @@ public final class HTTPEngine4Impl {
 		return new HeaderImpl(header.getName(), header.getValue());
 	}
 
-	public static HttpClientBuilder getHttpClientBuilder(boolean pooling, String clientCert, String clientCertPassword) throws GeneralSecurityException, IOException {
+	public static HttpClientBuilder getHttpClientBuilder(boolean pooling, String clientCert, String clientCertPassword, String redirect) throws GeneralSecurityException, IOException {
 		String key = clientCert + ":" + clientCertPassword;
 		Registry<ConnectionSocketFactory> reg = StringUtil.isEmpty(clientCert, true) ? createRegistry() : createRegistry(clientCert, clientCertPassword);
 
 		if (!pooling) {
 			HttpClientBuilder builder = HttpClients.custom();
 			HttpClientConnectionManager cm = new BasicHttpClientConnectionManager(new DefaultHttpClientConnectionOperatorImpl(reg), null);
-			builder.setConnectionManager(cm).setConnectionManagerShared(false);
+			builder.setConnectionManager(cm).setConnectionManagerShared(false).setRedirectStrategy(new LaxRedirectStrategy());
+			if (!Caster.toBooleanValue(redirect, true)) builder.disableRedirectHandling();
 			return builder;
 		}
 
@@ -293,16 +295,14 @@ public final class HTTPEngine4Impl {
 		}
 		HttpClientBuilder builder = HttpClients.custom();
 		builder
-
 				.setConnectionManager(cm)
-
 				.setConnectionManagerShared(true)
-
 				.setConnectionTimeToLive(POOL_CONN_TTL_MS, TimeUnit.MILLISECONDS)
-
 				.setConnectionReuseStrategy(new DefaultClientConnectionReuseStrategy())
-
+				.setRedirectStrategy("lax".equalsIgnoreCase(redirect) ? new LaxRedirectStrategy() : new DefaultRedirectStrategy())
 				.setRetryHandler(new NoHttpResponseExceptionHttpRequestRetryHandler());
+
+		if (!Caster.toBooleanValue(redirect, true)) builder.disableRedirectHandling();
 
 		return builder;
 	}
@@ -381,14 +381,10 @@ public final class HTTPEngine4Impl {
 		CloseableHttpClient client;
 		proxy = ProxyDataImpl.validate(proxy, url.getHost());
 
-		HttpClientBuilder builder = getHttpClientBuilder(pooling, null, null);
+		HttpClientBuilder builder = getHttpClientBuilder(pooling, null, null, String.valueOf(redirect));
 
 		// LDEV-2321
 		builder.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build());
-
-		// redirect
-		if (redirect) builder.setRedirectStrategy(DefaultRedirectStrategy.INSTANCE);
-		else builder.disableRedirectHandling();
 
 		HttpHost hh = new HttpHost(url.getHost(), url.getPort());
 		setHeader(request, headers);
