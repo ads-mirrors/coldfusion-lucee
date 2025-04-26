@@ -7143,8 +7143,7 @@ if this attribute is not provided all types are returned.</description>
 	<function>
 		<name>getTempFile</name>
 		<class>lucee.runtime.functions.system.GetTempFile</class>
-		<description>Creates a temporary file in a directory whose name starts with
-        (at most) the first three characters of prefix, with an optional extension, default is .tmp.</description>
+		<description>Creates a unique temporary file with a prefix in a directory.</description>
 		<argument>
 			<name>dir</name>
 			<type>string</type>
@@ -7163,7 +7162,7 @@ if this attribute is not provided all types are returned.</description>
 			<type>string</type>
 			<required>No</required>
 			<Default>tmp</Default>
-			<description>Creates temporary files with user defined extension, default is .tmp</description>
+			<description>File extension to use, default is .tmp</description>
 			<introduced>5.3.9.72</introduced>
 		</argument>
 		<return>
