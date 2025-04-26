@@ -390,7 +390,16 @@ try {
 	systemMetrics = getSystemMetrics();
 	arrayAppend( results, "");
 	loop list="activeDatasourceConnections,idleDatasourceConnections,waitingForConn" item="metric" {
-		arrayAppend( results, "DATABASE #metric#: #systemMetrics[metric]#");
+		if ( structKeyExists( systemMetrics, metric ) ) {
+			arrayAppend( results, "DATABASE Total #metric#: #systemMetrics[metric]#");
+	}
+	if ( structKeyExists( systemMetrics, "datasourceConnections" ) ) {
+		loop collection="#systemMetrics.datasourceConnections#" key="dc" value="dcStats" {
+			if ( dcStats.activeDatasourceConnections gt 0 ){ // || dcStats.idleDatasourceConnections gt 0) {
+				//arrayAppend( results, "DATABASE Connection [#dcStats.name#][#dc#] has #dcStats.activeDatasourceConnections# open, #dcStats.idleDatasourceConnections# idle connection(s)");
+				arrayAppend( results, "DATABASE Connection [#dcStats.name#][#dcStats.connectionString#] has #dcStats.activeDatasourceConnections# open connection(s)");
+			}
+		}
 	}
 	arrayAppend( results, "");
 
