@@ -51,6 +51,7 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpTrace;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.FormBodyPart;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -61,7 +62,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 
 import lucee.commons.io.CharsetUtil;
@@ -1092,7 +1092,7 @@ public final class Http extends BodyTagImpl {
 		HTTPResponse4Impl rsp = null;
 		CloseableHttpClient client = null;
 		try {
-			if (httpContext == null) httpContext = new BasicHttpContext();
+			if (httpContext == null) httpContext = new HttpClientContext();
 
 			Struct cfhttp = new StructImpl();
 			cfhttp.setEL(ERROR_DETAIL, "");
