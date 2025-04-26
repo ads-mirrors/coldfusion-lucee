@@ -10,7 +10,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="http" {
 				http url=variables.testUrl result="local.res" redirect=true;
 				expect( res).toHaveKey( "locations" );
 				expect( res.locations ).toBeArray();
-				expect( len( res.locations ) ).toBeGT( 1 );
+				expect( len( res.locations ) ).toBe( 1 );
 			});
 
 			it( title="Checking cfhttp doesn't return redirect locations, redirect=false", body=function( currentSpec ) {
