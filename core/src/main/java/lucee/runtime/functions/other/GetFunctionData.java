@@ -82,6 +82,7 @@ public final class GetFunctionData implements Function {
 	private static Struct javaBasedFunction(FunctionLibFunction function) throws PageException {
 		Struct sct = new StructImpl(StructImpl.TYPE_LINKED);
 		sct.set(KeyConstants._name, function.getName());
+		sct.set(KeyConstants._nameWithCase, function.getNameWithCase());
 		sct.set(KeyConstants._status, TagLibFactory.toStatus(function.getStatus()));
 		if (function.getIntroduced() != null) sct.set(INTRODUCED, function.getIntroduced().toString());
 		// else if(inside.equals("introduced")) att.setIntroduced(value);
@@ -115,6 +116,7 @@ public final class GetFunctionData implements Function {
 				_arg.set(KeyConstants._required, arg.getRequired() ? Boolean.TRUE : Boolean.FALSE);
 				_arg.set(KeyConstants._type, StringUtil.emptyIfNull(arg.getTypeAsString()));
 				_arg.set(KeyConstants._name, StringUtil.emptyIfNull(arg.getName()));
+				_arg.set(KeyConstants._nameWithCase, StringUtil.emptyIfNull(arg.getNameWithCase()));
 				_arg.set(KeyConstants._status, TagLibFactory.toStatus(arg.getStatus()));
 				if (arg.getIntroduced() != null) _arg.set(INTRODUCED, arg.getIntroduced().toString());
 				if (!StringUtil.isEmpty(arg.getAlias(), true)) _arg.set(KeyConstants._alias, arg.getAlias());
@@ -139,6 +141,7 @@ public final class GetFunctionData implements Function {
 		UDF udf = CFFunction.loadUDF(pc, filename, mappingName, name, isWeb);
 
 		sct.set(KeyConstants._name, function.getName());
+		sct.set(KeyConstants._nameWithCase, function.getNameWithCase());
 		sct.set(ARGUMENT_TYPE, "fixed");
 		sct.set(KeyConstants._description, StringUtil.emptyIfNull(udf.getHint()).replaceAll("\\n\\s+", "\n"));
 		sct.set(RETURN_TYPE, StringUtil.emptyIfNull(udf.getReturnTypeAsString()));
@@ -160,6 +163,7 @@ public final class GetFunctionData implements Function {
 			_arg.set(KeyConstants._required, fa.isRequired() ? Boolean.TRUE : Boolean.FALSE);
 			_arg.set(KeyConstants._type, StringUtil.emptyIfNull(fa.getTypeAsString()));
 			_arg.set(KeyConstants._name, StringUtil.emptyIfNull(fa.getName()));
+			_arg.set(KeyConstants._nameWithCase, StringUtil.emptyIfNull(fa.getName()));
 			_arg.set(KeyConstants._description, StringUtil.emptyIfNull(fa.getHint()).replaceAll("\\n\\s+", "\n"));
 
 			String status;

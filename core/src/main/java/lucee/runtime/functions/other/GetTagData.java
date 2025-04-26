@@ -107,6 +107,7 @@ public final class GetTagData implements Function {
 		sct.set("nameSpaceSeperator", tld.getNameSpaceSeparator());
 		sct.set("nameSpace", tld.getNameSpace());
 		sct.set(KeyConstants._name, name.substring(0, name.lastIndexOf('.')));
+		sct.set(KeyConstants._nameWithCase, tag.getNameWithCase());
 		sct.set("hasNameAppendix", Boolean.FALSE);
 		sct.set(KeyConstants._status, "implemented");
 		sct.set(KeyConstants._type, "cfml");
@@ -145,6 +146,7 @@ public final class GetTagData implements Function {
 					_attr.set(KeyConstants._description, Caster.toString(src.get(KeyConstants._hint, "")).replaceAll("\\n\\s+", "\n"));
 					_attr.set(KeyConstants._type, src.get(KeyConstants._type, "any"));
 					_attr.set(KeyConstants._required, Caster.toBoolean(src.get(KeyConstants._required, ""), null));
+					_attr.set(KeyConstants._nameWithCase, Caster.toString(src.get(KeyConstants._nameWithCase, ""),""));
 					_attr.set("scriptSupport", "none");
 					_attrs.setEL(e.getKey(), _attr);
 
@@ -159,6 +161,7 @@ public final class GetTagData implements Function {
 		sct.set("nameSpaceSeperator", tld.getNameSpaceSeparator());
 		sct.set("nameSpace", tld.getNameSpace());
 		sct.set(KeyConstants._name, tag.getName());
+		sct.set(KeyConstants._nameWithCase, tag.getNameWithCase());
 		sct.set(KeyConstants._description, tag.getDescription().replaceAll("\\n\\s+", "\n"));
 		sct.set(KeyConstants._status, TagLibFactory.toStatus(tag.getStatus()));
 
@@ -206,6 +209,7 @@ public final class GetTagData implements Function {
 			if (attr.getValues() != null) _arg.set(KeyConstants._values, Caster.toArray(attr.getValues()));
 			if (attr.getDefaultValue() != null) _arg.set("defaultValue", attr.getDefaultValue());
 			_arg.set(KeyConstants._required, attr.isRequired() ? Boolean.TRUE : Boolean.FALSE);
+			_arg.set(KeyConstants._nameWithCase, attr.getNameWithCase());
 			_arg.set("scriptSupport", attr.getScriptSupportAsString());
 			if (attr.getIntroduced() != null) _arg.set(GetFunctionData.INTRODUCED, attr.getIntroduced().toString());
 

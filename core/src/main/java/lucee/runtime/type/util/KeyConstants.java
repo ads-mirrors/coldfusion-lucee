@@ -510,6 +510,7 @@ public final class KeyConstants {
 	public static final Key _moduleName = KeyImpl._const("moduleName");
 	public static final Key _myFusebox = KeyImpl._const("myFusebox");
 	public static final Key _name = KeyImpl._const("name");
+	public static final Key _nameWithCase = KeyImpl._const("nameWithCase");
 	public static final Key _subname = KeyImpl._const("subname");
 	public static final Key _needssetup = KeyImpl._const("needssetup");
 	public static final Key _next = KeyImpl._const("next");

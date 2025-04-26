@@ -38,6 +38,7 @@ public final class FunctionLibFunctionArg {
 	private boolean required;
 	private FunctionLibFunction function;
 	private String name;
+	private String nameWithCase;
 	private String description = "";
 	private String alias = null;
 	private String defaultValue = null;
@@ -62,6 +63,7 @@ public final class FunctionLibFunctionArg {
 		dbl.strType = strType;
 		dbl.required = required;
 		dbl.name = name;
+		dbl.nameWithCase = nameWithCase;
 		dbl.description = description;
 		dbl.alias = alias;
 		dbl.defaultValue = defaultValue;
@@ -176,10 +178,18 @@ public final class FunctionLibFunctionArg {
 	}
 
 	/**
+	 * @return the name, without forcing it to lowercase
+	 */
+	public String getNameWithCase() {
+		return nameWithCase;
+	}
+
+	/**
 	 * @param name the name to set
 	 */
 	public void setName(String name) {
 		this.name = name;
+		this.nameWithCase = name;
 	}
 
 	public String getDescription() {
