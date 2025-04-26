@@ -66,6 +66,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.config.SocketConfig;
@@ -398,7 +399,7 @@ public final class HTTPEngine4Impl {
 		HttpContext context = setCredentials(builder, hh, username, password, false);
 		setProxy(url.getHost(), builder, request, proxy);
 		client = builder.build();
-		if (context == null) context = new BasicHttpContext();
+		if (context == null) context = new HttpClientContext();
 
 		return new HTTPResponse4Impl(url, context, request, client.execute(request, context));
 	}
@@ -439,7 +440,7 @@ public final class HTTPEngine4Impl {
 		}
 	}
 
-	public static BasicHttpContext setCredentials(HttpClientBuilder builder, HttpHost httpHost, String username, String password, boolean preAuth) {
+	public static HttpClientContext setCredentials(HttpClientBuilder builder, HttpHost httpHost, String username, String password, boolean preAuth) {
 		// set Username and Password
 		if (!StringUtil.isEmpty(username, true)) {
 
@@ -450,7 +451,7 @@ public final class HTTPEngine4Impl {
 
 			cp.setCredentials(new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT), new UsernamePasswordCredentials(username, password));
 
-			BasicHttpContext httpContext = new BasicHttpContext();
+			HttpClientContext httpContext = new HttpClientContext();
 			if (preAuth) {
 				AuthCache authCache = new BasicAuthCache();
 				authCache.put(httpHost, new BasicScheme());

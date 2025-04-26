@@ -94,7 +94,7 @@ public final class HTTPResponse4Impl extends HTTPResponseSupport implements HTTP
 	}
 
 	public Array getLocations() {
-		if (context instanceof HttpClientContext){ // on error it's BasicHttpContext
+		if (context instanceof HttpClientContext){
 			try {
 				List<URI> locations = ((HttpClientContext) context).getRedirectLocations();
 				if (locations != null) {

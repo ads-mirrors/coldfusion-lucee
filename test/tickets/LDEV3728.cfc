@@ -6,7 +6,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="http" {
 
 	function run( testResults, testBox ) {
 		describe("Testcase for LDEV-3728", function() {
-			it( title="Checking cfhttp returns redirect locations, with redirect=true", skip=true, body=function( currentSpec ) {
+			it( title="Checking cfhttp returns redirect locations, with redirect=true", body=function( currentSpec ) {
 				http url=variables.testUrl result="local.res" redirect=true;
 				expect( res).toHaveKey( "locations" );
 				expect( res.locations ).toBeArray();
