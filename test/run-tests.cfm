@@ -392,6 +392,7 @@ try {
 	loop list="activeDatasourceConnections,idleDatasourceConnections,waitingForConn" item="metric" {
 		if ( structKeyExists( systemMetrics, metric ) ) {
 			arrayAppend( results, "DATABASE Total #metric#: #systemMetrics[metric]#");
+		}
 	}
 	if ( structKeyExists( systemMetrics, "datasourceConnections" ) ) {
 		loop collection="#systemMetrics.datasourceConnections#" key="dc" value="dcStats" {
