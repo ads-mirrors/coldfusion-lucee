@@ -6511,10 +6511,12 @@ The returned number of unallocated bytes is a hint, but not a guarantee, that it
 	<function>
 		<name>GetSecret</name>
 		<class>lucee.runtime.functions.security.GetSecret</class>
+		<introduced>7.0.0.197</introduced>
 		<description>
 Returns a reference to a secret value stored in a configured Secret Provider. The function doesn't immediately return the actual value, but rather a value object that can be handled by Lucee like a simple value.
 
 This reference is automatically resolved to its actual value when:
+
 - It's converted to a real simple value (string, boolean, number, date)
 - It's used in operations requiring a simple value
 
@@ -10315,6 +10317,7 @@ For exception analysis and debugging, lower temperatures (0.2-0.3) are recommend
 	<function>
 		<name>LoadAISession</name>
 		<class>lucee.runtime.functions.ai.LoadAISession</class>
+		<introduced>7.0.0.195</introduced>
 		<description>
 Restores an AI session from a serialized JSON string or struct. This function recreates an AI session with:
 
@@ -10379,6 +10382,7 @@ Incomplete or improperly formatted data may cause initialization errors.
 	<function>
 		<name>SerializeAISession</name>
 		<class>lucee.runtime.functions.ai.SerializeAISession</class>
+		<introduced>7.0.0.195</introduced>
 		<description>
 Serializes an AI session to a JSON string that includes its configuration and conversation history. The serialized content includes:
 
@@ -10386,6 +10390,7 @@ Serializes an AI session to a JSON string that includes its configuration and co
 - Complete conversation history with questions and answers
 
 This function is useful for:
+
 - Persisting AI sessions
 - Debugging AI conversations
 - Sharing or transferring AI session data
