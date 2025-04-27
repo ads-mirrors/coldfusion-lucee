@@ -17953,7 +17953,7 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 		<description>Clears all pages from memory pools. This function is deprecated; use inspectTemplates() instead. As of Lucee 6.2.1, 
 		the default behavior has been changed to match inspectTemplates() since forcibly clearing all pages from the pool is inefficient and provides no benefits.</description>
 		
-		<status>hidden</status>
+		<status>deprecated</status>
 		<argument>
 			<name>force</name>
 			<type>booean</type>
