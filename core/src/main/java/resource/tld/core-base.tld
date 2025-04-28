@@ -4808,7 +4808,7 @@ Lucee uses the number of characters in the file.</description>
 			<description>Indicates whether the property must have a non-null value. When true, validation will be performed during setter calls and object creation.</description>
 		</attribute>
 		<attribute>
-			<type>any</type>
+			<type>object</type>
 			<name>default</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
