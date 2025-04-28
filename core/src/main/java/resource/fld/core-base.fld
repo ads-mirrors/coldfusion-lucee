@@ -16440,40 +16440,86 @@ you can use tag cfadmin instead. we will add support for this function in a futu
 		<class>lucee.runtime.functions.other.CreateObject</class>
 		<modified>6.2.0.0</modified>
 		<description>
-			Creates and returns a reference to objects of various types including Java classes, components, web services, and COM objects.
-	
-			## Type: "java"
-			Creates a Java object instance. As of Lucee 6.2, this supports Maven dependency management.
-	
-			```
-			CreateObject('java', className [, classpath|bundleName|javasettings] [, delimiter|bundleVersion])
-			```
-	
-			You can provide Java libraries in three ways:
-			- Using classpath: Specify directories or JAR files
-			- Using OSGi bundles: Provide a bundle name and version
-			- Using Maven: Define Maven artifacts via a javasettings structure
-	
-			## Type: "component"
-			Creates a CFC instance without calling the init method.
-	
-			```
-			CreateObject('component', componentName)
-			```
-	
-			## Type: "webservice"
-			Creates a web service client from a WSDL.
-	
-			```
-			CreateObject('webservice', urlToWsdl [, portName] [, options])
-			```
-	
-			## Type: "com"
-			Creates a COM object (Windows only).
-	
-			```
-			CreateObject('com', class, context, serverName)
-			```
+Creates and returns a reference to objects of various types including Java classes, components, web services, and COM objects.
+
+## Type: "java"
+Creates a Java object instance. As of Lucee 6.2, this supports Maven dependency management and enhanced Java settings.
+
+```
+CreateObject('java', className [, classpath|bundleName|javasettings] [, delimiter|bundleVersion])
+```
+
+You can provide Java libraries in four ways:
+- Using classpath: Specify directories or JAR files
+- Using OSGi bundles: Provide a bundle name and version
+- Using loadPaths: Define non-OSGi JAR paths directly
+- Using Maven: Define Maven artifacts via a javasettings structure
+
+### Using Classpath
+```cfml
+// Using directories and JAR files with a classpath
+createObject("java", "com.example.MyClass", "/path/to/libs/,/path/to/specific.jar");
+
+// Using an array of paths
+createObject("java", "com.example.MyClass", ["/path/to/libs/", "/path/to/specific.jar"]);
+```
+
+### OSGi Bundle Support
+```cfml
+createObject(
+  type: "java", 
+  class: "org.lucee.mockup.osgi.Test", 
+  bundleName: "lucee.mockup", 
+  bundleVersion: "1.0.0.0"
+);
+```
+
+### Maven Support (Lucee 6.2+)
+```cfml
+createObject(
+  type: "java",
+  class: "org.apache.commons.beanutils.BeanUtils",
+  javasettings: {
+    "maven": [
+      {
+        "groupId": "commons-beanutils",
+        "artifactId": "commons-beanutils",
+        "version": "1.9.4"
+      }
+    ]
+  }
+);
+```
+
+### Java Settings Structure
+The javasettings structure can contain:
+- maven: Array of Maven dependency structures (groupId, artifactId, version)
+- loadPaths: Array of paths to non-OSGi JAR files or directories
+- bundlePaths: Array of paths to OSGi bundle files or directories
+- reloadOnChange: Boolean indicating whether to reload updated classes dynamically (default: false)
+- watchInterval: Number of seconds between checks for changes (default: 60)
+- watchExtensions: Array of file extensions to monitor (default: ["jar", "class"])
+
+## Type: "component"
+Creates a CFC instance without calling the init method.
+
+```
+CreateObject('component', componentName)
+```
+
+## Type: "webservice"
+Creates a web service client from a WSDL.
+
+```
+CreateObject('webservice', urlToWsdl [, portName] [, options])
+```
+
+## Type: "com"
+Creates a COM object (Windows only).
+
+```
+CreateObject('com', class, context, serverName)
+```
 		</description>
 		<argument>
 			<name>type</name>
@@ -16481,10 +16527,10 @@ you can use tag cfadmin instead. we will add support for this function in a futu
 			<type>string</type>
 			<required>Yes</required>
 			<description>Specifies the type of object to create:
-				- "java": Creates a Java object instance
-				- "component": Creates a CFC without calling the init method
-				- "webservice": Creates a web service client
-				- "com": Creates a COM object (Windows only)</description>
+- "java": Creates a Java object instance
+- "component": Creates a CFC without calling the init method
+- "webservice": Creates a web service client
+- "com": Creates a COM object (Windows only)</description>
 		</argument>
 		<argument>
 			<name>classname</name>
@@ -16492,10 +16538,10 @@ you can use tag cfadmin instead. we will add support for this function in a futu
 			<type>object</type>
 			<required>no</required>
 			<description>Specifies the object to create based on the type:
-				- "java": Fully qualified Java class name
-				- "component": CFC name (file path without .cfc extension)
-				- "webservice": URL to the WSDL
-				- "com": Component ProgID for the object</description>
+- "java": Fully qualified Java class name
+- "component": CFC name (file path without .cfc extension)
+- "webservice": URL to the WSDL
+- "com": Component ProgID for the object</description>
 		</argument>
 		<argument>
 			<name>context</name>
@@ -16503,13 +16549,19 @@ you can use tag cfadmin instead. we will add support for this function in a futu
 			<type>object</type>
 			<required>No</required>
 			<description>Varies by object type:
-				- "java": 
-				  * Classpath: String list or array of paths to class files or JAR files
-				  * BundleName: Name of an OSGi bundle
-				  * JavaSettings: Structure containing Maven configuration
-				- "webservice": Structure with web service options (username, password, proxyServer, proxyPort, proxyUser, proxyPassword)
-				- "component": Not used
-				- "com": Not used</description>
+- "java":
+  * Classpath: String list or array of paths to class files or JAR files
+  * BundleName: Name of an OSGi bundle
+  * JavaSettings: Structure containing Maven and Java configuration including:
+    - maven: Array of Maven dependencies (groupId, artifactId, version)
+    - loadPaths: Array of paths to non-OSGi JAR files or directories
+    - bundlePaths: Array of paths to OSGi bundle files or directories
+    - reloadOnChange: Boolean to enable dynamic reload of updated classes
+    - watchInterval: Interval in seconds to check for changes
+    - watchExtensions: File extensions to monitor
+- "webservice": Structure with web service options (username, password, proxyServer, proxyPort, proxyUser, proxyPassword)
+- "component": Not used
+- "com": Not used</description>
 		</argument>
 		<argument>
 			<name>delimiterOrVersion</name>
@@ -16517,12 +16569,12 @@ you can use tag cfadmin instead. we will add support for this function in a futu
 			<type>object</type>
 			<required>No</required>
 			<description>Varies by object type:
-				- "java": 
-				  * Delimiter for classpath (default is comma)
-				  * Bundle version when using an OSGi bundle
-				- "webservice": Not used
-				- "component": Not used
-				- "com": Not used</description>
+- "java":
+  * Delimiter for classpath (default is comma)
+  * Bundle version when using an OSGi bundle
+- "webservice": Not used
+- "component": Not used
+- "com": Not used</description>
 		</argument>
 		<return>
 			<type>any</type>
