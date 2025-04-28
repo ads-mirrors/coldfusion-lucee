@@ -386,7 +386,14 @@ try {
 		arrayAppend( results, "ERROR getting thread count: #e.message#"); // backwards compat for lucee 6.0
 		ManagementFactoryError = true;
 	}
-	
+
+	systemMetrics = getSystemMetrics();
+	arrayAppend( results, "");
+	loop list="activeDatasourceConnections,idleDatasourceConnections,waitingForConn" item="metric" {
+		arrayAppend( results, "DATABASE #metric#: #systemMetrics[metric]#");
+	}
+	arrayAppend( results, "");
+
 	postTestMeM = reportMem( "", _reportMemStat.usage );
 	arrayAppend( results, postTestMeM.report, true );
 	arrayAppend( results, "Force GC");
