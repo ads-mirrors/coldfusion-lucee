@@ -65,7 +65,8 @@ Redirtect to entry --->
 			<cfset driver=drivers[connections.class]>
 			<cftry>
 				<cfset validConnection = true> 
-				<!--- <cfadmin 
+				<!--- <cfadmin  
+								
 				action="verifyAIConnection"
 				type="#request.adminType#"
 				password="#session["password"&request.adminType]#"
@@ -166,6 +167,17 @@ Redirtect to entry --->
 									name="custom_#field.getName()#" 
 									value="#default#" class="large" style="width:100%" required="#field.getRequired()#" 
 									message="Missing value for field #field.getDisplayName()#">
+								<!--- TODO more dynamic solution --->
+								<cfif not isNew and "model" EQ field.getName()>
+									<cftry>
+										<cfset meta=aiGetMetadata(connection.name,true)>
+										<cfif structKeyExists(meta,"models")>
+											<p></p><b>available models:<br>#arrayToList(queryColumnData(meta.models,"name"),", ")#</b></p>
+										</cfif>
+										
+										<cfcatch></cfcatch>
+									</cftry>
+								</cfif>
 							<cfelseif type EQ "textarea">
 								<textarea class="large" style="height:70px;width:100%" name="custom_#field.getName()#">#default#</textarea>
 							<cfelseif type EQ "time">

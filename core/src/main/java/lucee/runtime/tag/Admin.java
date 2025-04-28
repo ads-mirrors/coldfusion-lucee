@@ -3728,21 +3728,38 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		java.util.Collection<String> names = this.config.getAIEngineNames();
 		Map conns = config.getCacheConnections();
 		Iterator it = conns.entrySet().iterator();
-		lucee.runtime.type.Query qry = new QueryImpl(
-				new Key[] { KeyConstants._default, KeyConstants._name, KeyConstants._class, KeyConstants._bundleName, KeyConstants._bundleVersion, KeyConstants._custom }, 0,
-				"factories");
+		lucee.runtime.type.Query qry = new QueryImpl(new Key[] { KeyConstants._default, KeyConstants._label, KeyConstants._name,
+
+				KeyConstants._model, KeyConstants._temperature, KeyConstants._connectionTimeout, KeyConstants._socketTimeout,
+
+				KeyConstants._conversationSizeLimit, KeyConstants._class, KeyConstants._bundleName, KeyConstants._bundleVersion,
+
+				KeyConstants._custom }, 0, "factories");
 
 		int row;
 		AIEngine aie;
 		for (String name: names) {
 			aie = this.config.getAIEngine(name);
 			row = qry.addRow();
+
 			qry.setAtEL(KeyConstants._default, row, aie.getDefault());
 			qry.setAtEL(KeyConstants._name, row, aie.getName());
+			qry.setAtEL(KeyConstants._model, row, aie.getLabel());
+			qry.setAtEL(KeyConstants._model, row, aie.getModel());
+			qry.setAtEL(KeyConstants._temperature, row, aie.getTemperature());
+			qry.setAtEL(KeyConstants._connectionTimeout, row, aie.getConnectTimeout());
+			qry.setAtEL(KeyConstants._socketTimeout, row, aie.getSocketTimeout());
+			qry.setAtEL(KeyConstants._conversationSizeLimit, row, aie.getConversationSizeLimit());
 			qry.setAtEL(KeyConstants._class, row, aie.getClassDefinition().getClassName());
 			qry.setAtEL(KeyConstants._bundleName, row, aie.getClassDefinition().getName());
 			qry.setAtEL(KeyConstants._bundleVersion, row, aie.getClassDefinition().getVersionAsString());
-			qry.setAtEL(KeyConstants._custom, row, aie.getProperties());
+
+			Struct props = aie.getProperties();
+			if (StringUtil.isEmpty(props.get(KeyConstants._model, null), true)) {
+				props.setEL(KeyConstants._model, aie.getModel());
+			}
+
+			qry.setAtEL(KeyConstants._custom, row, props);
 		}
 		pageContext.setVariable(getString("admin", action, "returnVariable"), qry);
 	}

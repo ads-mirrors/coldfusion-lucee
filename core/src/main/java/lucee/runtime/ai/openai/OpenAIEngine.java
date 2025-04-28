@@ -64,6 +64,7 @@ public final class OpenAIEngine extends AIEngineSupport implements AIEngineFile 
 	private static final URL DEFAULT_URL_OLLAMA;
 	private static final URL DEFAULT_URL_PERPLEXITY;
 	private static final URL DEFAULT_URL_DEEPSEEK;
+	private static final URL DEFAULT_URL_GROK;
 	private static final int DEFAULT_CONVERSATION_SIZE_LIMIT = 100;
 
 	// TODO
@@ -116,6 +117,16 @@ public final class OpenAIEngine extends AIEngineSupport implements AIEngineFile 
 			log(e);
 		}
 		DEFAULT_URL_DEEPSEEK = tmp;
+
+		// grok
+		tmp = null;
+		try {
+			tmp = new URL("https://api.x.ai/v1/");
+		}
+		catch (MalformedURLException e) {
+			log(e);
+		}
+		DEFAULT_URL_GROK = tmp;
 	}
 
 	Struct properties;
@@ -159,9 +170,13 @@ public final class OpenAIEngine extends AIEngineSupport implements AIEngineFile 
 				label = "DeepSeek";
 				baseURL = DEFAULT_URL_DEEPSEEK;
 			}
+			else if ("grok".equals(str)) {
+				label = "Grok";
+				baseURL = DEFAULT_URL_GROK;
+			}
 
 			else throw new ApplicationException(
-					"ATM only 4 types are supported [deepseek, openai, ollama, perplexity], for any other endpoint simply define the attribute `url` that looks like this [https://api.lucee.com/v1/].");
+					"ATM only 5 types are supported [deepseek, grok, openai, ollama, perplexity], for any other endpoint simply define the attribute `url` that looks like this [https://api.lucee.com/v1/].");
 		}
 		else {
 			str = Caster.toStringTrim(properties.get(KeyConstants._URL, null), null);
@@ -173,6 +188,7 @@ public final class OpenAIEngine extends AIEngineSupport implements AIEngineFile 
 					if (baseURL.equals(DEFAULT_URL_OPENAI)) label = "ChatGPT";
 					if (baseURL.equals(DEFAULT_URL_PERPLEXITY)) label = "Perplexity";
 					if (baseURL.equals(DEFAULT_URL_DEEPSEEK)) label = "DeepSeek";
+					if (baseURL.equals(DEFAULT_URL_GROK)) label = "Grok";
 
 				}
 				catch (Exception e) {
@@ -206,14 +222,11 @@ public final class OpenAIEngine extends AIEngineSupport implements AIEngineFile 
 			// nice to have
 			String appendix = "";
 			List<String> models = AIUtil.getModelNames(this);
-			if (models.size() == 1) {
+			if (models.size() > 0) {
 				model = models.get(0);
 			}
-			else if (models.size() == 0) {
-				appendix = " There are no models available.";
-			}
 			else {
-				appendix = " Available models for this engine are [" + AIUtil.getModelNamesAsStringList(this) + "].";
+				appendix = " There are no models available.";
 			}
 
 			if (Util.isEmpty(model, true)) throw new ApplicationException("the property [model] is required for a OpenAI Engine!." + appendix);

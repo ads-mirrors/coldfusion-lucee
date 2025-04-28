@@ -7,7 +7,7 @@ component extends="AI" {
 			required = true,
 			description = "Select one of the predefined endpoints for this interface, or choose 'other' to specify a custom URL below.",
 			type = "select",
-			values = "other,chatgpt,ollama,perplexity,deepseek"
+			values = "other,chatgpt,deepseek,grok,ollama,perplexity"
 		)
 		,field(displayName = "URL",
 			name = "url",
@@ -28,8 +28,8 @@ component extends="AI" {
 		,field(displayName = "Model",
 			name = "model",
 			defaultValue = "",
-			required = true,
-			description = "Specify the model to use, e.g., 'gpt-4o-mini' for OpenAI or 'gemma2' for Ollama.",
+			required = false,
+			description = "Specify the model to use, e.g., 'gpt-4o-mini' for OpenAI or 'gemma2' for Ollama. If no model is defined, Lucee picks one. in edit view of this page, you get a list of all avilable models.",
 			type = "text"
 		)
 		,field(displayName = "System Message",
@@ -84,10 +84,10 @@ component extends="AI" {
 	}
 
 	public string function getLabelLong() {
-		return "OpenAI (ChatGPT, Ollama, Perplexity, Deepseek)";
+		return "OpenAI (ChatGPT, Deepseek, Grok, Ollama, Perplexity)";
 	}
 
 	public string function getDescription() {
-		return "Connect to OpenAI's models (https://platform.openai.com) and other AI providers that support the OpenAI-compatible REST API (like Ollama, Perplexity, Deepseek)."
+		return "Connect to OpenAI's models (https://platform.openai.com) and other AI providers that support the OpenAI-compatible REST API (like Deepseek, Grok, Ollama, Perplexity)."
 	}
 }
