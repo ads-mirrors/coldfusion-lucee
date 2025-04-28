@@ -941,9 +941,6 @@ public abstract class ComponentPageImpl extends ComponentPage {
 			// If rtn is a query or struct, set preserveCase to null to allow SerializationSettings
 			// to determine case preservation in JSONConverter. Otherwise set preserveCase to true.
 			Boolean preserveCase = (rtn instanceof QueryImpl || rtn instanceof StructImpl) ? null : true;
-			if (rtn instanceof QueryImpl || rtn instanceof StructImpl) {
-				preserveCase = null;
-			}
 			pc.forceWrite(prefix + converter.serialize(pc, rtn, qf, preserveCase));
 		}
 		// CFML
