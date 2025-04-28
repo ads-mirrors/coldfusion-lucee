@@ -63,7 +63,6 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				// maybe different with FNS?
 				expect( isNull( comp.getMyArray() ) ).toBeFalse( 'myArray property should be an array, not null' );
 				expect( comp.getMyArray() ).toBeArray( 'myArray property should be an array' );
-				expect( comp.getMyArray() ).toBeHaveLength( 1 );
 				expect( comp.getMyArray() ).toBe( [ 1 ] );
 			});
 
