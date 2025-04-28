@@ -261,6 +261,7 @@ public class CFMLExpressionInterpreter {
 
 		// message
 		Range range = cfml.currentLine();
+		if (range == null) return new InterpreterException(prefix.trim());
 		String line = spaces(nextLength - currLength) + l + ": " + cfml.substring(range.getMin(), range.getMax() - range.getMin() + 1);
 		int col = cfml.getPos() - range.getMin();
 		line += "\n" + spaces(col + nextLength + 2) + "^";
