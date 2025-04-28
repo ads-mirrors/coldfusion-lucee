@@ -2780,6 +2780,8 @@ For Java classes (Lucee 6.2+), the classpath is shared between components and Ja
 - `import cfml:org.lucee.cfml.Query;`
 
 Note: Imports only affect the current template, not the entire request.
+
+Reference: See addional documentation for import at https://github.com/lucee/lucee-docs/blob/master/docs/recipes/import.md
 </description>
 		<attribute-type>fixed</attribute-type>
 		<attribute>
