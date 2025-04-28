@@ -41,6 +41,7 @@ public final class GetSystemInfo implements Function {
 
 	public static Struct call(PageContext pc) {
 		Struct sct = new StructImpl();
+		Struct dsPoolInfo = new StructImpl();
 		ConfigWebPro config = (ConfigWebPro) pc.getConfig();
 		CFMLFactoryImpl factory = (CFMLFactoryImpl) config.getFactory();
 		ScopeContext sc = factory.getScopeContext();
@@ -59,10 +60,19 @@ public final class GetSystemInfo implements Function {
 				idle += pool.getNumIdle();
 				active += pool.getNumActive();
 				idle += pool.getNumWaiters();
+				Struct dc = new StructImpl();
+				dsPoolInfo.put(pool.getFactory().getDatasource().hashCode(), dc);
+				dc.put("activeDatasourceConnections", pool.getNumActive());
+				dc.put("idleDatasourceConnections", pool.getNumIdle());
+				dc.put("waitingForConn", pool.getNumWaiters());
+				dc.put("jdbcDriverClass", pool.getFactory().getDatasource().getClassDefinition().getName());
+				dc.put("name", pool.getFactory().getDatasource().getName());
+				dc.put("connectionString", pool.getFactory().getDatasource().getConnectionStringTranslated());
 			}
 			sct.put("activeDatasourceConnections", active);
 			sct.put("idleDatasourceConnections", idle);
 			sct.put("waitingForConn", waiters);
+			sct.put("datasourceConnections", dsPoolInfo);
 		}
 
 		// tasks
