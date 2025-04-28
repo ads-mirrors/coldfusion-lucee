@@ -33,6 +33,7 @@ import org.osgi.framework.Bundle;
 
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.IOUtil;
+import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.ExceptionUtil;
@@ -42,6 +43,7 @@ import lucee.commons.lang.types.RefInteger;
 import lucee.commons.lang.types.RefIntegerImpl;
 import lucee.runtime.converter.JavaConverter.ObjectInputStreamImpl;
 import lucee.runtime.exp.PageException;
+import lucee.runtime.op.Caster;
 import lucee.runtime.reflection.Reflector;
 import lucee.runtime.thread.ThreadUtil;
 import lucee.transformer.bytecode.util.ASMUtil;
@@ -53,7 +55,7 @@ import lucee.transformer.dynamic.meta.Method;
 public class ClazzDynamic extends Clazz {
 
 	private static final long serialVersionUID = 862370302422701585L;
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG;
 	private transient Class clazz;
 	// private static Map<String, SoftReference<ClazzDynamic>> classes = new ConcurrentHashMap<>();
 	private final Method[] methods;
@@ -69,6 +71,10 @@ public class ClazzDynamic extends Clazz {
 
 	private static Map<Class, SoftReference<ClazzDynamic>> classes = new IdentityHashMap<>();
 	// private static Map<String, SoftReference<ClazzDynamic>> classes = new ConcurrentHashMap<>();
+
+	static {
+		DEBUG = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.NoSuchMethodException.list", null), false);
+	}
 
 	/*
 	 * private static double generateClassLoderId = 0; private static double path = 0; private static
