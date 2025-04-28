@@ -8742,10 +8742,18 @@ Suport for cookie was removed in Lucee 7
 		<attribute>
 			<type>struct</type>
 			<name>SerializationSettings</name>
-			<alias>SerializationSetting</alias>
+			<alias>Serialization</alias>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description></description>
+			<description>
+				```
+				{
+					preserveCaseForStructKey: boolean,
+					preserveCaseForQueryColumn: boolean,
+					serializeQueryAs: "column|struct|row"
+				}
+				```
+		</description>
 		</attribute>
 		<attribute>
 			<type>struct</type>

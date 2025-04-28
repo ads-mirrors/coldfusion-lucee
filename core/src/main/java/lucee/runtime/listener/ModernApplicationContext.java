@@ -1022,6 +1022,9 @@ public final class ModernApplicationContext extends ApplicationContextSupport {
 	public ISerializationSettings getSerializationSettings() {
 		if (!initSerializationSettings) {
 			Struct sct = Caster.toStruct(get(component, KeyConstants._serialization, null), null);
+			if (sct == null) {
+				sct = Caster.toStruct(get(component, KeyConstants._serializationSettings, null), null);
+			}
 			if (sct != null) {
 				serializationSettings = SerializationSettings.toSerializationSettings(sct);
 			}
