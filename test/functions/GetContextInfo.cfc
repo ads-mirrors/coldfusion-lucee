@@ -18,13 +18,10 @@
  ---><cfscript>
 component extends="org.lucee.cfml.test.LuceeTestCase"	{
 	
-	public function setUp() localmode="true"{
-		
-	}
-
 	public void function test() localmode="true"{
 		var data=GetContextInfo();
-		assertEquals(true,structKeyExists(data,"flushed"));
+		expect(data).toHaveKey("flushed");
+		expect(data.flushed).toBe(isFlushed());
 	}
 
 } 
