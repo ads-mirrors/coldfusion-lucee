@@ -18008,7 +18008,7 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 		<status>deprecated</status>
 		<argument>
 			<name>force</name>
-			<type>booean</type>
+			<type>boolean</type>
 			<required>No</required>
 			<introduced>6.2.1.118</introduced>
 			<description>When set to false (default in Lucee 6.2.1+), this function behaves like inspectTemplates(), which only reloads changed pages. 
