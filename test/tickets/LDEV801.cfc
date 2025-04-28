@@ -4,7 +4,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 		describe( "cfproperty default attribute should support complex types", function(){
 
 			it( "inline component with complex default property", function(){
-				var comp = new component accessors=true{
+				var comp = new component accessors=true {
 					property name="MyArray" type="Array" getter="true" setter="true" default="#[]#";
 					property name="name" type="string" getter="true" setter="true" default="lucee";
 					function getInstance(){
@@ -39,12 +39,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect( comp.getMyArray() ).toBe( [ 1, 2, 3] );
 			});
 
-			xit( "inline component with complex property, no default", function(){
+			it( "inline component with complex property, no default", function(){
 				var comp = new component accessors=true{
 					property name="MyArray" type="Array" getter="true" setter="true";
 					property name="name" type="string" getter="true" setter="true" default="lucee";
-					property name="id" type="numeric" getter="true" setter="true" default=123;
-					property name="luceeRocks" type="boolean" getter="true" setter="true" default=true;
+					property name="id" type="numeric" getter="true" setter="true" default="#123#";
+					property name="luceeRocks" type="boolean" getter="true" setter="true" default="#true#";
 					function getInstance(){
 						return this;
 					}
@@ -68,11 +68,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect( comp.getMyArray() ).toBe( [ 1, 2, 3] );
 			});
 
-			xit( "inline component with simple properties defaults, check types", function(){
+			it( "inline component with simple properties defaults, check types", function(){
 				var comp = new component accessors=true{
 					property name="name" type="string" getter="true" setter="true" default="lucee";
-					property name="id" type="numeric" getter="true" setter="true" default=123;
-					property name="luceeRocks" type="boolean" getter="true" setter="true" default=true;
+					property name="id" type="numeric" getter="true" setter="true" default="#123#";
+					property name="luceeRocks" type="boolean" getter="true" setter="true" default="#true#";
 					function getInstance(){
 						return this;
 					}
