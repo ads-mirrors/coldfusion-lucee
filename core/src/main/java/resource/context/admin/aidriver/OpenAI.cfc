@@ -84,10 +84,10 @@ component extends="AI" {
 	}
 
 	public string function getLabelLong() {
-		return "OpenAI (ChatGPT, Deepseek, Grok, Ollama, Perplexity)";
+		return "OpenAI (ChatGPT, Copilot, Deepseek, Grok, Ollama, Perplexity)";
 	}
 
 	public string function getDescription() {
-		return "Connect to OpenAI's models (https://platform.openai.com) and other AI providers that support the OpenAI-compatible REST API (like Deepseek, Grok, Ollama, Perplexity)."
+		return "Connect to OpenAI's models (https://platform.openai.com) and other AI providers that support the OpenAI-compatible REST API (like Copilot, Deepseek, Grok, Ollama, Perplexity). For Copilot use ""other"", because every user has a custom URL."
 	}
 }
