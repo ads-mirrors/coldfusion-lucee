@@ -28,12 +28,14 @@ import java.io.OutputStream;
 import java.nio.file.CopyOption;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.DosFileAttributes;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
@@ -104,7 +106,7 @@ public final class FileResource extends File implements Resource {
 		applyPermissionsFromResource(res);
 	}
 
-	private void applyPermissionsFromResource( Resource res ){
+	private void applyPermissionsFromResource(Resource res) {
 		// executable?
 		boolean e = res instanceof File && ((File) res).canExecute();
 		boolean w = res.isWriteable();
@@ -133,7 +135,7 @@ public final class FileResource extends File implements Resource {
 		applyPermissionsToResource(res);
 	}
 
-	private void applyPermissionsToResource( Resource res ){
+	private void applyPermissionsToResource(Resource res) {
 		boolean e = canExecute();
 		boolean w = isWriteable();
 		boolean r = isReadable();
@@ -344,25 +346,39 @@ public final class FileResource extends File implements Resource {
 
 	@Override
 	public void remove(boolean alsoRemoveChildren) throws IOException {
-		if (alsoRemoveChildren && isDirectory()) {
-			Resource[] children = listResources();
-			if (children != null) {
-				for (int i = 0; i < children.length; i++) {
-					children[i].remove(alsoRemoveChildren);
-				}
-			}
-		}
+		Path p = toPath();
 		provider.lock(this);
-		try {
-			Files.delete(Paths.get(getPath()));
+		if (alsoRemoveChildren && isDirectory()) {
+			Files.walkFileTree(p, new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+					Files.delete(file);
+					return FileVisitResult.CONTINUE;
+				}
+
+				@Override
+				public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+					if (exc != null) {
+						throw exc;
+					}
+					// Skip deleting the root directory itself, we'll do that outside the walkFileTree
+					if (!dir.equals(p)) {
+						Files.delete(dir);
+					}
+					return FileVisitResult.CONTINUE;
+				}
+			});
 		}
-		catch( NoSuchFileException nfse){
+		try {
+			Files.delete(p);
+		}
+		catch (NoSuchFileException nfse) {
 			throw new IOException("Can't delete [" + this + "], as it doesn't exist", nfse);
 		}
-		catch( DirectoryNotEmptyException dne){
+		catch (DirectoryNotEmptyException dne) {
 			throw new IOException("Can't delete directory as it's not empty [" + this + "]", dne);
 		}
-		catch (IOException e){
+		catch (IOException e) {
 			throw new IOException("Can't delete [" + this + "], " + e.getMessage(), e);
 		}
 		finally {
@@ -466,7 +482,7 @@ public final class FileResource extends File implements Resource {
 		if (!Files.exists(path)) return 0;
 		if (SystemUtil.isUnix()) {
 			try {
-				PosixFileAttributes attrs = Files.readAttributes( path, PosixFileAttributes.class);
+				PosixFileAttributes attrs = Files.readAttributes(path, PosixFileAttributes.class);
 				Set<PosixFilePermission> permissions = attrs.permissions();
 				return ModeUtil.toOctalMode(PosixFilePermissions.toString(permissions));
 			}
@@ -491,7 +507,8 @@ public final class FileResource extends File implements Resource {
 			// print.ln(ModeUtil.toStringMode(mode));
 			String permissions = ModeUtil.fromOctalMode(mode);
 			Files.setPosixFilePermissions(toPath(), PosixFilePermissions.fromString(permissions));
-		} catch (IOException ioe) {
+		}
+		catch (IOException ioe) {
 			IOException e = new IOException("Error setting mode: [" + toString() + "]");
 			ExceptionUtil.initCauseEL(e, ioe);
 			throw e;
