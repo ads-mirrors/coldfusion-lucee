@@ -44,7 +44,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
-import lucee.aprint;
 import lucee.commons.date.TimeZoneConstants;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.FileUtil;
@@ -1940,6 +1939,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (cfmlFlds == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getFLDs")) {
 				if (cfmlFlds == null) {
+					// TODO make some kind of pre state in case root is empty
 					ConfigFactoryImpl.loadFunctions(this, root, newVersion());
 				}
 			}
@@ -5493,8 +5493,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (loggers == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "loggers")) {
 				if (loggers == null) {
-					if (insideLoggers.get()) {
-						aprint.ds("cycle loop detected"); // FUTURE remove this
+					if (root == null || insideLoggers.get()) {
 						return new HashMap<String, LoggerAndSourceData>(); // avoid cycle loop
 					}
 					insideLoggers.set(true);

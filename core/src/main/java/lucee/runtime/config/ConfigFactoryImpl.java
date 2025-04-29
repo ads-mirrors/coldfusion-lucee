@@ -2226,7 +2226,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		}
 	}
 
-	public static void loadFunctions(ConfigImpl config, Struct root, boolean doNew) {
+	public static void loadFunctions(ConfigImpl config, Struct rootMayNull, boolean doNew) {
 		try {
 			Resource configDir = config.getConfigDir();
 
@@ -2241,7 +2241,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 			if (StringUtil.isEmpty(strDefaultFuncDirectory)) strDefaultFuncDirectory = SystemUtil.getSystemPropOrEnvVar("lucee.library.default.function", null);
 			strFuncDirectory = SystemUtil.getSystemPropOrEnvVar("lucee.library.additional.function", null);
 
-			Struct fileSystem = ConfigUtil.getAsStruct("fileSystem", root);
+			Struct fileSystem = rootMayNull == null ? null : ConfigUtil.getAsStruct("fileSystem", rootMayNull);
 
 			// get library directories
 			if (fileSystem != null) {
