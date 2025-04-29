@@ -2057,7 +2057,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 							if (!cst.exists()) cst.mkdirs();
 
 						}
-						if (!tempDirectoryReload) ResourceUtil.removeChildrenEL(cst, true);// start with an empty temp directory
+						if (!tempDirectoryReload) ResourceUtil.removeChildrenEL(cst, false);// start with an empty temp directory
 						this.tempDirectory = cst;
 
 					}
@@ -5536,6 +5536,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		}
 	}
 
+	@Override
 	public boolean isLoggingLoaded() {
 		return loggers != null;
 	}

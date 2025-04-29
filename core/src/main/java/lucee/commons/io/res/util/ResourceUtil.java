@@ -1150,7 +1150,7 @@ public final class ResourceUtil {
 
 	public static void removeChildrenEL(Resource res, boolean async) {
 		try {
-			removeChildren(res, async);
+			removeChildren(res, (ResourceFilter) null, async);
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
