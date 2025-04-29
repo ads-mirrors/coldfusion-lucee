@@ -420,4 +420,6 @@ public interface ConfigPro extends Config {
 	public boolean getDateCasterClassicStyle();
 
 	public ConfigPro resetMappings();
+
+	public boolean isLoggingLoaded();
 }

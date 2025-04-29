@@ -2046,4 +2046,9 @@ public final class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	public Map<String, SecretProvider> getSecretProviders() {
 		return cs.getSecretProviders();
 	}
+
+	@Override
+	public boolean isLoggingLoaded() {
+		return cs.isLoggingLoaded();
+	}
 }

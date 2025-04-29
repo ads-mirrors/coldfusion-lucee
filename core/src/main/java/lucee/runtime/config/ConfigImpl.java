@@ -5493,7 +5493,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (loggers == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "loggers")) {
 				if (loggers == null) {
-					if (root == null || insideLoggers.get()) {
+					if (insideLoggers.get()) {
 						return new HashMap<String, LoggerAndSourceData>(); // avoid cycle loop
 					}
 					insideLoggers.set(true);
@@ -5534,6 +5534,10 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		catch (PageException e) {
 			throw new PageRuntimeException(e);
 		}
+	}
+
+	public boolean isLoggingLoaded() {
+		return loggers != null;
 	}
 
 	@Override
