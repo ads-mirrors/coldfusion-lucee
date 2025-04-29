@@ -19,7 +19,6 @@
 package lucee.runtime.component;
 
 import jakarta.servlet.jsp.tagext.BodyContent;
-import lucee.print;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.filter.DirectoryResourceFilter;
@@ -697,15 +696,13 @@ public final class ComponentLoader {
 			if (page instanceof InterfacePageImpl) throw new ApplicationException(
 					"you cannot instantiate the interface [" + page.getPageSource().getDisplayPath() + "] as a component (" + page.getClass().getName() + "" + ")");
 
-			try {
-				Class<?> src = page.getClass().getClassLoader().loadClass("lucee.runtime.ComponentPageImpl");
-				print.e(src.getClassLoader().getClass().getName());
-				print.e(ComponentPageImpl.class.getClassLoader().getClass().getName());
-			}
-			catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			/*
+			 * try { Class<?> src =
+			 * page.getClass().getClassLoader().loadClass("lucee.runtime.ComponentPageImpl");
+			 * print.e(src.getClassLoader().getClass().getName());
+			 * print.e(ComponentPageImpl.class.getClassLoader().getClass().getName()); } catch (Exception e) {
+			 * // TODO Auto-generated catch block e.printStackTrace(); }
+			 */
 			throw new ApplicationException("there is a problem with casting  [" + page.getPageSource().getDisplayPath() + "/" + page.getClass().getName()
 					+ "] to a component (ComponentPageImpl) (" + page.getClass().getClassLoader().getClass().getName() + "" + ")");
 

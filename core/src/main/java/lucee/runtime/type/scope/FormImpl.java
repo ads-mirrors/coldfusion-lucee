@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -175,11 +176,15 @@ public final class FormImpl extends ScopeSupport implements Form, ScriptProtecte
 
 		// Create a new file upload handler
 		final String encoding = getEncoding();
+		Charset cs = null;
 		try {
 			DiskFileItemFactory factory = getDiskFileItemFactory(pc);
 
 			JakartaServletDiskFileUpload upload = new JakartaServletDiskFileUpload(factory);
-			if (!StringUtil.isEmpty(encoding, true)) upload.setHeaderCharset(CharsetUtil.toCharset(encoding.trim()));
+			if (!StringUtil.isEmpty(encoding, true)) {
+				cs = CharsetUtil.toCharset(encoding.trim());
+				upload.setHeaderCharset(cs);
+			}
 
 			HttpServletRequest req = pc.getHttpServletRequest();
 
@@ -195,7 +200,7 @@ public final class FormImpl extends ScopeSupport implements Form, ScriptProtecte
 
 				// process Form Field
 				if (item.isFormField() || StringUtil.isEmpty(item.getName())) {
-					list.add(new URLItem(item.getFieldName(), item.getString(), false));
+					list.add(new URLItem(item.getFieldName(), cs != null ? item.getString(cs) : item.getString(), false));
 				}
 				// Process Uploaded File
 				else {
