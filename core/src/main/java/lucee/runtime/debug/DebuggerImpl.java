@@ -145,12 +145,15 @@ public final class DebuggerImpl implements Debugger {
 
 	private static final Key CACHE_TYPE = KeyConstants._cacheType;
 
-	private static final Key[] PAGE_COLUMNS = new Collection.Key[] { KeyConstants._id, KeyConstants._count, KeyConstants._min, KeyConstants._max, KeyConstants._avg,
-			KeyConstants._app, KeyConstants._load, KeyConstants._query, KeyConstants._total, KeyConstants._src };
-	private static final Key[] QUERY_COLUMNS = new Collection.Key[] { KeyConstants._name, KeyConstants._time, KeyConstants._sql, KeyConstants._sqlPattern, KeyConstants._paramValue,
-			KeyConstants._paramType, KeyConstants._src, KeyConstants._line, KeyConstants._count, KeyConstants._datasource, KeyConstants._usage, CACHE_TYPE };
-	private static final String[] QUERY_COLUMN_TYPES = new String[] { "VARCHAR", "DOUBLE", "VARCHAR", "VARCHAR", "VARCHAR", "VARCHAR", "VARCHAR", "DOUBLE", "DOUBLE", "VARCHAR",
-			"ANY", "VARCHAR" };
+	private static final Key[] PAGE_COLUMNS = new Collection.Key[] { KeyConstants._id, KeyConstants._count, KeyConstants._min,
+			KeyConstants._max, KeyConstants._avg, KeyConstants._app, KeyConstants._load,
+			KeyConstants._query, KeyConstants._total, KeyConstants._src };
+	private static final Key[] QUERY_COLUMNS = new Collection.Key[] { KeyConstants._name, KeyConstants._time, KeyConstants._sql,
+			KeyConstants._sqlPattern, KeyConstants._paramValue, KeyConstants._paramType, KeyConstants._src, KeyConstants._line,
+			KeyConstants._count, KeyConstants._datasource, KeyConstants._usage, CACHE_TYPE };
+	private static final String[] QUERY_COLUMN_TYPES = new String[] { "VARCHAR", "DOUBLE", "VARCHAR", 
+			"VARCHAR", "ARRAY", "ARRAY", "VARCHAR", "DOUBLE", 
+			"DOUBLE", "VARCHAR", "ANY", "VARCHAR" };
 	private static final Key[] GEN_DATA_COLUMNS = new Collection.Key[] { KeyConstants._category, KeyConstants._name, KeyConstants._value };
 	private static final Key[] TIMER_COLUMNS = new Collection.Key[] { KeyConstants._label, KeyConstants._time, KeyConstants._template, KeyConstants._line };
 	private static final Key[] DUMP_COLUMNS = new Collection.Key[] { KeyConstants._output, KeyConstants._template, KeyConstants._line };
@@ -478,16 +481,14 @@ public final class DebuggerImpl implements Debugger {
 					qryQueries.setAt(CACHE_TYPE, row, qe.getCacheType());
 
 					SQLItem[] params = qe.getSQL().getItems();
-					StringBuilder paramValue = new StringBuilder();
-					StringBuilder paramType = new StringBuilder();
+					Array paramType = new ArrayImpl( params.length );
+					Array paramValue = new ArrayImpl( params.length );
 					for (int i = 0; i < params.length; i++) {
-						paramValue.append(params[i].getValue()).toString();
-						if (i < params.length - 1) paramValue.append(",");
-						paramType.append(SQLCaster.toStringType(params[i].getType(), "")).toString();
-						if (i < params.length - 1) paramType.append(",");
+						paramValue.setEL(i + 1, params[i].getValue());
+						paramType.setEL(i + 1, SQLCaster.toStringType(params[i].getType(), ""));
 					}
-					qryQueries.setAt(KeyConstants._paramValue, row, paramValue.toString());
-					qryQueries.setAt(KeyConstants._paramType, row, paramType.toString());
+					qryQueries.setAt(KeyConstants._paramValue, row, paramValue);
+					qryQueries.setAt(KeyConstants._paramType, row, paramType);
 
 					Struct usage = getUsage(qe);
 					if (usage != null) qryQueries.setAt(KeyConstants._usage, row, usage);
