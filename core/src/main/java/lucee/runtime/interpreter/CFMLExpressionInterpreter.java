@@ -160,11 +160,11 @@ public class CFMLExpressionInterpreter {
 
 	protected static final short STATIC = 0;
 	private static final short DYNAMIC = 1;
-	private static FunctionLibFunction LITERAL_ARRAY = null;
-	private static FunctionLibFunction LITERAL_STRUCT = null;
-	private static FunctionLibFunction JSON_ARRAY = null;
-	private static FunctionLibFunction JSON_STRUCT = null;
-	private static FunctionLibFunction LITERAL_ORDERED_STRUCT = null;
+	private static FunctionLibFunction _LITERAL_ARRAY = null;
+	private static FunctionLibFunction _LITERAL_STRUCT = null;
+	private static FunctionLibFunction _JSON_ARRAY = null;
+	private static FunctionLibFunction _JSON_STRUCT = null;
+	private static FunctionLibFunction _LITERAL_ORDERED_STRUCT = null;
 
 	protected short mode = 0;
 
@@ -289,53 +289,6 @@ public class CFMLExpressionInterpreter {
 				catch (Exception e) {
 				}
 			}
-		}
-
-		if (JSON_ARRAY == null) {
-			synchronized (SystemUtil.createToken("CFMLExpressionInterpreter", "init")) {
-				if (JSON_ARRAY == null) {
-					init();
-				}
-			}
-		}
-	}
-
-	private static void init() {
-		if (JSON_ARRAY == null) {
-			JSON_ARRAY = new FunctionLibFunction(true);
-			JSON_ARRAY.setName("_jsonArray");
-			JSON_ARRAY.setFunctionClass(new ClassDefinitionImpl<>(JsonArray.class));
-			JSON_ARRAY.setArgType(FunctionLibFunction.ARG_DYNAMIC);
-			JSON_ARRAY.setReturn("array");
-		}
-		if (JSON_STRUCT == null) {
-			JSON_STRUCT = new FunctionLibFunction(true);
-			JSON_STRUCT.setName("_jsonStruct");
-			JSON_STRUCT.setFunctionClass(new ClassDefinitionImpl<>(JsonStruct.class));
-			JSON_STRUCT.setArgType(FunctionLibFunction.ARG_DYNAMIC);
-			JSON_STRUCT.setReturn("struct");
-		}
-
-		if (LITERAL_ARRAY == null) {
-			LITERAL_ARRAY = new FunctionLibFunction(true);
-			LITERAL_ARRAY.setName("_literalArray");
-			LITERAL_ARRAY.setFunctionClass(new ClassDefinitionImpl<>(LiteralArray.class));
-			LITERAL_ARRAY.setArgType(FunctionLibFunction.ARG_DYNAMIC);
-			LITERAL_ARRAY.setReturn("array");
-		}
-		if (LITERAL_STRUCT == null) {
-			LITERAL_STRUCT = new FunctionLibFunction(true);
-			LITERAL_STRUCT.setName("_literalStruct");
-			LITERAL_STRUCT.setFunctionClass(new ClassDefinitionImpl<>(LiteralStruct.class));
-			LITERAL_STRUCT.setArgType(FunctionLibFunction.ARG_DYNAMIC);
-			LITERAL_STRUCT.setReturn("struct");
-		}
-		if (LITERAL_STRUCT == null) {
-			LITERAL_STRUCT = new FunctionLibFunction(true);
-			LITERAL_STRUCT.setName("_literalOrderedStruct");
-			LITERAL_STRUCT.setFunctionClass(new ClassDefinitionImpl<>(LiteralOrderedStruct.class));
-			LITERAL_STRUCT.setArgType(FunctionLibFunction.ARG_DYNAMIC);
-			LITERAL_STRUCT.setReturn("struct");
 		}
 	}
 
@@ -1070,11 +1023,11 @@ public class CFMLExpressionInterpreter {
 			return ref;
 		}
 		// JSON
-		if ((ref = json(isJson ? JSON_ARRAY : LITERAL_ARRAY, '[', ']')) != null) {
+		if ((ref = json(isJson ? getJsonArray() : getLiteralArray(), '[', ']')) != null) {
 			mode = DYNAMIC;
 			return ref;
 		}
-		if ((ref = json(isJson ? JSON_STRUCT : LITERAL_STRUCT, '{', '}')) != null) {
+		if ((ref = json(isJson ? getJsonStruct() : getLiteralStruct(), '{', '}')) != null) {
 			mode = DYNAMIC;
 			return ref;
 		}
@@ -1099,21 +1052,21 @@ public class CFMLExpressionInterpreter {
 		 */
 
 		if (!isJson && cfml.forwardIfCurrent('[', ':', ']') || cfml.forwardIfCurrent('[', '=', ']')) {
-			return new BIFCall(LITERAL_ORDERED_STRUCT, new Ref[0]);
+			return new BIFCall(getLiteralOrderedStruct(), new Ref[0]);
 		}
 		Ref[] args = flf == null ? null : functionArg(flf.getName(), false, flf, end);
 		if (args != null && args.length > 0) {
 			if (isJson && start == '[' && args[0] instanceof LFunctionValue) {
 				throw new TemplateException("invalid syntax, json does not allow ordered structs");
 			}
-			if (flf == LITERAL_ARRAY) {
+			if (flf == getLiteralArray()) {
 				if (args[0] instanceof LFunctionValue) {
 					for (int i = 1; i < args.length; i++) {
 						if (!(args[i] instanceof LFunctionValue))
 							throw createSyntaxException("invalid argument for literal ordered struct, only named arguments are allowed like {name:\"value\",name2:\"value2\"}",
 									cfml);
 					}
-					flf = LITERAL_ORDERED_STRUCT;
+					flf = getLiteralOrderedStruct();
 				}
 				else {
 					for (int i = 1; i < args.length; i++) {
@@ -1645,6 +1598,81 @@ public class CFMLExpressionInterpreter {
 			throw createSyntaxException("Comment is not closed ", cfml);
 		}
 		return true;
+	}
+
+	private final static FunctionLibFunction getJsonStruct() {
+		if (_JSON_STRUCT == null) {
+			synchronized (SystemUtil.createToken("CFMLExpressionInterpreter", "getLiteralStruct")) {
+				if (_JSON_STRUCT == null) {
+					_JSON_STRUCT = new FunctionLibFunction(true);
+					_JSON_STRUCT.setName("_jsonStruct");
+					_JSON_STRUCT.setFunctionClass(new ClassDefinitionImpl<>(JsonStruct.class));
+					_JSON_STRUCT.setArgType(FunctionLibFunction.ARG_DYNAMIC);
+					_JSON_STRUCT.setReturn("struct");
+				}
+			}
+		}
+		return _JSON_STRUCT;
+	}
+
+	private final static FunctionLibFunction getJsonArray() {
+		if (_JSON_ARRAY == null) {
+			synchronized (SystemUtil.createToken("CFMLExpressionInterpreter", "getLiteralStruct")) {
+				if (_JSON_ARRAY == null) {
+					_JSON_ARRAY = new FunctionLibFunction(true);
+					_JSON_ARRAY.setName("_jsonArray");
+					_JSON_ARRAY.setFunctionClass(new ClassDefinitionImpl<>(JsonArray.class));
+					_JSON_ARRAY.setArgType(FunctionLibFunction.ARG_DYNAMIC);
+					_JSON_ARRAY.setReturn("array");
+				}
+			}
+		}
+		return _JSON_ARRAY;
+	}
+
+	private final static FunctionLibFunction getLiteralArray() {
+		if (_LITERAL_ARRAY == null) {
+			synchronized (SystemUtil.createToken("CFMLExpressionInterpreter", "getLiteralStruct")) {
+				if (_LITERAL_ARRAY == null) {
+					_LITERAL_ARRAY = new FunctionLibFunction(true);
+					_LITERAL_ARRAY.setName("_literalArray");
+					_LITERAL_ARRAY.setFunctionClass(new ClassDefinitionImpl<>(LiteralArray.class));
+					_LITERAL_ARRAY.setArgType(FunctionLibFunction.ARG_DYNAMIC);
+					_LITERAL_ARRAY.setReturn("array");
+				}
+			}
+		}
+		return _LITERAL_ARRAY;
+	}
+
+	private final static FunctionLibFunction getLiteralStruct() {
+		if (_LITERAL_STRUCT == null) {
+			synchronized (SystemUtil.createToken("CFMLExpressionInterpreter", "getLiteralStruct")) {
+				if (_LITERAL_STRUCT == null) {
+					_LITERAL_STRUCT = new FunctionLibFunction(true);
+					_LITERAL_STRUCT.setName("_literalStruct");
+					_LITERAL_STRUCT.setFunctionClass(new ClassDefinitionImpl<>(LiteralStruct.class));
+					_LITERAL_STRUCT.setArgType(FunctionLibFunction.ARG_DYNAMIC);
+					_LITERAL_STRUCT.setReturn("struct");
+				}
+			}
+		}
+		return _LITERAL_STRUCT;
+	}
+
+	private final static FunctionLibFunction getLiteralOrderedStruct() {
+		if (_LITERAL_ORDERED_STRUCT == null) {
+			synchronized (SystemUtil.createToken("CFMLExpressionInterpreter", "getLiteralOrderedStruct")) {
+				if (_LITERAL_ORDERED_STRUCT == null) {
+					_LITERAL_ORDERED_STRUCT = new FunctionLibFunction(true);
+					_LITERAL_ORDERED_STRUCT.setName("_literalOrderedStruct");
+					_LITERAL_ORDERED_STRUCT.setFunctionClass(new ClassDefinitionImpl<>(LiteralOrderedStruct.class));
+					_LITERAL_ORDERED_STRUCT.setArgType(FunctionLibFunction.ARG_DYNAMIC);
+					_LITERAL_ORDERED_STRUCT.setReturn("struct");
+				}
+			}
+		}
+		return _LITERAL_ORDERED_STRUCT;
 	}
 
 	public static void main(String[] args) {
