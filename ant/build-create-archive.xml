@@ -181,6 +181,16 @@
 		systemOutput( "ERROR: #cfcatch.message#", true);	
 		rethrow;
 	}
+
+	// err.log should normally be empty
+	errLog = expandPath( "{lucee-server}/logs/err.log" );
+	if ( fileExists( errLog ) && len( fileRead( errLog ) ) ){
+		systemOutput( "", true );
+		systemOutput( "Errors found in err.log", true, true );
+		systemOutput( fileRead( errLog ), true, true );
+		throw "Errors found in err.log";
+	}
+
 	systemOutput( DateTimeFormat(now(),'yyyy-mm-dd HH:nn:ss') & " finished", true);
 	]]>
   </script>
