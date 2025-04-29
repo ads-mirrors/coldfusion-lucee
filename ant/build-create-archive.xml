@@ -188,6 +188,13 @@
 		systemOutput( "", true );
 		systemOutput( "Errors found in err.log", true, true );
 		systemOutput( fileRead( errLog ), true, true );
+		if ( len( server.system.environment.GITHUB_STEP_SUMMARY?:"" )) {
+			fileWrite(  server.system.environment.GITHUB_STEP_SUMMARY, "#### #server.lucee.version# ");
+			fileAppend( server.system.environment.GITHUB_STEP_SUMMARY, "");
+			fileAppend( server.system.environment.GITHUB_STEP_SUMMARY, "###### Errors found in err.log ");
+			fileAppend( server.system.environment.GITHUB_STEP_SUMMARY, "");
+			fileAppend( server.system.environment.GITHUB_STEP_SUMMARY, fileRead( errLog ));
+		}
 		throw "Errors found in err.log";
 	}
 
