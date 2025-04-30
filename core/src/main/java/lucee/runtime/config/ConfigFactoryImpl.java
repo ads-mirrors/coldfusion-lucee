@@ -223,7 +223,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		((CFMLEngineImpl) ConfigUtil.getEngine(configWeb)).onStart(configWeb, false);
 
 		((GatewayEngineImpl) configWeb.getGatewayEngine()).autoStart();
-		log(configServer,
+		log(configServer, Log.LEVEL_INFO,
 				"\n===================================================================\n" + "WEB CONTEXT (" + createLabel(configServer, servletConfig) + ")\n"
 						+ "-------------------------------------------------------------------\n" + "- config:" + configDir + "\n" + "- webroot:"
 						+ ReqRspUtil.getRootPath(servletConfig.getServletContext()) + "\n" + "- label:" + createLabel(configServer, servletConfig) + "\n" + "- start-time:"
@@ -333,7 +333,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 				createContextFiles(configDir, config, doNew);
 				((CFMLEngineImpl) ConfigUtil.getEngine(config)).onStart(config, false);
 			}
-			log(config,
+			log(config, Log.LEVEL_INFO,
 					"\n===================================================================\n" + "SERVER CONTEXT\n"
 							+ "-------------------------------------------------------------------\n" + "- config:" + configDir + "\n" + "- loader-version:"
 							+ SystemUtil.getLoaderVersion() + "\n" + "- core-version:" + engine.getInfo().getVersion() + "\n" + "- start-time:"
@@ -400,7 +400,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		// load PW
 		try {
 			if (createSaltAndPW(root, config, essentialOnly)) reload = true;
-			if (LOG) log(config, "fixed salt");
+			if (LOG) log(config, Log.LEVEL_INFO, "fixed salt");
 
 			// reload when an old version of xml got updated
 			if (reload) {
@@ -416,10 +416,10 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 
 		config.setLastModified();
 
-		if (LOG) log(config, "loaded filesystem");
+		if (LOG) log(config, Log.LEVEL_INFO, "loaded filesystem");
 		if (!essentialOnly) {
 			_loadExtensionBundles(config, root);
-			if (LOG) log(config, "loaded extension");
+			if (LOG) log(config, Log.LEVEL_INFO, "loaded extension");
 		}
 
 		if (!essentialOnly) {
@@ -1810,13 +1810,13 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 					connStr = getAttr(driver, "connectionString");
 					// check if label exists
 					if (StringUtil.isEmpty(label)) {
-						log(config, "missing label for jdbc driver [" + cd.getClassName() + "]");
+						log(config, Log.LEVEL_INFO, "missing label for jdbc driver [" + cd.getClassName() + "]");
 						continue;
 					}
 
 					// check if it is a bundle
 					if (!cd.isBundle()) {
-						log(config, "jdbc driver [" + label + "] does not describe a bundle");
+						log(config, Log.LEVEL_INFO, "jdbc driver [" + label + "] does not describe a bundle");
 						continue;
 					}
 					map.put(cd.toString(), new JDBCDriver(label, id, connStr, cd));
@@ -1853,7 +1853,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 
 						// check if it is a bundle
 						if (!cd.isBundle()) {
-							log(config, "[" + cd + "] does not have bundle info");
+							log(config, Log.LEVEL_INFO, "[" + cd + "] does not have bundle info");
 							continue;
 						}
 						map.put(cd.getClassName(), cd);
@@ -2796,11 +2796,11 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		}
 	}
 
-	public static void log(Config config, String message) {
+	public static void log(Config config, int level, String message) {
 		try {
 			// Log log = ((ConfigPro) config).getLog("application", false);
 			// if (log != null) log.error("configuration", message);
-			LogUtil.logGlobal(config, Log.LEVEL_ERROR, ConfigFactoryImpl.class.getName(), message);
+			LogUtil.logGlobal(config, level, ConfigFactoryImpl.class.getName(), message);
 		}
 		catch (Throwable th) {
 			ExceptionUtil.rethrowIfNecessary(th);
