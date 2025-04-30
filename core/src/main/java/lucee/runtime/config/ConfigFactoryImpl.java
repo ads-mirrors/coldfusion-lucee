@@ -227,7 +227,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 				"\n===================================================================\n" + "WEB CONTEXT (" + createLabel(configServer, servletConfig) + ")\n"
 						+ "-------------------------------------------------------------------\n" + "- config:" + configDir + "\n" + "- webroot:"
 						+ ReqRspUtil.getRootPath(servletConfig.getServletContext()) + "\n" + "- label:" + createLabel(configServer, servletConfig) + "\n" + "- start-time:"
-						+ Caster.toString(SystemUtil.millis() - start) + " ms\n" + "===================================================================\n"
+						+ Caster.toString(Math.round(SystemUtil.millis() - start)) + " ms\n" + "===================================================================\n"
 
 		);
 		return configWeb;
@@ -337,7 +337,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 					"\n===================================================================\n" + "SERVER CONTEXT\n"
 							+ "-------------------------------------------------------------------\n" + "- config:" + configDir + "\n" + "- loader-version:"
 							+ SystemUtil.getLoaderVersion() + "\n" + "- core-version:" + engine.getInfo().getVersion() + "\n" + "- start-time:"
-							+ Caster.toString(SystemUtil.millis() - start) + " ms\n" + "===================================================================\n"
+							+ Caster.toString(Math.round(SystemUtil.millis() - start)) + " ms\n" + "===================================================================\n"
 
 			);
 
