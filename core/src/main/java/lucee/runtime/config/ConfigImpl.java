@@ -5493,7 +5493,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (loggers == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "loggers")) {
 				if (loggers == null) {
-					if (insideLoggers.get()) {
+					if (root == null || insideLoggers.get()) {
 						return new HashMap<String, LoggerAndSourceData>(); // avoid cycle loop
 					}
 					insideLoggers.set(true);
@@ -5537,15 +5537,16 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	@Override
-	public boolean isLoggingLoaded() {
-		return loggers != null;
-	}
-
-	@Override
 	public Log getLog(String name, boolean createIfNecessary) throws PageException {
+		if (root == null) return null;
 		LoggerAndSourceData lsd = _getLoggerAndSourceData(name, createIfNecessary);
 		if (lsd == null) return null;
 		return lsd.getLog(false);
+	}
+
+	@Override
+	public boolean isLoggingLoaded() {
+		return loggers != null;
 	}
 
 	private LoggerAndSourceData _getLoggerAndSourceData(String name, boolean createIfNecessary) throws PageException {
