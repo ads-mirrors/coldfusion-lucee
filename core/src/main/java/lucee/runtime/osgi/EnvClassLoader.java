@@ -268,7 +268,7 @@ public final class EnvClassLoader extends URLClassLoader {
 		if (name.startsWith("c")) {
 			int index = name.indexOf('.');
 			if (index > 10) {
-				Class<? extends Object> clazz = ClassDefinitionImpl.cfmlToClass(name.substring(index + 1));
+				Class<? extends Object> clazz = ClassDefinitionImpl.cfmlToClass(name.substring(index + 1), null);
 				if (clazz != null) return clazz;
 			}
 		}

@@ -31,6 +31,7 @@ import org.osgi.framework.Version;
 
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.DevNullOutputStream;
+import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.ClassException;
 import lucee.commons.lang.ClassUtil;
@@ -130,7 +131,7 @@ public final class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externa
 
 		// Component?
 		if (cl == null) {
-			Class<? extends Object> proxyClass = cfmlToClass(sct, prefix);
+			Class<? extends Object> proxyClass = cfmlToClass(sct, prefix, null);
 			if (proxyClass != null) {
 				return new ClassDefinitionImpl(proxyClass);
 			}
@@ -173,36 +174,35 @@ public final class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externa
 		return maven;
 	}
 
-	public static Class<? extends Object> cfmlToClass(Struct sct, String prefix) {
-		if (sct == null) return null;
+	public static Class<? extends Object> cfmlToClass(Struct sct, String prefix, Class<? extends Object> defaultValue) {
+		if (sct == null) return defaultValue;
 		prefix = improvePrefix(prefix);
 
 		// component path
 		String cfcName = Caster.toString(sct.get(prefix != null ? KeyImpl.init(prefix + "component") : KeyConstants._component, null), null);
-		if (StringUtil.isEmpty(cfcName)) return null;
-		return cfmlToClass(cfcName);
+		if (StringUtil.isEmpty(cfcName)) return defaultValue;
+		return cfmlToClass(cfcName, defaultValue);
 	}
 
-	public static Class<? extends Object> cfmlToClass(String cfcName) {
+	public static Class<? extends Object> cfmlToClass(String cfcName, Class<? extends Object> defaultValue) {
+
+		// component path
+		if (StringUtil.isEmpty(cfcName)) return null;
+
+		// load component
+		PageContext pc = ThreadLocalPageContext.get(true);
 		try {
-
-			// component path
-			if (StringUtil.isEmpty(cfcName)) return null;
-
-			// load component
-			PageContext pc = ThreadLocalPageContext.get(true);
 			if (pc == null) {
 				pc = ThreadUtil.createPageContext(ConfigUtil.toConfigWeb(ThreadLocalPageContext.getConfig()), DevNullOutputStream.DEV_NULL_OUTPUT_STREAM, "localhost", "/", "",
 						null, new Pair[0], null, new Pair[0], new StructImpl(), false, -1, null, null);
 			}
 			Object obj = Reflector.componentToClass(pc, pc.loadComponent(cfcName));
 			return obj.getClass();
-
 		}
-		catch (Exception ex) {
-			LogUtil.log("class-loading", ex);
+		catch (Exception e) {
+			LogUtil.log(Log.LEVEL_DEBUG, "class-loading", e);
+			return defaultValue;
 		}
-		return null;
 	}
 
 	public static String toBundleName(Struct sct, String prefix, boolean strict) {
