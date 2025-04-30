@@ -72,7 +72,14 @@ function checkTheBox(field) {
 					action="updateDefaultSecurityManager"
 					type="#request.adminType#"
 					password="#session["password"&request.adminType]#"
-					
+					file="#form.defaultFile#"
+					file_access="#getFileAccessPath()#"
+					direct_java_access="#fb('defaultDirectJavaAccess')#"
+					cfx_usage="#fb('defaultCfxUsage')#"
+					tag_execute="#fb('defaultTagExecute')#"
+					tag_import="#fb('defaultTagImport')#"
+					tag_object="#fb('defaultTagObject')#"
+					tag_registry="#fb('defaultTagRegistry')#"
 					access_read="#form.defaultaccess_read#"
 					access_write="#form.defaultaccess_write#"
 					remoteClients="#request.getRemoteClients()#">
