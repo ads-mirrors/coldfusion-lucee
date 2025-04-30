@@ -25,9 +25,12 @@ import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.tag.TagImpl;
 import lucee.runtime.op.Caster;
+import lucee.runtime.reflection.Reflector;
+import lucee.runtime.reflection.pairs.MethodInstance;
 import lucee.runtime.search.SearchCollection;
 import lucee.runtime.search.SearchEngine;
 import lucee.runtime.search.SearchException;
+import lucee.runtime.type.KeyImpl;
 
 /**
  * Allows you to create and administer Collections.
@@ -49,6 +52,7 @@ public final class Collection extends TagImpl {
 	/** language of the collection (operators,stopwords) */
 	private String language = "english";
 
+	private String embedding;
 	// private boolean categories=false;
 
 	@Override
@@ -59,6 +63,7 @@ public final class Collection extends TagImpl {
 		collection = null;
 		name = null;
 		language = "english";
+		embedding = null;
 		// categories=false;
 	}
 
@@ -78,6 +83,10 @@ public final class Collection extends TagImpl {
 	public void setAction(String action) {
 		if (action == null) return;
 		this.action = action.toLowerCase().trim();
+	}
+
+	public void setEmbedding(String embedding) {
+		if (!StringUtil.isEmpty(embedding, true)) this.embedding = embedding;
 	}
 
 	public void setEngine(String engine) {
@@ -247,7 +256,20 @@ public final class Collection extends TagImpl {
 	private void doCreate() throws SearchException, PageException {
 		required("collection", action, "collection", collection);
 		required("collection", action, "path", path);
-		getSearchEngine().createCollection(collection, path, language, SearchEngine.DENY_OVERWRITE);
+
+		SearchEngine engine = getSearchEngine();
+
+		// embedding
+		if (embedding != null) {
+			MethodInstance mi = Reflector.getMethodInstance(engine.getClass(), KeyImpl.init("createCollection"),
+					new Object[] { collection, path, language, embedding, SearchEngine.DENY_OVERWRITE }, true, true);
+			if (mi.hasMethod()) {
+				mi.invoke(engine);
+				return;
+			}
+		}
+
+		engine.createCollection(collection, path, language, SearchEngine.DENY_OVERWRITE);
 	}
 
 	/**
