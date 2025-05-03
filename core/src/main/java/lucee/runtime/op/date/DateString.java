@@ -34,6 +34,7 @@ public final class DateString {
 
 	private String str;
 	private int pos;
+	private int lastDigitLength = -1;
 
 	private static Map months = new HashMap();
 	static {
@@ -226,18 +227,30 @@ public final class DateString {
 	 * 
 	 * @return value from the digits
 	 */
+	public int getLastDigitLength() {
+		return lastDigitLength;
+	}
+
+	/**
+	 * read in the next digits from current position
+	 * 
+	 * @return value from the digits
+	 */
 	public int readDigits() {
 		int value = 0;
+		lastDigitLength = 0;
 		char c;
 		if (isValidIndex() && isDigit(c = str.charAt(pos))) {
 			value = ints[0][c - 48];
 			pos++;
+			lastDigitLength++;
 		}
 		else return -1;
 		while (isValidIndex() && isDigit(c = str.charAt(pos))) {
 			value *= 10;
 			value += ints[0][c - 48];
 			pos++;
+			lastDigitLength++;
 		}
 		return value;
 	}
@@ -343,6 +356,7 @@ public final class DateString {
 
 	public void reset() {
 		pos = 0;
+		lastDigitLength = -1;
 	}
 
 }
