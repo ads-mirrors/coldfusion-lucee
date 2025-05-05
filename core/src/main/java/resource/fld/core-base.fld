@@ -13646,6 +13646,19 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<default>443</default>
 			<description>port of the host, default is 443</description>
 		</argument>
+		<argument>
+			<name>cacertPath</name>
+			<alias>path,cacert</alias>
+			<type>any</type>
+			<required>No</required>
+			<description>Path to custom cacert file</description>
+		</argument>
+		<argument>
+			<name>password</name>
+			<type>string</type>
+			<required>No</required>
+			<description>Password for cacert database</description>
+		</argument>
 		<return>
 			<type>void</type>
 		</return>
