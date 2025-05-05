@@ -781,11 +781,23 @@ public final class DateCaster {
 			ds.removeWhitespace();
 			if (msSeconds == -1) return defaultValue;
 
-			double divisor = 1;
-			while (msSeconds / divisor >= 1) {
-				divisor *= 10;
-			}
-			msSeconds = (int) ((msSeconds / divisor) * 1000);
+			/*
+			 * In order to correct parse millisecond strings, we need to know the length
+			 * of the original digits. Once we know the length, we can generate a divisor
+			 * to make sure our millisecond string is correctly converted into an int.
+			 * 
+			 * This handles numeric strings as follows:
+			 * 
+			 * 001 = 1ms
+			 * 01 = 10ms
+			 * 1 = 100ms
+			 * 0001 = 0ms
+			 * 0005 = 1ms
+			 * 0009412 = 1ms
+			 */
+			double divisor = Math.pow(10, ds.getLastDigitLength());
+			// we use round, so that nanosecond inputs round to the nearest millisecond
+			msSeconds = (int) Math.round((msSeconds / divisor) * 1000);
 		}
 
 		if (ds.isAfterLast()) {
