@@ -24,6 +24,7 @@ import lucee.runtime.Mapping;
 import lucee.runtime.Page;
 import lucee.runtime.PageContext;
 import lucee.runtime.PageSource;
+import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.PageException;
@@ -116,8 +117,9 @@ public final class CFFunction {
 	}
 
 	public static UDF loadUDF(PageContext pc, String filename, String mappingName, Collection.Key name, boolean isweb) throws PageException {
-		ConfigWebPro config = (ConfigWebPro) pc.getConfig();
-		Mapping mapping = isweb ? config.getFunctionMapping(mappingName) : config.getServerFunctionMapping(mappingName);
+		ConfigPro config = (ConfigPro) pc.getConfig();
+		Mapping mapping = config.getFunctionMapping(mappingName);
+
 		return loadUDF(pc, mapping.getPageSource(filename), name, isweb, true);
 	}
 

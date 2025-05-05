@@ -10286,7 +10286,11 @@ dWord: creates a value of 0 (zero)</description>
 			<type>multiple</type>
 			<rtexprvalue>true</rtexprvalue>
 		</script>
-		<description>Allows you to create and administer search collections for indexing and searching content. This tag enables full-text search capabilities, including hybrid vector search when used with embedding services. Use this tag to manage the lifecycle of search collections that can be populated with cfindex and queried with cfsearch.</description>
+		<description>
+			Allows you to create and administer search collections for indexing and searching content. 
+			This tag enables full-text search capabilities, including hybrid vector search when used with embedding services. 
+			Collections can be queried using different search modes: keyword-based (traditional), vector-based (semantic), or hybrid (combining both approaches). 
+			Use this tag to manage the lifecycle of search collections that can be populated with cfindex and queried with cfsearch.</description>
 		<attribute-type>fixed</attribute-type>
 
 		<attribute>
@@ -10366,16 +10370,47 @@ dWord: creates a value of 0 (zero)</description>
 		<description>Variable name for storing the query results returned by the `list` or `categoryList` actions. 
 		This query contains metadata about collections or categories depending on the action used.</description>
 	</attribute>
+	
+	<attribute>
+			<type>string</type>
+			<name>mode</name>
+			<values>hybrid,keyword,vector</values>
+			<default>keyword</default>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+		<description>Specifies the search algorithm to use when querying this collection. Options:
+- `keyword`: Traditional term-based search using Lucene (default)
+- `vector`: Pure semantic search using vector embeddings
+- `hybrid`: Combines keyword and vector search for optimal results, balancing term matching with semantic understanding
+
+When set to `keyword`, the `embedding` attribute is ignored. Vector and hybrid modes require an embedding service to be specified.</description>
+	</attribute>
 	<attribute>
 			<type>string</type>
 			<name>embedding</name>
 			<alias>embeddingService</alias>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-		<description>Specifies the embedding service to use for creating vector representations of documents, enabling semantic search capabilities. Valid options:
+		<description>Specifies the embedding service to use for creating vector representations of documents,
+enabling semantic search capabilities. Default is "TF-IDF" if not specified.
+This attribute is ignored when `mode="keyword"`. Valid options:
 - `TF-IDF`: Uses Term Frequency-Inverse Document Frequency statistical method for generating document vectors
 - `word2vec`: Uses pre-trained word vectors to create document embeddings with better semantic understanding
 - *class-name*: Name of a custom class implementing the `org.lucee.extension.search.lucene.embedding.EmbeddingService` interface</description>
+	</attribute>
+	
+	<attribute>
+			<type>numeric</type>
+			<name>ratio</name>
+			<required>false</required>
+			<default>0.5</default>
+			<rtexprvalue>true</rtexprvalue>
+			<description>When `mode="hybrid"`, this value controls the balance between keyword and vector search components. Value range is 0.0 to 1.0, where:
+- 0.5: Equal weight given to both keyword and vector search (default)
+- Values greater than 0.5: Greater emphasis on vector search (semantic matching)
+- Values less than 0.5: Greater emphasis on keyword search (exact term matching)
+
+For example, a ratio of 0.7 would give 70% weight to vector search and 30% to keyword search. This attribute is ignored when mode is not "hybrid".</description>
 	</attribute>
 	</tag>
 <!-- Index -->

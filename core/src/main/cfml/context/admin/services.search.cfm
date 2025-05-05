@@ -169,6 +169,7 @@
 							<tr>
 								<th width="3%"><input type="checkbox" class="checkbox" name="rro" onclick="selectAll(this)"></th>
 								<th width="25%">#stText.Search.Name#</th>
+								<th width="10%">Mode</th>
 								<th width="10%">#stText.Search.Mapped#</th>
 								<th width="10%">#stText.Search.Online#</th>
 								<th width="10%">#stText.Search.External#</th>
@@ -183,7 +184,8 @@
 									<td>
 										<input type="checkbox" class="checkbox" name="name[]" value="#collections.name#">
 									</td>
-									<td><abbr title="#collections.name#">#cut(collections.name,16)#</abbr></td>
+									<td>#collections.name#</td>
+									<td>#collections.mode?:"keyword"#</td>
 									<td>#collections.mapped#</td>
 									<td>#collections.online#</td>
 									<td>#collections.external#</td>
@@ -254,12 +256,17 @@
 		</cfoutput>
 	<cfelse>
 		<cfset collection=struct()>
+		
 		<cfoutput query="collections">
 			<cfif collections.name EQ url.collection>
 				<cfloop index="item" list="#collections.columnlist#">
 					<cfset collection[item]=collections[item]>
 				</cfloop>
 			</cfif>
+			<cfscript>
+				cfindex(action="list" collection=collections.name name="indexes");
+
+			</cfscript>
 			<cfif not StructIsEmpty(collection)>
 				<h2>#stText.Search.Collection# #url.collection#</h2>
 				<table class="maintbl">
@@ -291,6 +298,22 @@
 						<tr>
 							<th scope="row">#stText.Search.Path#</th>
 							<td>#collection.path#</td>
+						</tr>
+						<tr>
+							<th scope="row">Mode</th>
+							<td>#collections.mode?:"keyword"#</td>
+						</tr>
+						<tr>
+							<th scope="row">Embedding</th>
+							<td>#collections.embedding?:""#</td>
+						</tr>
+						<tr>
+							<th scope="row">Ratio</th>
+							<td>#collections.ratio?:0.5#</td>
+						</tr>
+						<tr>
+							<th scope="row">indexes</th>
+							<td>#indexes.recordcount?:0#</td>
 						</tr>
 					</tbody>
 				</table>
@@ -427,7 +450,8 @@
 									<tr>
 										<td colspan="3">
 											<h4><cfif len(trim(result.title)) EQ 0>{no title}<cfelse>#result.title#</cfif></h4>
-											<div class="comment">#result.summary#</div>
+											<p>#result.summary#</p>
+											<span class="comment">Score: #result.score#</span>
 										</td>
 									</tr>
 								</cfloop>

@@ -375,8 +375,14 @@
 				dump(ex);
 				var collDirectory=expandPath("{temp-directory}");
 			}
-			// create collection
-			collection action= "Create" collection=collectionName path=collDirectory;
+			// create collection TF-IDF
+			collection 
+				action= "Create" 
+				collection=collectionName 
+				path=collDirectory 
+				mode="hybrid"
+				embedding="TF-IDF"
+				ratio="0.5";
 			
 		}	
 	}
@@ -384,25 +390,53 @@
 	function createIndex() {
 		if(!searchSupported()) return criteria;
 		createCollection();
-		var indexHash=server.system.properties["lucee.recipe.hash"]?:"";
-		if(isEmpty(indexHash)) {
-			indexHash=importRecipes(true,true);
-			System::setProperty("lucee.recipe.hash",indexHash);
+		
+		// hash recipe
+		var hashRecipe=server.system.properties["lucee.recipe.hash"]?:"";
+		if(isEmpty(hashRecipe)) {
+			hashRecipe=importRecipes(true,true);
+			System::setProperty("lucee.recipe.hash",hashRecipe);
 		}
+
+		// hash tags
+		var hashTags=server.system.properties["lucee.tag.hash"]?:"";
+		if(isEmpty(hashTags)) {
+			var qryTags=getTagDataAll();
+			hashTags=hash(qryTags.toString(),"quick");
+			System::setProperty("lucee.tag.hash",hashTags);
+		}
+
+		// hash functions
+		var hashFunctions=server.system.properties["lucee.functions.hash"]?:"";
+		if(isEmpty(hashFunctions)) {
+			var qryFunctions=getFunctionDataAll();
+			hashFunctions=hash(qryFunctions.toString(),"quick");
+			System::setProperty("lucee.functions.hash",hashFunctions);
+		}
+
+		
 		index action="list"
 			name="local.indexes"
 			collection=collectionName;
 		
 		// do we have a it?
-		var update=true;
+		var updateRecipe=true;
+		var updateTags=true;
+		var updateFunctions=true;
+		
 		loop query=indexes {
-			if(left(indexes.custom4,12)=="recipe-hash:" && indexes.custom4=="recipe-hash:"&indexHash) {
-				update=false;
-				break;
+			if(indexes.custom4=="hash:"&hashRecipe) {
+				updateRecipe=false;
+			}
+			else if(indexes.custom4=="hash:"&hashTags) {
+				updateTags=false;
+			}
+			else if(indexes.custom4=="hash:"&hashFunctions) {
+				updateFunctions=false;
 			}
 		}
 		// index collection
-		if(update) {
+		if(updateRecipe) {
 			var qryRecipes=recipesAsQuery(importRecipes(true));
 			// index recipes
 			index action="update" 
@@ -414,29 +448,30 @@
 				custom1="keywords"
 				custom2="url"
 				custom3="local"
-				custom4="recipe-hash:"&indexHash
+				custom4="hash:"&hashRecipe
 				query="qryRecipes";
-
-			// index functions
-			var qryFunctions=getFunctionDataAll();
+		}
+		if(updateTags) {
+			if(isNull(local.qryTags)) local.qryTags=getTagDataAll();
 			index action="update" 
 				type="custom"
 				collection=collectionName 
 				key="url"
 				title="title"
 				body="body"
-				query="qryFunctions";
-			
-			// index tags
-			var qryTags=getTagDataAll();
+				query="qryTags"
+				custom4="hash:"&hashTags;
+		}
+		if(updateFunctions) {
+			if(isNull(local.qryFunctions)) local.qryFunctions=getFunctionDataAll();
 			index action="update" 
 				type="custom"
 				collection=collectionName 
 				key="url"
 				title="title"
 				body="body"
-				query="qryTags";
-			
+				query="qryFunctions"
+				custom4="hash:"&hashFunctions;
 		}
 	}
 
@@ -444,7 +479,7 @@
 		if(!searchSupported()) return criteria;	
 		createIndex();
 
-		criteria=rereplace(criteria, "([+\-&|!(){}\[\]\^""~*?:\\\/])", "\\1", "ALL");
+		arguments.criteria=rereplace(criteria, "([+\-&|!(){}\[\]\^""~*?:\\\/])", "\\1", "ALL");
 		
 		search 
 			contextpassages=3

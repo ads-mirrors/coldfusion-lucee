@@ -52,6 +52,8 @@ public final class Collection extends TagImpl {
 	/** language of the collection (operators,stopwords) */
 	private String language = "english";
 
+	private double ratio = 0.5;
+	private String mode;
 	private String embedding;
 	// private boolean categories=false;
 
@@ -63,7 +65,9 @@ public final class Collection extends TagImpl {
 		collection = null;
 		name = null;
 		language = "english";
+		mode = null;
 		embedding = null;
+		ratio = 0.5;
 		// categories=false;
 	}
 
@@ -87,6 +91,17 @@ public final class Collection extends TagImpl {
 
 	public void setEmbedding(String embedding) {
 		if (!StringUtil.isEmpty(embedding, true)) this.embedding = embedding;
+	}
+
+	public void setRatio(double ratio) throws ApplicationException {
+		if (ratio > 1 || ratio < 0) {
+			throw new ApplicationException("Invalid ratio value [ " + ratio + "]. The ratio must be between 0.0 and 1.0 inclusive.");
+		}
+		this.ratio = ratio;
+	}
+
+	public void setMode(String mode) {
+		if (!StringUtil.isEmpty(mode, true)) this.mode = mode;
 	}
 
 	public void setEngine(String engine) {
@@ -258,11 +273,10 @@ public final class Collection extends TagImpl {
 		required("collection", action, "path", path);
 
 		SearchEngine engine = getSearchEngine();
-
 		// embedding
-		if (embedding != null) {
+		if (mode != null) {
 			MethodInstance mi = Reflector.getMethodInstance(engine.getClass(), KeyImpl.init("createCollection"),
-					new Object[] { collection, path, language, embedding, SearchEngine.DENY_OVERWRITE }, true, true);
+					new Object[] { collection, path, language, mode, embedding, ratio, SearchEngine.DENY_OVERWRITE }, true, true);
 			if (mi.hasMethod()) {
 				mi.invoke(engine);
 				return;
