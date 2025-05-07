@@ -268,7 +268,7 @@ public abstract class DateTimeUtil {
 		if (oldFormat) {
 			return StringUtil.replace(FormatUtil.format(HTTP_TIME_STRING_FORMAT_OLD.formatter, date, TimeZoneConstants.GMT), "+00:00", "", true);
 		}
-		return StringUtil.replace(FormatUtil.format(HTTP_TIME_STRING_FORMAT.formatter, date, TimeZoneConstants.UTC), "+00:00", "", true);
+		return StringUtil.replace(FormatUtil.format(HTTP_TIME_STRING_FORMAT.formatter, date, TimeZoneConstants.GMT), "+00:00", "", true);
 	}
 
 	public static String format(long time, Locale l, TimeZone tz) {
