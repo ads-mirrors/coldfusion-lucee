@@ -73,6 +73,18 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect(expected).toBe(actual);
 			});
 
+			it( title="Should return instance of dynamic proxy with 'component' return type", body=function( currentSpec ) {
+				var context = new DynamicProxyComponentReturnType5578({});
+				var proxy = context.asProxy();
+
+				var implements = [].append(proxy.getClass().getInterfaces(), true).map((item) => item.getName());
+
+				var expected = "com.givainc.test.TestInterface";
+				var actual = implements[1];
+
+				expect(expected).toBe(actual);
+			});
+
 		});
 	}
 }

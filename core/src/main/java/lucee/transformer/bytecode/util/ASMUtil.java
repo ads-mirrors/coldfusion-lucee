@@ -57,6 +57,7 @@ import lucee.runtime.engine.CFMLEngineImpl;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.exp.PageRuntimeException;
+import lucee.runtime.net.rpc.WSHandler;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
 import lucee.runtime.reflection.Reflector;
@@ -594,7 +595,7 @@ public final class ASMUtil {
 		// Constructor
 		GeneratorAdapter adapter = new GeneratorAdapter(Opcodes.ACC_PUBLIC, CONSTRUCTOR_OBJECT, null, null, cw);
 		adapter.loadThis();
-		adapter.invokeConstructor(toType(parent, true), CONSTRUCTOR_OBJECT);
+		adapter.invokeConstructor(toType(parent, hasAxisExtension()), CONSTRUCTOR_OBJECT);
 		adapter.returnValue();
 		adapter.endMethod();
 
@@ -703,6 +704,17 @@ public final class ASMUtil {
 	public static Type toType(Class type, boolean axistype) throws PageException {
 		if (axistype) type = ((ConfigWebPro) ThreadLocalPageContext.getConfig()).getWSHandler().toWSTypeClass(type);
 		return Type.getType(type);
+	}
+
+	/**
+	 * Determines if the AXIS extension is loaded.
+	 */
+	public static boolean hasAxisExtension(){
+		try {
+			return ((((ConfigWebPro) ThreadLocalPageContext.getConfig()).getWSHandler()) instanceof lucee.runtime.net.rpc.ref.WSHandlerReflector) ? false : true;
+		} catch (PageException e){
+			return false;
+		}
 	}
 
 	public static String createMD5(ASMProperty[] props) {
