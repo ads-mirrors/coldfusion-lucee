@@ -1066,6 +1066,7 @@ public final class ModernApplicationContext extends ApplicationContextSupport {
 	public Mapping[] getComponentMappings() {
 		if (!initCMappings) {
 			Object o = get(component, KeyConstants._componentpaths, null);
+			if (o == null) o = get(component, KeyConstants._componentMappings, null);
 			if (o != null) cmappings = AppListenerUtil.toComponentMappings(config, o, getSource(), cmappings);
 			initCMappings = true;
 		}

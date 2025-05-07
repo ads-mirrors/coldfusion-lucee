@@ -3060,6 +3060,7 @@ public final class KeyConstants {
 	public static final Key _question = KeyImpl._const("question");
 	public static final Key _conversationSizeLimit = KeyImpl._const("conversationSizeLimit");
 	public static final Key _socketTimeout = KeyImpl._const("socketTimeout");
+	public static final Key _componentMappings = KeyImpl._const("componentMappings");
 
 	private static Map<String, Key> _____keys;
 
