@@ -120,6 +120,7 @@ class SingleContextConfigWeb extends ConfigBase implements ConfigWebInner {
 	private SCCWIdentificationWeb id;
 	private Resource rootDir;
 	private Mapping[] mappings;
+	private ComponentPathCache componentPathCache = new ComponentPathCache();
 	private lucee.runtime.rest.Mapping[] restMappings;
 	private Resource configDirWeb;
 
@@ -1050,12 +1051,12 @@ class SingleContextConfigWeb extends ConfigBase implements ConfigWebInner {
 
 	@Override
 	public CIPage getCachedPage(PageContext pc, String pathWithCFC) throws TemplateException {
-		return cs.getCachedPage(pc, pathWithCFC);
+		return componentPathCache.getPage(pc, pathWithCFC);
 	}
 
 	@Override
 	public void putCachedPageSource(String pathWithCFC, PageSource ps) {
-		cs.putCachedPageSource(pathWithCFC, ps);
+		componentPathCache.put(pathWithCFC, ps);
 	}
 
 	@Override
@@ -1095,12 +1096,12 @@ class SingleContextConfigWeb extends ConfigBase implements ConfigWebInner {
 
 	@Override
 	public Struct listComponentCache() {
-		return cs.listComponentCache();
+		return componentPathCache.list();
 	}
 
 	@Override
 	public void clearComponentCache() {
-		cs.clearComponentCache();
+		componentPathCache.clear();
 	}
 
 	@Override
@@ -1988,7 +1989,7 @@ class SingleContextConfigWeb extends ConfigBase implements ConfigWebInner {
 	}
 
 	public void flushComponentPathCache() {
-		cs.flushApplicationPathCache();
+		componentPathCache.flush();
 	}
 
 	public String createSecurityToken() {
