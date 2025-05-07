@@ -119,8 +119,9 @@ public final class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	private CFMLFactoryImpl factory;
 	private SCCWIdentificationWeb id;
 	private Resource rootDir;
+
 	private Mapping[] mappings;
-	private Mapping ext;
+	private ComponentPathCache componentPathCache = new ComponentPathCache();
 
 	public ConfigWebImpl(CFMLFactoryImpl factory, ConfigServerImpl cs, ServletConfig config) {
 		setInstance(factory, cs, config, false);
@@ -1017,12 +1018,12 @@ public final class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 
 	@Override
 	public CIPage getCachedPage(PageContext pc, String pathWithCFC) throws TemplateException {
-		return cs.getCachedPage(pc, pathWithCFC);
+		return componentPathCache.getPage(pc, pathWithCFC);
 	}
 
 	@Override
 	public void putCachedPageSource(String pathWithCFC, PageSource ps) {
-		cs.putCachedPageSource(pathWithCFC, ps);
+		componentPathCache.put(pathWithCFC, ps);
 	}
 
 	@Override
@@ -1062,12 +1063,12 @@ public final class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 
 	@Override
 	public Struct listComponentCache() {
-		return cs.listComponentCache();
+		return componentPathCache.list();
 	}
 
 	@Override
 	public void clearComponentCache() {
-		cs.clearComponentCache();
+		componentPathCache.clear();
 	}
 
 	@Override
@@ -1878,7 +1879,7 @@ public final class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	}
 
 	public void flushComponentPathCache() {
-		cs.flushApplicationPathCache();
+		componentPathCache.flush();
 	}
 
 	public String createSecurityToken() {
