@@ -388,7 +388,7 @@
 	}
 
 	function createIndex() {
-		if(!searchSupported()) return criteria;
+		if(!searchSupported()) return;
 		createCollection();
 		
 		// hash recipe
