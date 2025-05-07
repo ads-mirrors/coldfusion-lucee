@@ -225,10 +225,22 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 					if (absFin != null && absFin.hasInterfaces()) {
 						Iterator<InterfaceImpl> it = absFin.getInterfaceIt();
 						InterfaceImpl i;
+						Map tmp;
 						while (it.hasNext()) {
 							i = it.next();
 							try {
-								js = JavaSettingsImpl.merge(pc.getConfig(), js, JavaSettingsImpl.readJavaSettings(pc, Caster.toStruct(i.meta, false)));
+								tmp = i.meta;
+								if (tmp != null) {
+									js = JavaSettingsImpl.merge(
+
+											pc.getConfig(),
+
+											js,
+
+											JavaSettingsImpl.readJavaSettings(pc, Caster.toStruct(tmp, false))
+
+									);
+								}
 							}
 							catch (PageException e) {
 								throw ExceptionUtil.toIOException(e);
