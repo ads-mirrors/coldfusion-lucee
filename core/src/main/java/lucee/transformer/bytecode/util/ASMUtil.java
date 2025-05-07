@@ -57,7 +57,6 @@ import lucee.runtime.engine.CFMLEngineImpl;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.exp.PageRuntimeException;
-import lucee.runtime.net.rpc.WSHandler;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
 import lucee.runtime.reflection.Reflector;
