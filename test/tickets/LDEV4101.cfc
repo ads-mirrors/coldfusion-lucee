@@ -22,7 +22,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					Encrypt( string=ex.password, key=ex.key, algorithm="AES", encoding="hex", precise=false );
 				} catch ( e ) {
 					// throws invalid character [=] in base64 string at position [23]
-					result = e.message;
+					result = e.stacktrace;
 				}
 				expect( result ).toBe( "" ); // shouldn't throw
 			});
