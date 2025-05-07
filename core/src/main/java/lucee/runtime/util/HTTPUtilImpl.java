@@ -33,6 +33,8 @@ import lucee.commons.net.http.HTTPEngine;
 import lucee.commons.net.http.HTTPResponse;
 import lucee.commons.net.http.Header;
 import lucee.commons.net.http.httpclient.HTTPEngine4Impl;
+import lucee.runtime.exp.ApplicationException;
+import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.net.proxy.ProxyDataImpl;
 
 public final class HTTPUtilImpl implements lucee.runtime.util.HTTPUtil {
@@ -51,7 +53,12 @@ public final class HTTPUtilImpl implements lucee.runtime.util.HTTPUtil {
 	 */
 	@Override
 	public String decode(String str, String charset) throws UnsupportedEncodingException {
-		return URLDecoder.decode(str, charset, false);
+		try {
+			return URLDecoder.decode(str, charset, false);
+		}
+		catch (ApplicationException e) {
+			throw new PageRuntimeException(e);
+		}
 	}
 
 	/**

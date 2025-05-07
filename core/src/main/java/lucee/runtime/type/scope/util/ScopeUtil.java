@@ -18,7 +18,6 @@
  **/
 package lucee.runtime.type.scope.util;
 
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,7 +50,7 @@ public final class ScopeUtil {
 						n = URLDecoder.decode(n, encoding, true);
 						v = URLDecoder.decode(v, encoding, true);
 					}
-					catch (UnsupportedEncodingException e) {
+					catch (Exception e) {
 					}
 				}
 				arr = parameters.get(n);
@@ -90,7 +89,7 @@ public final class ScopeUtil {
 						n = URLDecoder.decode(n, encoding, true);
 						v = URLDecoder.decode(v, encoding, true);
 					}
-					catch (UnsupportedEncodingException e) {
+					catch (Exception e) {
 					}
 				}
 				if (arr == null) arr = new String[] { v };

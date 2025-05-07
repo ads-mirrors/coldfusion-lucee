@@ -277,7 +277,7 @@ public final class ReqRspUtil {
 
 			return URLDecoder.decode(str, charset, force);
 		}
-		catch (UnsupportedEncodingException e) {
+		catch (Exception e) {
 			return str;
 		}
 	}

@@ -20,7 +20,6 @@ package lucee.runtime.config;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
@@ -907,7 +906,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 							try {
 								keys[i] = URLDecoder.decode(keys[i], "UTF-8", true);
 							}
-							catch (UnsupportedEncodingException e) {
+							catch (Exception e) {
 							}
 						}
 						authKeys = keys;

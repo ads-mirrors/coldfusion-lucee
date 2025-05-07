@@ -26,7 +26,9 @@ import org.apache.commons.codec.net.URLCodec;
 
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.LogUtil;
+import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
+import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.net.http.ReqRspUtil;
 
 public final class URLDecoder {
@@ -43,20 +45,25 @@ public final class URLDecoder {
 		try {
 			return decode(str, SystemUtil.getCharset().name(), force);
 		}
-		catch (UnsupportedEncodingException e) {
+		catch (UnsupportedEncodingException | ApplicationException e) {
 			return str;
 		}
 	}
 
-	public static String decode(String s, String enc, boolean force) throws UnsupportedEncodingException {
-		if (!force && !ReqRspUtil.needDecoding(s)) return s;
+	public static String decode(String s, String enc, boolean force) throws UnsupportedEncodingException, ApplicationException {
 		try {
+			if (!force && !ReqRspUtil.needDecoding(s)) return s;
 			URLCodec codec = new URLCodec(enc);
 			return codec.decode(preprocessInput(codec, s, enc));
 		}
 		catch (DecoderException e) {
-			throw new UnsupportedEncodingException(e.getMessage());
+			Throwable cause = e.getCause();
+			if (cause instanceof UnsupportedEncodingException) throw (UnsupportedEncodingException) cause;
+			ApplicationException ae = new ApplicationException("Invalid URL encoding in string [" + s + "]");
+			ExceptionUtil.initCauseEL(ae, e);
+			throw ae;
 		}
+
 	}
 
 	public static String preprocessInput(URLCodec codec, String input, String encoding) {

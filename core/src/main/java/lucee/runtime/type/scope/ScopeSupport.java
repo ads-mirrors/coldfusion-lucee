@@ -20,6 +20,7 @@ package lucee.runtime.type.scope;
 
 import java.io.UnsupportedEncodingException;
 
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.StringList;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.net.URLDecoder;
@@ -27,6 +28,7 @@ import lucee.commons.net.URLItem;
 import lucee.runtime.PageContext;
 import lucee.runtime.dump.DumpData;
 import lucee.runtime.dump.DumpProperties;
+import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.security.ScriptProtect;
@@ -153,8 +155,10 @@ public abstract class ScopeSupport extends StructImpl implements Scope {
 			try {
 				fillDecoded(raw, "iso-8859-1", scriptProteced, sameAsArray, formUrlAsStruct);
 			}
-			catch (UnsupportedEncodingException e1) {
+			catch (Exception e1) {
 			}
+		}
+		catch (Exception e) {
 		}
 	}
 
@@ -164,6 +168,7 @@ public abstract class ScopeSupport extends StructImpl implements Scope {
 	 * @param raw
 	 * @param encoding
 	 * @throws UnsupportedEncodingException
+	 * @throws ApplicationException
 	 */
 	protected void fillDecoded(URLItem[] raw, String encoding, boolean scriptProteced, boolean sameAsArray, boolean formUrlAsStruct) throws UnsupportedEncodingException {
 		clear();
@@ -173,8 +178,13 @@ public abstract class ScopeSupport extends StructImpl implements Scope {
 			name = raw[i].getName();
 			value = raw[i].getValue();
 			if (raw[i].isUrlEncoded()) {
-				name = URLDecoder.decode(name, encoding, true);
-				value = URLDecoder.decode(value, encoding, true);
+				try {
+					name = URLDecoder.decode(name, encoding, true);
+					value = URLDecoder.decode(value, encoding, true);
+				}
+				catch (ApplicationException ae) {
+					LogUtil.log("encoding", ae);
+				}
 			}
 
 			if (formUrlAsStruct && name.indexOf('.') != -1) {

@@ -15508,7 +15508,12 @@ function(key1, key2)
 		<name>uRLDecode</name>
 		<class>lucee.runtime.functions.other.URLDecode</class>
 		<member-name>uRLDecode</member-name>
-		<description>Decodes a URL-encoded string.</description>
+		<description>Decodes a URL-encoded string, converting encoded characters back to their original form. 
+This function handles URL encoding conventions such as converting plus signs (`+`) to spaces and percent-encoded sequences (`%xx`) to their corresponding characters.
+
+The function throws an exception when encountering malformed URL encodings (such as incomplete or invalid percent sequences like `%G`). 
+For optimal results, ensure the input string contains valid URL encoding.
+</description>
 		<argument>
 			<name>string</name>
 			<type>string</type>
