@@ -24,7 +24,11 @@ component {
 		"output": {required:false, type:"string",default:"browser",hint="Where to send the results:
 - console: the result is written to the console (System.out).
 - debug: the result is send to the debug output.
-- browser (default): the result is written the the browser response stream."},
+- browser (default): the result is written the the browser response stream.
+- false: disable about, same as enabled=false
+
+Otherwise, the value, if specified, is treated as a filename to append the dump output to
+"},
 		"metainfo": {required:false, type:"boolean",default:true,hint="Includes information about the query in the cfdump results."},
 		"keys": {required:false, type:"number",default:9999,hint="For a structure, number of keys to display."},
 		"hide": {required:false, type:"string",default:"all",hint="hide column or keys."},
@@ -58,7 +62,7 @@ component {
 
 		var attrib = arguments.attributes;
 
-		if (!attrib.enabled)
+		if (!attrib.enabled || attrib.output == "false")
 			return false;
 
 		//eval
