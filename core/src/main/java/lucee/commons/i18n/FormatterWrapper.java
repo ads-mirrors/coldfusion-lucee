@@ -51,8 +51,6 @@ public final class FormatterWrapper {
 	}
 
 	public boolean valid(String str) {
-		if (pattern.length() > str.length()) return false;
-
 		if (hasComma) {
 			if (str.indexOf(',') == -1) return false;
 		}
