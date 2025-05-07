@@ -64,6 +64,8 @@ Otherwise, the value, if specified, is treated as a filename to append the dump 
 
 		if (!attrib.enabled || attrib.output == "false")
 			return false;
+		if (IsEmpty(trim(attrib.output)))
+			attrib.output="browser";
 
 		//eval
 		if(not structKeyExists(attrib,'var') and structKeyExists(attrib,'eval')) {
@@ -158,10 +160,11 @@ Otherwise, the value, if specified, is treated as a filename to append the dump 
 				admin action="addDump" dump="#result#";
 		} 
 		else {
+			var filename=expandPath(arguments.attrib.output);
 			if(arguments.attrib.format == 'text')
-				file action="append" addnewline="yes" file="#arguments.attrib.output#" output="#result#";
+				file action="append" addnewline="yes" file="#filename#" output="#result#";
 			else
-				file action="append" addnewline="yes" file="#arguments.attrib.output#" output="<div id=""#dumpID#"" class=""-lucee-dump"">#result#</div>";
+				file action="append" addnewline="yes" file="#filename#" output="<div id=""#dumpID#"" class=""-lucee-dump"">#result#</div>";
 		}
 	}
 
