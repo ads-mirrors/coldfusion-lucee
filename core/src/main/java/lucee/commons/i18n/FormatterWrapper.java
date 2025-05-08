@@ -2,9 +2,13 @@ package lucee.commons.i18n;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.ResolverStyle;
 
 public final class FormatterWrapper {
 	public final DateTimeFormatter formatter;
+	public final DateTimeFormatter smartFormatter;
+	public final DateTimeFormatter strictFormatter;
+	public final DateTimeFormatter lenientFormatter;
 	public int successCount;
 	public final String pattern;
 	public final boolean custom;
@@ -19,23 +23,15 @@ public final class FormatterWrapper {
 	private final boolean hasTimeZone;
 
 	FormatterWrapper(DateTimeFormatter formatter, String pattern, short type, ZoneId zone) {
-		this.formatter = formatter;
-		this.successCount = 0;
-		this.pattern = pattern;
-		this.type = type;
-		this.zone = zone;
-		this.custom = false;
-
-		this.hasComma = pattern.indexOf(',') != -1;
-		this.hasSlash = pattern.indexOf('/') != -1;
-		this.hasHyphen = pattern.indexOf('-') != -1;
-		this.hasColon = pattern.indexOf(':') != -1;
-		this.hasTimeZone = pattern.indexOf('z') != -1 || pattern.indexOf('Z') != -1;
-		this.hasWhitespace = pattern.chars().anyMatch(Character::isWhitespace);
+		this(formatter, pattern, type, zone, false);
 	}
 
 	FormatterWrapper(DateTimeFormatter formatter, String pattern, short type, ZoneId zone, boolean custom) {
-		this.formatter = formatter;
+		this.smartFormatter = formatter;
+		this.strictFormatter = formatter.withResolverStyle(ResolverStyle.STRICT);
+		this.lenientFormatter = formatter.withResolverStyle(ResolverStyle.LENIENT);
+		this.formatter = strictFormatter;
+
 		this.successCount = 0;
 		this.pattern = pattern;
 		this.type = type;
