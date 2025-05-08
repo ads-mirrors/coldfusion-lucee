@@ -62,6 +62,7 @@ public final class DateCaster {
 	public static final short CONVERTING_TYPE_NONE = 0;
 	public static final short CONVERTING_TYPE_YEAR = 1;
 	public static final short CONVERTING_TYPE_OFFSET = 2;
+	public static final boolean DO_OLD_DATE_PARSER = true;
 
 	// private static short MODE_DAY_STR=1;
 	// private static short MODE_MONTH_STR=2;
@@ -209,23 +210,23 @@ public final class DateCaster {
 	 */
 	public static DateTime toDateTime(Locale locale, String str, TimeZone tz, boolean useCommomDateParserAsWell) throws PageException {
 		DateTime dt = toDateTimeNew(locale, str, tz, null, useCommomDateParserAsWell);
-		if (dt == null) {
+		if (dt != null) return dt;
+
+		if (DO_OLD_DATE_PARSER) {
 			dt = toDateTimeOld(locale, str, tz, null, false);
 			if (dt != null) {
 				LogUtil.log(FormatUtil.debug ? Log.LEVEL_FATAL : Log.LEVEL_DEBUG, "dateformat",
 						"DateTimeFormatter failed to parse the date string [" + str + "] for locale [" + locale + "] and timezone [" + (tz == null ? "undefined" : tz.getID())
 								+ "]. SimpleDateFormat successfully parsed the date using the same locale and timezone.");
+				return dt;
 			}
 		}
-		if (dt == null) {
-			String prefix = locale.getLanguage() + "-" + locale.getCountry() + "-";
-			throw new ExpressionException("can't cast [" + str + "] to date value",
-					"to add custom formats for " + LocaleFactory.toString(locale) + ", create/extend on of the following files [" + prefix + "datetime.df (for date time formats), "
-							+ prefix + "date.df (for date formats) or " + prefix + "time.df (for time formats)] in the following directory [<context>/lucee/locales]." + "");
 
-			// throw new ExpressionException("can't cast ["+str+"] to date value");
-		}
-		return dt;
+		String prefix = locale.getLanguage() + "-" + locale.getCountry() + "-";
+		throw new ExpressionException("can't cast [" + str + "] to date value",
+				"to add custom formats for " + LocaleFactory.toString(locale) + ", create/extend on of the following files [" + prefix + "datetime.df (for date time formats), "
+						+ prefix + "date.df (for date formats) or " + prefix + "time.df (for time formats)] in the following directory [<context>/lucee/locales]." + "");
+
 	}
 
 	/**
@@ -302,8 +303,12 @@ public final class DateCaster {
 
 	public static DateTime toDateTime(Locale locale, String str, TimeZone tz, DateTime defaultValue, boolean useCommomDateParserAsWell) {
 		DateTime dt = toDateTimeNew(locale, str, tz, null, useCommomDateParserAsWell);
-		if (dt == null) dt = toDateTimeOld(locale, str, tz, null, false); // FUTURE remove this
-		return (dt == null) ? defaultValue : dt;
+		if (dt != null) return dt;
+		if (DO_OLD_DATE_PARSER) {
+			dt = toDateTimeOld(locale, str, tz, null, false);
+			return (dt == null) ? defaultValue : dt;
+		}
+		return defaultValue;
 	}
 
 	/*
@@ -779,18 +784,13 @@ public final class DateCaster {
 			if (msSeconds == -1) return defaultValue;
 
 			/*
-			 * In order to correct parse millisecond strings, we need to know the length
-			 * of the original digits. Once we know the length, we can generate a divisor
-			 * to make sure our millisecond string is correctly converted into an int.
+			 * In order to correct parse millisecond strings, we need to know the length of the original digits.
+			 * Once we know the length, we can generate a divisor to make sure our millisecond string is
+			 * correctly converted into an int.
 			 * 
 			 * This handles numeric strings as follows:
 			 * 
-			 * 001 = 1ms
-			 * 01 = 10ms
-			 * 1 = 100ms
-			 * 0001 = 0ms
-			 * 0005 = 1ms
-			 * 0009412 = 1ms
+			 * 001 = 1ms 01 = 10ms 1 = 100ms 0001 = 0ms 0005 = 1ms 0009412 = 1ms
 			 */
 			double divisor = Math.pow(10, ds.getLastDigitLength());
 			// we use round, so that nanosecond inputs round to the nearest millisecond
