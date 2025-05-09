@@ -311,16 +311,10 @@ public final class DateCaster {
 		return defaultValue;
 	}
 
-	/*
-	 * public static void main(String[] args) { print.e(toDateTimeNew(Locale.ENGLISH,
-	 * "2024/12/23 12:07:11 CET", TimeZoneConstants.CET, null, true)); }
-	 */
-
 	public static DateTime toDateTimeNew(Locale locale, String str, TimeZone tz, DateTime defaultValue, boolean useCommomDateParserAsWell) {
 		countCheck++;
 		str = str.trim();
 		tz = ThreadLocalPageContext.getTimeZone(tz);
-
 		List<FormatterWrapper> all = FormatUtil.getAllFormats(locale, tz, true);
 		Long time;
 		try {

@@ -18,6 +18,7 @@
  **/
 package lucee.commons.date;
 
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -104,7 +105,15 @@ public abstract class DateTimeUtil {
 	}
 
 	public long toTime(TimeZone tz, int year, int month, int day, int hour, int minute, int second, int milliSecond) throws DateTimeException {
-		tz = ThreadLocalPageContext.getTimeZone(tz);
+		return toTime(tz == null ? ThreadLocalPageContext.getTimeZone().toZoneId() : tz.toZoneId(),
+
+				year, month, day, hour, minute, second, milliSecond);
+	}
+
+	public long toTime(ZoneId zone, int year, int month, int day, int hour, int minute, int second, int milliSecond) throws DateTimeException {
+		if (zone == null) {
+			zone = ThreadLocalPageContext.getTimeZone().toZoneId();
+		}
 		year = toYear(year);
 
 		if (month < 1) throw new DateTimeException("Month number [" + month + "] must be at least 1");
@@ -122,7 +131,30 @@ public abstract class DateTimeUtil {
 		if (daysInMonth(year, month) < day)
 			throw new DateTimeException("Day number [" + day + "] can not be greater than " + daysInMonth(year, month) + " when month is " + month + " and year " + year);
 
-		return _toTime(tz, year, month, day, hour, minute, second, milliSecond);
+		return _toTime(zone, year, month, day, hour, minute, second, milliSecond);
+	}
+
+	public Long toTime(ZoneId zone, int year, int month, int day, int hour, int minute, int second, int milliSecond, Long defaultValue) {
+		if (zone == null) {
+			zone = ThreadLocalPageContext.getTimeZone().toZoneId();
+		}
+		year = toYear(year);
+
+		if (month < 1) return defaultValue;
+		if (month > 12) return defaultValue;
+		if (day < 1) return defaultValue;
+		if (hour < 0) return defaultValue;
+		if (minute < 0) return defaultValue;
+		if (second < 0) return defaultValue;
+		if (milliSecond < 0) return defaultValue;
+
+		if (hour > 24) return defaultValue;
+		if (minute > 59) return defaultValue;
+		if (second > 59) return defaultValue;
+
+		if (daysInMonth(year, month) < day) return defaultValue;
+
+		return _toTime(zone, year, month, day, hour, minute, second, milliSecond);
 	}
 
 	/**
@@ -207,6 +239,8 @@ public abstract class DateTimeUtil {
 	}
 
 	abstract long _toTime(TimeZone tz, int year, int month, int day, int hour, int minute, int second, int milliSecond);
+
+	abstract long _toTime(ZoneId zone, int year, int month, int day, int hour, int minute, int second, int milliSecond);
 
 	public abstract int getYear(TimeZone tz, lucee.runtime.type.dt.DateTime dt);
 

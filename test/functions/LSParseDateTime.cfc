@@ -299,6 +299,7 @@
 				assertEquals("-{ts '2008-04-06 00:00:00'}", "-#lsParseDateTime("April 6, 2008")#");
 				if(getJavaVersion()<=11) assertEquals("-{ts '1899-12-30 01:02:03'}", "-#lsParseDateTime("1:02:03 AM CET")#");
 				assertEquals("-{ts '2008-04-06 00:00:00'}", "-#lsParseDateTime("Sunday, April 6, 2008")#");
+				assertEquals("-{ts '2008-04-06 01:02:00'}", "-#lsParseDateTime(date:"4/6/08 1:02 AM",timezone:"CET")#");
 				assertEquals("-{ts '2008-04-06 01:02:00'}", "-#lsParseDateTime("4/6/08 1:02 AM")#");
 				assertEquals("-{ts '2008-04-06 01:02:03'}", "-#lsParseDateTime("4/6/08 1:02:03 AM")#");
 				

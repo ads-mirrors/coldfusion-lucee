@@ -46,6 +46,11 @@ public final class FormatterWrapper {
 		this.hasWhitespace = pattern.chars().anyMatch(Character::isWhitespace);
 	}
 
+	@Override
+	public String toString() {
+		return "Pattern:" + pattern + "; Zone:" + zone + "; Custom:" + custom + "; " + formatter.toString();
+	}
+
 	public boolean valid(String str) {
 		if (hasComma) {
 			if (str.indexOf(',') == -1) return false;
