@@ -30,7 +30,7 @@ public final class FormatterWrapper {
 		this.smartFormatter = formatter;
 		this.strictFormatter = formatter.withResolverStyle(ResolverStyle.STRICT);
 		this.lenientFormatter = formatter.withResolverStyle(ResolverStyle.LENIENT);
-		this.formatter = strictFormatter;
+		this.formatter = smartFormatter;
 
 		this.successCount = 0;
 		this.pattern = pattern;
