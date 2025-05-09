@@ -112,7 +112,7 @@
         var trimmed = String( attributes.get( "str" ) ).trim();
         if ( trimmed.length > 0 ){
           var echo = project.createTask( "echo" );
-          echo.setMessage( trimmed );
+          echo.setMessage( trimmed.replace(/(\s*\n){3,}/g, '\n\n'); );
           echo.perform();
         }
      ]]>
