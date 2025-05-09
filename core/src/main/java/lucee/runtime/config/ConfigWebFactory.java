@@ -1271,10 +1271,9 @@ public final class ConfigWebFactory extends ConfigFactory {
 				SecurityManagerImpl sm = isSingle ? _toSecurityManagerSingle(security) : _toSecurityManager(security);
 				cs.setDefaultSecurityManager(sm);
 				// additional file access directories
+				Array elFileAccesses = ConfigWebUtil.getAsArray("fileAccess", security);
+				sm.setCustomFileAccess(_loadFileAccess(config, elFileAccesses, log));
 				if (!isSingle) {
-					Array elFileAccesses = ConfigWebUtil.getAsArray("fileAccess", security);
-					sm.setCustomFileAccess(_loadFileAccess(config, elFileAccesses, log));
-
 					// Web SecurityManager
 					Array accessors = ConfigWebUtil.getAsArray("", security);
 					Iterator<?> it = accessors.getIterator();
@@ -1375,6 +1374,13 @@ public final class ConfigWebFactory extends ConfigFactory {
 		sm.setAccess(SecurityManager.TYPE_ACCESS_READ, _attr2(el, "access_read", SecurityManager.ACCESS_PROTECTED));
 		sm.setAccess(SecurityManager.TYPE_ACCESS_WRITE, _attr2(el, "access_write", SecurityManager.ACCESS_PROTECTED));
 		sm.setAccess(SecurityManager.TYPE_REMOTE, _attr(el, "remote", SecurityManager.VALUE_YES));
+		sm.setAccess(SecurityManager.TYPE_FILE, _attr(el, "file", SecurityManager.VALUE_ALL));
+		sm.setAccess(SecurityManager.TYPE_TAG_EXECUTE,_attr(el, "tag_execute", SecurityManager.VALUE_YES));
+		sm.setAccess(SecurityManager.TYPE_TAG_IMPORT, _attr(el, "tag_import", SecurityManager.VALUE_YES));
+		sm.setAccess(SecurityManager.TYPE_TAG_OBJECT, _attr(el, "tag_object", SecurityManager.VALUE_YES));
+		sm.setAccess(SecurityManager.TYPE_TAG_REGISTRY, _attr(el, "tag_registry", SecurityManager.VALUE_YES));
+		sm.setAccess(SecurityManager.TYPE_DIRECT_JAVA_ACCESS, _attr(el, "direct_java_access", SecurityManager.VALUE_YES));
+		sm.setAccess(SecurityManager.TYPE_CFX_USAGE, _attr(el, "cfx_usage", SecurityManager.VALUE_YES));
 		return sm;
 	}
 
