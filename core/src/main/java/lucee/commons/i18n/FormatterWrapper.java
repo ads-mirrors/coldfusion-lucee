@@ -19,19 +19,7 @@ public class FormatterWrapper {
 	private final boolean hasTimeZone;
 
 	FormatterWrapper(DateTimeFormatter formatter, String pattern, short type, ZoneId zone) {
-		this.formatter = formatter;
-		this.successCount = 0;
-		this.pattern = pattern;
-		this.type = type;
-		this.zone = zone;
-		this.custom = false;
-
-		this.hasComma = pattern.indexOf(',') != -1;
-		this.hasSlash = pattern.indexOf('/') != -1;
-		this.hasHyphen = pattern.indexOf('-') != -1;
-		this.hasColon = pattern.indexOf(':') != -1;
-		this.hasTimeZone = pattern.indexOf('z') != -1 || pattern.indexOf('Z') != -1;
-		this.hasWhitespace = pattern.chars().anyMatch(Character::isWhitespace);
+		this(formatter, pattern, type, zone, false);
 	}
 
 	FormatterWrapper(DateTimeFormatter formatter, String pattern, short type, ZoneId zone, boolean custom) {
@@ -48,6 +36,11 @@ public class FormatterWrapper {
 		this.hasColon = pattern.indexOf(':') != -1;
 		this.hasTimeZone = pattern.indexOf('z') != -1 || pattern.indexOf('Z') != -1;
 		this.hasWhitespace = pattern.chars().anyMatch(Character::isWhitespace);
+	}
+
+	@Override
+	public String toString() {
+		return "Pattern:" + pattern + "; Zone:" + zone + "; Custom:" + custom + "; " + formatter.toString();
 	}
 
 	public boolean valid(String str) {

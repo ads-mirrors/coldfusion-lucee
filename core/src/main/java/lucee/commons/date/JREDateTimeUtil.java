@@ -19,6 +19,7 @@
 package lucee.commons.date;
 
 import java.time.DayOfWeek;
+import java.time.ZoneId;
 import java.time.temporal.WeekFields;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -50,9 +51,26 @@ public class JREDateTimeUtil extends DateTimeUtil {
 	long _toTime(TimeZone tz, int year, int month, int day, int hour, int minute, int second, int milliSecond) {
 		if (tz == null) tz = ThreadLocalPageContext.getTimeZone(tz);
 		Calendar time = _getThreadCalendar((PageContext) null, tz);
+
 		time.set(year, month - 1, day, hour, minute, second);
 		time.set(Calendar.MILLISECOND, milliSecond);
 		return time.getTimeInMillis();
+	}
+
+	@Override
+	/**
+	 * Converts date-time components to epoch milliseconds using legacy Calendar API.
+	 * 
+	 * Note: Uses Calendar directly rather than modern Java Time API to maintain exact compatibility
+	 * with legacy timezone and DST handling behavior, particularly for historical dates and edge cases
+	 * during DST transitions.
+	 * 
+	 * @see https://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html#calendars
+	 * @see https://bugs.openjdk.org/browse/JDK-8066982 (Bug report on Time-zone differences)
+	 * @see https://stackoverflow.com/questions/6841333/why-is-subtracting-these-two-times-in-1927-giving-a-strange-result
+	 */
+	long _toTime(ZoneId zone, int year, int month, int day, int hour, int minute, int second, int milliSecond) {
+		return _toTime((zone == null) ? ThreadLocalPageContext.getTimeZone() : TimeZone.getTimeZone(zone), year, month, day, hour, minute, second, milliSecond);
 	}
 
 	private static int _get(TimeZone tz, DateTime dt, int field) {
@@ -309,7 +327,9 @@ public class JREDateTimeUtil extends DateTimeUtil {
 	private static Calendar _getThreadCalendar(PageContext pc, TimeZone tz) {
 		Calendar c = _calendar.get();
 		c.clear();
-		if (tz == null) tz = ThreadLocalPageContext.getTimeZone(pc);
+		if (tz == null) {
+			tz = ThreadLocalPageContext.getTimeZone(pc);
+		}
 		c.setTimeZone(tz);
 		return c;
 	}

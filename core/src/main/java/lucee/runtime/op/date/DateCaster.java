@@ -306,16 +306,10 @@ public final class DateCaster {
 		return (dt == null) ? defaultValue : dt;
 	}
 
-	/*
-	 * public static void main(String[] args) { print.e(toDateTimeNew(Locale.ENGLISH,
-	 * "2024/12/23 12:07:11 CET", TimeZoneConstants.CET, null, true)); }
-	 */
-
 	public static DateTime toDateTimeNew(Locale locale, String str, TimeZone tz, DateTime defaultValue, boolean useCommomDateParserAsWell) {
 		countCheck++;
 		str = str.trim();
 		tz = ThreadLocalPageContext.getTimeZone(tz);
-
 		List<FormatterWrapper> all = FormatUtil.getAllFormats(locale, tz, true);
 		Long time;
 		try {
@@ -782,18 +776,13 @@ public final class DateCaster {
 			if (msSeconds == -1) return defaultValue;
 
 			/*
-			 * In order to correct parse millisecond strings, we need to know the length
-			 * of the original digits. Once we know the length, we can generate a divisor
-			 * to make sure our millisecond string is correctly converted into an int.
+			 * In order to correct parse millisecond strings, we need to know the length of the original digits.
+			 * Once we know the length, we can generate a divisor to make sure our millisecond string is
+			 * correctly converted into an int.
 			 * 
 			 * This handles numeric strings as follows:
 			 * 
-			 * 001 = 1ms
-			 * 01 = 10ms
-			 * 1 = 100ms
-			 * 0001 = 0ms
-			 * 0005 = 1ms
-			 * 0009412 = 1ms
+			 * 001 = 1ms 01 = 10ms 1 = 100ms 0001 = 0ms 0005 = 1ms 0009412 = 1ms
 			 */
 			double divisor = Math.pow(10, ds.getLastDigitLength());
 			// we use round, so that nanosecond inputs round to the nearest millisecond
