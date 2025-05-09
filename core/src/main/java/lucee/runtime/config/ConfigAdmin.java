@@ -3361,11 +3361,9 @@ public final class ConfigAdmin {
 
 	}
 
-	public void updateDefaultSecurity(short file, Resource[] fileAccess, short directJavaAccess, 
-			short cfxUsage, short tagExecute, short tagImport, short tagObject,
+	public void updateDefaultSecurity(short file, Resource[] fileAccess, short directJavaAccess, short cfxUsage, short tagExecute, short tagImport, short tagObject,
 			short tagRegistry, short accessRead, short accessWrite) throws SecurityException {
 		checkWriteAccess();
-		if (!(config instanceof ConfigServer)) throw new SecurityException("can't change security settings from this context");
 
 		Struct security = _getRootElement("security");
 		updateSecurityFileAccess(security, fileAccess, file);
