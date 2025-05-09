@@ -60,7 +60,7 @@ public final class LogExecutionLog extends ExecutionLogSupport {
 		else {
 			log += positions(startPos, endPos) + " > " + timeLongToString(diff);
 		}
-		LogUtil.log(pc, logLevel, Controler.class.getName(), log);
+		LogUtil.log(pc, logLevel, logName, Controler.class.getName(), log);
 	}
 
 	@Override
