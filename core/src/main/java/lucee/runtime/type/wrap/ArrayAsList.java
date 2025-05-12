@@ -219,9 +219,21 @@ public class ArrayAsList implements List {
 		return array.size();
 	}
 
+	private static void subListRangeCheck(int fromIndex, int toIndex, int size) {
+		if (fromIndex < 0) throw new IndexOutOfBoundsException("fromIndex = " + fromIndex);
+		if (toIndex > size) throw new IndexOutOfBoundsException("toIndex = " + toIndex);
+		if (fromIndex > toIndex) throw new IllegalArgumentException("fromIndex(" + fromIndex + ") > toIndex(" + toIndex + ")");
+	}
+
 	@Override
 	public List subList(int fromIndex, int toIndex) {
-		return array.toList().subList(fromIndex, toIndex);
+		subListRangeCheck(fromIndex, toIndex, size());
+
+		List subList = new ArrayList<>();
+		for (int i = fromIndex; i < toIndex; i++) {
+			subList.add(get(i));
+		}
+		return subList;
 	}
 
 	@Override

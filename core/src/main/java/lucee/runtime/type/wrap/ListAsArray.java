@@ -38,7 +38,6 @@ import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Duplicator;
 import lucee.runtime.type.Array;
-import lucee.runtime.type.ArrayImpl;
 import lucee.runtime.type.Collection;
 import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.it.EntryIterator;
@@ -335,7 +334,6 @@ public class ListAsArray extends ArraySupport implements Array, List {
 
 	@Override
 	public Collection duplicate(boolean deepCopy) {
-		new ArrayImpl().duplicate(deepCopy);
 		return new ListAsArray((List) Duplicator.duplicate(list, deepCopy));
 	}
 
