@@ -35,6 +35,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
 import lucee.aprint;
+import lucee.print;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.res.Resource;
@@ -273,23 +274,36 @@ public class DynamicInvoker {
 				methodDesc.append('(');
 			}
 			Type rt;
-			if (isConstr) {
-				rt = Type.getType(clazzz.getDeclaringClass());
-			}
-			else {
-				Class tmp = ((lucee.transformer.dynamic.meta.Method) fm).getDeclaringProviderRtnClassWithSameAccess();
-				if (tmp != null) rt = Type.getType(tmp);
-				else rt = fm.getReturnType();
+			// return type
+			{
+				// constructor
+				if (isConstr) {
+					rt = Type.getType(clazzz.getDeclaringClass());
+				}
+				// static method
+				else if (isStatic) {
+					rt = fm.getReturnType();
+				}
+				// instance method
+				else {
+					Class tmp = ((lucee.transformer.dynamic.meta.Method) fm).getDeclaringProviderRtnClassWithSameAccess();
+					if (tmp != null) rt = Type.getType(tmp);
+					else rt = fm.getReturnType();
+				}
 			}
 
 			methodDesc.append(')').append(isConstr ? Types.VOID : rt.getDescriptor());
+			// constructor
 			if (isConstr) {
 				// Create a new instance of java/lang/String
 				mv.visitMethodInsn(Opcodes.INVOKESPECIAL, rt.getInternalName(), "<init>", methodDesc.toString(), false); // Call the constructor of String
 			}
+			// static method
 			else if (isStatic) {
+				print.e(methodDesc);
 				mv.visitMethodInsn(Opcodes.INVOKESTATIC, Type.getInternalName(fm.getDeclaringClass()), fm.getName(), methodDesc.toString(), fm.getDeclaringClass().isInterface());
 			}
+			// instance method
 			else {
 				mv.visitMethodInsn((fm.getDeclaringProviderClassWithSameAccess().isInterface() ? Opcodes.INVOKEINTERFACE : Opcodes.INVOKEVIRTUAL),
 						Type.getInternalName(fm.getDeclaringProviderClassWithSameAccess()), fm.getName(), methodDesc.toString(),
@@ -422,18 +436,45 @@ public class DynamicInvoker {
 		return null;
 	}
 
+	public static class C<E> extends ArrayList<E> {
+		public static <E> C<E> of(E e1) {
+			C c = new C();
+			c.add(e1);
+			c.add(e1);
+			c.add(e1);
+			return c;
+		}
+	}
+
 	public static void main(String[] argsw) throws Throwable {
 		System.setProperty("lucee.allow.reflection", "false");
 		Resource classes = ResourcesImpl.getFileResourceProvider().getResource("/Users/mic/tmp8/classes/");
 		ResourceUtil.deleteContent(classes, null);
 
 		DynamicInvoker e = DynamicInvoker.getInstance(classes);
-		if (true) {
+		if (false) {
 			aprint.e(A.x());
 			aprint.e(B.x());
 			aprint.e(e.invokeStaticMethod(A.class, "x", new Object[] {}, true, true));
 			aprint.e(e.invokeStaticMethod(B.class, "x", new Object[] {}, true, true));
 
+		}
+
+		if (true) {
+
+			/*
+			 * for (java.lang.reflect.Method m: C.class.getMethods()) { if (m.getName().equals("of"))
+			 * aprint.e(">" + m); }
+			 */
+
+			// aprint.e(e.invokeStaticMethod(List.class, "of", new Object[] { "Susi" }, true, true));
+			aprint.e(e.invokeStaticMethod(List.class, "of", new Object[] { "Susi" }, true, true));
+			aprint.e(e.invokeStaticMethod(C.class, "of", new Object[] { "Susi" }, true, true));
+
+			// aprint.e(List.of("ww"));
+			// aprint.e(C.of("ww"));
+			// aprint.e(ArrayList.of(""));
+			return;
 		}
 
 		if (true) {
@@ -790,4 +831,5 @@ public class DynamicInvoker {
 			return "B";
 		}
 	}
+
 }
