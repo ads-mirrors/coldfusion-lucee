@@ -92,7 +92,7 @@
 				><cfscript>
 					arrayAppend(spev, _extensions.id&";version="&_extensions.version);
 					latest=getLatestVersion(_extensions.id);
-					latestVersion = latest.vs;
+					latestVersion = ( isEmpty( latest.vs ) ) ? _extensions.version : latest.vs;
 					hasUpdates = toNumeric( REReplace( latestVersion, "[^\d]", "", "all" ) ) GT
 								 toNumeric( REReplace( toVersionSortable( _extensions.version ), "[^\d]", "", "all" ) );
 					link="#request.self#?action=#url.action#&action2=detail&id=#_extensions.id#";

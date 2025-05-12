@@ -30,7 +30,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
             */
 
             variables.adminRoot = "/admin/";
-            //variables.adminPage = "server.cfm"; 
+            if( !isEmpty( server.system.environment.LUCEE_TEST_ADMIN_PATH ?: "" ) ){
+                variables.adminRoot = server.system.environment.LUCEE_TEST_ADMIN_PATH;
+            }
+
             variables.adminPage = "index.cfm"; // server.cfm or web.cfm don't work???
             
             variables.cookies = {}; // need to be authenticated to the admin, for subsequent requests after login
