@@ -6512,9 +6512,9 @@ The returned number of unallocated bytes is a hint, but not a guarantee, that it
 			<type>struct</type>
 		</return>
 	</function>
-	<!-- GetSecret -->
+	<!-- SecretProviderGet -->
 	<function>
-		<name>GetSecret</name>
+		<name>SecretProviderGet</name>
 		<class>lucee.runtime.functions.security.GetSecret</class>
 		<introduced>7.0.0.197</introduced>
 		<description>
