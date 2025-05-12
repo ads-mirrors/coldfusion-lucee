@@ -29,7 +29,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
-import lucee.print;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
@@ -202,14 +201,14 @@ public class MavenUtil {
 	public static GAVSO getDependency(POMReader.Dependency rd, POM parent, POM current, Map<String, String> properties, List<POM> parentDendencyManagement, boolean management)
 			throws IOException {
 		POM pdm = null;// TODO move out of here so multiple loop elements can profit
-
+		boolean loadedPDM = false;
 		String g = resolvePlaceholders(current, rd.groupId, properties);
 		String a = resolvePlaceholders(current, rd.artifactId, properties);
-
 		// scope
 		String s = rd.scope;
 		if (s == null && parentDendencyManagement != null) {
-			if (pdm == null) pdm = getDendency(parentDendencyManagement, g, a);
+			pdm = getDependency(parentDendencyManagement, g, a);
+			loadedPDM = true;
 			if (pdm != null) {
 				s = pdm.getScopeAsString();
 			}
@@ -223,18 +222,24 @@ public class MavenUtil {
 
 		// version
 		String v = rd.version;
-		if (v == null) {
-			pdm = getDendency(parentDendencyManagement, g, a);
-
+		if (v != null) {
+			v = resolvePlaceholders(current, v, properties);
+		}
+		else {
+			if (!loadedPDM) {
+				pdm = getDependency(parentDendencyManagement, g, a);
+				loadedPDM = true;
+			}
 			if (pdm != null) {
 				v = pdm.getVersion();
+				v = resolvePlaceholders(pdm, v, pdm.getProperties());
 			}
+
 			if (v == null) {
 				throw new IOException("could not find version for dependency [" + g + ":" + a + "] in [" + current + "]");
 			}
 		}
 
-		v = resolvePlaceholders(current, v, properties);
 		// PATCH TODO better solution for this
 		if (v != null && v.startsWith("[")) {
 			v = v.substring(1, v.indexOf(','));
@@ -243,7 +248,10 @@ public class MavenUtil {
 		// optional
 		String o = rd.optional;
 		if (o == null && parentDendencyManagement != null) {
-			if (pdm == null) pdm = getDendency(parentDendencyManagement, g, a);
+			if (!loadedPDM) {
+				pdm = getDependency(parentDendencyManagement, g, a);
+				loadedPDM = true;
+			}
 			if (pdm != null) {
 				o = pdm.getOptionalAsString();
 			}
@@ -362,10 +370,23 @@ public class MavenUtil {
 		return (allowedScopes & scope) != 0;
 	}
 
-	private static POM getDendency(List<POM> dependencies, String groupId, String artifactId) {
+	private static POM getDependency(List<POM> dependencies, String groupId, String artifactId) {
 		if (dependencies != null) {
 			for (POM pom: dependencies) {
-				if (pom.getGroupId().equals(groupId) && pom.getArtifactId().equals(artifactId)) return pom;
+				try {
+					List<POM> dependencyManagement = pom.getDependencyManagement();
+					if (dependencyManagement != null) {
+						for (POM p: dependencyManagement) {
+							if (p.getGroupId().equals(groupId) && p.getArtifactId().equals(artifactId)) {
+								return p;
+							}
+						}
+					}
+				}
+				catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 		return null;
@@ -485,11 +506,9 @@ public class MavenUtil {
 					Resource localRepo = getLocalRepository();
 					if (localRepo != null) {
 						Resource tmp = pom.getArtifact(localRepo, type);
-						print.e("->" + tmp);
 						// found one in local maven
 						if (tmp.isFile()) {
 							tmp.copyTo(res, false);
-							print.e("=>" + tmp);
 							return;
 						}
 					}

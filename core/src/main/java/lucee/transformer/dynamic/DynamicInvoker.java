@@ -35,7 +35,6 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
 import lucee.aprint;
-import lucee.print;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.res.Resource;
@@ -300,7 +299,6 @@ public class DynamicInvoker {
 			}
 			// static method
 			else if (isStatic) {
-				print.e(methodDesc);
 				mv.visitMethodInsn(Opcodes.INVOKESTATIC, Type.getInternalName(fm.getDeclaringClass()), fm.getName(), methodDesc.toString(), fm.getDeclaringClass().isInterface());
 			}
 			// instance method
