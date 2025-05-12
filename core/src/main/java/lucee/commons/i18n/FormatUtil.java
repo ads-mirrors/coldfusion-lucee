@@ -785,63 +785,67 @@ public class FormatUtil {
 	public static Long parse(FormatterWrapper fw, String date, ZoneId zone, Long defaultValue) {
 		ParsePosition position = new ParsePosition(0);
 		TemporalAccessor accessor = fw.formatter.parseUnresolved(date, position);
+		try {
+			// Check if parsing was successful and consumed the entire string
+			if (position.getErrorIndex() >= 0 || position.getIndex() < date.length()) {
+				return defaultValue;
+			}
+			ZoneId tmp;
+			if (accessor.isSupported(ChronoField.OFFSET_SECONDS)) {
+				zone = ZoneOffset.ofTotalSeconds(accessor.get(ChronoField.OFFSET_SECONDS));
+			}
+			else if ((tmp = accessor.query(TemporalQueries.zone())) != null) {
+				zone = tmp;
+			}
 
-		// Check if parsing was successful and consumed the entire string
-		if (position.getErrorIndex() >= 0 || position.getIndex() < date.length()) {
+			if (FormatUtil.FORMAT_TYPE_DATE_TIME == fw.type) {
+				return DateTimeUtil.getInstance().toTime(zone,
+
+						year(accessor),
+
+						accessor.get(ChronoField.MONTH_OF_YEAR),
+
+						accessor.get(ChronoField.DAY_OF_MONTH),
+
+						hour(accessor),
+
+						accessor.isSupported(ChronoField.MINUTE_OF_HOUR) ? accessor.get(ChronoField.MINUTE_OF_HOUR) : 0,
+
+						accessor.isSupported(ChronoField.SECOND_OF_MINUTE) ? accessor.get(ChronoField.SECOND_OF_MINUTE) : 0,
+
+						accessor.isSupported(ChronoField.MILLI_OF_SECOND) ? accessor.get(ChronoField.MILLI_OF_SECOND) : 0,
+
+						defaultValue);
+
+			}
+			else if (FormatUtil.FORMAT_TYPE_DATE == fw.type) {
+				return DateTimeUtil.getInstance().toTime(zone,
+
+						year(accessor),
+
+						accessor.get(ChronoField.MONTH_OF_YEAR),
+
+						accessor.get(ChronoField.DAY_OF_MONTH),
+
+						DEFAULT_HOUR, DEFAULT_MINUTE, DEFAULT_SECOND, DEFAULT_MILLISECOND, defaultValue);
+
+			}
+			else { // FormatUtil.FORMAT_TYPE_TIME
+				return DateTimeUtil.getInstance().toTime(zone, DEFAULT_YEAR, DEFAULT_MONTH, DEFAULT_DAY,
+
+						hour(accessor),
+
+						accessor.isSupported(ChronoField.MINUTE_OF_HOUR) ? accessor.get(ChronoField.MINUTE_OF_HOUR) : 0,
+
+						accessor.isSupported(ChronoField.SECOND_OF_MINUTE) ? accessor.get(ChronoField.SECOND_OF_MINUTE) : 0,
+
+						accessor.isSupported(ChronoField.MILLI_OF_SECOND) ? accessor.get(ChronoField.MILLI_OF_SECOND) : 0,
+
+						defaultValue);
+			}
+		}
+		catch (java.time.DateTimeException dte) {
 			return defaultValue;
-		}
-		ZoneId tmp;
-		if (accessor.isSupported(ChronoField.OFFSET_SECONDS)) {
-			zone = ZoneOffset.ofTotalSeconds(accessor.get(ChronoField.OFFSET_SECONDS));
-		}
-		else if ((tmp = accessor.query(TemporalQueries.zone())) != null) {
-			zone = tmp;
-		}
-
-		if (FormatUtil.FORMAT_TYPE_DATE_TIME == fw.type) {
-			return DateTimeUtil.getInstance().toTime(zone,
-
-					year(accessor),
-
-					accessor.get(ChronoField.MONTH_OF_YEAR),
-
-					accessor.get(ChronoField.DAY_OF_MONTH),
-
-					hour(accessor),
-
-					accessor.isSupported(ChronoField.MINUTE_OF_HOUR) ? accessor.get(ChronoField.MINUTE_OF_HOUR) : 0,
-
-					accessor.isSupported(ChronoField.SECOND_OF_MINUTE) ? accessor.get(ChronoField.SECOND_OF_MINUTE) : 0,
-
-					accessor.isSupported(ChronoField.MILLI_OF_SECOND) ? accessor.get(ChronoField.MILLI_OF_SECOND) : 0,
-
-					defaultValue);
-
-		}
-		else if (FormatUtil.FORMAT_TYPE_DATE == fw.type) {
-			return DateTimeUtil.getInstance().toTime(zone,
-
-					year(accessor),
-
-					accessor.get(ChronoField.MONTH_OF_YEAR),
-
-					accessor.get(ChronoField.DAY_OF_MONTH),
-
-					DEFAULT_HOUR, DEFAULT_MINUTE, DEFAULT_SECOND, DEFAULT_MILLISECOND, defaultValue);
-
-		}
-		else { // FormatUtil.FORMAT_TYPE_TIME
-			return DateTimeUtil.getInstance().toTime(zone, DEFAULT_YEAR, DEFAULT_MONTH, DEFAULT_DAY,
-
-					hour(accessor),
-
-					accessor.isSupported(ChronoField.MINUTE_OF_HOUR) ? accessor.get(ChronoField.MINUTE_OF_HOUR) : 0,
-
-					accessor.isSupported(ChronoField.SECOND_OF_MINUTE) ? accessor.get(ChronoField.SECOND_OF_MINUTE) : 0,
-
-					accessor.isSupported(ChronoField.MILLI_OF_SECOND) ? accessor.get(ChronoField.MILLI_OF_SECOND) : 0,
-
-					defaultValue);
 		}
 
 	}
