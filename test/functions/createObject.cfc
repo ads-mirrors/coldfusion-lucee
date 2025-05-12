@@ -40,8 +40,15 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
                 // Assert the object was created successfully
                 expect( isObject(bean) ).toBeTrue();
             });
+
+			it( title = "should NOT load railo/loader/servlet/CFMLServlet with 2 arguments", body = function( currentSpec ) {
+                var servlet = createObject( "java", "railo.loader.servlet.CFMLServlet" );
+                
+                // Assert the object was created successfully
+                expect( isObject(servlet) ).toBeTrue();
+            });
             
-            
+            /Users/mic/Projects/Lucee/Lucee5/loader/target/classes/railo/loader/servlet/CFMLServlet.class
 
 			it( title = "Checking the createObject(..,javasettings:{maven:...}) with jlama", body = function( currentSpec ) {
 				
