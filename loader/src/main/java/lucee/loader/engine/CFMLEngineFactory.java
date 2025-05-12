@@ -97,6 +97,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 	private static final long MB100 = 1024 * 1024 * 100;
 	private static final int MAX_REDIRECTS = 5;
 	private static final Version MIN_VERSION = toVersion("5.0.0.248", null);
+	private static final Version MAX_VERSION = toVersion("7.0.0.115", null); // after that the loader changed
 
 	private static CFMLEngineFactory factory;
 	// private static CFMLEngineWrapper engineListener;
@@ -339,8 +340,10 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 						continue;
 					}
 
-					// newest version
-					if (lucee == null || Util.isNewerThan(pv, toVersion(lucee.getName(), VERSION_ZERO))) lucee = patch;
+					// newest possible version
+					if ((lucee == null || Util.isNewerThan(pv, toVersion(lucee.getName(), VERSION_ZERO))) && !Util.isNewerThan(pv, MAX_VERSION)) {
+						lucee = patch;
+					}
 				}
 			}
 
