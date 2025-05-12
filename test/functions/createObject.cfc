@@ -7,6 +7,42 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect(object.length()).toBe(0);
 			});
 
+			it( title = "should load a class from bootdelegation with 2 arguments", body = function( currentSpec ) {
+                // java.nio.charset is in the bootdelegation list
+                var charset = createObject( "java", "java.nio.charset.Charset" );
+                
+                // Assert the object was created successfully
+                expect( isObject(charset) ).toBeTrue();
+                
+                // Call a method to verify functionality
+                var defaultCharset = charset.defaultCharset();
+                expect( isObject(defaultCharset) ).toBeTrue();
+            });
+
+			it( title = "should load a class outside bootdelegation with 2 arguments", body = function( currentSpec ) {
+                // java.util.concurrent.atomic is NOT in the bootdelegation list
+                var atomicInteger = createObject( "java", "java.util.concurrent.atomic.AtomicInteger" );
+                
+                // Assert the object was created successfully
+                expect( isObject(atomicInteger) ).toBeTrue();
+                
+                // Call a method to verify functionality
+                var val = atomicInteger.get();
+                expect( val ).toBe(0);
+            });
+
+
+
+			it( title = "should NOT load com.sun.management.HotSpotDiagnosticMXBean with 2 arguments", body = function( currentSpec ) {
+                // com.sun.management is NOT in the bootdelegation list
+                var bean = createObject( "java", "com.sun.management.HotSpotDiagnosticMXBean" );
+                
+                // Assert the object was created successfully
+                expect( isObject(bean) ).toBeTrue();
+            });
+            
+            
+
 			it( title = "Checking the createObject(..,javasettings:{maven:...}) with jlama", body = function( currentSpec ) {
 				
 				if ( getJavaVersion() < 21) return;
@@ -375,9 +411,6 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					cleanup(data);
 				}
 			});
-
-
-
 
 
 			it( title = "Checking the createObject(..,javasettings:{maven:...}) with maven-core", body = function( currentSpec ) {
