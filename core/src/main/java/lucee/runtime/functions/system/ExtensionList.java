@@ -28,7 +28,6 @@ public class ExtensionList extends BIF {
 		boolean bifLoaded = false;
 
 		Query qry = RHExtension.toQuery(config, ((ConfigWebPro) pc.getConfig()).getServerRHExtensions(), null);
-		RHExtension.toQuery(config, ((ConfigWebPro) pc.getConfig()).getRHExtensions(), qry);
 		if (imageObject) {
 			try {
 				for (int i = 1; i <= qry.getRecordcount(); i++) {
