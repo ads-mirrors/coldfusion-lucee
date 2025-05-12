@@ -236,8 +236,6 @@ public class DynamicInvoker {
 			// For methods that require arguments, you would need to manipulate the args array appropriately
 			// here
 
-			// print.e(Type.getInternalName(clazz));
-
 			StringBuilder methodDesc = new StringBuilder();
 			String del = "(";
 			if (fm.getArgumentCount() > 0) {
@@ -289,8 +287,11 @@ public class DynamicInvoker {
 				// Create a new instance of java/lang/String
 				mv.visitMethodInsn(Opcodes.INVOKESPECIAL, rt.getInternalName(), "<init>", methodDesc.toString(), false); // Call the constructor of String
 			}
+			else if (isStatic) {
+				mv.visitMethodInsn(Opcodes.INVOKESTATIC, Type.getInternalName(fm.getDeclaringClass()), fm.getName(), methodDesc.toString(), fm.getDeclaringClass().isInterface());
+			}
 			else {
-				mv.visitMethodInsn(isStatic ? Opcodes.INVOKESTATIC : (fm.getDeclaringProviderClassWithSameAccess().isInterface() ? Opcodes.INVOKEINTERFACE : Opcodes.INVOKEVIRTUAL),
+				mv.visitMethodInsn((fm.getDeclaringProviderClassWithSameAccess().isInterface() ? Opcodes.INVOKEINTERFACE : Opcodes.INVOKEVIRTUAL),
 						Type.getInternalName(fm.getDeclaringProviderClassWithSameAccess()), fm.getName(), methodDesc.toString(),
 						fm.getDeclaringProviderClassWithSameAccess().isInterface());
 
@@ -425,7 +426,16 @@ public class DynamicInvoker {
 		System.setProperty("lucee.allow.reflection", "false");
 		Resource classes = ResourcesImpl.getFileResourceProvider().getResource("/Users/mic/tmp8/classes/");
 		ResourceUtil.deleteContent(classes, null);
+
 		DynamicInvoker e = DynamicInvoker.getInstance(classes);
+		if (true) {
+			aprint.e(A.x());
+			aprint.e(B.x());
+			aprint.e(e.invokeStaticMethod(A.class, "x", new Object[] {}, true, true));
+			aprint.e(e.invokeStaticMethod(B.class, "x", new Object[] {}, true, true));
+
+		}
+
 		if (true) {
 
 			HashMap<String, String> arr = new HashMap<>();
@@ -769,4 +779,15 @@ public class DynamicInvoker {
 
 	}
 
+	public static class A {
+		public static String x() {
+			return "A";
+		}
+	}
+
+	public static class B extends A {
+		public static String x() {
+			return "B";
+		}
+	}
 }
