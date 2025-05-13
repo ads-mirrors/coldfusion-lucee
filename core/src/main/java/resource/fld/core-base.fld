@@ -13648,6 +13648,7 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 		</argument>
 		<argument>
 			<name>cacertPath</name>
+			<introduced>7.0.0.234</introduced>
 			<alias>path,cacert</alias>
 			<type>any</type>
 			<required>No</required>
@@ -13655,6 +13656,7 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 		</argument>
 		<argument>
 			<name>password</name>
+			<introduced>7.0.0.234</introduced>
 			<type>string</type>
 			<required>No</required>
 			<description>Password for cacert database</description>
