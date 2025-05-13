@@ -920,8 +920,4 @@ public class MavenUtil {
 		return localRepository;
 	}
 
-	public static void main(String[] args) {
-		print.e(getLocalRepository());
-	}
-
 }
