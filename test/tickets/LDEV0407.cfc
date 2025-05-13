@@ -12,13 +12,15 @@
 						.getPrefix();
 					} catch ( any e){
 						var httpResponse = e.message;
-						if(httpResponse!="408 Request Time-out") rethrow;
+						if(httpResponse=="503 Service Temporarily Unavailable") return;
+						if(httpResponse!="408 Request Time-out" ) rethrow;
 					}
 					expect(httpResponse).toBe("408 Request Time-out");
 				});
 
 				it(title="checking cfhttp tag with timeout attribute on request", body = function( currentSpec ) {
 					var httpResponse = cfhttptag();
+					if(httpResponse=="503 Service Temporarily Unavailable") return;
 					expect(httpResponse).toBe("408 Request Time-out");
 				});
 			});
