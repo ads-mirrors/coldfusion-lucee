@@ -437,6 +437,16 @@
     {
         "sysprop": "lucee.compiler.block.bytecode",
         "envvar": "LUCEE_COMPILER_BLOCK_BYTECODE",
-        "desc": "Boolean which wontrols whether Lucee allows cfml files to be bytecode, disabled by default in Lucee 7"
-    }
+        "desc": "Boolean which controls whether Lucee allows cfml files to be bytecode, disabled by default in Lucee 7"
+    },
+    {
+        "sysprop": "lucee.jsch.debug",
+        "envvar": "LUCEE_JSCH_DEBUG",
+        "desc": "Boolean which enables debug logging to the console for SFTP"
+    },
+    {
+        "sysprop": "lucee.ftp.debug",
+        "envvar": "LUCEE_FTP_DEBUG",
+        "desc": "Boolean which enables debug logging to the console for FTP"
+    },
 ]
