@@ -3012,8 +3012,8 @@ To use cached data, the function must be called with the exact same arguments.
 			<alias>columns</alias>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>A comma-separated list of form fields to insert. If this attribute is not specified, all
-	fields in the form are included in the operation.</description>
+			<description>A comma-separated list of the columns to insert. If this attribute is not specified, all
+	fields in the form / struct are included in the operation.</description>
 		</attribute>
 		<attribute>
 			<type>object</type>
@@ -3022,7 +3022,7 @@ To use cached data, the function must be called with the exact same arguments.
 			<alias>columns</alias>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Default is the form scope.</description>
+			<description>Default is the `form` scope. Can be a struct or a variable name of a struct</description>
 		</attribute>
 	</tag>
 	<!-- Invoke -->
@@ -6656,8 +6656,8 @@ To use cached data, the current query must use the same SQL statement, data sour
 			<alias>columns</alias>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>A comma-separated list of form fields to update. If this attribute is not specified, all fields
-		in the form are included in the operation.</description>
+			<description>A comma-separated list of columns to update. If this attribute is not specified, all fields
+		in the form/struct are included in the operation.</description>
 		</attribute>
 		<attribute>
 			<type>object</type>
@@ -6666,7 +6666,7 @@ To use cached data, the current query must use the same SQL statement, data sour
 			<alias>columns</alias>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Default is the form scope.</description>
+			<description>Default is the `form` scope. Can be a struct or a variable name of a struct</description>
 		</attribute>
 	</tag>
 
