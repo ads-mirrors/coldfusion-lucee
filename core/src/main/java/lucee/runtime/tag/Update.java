@@ -37,11 +37,13 @@ import lucee.runtime.db.SQLItemImpl;
 import lucee.runtime.debug.DebuggerImpl;
 import lucee.runtime.debug.DebuggerUtil;
 import lucee.runtime.engine.ThreadLocalPageContext;
+import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.DatabaseException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.tag.TagImpl;
 import lucee.runtime.functions.displayFormatting.DecimalFormat;
 import lucee.runtime.op.Caster;
+import lucee.runtime.op.Decision;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.QueryImpl;
 import lucee.runtime.type.Struct;
@@ -91,6 +93,8 @@ public final class Update extends TagImpl {
 	 */
 	private String tablequalifier;
 
+	private Struct source;
+
 	@Override
 	public void release() {
 		super.release();
@@ -100,6 +104,7 @@ public final class Update extends TagImpl {
 		tableowner = null;
 		tablequalifier = null;
 		datasource = null;
+		source = null;
 	}
 
 	/**
@@ -175,6 +180,15 @@ public final class Update extends TagImpl {
 	 **/
 	public void setTablequalifier(String tablequalifier) {
 		this.tablequalifier = tablequalifier;
+	}
+
+	/**
+	 * @param source source scope for data
+	 **/
+	public void setSource(Object source) throws PageException {
+		if (Decision.isStruct(source)) this.source = Caster.toStruct(source);
+		else if (Decision.isString(source)) Caster.toStruct(pageContext.getVariable(Caster.toString(source)));
+		else throw new ApplicationException("Source must be a variable name, i.e a string or a struct");
 	}
 
 	@Override
@@ -275,9 +289,11 @@ public final class Update extends TagImpl {
 	 */
 	private SQL createSQL(DatasourceConnection dc, String[] keys, Struct meta) throws PageException {
 		String[] fields = null;
-		Form form = pageContext.formScope();
+		Struct src = null;
+		if (source == null) src = pageContext.formScope();
+		else src = source;
 		if (formfields != null) fields = ListUtil.toStringArray(ListUtil.listToArrayRemoveEmpty(formfields, ','));
-		else fields = CollectionUtil.keysAsString(pageContext.formScope());
+		else fields = CollectionUtil.keysAsString(src);
 
 		StringBuffer set = new StringBuffer();
 		StringBuffer where = new StringBuffer();
@@ -297,12 +313,12 @@ public final class Update extends TagImpl {
 					set.append("=?");
 					ColumnInfo ci = (ColumnInfo) meta.get(fieldKey);
 					if (ci != null){ 
-						Object val = form.get(fieldKey, null);
+						Object val = src.get(fieldKey, null);
 						SQLItemImpl item = new SQLItemImpl(val, ci.getType());
 						if (ci.isNullable() && StringUtil.isEmpty(val)) item.setNulls(true);
 						setItems.add(item);
 					} else {
-						setItems.add(new SQLItemImpl(form.get(fieldKey, null)));
+						setItems.add(new SQLItemImpl(src.get(fieldKey, null)));
 					}
 				}
 				else {
@@ -310,14 +326,14 @@ public final class Update extends TagImpl {
 					else where.append(" and ");
 					where.append(field);
 					where.append("=?");
-					whereItems.add(new SQLItemImpl(form.get(fieldKey, null)));
+					whereItems.add(new SQLItemImpl(src.get(fieldKey, null)));
 				}
 			}
 		}
 		if ((setItems.size() + whereItems.size()) == 0) return null;
 
 		if (whereItems.size() == 0)
-			throw new DatabaseException("can't find primary keys [" + ListUtil.arrayToList(keys, ",") + "] of table [" + tablename + "] in form scope", null, null, dc);
+			throw new DatabaseException("can't find primary keys [" + ListUtil.arrayToList(keys, ",") + "] of table [" + tablename + "] in source scope", null, null, dc);
 
 		StringBuffer sql = new StringBuffer();
 		sql.append("update ");
