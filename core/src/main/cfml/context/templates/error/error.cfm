@@ -126,8 +126,9 @@ function luceeSpinner(index) {
 	setTimeout(luceeSpinner, 200, index)
 }
 
-
-<cfoutput>luceeCatchData=#luceeCatchToString()#;</cfoutput>
+<cfif LuceeAIHas('default:exception')>
+	<cfoutput>luceeCatchData=#luceeCatchToString(catch)#;</cfoutput>
+</cfif>
 </script>
 
 <cfscript>
@@ -155,31 +156,35 @@ function luceeMonoBlock(input,tablengt=1) {
 	}
 	return rtn;
 }
-function luceeCatchToString() {try{
-	var catchi=duplicate(catch,true);
-	var path=catch.TagContext[1].template?:"";
-	var line=catch.TagContext[1].line?:"";
-	
-	if(!fileExists(path)) path=expandPath(path);
-	if(fileExists(path)) {
-		catchi["content"]=fileRead(path);
 
-	}
-	catchi.path=path;
-	catchi.line=line;
-	//structDelete(catchi, "TagContext",false);
-	if(structKeyExists(catchi, "TagContext")) {
-		loop array=catchi.TagContext item="el" {
-			structDelete(el, "id",false);
-			structDelete(el, "column",false);
-			structDelete(el, "Raw_Trace",false);
-			structDelete(el, "codePrintHTML",false);
-			structDelete(el, "type",false);
+function luceeCatchToString(caughtError) {
+	try{
+		var catchi=duplicate(arguments.caughtError,true);
+		if (structKeyExists(catchi, "TagContext")) {
+			var path=catch.TagContext[1].template?:"";
+			var line=catch.TagContext[1].line?:"";
+			
+			if(!fileExists(path)) path=expandPath(path);
+			if(fileExists(path)) {
+				catchi["content"]=fileRead(path);
+			}
+			catchi.path=path;
+			catchi.line=line;
+			//structDelete(catchi, "TagContext",false);
+			loop array=catchi.TagContext item="el" {
+				structDelete(el, "id",false);
+				structDelete(el, "column",false);
+				structDelete(el, "Raw_Trace",false);
+				structDelete(el, "codePrintHTML",false);
+				structDelete(el, "type",false);
+			}
 		}
-	}
-	structDelete(catchi, "ErrorCode",false);
+		structDelete(catchi, "ErrorCode",false);
 
-	return serializeJSON(catchi);}catch(e) {dump(e);}
+		return serializeJSON(catchi);
+	} catch(e) {
+		SerializeJSON(arguments.caughtError);
+	}
 }
 
 
@@ -209,7 +214,8 @@ function luceeCatchToString() {try{
 		<td id="ai-response-cell" class="mono">
 		    <cftry>
 				<cfif LuceeAIHas('default:exception')>
-					<a href="##" onclick="luceeLoadError(luceeCatchData); return false;">Analyse</a><cfelse>
+					<a href="##" onclick="luceeLoadError(luceeCatchData); return false;">Analyse</a>
+				<cfelse>
 					For AI-driven exception analysis setup, see <a target="blank" href="https://github.com/lucee/lucee-docs/blob/master/docs/recipes/ai.md">AI Setup Guide</a>.
 				</cfif>
 				<cfcatch>
