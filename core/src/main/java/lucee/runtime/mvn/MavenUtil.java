@@ -372,6 +372,12 @@ public class MavenUtil {
 
 	private static POM getDependency(List<POM> dependencies, String groupId, String artifactId) {
 		if (dependencies != null) {
+
+			for (POM pom: dependencies) {
+				if (pom.getGroupId().equals(groupId) && pom.getArtifactId().equals(artifactId)) {
+					return pom;
+				}
+			}
 			for (POM pom: dependencies) {
 				try {
 					List<POM> dependencyManagement = pom.getDependencyManagement();
@@ -417,7 +423,7 @@ public class MavenUtil {
 				}
 				if (gavso == null) continue;
 				POM p = POM.getInstance(localDirectory, current.getRepositories(), gavso.g, gavso.a, gavso.v, gavso.s, gavso.o, gavso.c, current.getDependencyScope(),
-						current.getDependencyScopeManagement(), log);
+						current.getDependencyScopeManagement(), false, log);
 				dependencies.add(p);
 			}
 		}

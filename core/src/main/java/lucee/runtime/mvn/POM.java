@@ -132,23 +132,28 @@ public class POM {
 	private String checksum;
 
 	public static POM getInstance(Resource localDirectory, String groupId, String artifactId, String version, int dependencyScope, Log log) {
-		return getInstance(localDirectory, null, groupId, artifactId, version, null, null, null, dependencyScope, SCOPE_ALL, log);
+		return getInstance(localDirectory, null, groupId, artifactId, version, null, null, null, dependencyScope, SCOPE_ALL, true, log);
 	}
 
 	public static POM getInstance(Resource localDirectory, Collection<Repository> repositories, String groupId, String artifactId, String version, int dependencyScope,
 			int dependencyScopeManagement, Log log) {
-		return getInstance(localDirectory, null, groupId, artifactId, version, null, null, null, dependencyScope, dependencyScopeManagement, log);
+		return getInstance(localDirectory, null, groupId, artifactId, version, null, null, null, dependencyScope, dependencyScopeManagement, true, log);
 	}
 
 	static POM getInstance(Resource localDirectory, Collection<Repository> repositories, String groupId, String artifactId, String version, String scope, String optional,
 			String checksum, int dependencyScope, int dependencyScopeManagement, Log log) {
+		return getInstance(localDirectory, repositories, groupId, artifactId, version, scope, optional, checksum, dependencyScope, dependencyScopeManagement, true, log);
+	}
+
+	static POM getInstance(Resource localDirectory, Collection<Repository> repositories, String groupId, String artifactId, String version, String scope, String optional,
+			String checksum, int dependencyScope, int dependencyScopeManagement, boolean triggeerLoad, Log log) {
 		String id = toId(localDirectory, groupId, artifactId, version, scope, optional, dependencyScope, dependencyScopeManagement);
 		POM pom = cache.get(id);
 		if (pom != null) {
 			return pom;
 		}
 
-		pom = new POM(localDirectory, repositories, groupId, artifactId, version, scope, optional, checksum, dependencyScope, dependencyScopeManagement, log);
+		pom = new POM(localDirectory, repositories, groupId, artifactId, version, scope, optional, checksum, dependencyScope, dependencyScopeManagement, triggeerLoad, log);
 		cache.put(id, pom);
 		return pom;
 	}
@@ -160,7 +165,7 @@ public class POM {
 	}
 
 	private POM(Resource localDirectory, Collection<Repository> repositories, String groupId, String artifactId, String version, String scope, String optional, String checksum,
-			int dependencyScope, int dependencyScopeManagement, Log log) {
+			int dependencyScope, int dependencyScopeManagement, boolean triggeerLoad, Log log) {
 		if (groupId == null) throw new IllegalArgumentException("groupId cannot be null");
 		if (artifactId == null) throw new IllegalArgumentException("artifactId cannot be null");
 		if (version == null) throw new IllegalArgumentException("version cannot be null");
@@ -183,7 +188,7 @@ public class POM {
 		this.dependencyScope = dependencyScope;
 		this.log = log;
 
-		initXMLAsync();
+		if (triggeerLoad) initXMLAsync();
 		cache.put(id(), this);
 
 	}
