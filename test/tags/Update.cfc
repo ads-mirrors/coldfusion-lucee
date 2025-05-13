@@ -1,4 +1,4 @@
-component extends="org.lucee.cfml.test.LuceeTestCase"  labels="mysql" { 
+component extends="org.lucee.cfml.test.LuceeTestCase"  labels="mysql" {
 	function beforeAll(){
 		if(isNotSupported()) return;
 		var mySQL = getCredentials();
@@ -10,13 +10,26 @@ component extends="org.lucee.cfml.test.LuceeTestCase"  labels="mysql" {
 	function run( testResults , testBox ) {
 		describe( title="Test suite for CFupdate",skip=isNotSupported(), body=function() {
 			it(title = "checking CFUPDATE tag", body = function( currentSpec ) {
-				form.id =1; 
-				form.myValue ="LuceeTestCase";
-				cfupdate(tableName = "cfupdatetbl" formFields = "id,myValue" datasource=str);
-				query datasource=str name="testQry"{
+				tableCreation();
+				form.id = 1;
+				form.myValue = "LuceeTestCase";
+				cfupdate(tableName = "cfupdatetbl" formFields="id,myValue" datasource=str);
+				query datasource=str name="local.testQry"{
 					echo("SELECT * FROM `cfupdatetbl`");
 				}
 				expect(testQry.myValue).toBe('LuceeTestCase');
+			});
+
+			it(title = "checking CFUPDATE tag with source struct", body = function( currentSpec ) {
+				tableCreation();
+				var sct = {};
+				sct.id = 1;
+				sct.myValue = "LuceeSource";
+				cfupdate(tableName = "cfupdatetbl" columns="id,myValue" datasource=str source="#sct#");
+				query datasource=str name="local.testQry"{
+					echo("SELECT * FROM `cfupdatetbl`");
+				}
+				expect(testQry.myValue).toBe( sct.myValue );
 			});
 		});
 	}
@@ -53,5 +66,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"  labels="mysql" {
 		query datasource=str{
 			echo("DROP TABLE IF EXISTS `cfupdatetbl`");
 		}
+		structDelete(form, "id");
+		structDelete(form, "myValue");
 	}
 }

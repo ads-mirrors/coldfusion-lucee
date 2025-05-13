@@ -3016,7 +3016,7 @@ To use cached data, the function must be called with the exact same arguments.
 	fields in the form are included in the operation.</description>
 		</attribute>
 		<attribute>
-			<type>struct</type>
+			<type>object</type>
 			<name>source</name>
 			<alias>columns</alias>
 			<required>false</required>
@@ -6659,7 +6659,7 @@ To use cached data, the current query must use the same SQL statement, data sour
 		in the form are included in the operation.</description>
 		</attribute>
 		<attribute>
-			<type>struct</type>
+			<type>object</type>
 			<name>source</name>
 			<alias>columns</alias>
 			<required>false</required>
