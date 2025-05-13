@@ -37,11 +37,13 @@ import lucee.runtime.db.SQLItem;
 import lucee.runtime.db.SQLItemImpl;
 import lucee.runtime.debug.DebuggerImpl;
 import lucee.runtime.engine.ThreadLocalPageContext;
+import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.DatabaseException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.tag.TagImpl;
 import lucee.runtime.functions.displayFormatting.DecimalFormat;
 import lucee.runtime.op.Caster;
+import lucee.runtime.op.Decision;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.QueryImpl;
 import lucee.runtime.type.Struct;
@@ -84,6 +86,8 @@ public final class Insert extends TagImpl {
 	/** Name of the table you want the form fields inserted in. */
 	private String tablename;
 
+	private Struct source;
+
 	/**
 	 * For data sources that support table qualifiers, use this field to specify the qualifier for the
 	 ** table. The purpose of table qualifiers varies across drivers. For SQL Server and Oracle, the
@@ -101,6 +105,7 @@ public final class Insert extends TagImpl {
 		tableowner = "";
 		tablequalifier = "";
 		datasource = null;
+		source = null;
 	}
 
 	/**
@@ -176,6 +181,15 @@ public final class Insert extends TagImpl {
 	 **/
 	public void setTablequalifier(String tablequalifier) {
 		this.tablequalifier = tablequalifier;
+	}
+
+	/**
+	 * @param source source scope for data
+	 **/
+	public void setSource(Object source) throws PageException {
+		if (Decision.isStruct(source)) this.source = Caster.toStruct(source);
+		else if (Decision.isString(source)) Caster.toStruct(pageContext.getVariable(Caster.toString(source)));
+		else throw new ApplicationException("Source must be a variable name, i.e a string or a struct");
 	}
 
 	@Override
@@ -274,9 +288,13 @@ public final class Insert extends TagImpl {
 	 */
 	private SQL createSQL(Struct meta) throws PageException {
 		String[] fields = null;
-		Form form = pageContext.formScope();
+
+		Struct src = null;
+		if (source == null) src = pageContext.formScope();
+		else src = source;
+
 		if (formfields != null) fields = ListUtil.toStringArray(ListUtil.listToArrayRemoveEmpty(formfields, ','));
-		else fields = CollectionUtil.keysAsString(pageContext.formScope());
+		else fields = CollectionUtil.keysAsString(src);
 
 		StringBuffer names = new StringBuffer();
 		StringBuffer values = new StringBuffer();
@@ -296,13 +314,13 @@ public final class Insert extends TagImpl {
 				Key fieldKey = Caster.toKey(field);
 				ColumnInfo ci = (ColumnInfo) meta.get(fieldKey, null);
 				if (ci != null){ 
-					Object val = form.get(fieldKey, null);
+					Object val = src.get(fieldKey, null);
 					SQLItemImpl item = new SQLItemImpl(val, ci.getType());
 					if (ci.isNullable() && StringUtil.isEmpty(val))
 						item.setNulls(true);
 					items.add(item);
 				} else {
-					items.add(new SQLItemImpl(form.get(fieldKey, null)));
+					items.add(new SQLItemImpl(src.get(fieldKey, null)));
 				}
 			}
 		}

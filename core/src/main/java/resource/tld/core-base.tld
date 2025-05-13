@@ -2951,7 +2951,6 @@ To use cached data, the function must be called with the exact same arguments.
 	<!-- Insert -->
 	<tag>
 		<name>Insert</name>
-		<status>deprecated</status>
 		<tag-class>lucee.runtime.tag.Insert</tag-class>
 		<body-content>empty</body-content>
 		<body-rtexprvalue>false</body-rtexprvalue>
@@ -3010,10 +3009,19 @@ To use cached data, the function must be called with the exact same arguments.
 		<attribute>
 			<type>string</type>
 			<name>formFields</name>
+			<alias>columns</alias>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 			<description>A comma-separated list of form fields to insert. If this attribute is not specified, all
 	fields in the form are included in the operation.</description>
+		</attribute>
+		<attribute>
+			<type>struct</type>
+			<name>source</name>
+			<alias>columns</alias>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Default is the form scope.</description>
 		</attribute>
 	</tag>
 	<!-- Invoke -->
@@ -6586,7 +6594,6 @@ To use cached data, the current query must use the same SQL statement, data sour
 	<!-- Update -->
 	<tag>
 		<name>Update</name>
-		<status>deprecated</status>
 		<tag-class>lucee.runtime.tag.Update</tag-class>
 		<body-content>empty</body-content>
 		<body-rtexprvalue>false</body-rtexprvalue>
@@ -6645,10 +6652,19 @@ To use cached data, the current query must use the same SQL statement, data sour
 		<attribute>
 			<type>string</type>
 			<name>formFields</name>
+			<alias>columns</alias>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 			<description>A comma-separated list of form fields to update. If this attribute is not specified, all fields
 		in the form are included in the operation.</description>
+		</attribute>
+		<attribute>
+			<type>struct</type>
+			<name>source</name>
+			<alias>columns</alias>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Default is the form scope.</description>
 		</attribute>
 	</tag>
 
