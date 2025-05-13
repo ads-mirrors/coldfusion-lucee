@@ -3017,6 +3017,7 @@ To use cached data, the function must be called with the exact same arguments.
 		</attribute>
 		<attribute>
 			<type>object</type>
+			<introduced>7.0.0.232</introduced>
 			<name>source</name>
 			<alias>columns</alias>
 			<required>false</required>
@@ -6660,6 +6661,7 @@ To use cached data, the current query must use the same SQL statement, data sour
 		</attribute>
 		<attribute>
 			<type>object</type>
+			<introduced>7.0.0.232</introduced>
 			<name>source</name>
 			<alias>columns</alias>
 			<required>false</required>
