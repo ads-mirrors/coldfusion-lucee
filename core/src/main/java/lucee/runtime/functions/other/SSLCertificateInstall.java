@@ -18,11 +18,14 @@
  **/
 package lucee.runtime.functions.other;
 
+import lucee.commons.io.SystemUtil;
 import lucee.runtime.PageContext;
+import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.Function;
+import lucee.commons.io.res.Resource;
+import lucee.runtime.net.http.CertificateInstaller;
 import lucee.runtime.op.Caster;
-import lucee.runtime.tag.Admin;
 
 public final class SSLCertificateInstall implements Function {
 
@@ -33,7 +36,30 @@ public final class SSLCertificateInstall implements Function {
 	}
 
 	public static String call(PageContext pc, String host, Number port) throws PageException {
-		Admin.updateSSLCertificate(pc.getConfig(), host, Caster.toIntValue(port));
+		return call(pc, host, port, null, null);
+	}
+
+	public static String call(PageContext pc, String host, Number port, Object cacerts) throws PageException {
+		return call(pc, host, port, cacerts, null);
+	}
+
+	public static String call(PageContext pc, String host, Number port, Object cacerts, String password) throws PageException {
+		CertificateInstaller installer;
+		Resource _cacerts;
+		try {
+			if (cacerts == null) {
+				if (!SystemUtil.getSystemPropOrEnvVar("lucee.use.lucee.SSL.TrustStore", "").equalsIgnoreCase("true"))
+					throw new ApplicationException("Using JVM cacerts, set lucee.use.lucee.SSL.TrustStore=true to enable"); // LDEV-917
+				_cacerts = pc.getConfig().getSecurityDirectory();
+			} else {
+				_cacerts = Caster.toResource(pc, cacerts, true);
+			}
+			if (password == null) installer = new CertificateInstaller(_cacerts, host, Caster.toIntValue(port)); // use default password changeit
+			else installer = new CertificateInstaller(_cacerts, host, Caster.toIntValue(port), password.toCharArray());
+			installer.installAll(true);
+		} catch (Exception e){
+			throw Caster.toPageException(e);
+		}
 		return "";
 	}
 
