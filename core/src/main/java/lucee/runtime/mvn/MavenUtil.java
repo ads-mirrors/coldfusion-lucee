@@ -205,14 +205,14 @@ public final class MavenUtil {
 	public static GAVSO getDependency(POMReader.Dependency rd, POM parent, POM current, Map<String, String> properties, List<POM> parentDendencyManagement, boolean management)
 			throws IOException {
 		POM pdm = null;// TODO move out of here so multiple loop elements can profit
-
+		boolean loadedPDM = false;
 		String g = resolvePlaceholders(current, rd.groupId, properties);
 		String a = resolvePlaceholders(current, rd.artifactId, properties);
-
 		// scope
 		String s = rd.scope;
 		if (s == null && parentDendencyManagement != null) {
-			if (pdm == null) pdm = getDendency(parentDendencyManagement, g, a);
+			pdm = getDependency(parentDendencyManagement, g, a);
+			loadedPDM = true;
 			if (pdm != null) {
 				s = pdm.getScopeAsString();
 			}
@@ -226,18 +226,24 @@ public final class MavenUtil {
 
 		// version
 		String v = rd.version;
-		if (v == null) {
-			pdm = getDendency(parentDendencyManagement, g, a);
-
+		if (v != null) {
+			v = resolvePlaceholders(current, v, properties);
+		}
+		else {
+			if (!loadedPDM) {
+				pdm = getDependency(parentDendencyManagement, g, a);
+				loadedPDM = true;
+			}
 			if (pdm != null) {
 				v = pdm.getVersion();
+				v = resolvePlaceholders(pdm, v, pdm.getProperties());
 			}
+
 			if (v == null) {
 				throw new IOException("could not find version for dependency [" + g + ":" + a + "] in [" + current + "]");
 			}
 		}
 
-		v = resolvePlaceholders(current, v, properties);
 		// PATCH TODO better solution for this
 		if (v != null && v.startsWith("[")) {
 			v = v.substring(1, v.indexOf(','));
@@ -246,7 +252,10 @@ public final class MavenUtil {
 		// optional
 		String o = rd.optional;
 		if (o == null && parentDendencyManagement != null) {
-			if (pdm == null) pdm = getDendency(parentDendencyManagement, g, a);
+			if (!loadedPDM) {
+				pdm = getDependency(parentDendencyManagement, g, a);
+				loadedPDM = true;
+			}
 			if (pdm != null) {
 				o = pdm.getOptionalAsString();
 			}
@@ -396,7 +405,6 @@ public final class MavenUtil {
 		public boolean equalID(GAVSO other) {
 			if (!g.equalsIgnoreCase(other.g)) return false;
 			if (!a.equalsIgnoreCase(other.a)) return false;
-
 			return true;
 		}
 
@@ -404,17 +412,35 @@ public final class MavenUtil {
 			if (!v.equalsIgnoreCase(other.v)) return false;
 			return equalID(other);
 		}
-
 	}
 
 	public static boolean allowed(int allowedScopes, int scope) {
 		return (allowedScopes & scope) != 0;
 	}
 
-	private static POM getDendency(List<POM> dependencies, String groupId, String artifactId) {
+	private static POM getDependency(List<POM> dependencies, String groupId, String artifactId) {
 		if (dependencies != null) {
+
 			for (POM pom: dependencies) {
-				if (pom.getGroupId().equals(groupId) && pom.getArtifactId().equals(artifactId)) return pom;
+				if (pom.getGroupId().equals(groupId) && pom.getArtifactId().equals(artifactId)) {
+					return pom;
+				}
+			}
+			for (POM pom: dependencies) {
+				try {
+					List<POM> dependencyManagement = pom.getDependencyManagement();
+					if (dependencyManagement != null) {
+						for (POM p: dependencyManagement) {
+							if (p.getGroupId().equals(groupId) && p.getArtifactId().equals(artifactId)) {
+								return p;
+							}
+						}
+					}
+				}
+				catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 		return null;
@@ -445,7 +471,7 @@ public final class MavenUtil {
 				}
 				if (gavso == null) continue;
 				POM p = POM.getInstance(localDirectory, current.getRepositories(), gavso.g, gavso.a, gavso.v, gavso.s, gavso.o, gavso.c, current.getDependencyScope(),
-						current.getDependencyScopeManagement(), log);
+						current.getDependencyScopeManagement(), false, log);
 				dependencies.add(p);
 			}
 		}
@@ -663,7 +689,6 @@ public final class MavenUtil {
 	}
 
 	public static Repository[] sort(Collection<Repository> repositories) {
-
 		// Convert collection to array for sorting
 		Repository[] result = repositories.toArray(new Repository[0]);
 		if (ranking.size() > 0) {

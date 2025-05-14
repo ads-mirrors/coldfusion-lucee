@@ -20,7 +20,7 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" {
 			it("test AWS library with createObject", function() {
 				var uri = createURI("/LDEV5457");
 				var result =_InternalRequest(template:"#uri#\ldev5457.cfm");
-				expect( result.filecontent ).toBe( "software.amazon.awssdk.auth.credentials.AwsBasicCredentials" );
+				expect( trim(result.filecontent) ).toBe( "software.amazon.awssdk.auth.credentials.AwsBasicCredentials" );
 			} );
 
 			it("test AWS library using createObject with a component", function() {

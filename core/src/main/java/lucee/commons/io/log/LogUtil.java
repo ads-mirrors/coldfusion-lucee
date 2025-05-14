@@ -228,7 +228,15 @@ public final class LogUtil {
 	}
 
 	public static void logGlobal(Config config, int level, String type, String msg) {
-		logGlobal(ConfigUtil.getCFMLEngineFactory(config), level, type, msg);
+		CFMLEngineFactory factory = null;
+		try {
+			factory = ConfigUtil.getCFMLEngineFactory(config);
+		}
+		catch (RuntimeException re) {
+			aprint.e(level + ":" + type + ":" + msg);
+			return;
+		}
+		logGlobal(factory, level, type, msg);
 	}
 
 	public static void logGlobal(CFMLEngineFactory factory, int level, String type, String msg) {
