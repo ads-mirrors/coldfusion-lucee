@@ -3,7 +3,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip=true {
 	function run( testResults , testBox ) {
 		describe( title="trigger tag ConcurrentModificationException ", body=function() {
 
-			it(title="torture the ", body = function( currentSpec ) {
+			it(title="constantly force the config to be reloaded", body = function( currentSpec ) {
 				SystemOutput("---------pre torture--------", true);
 				thread name="myBackgroundThread" action="run" {
 					SystemOutput("---------in torture--------", true);
@@ -15,7 +15,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip=true {
 							admin 
 								action="removeCacheConnection"
 								type="server"
-								password="webweb"
+								password="#request.serverAdminPassword#"
 								name="zac";
 							sleep(10);
 							c++;
