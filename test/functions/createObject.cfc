@@ -48,8 +48,6 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
                 expect( isObject(servlet) ).toBeTrue();
             });
             
-            /Users/mic/Projects/Lucee/Lucee5/loader/target/classes/railo/loader/servlet/CFMLServlet.class
-
 			it( title = "Checking the createObject(..,javasettings:{maven:...}) with jlama", body = function( currentSpec ) {
 				
 				if ( getJavaVersion() < 21) return;

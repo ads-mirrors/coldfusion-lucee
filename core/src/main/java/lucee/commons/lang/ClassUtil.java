@@ -287,7 +287,6 @@ public final class ClassUtil {
 		}
 
 		String msg = "cannot load class through its string name, because no definition for the class with the specified name [" + className + "] could be found";
-
 		if (exceptions.size() == 1) {
 			Throwable t = exceptions.iterator().next();
 			ClassException ce = new ClassException(msg);
@@ -295,15 +294,20 @@ public final class ClassUtil {
 			throw ce;
 		}
 
-		else if (exceptions.size() > 0) {
-			StringBuilder detail = new StringBuilder();
+		else if (exceptions.size() > 1) {
 			Iterator<Throwable> it = exceptions.iterator();
 			Throwable t;
+			Throwable cause = null;
 			while (it.hasNext()) {
 				t = it.next();
-				detail.append(t.getClass().getName()).append(':').append(t.getMessage()).append(';');
+				if (cause != null) {
+					ExceptionUtil.initCauseEL(t, cause);
+				}
+				cause = t;
 			}
-			throw new ClassException(msg + " caused by (" + detail.toString() + ")");
+			ClassException ce = new ClassException(msg + "; failed to load class with multiple classloaders, every cause in the stacktrace represents a classloader");
+			if (cause != null) ExceptionUtil.initCauseEL(ce, cause);
+			throw ce;
 		}
 		throw new ClassException(msg);
 	}
@@ -357,16 +361,29 @@ public final class ClassUtil {
 
 		String msg = "cannot load class through its string name, because no definition for the class with the specified name [" + className + "] could be found";
 
-		if (!exceptions.isEmpty()) {
-
-			StringBuilder detail = new StringBuilder();
+		// single exception
+		if (exceptions.size() == 1) {
+			Throwable t = exceptions.iterator().next();
+			ClassException ce = new ClassException(msg);
+			ExceptionUtil.initCauseEL(ce, t);
+			throw ce;
+		}
+		// multiple exceptions
+		else if (exceptions.size() > 1) {
 			Iterator<Throwable> it = exceptions.iterator();
 			Throwable t;
+			Throwable cause = null;
 			while (it.hasNext()) {
 				t = it.next();
-				detail.append(t.getClass().getName()).append(':').append(t.getMessage()).append(';');
+				if (cause != null) {
+					ExceptionUtil.initCauseEL(t, cause);
+				}
+				cause = t;
 			}
-			throw new ClassException(msg + " caused by (" + detail.toString() + ")");
+			ClassException ce = new ClassException(msg + "; failed to load class with multiple classloaders, every cause in the stacktrace represents a classloader");
+			if (cause != null) ExceptionUtil.initCauseEL(ce, cause);
+			throw ce;
+
 		}
 		throw new ClassException(msg);
 	}

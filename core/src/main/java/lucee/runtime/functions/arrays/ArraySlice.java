@@ -21,8 +21,6 @@
  */
 package lucee.runtime.functions.arrays;
 
-import java.util.List;
-
 import lucee.runtime.PageContext;
 import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
@@ -73,8 +71,7 @@ public final class ArraySlice extends BIF {
 		if (dimension < 2) {
 			if (to < 1) to = arr.size();
 			if (from > to) return rtn;
-			List subList = ((List) arr).subList(from - 1, to);
-			rtn = new ArrayImpl(subList.toArray());
+			rtn = new ArrayImpl(Caster.toList(arr).subList(from - 1, to).toArray());
 		}
 		else { // two and three-dimensional arrays need this because the above one losses dimension
 			int[] keys = arr.intKeys();

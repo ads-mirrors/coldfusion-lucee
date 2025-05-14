@@ -1,4 +1,4 @@
-component extends="org.lucee.cfml.test.LuceeTestCase" skip=true {
+component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 	function run( testResults , testBox ) {
 		describe( title="Test case LDEV-5581, duplicates in extensionList", body=function() {
@@ -16,6 +16,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip=true {
 					}
 				}
 
+				expect( q_ext.recordcount>0 ).toBeTrue( );
 				expect( dups ).toBe( 0, "found duplicate extensions in extensionList" );
 
 			});
