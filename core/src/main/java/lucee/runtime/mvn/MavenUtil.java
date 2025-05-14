@@ -256,7 +256,7 @@ public class MavenUtil {
 				o = pdm.getOptionalAsString();
 			}
 		}
-		if (o != null) s = resolvePlaceholders(current, o, properties);
+		if (o != null) o = resolvePlaceholders(current, o, properties);
 		return new GAVSO(g, a, v, s, o, null);
 		// p = POM.getInstance(localDirectory, g, a, v, s, o, current.getDependencyScope(),
 		// current.getDependencyScopeManagement());
@@ -389,9 +389,8 @@ public class MavenUtil {
 						}
 					}
 				}
-				catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				catch (IOException ioe) {
+					LogUtil.log(null, "mvn", ioe, Log.LEVEL_WARN, "application");
 				}
 			}
 		}
