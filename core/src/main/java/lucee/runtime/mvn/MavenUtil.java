@@ -437,9 +437,8 @@ public final class MavenUtil {
 						}
 					}
 				}
-				catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				catch (IOException ioe) {
+					LogUtil.log(null, "mvn", ioe, Log.LEVEL_WARN, "application");
 				}
 			}
 		}
