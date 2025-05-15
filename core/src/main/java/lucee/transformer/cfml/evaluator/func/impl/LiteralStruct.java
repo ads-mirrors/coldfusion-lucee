@@ -74,7 +74,7 @@ public class LiteralStruct implements FunctionEvaluator {
 
 				}
 				else {
-					throw new TemplateException(GENERAL_MSG);
+					throw new TemplateException(bif.getData().srcCode, arg.getEnd().line, arg.getEnd().column, GENERAL_MSG);
 				}
 
 				if (modified) {
