@@ -84,11 +84,11 @@ public final class TagUtil {
 		if (pc.getConfig() instanceof ConfigWebPro) {
 			ConfigWebPro cw = (ConfigWebPro) pc.getConfig();
 
-			List<TagLib> allTlds = new ArrayList();
+			List<TagLib> allTlds = new ArrayList<>();
 			allTlds.addAll(Arrays.asList(cw.getTLDs()));
 
 			for (TagLib tld: allTlds) {
-				tlt = tld.getTag(tag.getClass());
+				tlt = tld != null ? tld.getTag(tag.getClass()) : null;
 				if (tlt != null) break;
 			}
 		}

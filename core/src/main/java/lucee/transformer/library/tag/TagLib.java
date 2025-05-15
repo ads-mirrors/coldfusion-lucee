@@ -148,10 +148,7 @@ public class TagLib implements Cloneable, Lib {
 	}
 
 	public TagLibTag getTag(Class clazz) {
-		Iterator<TagLibTag> _tags = tags.values().iterator();
-		TagLibTag tlt;
-		while (_tags.hasNext()) {
-			tlt = _tags.next();
+		for (TagLibTag tlt: tags.values()) {
 			if (tlt.getTagClassDefinition().isClassNameEqualTo(clazz.getName(), true)) {
 				return tlt;
 			}
