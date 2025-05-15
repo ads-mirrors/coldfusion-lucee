@@ -28,10 +28,7 @@ import java.util.Map.Entry;
 
 import javax.servlet.jsp.tagext.Tag;
 
-import org.osgi.framework.BundleException;
-
 import lucee.commons.io.DevNullOutputStream;
-import lucee.commons.lang.ClassException;
 import lucee.commons.lang.ClassUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.Pair;
@@ -80,7 +77,8 @@ public class TagUtil {
 	// named on regular arguments]" = "invalid argument for
 	// function, only named arguments are allowed like struct(name:\"value\",name2:\"value2\")";
 
-	public static void setAttributeCollection(PageContext pc, Tag tag, MissingAttribute[] missingAttrs, Struct _attrs, int attrType) throws PageException {
+	public static void setAttributeCollection(final PageContext pc, final Tag tag, final MissingAttribute[] missingAttrs, final Struct _attrs, final int attrType)
+			throws PageException {
 
 		TagLibTag tlt = null;
 		Key k;
@@ -88,11 +86,11 @@ public class TagUtil {
 		if (pc.getConfig() instanceof ConfigWebPro) {
 			ConfigWebPro cw = (ConfigWebPro) pc.getConfig();
 
-			List<TagLib> allTlds = new ArrayList();
+			List<TagLib> allTlds = new ArrayList<>();
 			allTlds.addAll(Arrays.asList(cw.getTLDs()));
 
 			for (TagLib tld: allTlds) {
-				tlt = tld.getTag(tag.getClass());
+				tlt = tld != null ? tld.getTag(tag.getClass()) : null;
 				if (tlt != null) break;
 			}
 		}
