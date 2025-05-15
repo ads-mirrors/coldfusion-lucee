@@ -813,7 +813,7 @@ Error Output --->
 						<!--- Mailing List --->
 						<tr>
 							<td>
-								<a href="https://groups.google.com/group/lucee" target="_blank">#stText.Overview.Mailinglist#</a>
+								<a href="https://dev.lucee.org/" target="_blank">#stText.Overview.Mailinglist#</a>
 								<div class="comment">#stText.Overview.MailinglistDesc#</div>
 							</td>
 						</tr>
