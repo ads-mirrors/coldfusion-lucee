@@ -39,6 +39,7 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 import org.objectweb.asm.util.CheckClassAdapter;
 
+import coldfusion.xml.rpc.QueryBean;
 import lucee.aprint;
 import lucee.commons.digest.MD5;
 import lucee.commons.io.IOUtil;
@@ -46,20 +47,22 @@ import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
+import lucee.commons.lang.ClassUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.SerializableObject;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.component.Property;
 import lucee.runtime.config.Config;
-import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.engine.CFMLEngineImpl;
-import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
 import lucee.runtime.reflection.Reflector;
+import lucee.runtime.type.Array;
+import lucee.runtime.type.Query;
+import lucee.runtime.type.Struct;
 import lucee.runtime.type.dt.TimeSpanImpl;
 import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.type.util.ListUtil;
@@ -701,8 +704,18 @@ public final class ASMUtil {
 	 * @throws PageException
 	 */
 	public static Type toType(Class type, boolean axistype) throws PageException {
-		if (axistype) type = ((ConfigWebPro) ThreadLocalPageContext.getConfig()).getWSHandler().toWSTypeClass(type);
-		return Type.getType(type);
+		return Type.getType(axistype ? toAxisClass(type) : type);
+	}
+
+	private static Class toAxisClass(Class clazz) throws PageException {
+		if (clazz.isArray()) {
+			return ClassUtil.toArrayClass(toAxisClass(clazz.getComponentType()));
+		}
+		else if (Query.class == clazz) return QueryBean.class;
+		else if (Array.class == clazz) return Object[].class;
+		else if (Struct.class == clazz) return Map.class;
+
+		return clazz;
 	}
 
 	public static String createMD5(ASMProperty[] props) {
