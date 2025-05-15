@@ -31,7 +31,7 @@ public final class DummyWSHandler implements WSHandler {
 
 	@Override
 	public Class<?> toWSTypeClass(Class<?> clazz) {
-		throw notInstalledEL();
+		return clazz;
 	}
 
 	@Override
