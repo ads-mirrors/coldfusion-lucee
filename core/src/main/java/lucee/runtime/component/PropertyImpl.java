@@ -54,8 +54,15 @@ public final class PropertyImpl extends MemberSupport implements Property, ASMPr
 
 	private String ownerName;
 
+	private boolean axisType;
+
 	public PropertyImpl() {
+		this(true);
+	}
+
+	public PropertyImpl(boolean axisType) {
 		super(Component.ACCESS_REMOTE);
+		this.axisType = axisType;
 	}
 
 	@Override
@@ -68,6 +75,7 @@ public final class PropertyImpl extends MemberSupport implements Property, ASMPr
 		}
 	}
 
+	@Override
 	public Object getDefaultAsObject() {
 		return _default;
 	}
@@ -166,7 +174,7 @@ public final class PropertyImpl extends MemberSupport implements Property, ASMPr
 
 	@Override
 	public Type getASMType() throws PageException {
-		return ASMUtil.toType(ThreadLocalPageContext.get(), getType(), true);
+		return ASMUtil.toType(ThreadLocalPageContext.get(), getType(), axisType);
 	}
 
 	/**

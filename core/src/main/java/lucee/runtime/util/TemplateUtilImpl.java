@@ -37,7 +37,11 @@ public final class TemplateUtilImpl implements TemplateUtil {
 
 	@Override
 	public Class<?> getComponentPropertiesClass(PageContext pc, Component component) throws PageException {
-		return ComponentUtil.getComponentPropertiesClass(pc, component);
+		return ComponentUtil.getComponentPropertiesClass(pc, component, true);
+	}
+
+	public Class<?> getComponentPropertiesClass(PageContext pc, Component component, boolean axisType) throws PageException {
+		return ComponentUtil.getComponentPropertiesClass(pc, component, axisType);
 	}
 
 	@Override

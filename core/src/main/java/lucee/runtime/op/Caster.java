@@ -3808,7 +3808,7 @@ public final class Caster {
 		if (pc != null) {
 			try {
 				Component c = pc.loadComponent(type);
-				return ComponentUtil.getComponentPropertiesClass(pc, c);
+				return ComponentUtil.getComponentPropertiesClass(pc, c, false);
 			}
 			catch (PageException e) {
 				pe = e;
@@ -5266,24 +5266,24 @@ public final class Caster {
 		return str;
 	}
 
-	public static Pojo toPojo(Pojo pojo, Component comp, Set<Object> done) throws PageException {
+	public static Pojo toPojo(Pojo pojo, Component comp, Set<Object> done, boolean axisType) throws PageException {
 		PageContext pc = ThreadLocalPageContext.get();
 		try {
-			return _toPojo(pc, pojo, comp, done);
+			return _toPojo(pc, pojo, comp, done, axisType);
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);
 		}
 	}
 
-	private static Pojo _toPojo(PageContext pc, Pojo pojo, Component comp, Set<Object> done) throws PageException {// print.ds();System.exit(0);
+	private static Pojo _toPojo(PageContext pc, Pojo pojo, Component comp, Set<Object> done, boolean axisType) throws PageException {// print.ds();System.exit(0);
 		comp = ComponentSpecificAccess.toComponentSpecificAccess(Component.ACCESS_PRIVATE, comp);
 		ComponentScope scope = comp.getComponentScope();
 
 		// create Pojo
 		if (pojo == null) {
 			try {
-				pojo = (Pojo) ClassUtil.loadInstance(ComponentUtil.getComponentPropertiesClass(pc, comp));
+				pojo = (Pojo) ClassUtil.loadInstance(ComponentUtil.getComponentPropertiesClass(pc, comp, axisType));
 			}
 			catch (ClassException e) {
 				throw Caster.toPageException(e);
@@ -5297,21 +5297,21 @@ public final class Caster {
 		return pojo;
 	}
 
-	public static Pojo toPojo(Pojo pojo, Struct sct, Set<Object> done) throws PageException {
+	public static Pojo toPojo(Pojo pojo, Struct sct, Set<Object> done, boolean axisType) throws PageException {
 		PageContext pc = ThreadLocalPageContext.get();
 		try {
-			return _toPojo(pc, pojo, sct, done);
+			return _toPojo(pc, pojo, sct, done, axisType);
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);
 		}
 	}
 
-	private static Pojo _toPojo(PageContext pc, Pojo pojo, Struct sct, Set<Object> done) throws PageException {// print.ds();System.exit(0);
+	private static Pojo _toPojo(PageContext pc, Pojo pojo, Struct sct, Set<Object> done, boolean axisType) throws PageException {// print.ds();System.exit(0);
 		if (pojo == null) {
 			try {
 				PhysicalClassLoader cl = (PhysicalClassLoader) pc.getConfig().getRPCClassLoader(false);
-				pojo = (Pojo) ClassUtil.loadInstance(ComponentUtil.getStructPropertiesClass(pc, sct, cl));
+				pojo = (Pojo) ClassUtil.loadInstance(ComponentUtil.getStructPropertiesClass(pc, sct, cl, axisType));
 			}
 			catch (ClassException e) {
 				throw Caster.toPageException(e);

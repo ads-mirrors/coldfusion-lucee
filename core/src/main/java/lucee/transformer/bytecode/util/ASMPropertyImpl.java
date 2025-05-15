@@ -29,9 +29,11 @@ public final class ASMPropertyImpl implements ASMProperty {
 	private Class clazz;
 
 	public ASMPropertyImpl(Class type, String name) throws PageException {
-		this.type = ASMUtil.toType(type, true);
-		this.name = name;
-		this.clazz = type;
+		this(ASMUtil.toType(type, true), name);
+	}
+
+	public ASMPropertyImpl(Class type, String name, boolean axisType) throws PageException {
+		this(ASMUtil.toType(type, axisType), name);
 	}
 
 	public ASMPropertyImpl(Type type, String name) {

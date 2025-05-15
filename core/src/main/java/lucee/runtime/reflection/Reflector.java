@@ -459,8 +459,8 @@ public final class Reflector {
 			Struct sct = Caster.toStruct(src);
 			try {
 				Pojo pojo = (Pojo) ClassUtil.newInstance(trgClass);
-				if (sct instanceof Component) return Caster.toPojo(pojo, (Component) sct, new HashSet<Object>());
-				return Caster.toPojo(pojo, sct, new HashSet<Object>());
+				if (sct instanceof Component) return Caster.toPojo(pojo, (Component) sct, new HashSet<Object>(), false);
+				return Caster.toPojo(pojo, sct, new HashSet<Object>(), false);
 			}
 			catch (Throwable t) {
 				ExceptionUtil.rethrowIfNecessary(t);

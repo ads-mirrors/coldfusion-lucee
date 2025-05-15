@@ -41,6 +41,7 @@ import org.objectweb.asm.util.CheckClassAdapter;
 
 import coldfusion.xml.rpc.QueryBean;
 import lucee.aprint;
+import lucee.print;
 import lucee.commons.digest.MD5;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
@@ -568,7 +569,7 @@ public final class ASMUtil {
 		else adapter.invokeVirtual(type, method);
 	}
 
-	public static byte[] createPojo(String className, ASMProperty[] properties, Class parent, Class[] interfaces, String srcName) throws PageException {
+	public static byte[] createPojo(String className, ASMProperty[] properties, Class parent, Class[] interfaces, String srcName, boolean axisType) throws PageException {
 		className = className.replace('.', '/');
 		className = className.replace('\\', '/');
 		className = ListUtil.trim(className, "/");
@@ -597,7 +598,7 @@ public final class ASMUtil {
 		// Constructor
 		GeneratorAdapter adapter = new GeneratorAdapter(Opcodes.ACC_PUBLIC, CONSTRUCTOR_OBJECT, null, null, cw);
 		adapter.loadThis();
-		adapter.invokeConstructor(toType(parent, true), CONSTRUCTOR_OBJECT);
+		adapter.invokeConstructor(toType(parent, axisType), CONSTRUCTOR_OBJECT);
 		adapter.returnValue();
 		adapter.endMethod();
 
@@ -708,6 +709,7 @@ public final class ASMUtil {
 	}
 
 	private static Class toAxisClass(Class clazz) throws PageException {
+		print.ds("xxxxxxxx " + clazz.getName() + " xxxxxxxxxxxx");
 		if (clazz.isArray()) {
 			return ClassUtil.toArrayClass(toAxisClass(clazz.getComponentType()));
 		}

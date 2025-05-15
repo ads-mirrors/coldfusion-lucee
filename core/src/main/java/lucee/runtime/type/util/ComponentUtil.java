@@ -367,9 +367,10 @@ public final class ComponentUtil {
 	 * 
 	 * @throws PageException
 	 */
+	// TO NOT DELETE, USED IN AXIS
 	public static Class getClientComponentPropertiesClass(PageContext pc, String className, ASMProperty[] properties, Class extendsClass) throws PageException {
 		try {
-			return _getComponentPropertiesClass(pc, pc.getConfig(), className, properties, extendsClass);
+			return _getComponentPropertiesClass(pc, pc.getConfig(), className, properties, extendsClass, true);
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);
@@ -389,16 +390,17 @@ public final class ComponentUtil {
 	 * 
 	 * @throws PageException
 	 */
+	// TO NOT DELETE, USED IN AXIS
 	public static Class getComponentPropertiesClass(Config config, String className, ASMProperty[] properties, Class extendsClass) throws PageException {
 		try {
-			return _getComponentPropertiesClass(null, config, className, properties, extendsClass);
+			return _getComponentPropertiesClass(null, config, className, properties, extendsClass, true);
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);
 		}
 	}
 
-	private static Class _getComponentPropertiesClass(PageContext pc, Config secondChanceConfig, String className, ASMProperty[] properties, Class extendsClass)
+	private static Class _getComponentPropertiesClass(PageContext pc, Config secondChanceConfig, String className, ASMProperty[] properties, Class extendsClass, boolean axisType)
 			throws PageException, IOException, ClassNotFoundException {
 		String real = className.replace('.', '/');
 
@@ -424,7 +426,7 @@ public final class ComponentUtil {
 		}
 		// create file
 		if (extendsClass == null) extendsClass = Object.class;
-		byte[] barr = ASMUtil.createPojo(real, properties, extendsClass, new Class[] { Pojo.class }, null);
+		byte[] barr = ASMUtil.createPojo(real, properties, extendsClass, new Class[] { Pojo.class }, null, axisType);
 		boolean exist = classFile.exists();
 		ResourceUtil.touch(classFile);
 		IOUtil.copy(new ByteArrayInputStream(barr), classFile, true);
@@ -436,16 +438,26 @@ public final class ComponentUtil {
 
 	}
 
+	// TO NOT DELETE, USED IN AXIS
 	public static Class getComponentPropertiesClass(PageContext pc, Component component) throws PageException {
 		try {
-			return _getComponentPropertiesClass(pc, component);
+			return _getComponentPropertiesClass(pc, component, true);
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);
 		}
 	}
 
-	private static Class _getComponentPropertiesClass(PageContext pc, Component component) throws PageException, IOException, ClassNotFoundException {
+	public static Class getComponentPropertiesClass(PageContext pc, Component component, boolean axisType) throws PageException {
+		try {
+			return _getComponentPropertiesClass(pc, component, axisType);
+		}
+		catch (Exception e) {
+			throw Caster.toPageException(e);
+		}
+	}
+
+	private static Class _getComponentPropertiesClass(PageContext pc, Component component, boolean axisType) throws PageException, IOException, ClassNotFoundException {
 
 		ASMProperty[] props = ASMUtil.toASMProperties(component.getProperties(false, true, false, false));
 
@@ -481,7 +493,7 @@ public final class ComponentUtil {
 		}
 		//
 		// create file
-		byte[] barr = ASMUtil.createPojo(real, props, ext, new Class[] { Pojo.class }, component.getPageSource().getDisplayPath());
+		byte[] barr = ASMUtil.createPojo(real, props, ext, new Class[] { Pojo.class }, component.getPageSource().getDisplayPath(), axisType);
 		ResourceUtil.touch(classFile);
 		IOUtil.copy(new ByteArrayInputStream(barr), classFile, true);
 		cl = (PhysicalClassLoader) ((PageContextImpl) pc).getRPCClassLoader(true);
@@ -490,14 +502,23 @@ public final class ComponentUtil {
 
 	public static Class getStructPropertiesClass(PageContext pc, Struct sct, PhysicalClassLoader cl) throws PageException {
 		try {
-			return _getStructPropertiesClass(pc, sct, cl);
+			return _getStructPropertiesClass(pc, sct, cl, true);
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);
 		}
 	}
 
-	private static Class _getStructPropertiesClass(PageContext pc, Struct sct, PhysicalClassLoader cl) throws PageException, IOException, ClassNotFoundException {
+	public static Class getStructPropertiesClass(PageContext pc, Struct sct, PhysicalClassLoader cl, boolean axisType) throws PageException {
+		try {
+			return _getStructPropertiesClass(pc, sct, cl, axisType);
+		}
+		catch (Exception e) {
+			throw Caster.toPageException(e);
+		}
+	}
+
+	private static Class _getStructPropertiesClass(PageContext pc, Struct sct, PhysicalClassLoader cl, boolean axisType) throws PageException, IOException, ClassNotFoundException {
 		// create hash based on the keys of the struct
 		String hash = StructUtil.keyHash(sct);
 		char c = hash.charAt(0);
@@ -527,11 +548,11 @@ public final class ComponentUtil {
 		Entry<Key, Object> e;
 		while (it.hasNext()) {
 			e = it.next();
-			props.add(new ASMPropertyImpl(ASMUtil.toType(e.getValue() == null ? Object.class : Object.class/* e.getValue().getClass() */, true), e.getKey().getString()));
+			props.add(new ASMPropertyImpl(ASMUtil.toType(e.getValue() == null ? Object.class : Object.class/* e.getValue().getClass() */, axisType), e.getKey().getString()));
 		}
 
 		// create file
-		byte[] barr = ASMUtil.createPojo(real, props.toArray(new ASMProperty[props.size()]), Object.class, new Class[] { Pojo.class }, null);
+		byte[] barr = ASMUtil.createPojo(real, props.toArray(new ASMProperty[props.size()]), Object.class, new Class[] { Pojo.class }, null, axisType);
 
 		// create class file from bytecode
 		ResourceUtil.touch(classFile);
