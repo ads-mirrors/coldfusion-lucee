@@ -64,7 +64,7 @@ public class POM {
 
 		REPOSITORIES.add(REPOSITORY_MAVEN_CENTRAL);
 		REPOSITORIES.add(REPOSITORY_SONATYPE);
-		REPOSITORIES.add(REPOSITORY_JCENTER);
+		// REPOSITORIES.add(REPOSITORY_JCENTER);
 		// REPOSITORIES.add(REPOSITORY_APACHE);
 		// REPOSITORIES.add(REPOSITORY_GOOGLE);
 		// REPOSITORIES.add(REPOSITORY_SPRING);
@@ -130,6 +130,10 @@ public class POM {
 	private String hash;
 
 	private String checksum;
+
+	private boolean custom;
+
+	private boolean artifactDownloaded;
 
 	public static POM getInstance(Resource localDirectory, String groupId, String artifactId, String version, int dependencyScope, Log log) {
 		return getInstance(localDirectory, null, groupId, artifactId, version, null, null, null, dependencyScope, SCOPE_ALL, true, log);
@@ -221,7 +225,7 @@ public class POM {
 						throw ioe;
 					}
 					this.packaging = reader.getPackaging();
-					boolean custom = true;
+					custom = true;
 					this.artifactExtension = this.packaging;
 					if (artifactExtension == null || "bundle".equalsIgnoreCase(artifactExtension)) {
 						custom = false;
@@ -232,14 +236,6 @@ public class POM {
 					this.description = reader.getDescription();
 					this.url = reader.getURL();
 
-					if (this.artifactExtension != null && !"pom".equalsIgnoreCase(this.artifactExtension)) {
-						try {
-							MavenUtil.download(this, initRepositories, artifactExtension, log);
-						}
-						catch (IOException ioe) {
-							if (!custom) throw ioe;
-						}
-					}
 					isInitXML = true;
 				}
 			}
@@ -405,16 +401,27 @@ public class POM {
 		return hash;
 	}
 
-	Resource getArtifact(String type) {
-		return local(localDirectory, type);
-	}
-
-	Resource getArtifact(Resource directory, String type) {
-		return local(directory, type);
+	public void downloadArtifact() throws IOException {
+		synchronized (SystemUtil.createToken("downloadArtifact", id())) {
+			if (!artifactDownloaded) {
+				if (this.artifactExtension != null && !"pom".equalsIgnoreCase(this.artifactExtension)) {
+					try {
+						MavenUtil.download(this, initRepositories, artifactExtension, log);
+					}
+					catch (IOException ioe) {
+						if (!custom) throw ioe;
+					}
+				}
+				artifactDownloaded = true;
+			}
+		}
 	}
 
 	public Resource getArtifact() throws IOException {
 		initXML();
+		if (!artifactDownloaded) {
+			downloadArtifact();
+		}
 		if (artifactExtension == null) return null;
 		return local(localDirectory, artifactExtension);
 	}
@@ -460,13 +467,17 @@ public class POM {
 		return Boolean.TRUE.equals(Caster.toBoolean(optional, null));
 	}
 
-	private Resource local(Resource dir, String extension) {
+	Resource local(String extension) {
+		return local(localDirectory, extension);
+	}
+
+	Resource local(Resource dir, String extension) {
 		Resource parent = dir.getRealResource(groupId.replace('.', '/') + "/" + artifactId + "/" + version + "/");
 		if (!parent.isDirectory()) parent.mkdirs();
 		return parent.getRealResource(artifactId + "-" + version + "." + extension);
 	}
 
-	public URL getArtifact(String type, Collection<Repository> repositories) throws IOException {
+	public URL getArtifactX(String type, Collection<Repository> repositories) throws IOException {
 		if (repositories == null || repositories.isEmpty()) repositories = getRepositories();
 
 		StringBuilder sb = null;

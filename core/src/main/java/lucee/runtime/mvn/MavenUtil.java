@@ -158,12 +158,9 @@ public class MavenUtil {
 	public static List<POM> getDependencies(List<POMReader.Dependency> rawDependencies, POM current, POM parent, Map<String, String> properties, Resource localDirectory,
 			boolean management, Log log) throws IOException {
 		List<POM> dependencies = new ArrayList<>();
-		List<POM> parentDendencyManagement = null;
-
 		ExecutorService executor = ThreadUtil.createExecutorService(Runtime.getRuntime().availableProcessors());
 
 		if (parent != null) {
-			parentDendencyManagement = current.getDependencyManagement();
 			List<POM> tmp = parent.getDependencies();
 			if (tmp != null) {
 				for (POM pom: tmp) {
@@ -174,7 +171,7 @@ public class MavenUtil {
 		if (rawDependencies != null) {
 			List<Future<POM>> futures = new ArrayList<>();
 			for (POMReader.Dependency rd: rawDependencies) {
-				GAVSO gavso = getDependency(rd, parent, current, properties, parentDendencyManagement, management);
+				GAVSO gavso = getDependency(rd, current, properties, management);
 				if (gavso == null) continue;
 
 				Future<POM> future = executor.submit(() -> {
@@ -198,23 +195,23 @@ public class MavenUtil {
 		return dependencies;
 	}
 
-	public static GAVSO getDependency(POMReader.Dependency rd, POM parent, POM current, Map<String, String> properties, List<POM> parentDendencyManagement, boolean management)
-			throws IOException {
+	public static GAVSO getDependency(POMReader.Dependency rd, POM current, Map<String, String> properties, boolean management) throws IOException {
 		POM pdm = null;// TODO move out of here so multiple loop elements can profit
 		boolean loadedPDM = false;
 		String g = resolvePlaceholders(current, rd.groupId, properties);
 		String a = resolvePlaceholders(current, rd.artifactId, properties);
 		// scope
 		String s = rd.scope;
-		if (s == null && parentDendencyManagement != null) {
-			pdm = getDependency(parentDendencyManagement, g, a);
+		if (s != null) {
+			s = resolvePlaceholders(current, s, properties);
+		}
+		else {
+			pdm = getDependency(current.getDependencyManagement(), g, a);
 			loadedPDM = true;
 			if (pdm != null) {
 				s = pdm.getScopeAsString();
 			}
 		}
-		if (s != null) s = resolvePlaceholders(current, s, properties);
-
 		// scope allowed?
 		if (!allowed(management ? current.getDependencyScopeManagement() : current.getDependencyScope(), toScope(s, POM.SCOPE_COMPILE))) {
 			return null;
@@ -227,12 +224,12 @@ public class MavenUtil {
 		}
 		else {
 			if (!loadedPDM) {
-				pdm = getDependency(parentDendencyManagement, g, a);
+				pdm = getDependency(current.getDependencyManagement(), g, a);
 				loadedPDM = true;
 			}
 			if (pdm != null) {
 				v = pdm.getVersion();
-				v = resolvePlaceholders(pdm, v, pdm.getProperties());
+				// v = resolvePlaceholders(pdm, v, pdm.getProperties());
 			}
 
 			if (v == null) {
@@ -247,16 +244,19 @@ public class MavenUtil {
 
 		// optional
 		String o = rd.optional;
-		if (o == null && parentDendencyManagement != null) {
+		if (o != null) {
+			o = resolvePlaceholders(current, o, properties);
+		}
+		else {
 			if (!loadedPDM) {
-				pdm = getDependency(parentDendencyManagement, g, a);
+				pdm = getDependency(current.getDependencyManagement(), g, a);
 				loadedPDM = true;
 			}
 			if (pdm != null) {
 				o = pdm.getOptionalAsString();
 			}
 		}
-		if (o != null) o = resolvePlaceholders(current, o, properties);
+
 		return new GAVSO(g, a, v, s, o, null);
 		// p = POM.getInstance(localDirectory, g, a, v, s, o, current.getDependencyScope(),
 		// current.getDependencyScopeManagement());
@@ -415,7 +415,7 @@ public class MavenUtil {
 			for (Dependency rd: rawDependencies) {
 				GAVSO gavso = null;
 				try {
-					gavso = getDependency(rd, parent, current, properties, null, true);
+					gavso = getDependency(rd, current, properties, true);
 				}
 				catch (IOException ioe) {
 					LogUtil.log(null, "mvn", ioe, Log.LEVEL_WARN, "application");
@@ -435,25 +435,31 @@ public class MavenUtil {
 			modifed = false;
 			if (pom != null && value != null && value.contains("${project.")) {
 				String placeholder = value.substring(value.indexOf("${project.") + 10, value.indexOf("}"));
+				POM p = pom;
+				// parent?
+				if (placeholder.startsWith("parent.")) {
+					placeholder = placeholder.substring(7);
+					if (p.getParent() != null) p = p.getParent();
+				}
 
 				if ("groupId".equals(placeholder)) {
-					value = pom.getGroupId();
+					value = p.getGroupId();
 					modifed = true;
 				}
 				else if ("artifactId".equals(placeholder)) {
-					value = pom.getArtifactId();
+					value = p.getArtifactId();
 					modifed = true;
 				}
 				else if ("version".equals(placeholder)) {
-					value = pom.getVersion();
+					value = p.getVersion();
 					modifed = true;
 				}
-				else if ("scope".equals(placeholder) && pom.getScopeUnresolved() != null) {
-					value = pom.getScopeUnresolved();
+				else if ("scope".equals(placeholder) && p.getScopeUnresolved() != null) {
+					value = p.getScopeUnresolved();
 					modifed = true;
 				}
 				else if ("optional".equals(placeholder)) {
-					value = pom.getOptionaUnresolved();
+					value = p.getOptionaUnresolved();
 					modifed = true;
 				}
 				// TODO is there more?
@@ -500,7 +506,7 @@ public class MavenUtil {
 	}
 
 	public static void download(POM pom, Collection<Repository> repositories, String type, Log log) throws IOException {
-		Resource res = pom.getArtifact(type);
+		Resource res = pom.local(type);
 
 		// file is empty or does not exist
 		if (!res.isFile()) {
@@ -510,7 +516,7 @@ public class MavenUtil {
 
 					Resource localRepo = getLocalRepository();
 					if (localRepo != null) {
-						Resource tmp = pom.getArtifact(localRepo, type);
+						Resource tmp = pom.local(localRepo, type);
 						// found one in local maven
 						if (tmp.isFile()) {
 							tmp.copyTo(res, false);
@@ -609,14 +615,13 @@ public class MavenUtil {
 					}
 					catch (IOException ioe) {
 						createLastUpdated(res, info);
-						IOException ex = new IOException("Failed to download: " + pom + "");
+						IOException ex = new IOException("Failed to download [ " + pom + ":" + type + "]");
 						ExceptionUtil.initCauseEL(ex, ioe);
 						// MUST add again ResourceUtil.deleteEmptyFoldersInside(pom.getLocalDirectory());
 						throw ex;
 					}
-
 					createLastUpdated(res, info);
-					throw new IOException("Failed to download [" + pom + "] ");
+					throw new IOException("Failed to download [" + pom + ":" + type + "] from " + repositories.size() + " repositories");
 				}
 			}
 		}
