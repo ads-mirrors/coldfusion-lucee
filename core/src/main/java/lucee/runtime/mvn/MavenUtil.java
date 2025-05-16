@@ -38,10 +38,14 @@ import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.ResourceProvider;
 import lucee.commons.io.res.ResourcesImpl;
+import lucee.commons.io.res.util.ResourceUtil;
+import lucee.commons.lang.ClassUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.SerializableObject;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.net.HTTPUtil;
+import lucee.runtime.config.Config;
+import lucee.runtime.config.ConfigPro;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.mvn.POMReader.Dependency;
 import lucee.runtime.op.Caster;
@@ -998,5 +1002,50 @@ public final class MavenUtil {
 		else if ("sha512".equalsIgnoreCase(algorithm)) return "sha512:" + Hash.sha512(res);
 
 		throw new IOException("Invalid checksum algorithm '" + algorithm + "'. Only the following algorithms are supported: md5, sha1, sha256, sha512");
+	}
+
+	public static Struct getMetaData(Config config, Class clazz, Struct defaultValue) {
+		String path = ClassUtil.getSourcePathForClass(clazz, null);
+		if (path != null) {
+			Resource res = ResourceUtil.toResourceExisting(config, path, null);
+			if (res != null) {
+				// is Maven?
+				Resource mvnDir = ((ConfigPro) config).getMavenDir();
+				if (ResourceUtil.isChildOf(res, mvnDir)) {
+					String name = res.getName();
+					if (name.endsWith(".jar")) {
+
+						String pomName = name.substring(0, name.length() - 4) + ".pom";
+						Resource pom = res.getParentResource().getRealResource(pomName);
+						if (pom.isFile()) {
+							try {
+
+								Resource parent = res.getParentResource();
+								String v = parent.getName();
+
+								parent = parent.getParentResource();
+								String a = parent.getName();
+
+								parent = parent.getParentResource();
+								String g = parent.getName();
+								while (!mvnDir.equals(parent = parent.getParentResource())) {
+									g = parent.getName() + "." + g;
+
+								}
+								Struct data = new StructImpl(Struct.TYPE_LINKED);
+								data.setEL(KeyConstants._groupId, g);
+								data.setEL(KeyConstants._artifactId, a);
+								data.setEL(KeyConstants._version, v);
+								data.setEL(KeyConstants._location, res.getAbsolutePath());
+								return data;
+							}
+							catch (Exception e) {
+							}
+						}
+					}
+				}
+			}
+		}
+		return defaultValue;
 	}
 }
