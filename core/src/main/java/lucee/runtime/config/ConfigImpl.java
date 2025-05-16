@@ -3066,11 +3066,11 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 					if (listenerMode == -1) listenerMode = ApplicationListener.MODE_CURRENT2ROOT;
 					listener.setMode(listenerMode);
 
-					// singelton
+					// singleton
 					if (listener instanceof ModernAppListener) {
-						String strSi = SystemUtil.getSystemPropOrEnvVar("lucee.listener.singelton", null);
-						if (StringUtil.isEmpty(strSi)) strSi = SystemUtil.getSystemPropOrEnvVar("lucee.application.singelton", null);
-						if (StringUtil.isEmpty(strSi)) strSi = ConfigFactoryImpl.getAttr(root, new String[] { "listenerSingelton", "applicationSingelton" });
+						String strSi = SystemUtil.getSystemPropOrEnvVar("lucee.listener.singleton", null);
+						if (StringUtil.isEmpty(strSi)) strSi = SystemUtil.getSystemPropOrEnvVar("lucee.application.singleton", null);
+						if (StringUtil.isEmpty(strSi)) strSi = ConfigFactoryImpl.getAttr(root, new String[] { "listenerSingleton", "applicationSingleton"});
 						listener.setSingelton(Caster.toBooleanValue(strSi, false));
 					}
 					applicationListener = listener;

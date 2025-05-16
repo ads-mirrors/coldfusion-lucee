@@ -567,11 +567,11 @@ public final class ConfigAdmin {
 	}
 
 	protected static void updateMapping(ConfigPro config, String virtual, String physical, String archive, String primary, short inspect, int inspectTemplateIntervalSlow,
-			int inspectTemplateIntervalFast, boolean toplevel, int listenerMode, int listenerType, boolean listenerSingelton, boolean readonly, boolean reload)
+			int inspectTemplateIntervalFast, boolean toplevel, int listenerMode, int listenerType, boolean listenerSingleton, boolean readonly, boolean reload)
 			throws IOException, PageException, BundleException, ConverterException {
 		ConfigAdmin admin = new ConfigAdmin(config, null, true);
 		admin._updateMapping(virtual, physical, archive, primary, inspect, inspectTemplateIntervalSlow, inspectTemplateIntervalFast, toplevel, listenerMode, listenerType,
-				listenerSingelton, readonly);
+				listenerSingleton, readonly);
 		admin._store();
 		ConfigUtil.getConfigWebIfPossible(config).resetMappings();
 		if (reload) admin._reload();
@@ -699,10 +699,10 @@ public final class ConfigAdmin {
 	 * @throws SecurityException
 	 */
 	public void updateMapping(String virtual, String physical, String archive, String primary, short inspect, int inspectTemplateIntervalSlow, int inspectTemplateIntervalFast,
-			boolean toplevel, int listenerMode, int listenerType, Boolean listenerSingelton, boolean readOnly) throws ExpressionException, SecurityException {
+			boolean toplevel, int listenerMode, int listenerType, Boolean listenerSingleton, boolean readOnly) throws ExpressionException, SecurityException {
 		checkWriteAccess();
 		_updateMapping(virtual, physical, archive, primary, inspect, inspectTemplateIntervalSlow, inspectTemplateIntervalFast, toplevel, listenerMode, listenerType,
-				listenerSingelton, readOnly);
+				listenerSingleton, readOnly);
 	}
 
 	private void _updateMaven(GAVSO mvnEntry) throws PageException {
@@ -764,7 +764,7 @@ public final class ConfigAdmin {
 	}
 
 	private void _updateMapping(String virtual, String physical, String archive, String primary, short inspect, int inspectTemplateIntervalSlow, int inspectTemplateIntervalFast,
-			boolean toplevel, int listenerMode, int listenerType, Boolean listenerSingelton, boolean readOnly) throws ExpressionException, SecurityException {
+			boolean toplevel, int listenerMode, int listenerType, Boolean listenerSingleton, boolean readOnly) throws ExpressionException, SecurityException {
 
 		boolean hasAccess = ConfigUtil.hasAccess(config, SecurityManager.TYPE_MAPPING);
 		virtual = virtual.trim();
@@ -853,12 +853,12 @@ public final class ConfigAdmin {
 			el.remove("listenerMode");
 		}
 
-		// listener-singelton
-		if (listenerSingelton != null) {
-			el.setEL("listenerSingelton", listenerSingelton);
+		// listener-singleton
+		if (listenerSingleton != null) {
+			el.setEL("listenerSingleton", listenerSingleton);
 		}
-		else if (el.containsKey("listenerSingelton")) {
-			el.remove("listenerSingelton");
+		else if (el.containsKey("listenerSingleton")) {
+			el.remove("listenerSingleton");
 		}
 
 		// others
@@ -2922,7 +2922,7 @@ public final class ConfigAdmin {
 		else rem(root, "applicationTimeout");
 	}
 
-	public void updateApplicationListener(String type, String mode, Boolean singelton) throws SecurityException {
+	public void updateApplicationListener(String type, String mode, Boolean singleton) throws SecurityException {
 		checkWriteAccess();
 		boolean hasAccess = ConfigUtil.hasAccess(config, SecurityManager.TYPE_SETTING);
 
@@ -2930,8 +2930,8 @@ public final class ConfigAdmin {
 
 		root.setEL("listenerType", type.toLowerCase().trim());
 		root.setEL("listenerMode", mode.toLowerCase().trim());
-		if (singelton != null) root.setEL(KeyConstants._listenerSingelton, singelton);
-		else root.removeEL(KeyConstants._listenerSingelton);
+		if (singleton != null) root.setEL(KeyConstants._listenerSingleton, singleton);
+		else root.removeEL(KeyConstants._listenerSingleton);
 	}
 
 	public void updateCachedWithin(int type, Object value) throws SecurityException, ApplicationException {
@@ -4615,7 +4615,7 @@ public final class ConfigAdmin {
 		String type = null, virtual = null, name = null;
 		boolean readOnly, topLevel, hidden, physicalFirst;
 		short inspect;
-		Boolean singelton;
+		Boolean singleton;
 		int listMode, listType, inspectTemplateIntervalSlow, inspectTemplateIntervalFast;
 		InputStream is = null;
 		ZipFile file = null;
@@ -4642,7 +4642,7 @@ public final class ConfigAdmin {
 
 			listMode = ConfigUtil.toListenerMode(StringUtil.unwrap(attr.getValue("mapping-listener-mode")), -1);
 			listType = ConfigUtil.toListenerType(StringUtil.unwrap(attr.getValue("mapping-listener-type")), -1);
-			singelton = Caster.toBoolean(StringUtil.unwrap(attr.getValue("mapping-listener-singelton")), null);
+			singleton = Caster.toBoolean(StringUtil.unwrap(attr.getValue("mapping-listener-singleton")), null);
 			inspect = ConfigUtil.inspectTemplate(StringUtil.unwrap(attr.getValue("mapping-inspect")), Config.INSPECT_UNDEFINED);
 			if (inspect == Config.INSPECT_UNDEFINED) {
 				Boolean trusted = Caster.toBoolean(StringUtil.unwrap(attr.getValue("mapping-trusted")), null);
@@ -4684,7 +4684,7 @@ public final class ConfigAdmin {
 			ResourceUtil.moveTo(archive, trgFile, true);
 			logger.log(Log.LEVEL_INFO, "archive", "Add " + type + " mapping [" + virtual + "] with archive [" + trgFile.getAbsolutePath() + "]");
 			if ("regular".equalsIgnoreCase(type)) _updateMapping(virtual, null, trgFile.getAbsolutePath(), "archive", inspect, inspectTemplateIntervalSlow,
-					inspectTemplateIntervalFast, topLevel, listMode, listType, singelton, readOnly);
+					inspectTemplateIntervalFast, topLevel, listMode, listType, singleton, readOnly);
 			else if ("cfc".equalsIgnoreCase(type))
 				_updateComponentMapping(virtual, null, trgFile.getAbsolutePath(), "archive", inspect, inspectTemplateIntervalSlow, inspectTemplateIntervalFast);
 			else if ("ct".equalsIgnoreCase(type))
@@ -5162,7 +5162,7 @@ public final class ConfigAdmin {
 
 				String virtual, physical, archive, primary;
 				short inspect;
-				Boolean singelton;
+				Boolean singleton;
 				int lmode, ltype, inspectTemplateIntervalSlow, inspectTemplateIntervalFast;
 				boolean toplevel, readonly;
 				while (itl.hasNext()) {
@@ -5199,15 +5199,15 @@ public final class ConfigAdmin {
 					if (StringUtil.isEmpty(strLType, true)) strLType = map.get("listenerType");
 					ltype = ConfigUtil.toListenerType(strLType, -1);
 
-					// singelton
-					String strSingelton = map.get("listener-singelton");
-					if (StringUtil.isEmpty(strSingelton, true)) strSingelton = map.get("listenerSingelton");
-					if (StringUtil.isEmpty(strSingelton, true)) strSingelton = map.get("listenersingelton");
-					singelton = Caster.toBoolean(strSingelton, null);
+					// singleton
+					String strSingleton = map.get("listener-singleton");
+					if (StringUtil.isEmpty(strSingleton, true)) strSingleton = map.get("listenerSingleton");
+					if (StringUtil.isEmpty(strSingleton, true)) strSingleton = map.get("listenersingleton");
+					singleton = Caster.toBoolean(strSingleton, null);
 
 					toplevel = Caster.toBooleanValue(map.get("toplevel"), false);
 					readonly = Caster.toBooleanValue(map.get("readonly"), false);
-					_updateMapping(virtual, physical, archive, primary, inspect, inspectTemplateIntervalSlow, inspectTemplateIntervalFast, toplevel, lmode, ltype, singelton,
+					_updateMapping(virtual, physical, archive, primary, inspect, inspectTemplateIntervalSlow, inspectTemplateIntervalFast, toplevel, lmode, ltype, singleton,
 							readonly);
 					ConfigUtil.getConfigWebIfPossible(config).resetMappings();
 					reloadNecessary = true;

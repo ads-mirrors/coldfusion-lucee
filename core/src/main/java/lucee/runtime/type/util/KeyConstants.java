@@ -3044,6 +3044,7 @@ public final class KeyConstants {
 	public static final Key _isCaseSensitive = KeyImpl._const("isCaseSensitive");
 	public static final Key _isAttributesSupported = KeyImpl._const("isAttributesSupported");
 	public static final Key _isModeSupported = KeyImpl._const("isModeSupported");
+	public static final Key _listenerSingleton = KeyImpl._const("listenerSingleton");
 	public static final Key _listenerSingelton = KeyImpl._const("listenerSingelton");
 	public static final Key _origin = KeyImpl._const("origin");
 	public static final Key _captcha = KeyImpl._const("captcha");

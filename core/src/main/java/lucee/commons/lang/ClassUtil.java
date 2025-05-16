@@ -249,11 +249,13 @@ public final class ClassUtil {
 	 */
 	public static Class loadClass(PageContext pc, String className) throws ClassException {
 		Set<Throwable> exceptions = new HashSet<Throwable>();
+		Class clazz;
 		// OSGI env
-		Class clazz = _loadClass(new OSGiBasedClassLoading(), className, null, exceptions);
-		if (clazz != null) {
-			return clazz;
-		}
+		/*
+		 * Class clazz = _loadClass(new OSGiBasedClassLoading(), className, null, exceptions); if (clazz !=
+		 * null) { return clazz; }
+		 */
+
 		// no ThreadLocalPageContext !!!
 		if (pc instanceof PageContextImpl) {
 			ClassLoader cl;

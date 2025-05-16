@@ -66,12 +66,12 @@
     </build>
 
 	<dependencies>
-   <!-- temp disable until we have a 7 release we can link <dependency>
+   <dependency>
       <groupId>org.lucee</groupId>
       <artifactId>lucee</artifactId>
-      <version>6.1.1.118</version>
+      <version>7.0.0.211-BETA</version>
       <scope>compile</scope>
-    </dependency>-->
+    </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.framework</artifactId>

@@ -2082,7 +2082,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 				getString("admin", action, "primary"), ConfigUtil.inspectTemplate(getString("inspect", ""), ConfigPro.INSPECT_UNDEFINED),
 				getInt("inspectTemplateIntervalSlow", ConfigPro.INSPECT_INTERVAL_UNDEFINED), getInt("inspectTemplateIntervalFast", ConfigPro.INSPECT_INTERVAL_UNDEFINED),
 				Caster.toBooleanValue(getString("toplevel", "true")), ConfigUtil.toListenerMode(getString("listenerMode", ""), -1),
-				ConfigUtil.toListenerType(getString("listenerType", ""), -1), getBool("listenerSingelton", null), Caster.toBooleanValue(getString("readonly", "false"))
+				ConfigUtil.toListenerType(getString("listenerType", ""), -1), getBool("listenerSingleton", null), Caster.toBooleanValue(getString("readonly", "false"))
 
 		);
 		store();
@@ -5033,7 +5033,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	}
 
 	private void doUpdateApplicationListener() throws PageException {
-		admin.updateApplicationListener(getString("admin", action, "listenerType"), getString("admin", action, "listenerMode"), getBool("listenerSingelton", null));
+		admin.updateApplicationListener(getString("admin", action, "listenerType"), getString("admin", action, "listenerMode"), getBool("listenerSingleton", null));
 		admin.updateApplicationPathTimeout(getTimespan("admin", action, "applicationPathTimeout"));
 		store();
 		ConfigUtil.getConfigServerImpl(config).resetApplicationListener().resetApplicationPathCacheTimeout();
@@ -5140,7 +5140,7 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 		AppListenerSupport appListener = (AppListenerSupport) config.getApplicationListener();
 		sct.set("type", AppListenerUtil.toStringType(appListener));
 		sct.set("mode", AppListenerUtil.toStringMode(appListener.getMode()));
-		sct.set("singelton", appListener.isSingelton());
+		sct.set("singleton", appListener.isSingelton());
 
 		sct.set("applicationPathTimeout", TimeSpanImpl.fromMillis(config.getApplicationPathCacheTimeout()));
 		// replaced with encoding outputsct.set("defaultencoding", config.get DefaultEncoding());
