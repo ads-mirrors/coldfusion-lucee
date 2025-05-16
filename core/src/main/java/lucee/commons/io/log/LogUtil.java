@@ -233,7 +233,7 @@ public final class LogUtil {
 			factory = ConfigUtil.getCFMLEngineFactory(config);
 		}
 		catch (RuntimeException re) {
-			aprint.e(level + ":" + type + ":" + msg);
+			aprint.e(levelToString(level, "unknown") + ":" + type + ":" + msg);
 			return;
 		}
 		logGlobal(factory, level, type, msg);
