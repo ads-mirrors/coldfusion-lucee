@@ -12,8 +12,9 @@
 						.getPrefix();
 					} catch ( any e){
 						var httpResponse = e.message;
+						if(httpResponse=="503 Service Temporarily Unavailable") return;
 						if(httpResponse!="408 Request Time-out") rethrow;
-					}
+					} 
 					expect(httpResponse).toBe("408 Request Time-out");
 				});
 
