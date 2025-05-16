@@ -2,7 +2,17 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )" # get the path to the current folder
 
-JAVA_PATH="/usr/lib/jvm/java-21-openjdk/bin"
+# Dynamically find Java 11 installation
+JAVA_HOME=$(/usr/libexec/java_home -v 11)
+JAVA_PATH="$JAVA_HOME/bin"
+
+# Check if Java 11 was found
+if [ -z "$JAVA_HOME" ]; then
+  echo "Error: Java 11 not found on this system"
+  exit 1
+fi
+
+echo "Using Java 11 at: $JAVA_PATH"
 
 # compile the class
 $JAVA_PATH/javac -d . TestInterface.java
