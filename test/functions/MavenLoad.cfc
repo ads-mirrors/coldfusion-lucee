@@ -73,7 +73,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 						"version" : "1.2.11"
 					}
 				]));
-				expect(l).toBe(8);
+				expect(l).toBe(9);
 			});
 
 			it(title="load org.hamcrest", body=function( currentSpec ) {
