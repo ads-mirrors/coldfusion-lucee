@@ -367,6 +367,7 @@ public final class PageContextImpl extends PageContext {
 
 	private static final boolean READ_CFID_FROM_URL;
 	private static final String READ_CFID_FROM_URL_LOG;
+	private static final boolean INHERIT_JAVA_SETTINGS = false;
 	private static AtomicInteger _idCounter = new AtomicInteger(1);
 	private long lastTimeoutNoAction;
 
@@ -3911,40 +3912,29 @@ public final class PageContextImpl extends PageContext {
 		return ormSession;
 	}
 
-	public boolean hasComponentCustomClassloading() {
-		Component ac = getActiveComponent();
-		if (ac instanceof ComponentImpl) {
-			return ((ComponentImpl) ac).hasJavaSettings(this);
-		}
-		return false;
-	}
-
 	public ClassLoader getRPCClassLoader() throws IOException {
-		return getRPCClassLoader(false, (JavaSettings) null, true);
+		return getRPCClassLoader(false, (JavaSettings) null);
 	}
 
 	public ClassLoader getRPCClassLoader(boolean reload) throws IOException {
-		return getRPCClassLoader(reload, (JavaSettings) null, true);
+		return getRPCClassLoader(reload, (JavaSettings) null);
 	}
 
 	public ClassLoader getRPCClassLoader(JavaSettings customJS) throws IOException {
-		return getRPCClassLoader(false, customJS, true);
+		return getRPCClassLoader(false, customJS);
 	}
 
 	public ClassLoader getRPCClassLoader(boolean reload, JavaSettings customJS) throws IOException {
-		return getRPCClassLoader(reload, customJS, true);
-	}
+		ClassLoader cl = getApplicationContext().getRPCClassLoader();
 
-	public ClassLoader getRPCClassLoader(boolean reload, JavaSettings customJS, boolean includeCore) throws IOException {
-		ClassLoader cl = null;
 		Component ac = getActiveComponent();
 		if (ac instanceof ComponentImpl) {
 			JavaSettings js = ((ComponentImpl) ac).getJavaSettings(this);
 			if (js != null) {
-				cl = config.getRPCClassLoader(reload, js, includeCore ? SystemUtil.getCombinedClassLoader() : ClassLoader.getPlatformClassLoader());
+				if (INHERIT_JAVA_SETTINGS) cl = config.getRPCClassLoader(reload, js, cl);
+				else cl = config.getRPCClassLoader(reload, js, null);
 			}
 		}
-		if (cl == null) cl = getApplicationContext().getRPCClassLoader();
 
 		if (customJS != null) {
 			cl = config.getRPCClassLoader(reload, customJS, cl);
