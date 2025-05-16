@@ -127,13 +127,19 @@ public class MavenInfo implements Function {
 			optional = Caster.toBoolean(strOptional);
 		}
 		if (!includeOptional && Boolean.TRUE.equals(optional)) return;
-		// local resource
-		Resource jar = pom.getArtifact("jar");
 
+		// local resource
+		Resource jar = null;
+		try {
+			jar = pom.getArtifact("jar");
+		}
+		catch (IOException ioe) {
+
+		}
 		// checksum
 		String checksum = pom.getChecksum();
 		if (StringUtil.isEmpty(checksum)) {
-			checksum = jar.isFile() ? MavenUtil.createChecksum(jar, "md5") : "";
+			checksum = jar != null && jar.isFile() ? MavenUtil.createChecksum(jar, "md5") : "";
 		}
 
 		int row = qry.addRow();
@@ -144,6 +150,6 @@ public class MavenInfo implements Function {
 		qry.setAt(KeyConstants._optional, row, optional);
 		qry.setAt(KeyConstants._checksum, row, checksum);
 		qry.setAt(KeyConstants._url, row, pom.getArtifactAsURL("jar", null, validate).toExternalForm());
-		qry.setAt(KeyConstants._path, row, jar.toString());
+		qry.setAt(KeyConstants._path, row, jar != null ? jar.toString() : "");
 	}
 }

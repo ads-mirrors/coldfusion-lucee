@@ -557,7 +557,7 @@ public final class MavenUtil {
 		}, true).start();
 	}
 
-	public static void download(POM pom, Collection<Repository> repositories, String type, Log log) throws IOException {
+	public static Resource download(POM pom, Collection<Repository> repositories, String type, Log log) throws IOException {
 		Resource res = pom.local(type);
 
 		// file is empty or does not exist
@@ -572,7 +572,7 @@ public final class MavenUtil {
 						// found one in local maven
 						if (tmp.isFile()) {
 							tmp.copyTo(res, false);
-							return;
+							return res;
 						}
 					}
 
@@ -584,7 +584,7 @@ public final class MavenUtil {
 						if ((lastUpdated.lastModified() + ARTIFACT_UNAVAILABLE_CACHE_DURATION) < System.currentTimeMillis()) {
 							lastUpdated.remove(true);
 							download(pom, repositories, type, log);
-							return;
+							return res;
 						}
 						throw new IOException("Failed to download [" + pom + "] ");
 					}
@@ -643,7 +643,7 @@ public final class MavenUtil {
 											rank = new AtomicInteger(1);
 											ranking.put(r, rank);
 										}
-										return;
+										return res;
 									}
 								}
 								else {
@@ -677,6 +677,7 @@ public final class MavenUtil {
 				}
 			}
 		}
+		return res;
 	}
 
 	private static StringBuilder createInfo() {

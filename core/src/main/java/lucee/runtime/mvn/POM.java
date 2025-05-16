@@ -417,6 +417,14 @@ public final class POM {
 		return local(localDirectory, artifactExtension);
 	}
 
+	public Resource getArtifact(String ext) throws IOException {
+		if (ext == null || ext.equalsIgnoreCase(artifactExtension)) {
+			return getArtifact();
+		}
+		initXML();
+		return MavenUtil.download(this, initRepositories, ext, log);
+	}
+
 	public boolean isInit() {
 		return isInit;
 	}

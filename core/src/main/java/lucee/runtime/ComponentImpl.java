@@ -264,7 +264,7 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 
 	public boolean hasJavaSettings(PageContext pc) {
 		try {
-			return this.cp.getJavaSettings(pc, properties) != null;
+			return getJavaSettings(pc) != null;
 		}
 		catch (IOException ioe) {
 			return false;
