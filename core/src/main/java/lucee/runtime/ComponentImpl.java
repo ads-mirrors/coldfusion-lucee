@@ -262,6 +262,15 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 		return this.cp.getJavaSettings();
 	}
 
+	public boolean hasJavaSettings(PageContext pc) {
+		try {
+			return this.cp.getJavaSettings(pc, properties) != null;
+		}
+		catch (IOException ioe) {
+			return false;
+		}
+	}
+
 	@Override
 	public Collection duplicate(boolean deepCopy) {
 		ComponentImpl top = _duplicate(deepCopy, true);

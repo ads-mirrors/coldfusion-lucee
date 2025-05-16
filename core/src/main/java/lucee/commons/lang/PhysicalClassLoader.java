@@ -87,6 +87,8 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 
 	private String birthplace;
 
+	public final String id;
+
 	private static final AtomicLong counter = new AtomicLong(0);
 	private static long _start = 0L;
 	private static String start = Long.toString(_start, Character.MAX_RADIX);
@@ -129,10 +131,13 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 	}
 
 	public static PhysicalClassLoader getRPCClassLoader(Config c, JavaSettings js, boolean reload, ClassLoader parent) throws IOException {
-
 		String key = js == null ? "orphan" : ((JavaSettingsImpl) js).id();
-
+		if (parent != null) {
+			if (parent instanceof PhysicalClassLoader) key += ":" + ((PhysicalClassLoader) parent).id;
+			else key += ":" + parent.hashCode();
+		}
 		PhysicalClassLoader rpccl = reload ? null : classLoaders.get(key);
+
 		if (rpccl == null) {
 			synchronized (SystemUtil.createToken("PhysicalClassLoader", key)) {
 				rpccl = reload ? null : classLoaders.get(key);
@@ -188,7 +193,6 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 		this.addionalClassLoader = addionalClassLoader;
 		this.birthplace = ExceptionUtil.getStacktrace(new Throwable(), false);
 		this.pageSourcePool = pageSourcePool;
-		// ClassLoader resCL = parent!=null?parent:config.getResourceClassLoader(null);
 
 		// check directory
 		if (!directory.exists()) directory.mkdirs();
@@ -196,6 +200,15 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 		if (!directory.canRead()) throw new IOException("Access denied to [" + directory + "] directory");
 		this.directory = directory;
 		this.rpc = rpc;
+
+		StringBuilder sb = new StringBuilder();
+		sb.append(directory);
+		if (resources != null) {
+			for (Resource r: resources) {
+				sb.append(';').append(r);
+			}
+		}
+		id = HashUtil.create64BitHashAsString(sb.toString());
 	}
 
 	public String getBirthplace() {
