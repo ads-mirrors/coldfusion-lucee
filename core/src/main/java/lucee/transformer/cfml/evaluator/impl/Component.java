@@ -18,15 +18,20 @@
  */
 package lucee.transformer.cfml.evaluator.impl;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import lucee.print;
 import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.ExceptionUtil;
+import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageSource;
 import lucee.runtime.config.Constants;
 import lucee.runtime.type.util.ComponentUtil;
+import lucee.runtime.type.util.ListUtil;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.Page;
 import lucee.transformer.bytecode.Statement;
@@ -167,14 +172,88 @@ public class Component extends EvaluatorSupport {
 		}
 
 		// implements
-		if (isComponent) {
-			attr = tag.getAttribute("implements");
-			if (attr != null) {
-				Expression expr = tag.getFactory().toExprString(attr.getValue());
-				if (!(expr instanceof LitString))
-					throw new EvaluatorException("Attribute [implements] of the tag [" + tlt.getFullName() + "], must contain a literal string value");
+		attr = tag.getAttribute("implements");
+		if (attr != null) {
+			Expression expr = tag.getFactory().toExprString(attr.getValue());
+			if (!(expr instanceof LitString)) throw new EvaluatorException("Attribute [implements] of the tag [" + tlt.getFullName() + "], must contain a literal string value");
+			print.e("has implments!");
+			LitString ls = (LitString) expr;
+			String raw = ls.getString();
+			print.e("raw: " + raw);
+			if (!StringUtil.isEmpty(raw, true)) {
+				String[] arr = ListUtil.listToStringArray(raw.trim(), ',');
+				print.e(arr);
+				Set<String> implementsJava = null;
+				Set<String> implementsCFML = null;
+				for (String str: arr) {
+					if (StringUtil.isEmpty(str, true)) continue;
+					str = str.trim();
+					// java
+					if (str.startsWith("java:") || str.startsWith("java :") || str.startsWith("java	:")) {
+						int index = str.indexOf(':');
+						str = str.substring(index + 1).trim();
+						if (implementsJava == null) implementsJava = new HashSet<>();
+						implementsJava.add(str);
+						continue;
+					}
+
+					if (str.startsWith("cfml:") || str.startsWith("cfml :") || str.startsWith("cfml	:")) {
+						int index = str.indexOf(':');
+						str = str.substring(index + 1).trim();
+						if (implementsCFML == null) implementsCFML = new HashSet<>();
+						implementsCFML.add(str);
+						continue;
+					}
+
+					// no explicit type we take as CFML
+					if (implementsCFML == null) implementsCFML = new HashSet<>();
+					implementsCFML.add(str);
+				}
+				print.e(implementsCFML);
+				print.e(implementsJava);
+				if (implementsCFML != null || implementsJava != null) {
+					// no cfml (anymore)
+					if (implementsCFML == null || implementsCFML.size() == 0) {
+						tag.removeAttribute("implements");
+					}
+					// update CFML
+					else {
+						print.e("implements: " + implementsCFML.toString());
+
+						print.e("--- implements:");
+						print.e((implementsCFML));
+						print.e(toString(implementsCFML));
+						tag.addAttribute(new Attribute(false, "implements", tag.getFactory().createLitString(toString(implementsCFML)), "string"));
+					}
+
+					// java
+					if (implementsJava != null && implementsJava.size() > 0) {
+						Attribute jattr = tag.getAttribute("implementsJava");
+						if (jattr != null) {
+							Expression jexpr = tag.getFactory().toExprString(jattr.getValue());
+							if (!(jexpr instanceof LitString))
+								throw new EvaluatorException("Attribute [implementsJava] of the tag [" + tlt.getFullName() + "], must contain a literal string value");
+							LitString jls = (LitString) jexpr;
+							String tmp = jls.getString();
+							if (!StringUtil.isEmpty(tmp, true)) {
+								for (String s: ListUtil.listToStringArray(tmp.trim(), ',')) {
+									if (!StringUtil.isEmpty(s, true)) {
+										implementsJava.add(s.trim());
+									}
+								}
+							}
+						}
+						print.e("--- implementsJava:");
+						print.e(implementsJava);
+						print.e(toString(implementsJava));
+
+						tag.addAttribute(new Attribute(false, "implementsJava", tag.getFactory().createLitString(toString(implementsJava)), "string"));
+					}
+				}
 			}
+
 		}
+
 		// modifier
 		if (isComponent) {
 			attr = tag.getAttribute("modifier");
@@ -188,6 +267,17 @@ public class Component extends EvaluatorSupport {
 						"Value [" + ls.getString() + "] from attribute [modifier] of the tag [" + tlt.getFullName() + "] is invalid, valid values are [none, abstract, final]");
 			}
 		}
+	}
+
+	private String toString(Set<String> set) {
+		StringBuilder sb = new StringBuilder();
+		if (set != null) {
+			for (String s: set) {
+				if (sb.length() > 0) sb.append(',');
+				sb.append(s.trim());
+			}
+		}
+		return sb.toString();
 	}
 
 	private boolean isMainComponent(Page page, TagCIObject comp) {
