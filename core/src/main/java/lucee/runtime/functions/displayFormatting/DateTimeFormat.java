@@ -167,13 +167,6 @@ public final class DateTimeFormat extends BIF {
 			switch (c) {
 			// max 1
 			case 'W':
-				if (!inside) {
-					if (!hasAlready(sb, c, 2)) sb.append('w');
-				}
-				else {
-					sb.append(c);
-				}
-				break;
 			case 'a':
 			case 'F':
 				if (!inside) {
