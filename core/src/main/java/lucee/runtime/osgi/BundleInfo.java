@@ -37,6 +37,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 
 import lucee.commons.io.IOUtil;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.type.file.FileResource;
 import lucee.commons.lang.ExceptionUtil;
@@ -68,6 +69,7 @@ public class BundleInfo implements Serializable {
 	private String requireBundle;
 	private String fragementHost;
 	private Map<String, Object> headers;
+	private boolean valid;
 
 	private Map<String, PackageDefinition> exportPackageAsMap;
 	private static Map<String, BundleInfo> bundles = new HashMap<String, BundleInfo>();
@@ -117,6 +119,40 @@ public class BundleInfo implements Serializable {
 			fragementHost = attrs.getValue("Fragment-Host");
 
 			headers = createHeaders(attrs);
+
+			// is valid bundle?
+			boolean valid;
+			try {
+				// no name or version = not valid
+				if (getSymbolicName() == null || getVersion() == null) {
+					valid = false;
+				}
+				// has exportPackage or is a fragment = valid
+				else if (!StringUtil.isEmpty(exportPackage, true) || !StringUtil.isEmpty(fragementHost, true)) {
+					valid = true;
+				}
+				// has no exportPackage, fine wjhen it has other files than just class files or has no class files
+				// at all
+				else {
+					valid = true;
+					if (containsOnlyClassFiles(jar)) {
+						IOException ioe = new IOException("Invalid OSGi bundle structure in [" + file.getName() + "]: "
+								+ "This bundle contains only Java class files but does not declare any 'Export-Package' entries in its manifest. "
+								+ "According to OSGi specifications, bundles that contain classes intended for use by other bundles must explicitly export their packages. "
+								+ "Please add appropriate 'Export-Package' declarations to the MANIFEST.MF file.");
+						LogUtil.log("bundle", ioe);
+						throw ioe;
+
+					}
+
+				}
+
+			}
+			catch (Throwable t) {
+				ExceptionUtil.rethrowIfNecessary(t);
+				valid = false;
+			}
+			this.valid = valid;
 		}
 		finally {
 			IOUtil.closeEL(jar);
@@ -124,12 +160,47 @@ public class BundleInfo implements Serializable {
 	}
 
 	public boolean isBundle() {
+		return valid;
+	}
+
+	/**
+	 * Checks if the JAR contains only class files and no other resources. If true, the JAR likely needs
+	 * to export packages but doesn't.
+	 * 
+	 * @return true if the JAR only contains class files, false otherwise
+	 */
+	private static boolean containsOnlyClassFiles(JarFile jar) {
 		try {
-			return getSymbolicName() != null && getVersion() != null;
+
+			// Iterate through JAR entries
+			java.util.Enumeration<java.util.jar.JarEntry> entries = jar.entries();
+
+			boolean hasClassFiles = false;
+
+			while (entries.hasMoreElements()) {
+				java.util.jar.JarEntry entry = entries.nextElement();
+				String name = entry.getName();
+
+				// Skip directories and META-INF
+				if (entry.isDirectory() || name.indexOf("META-INF/MANIFEST.MF") != -1) {
+					continue;
+				}
+
+				if (name.endsWith(".class")) {
+					hasClassFiles = true;
+				}
+				else {
+					return false;
+				}
+			}
+
+			// If we have class files but no other files, return true
+			return hasClassFiles;
+
 		}
-		catch (Throwable t) {
-			ExceptionUtil.rethrowIfNecessary(t);
-			return false;
+		catch (Exception e) {
+			// Error accessing JAR, log it if needed
+			return false; // Assume valid in case of errors
 		}
 	}
 
