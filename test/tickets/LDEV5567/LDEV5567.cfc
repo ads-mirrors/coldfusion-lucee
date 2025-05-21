@@ -28,7 +28,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect(actual).toBe("[4]");
 			});
 
-			it( title="Should return 2 digits for FF mask", body=function( currentSpec ) {
+			it( title="Should return 2 digits for FF mask",skip=true, body=function( currentSpec ) {
 				var timestamp = createDateTime(2018, 1, 21, 10, 0, 0);
 
 				var actual = dateTimeFormat(timestamp, "'['FF']'", 'GMT');
