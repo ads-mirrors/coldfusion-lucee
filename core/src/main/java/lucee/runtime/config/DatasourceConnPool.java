@@ -8,10 +8,10 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
+import lucee.runtime.db.ApplicationDataSource;
 import lucee.runtime.db.DataSource;
 import lucee.runtime.db.DatasourceConnection;
 import lucee.runtime.db.DatasourceConnectionFactory;
-import lucee.runtime.db.ApplicationDataSource;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.Struct;
@@ -19,6 +19,8 @@ import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 
 public final class DatasourceConnPool extends GenericObjectPool<DatasourceConnection> {
+
+	private long lastBorrowed;
 
 	public DatasourceConnPool(Config config, DataSource ds, String user, String pass, String logName, GenericObjectPoolConfig<DatasourceConnection> genericObjectPoolConfig) {
 		super(new DatasourceConnectionFactory(config, ds, user, pass, logName), genericObjectPoolConfig);
@@ -28,11 +30,21 @@ public final class DatasourceConnPool extends GenericObjectPool<DatasourceConnec
 	@Override
 	public DatasourceConnection borrowObject() throws PageException {
 		try {
+			this.lastBorrowed = System.currentTimeMillis();
 			return super.borrowObject();
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);
 		}
+	}
+
+	/**
+	 * Returns the timestamp of when a connection was last borrowed from this pool.
+	 * 
+	 * @return timestamp in milliseconds, or -1 if no connection has been borrowed
+	 */
+	public long getLastBorrowed() {
+		return this.lastBorrowed;
 	}
 
 	@Override

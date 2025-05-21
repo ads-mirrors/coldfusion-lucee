@@ -117,7 +117,6 @@ public final class DatasourceConnectionImpl implements DatasourceConnection, Tas
 
 	@Override
 	public DatasourceConnection using() throws PageException {
-		lastUsed = System.currentTimeMillis();
 		if (datasource.isAlwaysResetConnections()) {
 			try {
 				connection.setAutoCommit(true);
@@ -528,6 +527,10 @@ public final class DatasourceConnectionImpl implements DatasourceConnection, Tas
 	@Override
 	public void setManaged(boolean managed) {
 		this.managed = managed;
+	}
+
+	public void touch() {
+		this.lastUsed = System.currentTimeMillis();
 	}
 
 }

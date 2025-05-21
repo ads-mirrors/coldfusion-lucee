@@ -79,8 +79,6 @@ public final class DatasourceConnectionFactory extends BasePooledObjectFactory<D
 		LogUtil.log(config, Log.LEVEL_DEBUG, logName, "connection", "validate datasource connection: " + datasource.getName());
 		DatasourceConnection dc = p.getObject();
 
-		DataSourcePro dsp = (DataSourcePro) dc.getDatasource();
-
 		if (dc.isTimeout()) {
 			LogUtil.log(config, Log.LEVEL_DEBUG, logName, "connection", "reached idle timeout for datasource connection: " + datasource.getName());
 			return false;
@@ -105,6 +103,11 @@ public final class DatasourceConnectionFactory extends BasePooledObjectFactory<D
 		catch (Exception e) {
 			LogUtil.log(config, "connection", e, Log.LEVEL_ERROR, logName);
 		}
+
+		if (dc instanceof DatasourceConnectionImpl) {
+			((DatasourceConnectionImpl) dc).touch();
+		}
+
 		return true;
 	}
 
