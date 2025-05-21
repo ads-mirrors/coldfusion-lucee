@@ -12,7 +12,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 		
 		describe( title="[LDEV-5567] dateTimeFormat() returns wrong value for 'WW' mask", body=function() {
 
-			it( title="Should return 2 digits for WW mask",skip=true body=function( currentSpec ) {
+			it( title="Should return 2 digits for WW mask",skip=true, body=function( currentSpec ) {
 				var timestamp = createDateTime(2018, 1, 21, 10, 0, 0);
 
 				var actual = dateTimeFormat(timestamp, "'['WW']'", 'GMT');
