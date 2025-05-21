@@ -2258,6 +2258,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	}
 
 	private static final Object dclt = new SerializableObject();
+	private static final long POOL_MAX_IDLE = 60000;
 
 	@Override
 	public PhysicalClassLoader getDirectClassLoader(boolean reload) throws IOException {
@@ -2446,10 +2447,32 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 					pool = new DatasourceConnPool(this, ds, user, pass, "datasource",
 							DatasourceConnPool.createPoolConfig(null, null, null, dsp.getMinIdle(), dsp.getMaxIdle(), mt, 0, 0, 0, 0, 0, null));
 					pools.put(id, pool);
+					cleanConnectionPools(id);
 				}
 			}
 		}
 		return pool;
+	}
+
+	private void cleanConnectionPools(String excludeId) {
+		DatasourceConnPool pool;
+		List<String> keysToRemove = null;
+		for (Entry<String, DatasourceConnPool> e: pools.entrySet()) {
+			if (excludeId.equals(e.getKey())) {
+				continue;
+			}
+			pool = e.getValue();
+			if ((pool.getNumActive() + pool.getNumIdle() + pool.getNumWaiters()) == 0 && (pool.getLastBorrowed() + POOL_MAX_IDLE) < System.currentTimeMillis()) {
+				if (keysToRemove == null) keysToRemove = new ArrayList<>();
+				keysToRemove.add(e.getKey());
+			}
+		}
+
+		if (keysToRemove != null) {
+			for (String k: keysToRemove) {
+				pools.remove(k);
+			}
+		}
 	}
 
 	@Override

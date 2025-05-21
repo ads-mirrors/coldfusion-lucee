@@ -24,4 +24,6 @@ public interface DatasourceConnectionPro extends DatasourceConnection {
 	public void setManaged(boolean managed);
 
 	public boolean isManaged();
+
+	public void touch();
 }

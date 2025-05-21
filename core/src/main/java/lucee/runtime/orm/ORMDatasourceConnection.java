@@ -438,4 +438,8 @@ public class ORMDatasourceConnection implements DatasourceConnectionPro {
 	public void setManaged(boolean managed) {
 		this.managed = managed;
 	}
+
+	@Override
+	public void touch() {
+	}
 }
