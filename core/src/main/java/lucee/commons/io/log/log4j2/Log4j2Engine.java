@@ -132,7 +132,7 @@ public class Log4j2Engine extends LogEngine {
 
 	@Override
 	public ClassDefinition<?> layoutClassDefintion(String className) {
-		if ("classic".equalsIgnoreCase(className) || "lucee.commons.io.log.log4j.layout.ClassicLayout".equals(className)
+		if (StringUtil.isEmpty(className, true) || "classic".equalsIgnoreCase(className) || "lucee.commons.io.log.log4j.layout.ClassicLayout".equals(className)
 				|| "lucee.commons.io.log.log4j2.layout.ClassicLayout".equals(className)) {
 			return new ClassDefinitionImpl(ClassicLayout.class);
 		}
