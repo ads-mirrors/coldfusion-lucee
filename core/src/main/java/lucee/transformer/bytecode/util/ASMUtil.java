@@ -41,7 +41,6 @@ import org.objectweb.asm.util.CheckClassAdapter;
 
 import coldfusion.xml.rpc.QueryBean;
 import lucee.aprint;
-import lucee.print;
 import lucee.commons.digest.MD5;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
@@ -709,7 +708,6 @@ public final class ASMUtil {
 	}
 
 	private static Class toAxisClass(Class clazz) throws PageException {
-		print.ds("xxxxxxxx " + clazz.getName() + " xxxxxxxxxxxx");
 		if (clazz.isArray()) {
 			return ClassUtil.toArrayClass(toAxisClass(clazz.getComponentType()));
 		}

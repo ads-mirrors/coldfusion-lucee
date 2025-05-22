@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import lucee.print;
 import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
@@ -176,13 +175,10 @@ public class Component extends EvaluatorSupport {
 		if (attr != null) {
 			Expression expr = tag.getFactory().toExprString(attr.getValue());
 			if (!(expr instanceof LitString)) throw new EvaluatorException("Attribute [implements] of the tag [" + tlt.getFullName() + "], must contain a literal string value");
-			print.e("has implments!");
 			LitString ls = (LitString) expr;
 			String raw = ls.getString();
-			print.e("raw: " + raw);
 			if (!StringUtil.isEmpty(raw, true)) {
 				String[] arr = ListUtil.listToStringArray(raw.trim(), ',');
-				print.e(arr);
 				Set<String> implementsJava = null;
 				Set<String> implementsCFML = null;
 				for (String str: arr) {
@@ -209,8 +205,6 @@ public class Component extends EvaluatorSupport {
 					if (implementsCFML == null) implementsCFML = new HashSet<>();
 					implementsCFML.add(str);
 				}
-				print.e(implementsCFML);
-				print.e(implementsJava);
 				if (implementsCFML != null || implementsJava != null) {
 					// no cfml (anymore)
 					if (implementsCFML == null || implementsCFML.size() == 0) {
@@ -218,11 +212,6 @@ public class Component extends EvaluatorSupport {
 					}
 					// update CFML
 					else {
-						print.e("implements: " + implementsCFML.toString());
-
-						print.e("--- implements:");
-						print.e((implementsCFML));
-						print.e(toString(implementsCFML));
 						tag.addAttribute(new Attribute(false, "implements", tag.getFactory().createLitString(toString(implementsCFML)), "string"));
 					}
 
@@ -243,10 +232,6 @@ public class Component extends EvaluatorSupport {
 								}
 							}
 						}
-						print.e("--- implementsJava:");
-						print.e(implementsJava);
-						print.e(toString(implementsJava));
-
 						tag.addAttribute(new Attribute(false, "implementsJava", tag.getFactory().createLitString(toString(implementsJava)), "string"));
 					}
 				}
