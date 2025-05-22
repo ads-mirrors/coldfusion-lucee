@@ -133,8 +133,8 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 	public static PhysicalClassLoader getRPCClassLoader(Config c, JavaSettings js, boolean reload, ClassLoader parent) throws IOException {
 		String key = js == null ? "orphan" : ((JavaSettingsImpl) js).id();
 		if (parent != null) {
-			if (parent instanceof PhysicalClassLoader) key += ":" + ((PhysicalClassLoader) parent).id;
-			else key += ":" + parent.hashCode();
+			if (parent instanceof PhysicalClassLoader) key += "_" + ((PhysicalClassLoader) parent).id; 
+			else key += "_" + parent.hashCode();
 		}
 		PhysicalClassLoader rpccl = reload ? null : classLoaders.get(key);
 
