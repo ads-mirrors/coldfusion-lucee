@@ -250,29 +250,19 @@ public final class ClassUtil {
 	public static Class loadClass(PageContext pc, String className) throws ClassException {
 		Set<Throwable> exceptions = new HashSet<Throwable>();
 		Class clazz;
-		// OSGI env
-		/*
-		 * Class clazz = _loadClass(new OSGiBasedClassLoading(), className, null, exceptions); if (clazz !=
-		 * null) { return clazz; }
-		 */
+
+		if (pc instanceof PageContextImpl) {
+			// are we within a component with custom classloader, we do that first
+			if (pc instanceof PageContextImpl && ((PageContextImpl) pc).hasComponentCustomClassloading()) {
+				clazz = _loadClass((PageContextImpl) pc, className, exceptions, false);
+				if (clazz != null) return clazz;
+			}
+		}
 
 		// no ThreadLocalPageContext !!!
 		if (pc instanceof PageContextImpl) {
-			ClassLoader cl;
-			try {
-				cl = ((PageContextImpl) pc).getRPCClassLoader(null);
-			}
-			catch (IOException e) {
-				ClassException ce = new ClassException("cannot load class through its string name");
-				ExceptionUtil.initCauseEL(ce, e);
-				throw ce;
-			}
-
-			// core classloader
-			clazz = _loadClass(new ClassLoaderBasedClassLoading(cl), className, null, exceptions);
-			if (clazz != null) {
-				return clazz;
-			}
+			clazz = _loadClass((PageContextImpl) pc, className, exceptions, true);
+			if (clazz != null) return clazz;
 		}
 		else {
 			// core classloader
@@ -312,6 +302,21 @@ public final class ClassUtil {
 			throw ce;
 		}
 		throw new ClassException(msg);
+	}
+
+	private static Class _loadClass(PageContextImpl pc, String className, Set<Throwable> exceptions, boolean includeCore) throws ClassException {
+
+		// no ThreadLocalPageContext !!!
+		ClassLoader cl;
+		try {
+			cl = pc.getRPCClassLoader(false, null, includeCore);
+		}
+		catch (IOException e) {
+			ClassException ce = new ClassException("cannot load class through its string name");
+			ExceptionUtil.initCauseEL(ce, e);
+			throw ce;
+		}
+		return _loadClass(new ClassLoaderBasedClassLoading(cl), className, null, exceptions);
 	}
 
 	public static Class loadClass(ClassLoader cl, String className, Class defaultValue) {

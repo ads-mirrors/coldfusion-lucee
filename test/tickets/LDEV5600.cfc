@@ -1,4 +1,4 @@
-component extends="org.lucee.cfml.test.LuceeTestCase" labels="javasettings" skip=true  {
+component extends="org.lucee.cfml.test.LuceeTestCase" labels="javasettings"  {
 
 	function run( testResults , testBox ) {
 		describe( title="Test Tika", body=function() {

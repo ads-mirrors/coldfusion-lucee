@@ -17,6 +17,8 @@
  */
 package lucee.runtime.osgi;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -39,6 +41,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
+import java.util.jar.Attributes;
+import java.util.jar.JarOutputStream;
+import java.util.jar.Manifest;
 
 import org.apache.felix.framework.BundleWiringImpl.BundleClassLoader;
 import org.apache.felix.framework.Logger;
@@ -47,6 +52,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.resource.Requirement;
 
 import jakarta.servlet.Servlet;
@@ -91,6 +97,8 @@ public final class OSGiUtil {
 	private static final int QUALIFIER_APPENDIX_STABLE = 5;
 
 	private static final int MAX_REDIRECTS = 5;
+
+	private static ClassLoader emptyBundleClassLoader;
 
 	private static ThreadLocal<Set<String>> bundlesThreadLocal = new ThreadLocal<Set<String>>() {
 		@Override
@@ -2590,5 +2598,44 @@ public final class OSGiUtil {
 			}
 		}
 		return -1;
+	}
+
+	public static ClassLoader getEmptyBundleClassLoader(BundleContext bc) throws IOException {
+		if (emptyBundleClassLoader == null) {
+			synchronized (SystemUtil.createToken("OSGiUtil", "getEmptyBundleClassLoader")) {
+				if (emptyBundleClassLoader == null) {
+					if (bc == null) bc = CFMLEngineFactory.getInstance().getBundleContext();
+
+					// Create minimal bundle manifest
+					Manifest manifest = new Manifest();
+					Attributes mainAttributes = manifest.getMainAttributes();
+					mainAttributes.put(Attributes.Name.MANIFEST_VERSION, "1.0");
+					mainAttributes.putValue("Bundle-ManifestVersion", "2");
+					mainAttributes.putValue("Bundle-SymbolicName", "empty.bundle." + System.currentTimeMillis());
+					mainAttributes.putValue("Bundle-Version", "1.0.0");
+
+					// Create empty JAR with just the manifest
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					try (JarOutputStream jos = new JarOutputStream(baos, manifest)) {
+						// Don't add any entries - completely empty bundle
+					}
+					try {
+						// Install the empty bundle
+						Bundle emptyBundle = bc.installBundle("empty-bundle-" + System.currentTimeMillis(), new ByteArrayInputStream(baos.toByteArray()));
+
+						// Start it to get active classloader
+						emptyBundle.start();
+						BundleWiring bundleWiring = emptyBundle.adapt(BundleWiring.class);
+						emptyBundleClassLoader = bundleWiring.getClassLoader();
+					}
+					catch (BundleException be) {
+						throw ExceptionUtil.toIOException(be);
+					}
+					// Get the classloader with boot delegation
+
+				}
+			}
+		}
+		return emptyBundleClassLoader;
 	}
 }

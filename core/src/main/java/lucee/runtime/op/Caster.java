@@ -4547,6 +4547,12 @@ public final class Caster {
 		else if (o instanceof ObjectWrap) {
 			return toComponent(((ObjectWrap) o).getEmbededObject());
 		}
+		ClassLoader cl = o.getClass().getClassLoader();
+		if (cl instanceof PhysicalClassLoader && ((PhysicalClassLoader) cl).isRPC()) {
+			Object val = Reflector.getField(o, "cfc", null);
+			if (val instanceof Component) return (Component) val;
+		}
+
 		throw new CasterException(o, "Component");
 	}
 
@@ -4556,6 +4562,13 @@ public final class Caster {
 		else if (o instanceof ObjectWrap) {
 			return toComponent(((ObjectWrap) o).getEmbededObject(defaultValue), defaultValue);
 		}
+
+		ClassLoader cl = o.getClass().getClassLoader();
+		if (cl instanceof PhysicalClassLoader && ((PhysicalClassLoader) cl).isRPC()) {
+			Object val = Reflector.getField(o, "cfc", null);
+			if (val instanceof Component) return (Component) val;
+		}
+
 		return defaultValue;
 	}
 

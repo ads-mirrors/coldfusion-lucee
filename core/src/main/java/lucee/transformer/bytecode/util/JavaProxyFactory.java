@@ -133,7 +133,6 @@ public final class JavaProxyFactory {
 	private static final org.objectweb.asm.commons.Method LOAD_COMPONENT = new org.objectweb.asm.commons.Method("loadComponent", Types.COMPONENT, new Type[] { Types.STRING });
 	private static final org.objectweb.asm.commons.Method LOAD_INLINE = new org.objectweb.asm.commons.Method("loadInline", Types.COMPONENT,
 			new Type[] { Types.PAGE_CONTEXT, Types.STRING, Types.STRING });
-	private static final org.objectweb.asm.commons.Method TO_COMPONENT = new org.objectweb.asm.commons.Method("_toComponent", Types.COMPONENT, new Type[] {});
 
 	public static Object createProxy(Object defaultValue, PageContext pc, UDF udf, Class interf) {
 		try {
@@ -259,11 +258,10 @@ public final class JavaProxyFactory {
 		String[] strInterfaces;
 		{
 			Type[] typeInterfaces = ASMUtil.toTypes(interfaces);
-			strInterfaces = new String[typeInterfaces.length + 1];
+			strInterfaces = new String[typeInterfaces.length];
 			for (int i = 0; i < typeInterfaces.length; i++) {
 				strInterfaces[i] = typeInterfaces[i].getInternalName();
 			}
-			strInterfaces[typeInterfaces.length] = Types.COMPONENT_WRAP.getInternalName();
 		}
 
 		String className = createClassName("cfc", cfc, pcl.getDirectory(), extendz, interfaces);
@@ -288,7 +286,7 @@ public final class JavaProxyFactory {
 				cw.visit(ASMUtil.getJavaVersionForBytecodeGeneration(), Opcodes.ACC_PUBLIC, classPath, null, typeExtends.getInternalName(), strInterfaces);
 
 				// field Component
-				FieldVisitor _fv = cw.visitField(Opcodes.ACC_PRIVATE, "cfc", COMPONENT_NAME, null, null);
+				FieldVisitor _fv = cw.visitField(Opcodes.ACC_PUBLIC, "cfc", COMPONENT_NAME, null, null);
 				_fv.visitEnd();
 				_fv = cw.visitField(Opcodes.ACC_PRIVATE, "config", CONFIG_WEB_NAME, null, null);
 				_fv.visitEnd();
@@ -410,31 +408,27 @@ public final class JavaProxyFactory {
 				}
 
 				// create toComponent
-				{
-
-					// Create a GeneratorAdapter for the toComponent method
-					GeneratorAdapter adapter = new GeneratorAdapter(Opcodes.ACC_PUBLIC, TO_COMPONENT, null, null, cw);
-
-					Label begin = new Label();
-					adapter.visitLabel(begin);
-
-					// Load 'this' onto the stack (for accessing the instance field)
-					adapter.loadThis();
-
-					// Get the value of 'cfc' field (ALoad 0, then getField)
-					adapter.visitFieldInsn(Opcodes.GETFIELD, classPath, "cfc", Type.getDescriptor(Component.class));
-
-					// Return the value (which is of type Component)
-					adapter.returnValue();
-
-					// Define the labels and local variables for debugging purposes
-					Label end = new Label();
-					adapter.visitLabel(end);
-					adapter.visitLocalVariable("this", descriptor, null, begin, end, 0); // 'this' as local variable 0
-
-					// Complete the method definition
-					adapter.endMethod();
-				}
+				/*
+				 * {
+				 * 
+				 * // Create a GeneratorAdapter for the toComponent method GeneratorAdapter adapter = new
+				 * GeneratorAdapter(Opcodes.ACC_PUBLIC, RUN, null, null, cw);
+				 * 
+				 * Label begin = new Label(); adapter.visitLabel(begin);
+				 * 
+				 * // Load 'this' onto the stack (for accessing the instance field) adapter.loadThis();
+				 * 
+				 * // Get the value of 'cfc' field (ALoad 0, then getField) adapter.visitFieldInsn(Opcodes.GETFIELD,
+				 * classPath, "cfc", Type.getDescriptor(Component.class));
+				 * 
+				 * // Return the value (which is of type Component) adapter.returnValue();
+				 * 
+				 * // Define the labels and local variables for debugging purposes Label end = new Label();
+				 * adapter.visitLabel(end); adapter.visitLocalVariable("this", descriptor, null, begin, end, 0); //
+				 * 'this' as local variable 0
+				 * 
+				 * // Complete the method definition adapter.endMethod(); }
+				 */
 
 				// create methods
 				Set<Class> cDone = new HashSet<Class>();

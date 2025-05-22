@@ -130,12 +130,25 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 		return rpccl;
 	}
 
+	public static PhysicalClassLoader getRPCClassLoader(Config c, BundleClassLoader bcl, boolean reload) throws IOException {
+		return getRPCClassLoader(c, null, bcl, null, reload);
+	}
+
 	public static PhysicalClassLoader getRPCClassLoader(Config c, JavaSettings js, boolean reload, ClassLoader parent) throws IOException {
+		return getRPCClassLoader(c, js, null, parent, reload);
+	}
+
+	private static PhysicalClassLoader getRPCClassLoader(Config c, JavaSettings js, BundleClassLoader bcl, ClassLoader parent, boolean reload) throws IOException {
 		String key = js == null ? "orphan" : ((JavaSettingsImpl) js).id();
 		if (parent != null) {
 			if (parent instanceof PhysicalClassLoader) key += ":" + ((PhysicalClassLoader) parent).id;
 			else key += ":" + parent.hashCode();
 		}
+		if (bcl != null) {
+			key += ":" + bcl;
+		}
+		key = HashUtil.create64BitHashAsString(key);
+
 		PhysicalClassLoader rpccl = reload ? null : classLoaders.get(key);
 
 		if (rpccl == null) {
@@ -156,29 +169,7 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 					}
 					Resource dir = storeResourceMeta(c, key, js, resources);
 					// (Config config, String key, JavaSettings js, Collection<Resource> _resources)
-					classLoaders.put(key, rpccl = new PhysicalClassLoader(c, resources, dir, parent != null ? parent : SystemUtil.getCombinedClassLoader(), null, null, true));
-				}
-			}
-		}
-		return rpccl;
-	}
-
-	public static PhysicalClassLoader getRPCClassLoader(Config c, BundleClassLoader bcl, boolean reload) throws IOException {
-		String key = HashUtil.create64BitHashAsString(bcl + "");
-		PhysicalClassLoader rpccl = reload ? null : classLoaders.get(key);
-		if (rpccl == null) {
-			synchronized (SystemUtil.createToken("PhysicalClassLoader", key)) {
-				rpccl = reload ? null : classLoaders.get(key);
-				if (rpccl == null) {
-					// if we have a reload, clear the existing before set a new one
-					if (reload) {
-						PhysicalClassLoader existing = classLoaders.get(key);
-						if (existing != null) existing.clear();
-					}
-					Resource dir = c.getClassDirectory().getRealResource("RPC/" + key);
-					if (!dir.exists()) ResourceUtil.createDirectoryEL(dir, true);
-					// (Config config, String key, JavaSettings js, Collection<Resource> _resources)
-					classLoaders.put(key, rpccl = new PhysicalClassLoader(c, new ArrayList<Resource>(), dir, SystemUtil.getCombinedClassLoader(), bcl, null, true));
+					classLoaders.put(key, rpccl = new PhysicalClassLoader(c, resources, dir, parent != null ? parent : SystemUtil.getCombinedClassLoader(), bcl, null, true));
 				}
 			}
 		}
@@ -246,7 +237,6 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 	private Class<?> loadClass(String name, boolean resolve, boolean loadFromFS, Class<?> defaultValue) {
 		// First, check if the class has already been loaded
 		Class<?> c = findLoadedClass(name);
-
 		if (c == null) {
 			synchronized (SystemUtil.createToken("PhysicalClassLoader:load", name)) {
 				c = findLoadedClass(name);
