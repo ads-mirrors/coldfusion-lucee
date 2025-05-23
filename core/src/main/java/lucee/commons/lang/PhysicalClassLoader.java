@@ -153,7 +153,7 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 		if (bcl != null) {
 			key += ":" + bcl;
 		}
-		// key = HashUtil.create64BitHashAsString(key);
+		key = HashUtil.create64BitHashAsString(key);
 
 		PhysicalClassLoader rpccl = reload ? null : classLoaders.get(key);
 
