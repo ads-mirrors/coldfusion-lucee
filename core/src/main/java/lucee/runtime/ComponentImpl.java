@@ -1781,23 +1781,23 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 		sct.set(KeyConstants._functions, arr);
 	}
 
-	public static List<SimpleMethod> getSimpleMethods(ComponentImpl comp, int access) {
+	public static List<SimpleMethod> getSimpleMethods(ClassLoader cl, ComponentImpl comp, int access) {
 		List<SimpleMethod> methods = new ArrayList<>();
 		if (comp.absFin != null) {
 			// we not to add abstract separately because they are not real Methods, more a rule
 			if (comp.absFin.hasAbstractUDFs()) {
 				java.util.Collection<UDF> absUdfs = ComponentUtil.toUDFs(comp.absFin.getAbstractUDFBs().values(), false);
-				getSimpleMethods(absUdfs.iterator(), comp, access, methods);
+				getSimpleMethods(cl, absUdfs.iterator(), comp, access, methods);
 			}
 		}
 
 		if (comp._udfs != null) {
-			getSimpleMethods(comp._udfs.values().iterator(), comp, access, methods);
+			getSimpleMethods(cl, comp._udfs.values().iterator(), comp, access, methods);
 		}
 		if (comp._static != null) {
 			Map<Key, Object> entries = comp._static._entries(new HashMap<Key, Object>(), access);
 			List<UDF> udfs = extractUDFS(entries.values());
-			if (udfs.size() > 0) getSimpleMethods(udfs.iterator(), comp, access, methods);
+			if (udfs.size() > 0) getSimpleMethods(cl, udfs.iterator(), comp, access, methods);
 		}
 
 		// property functions
@@ -1812,7 +1812,7 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 				if (comp.base != null) {
 					if (udf == comp.base.getMember(access, entry.getKey(), true, true)) continue;
 				}
-				methods.add(new SimpleMethodUDF(udf));
+				methods.add(new SimpleMethodUDF(cl, udf));
 			}
 		}
 
@@ -1827,20 +1827,20 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 				if (!(e.getValue() instanceof UDF)) continue;
 				udf = (UDF) e.getValue();
 				if (udf.getAccess() > access || !(udf instanceof UDFGSProperty)) continue;
-				methods.add(new SimpleMethodUDF(udf));
+				methods.add(new SimpleMethodUDF(cl, udf));
 			}
 		}
 		return methods;
 	}
 
-	private static void getSimpleMethods(Iterator<UDF> it, ComponentImpl comp, int access, List<SimpleMethod> methods) {
+	private static void getSimpleMethods(ClassLoader cl, Iterator<UDF> it, ComponentImpl comp, int access, List<SimpleMethod> methods) {
 		UDF udf;
 		while (it.hasNext()) {
 			udf = it.next();
 			if (udf instanceof UDFGSProperty) continue;
 			if (udf.getAccess() > access) continue;
 			if (udf.getPageSource() != null && !udf.getPageSource().equals(comp._getPageSource())) continue;
-			methods.add(new SimpleMethodUDF(udf));
+			methods.add(new SimpleMethodUDF(cl, udf));
 		}
 	}
 

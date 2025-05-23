@@ -378,7 +378,7 @@ public final class DynamicInvoker {
 
 	public DynamicClassLoader getCL(Class<?> clazz) {
 		ClassLoader parent = clazz.getClassLoader();
-		if (parent == null) parent = SystemUtil.getCombinedClassLoader();
+		if (parent == null) parent = SystemUtil.getCoreClassLoader();
 		DynamicClassLoader cl = loaders.get(parent.hashCode());
 		if (cl == null) {
 			synchronized (token) {

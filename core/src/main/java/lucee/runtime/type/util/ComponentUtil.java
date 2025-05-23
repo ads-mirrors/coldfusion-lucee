@@ -40,8 +40,11 @@ import lucee.commons.digest.MD5;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.util.ResourceUtil;
+import lucee.commons.lang.ClassException;
 import lucee.commons.lang.ClassUtil;
+import lucee.commons.lang.DirectoryProvider;
 import lucee.commons.lang.ExceptionUtil;
+import lucee.commons.lang.ExtendableClassLoader;
 import lucee.commons.lang.PhysicalClassLoader;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.lang.types.RefBoolean;
@@ -125,14 +128,14 @@ public final class ComponentUtil {
 		String real = className.replace('.', '/');
 		String realOriginal = classNameOriginal.replace('.', '/');
 		Mapping mapping = component.getPageSource().getMapping();
-		PhysicalClassLoader cl = null;
+		ClassLoader cl = null;
 		try {
-			cl = (PhysicalClassLoader) ((PageContextImpl) pc).getRPCClassLoader();
+			cl = ((PageContextImpl) pc).getRPCClassLoader();
 		}
 		catch (IOException e) {
 			throw Caster.toPageException(e);
 		}
-		Resource classFile = cl.getDirectory().getRealResource(real.concat(".class"));
+		Resource classFile = ((DirectoryProvider) cl).getDirectory().getRealResource(real.concat(".class"));
 		Resource classFileOriginal = mapping.getClassRootDirectory().getRealResource(realOriginal.concat(".class"));
 
 		// LOAD CLASS
@@ -195,9 +198,9 @@ public final class ComponentUtil {
 			ResourceUtil.touch(classFile);
 			IOUtil.copy(new ByteArrayInputStream(barr), classFile, true);
 
-			cl = (PhysicalClassLoader) ((PageContextImpl) pc).getRPCClassLoader(true);
+			cl = ((PageContextImpl) pc).getRPCClassLoader(true);
 
-			return registerTypeMapping(cl.loadClass(className, barr));
+			return registerTypeMapping(((ExtendableClassLoader) cl).loadClass(className, barr));
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
@@ -441,33 +444,33 @@ public final class ComponentUtil {
 	// TO NOT DELETE, USED IN AXIS
 	public static Class getComponentPropertiesClass(PageContext pc, Component component) throws PageException {
 		try {
-			return _getComponentPropertiesClass(pc, component, true);
+			return _getComponentPropertiesClass(pc, null, component, true);
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);
 		}
 	}
 
-	public static Class getComponentPropertiesClass(PageContext pc, Component component, boolean axisType) throws PageException {
+	public static Class getComponentPropertiesClass(PageContext pc, ClassLoader cl, Component component, boolean axisType) throws PageException {
 		try {
-			return _getComponentPropertiesClass(pc, component, axisType);
+			return _getComponentPropertiesClass(pc, cl, component, axisType);
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);
 		}
 	}
 
-	private static Class _getComponentPropertiesClass(PageContext pc, Component component, boolean axisType) throws PageException, IOException, ClassNotFoundException {
-
+	private static Class _getComponentPropertiesClass(PageContext pc, ClassLoader clw, Component component, boolean axisType)
+			throws PageException, IOException, ClassNotFoundException {
 		ASMProperty[] props = ASMUtil.toASMProperties(component.getProperties(false, true, false, false));
 
-		String className = getClassname(component, props);
+		final String className = getClassname(component, props);
 		String real = className.replace('.', '/');
 
 		Mapping mapping = component.getPageSource().getMapping();
-		PhysicalClassLoader cl = (PhysicalClassLoader) ((PageContextImpl) pc).getRPCClassLoader();
+		ClassLoader rpc = ((PageContextImpl) pc).getRPCClassLoader();
 
-		Resource classFile = cl.getDirectory().getRealResource(real.concat(".class"));
+		Resource classFile = ((DirectoryProvider) rpc).getDirectory().getRealResource(real.concat(".class"));
 
 		// get component class information
 		String classNameOriginal = component.getPageSource().getClassName();
@@ -477,7 +480,9 @@ public final class ComponentUtil {
 		// load existing class when pojo is still newer than component class file
 		if (classFile.lastModified() >= classFileOriginal.lastModified()) {
 			try {
-				Class clazz = cl.loadClass(className);
+				Class clazz = null;
+				if (clw != null) clazz = ClassUtil.loadClass(clw, className, null);
+				if (clazz != null) clazz = rpc.loadClass(className);
 				if (clazz != null && !hasChangesOfChildren(classFile.lastModified(), clazz)) return clazz;// ClassUtil.loadInstance(clazz);
 			}
 			catch (Throwable t) {
@@ -489,14 +494,21 @@ public final class ComponentUtil {
 		String strExt = component.getExtends();
 		Class<?> ext = Object.class;
 		if (!StringUtil.isEmpty(strExt, true)) {
-			ext = Caster.cfTypeToClass(pc, strExt);
+			ext = Caster.cfTypeToClass(pc, clw, strExt);
 		}
 		//
 		// create file
 		byte[] barr = ASMUtil.createPojo(real, props, ext, new Class[] { Pojo.class }, component.getPageSource().getDisplayPath(), axisType);
 		ResourceUtil.touch(classFile);
 		IOUtil.copy(new ByteArrayInputStream(barr), classFile, true);
-		cl = (PhysicalClassLoader) ((PageContextImpl) pc).getRPCClassLoader(true);
+
+		Class clazz = null;
+		if (clw != null) {
+			clazz = ClassUtil.loadClass(clw, className, null);
+			if (clazz != null) return clazz;
+		}
+
+		ClassLoader cl = ((PageContextImpl) pc).getRPCClassLoader(true);
 		return cl.loadClass(className); // ClassUtil.loadInstance(cl.loadClass(className));
 	}
 
@@ -618,7 +630,13 @@ public final class ComponentUtil {
 	}
 
 	private static Type toType(PageContext pc, String cfType, boolean axistype) throws PageException {
-		Class clazz = Caster.cfTypeToClass(pc, cfType);
+		Class clazz;
+		try {
+			clazz = Caster.cfTypeToClass(pc, cfType);
+		}
+		catch (ClassException e) {
+			throw Caster.toPageException(e);
+		}
 		if (axistype) clazz = ((ConfigWebPro) ThreadLocalPageContext.getConfig()).getWSHandler().toWSTypeClass(clazz);
 		return Type.getType(clazz);
 
@@ -1071,7 +1089,7 @@ public final class ComponentUtil {
 			try {
 				JavaSettings js = ((ComponentImpl) cfc).getJavaSettings(pc);
 				if (js != null) {
-					return ((ConfigPro) pc.getConfig()).getRPCClassLoader(false, js, null);
+					return ((ConfigPro) pc.getConfig()).getRPCClassLoader(false, js);
 				}
 			}
 			catch (IOException e) {

@@ -47,6 +47,7 @@ import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
+import lucee.commons.lang.ClassException;
 import lucee.commons.lang.ClassUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.SerializableObject;
@@ -692,7 +693,12 @@ public final class ASMUtil {
 	 * @throws PageException
 	 */
 	public static Type toType(PageContext pc, String cfType, boolean axistype) throws PageException {
-		return toType(Caster.cfTypeToClass(pc, cfType), axistype);
+		try {
+			return toType(Caster.cfTypeToClass(pc, cfType), axistype);
+		}
+		catch (ClassException e) {
+			throw Caster.toPageException(e);
+		}
 	}
 
 	/**

@@ -44,7 +44,9 @@ import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.util.ResourceUtil;
+import lucee.commons.lang.DirectoryProvider;
 import lucee.commons.lang.ExceptionUtil;
+import lucee.commons.lang.ExtendableClassLoader;
 import lucee.commons.lang.PhysicalClassLoader;
 import lucee.commons.lang.StringUtil;
 import lucee.loader.engine.CFMLEngine;
@@ -131,8 +133,13 @@ public final class JavaProxyFactory {
 	private static final org.objectweb.asm.commons.Method GET_CONFIG = new org.objectweb.asm.commons.Method("getConfig", Types.CONFIG_WEB, new Type[] {});
 	private static final org.objectweb.asm.commons.Method GET = new org.objectweb.asm.commons.Method("get", Types.PAGE_CONTEXT, new Type[] {});
 	private static final org.objectweb.asm.commons.Method LOAD_COMPONENT = new org.objectweb.asm.commons.Method("loadComponent", Types.COMPONENT, new Type[] { Types.STRING });
+	// private static final org.objectweb.asm.commons.Method LOAD_INLINE = new
+	// org.objectweb.asm.commons.Method("loadInline", Types.COMPONENT,new Type[] { Types.PAGE_CONTEXT,
+	// Types.STRING, Types.STRING });
+
 	private static final org.objectweb.asm.commons.Method LOAD_INLINE = new org.objectweb.asm.commons.Method("loadInline", Types.COMPONENT,
-			new Type[] { Types.PAGE_CONTEXT, Types.STRING, Types.STRING });
+			new Type[] { Types.STRING, Types.STRING });
+	private static final org.objectweb.asm.commons.Method TO_COMPONENT = new org.objectweb.asm.commons.Method("_toComponent", Types.COMPONENT, new Type[] {});
 
 	public static Object createProxy(Object defaultValue, PageContext pc, UDF udf, Class interf) {
 		try {
@@ -145,17 +152,17 @@ public final class JavaProxyFactory {
 
 	public static Object createProxy(PageContext pc, UDF udf, Class interf) throws PageException, IOException {
 		PageContextImpl pci = (PageContextImpl) pc;
-		PhysicalClassLoader pcl = getRPCClassLoaderFromClass(pc, interf);
-		if (pcl == null) pcl = (PhysicalClassLoader) pci.getRPCClassLoader();
+		ClassLoader pcl = getRPCClassLoaderFromClass(pc, interf);
+		if (pcl == null) pcl = pci.getRPCClassLoader();
 
 		if (!interf.isInterface()) throw new IOException("definition [" + interf.getName() + "] is a class and not a interface");
 
 		Type typeExtends = Types.OBJECT;
 		Type typeInterface = Type.getType(interf);
 		String strInterface = typeInterface.getInternalName();
-		String className = createClassName("udf", null, pcl.getDirectory(), Object.class, interf);
+		String className = createClassName("udf", null, ((DirectoryProvider) pcl).getDirectory(), Object.class, interf);
 
-		Resource classFile = pcl.getDirectory().getRealResource(className.concat(".class"));
+		Resource classFile = ((DirectoryProvider) pcl).getDirectory().getRealResource(className.concat(".class"));
 
 		// check if already exists, if yes return
 		if (classFile.exists()) {
@@ -216,7 +223,7 @@ public final class JavaProxyFactory {
 			ResourceUtil.touch(classFile);
 			IOUtil.copy(new ByteArrayInputStream(barr), classFile, true);
 
-			Class<?> clazz = pcl.loadClass(className, barr);
+			Class<?> clazz = ((ExtendableClassLoader) pcl).loadClass(className, barr);
 			return newInstance(clazz, pc.getConfig(), udf);
 		}
 		catch (Throwable t) {
@@ -236,8 +243,12 @@ public final class JavaProxyFactory {
 
 	public static Object createProxy(PageContext pc, final Component cfc, Class extendz, Class... interfaces) throws PageException, IOException {
 		PageContextImpl pci = (PageContextImpl) pc;
-		PhysicalClassLoader pcl = getRPCClassLoaderFromClasses(pc, extendz, interfaces);
-		if (pcl == null) pcl = (PhysicalClassLoader) pci.getRPCClassLoader();
+		DirectoryProvider dp;
+		ClassLoader cl = getRPCClassLoaderFromClasses(pc, extendz, interfaces);
+		if (cl == null) {
+			cl = pci.getRPCClassLoader();
+		}
+		dp = (DirectoryProvider) cl;
 
 		boolean hasTemplates = false;
 		if (extendz == null) extendz = Object.class;
@@ -264,13 +275,13 @@ public final class JavaProxyFactory {
 			}
 		}
 
-		String className = createClassName("cfc", cfc, pcl.getDirectory(), extendz, interfaces);
+		String className = createClassName("cfc", cfc, dp.getDirectory(), extendz, interfaces);
 		String classPath = className.replace('.', '/'); // Ensure classPath is using slashes
-		Resource classFile = pcl.getDirectory().getRealResource(classPath.concat(".class"));
+		Resource classFile = dp.getDirectory().getRealResource(classPath.concat(".class"));
 		if (classFile.exists()) {
 			// we already have it in store
 			try {
-				Object obj = newInstance(pcl, className, pc.getConfig(), cfc);
+				Object obj = newInstance(cl, className, pc.getConfig(), cfc);
 				if (obj != null) return obj;
 			}
 			catch (Throwable t) {
@@ -339,13 +350,11 @@ public final class JavaProxyFactory {
 						if (!StringUtil.isEmpty(sub)) {
 							// inline
 							if (((ComponentImpl) cfc).getInline()) {
-
-								// this.cfc = pc.loadInline(...);
 								adapter.loadThis(); // Load 'this' onto the stack
 								adapter.visitVarInsn(Opcodes.ALOAD, 1); // Load the PageContext (local variable 1)
 								adapter.push((((ComponentImpl) cfc).getPageSource().getRealpathWithVirtual()));
 								adapter.push(sub);
-								adapter.invokeStatic(Types.PAGE_CONTEXT_UTIL, LOAD_INLINE);
+								adapter.invokeVirtual(Types.PAGE_CONTEXT, LOAD_INLINE);
 
 							}
 							// sub
@@ -408,27 +417,31 @@ public final class JavaProxyFactory {
 				}
 
 				// create toComponent
-				/*
-				 * {
-				 * 
-				 * // Create a GeneratorAdapter for the toComponent method GeneratorAdapter adapter = new
-				 * GeneratorAdapter(Opcodes.ACC_PUBLIC, RUN, null, null, cw);
-				 * 
-				 * Label begin = new Label(); adapter.visitLabel(begin);
-				 * 
-				 * // Load 'this' onto the stack (for accessing the instance field) adapter.loadThis();
-				 * 
-				 * // Get the value of 'cfc' field (ALoad 0, then getField) adapter.visitFieldInsn(Opcodes.GETFIELD,
-				 * classPath, "cfc", Type.getDescriptor(Component.class));
-				 * 
-				 * // Return the value (which is of type Component) adapter.returnValue();
-				 * 
-				 * // Define the labels and local variables for debugging purposes Label end = new Label();
-				 * adapter.visitLabel(end); adapter.visitLocalVariable("this", descriptor, null, begin, end, 0); //
-				 * 'this' as local variable 0
-				 * 
-				 * // Complete the method definition adapter.endMethod(); }
-				 */
+				{
+
+					// Create a GeneratorAdapter for the toComponent method
+					GeneratorAdapter adapter = new GeneratorAdapter(Opcodes.ACC_PUBLIC, TO_COMPONENT, null, null, cw);
+
+					Label begin = new Label();
+					adapter.visitLabel(begin);
+
+					// Load 'this' onto the stack (for accessing the instance field)
+					adapter.loadThis();
+
+					// Get the value of 'cfc' field (ALoad 0, then getField)
+					adapter.visitFieldInsn(Opcodes.GETFIELD, classPath, "cfc", Type.getDescriptor(Component.class));
+
+					// Return the value (which is of type Component)
+					adapter.returnValue();
+
+					// Define the labels and local variables for debugging purposes
+					Label end = new Label();
+					adapter.visitLabel(end);
+					adapter.visitLocalVariable("this", descriptor, null, begin, end, 0); // 'this' as local variable 0
+
+					// Complete the method definition
+					adapter.endMethod();
+				}
 
 				// create methods
 				Set<Class> cDone = new HashSet<Class>();
@@ -437,7 +450,7 @@ public final class JavaProxyFactory {
 					_createProxy(cw, cDone, mDone, cfc, interfaces[i], classPath);
 				}
 				// if (!hasTemplates) {
-				createProxyFromComponentInterface(cw, cDone, mDone, cfc, classPath);
+				createProxyFromComponentInterface(cl, cw, cDone, mDone, cfc, classPath);
 				// }
 				cw.visitEnd();
 
@@ -448,7 +461,7 @@ public final class JavaProxyFactory {
 					ResourceUtil.touch(classFile);
 					IOUtil.copy(new ByteArrayInputStream(barr), classFile, true);
 
-					Class<?> clazz = pcl.loadClass(className, barr);
+					Class<?> clazz = ((ExtendableClassLoader) cl).loadClass(className, barr);
 					return newInstance(clazz, pc.getConfig(), cfc);
 				}
 				catch (Exception e) {
@@ -457,7 +470,7 @@ public final class JavaProxyFactory {
 			}
 
 			try {
-				return newInstance(pcl, className, pc.getConfig(), cfc);
+				return newInstance(cl, className, pc.getConfig(), cfc);
 			}
 			catch (Exception e) {
 				throw Caster.toPageException(e);
@@ -467,9 +480,9 @@ public final class JavaProxyFactory {
 
 	}
 
-	private static PhysicalClassLoader getRPCClassLoaderFromClasses(PageContext pc, Class extendz, Class... interfaces) throws IOException {
+	private static ClassLoader getRPCClassLoaderFromClasses(PageContext pc, Class extendz, Class... interfaces) throws IOException {
 		// extends and implement need to come from the same parent classloader
-		PhysicalClassLoader pcl = null;
+		ClassLoader pcl = null;
 		if (extendz != null) {
 			pcl = getRPCClassLoaderFromClass(pc, extendz);
 			if (pcl != null) return pcl;
@@ -484,16 +497,15 @@ public final class JavaProxyFactory {
 		return null;
 	}
 
-	public static PhysicalClassLoader getRPCClassLoaderFromClass(PageContext pc, Class clazz) throws IOException {
+	public static ClassLoader getRPCClassLoaderFromClass(PageContext pc, Class clazz) throws IOException {
 		ClassLoader cl = clazz.getClassLoader();
 		if (cl != null) {
 			if (cl instanceof PhysicalClassLoader) {
-				return ((PhysicalClassLoader) cl);
+				return cl;
 			}
 			else if (cl instanceof BundleClassLoader) {
 				return PhysicalClassLoader.getRPCClassLoader(pc.getConfig(), (BundleClassLoader) cl, false);
 			}
-
 		}
 		return null;
 	}
@@ -520,12 +532,13 @@ public final class JavaProxyFactory {
 		}
 	}
 
-	private static void createProxyFromComponentInterface(ClassWriter cw, Set<Class> cDone, Map<String, Class> mDone, Component cfc, String className) throws IOException {
+	private static void createProxyFromComponentInterface(ClassLoader cl, ClassWriter cw, Set<Class> cDone, Map<String, Class> mDone, Component cfc, String className)
+			throws IOException {
 		if (cDone.contains(cfc.getClass())) return;
 		cDone.add(cfc.getClass());
 
 		ComponentImpl cfci = (ComponentImpl) cfc;
-		List<SimpleMethod> methods = ComponentImpl.getSimpleMethods(cfci, ComponentImpl.ACCESS_PUBLIC);
+		List<SimpleMethod> methods = ComponentImpl.getSimpleMethods(cl, cfci, ComponentImpl.ACCESS_PUBLIC);
 
 		if (methods != null) {
 			for (SimpleMethod m: methods) {
@@ -568,13 +581,28 @@ public final class JavaProxyFactory {
 		}
 
 		@Override
-		public Class[] getParameterTypes() {
+		public Class[] getParameterClasses() {
 			return method.getParameterTypes();
 		}
 
 		@Override
-		public Class getReturnType() {
+		public Class[] getParameterClasses(Class defaultValue) {
+			return method.getParameterTypes();
+		}
+
+		@Override
+		public Class getReturnClass() {
 			return method.getReturnType();
+		}
+
+		@Override
+		public Class getReturnClass(Class defaultValue) {
+			return method.getReturnType();
+		}
+
+		@Override
+		public String getReturnType() {
+			return method.getReturnType().getName();
 		}
 	}
 
@@ -596,19 +624,35 @@ public final class JavaProxyFactory {
 		}
 
 		@Override
-		public Class[] getParameterTypes() {
+		public Class[] getParameterClasses() {
 			return parameterTypes;
 		}
 
 		@Override
-		public Class getReturnType() {
+		public Class[] getParameterClasses(Class defaultValue) {
+			return parameterTypes;
+		}
+
+		@Override
+		public Class getReturnClass() {
 			return returnType;
+		}
+
+		@Override
+		public Class getReturnClass(Class defaultValue) {
+			return returnType;
+		}
+
+		@Override
+		public String getReturnType() {
+			return returnType.getName();
 		}
 	}
 
 	private static void _createMethod(ClassWriter cw, Map<String, Class> mDone, SimpleMethod src, String className, short type) throws IOException {
-		final Class<?>[] classArgs = src.getParameterTypes();
-		final Class<?> classRtn = src.getReturnType();
+		// TODO allow return type of the class itself
+		final Class<?>[] classArgs = src.getParameterClasses(Object.class);
+		final Class<?> classRtn = src.getReturnClass(Object.class);
 
 		String str = src.getName() + "(" + Reflector.getDspMethods(classArgs) + ")";
 		Class rtnClass = mDone.get(str);
@@ -723,8 +767,8 @@ public final class JavaProxyFactory {
 				|| classRtn == long.class || classRtn == short.class || classRtn == String.class;
 	}
 
-	private static Object newInstance(PhysicalClassLoader cl, String className, ConfigWeb config, UDF udf) throws IllegalArgumentException, InstantiationException,
-			IllegalAccessException, InvocationTargetException, SecurityException, NoSuchMethodException, ClassNotFoundException {
+	private static Object newInstance(ClassLoader cl, String className, ConfigWeb config, UDF udf) throws IllegalArgumentException, InstantiationException, IllegalAccessException,
+			InvocationTargetException, SecurityException, NoSuchMethodException, ClassNotFoundException {
 		return newInstance(cl.loadClass(className), config, udf);
 	}
 
@@ -734,7 +778,7 @@ public final class JavaProxyFactory {
 		return constr.newInstance(new Object[] { config, udf });
 	}
 
-	private static Object newInstance(PhysicalClassLoader cl, String className, ConfigWeb config, Component cfc) throws IllegalArgumentException, InstantiationException,
+	private static Object newInstance(ClassLoader cl, String className, ConfigWeb config, Component cfc) throws IllegalArgumentException, InstantiationException,
 			IllegalAccessException, InvocationTargetException, SecurityException, NoSuchMethodException, ClassNotFoundException {
 		return newInstance(cl.loadClass(className), config, cfc);
 	}

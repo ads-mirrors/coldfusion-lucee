@@ -73,7 +73,6 @@ import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.ResourceProvider;
 import lucee.commons.io.res.ResourcesImpl;
-import lucee.commons.io.res.util.CombinedClassLoader;
 import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.ArchiveClassLoader;
 import lucee.commons.lang.CharSet;
@@ -271,13 +270,18 @@ public final class SystemUtil {
 	private static final Map<String, String> tokens = Collections.synchronizedMap(new AccessOrderLimitedSizeMap<String, String>(10000, 100));
 	private static ClassLoader loaderCL;
 	private static ClassLoader coreCL;
-	private static ClassLoader combCL;
 
 	public static ClassLoader getLoaderClassLoader() {
 		if (loaderCL == null) {
 			synchronized (tokens) {
 				if (loaderCL == null) {
-					loaderCL = new TP().getClass().getClassLoader();
+					// loaderCL = new TP().getClass().getClassLoader();
+					try {
+						loaderCL = OSGiUtil.getEmptyBundleClassLoader(null);
+					}
+					catch (IOException e) {
+						throw new PageRuntimeException(e);
+					}
 				}
 			}
 		}
@@ -293,17 +297,6 @@ public final class SystemUtil {
 			}
 		}
 		return coreCL;
-	}
-
-	public static ClassLoader getCombinedClassLoader() {
-		if (combCL == null) {
-			synchronized (tokens) {
-				if (combCL == null) {
-					combCL = new CombinedClassLoader(SystemUtil.getLoaderClassLoader(), SystemUtil.getCoreClassLoader());
-				}
-			}
-		}
-		return combCL;
 	}
 
 	public static MemoryPoolMXBean getPermGenSpaceBean() {

@@ -138,6 +138,7 @@ import lucee.runtime.listener.ApplicationContextSupport;
 import lucee.runtime.listener.ApplicationListener;
 import lucee.runtime.listener.ClassicApplicationContext;
 import lucee.runtime.listener.JavaSettings;
+import lucee.runtime.listener.JavaSettingsImpl;
 import lucee.runtime.listener.ModernAppListenerException;
 import lucee.runtime.listener.NoneAppListener;
 import lucee.runtime.listener.SerializationSettings;
@@ -155,7 +156,6 @@ import lucee.runtime.op.Decision;
 import lucee.runtime.orm.ORMConfiguration;
 import lucee.runtime.orm.ORMEngine;
 import lucee.runtime.orm.ORMSession;
-import lucee.runtime.osgi.OSGiUtil;
 import lucee.runtime.regex.Regex;
 import lucee.runtime.rest.RestRequestListener;
 import lucee.runtime.rest.RestUtil;
@@ -3902,35 +3902,34 @@ public final class PageContextImpl extends PageContext {
 	}
 
 	public ClassLoader getRPCClassLoader() throws IOException {
-		return getRPCClassLoader(false, (JavaSettings) null, true);
+		return getRPCClassLoader(false, (JavaSettings) null);
 	}
 
 	public ClassLoader getRPCClassLoader(boolean reload) throws IOException {
-		return getRPCClassLoader(reload, (JavaSettings) null, true);
+		return getRPCClassLoader(reload, (JavaSettings) null);
 	}
 
 	public ClassLoader getRPCClassLoader(JavaSettings customJS) throws IOException {
-		return getRPCClassLoader(false, customJS, true);
+		return getRPCClassLoader(false, customJS);
 	}
 
 	public ClassLoader getRPCClassLoader(boolean reload, JavaSettings customJS) throws IOException {
-		return getRPCClassLoader(reload, customJS, true);
-	}
-
-	public ClassLoader getRPCClassLoader(boolean reload, JavaSettings customJS, boolean includeCore) throws IOException {
 		ClassLoader cl = null;
-
+		JavaSettings js = null;
 		Component ac = getActiveComponent();
 		if (ac instanceof ComponentImpl) {
-			JavaSettings js = ((ComponentImpl) ac).getJavaSettings(this);
+			js = ((ComponentImpl) ac).getJavaSettings(this);
 			if (js != null) {
-				cl = config.getRPCClassLoader(reload, js, includeCore ? SystemUtil.getCombinedClassLoader() : OSGiUtil.getEmptyBundleClassLoader(null));
+				cl = config.getRPCClassLoader(reload, js);
 			}
 		}
-		if (cl == null) cl = getApplicationContext().getRPCClassLoader();
+		if (cl == null) {
+			cl = config.getRPCClassLoader(reload, js = getApplicationContext().getJavaSettings());
+		}
 
 		if (customJS != null) {
-			cl = config.getRPCClassLoader(reload, customJS, cl);
+			js = JavaSettingsImpl.merge(config, customJS, js);
+			cl = config.getRPCClassLoader(reload, js);
 		}
 		return cl;
 	}
@@ -4344,5 +4343,9 @@ public final class PageContextImpl extends PageContext {
 			}
 		}
 		return defaultValue;
+	}
+
+	public lucee.runtime.Component loadInline(String realPath, String inlineName) throws PageException {
+		return PageContextUtil.loadInline(this, realPath, inlineName);
 	}
 }

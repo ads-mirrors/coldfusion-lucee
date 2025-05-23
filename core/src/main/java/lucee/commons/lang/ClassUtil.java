@@ -21,6 +21,8 @@ package lucee.commons.lang;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.Reference;
+import java.lang.ref.SoftReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
@@ -31,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -62,8 +65,12 @@ import lucee.transformer.dynamic.meta.Method;
 
 public final class ClassUtil {
 
+	private static ClassLoading coreCL = ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(SystemUtil.getCoreClassLoader());
+	private static ClassLoading loaderCL = ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(SystemUtil.getLoaderClassLoader());
+	private static Map<String, Class<?>> classes = new ConcurrentHashMap<>();
+
 	/**
-	 * @param className
+	 * @par()am className
 	 * @return
 	 * @throws ClassException
 	 */
@@ -226,11 +233,11 @@ public final class ClassUtil {
 		if (clazz != null) return clazz;
 
 		// core classloader
-		clazz = _loadClass(new ClassLoaderBasedClassLoading(SystemUtil.getCoreClassLoader()), className, null, null);
+		clazz = _loadClass(ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(SystemUtil.getCoreClassLoader()), className, null, null);
 		if (clazz != null) return clazz;
 
 		// loader classloader
-		clazz = _loadClass(new ClassLoaderBasedClassLoading(SystemUtil.getLoaderClassLoader()), className, null, null);
+		clazz = _loadClass(ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(SystemUtil.getLoaderClassLoader()), className, null, null);
 		if (clazz != null) return clazz;
 
 		return defaultValue;
@@ -252,30 +259,34 @@ public final class ClassUtil {
 		Class clazz;
 
 		if (pc instanceof PageContextImpl) {
-			// are we within a component with custom classloader, we do that first
-			if (pc instanceof PageContextImpl && ((PageContextImpl) pc).hasComponentCustomClassloading()) {
-				clazz = _loadClass((PageContextImpl) pc, className, exceptions, false);
-				if (clazz != null) return clazz;
-			}
-		}
-
-		// no ThreadLocalPageContext !!!
-		if (pc instanceof PageContextImpl) {
-			clazz = _loadClass((PageContextImpl) pc, className, exceptions, true);
+			clazz = _loadClass((PageContextImpl) pc, className, exceptions);
 			if (clazz != null) return clazz;
 		}
 		else {
-			// core classloader
-			clazz = _loadClass(new ClassLoaderBasedClassLoading(SystemUtil.getCoreClassLoader()), className, null, exceptions);
+			clazz = classes.get(className);
+			if (clazz != null) return clazz;
+
+			// loader classloader
+			clazz = _loadClass(loaderCL, className, null, exceptions);
 			if (clazz != null) {
+				classes.put(className, clazz);
 				return clazz;
 			}
 
-			// loader classloader
-			clazz = _loadClass(new ClassLoaderBasedClassLoading(SystemUtil.getLoaderClassLoader()), className, null, exceptions);
+			// core classloader
+			clazz = _loadClass(coreCL, className, null, exceptions);
 			if (clazz != null) {
+				classes.put(className, clazz);
 				return clazz;
 			}
+		}
+
+		// System ClassLoader
+		try {
+			clazz = Class.forName(className);
+		}
+		catch (ClassNotFoundException e) {
+			exceptions.add(e);
 		}
 
 		String msg = "cannot load class through its string name, because no definition for the class with the specified name [" + className + "] could be found";
@@ -304,19 +315,19 @@ public final class ClassUtil {
 		throw new ClassException(msg);
 	}
 
-	private static Class _loadClass(PageContextImpl pc, String className, Set<Throwable> exceptions, boolean includeCore) throws ClassException {
+	private static Class _loadClass(PageContextImpl pc, String className, Set<Throwable> exceptions) throws ClassException {
 
 		// no ThreadLocalPageContext !!!
 		ClassLoader cl;
 		try {
-			cl = pc.getRPCClassLoader(false, null, includeCore);
+			cl = pc.getRPCClassLoader(false, null);
 		}
 		catch (IOException e) {
 			ClassException ce = new ClassException("cannot load class through its string name");
 			ExceptionUtil.initCauseEL(ce, e);
 			throw ce;
 		}
-		return _loadClass(new ClassLoaderBasedClassLoading(cl), className, null, exceptions);
+		return _loadClass(ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(cl), className, null, exceptions);
 	}
 
 	public static Class loadClass(ClassLoader cl, String className, Class defaultValue) {
@@ -326,7 +337,7 @@ public final class ClassUtil {
 	private static Class loadClass(ClassLoader cl, String className, Class defaultValue, Set<Throwable> exceptions) {
 
 		if (cl != null) {
-			Class clazz = _loadClass(new ClassLoaderBasedClassLoading(cl), className, defaultValue, exceptions);
+			Class clazz = _loadClass(ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(cl), className, defaultValue, exceptions);
 			if (clazz != null) return clazz;
 		}
 
@@ -338,13 +349,13 @@ public final class ClassUtil {
 
 		// core classloader
 		if (cl != SystemUtil.getCoreClassLoader()) {
-			clazz = _loadClass(new ClassLoaderBasedClassLoading(SystemUtil.getCoreClassLoader()), className, null, exceptions);
+			clazz = _loadClass(ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(SystemUtil.getCoreClassLoader()), className, null, exceptions);
 			if (clazz != null) return clazz;
 		}
 
 		// loader classloader
 		if (cl != SystemUtil.getLoaderClassLoader()) {
-			clazz = _loadClass(new ClassLoaderBasedClassLoading(SystemUtil.getLoaderClassLoader()), className, null, exceptions);
+			clazz = _loadClass(ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(SystemUtil.getLoaderClassLoader()), className, null, exceptions);
 			if (clazz != null) return clazz;
 		}
 
@@ -970,16 +981,32 @@ public final class ClassUtil {
 		return loadClassByBundle(className, bundleName, bundleVersion, id, addional);
 	}
 
-	private static interface ClassLoading {
+	public static interface ClassLoading {
 		public Class<?> loadClass(String className, Class defaultValue);
 
 		public Class<?> loadClass(String className, Class defaultValue, Set<Throwable> exceptions);
 	}
 
 	private static class ClassLoaderBasedClassLoading implements ClassLoading {
+
+		private static Map<Integer, Reference<ClassLoading>> instances = new ConcurrentHashMap<>();
+
 		private ClassLoader cl;
 
-		public ClassLoaderBasedClassLoading(ClassLoader cl) {
+		public static ClassLoading getClassLoaderBasedClassLoading(ClassLoader cl) {
+			if (cl instanceof ClassLoading) return (ClassLoading) cl;
+			Reference<ClassLoading> ref = instances.get(cl.hashCode());
+			ClassLoading instance = null;
+			if (ref != null) {
+				instance = ref.get();
+				if (instance != null) return instance;
+			}
+			instance = new ClassLoaderBasedClassLoading(cl);
+			instances.put(cl.hashCode(), new SoftReference<>(instance));
+			return instance;
+		}
+
+		private ClassLoaderBasedClassLoading(ClassLoader cl) {
 			this.cl = cl;
 		}
 
@@ -995,15 +1022,10 @@ public final class ClassUtil {
 				return cl.loadClass(className);
 			}
 			catch (Exception e) {
-				try {
-					return Class.forName(className, false, cl);
+				if (exceptions != null) {
+					exceptions.add(e);
 				}
-				catch (Exception e2) {
-					if (exceptions != null) {
-						exceptions.add(e2);
-					}
-					return defaultValue;
-				}
+				return defaultValue;
 			}
 
 		}
@@ -1043,7 +1065,7 @@ public final class ClassUtil {
 		}
 		Config config = ThreadLocalPageContext.getConfig();
 		if (config instanceof ConfigPro) {
-			return ((ConfigPro) config).getRPCClassLoader(false, null, null);
+			return ((ConfigPro) config).getRPCClassLoader(false, null);
 		}
 		return new lucee.commons.lang.ClassLoaderHelper().getClass().getClassLoader();
 	}

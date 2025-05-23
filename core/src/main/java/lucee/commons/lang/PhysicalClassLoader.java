@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -42,7 +43,9 @@ import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.type.file.FileResource;
+import lucee.commons.io.res.util.CombinedClassLoader;
 import lucee.commons.io.res.util.ResourceUtil;
+import lucee.commons.lang.ClassUtil.ClassLoading;
 import lucee.runtime.PageSourcePool;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
@@ -62,7 +65,7 @@ import lucee.transformer.bytecode.util.ClassRenamer;
 /**
  * Directory ClassLoader
  */
-public final class PhysicalClassLoader extends URLClassLoader implements ExtendableClassLoader, ClassLoaderDefault {
+public final class PhysicalClassLoader extends URLClassLoader implements ExtendableClassLoader, ClassLoaderDefault, ClassLoading, DirectoryProvider {
 
 	static {
 		boolean res = registerAsParallelCapable();
@@ -123,31 +126,34 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 						PhysicalClassLoader existing = classLoaders.get(key);
 						if (existing != null) existing.clear();
 					}
-					classLoaders.put(key, rpccl = new PhysicalClassLoader(c, new ArrayList<Resource>(), directory, SystemUtil.getCombinedClassLoader(), null, null, false));
+					classLoaders.put(key, rpccl = new PhysicalClassLoader(key, c, new ArrayList<Resource>(), directory, SystemUtil.getCoreClassLoader(), null, null, false));
 				}
 			}
 		}
 		return rpccl;
 	}
 
-	public static PhysicalClassLoader getRPCClassLoader(Config c, BundleClassLoader bcl, boolean reload) throws IOException {
-		return getRPCClassLoader(c, null, bcl, null, reload);
+	public static CombinedClassLoader getRPCClassLoader(Config c, BundleClassLoader bcl, boolean reload) throws IOException {
+		return new CombinedClassLoader(getRPCClassLoader(c, null, bcl, SystemUtil.getLoaderClassLoader(), reload),
+				getRPCClassLoader(c, null, bcl, SystemUtil.getCoreClassLoader(), reload));
 	}
 
-	public static PhysicalClassLoader getRPCClassLoader(Config c, JavaSettings js, boolean reload, ClassLoader parent) throws IOException {
-		return getRPCClassLoader(c, js, null, parent, reload);
+	public static CombinedClassLoader getRPCClassLoader(Config c, JavaSettings js, boolean reload) throws IOException {
+		return new CombinedClassLoader(getRPCClassLoader(c, js, null, SystemUtil.getLoaderClassLoader(), reload),
+				getRPCClassLoader(c, js, null, SystemUtil.getCoreClassLoader(), reload));
 	}
 
 	private static PhysicalClassLoader getRPCClassLoader(Config c, JavaSettings js, BundleClassLoader bcl, ClassLoader parent, boolean reload) throws IOException {
 		String key = js == null ? "orphan" : ((JavaSettingsImpl) js).id();
-		if (parent != null) {
-			if (parent instanceof PhysicalClassLoader) key += ":" + ((PhysicalClassLoader) parent).id;
-			else key += ":" + parent.hashCode();
-		}
+
+		if (parent == null) parent = SystemUtil.getCoreClassLoader();
+		if (parent instanceof PhysicalClassLoader) key += ":" + ((PhysicalClassLoader) parent).id;
+		else key += ":" + parent.getClass().getName() + parent.hashCode();
+
 		if (bcl != null) {
 			key += ":" + bcl;
 		}
-		key = HashUtil.create64BitHashAsString(key);
+		// key = HashUtil.create64BitHashAsString(key);
 
 		PhysicalClassLoader rpccl = reload ? null : classLoaders.get(key);
 
@@ -169,17 +175,18 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 					}
 					Resource dir = storeResourceMeta(c, key, js, resources);
 					// (Config config, String key, JavaSettings js, Collection<Resource> _resources)
-					classLoaders.put(key, rpccl = new PhysicalClassLoader(c, resources, dir, parent != null ? parent : SystemUtil.getCombinedClassLoader(), bcl, null, true));
+					classLoaders.put(key, rpccl = new PhysicalClassLoader(key, c, resources, dir, parent, bcl, null, true));
 				}
 			}
 		}
 		return rpccl;
 	}
 
-	private PhysicalClassLoader(Config c, List<Resource> resources, Resource directory, ClassLoader parentClassLoader, ClassLoader addionalClassLoader,
+	private PhysicalClassLoader(String key, Config c, List<Resource> resources, Resource directory, ClassLoader parentClassLoader, ClassLoader addionalClassLoader,
 			PageSourcePool pageSourcePool, boolean rpc) throws IOException {
-		super(doURLs(resources), parentClassLoader == null ? (parentClassLoader = SystemUtil.getCombinedClassLoader()) : parentClassLoader);
+		super(doURLs(resources), parentClassLoader == null ? (parentClassLoader = SystemUtil.getCoreClassLoader()) : parentClassLoader);
 		this.resources = resources;
+
 		config = (ConfigPro) c;
 		this.addionalClassLoader = addionalClassLoader;
 		this.birthplace = ExceptionUtil.getStacktrace(new Throwable(), false);
@@ -192,14 +199,12 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 		this.directory = directory;
 		this.rpc = rpc;
 
-		StringBuilder sb = new StringBuilder();
-		sb.append(directory);
-		if (resources != null) {
-			for (Resource r: resources) {
-				sb.append(';').append(r);
-			}
-		}
-		id = HashUtil.create64BitHashAsString(sb.toString());
+		id = key;
+		/*
+		 * StringBuilder sb = new StringBuilder(); sb.append(directory); if (resources != null) { for
+		 * (Resource r: resources) { sb.append(';').append(r); } } id =
+		 * HashUtil.create64BitHashAsString(sb.toString());
+		 */
 	}
 
 	public String getBirthplace() {
@@ -232,6 +237,24 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 	@Override
 	public Class<?> loadClass(String name, boolean resolve, Class<?> defaultValue) {
 		return loadClass(name, resolve, true, defaultValue);
+	}
+
+	@Override
+	public Class<?> loadClass(String className, Class defaultValue) {
+		return loadClass(className, false, true, defaultValue);
+	}
+
+	@Override
+	public Class<?> loadClass(String className, Class defaultValue, Set<Throwable> exceptions) {
+		try {
+			return loadClass(className);
+		}
+		catch (Exception e) {
+			if (exceptions != null) {
+				exceptions.add(e);
+			}
+			return defaultValue;
+		}
 	}
 
 	private Class<?> loadClass(String name, boolean resolve, boolean loadFromFS, Class<?> defaultValue) {
@@ -469,6 +492,7 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 	/**
 	 * @return the directory
 	 */
+	@Override
 	public Resource getDirectory() {
 		return directory;
 	}

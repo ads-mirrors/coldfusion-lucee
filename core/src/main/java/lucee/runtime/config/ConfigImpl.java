@@ -1126,7 +1126,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		catch (IOException e) {
 		}
 		if (cl != null) return cl;
-		return SystemUtil.getCombinedClassLoader();
+		return SystemUtil.getCoreClassLoader();
 
 	}
 
@@ -3070,7 +3070,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 					if (listener instanceof ModernAppListener) {
 						String strSi = SystemUtil.getSystemPropOrEnvVar("lucee.listener.singleton", null);
 						if (StringUtil.isEmpty(strSi)) strSi = SystemUtil.getSystemPropOrEnvVar("lucee.application.singleton", null);
-						if (StringUtil.isEmpty(strSi)) strSi = ConfigFactoryImpl.getAttr(root, new String[] { "listenerSingleton", "applicationSingleton"});
+						if (StringUtil.isEmpty(strSi)) strSi = ConfigFactoryImpl.getAttr(root, new String[] { "listenerSingleton", "applicationSingleton" });
 						listener.setSingelton(Caster.toBooleanValue(strSi, false));
 					}
 					applicationListener = listener;
@@ -3246,12 +3246,12 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 
 	@Override
 	public ClassLoader getRPCClassLoader(boolean reload) throws IOException {
-		return PhysicalClassLoader.getRPCClassLoader(this, getJavaSettings(), reload, null);
+		return PhysicalClassLoader.getRPCClassLoader(this, getJavaSettings(), reload);
 	}
 
 	@Override
-	public ClassLoader getRPCClassLoader(boolean reload, JavaSettings js, ClassLoader parent) throws IOException {
-		return PhysicalClassLoader.getRPCClassLoader(this, js != null ? js : getJavaSettings(), reload, parent);
+	public ClassLoader getRPCClassLoader(boolean reload, JavaSettings js) throws IOException {
+		return PhysicalClassLoader.getRPCClassLoader(this, js != null ? js : getJavaSettings(), reload);
 	}
 
 	private static final Object dclt = new SerializableObject();

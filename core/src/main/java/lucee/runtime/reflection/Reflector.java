@@ -483,7 +483,7 @@ public final class Reflector {
 
 	private static Object componentToClass(PageContext pc, Component src, Class trgClass, RefInteger rating) throws PageException {
 		try {
-			JavaAnnotation ja = getJavaAnnotation(pc, trgClass != null ? trgClass.getClassLoader() : SystemUtil.getCombinedClassLoader(), src);
+			JavaAnnotation ja = getJavaAnnotation(pc, trgClass != null ? trgClass.getClassLoader() : SystemUtil.getCoreClassLoader(), src);
 			Class<?> _extends = ja != null && ja.extend != null ? ja.extend : null;
 			return JavaProxyFactory.createProxy(pc, src, _extends, extractImplements(pc, src, ja, trgClass, rating));
 		}
@@ -509,7 +509,7 @@ public final class Reflector {
 			if (arrImplements != null) {
 				List<Class<?>> list = new ArrayList<>();
 
-				ClassLoader cl = ComponentUtil.getClassLoader(pc, cfc, SystemUtil.getCombinedClassLoader());
+				ClassLoader cl = ComponentUtil.getClassLoader(pc, cfc, SystemUtil.getCoreClassLoader());
 				Class clazz;
 				for (Object o: arrImplements) {
 					String str = Caster.toString(o, null);

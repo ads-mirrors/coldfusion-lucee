@@ -12,11 +12,11 @@ public abstract class SimpleMethodSupport implements SimpleMethod {
 
 		try {
 			// Parameters
-			for (Class p: getParameterTypes()) {
+			for (Class p: getParameterClasses()) {
 				sb.append(p.getName()).append(';');
 			}
 			// return
-			sb.append(getReturnType().getName());
+			sb.append(getReturnClass().getName());
 		}
 		catch (IOException e) {
 			throw new RuntimeException(e);

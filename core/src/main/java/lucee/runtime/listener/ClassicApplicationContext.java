@@ -852,11 +852,7 @@ public final class ClassicApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public ClassLoader getRPCClassLoader() throws IOException {
-		ClassLoader cl = ModernApplicationContext.getDefaultClassLoader(config);
-		if (javaSettings != null) {
-			cl = ((ConfigPro) config).getRPCClassLoader(false, javaSettings, cl);
-		}
-		return cl;
+		throw new RuntimeException("the method [getRPCClassLoader()] is no longer supported");
 	}
 
 	@Override

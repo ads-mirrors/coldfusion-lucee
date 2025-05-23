@@ -214,10 +214,9 @@ public final class ModernApplicationContext extends ApplicationContextSupport {
 	private ORMConfiguration ormConfig;
 	private boolean initRestSetting;
 	private RestSettings restSetting;
-	private boolean initClassLoader;
-	private boolean initClassLoaderBefore;
+	private boolean initJavaSettings;
+	private boolean initJavaSettingsBefore;
 	private JavaSettings javaSettings;
-	private ClassLoader cl;
 	private Object ormDatasource;
 	private boolean initOrmDatasource;
 	private Locale locale;
@@ -1770,38 +1769,32 @@ public final class ModernApplicationContext extends ApplicationContextSupport {
 
 	@Override
 	public void setJavaSettings(JavaSettings javaSettings) {
-		initClassLoader = false;
+		initJavaSettings = false;
 		this.javaSettings = javaSettings;
 	}
 
 	@Override
 	public ClassLoader getRPCClassLoader() throws IOException {
-		if (!initClassLoader) {
-			// PATCH to avoid cycle
-			if (initClassLoaderBefore) {
-				return getDefaultClassLoader(config);
-			}
-			initClassLoaderBefore = true;
-			cl = getDefaultClassLoader(config);
-			Object o = javaSettings != null ? null : get(component, KeyConstants._javasettings, null);
-			if (javaSettings != null || (o != null && Decision.isStruct(o))) {
-				if (javaSettings == null) javaSettings = JavaSettingsImpl.getInstance(config, Caster.toStruct(o, null), null);
-				cl = ((ConfigPro) config).getRPCClassLoader(false, javaSettings, cl);
-			}
-
-			initClassLoader = true;
-			initClassLoaderBefore = false;
-		}
-		return cl;
+		throw new RuntimeException("the method [getRPCClassLoader()] is no longer supported");
 	}
 
 	@Override
 	public JavaSettings getJavaSettings() {
-		try {
-			getRPCClassLoader();
+		if (!initJavaSettings) {
+			// PATCH to avoid cycle
+			if (initJavaSettingsBefore) {
+				return null;
+			}
+			initJavaSettingsBefore = true;
+			Object o = javaSettings != null ? null : get(component, KeyConstants._javasettings, null);
+			if (javaSettings != null || (o != null && Decision.isStruct(o))) {
+				if (javaSettings == null) javaSettings = JavaSettingsImpl.getInstance(config, Caster.toStruct(o, null), null);
+			}
+
+			initJavaSettings = true;
+			initJavaSettingsBefore = false;
 		}
-		catch (IOException e) {
-		}
+
 		if (javaSettings == null) return ((ConfigPro) config).getJavaSettings();
 		return javaSettings;
 	}
@@ -1810,7 +1803,7 @@ public final class ModernApplicationContext extends ApplicationContextSupport {
 		if (defaultClassLoader == null) {
 			synchronized (token) {
 				if (defaultClassLoader == null) {
-					defaultClassLoader = ((ConfigPro) config).getRPCClassLoader(false, ((ConfigPro) config).getJavaSettings(), null);
+					defaultClassLoader = ((ConfigPro) config).getRPCClassLoader(false, ((ConfigPro) config).getJavaSettings());
 				}
 			}
 		}

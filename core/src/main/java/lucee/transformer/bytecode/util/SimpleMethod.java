@@ -5,9 +5,15 @@ import java.io.IOException;
 public interface SimpleMethod {
 	public String getName();
 
-	public Class[] getParameterTypes() throws IOException;
+	public Class[] getParameterClasses() throws IOException;
 
-	public Class getReturnType() throws IOException;
+	public Class[] getParameterClasses(Class defaultValue);
+
+	public Class getReturnClass() throws IOException;
+
+	public Class getReturnClass(Class defaultValue);
+
+	public String getReturnType() throws IOException;
 
 	public String hash();
 }

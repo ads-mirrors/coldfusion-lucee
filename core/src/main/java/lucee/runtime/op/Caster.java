@@ -3673,12 +3673,20 @@ public final class Caster {
 
 	// do not remove, the Axis extension has a direct reference to this method via reflection
 	@Deprecated
-	public static Class cfTypeToClass(String type) throws PageException {
+	public static Class cfTypeToClass(String type) throws PageException, ClassException {
 		// no need to load pc at this point, the method will do when needed
-		return cfTypeToClass(null, type);
+		return cfTypeToClass(null, null, type);
 	}
 
-	public static Class cfTypeToClass(PageContext pc, String type) throws PageException {
+	public static Class cfTypeToClass(PageContext pc, String type) throws PageException, ClassException {
+		return cfTypeToClass(pc, null, type);
+	}
+
+	public static Class cfTypeToClass(ClassLoader cl, String type) throws PageException, ClassException {
+		return cfTypeToClass(null, cl, type);
+	}
+
+	public static Class cfTypeToClass(PageContext pc, ClassLoader cl, String type) throws PageException, ClassException {
 		// TODO weitere typen siehe bytecode.cast.Cast
 
 		type = type.trim();
@@ -3786,29 +3794,23 @@ public final class Caster {
 		}
 		// array
 		if (type.endsWith("[]")) {
-			Class clazz = cfTypeToClass(pc, type.substring(0, type.length() - 2));
+			Class clazz = cfTypeToClass(pc, cl, type.substring(0, type.length() - 2));
 			clazz = ClassUtil.toArrayClass(clazz);
 			return clazz;
 		}
 		// check for argument
-		Class<?> clazz;
-		try {
-			clazz = otherTypeToClass(pc, type);
-		}
-		catch (ClassException e) {
-			throw Caster.toPageException(e);
-		}
-		return clazz;
+		return otherTypeToClass(pc, cl, type);
 	}
 
-	private static Class<?> otherTypeToClass(PageContext pc, String type) throws PageException, ClassException {
+	private static Class<?> otherTypeToClass(PageContext pc, ClassLoader cl, String type) throws PageException, ClassException {
 		pc = ThreadLocalPageContext.get(pc);
 		PageException pe = null;
 		// try to load as cfc
 		if (pc != null) {
 			try {
 				Component c = pc.loadComponent(type);
-				return ComponentUtil.getComponentPropertiesClass(pc, c, false);
+
+				return ComponentUtil.getComponentPropertiesClass(pc, cl, c, false);
 			}
 			catch (PageException e) {
 				pe = e;
@@ -3816,6 +3818,10 @@ public final class Caster {
 		}
 		// try to load as class
 		try {
+			if (cl != null) {
+				Class clazz = ClassUtil.loadClass(cl, type, null);
+				if (clazz != null) return clazz;
+			}
 			return ClassUtil.loadClass(pc, type);
 		}
 		catch (ClassException ce) {
@@ -5296,7 +5302,7 @@ public final class Caster {
 		// create Pojo
 		if (pojo == null) {
 			try {
-				pojo = (Pojo) ClassUtil.loadInstance(ComponentUtil.getComponentPropertiesClass(pc, comp, axisType));
+				pojo = (Pojo) ClassUtil.loadInstance(ComponentUtil.getComponentPropertiesClass(pc, null, comp, axisType));
 			}
 			catch (ClassException e) {
 				throw Caster.toPageException(e);

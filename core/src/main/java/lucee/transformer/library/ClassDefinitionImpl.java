@@ -275,7 +275,7 @@ public final class ClassDefinitionImpl<T> implements ClassDefinition<T>, Externa
 		if (maven != null) {
 			ConfigPro config = (ConfigPro) ThreadLocalPageContext.getConfig();
 			try {
-				return clazz = (Class<T>) config.getRPCClassLoader(false, JavaSettingsImpl.getInstance(config, getMaven()), null).loadClass(className);
+				return clazz = (Class<T>) config.getRPCClassLoader(false, JavaSettingsImpl.getInstance(config, getMaven())).loadClass(className);
 			}
 			catch (Exception e) {
 				ClassException ce = new ClassException("Failes to load class [" + className + "]");

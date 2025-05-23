@@ -1186,4 +1186,7 @@ public abstract class PageContext extends jakarta.servlet.jsp.PageContext {
 	public abstract boolean ignoreScopes();
 
 	public abstract void writeEncodeFor(String value, String encodeType) throws IOException, PageException;
+
+	public abstract lucee.runtime.Component loadInline(String realPath, String inlineName) throws PageException;
+
 }

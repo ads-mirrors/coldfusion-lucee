@@ -702,8 +702,8 @@ public final class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	}
 
 	@Override
-	public ClassLoader getRPCClassLoader(boolean reload, JavaSettings js, ClassLoader parent) throws IOException {
-		return cs.getRPCClassLoader(reload, js, parent);
+	public ClassLoader getRPCClassLoader(boolean reload, JavaSettings js) throws IOException {
+		return cs.getRPCClassLoader(reload, js);
 	}
 
 	@Override

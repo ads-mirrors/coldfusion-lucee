@@ -328,14 +328,14 @@ public final class ThreadLocalPageContext {
 		if (pc != null) {
 			ClassLoader cl = ((PageContextImpl) pc).getRPCClassLoader(reload);
 			if (cl != null) return cl;
-			return SystemUtil.getCombinedClassLoader();
+			return SystemUtil.getCoreClassLoader();
 		}
 		// pc from current thread
 		pc = pcThreadLocal.get();
 		if (pc != null) {
 			ClassLoader cl = ((PageContextImpl) pc).getRPCClassLoader();
 			if (cl != null) return cl;
-			return SystemUtil.getCombinedClassLoader();
+			return SystemUtil.getCoreClassLoader();
 		}
 
 		// pc from parent thread
@@ -343,7 +343,7 @@ public final class ThreadLocalPageContext {
 		if (pc != null) {
 			ClassLoader cl = ((PageContextImpl) pc).getRPCClassLoader();
 			if (cl != null) return cl;
-			return SystemUtil.getCombinedClassLoader();
+			return SystemUtil.getCoreClassLoader();
 		}
 
 		// config
@@ -352,7 +352,7 @@ public final class ThreadLocalPageContext {
 			ClassLoader cl = config.getRPCClassLoader(reload);
 			if (cl != null) return cl;
 		}
-		return SystemUtil.getCombinedClassLoader();
+		return SystemUtil.getCoreClassLoader();
 	}
 
 	public static ClassLoader getRPCClassLoader(boolean reload) throws IOException {
