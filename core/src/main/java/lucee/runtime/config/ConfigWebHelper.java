@@ -2,11 +2,9 @@ package lucee.runtime.config;
 
 import java.lang.ref.SoftReference;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -63,8 +61,6 @@ public final class ConfigWebHelper {
 	private final CFMLCompilerImpl compiler = new CFMLCompilerImpl();
 	private WSHandler wsHandler;
 	private GatewayEngineImpl gatewayEngine;
-	private Map<String, Mapping> serverTagMappings;
-	private Map<String, Mapping> serverFunctionMappings;
 	private SearchEngine searchEngine;
 	private ClassDefinition<SearchEngine> searchEngineCD;
 	private static final LockManager lockManager = LockManagerImpl.getInstance(false);
@@ -142,46 +138,6 @@ public final class ConfigWebHelper {
 
 	public TagHandlerPool getTagHandlerPool() {
 		return tagHandlerPool;
-	}
-
-	public Collection<Mapping> getServerTagMappings() {
-		if (serverTagMappings == null) {
-			Iterator<Entry<String, Mapping>> it = cs.tagMappings.entrySet().iterator();// .cloneReadOnly(this);
-			Entry<String, Mapping> e;
-			serverTagMappings = new ConcurrentHashMap<String, Mapping>();
-			while (it.hasNext()) {
-				e = it.next();
-				serverTagMappings.put(e.getKey(), ((MappingImpl) e.getValue()).cloneReadOnly(cw));
-			}
-		}
-		return serverTagMappings.values();
-	}
-
-	public Mapping getServerTagMapping(String mappingName) {
-		getServerTagMappings(); // necessary to make sure it exists
-		return serverTagMappings.get(mappingName);
-	}
-
-	public Collection<Mapping> getServerFunctionMappings() {
-		if (serverFunctionMappings == null) {
-			Iterator<Entry<String, Mapping>> it = cs.functionMappings.entrySet().iterator();
-			Entry<String, Mapping> e;
-			serverFunctionMappings = new ConcurrentHashMap<String, Mapping>();
-			while (it.hasNext()) {
-				e = it.next();
-				serverFunctionMappings.put(e.getKey(), ((MappingImpl) e.getValue()).cloneReadOnly(cw));
-			}
-		}
-		return serverFunctionMappings.values();
-	}
-
-	public Mapping getServerFunctionMapping(String mappingName) {
-		getServerFunctionMappings();// call this to make sure it exists
-		return serverFunctionMappings.get(mappingName);
-	}
-
-	public void resetServerFunctionMappings() {
-		serverFunctionMappings = null;
 	}
 
 	public GatewayEngineImpl getGatewayEngineImpl(GatewayMap entries) throws PageException {

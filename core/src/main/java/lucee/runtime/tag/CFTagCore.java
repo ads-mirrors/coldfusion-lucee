@@ -71,7 +71,7 @@ public final class CFTagCore extends CFTag {
 	public static InitFile createInitFile(PageContext pageContext, boolean isweb, String filename, String mappingName) {
 		ConfigWebPro config = (ConfigWebPro) pageContext.getConfig();
 		if (StringUtil.isEmpty(mappingName)) mappingName = "mapping-tag";
-		Mapping mapping = isweb ? config.getTagMapping(mappingName) : config.getServerTagMapping(mappingName);
+		Mapping mapping = config.getTagMapping(mappingName);
 
 		return new InitFile(pageContext, mapping.getPageSource(filename), filename);
 

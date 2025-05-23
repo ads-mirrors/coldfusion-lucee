@@ -62,9 +62,7 @@ public final class InspectTemplates extends BIF implements Function {
 		reset(config, config.getCustomTagMappings());
 		reset(config, config.getComponentMappings());
 		reset(config, config.getFunctionMappings());
-		reset(config, config.getServerFunctionMappings());
 		reset(config, config.getTagMappings());
-		reset(config, config.getServerTagMappings());
 	}
 
 	public static void reset(Config config, Collection<Mapping> mappings) {

@@ -87,14 +87,12 @@ public final class SystemCacheClear implements Function {
 
 	private static void tagCache(PageContext pc) {
 		ConfigWebPro config = (ConfigWebPro) pc.getConfig();
-		InspectTemplates.reset(config, config.getServerTagMappings());
 		InspectTemplates.reset(config, config.getTagMappings());
 	}
 
 	private static void functionCache(PageContext pc) {
 		ConfigWebPro config = (ConfigWebPro) pc.getConfig();
 		config.clearFunctionCache();
-		InspectTemplates.reset(config, config.getServerFunctionMappings());
 		InspectTemplates.reset(config, config.getFunctionMappings());
 
 	}

@@ -1555,26 +1555,6 @@ public final class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	}
 
 	@Override
-	public Collection<Mapping> getServerFunctionMappings() {
-		return helper.getServerFunctionMappings();
-	}
-
-	@Override
-	public Mapping getServerFunctionMapping(String mappingName) {
-		return helper.getServerFunctionMapping(mappingName);
-	}
-
-	@Override
-	public Collection<Mapping> getServerTagMappings() {
-		return helper.getServerTagMappings();
-	}
-
-	@Override
-	public Mapping getServerTagMapping(String mappingName) {
-		return helper.getServerTagMapping(mappingName);
-	}
-
-	@Override
 	public GatewayEngine getGatewayEngine() throws PageException {
 		return helper.getGatewayEngineImpl(getGatewayEntries());
 	}
@@ -1825,11 +1805,6 @@ public final class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	@Override
 	public boolean getPreciseMath() {
 		return cs.getPreciseMath();
-	}
-
-	@Override
-	public void resetServerFunctionMappings() {
-
 	}
 
 	@Override

@@ -1,7 +1,6 @@
 package lucee.runtime.config;
 
 import java.io.IOException;
-import java.util.Collection;
 
 import org.osgi.framework.BundleException;
 import org.xml.sax.SAXException;
@@ -26,14 +25,6 @@ import lucee.runtime.writer.CFMLWriter;
 public interface ConfigWebPro extends ConfigWeb, ConfigPro {
 
 	public Mapping getApplicationMapping(String type, String virtual, String physical, String archive, boolean physicalFirst, boolean ignoreVirtual);
-
-	public Collection<Mapping> getServerFunctionMappings();
-
-	public Mapping getServerFunctionMapping(String mappingName);
-
-	public Collection<Mapping> getServerTagMappings();
-
-	public Mapping getServerTagMapping(String mappingName);
 
 	public WSHandler getWSHandler() throws PageException;
 
@@ -69,8 +60,6 @@ public interface ConfigWebPro extends ConfigWeb, ConfigPro {
 	public void updatePassword(boolean server, String passwordOld, String passwordNew) throws PageException, IOException, SAXException, BundleException;
 
 	public Password updatePasswordIfNecessary(boolean server, String passwordRaw);
-
-	public void resetServerFunctionMappings();
 
 	// public boolean isSingle();
 

@@ -532,8 +532,7 @@ public final class JavaProxyFactory {
 		}
 	}
 
-	private static void createProxyFromComponentInterface(ClassLoader cl, ClassWriter cw, Set<Class> cDone, Map<String, Class> mDone, Component cfc, String className)
-			throws IOException {
+	private static void createProxyFromComponentInterface(ClassLoader cl, ClassWriter cw, Set<Class> cDone, Map<String, Class> mDone, Component cfc, String className) {
 		if (cDone.contains(cfc.getClass())) return;
 		cDone.add(cfc.getClass());
 
@@ -649,7 +648,7 @@ public final class JavaProxyFactory {
 		}
 	}
 
-	private static void _createMethod(ClassWriter cw, Map<String, Class> mDone, SimpleMethod src, String className, short type) throws IOException {
+	private static void _createMethod(ClassWriter cw, Map<String, Class> mDone, SimpleMethod src, String className, short type) {
 		// TODO allow return type of the class itself
 		final Class<?>[] classArgs = src.getParameterClasses(Object.class);
 		final Class<?> classRtn = src.getReturnClass(Object.class);

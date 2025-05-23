@@ -267,7 +267,6 @@ public final class TagUtil {
 	private static void _addTagMetaData(PageContext pc, ConfigWebPro cw) {
 		TagLibTagAttr attrFileName, attrMapping, attrIsWeb;
 		String filename, mappingName;
-		Boolean isWeb;
 		TagLibTag tlt;
 		TagLib[] tlds = cw.getTLDs();
 		for (int i = 0; i < tlds.length; i++) {
@@ -282,9 +281,8 @@ public final class TagUtil {
 					if (attrFileName != null && attrIsWeb != null) {
 						filename = Caster.toString(attrFileName.getDefaultValue(), null);
 						mappingName = Caster.toString(attrMapping.getDefaultValue(), "mapping-tag");
-						isWeb = Caster.toBoolean(attrIsWeb.getDefaultValue(), null);
-						if (filename != null && isWeb != null) {
-							addTagMetaData(pc, tlds[i], tlt, filename, mappingName, isWeb.booleanValue());
+						if (filename != null) {
+							addTagMetaData(pc, tlds[i], tlt, filename, mappingName);
 						}
 					}
 				}
@@ -292,11 +290,11 @@ public final class TagUtil {
 		}
 	}
 
-	private static void addTagMetaData(PageContext pc, TagLib tl, TagLibTag tlt, String filename, String mappingName, boolean isWeb) {
+	private static void addTagMetaData(PageContext pc, TagLib tl, TagLibTag tlt, String filename, String mappingName) {
 		if (pc == null) return;
 		try {
 			ConfigWebPro config = (ConfigWebPro) pc.getConfig();
-			PageSource ps = isWeb ? config.getTagMapping(mappingName).getPageSource(filename) : config.getServerTagMapping(mappingName).getPageSource(filename);
+			PageSource ps = config.getTagMapping(mappingName).getPageSource(filename);
 
 			// Page p = ps.loadPage(pc);
 			ComponentImpl c = ComponentLoader.loadComponent(pc, ps, filename, true, true);

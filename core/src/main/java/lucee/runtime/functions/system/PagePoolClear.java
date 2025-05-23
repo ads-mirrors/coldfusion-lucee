@@ -83,9 +83,7 @@ public final class PagePoolClear extends BIF implements Function {
 		clear(config, config.getCustomTagMappings(), unused);
 		clear(config, config.getComponentMappings(), unused);
 		clear(config, config.getFunctionMappings(), unused);
-		clear(config, config.getServerFunctionMappings(), unused);
 		clear(config, config.getTagMappings(), unused);
-		clear(config, config.getServerTagMappings(), unused);
 	}
 
 	public static void clear(Config config, Collection<Mapping> mappings, boolean unused) {

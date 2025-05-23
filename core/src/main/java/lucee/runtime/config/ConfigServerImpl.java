@@ -777,10 +777,7 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		count += shrink(config.getCustomTagMappings(), force);
 		count += shrink(config.getComponentMappings(), force);
 		count += shrink(config.getFunctionMappings(), force);
-		count += shrink(config.getServerFunctionMappings(), force);
 		count += shrink(config.getTagMappings(), force);
-		count += shrink(config.getServerTagMappings(), force);
-		// count+=shrink(config.getServerTagMapping(),force);
 		return count;
 	}
 
