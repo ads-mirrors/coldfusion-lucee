@@ -37,10 +37,10 @@ import lucee.runtime.java.JavaObject;
 import lucee.runtime.listener.JavaSettingsImpl;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
+import lucee.runtime.reflection.Reflector;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
-import lucee.transformer.bytecode.util.JavaProxyFactory;
 
 public final class CreateDynamicProxy implements Function {
 
@@ -106,7 +106,7 @@ public final class CreateDynamicProxy implements Function {
 		return _call(pc, cfc, interfaces);
 	}
 
-	public static Object _call(PageContext pc, Component cfc, Class[] interfaces) throws PageException, IOException {
+	public static Object _call(PageContext pc, Component cfc, Class[] interfaces) throws PageException {
 
 		// check if all classes are interfaces
 		if (interfaces != null) {
@@ -115,7 +115,7 @@ public final class CreateDynamicProxy implements Function {
 					throw new FunctionException(pc, "CreateDynamicProxy", 2, "interfaces", "definition [" + interfaces[i].getClass() + "] is a class and not a interface");
 			}
 		}
-		return JavaProxyFactory.createProxy(pc, cfc, null, interfaces);
+		return Reflector.componentToClass(pc, cfc, null, interfaces);
 	}
 
 	private static Class toClass(PageContext pc, ClassLoader cl, Struct sct) throws FunctionException, ClassException, BundleException {

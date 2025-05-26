@@ -17,6 +17,7 @@
  */
 package lucee.runtime.functions.other;
 
+import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.StaticScope;
 import lucee.runtime.component.ComponentLoader;
@@ -34,12 +35,18 @@ public class _GetStaticScope implements Function {
 
 	public static Object call(PageContext pc, String componentPath, String type) throws PageException {
 
-		if (type == null || "cfml".equalsIgnoreCase(type)) {
-			StaticScope ss = ComponentLoader.getStaticScope(pc, null, componentPath, null, null, type != null);
+		int iType = _CreateComponent.TYPE_BOTH;
+		if (StringUtil.isEmpty(type, true)) iType = _CreateComponent.TYPE_BOTH;
+		if ("java".equalsIgnoreCase(type)) iType = _CreateComponent.TYPE_JAVA;
+		else if ("cfml".equals(type)) iType = _CreateComponent.TYPE_CFML;
+
+		if (iType != _CreateComponent.TYPE_JAVA) {
+			StaticScope ss = ComponentLoader.getStaticScope(pc, null, componentPath, null, null, iType == _CreateComponent.TYPE_CFML);
 			if (ss != null) return ss;
 		}
+
 		// no if needed, if type=="cfml", getStaticScope return a result or throw an exception
-		Class cls = _CreateComponent.loadClass(pc, componentPath);
+		Class cls = _CreateComponent.loadClass(pc, componentPath, iType);
 		return new JavaObject((pc).getVariableUtil(), cls, false);
 
 	}

@@ -46,9 +46,9 @@ public final class _CreateComponent {
 	public static final ImportDefintion JAVA_LANG = new ImportDefintionImpl("java.lang", "*");
 	public static ImportDefintion[] EMPTY_ID = new ImportDefintion[0];
 
-	private static int TYPE_BOTH = 1;
-	private static int TYPE_JAVA = 2;
-	private static int TYPE_CFML = 4;
+	public static int TYPE_BOTH = 1;
+	public static int TYPE_JAVA = 2;
+	public static int TYPE_CFML = 4;
 
 	public static Object call(PageContext pc, Object[] objArr) throws PageException {
 		String path = Caster.toString(objArr[objArr.length - 1]);
@@ -67,7 +67,7 @@ public final class _CreateComponent {
 		Component cfc = type != TYPE_JAVA ? ComponentLoader.searchComponent(pc, null, path, null, null, false, true, true, type == TYPE_CFML) : null;
 		// if type is TYPE_CFML we do not have to check for it here anymore, because the line above has a
 		// cfc or throws an exception
-		Class cls = cfc == null ? cls = loadClass(pc, path) : null;
+		Class cls = cfc == null ? cls = loadClass(pc, path, type) : null;
 
 		// no init method
 		if (cfc != null && !(cfc.get(pc, KeyConstants._init, null) instanceof UDF)) {
@@ -134,7 +134,7 @@ public final class _CreateComponent {
 		return rtn;
 	}
 
-	public static Class loadClass(PageContext pc, String path) throws ApplicationException {
+	public static Class loadClass(PageContext pc, String path, int type) throws ApplicationException {
 		Class cls = null;
 		// no package
 		if (path.indexOf('.') == -1) {
@@ -158,7 +158,7 @@ public final class _CreateComponent {
 				cls = ClassUtil.loadClass(pc, path);
 			}
 			catch (Exception e) {
-				ApplicationException ae = new ApplicationException("could not find component or class with name [" + path + "]");
+				ApplicationException ae = new ApplicationException("could not find " + (type == TYPE_BOTH ? "component or class" : "class") + "  with name [" + path + "]");
 				ExceptionUtil.initCauseEL(ae, e);
 				throw ae;
 			}

@@ -113,7 +113,12 @@ public class JavaObject implements Objects, ObjectWrap {
 				}
 			}
 		}
-		// male Instance
+
+		if ("class".equalsIgnoreCase(propertyName)) {
+			return clazz;
+		}
+
+		// make Instance
 		return variableUtil(pc).get(pc, init(EMPTY, TYPE_FIELD, propertyName), propertyName);
 	}
 

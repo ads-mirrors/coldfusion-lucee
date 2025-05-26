@@ -394,7 +394,7 @@ public final class Reflector {
 		// component as class
 		PageContext pc;
 		if (src instanceof Component && trgClass.isInterface() && (pc = ThreadLocalPageContext.get()) != null) {
-			return componentToClass(pc, (Component) src, trgClass, rating);
+			return componentToClass(pc, rating, (Component) src, null, trgClass);
 		}
 
 		// UDF as @FunctionalInterface
@@ -474,18 +474,22 @@ public final class Reflector {
 	}
 
 	public static Object componentToClass(PageContext pc, Component src) throws PageException {
-		return componentToClass(pc, src, null, null);
+		return componentToClass(pc, null, src, null);
 	}
 
 	public static Object componentToClass(PageContext pc, Component src, Class trgClass) throws PageException {
-		return componentToClass(pc, src, trgClass, null);
+		return componentToClass(pc, null, src, trgClass);
 	}
 
-	private static Object componentToClass(PageContext pc, Component src, Class trgClass, RefInteger rating) throws PageException {
+	public static Object componentToClass(PageContext pc, Component src, Class trgClass, Class... interfaces) throws PageException {
+		return componentToClass(pc, null, src, trgClass, interfaces);
+	}
+
+	private static Object componentToClass(PageContext pc, RefInteger rating, Component src, Class trgClass, Class... interfaces) throws PageException {
 		try {
 			JavaAnnotation ja = getJavaAnnotation(pc, trgClass != null ? trgClass.getClassLoader() : SystemUtil.getCoreClassLoader(), src);
 			Class<?> _extends = ja != null && ja.extend != null ? ja.extend : null;
-			return JavaProxyFactory.createProxy(pc, src, _extends, extractImplements(pc, src, ja, trgClass, rating));
+			return JavaProxyFactory.createProxy(pc, src, _extends, merge(extractImplements(pc, src, ja, trgClass, rating), interfaces));
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);
