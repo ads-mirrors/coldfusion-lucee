@@ -612,7 +612,7 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 		}
 
 		// return type
-		if (iUdf.getReturnType() != cUdf.getReturnType()) {
+		if (iUdf.getReturnType() != cUdf.getReturnType() && iUdf.getReturnType() != CFTypes.TYPE_ANY) {
 			throw new ApplicationException(_getErrorMessage(cUdf, iUdf), "return type [" + cUdf.getReturnTypeAsString() + "] does not match the " + ("abstract component/interface")
 					+ " function return type [" + iUdf.getReturnTypeAsString() + "]");
 		}

@@ -1,3 +1,3 @@
 component {
-	funciton test();
+	function test();
 }
