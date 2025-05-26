@@ -86,6 +86,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.op.Duplicator;
 import lucee.runtime.op.ThreadLocalDuplication;
 import lucee.runtime.op.date.DateCaster;
+import lucee.runtime.reflection.Reflector;
 import lucee.runtime.thread.SerializableCookie;
 import lucee.runtime.thread.ThreadUtil;
 import lucee.runtime.type.ArrayImpl;
@@ -707,6 +708,12 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 
 			return _call(pc, KeyConstants._onmissingmethod, (UDF) ommm, null, newArgs);
 		}
+
+		// getClass
+		if (KeyConstants._getClass.equals(name)) {
+			return Reflector.componentToClass(pc, this).getClass();
+		}
+
 		if (member == null) throw ComponentUtil.notFunction(this, KeyImpl.init(name), null, access);
 		throw ComponentUtil.notFunction(this, KeyImpl.init(name), member.getValue(), access);
 	}
