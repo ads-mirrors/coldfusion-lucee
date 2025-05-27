@@ -85,7 +85,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
                 expect(Asc(res.currency.symbol)).toBe("36"); // $
                 // this differs in different java versions
                 expect(res.dateTimeFormat.date).toBe(getJavaVersion()<9?"EEEE d' de 'MMMM' de 'yyyy":"EEEE, d 'de' MMMM 'de' y");
-                expect(res.dateTimeFormat.time).toBe("HH:mm:ss");
+                if (getJavaVersion() >= 24) { 
+                    expect(res.dateTimeFormat.time).toBe("h:mm:ss a");
+                } else {
+                    expect(res.dateTimeFormat.time).toBe("HH:mm:ss");
+                }
                 
                 setLocale(origLocale);
             });
