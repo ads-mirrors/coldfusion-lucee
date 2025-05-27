@@ -147,7 +147,9 @@
 		assertEquals("#timeFormat(dt,"long")#x", "2:00:00 PM CETx");
 
 		// Java 10 changed the timezone output for full, what actually makes more sense than before
-		if(getJavaVersion()>=9)
+		if (getJavaVersion()>=24)
+			assertEquals("#timeFormat(dt,"full")#x", "2:00:00 PM Central European Standard Timex");
+		else if(getJavaVersion()>=9)
 			assertEquals("#timeFormat(dt,"full")#x", "2:00:00 PM Central European Timex");
 		else
 			assertEquals("#timeFormat(dt,"full")#x", "2:00:00 PM CETx");
