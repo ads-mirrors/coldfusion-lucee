@@ -791,7 +791,8 @@ public final class StringUtil {
 	public static CharSequence _replace(String input, String find, String repl, boolean firstOnly, boolean ignoreCase, List<Pos> positions) {
 		int findLen = find.length();
 
-		if (findLen == 0) return input;
+		if (findLen == 0 ) return input;
+		if (input.length() == 0) return input;
 
 		// String scan = input;
 
@@ -803,7 +804,19 @@ public final class StringUtil {
 			if (!firstOnly && findLen == 1 && positions == null) return input.replace(find.charAt(0), repl.charAt(0));
 		}
 
-		int pos = ignoreCase ? indexOfIgnoreCase(input, find) : input.indexOf(find);
+		String _find = null;
+		String _input = null;
+		if (ignoreCase){
+			_find = find.toUpperCase();
+			_input = input.toUpperCase();
+			// LDEV-4018
+			if (_find.length() > find.length() || _input.length() > input.length()) {
+				_find = find.toLowerCase();
+				_input = input.toLowerCase();
+			}
+		}
+
+		int pos = ignoreCase ? _input.indexOf(_find) : input.indexOf(find);
 		if (pos == -1) return input;
 
 		int start = 0;
@@ -815,7 +828,7 @@ public final class StringUtil {
 			sb.append(repl);
 			start = pos + findLen;
 			if (firstOnly) break;
-			pos = ignoreCase ? indexOfIgnoreCase(input, find, start) : input.indexOf(find, start);
+			pos = ignoreCase ? _input.indexOf(_find, start) : input.indexOf(find, start);
 		}
 		if (input.length() > start) sb.append(input.substring(start));
 		return sb;
@@ -919,19 +932,6 @@ public final class StringUtil {
 	public static int indexOfIgnoreCase(String haystack, String needle, int offset) {
 		if (StringUtil.isEmpty(haystack) || StringUtil.isEmpty(needle)) return -1;
 		return offset > 0 ? haystack.toLowerCase().indexOf(needle.toLowerCase(), offset) : haystack.toLowerCase().indexOf(needle.toLowerCase());
-	}
-
-	public static int indexOfIgnoreCaseExtended(String haystack, String needle, int offset) {
-		if (StringUtil.isEmpty(haystack) || StringUtil.isEmpty(needle)) return -1;
-
-		String modHaystack = haystack.toUpperCase();
-		String modNeedle = needle.toUpperCase();
-
-		if (modHaystack.length() > haystack.length() || modNeedle.length() > needle.length()) {
-			modHaystack = haystack.toLowerCase();
-			modNeedle = needle.toLowerCase();
-		}
-		return offset > 0 ? modHaystack.indexOf(modNeedle, offset) : modHaystack.indexOf(modNeedle);
 	}
 
 	/**
