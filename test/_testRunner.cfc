@@ -331,6 +331,11 @@ Begin Stack Trace
 				local.tmp = mid( local.tmp, 1, local.j );
 		}
 		arrayAppend( stack, TAB & local.tmp );
+
+		if ( arrayLen( stack ) == 0 || len( trim( ArrayToList( stack, "" ) ) == 0 ) ){
+			// filtered stack was empty, return the whole stack
+			return [ TAB & arguments.st ];
+		}
 		
 		local.firstCausedBy = find( "Caused by:", arguments.st );
 		if ( firstCausedBy gt 0 ) {
