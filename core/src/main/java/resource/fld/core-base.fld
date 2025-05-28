@@ -15103,7 +15103,7 @@ _- asc (default): ascending (a to z) sort order
 	<function>
 		<name>structToSorted</name>
 		<class>lucee.runtime.functions.struct.StructToSorted</class>
-		<introduced>6.2.16</introduced>
+		<introduced>6.2.1.6</introduced>
 		<member-name>toSorted</member-name>
 		<keywords>struct,sort</keywords>
 		<description>Returns a struct sorted by the top level keys in a structure.
