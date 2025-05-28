@@ -918,6 +918,11 @@ public final class StringUtil {
 
 	public static int indexOfIgnoreCase(String haystack, String needle, int offset) {
 		if (StringUtil.isEmpty(haystack) || StringUtil.isEmpty(needle)) return -1;
+		return offset > 0 ? haystack.toLowerCase().indexOf(needle.toLowerCase(), offset) : haystack.toLowerCase().indexOf(needle.toLowerCase());
+	}
+
+	public static int indexOfIgnoreCaseExtended(String haystack, String needle, int offset) {
+		if (StringUtil.isEmpty(haystack) || StringUtil.isEmpty(needle)) return -1;
 
 		String modHaystack = haystack.toUpperCase();
 		String modNeedle = needle.toUpperCase();
