@@ -318,7 +318,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private PrintWriter out;
 	private PrintWriter err;
 
-	private final Map<String, DatasourceConnPool> pools = new HashMap<>();
+	private final Map<String, DatasourceConnPool> pools = new ConcurrentHashMap<>();
 
 	private Boolean doCustomTagDeepSearch = null;
 	private Boolean doComponentTagDeepSearch;
