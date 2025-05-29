@@ -328,7 +328,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 	private PrintWriter out = SystemUtil.getPrintWriter(SystemUtil.OUT);
 	private PrintWriter err = SystemUtil.getPrintWriter(SystemUtil.ERR);
 
-	private Map<String, DatasourceConnPool> pools = new HashMap<>();
+	private Map<String, DatasourceConnPool> pools = new ConcurrentHashMap<>();
 
 	private boolean doCustomTagDeepSearch = false;
 	private boolean doComponentTagDeepSearch = false;
