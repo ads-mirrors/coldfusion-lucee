@@ -52,15 +52,20 @@ group("Execution Time","Execution times for templates, includes, modules, custom
 		}
 
 		function isSectionOpen( string name ) {
-			try{
-			if ( arguments.name == "ALL" && !structKeyExists( Cookie, variables.cookieName ) )
-				return true;
+			try {
+				if ( arguments.name == "ALL" && !structKeyExists( Cookie, variables.cookieName ) )
+					return true;
 
-			var cookieValue = structKeyExists( Cookie, variables.cookieName ) ? Cookie[ variables.cookieName ] : 0;
-
-			return cookieValue && ( bitAnd( cookieValue, this.allSections[ arguments.name ] ) );
-			}
-			catch(e){
+				var openSections = [];
+				if ( structKeyExists( Cookie, variables.cookieName ) ) {
+					try {
+						openSections = deserializeJSON( Cookie[ variables.cookieName ] );
+					} catch (any e) {
+						openSections = [];
+					}
+				}
+				return arrayFind(openSections, arguments.name) > 0;
+			} catch (any e) {
 				return false;
 			}
 		}
@@ -84,7 +89,7 @@ group("Execution Time","Execution times for templates, includes, modules, custom
 				queryAddColumn(queries, "hash",[]);
 			}
 			loop query=queries {
-				var h="h"&hash(queries.src&":"&queries.line, "quick");
+				var h = "h" & hash(queries.src & ":" & queries.line & ":" & queries.currentrow, "quick");
 				arrayAppend(otherSections, h);
 				querySetCell(queries, "hash", h,queries.currentrow);
 			}
@@ -914,45 +919,36 @@ if(structKeyExists(arguments.custom, "metrics_Charts")) {
 
 				<cfoutput>
 				  cookieName: 	"#variables.cookieName#"
-				, bitmaskAll: 	Math.pow( 2, 31 ) - 1
-				, allSections: 	#serializeJSON( this.allSections )#
 				</cfoutput>
 
-				, setFlag: 		function( name ) {
-
-					var value = __LUCEE.util.getCookie( __LUCEE.debug.cookieName, __LUCEE.debug.allSections.ALL ) | __LUCEE.debug.allSections[ name ];
-					__LUCEE.util.setCookie( __LUCEE.debug.cookieName, value );
-					return value;
-				}
-
-				, clearFlag: 	function( name ) {
-
-					var value = __LUCEE.util.getCookie( __LUCEE.debug.cookieName, 0 ) & ( __LUCEE.debug.bitmaskAll - __LUCEE.debug.allSections[ name ] );
-					__LUCEE.util.setCookie( __LUCEE.debug.cookieName, value );
-					return value;
-				}
-
-				, toggleSection: 	function( name ) {
+				, toggleSection:	function( name ) {
 
 					var btn = __LUCEE.util.getDomObject( "-lucee-debugging-btn-" + name );
 					var obj = __LUCEE.util.getDomObject( "-lucee-debugging-" + name );
-					var isOpen = ( __LUCEE.util.getCookie( __LUCEE.debug.cookieName, 0 ) & __LUCEE.debug.allSections[ name ] ) > 0;
+					var openSections = [];
+					try {
+						openSections = JSON.parse( __LUCEE.util.getCookie(__LUCEE.debug.cookieName) || "[]" );
+						if ( !Array.isArray( openSections ) ) openSections = [];
+					} catch(e) {
+						openSections = [];
+					}
+					var idx = openSections.indexOf (name );
+					var isOpen = idx > -1;
 
 					if ( isOpen ) {
-
+						openSections.splice( idx, 1 );
 						__LUCEE.util.removeClass( btn, '-lucee-icon-minus' );
 						__LUCEE.util.addClass( btn, '-lucee-icon-plus' );
 						__LUCEE.util.addClass( obj, 'collapsed' );
-						__LUCEE.debug.clearFlag( name );
 					} else {
 
-						__LUCEE.util.removeClass( btn, '-lucee-icon-plus' );
+						openSections.push( name );
+						__LUCEE.util.removeClass( btn, '-lucee-icon-plus');
 						__LUCEE.util.addClass( btn, '-lucee-icon-minus' );
 						__LUCEE.util.removeClass( obj, 'collapsed' );
-						__LUCEE.debug.setFlag( name );
 					}
-
-					return !isOpen;					// returns true if section is open after the operation
+					__LUCEE.util.setCookie( __LUCEE.debug.cookieName, JSON.stringify(openSections) );
+					return !isOpen;
 				}
 
 				, selectText:	__LUCEE.util.selectText
