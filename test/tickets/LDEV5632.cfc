@@ -21,6 +21,15 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="javasettings"  {
             fileCopy("https://repo1.maven.org/maven2/io/opentelemetry/opentelemetry-context/1.50.0/opentelemetry-context-1.50.0.jar", trg);
     }
 
+	function afterAll() {
+        var curr=getDirectoryFromPath(getCurrentTemplatePath());
+        variables.loadPaths=curr&"LDEV5632/";
+        // create lib dir
+        if(directoryExists(variables.loadPaths)) {
+            directoryDelete(variables.loadPaths,true);
+        }
+    }
+
 
 	function run( testResults , testBox ) {
 		describe( title="test java settings set directly with createObject", body=function() {
