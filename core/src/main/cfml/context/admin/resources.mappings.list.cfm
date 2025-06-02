@@ -232,7 +232,15 @@
 							</cfloop>
 							</ul>
 							
-							<input type="hidden" name="toplevel_1" value="yes">
+						</td>
+					</tr>
+					<tr>
+						<th scope="row">
+							#stText.Mappings.ToplevelHead#
+						</th>
+						<td>
+							<input type="checkbox" class="checkbox" name="toplevel_1" value="yes" checked="checked">
+							#stText.mappings.topleveldesc#
 						</td>
 					</tr>
 					<cfmodule template="remoteclients.cfm" colspan="2" line=true>
