@@ -65,7 +65,7 @@ import lucee.transformer.dynamic.meta.dynamic.ClazzDynamic;
 public class DynamicInvoker {
 
 	private static DynamicInvoker engine;
-	private Map<Integer, DynamicClassLoader> loaders = new HashMap<>();
+	private Map<Integer, DynamicClassLoader> loaders = new ConcurrentHashMap<>();
 	private Resource root;
 	private Log _log;
 	private static final Object token = new SerializableObject();
