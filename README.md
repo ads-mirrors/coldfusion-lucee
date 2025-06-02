@@ -9,11 +9,19 @@ Lucee simplifies technologies like webservices (REST, SOAP, HTTP), ORM (Hibernat
 
 Lucee provides a compatibility layer for Adobe ColdFusion &copy;  CFML using less resources and delivering better performance. 
 
- [What is new with Lucee 6](README-Lucee6.md)
+[What is new with Lucee 6](README-Lucee6.md)
 
- ## CFCAMP 2025 - Meet the Lucee team!
+## Changelogs
 
- [![Meet the Lucee Team at CFCAMP 2025](https://docs.lucee.org/assets/images/conferences/CFCAMP-2025.png)](https://www.cfcamp.org/?utm_source=website&utm_id=Ldoc)
+- [Changelogs per Release](https://download.lucee.org/changelog/?version=6.2)
+- [New Tags & Functions, Arguments and Attributes](https://docs.lucee.org/reference/changelog.html)
+
+### Breaking changes
+
+- [Breaking Changes Between Lucee 5.4 and 6.0](https://docs.lucee.org/recipes/breaking-changes-6-0.html)
+- [Breaking Changes Between Lucee 6.0 and 6.1](https://docs.lucee.org/recipes/breaking-changes-6-1.html)
+- [Breaking Changes Between Lucee 6.1 and 6.2](https://docs.lucee.org/recipes/breaking-changes-6-2.html)
+- [Breaking Changes Between Lucee 6.2 and 7.0](https://docs.lucee.org/recipes/breaking-changes-7.html)
 
 ## Installation
 
@@ -59,6 +67,7 @@ For more peruse the [Lucee Manifesto](https://dev.lucee.org/t/lucee-manifesto/18
 
 The Lucee team is always open to feedback and active at CFML community events, and is keen to remind people that Lucee is a community project.
 
+Our Release approach follows the [The Tip & Tail Model of Library Development](https://openjdk.org/jeps/14) approach as used by the Java JDK
 
 ![GitHub](https://img.shields.io/github/license/lucee/Lucee)
 5.3 [![Java CI](https://github.com/lucee/Lucee/actions/workflows/main.yml/badge.svg?branch=5.3)](https://github.com/lucee/Lucee/actions/workflows/main.yml)

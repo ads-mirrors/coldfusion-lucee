@@ -17,7 +17,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				assertEquals("2000.01.02 AD at 03:04:05 CET", DateTimeFormat(d, "yyyy.MM.dd G 'at' HH:nn:ss z"));
 				assertEquals("Sun, Jan 2, '00", DateTimeFormat(d, "EEE, MMM d, ''yy"));
 				assertEquals("3:04 AM", DateTimeFormat(d, "h:nn a"));
-				assertEquals("03 o'clock AM, Central European Time", DateTimeFormat(d, "hh 'o''clock' a, zzzz"));
+				if (getJavaVersion() >= 24) { 
+					assertEquals("03 o'clock AM, Central European Standard Time", DateTimeFormat(d, "hh 'o''clock' a, zzzz"));
+				} else {
+					assertEquals("03 o'clock AM, Central European Time", DateTimeFormat(d, "hh 'o''clock' a, zzzz"));
+				}
 				assertEquals("3:04 AM, CET", DateTimeFormat(d, "K:nn a, z"));
 				assertEquals("02000.January.02 AD 03:04 AM", DateTimeFormat(d, "yyyyy.MMMMM.dd GGG hh:nn aaa"));
 				assertEquals("Sun, 2 Jan 2000 03:04:05 +0100", DateTimeFormat(d, "EEE, d MMM yyyy HH:nn:ss Z"));
@@ -35,5 +39,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			});
 
 		});
+	}
+
+	private function getJavaVersion() {
+		var raw=server.java.version;
+		var arr=listToArray(raw,'.');
+		if (arr[1]==1) // version 1-9
+			return arr[2];
+		return arr[1];
 	}
 }
