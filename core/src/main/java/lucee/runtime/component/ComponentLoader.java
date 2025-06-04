@@ -194,21 +194,9 @@ public final class ComponentLoader {
 
 	private static Object _search(PageContext pc, PageSource loadingLocation, String rawPath, Boolean searchLocal, Boolean searchRoot, boolean executeConstr, short returnType,
 			final boolean isExtendedComponent, boolean validate, boolean throwOnMissing) throws PageException {
-		PageSource currPS = pc.getCurrentPageSource(null);
 
-		ImportDefintion[] importDefintions = null;
-		if (currPS != null) {
-			Page currP;
-			Component cfc = pc.getActiveComponent();
-			if (cfc instanceof ComponentImpl && currPS.equals(cfc.getPageSource())) {
-				importDefintions = ((ComponentImpl) cfc)._getImportDefintions();
-			}
-			else if ((currP = currPS.loadPage(pc, false, null)) != null) {
-				importDefintions = currP.getImportDefintions();
-			}
-		}
 		// first try for the current dialect
-		Object obj = _search(pc, loadingLocation, rawPath, searchLocal, searchRoot, executeConstr, returnType, currPS, importDefintions, isExtendedComponent, validate);
+		Object obj = _search(pc, loadingLocation, rawPath, searchLocal, searchRoot, executeConstr, returnType, pc.getCurrentPageSource(null), isExtendedComponent, validate);
 
 		if (obj == null && throwOnMissing) {
 			throw new ExpressionException("invalid " + toStringType(returnType) + " definition, can't find " + toStringType(returnType) + " [" + rawPath + "]");
@@ -217,7 +205,8 @@ public final class ComponentLoader {
 	}
 
 	private static Object _search(PageContext pc, PageSource loadingLocation, String rawPath, Boolean searchLocal, Boolean searchRoot, boolean executeConstr, short returnType,
-			PageSource currPS, ImportDefintion[] importDefintions, final boolean isExtendedComponent, boolean validate) throws PageException {
+			PageSource currPS, final boolean isExtendedComponent, boolean validate) throws PageException {
+
 		ConfigPro config = (ConfigPro) pc.getConfig();
 
 		boolean doCache = config.useComponentPathCache();
@@ -233,9 +222,10 @@ public final class ComponentLoader {
 
 		// app-String appName=pc.getApplicationContext().getName();
 		rawPath = rawPath.trim().replace('\\', '/');
-		String ext = "." + Constants.getCFMLComponentExtension();
+		String ext = "." + Constants.CFML_COMPONENT_EXTENSION;
 		final String path = (rawPath.indexOf("./") == -1 && !rawPath.endsWith(ext)) ? rawPath.replace('.', '/') : rawPath;
 		boolean isRealPath = !StringUtil.startsWith(path, '/');
+
 		// PageSource currPS = pc.getCurrentPageSource();
 		// Page currP=currPS.loadPage(pc,false);
 		PageSource ps = null;
@@ -243,35 +233,50 @@ public final class ComponentLoader {
 
 		// MUSTMUST improve to handle different extensions
 		String pathWithCFC = (path.endsWith(ext)) ? path : path + ext;
-		// no cache for per application pathes
-		Mapping[] acm = pc.getApplicationContext().getComponentMappings();
-		if (!ArrayUtil.isEmpty(acm)) {
-			Mapping m;
-			for (int y = 0; y < acm.length; y++) {
-				m = acm[y];
-				ps = m.getPageSource(pathWithCFC);
-				page = toCIPage(ps.loadPageThrowTemplateException(pc, false, (Page) null));
-				if (page != null) {
+		boolean currDir = pathWithCFC.indexOf('/') == -1;
 
+		// no cache for per application pathes
+		{
+			Mapping[] acm = pc.getApplicationContext().getComponentMappings();
+			if (!ArrayUtil.isEmpty(acm)) {
+				Mapping m;
+				for (int y = 0; y < acm.length; y++) {
+					m = acm[y];
+					ps = m.getPageSource(pathWithCFC);
+					page = toCIPage(ps.loadPageThrowTemplateException(pc, false, (Page) null));
+					if (page != null) {
+						return returnType == RETURN_TYPE_PAGE ? page
+								: load(pc, page, trim(path.replace('/', '.')), sub, isRealPath, returnType, isExtendedComponent, executeConstr, validate);
+					}
+				}
+			}
+		}
+
+		// CACHE
+		// check local in cache
+		String localCacheName = null;
+		if (searchLocal == null) searchLocal = Caster.toBoolean(rawPath.indexOf('.') == -1 ? true : config.getComponentLocalSearch());
+		if (searchLocal && isRealPath && currPS != null) {
+			localCacheName = currPS.getDisplayPath().replace('\\', '/');
+			localCacheName = localCacheName.substring(0, localCacheName.lastIndexOf('/') + 1).concat(pathWithCFC);
+			if (doCache) {
+				page = config.getCachedPage(pc, localCacheName);
+				if (page != null) {
 					return returnType == RETURN_TYPE_PAGE ? page
 							: load(pc, page, trim(path.replace('/', '.')), sub, isRealPath, returnType, isExtendedComponent, executeConstr, validate);
 				}
 			}
 		}
 
-		if (searchLocal == null) searchLocal = Caster.toBoolean(rawPath.indexOf('.') == -1 ? true : config.getComponentLocalSearch());
-		if (searchRoot == null) searchRoot = Caster.toBoolean(config.getComponentRootSearch());
-
-		// CACHE
-		// check local in cache
-		String localCacheName = null;
-		if (searchLocal && isRealPath && currPS != null) {
-			localCacheName = currPS.getDisplayPath().replace('\\', '/');
-			localCacheName = localCacheName.substring(0, localCacheName.lastIndexOf('/') + 1).concat(pathWithCFC);
-			if (doCache) {
-				page = config.getCachedPage(pc, localCacheName);
-				if (page != null) return returnType == RETURN_TYPE_PAGE ? page
-						: load(pc, page, trim(path.replace('/', '.')), sub, isRealPath, returnType, isExtendedComponent, executeConstr, validate);
+		ImportDefintion[] importDefintions = null;
+		if (currPS != null) {
+			Page currP;
+			Component cfc = pc.getActiveComponent();
+			if (cfc instanceof ComponentImpl && currPS.equals(cfc.getPageSource())) {
+				importDefintions = ((ComponentImpl) cfc)._getImportDefintions();
+			}
+			else if ((currP = currPS.loadPage(pc, false, null)) != null) {
+				importDefintions = currP.getImportDefintions();
 			}
 		}
 
@@ -282,10 +287,12 @@ public final class ComponentLoader {
 			int i = -1;
 			do {
 
-				if (impDef.isWildcard() || impDef.getName().equalsIgnoreCase(path)) {
+				if ((currDir && impDef.isWildcard()) || impDef.getName().equalsIgnoreCase(path)) {
 					page = config.getCachedPage(pc, "import:" + impDef.getPackageAsPath() + pathWithCFC);
-					if (page != null) return returnType == RETURN_TYPE_PAGE ? page
-							: load(pc, page, trim(path.replace('/', '.')), sub, isRealPath, returnType, isExtendedComponent, executeConstr, validate);
+					if (page != null) {
+						return returnType == RETURN_TYPE_PAGE ? page
+								: load(pc, page, trim(path.replace('/', '.')), sub, isRealPath, returnType, isExtendedComponent, executeConstr, validate);
+					}
 				}
 				impDef = ++i < impDefs.length ? impDefs[i] : null;
 			}
@@ -295,8 +302,10 @@ public final class ComponentLoader {
 		if (doCache) {
 			// check global in cache
 			page = config.getCachedPage(pc, pathWithCFC);
-			if (page != null) return returnType == RETURN_TYPE_PAGE ? page
-					: load(pc, page, trim(path.replace('/', '.')), sub, isRealPath, returnType, isExtendedComponent, executeConstr, validate);
+			if (page != null) {
+				return returnType == RETURN_TYPE_PAGE ? page
+						: load(pc, page, trim(path.replace('/', '.')), sub, isRealPath, returnType, isExtendedComponent, executeConstr, validate);
+			}
 		}
 
 		// SEARCH
@@ -307,6 +316,7 @@ public final class ComponentLoader {
 			page = toCIPage(PageSourceImpl.loadPage(pc, arr, null));
 			if (page != null) {
 				if (doCache) config.putCachedPageSource(localCacheName, page.getPageSource());
+
 				return returnType == RETURN_TYPE_PAGE ? page
 						: load(pc, page, trim(path.replace('/', '.')), sub, isRealPath, returnType, isExtendedComponent, executeConstr, validate);
 			}
@@ -326,7 +336,7 @@ public final class ComponentLoader {
 			int i = -1;
 			do {
 
-				if (impDef.isWildcard() || impDef.getName().equalsIgnoreCase(path)) {
+				if ((currDir && impDef.isWildcard()) || impDef.getName().equalsIgnoreCase(path)) {
 
 					// search from local first
 					if (searchLocal) {
@@ -400,7 +410,9 @@ public final class ComponentLoader {
 						ps = MappingUtil.searchMappingRecursive(m, pathWithCFC, true);
 						if (ps != null) {
 							page = toCIPage(ps.loadPageThrowTemplateException(pc, false, (Page) null));
-							if (page != null) doCache = false;// do not cache this, it could be ambigous
+							if (page != null) {
+								doCache = false;// do not cache this, it could be ambigous
+							}
 						}
 					}
 
@@ -436,7 +448,8 @@ public final class ComponentLoader {
 		if (StringUtil.startsWithIgnoreCase(rawPath, "cfide.")) {
 			String rpm = Constants.DEFAULT_PACKAGE + "." + rawPath.substring(6);
 			try {
-				return _search(pc, loadingLocation, rpm, searchLocal, searchRoot, executeConstr, returnType, currPS, importDefintions, false, validate);
+				if (searchRoot == null) searchRoot = Caster.toBoolean(config.getComponentRootSearch());
+				return _search(pc, loadingLocation, rpm, searchLocal, searchRoot, executeConstr, returnType, currPS, false, validate);
 			}
 			catch (ExpressionException ee) {
 				return null;
@@ -461,8 +474,6 @@ public final class ComponentLoader {
 		}
 
 		return null;
-		// throw new ExpressionException("invalid "+toStringType(returnType)+" definition, can't find
-		// "+toStringType(returnType)+" ["+rawPath+"]");
 	}
 
 	private static String toStringType(short returnType) {
