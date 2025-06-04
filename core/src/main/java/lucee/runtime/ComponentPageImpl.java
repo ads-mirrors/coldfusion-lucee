@@ -82,6 +82,7 @@ import lucee.runtime.type.UDF;
 import lucee.runtime.type.scope.Scope;
 import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.type.util.CollectionUtil;
+import lucee.runtime.type.util.ComponentUtil;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
 import lucee.runtime.type.util.StructUtil;
@@ -1178,6 +1179,10 @@ public abstract class ComponentPageImpl extends ComponentPage {
 		this.initJS = true;
 		this.js = js;
 		return js;
+	}
+
+	public short hasInit() {
+		return ComponentUtil.HAS_INIT_UNDEFINED;
 	}
 }
 

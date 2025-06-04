@@ -612,4 +612,8 @@ public abstract class Function extends StatementBaseNoFinal implements Opcodes, 
 		return index;
 	}
 
+	public ExprString getName() {
+		return name;
+	}
+
 }

@@ -38,6 +38,7 @@ import lucee.runtime.op.Decision;
 import lucee.runtime.type.FunctionValue;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.UDF;
+import lucee.runtime.type.util.ComponentUtil;
 import lucee.runtime.type.util.KeyConstants;
 
 public final class _CreateComponent {
@@ -64,14 +65,16 @@ public final class _CreateComponent {
 		}
 
 		// not store the index to make it faster
-		Component cfc = type != TYPE_JAVA ? ComponentLoader.searchComponent(pc, null, path, null, null, false, true, true, type == TYPE_CFML) : null;
+		ComponentImpl cfc = type != TYPE_JAVA ? ComponentLoader.searchComponent(pc, null, path, null, null, false, true, true, type == TYPE_CFML) : null;
 		// if type is TYPE_CFML we do not have to check for it here anymore, because the line above has a
 		// cfc or throws an exception
 		Class cls = cfc == null ? cls = loadClass(pc, path, type) : null;
 
-		// no init method
-		if (cfc != null && !(cfc.get(pc, KeyConstants._init, null) instanceof UDF)) {
-
+		// no init method HAS_INIT_UNDEFINED part, this was just for older archives not having "hasInit"
+		// method
+		// FUTURE remove the
+		if (cfc != null && (cfc.hasInit() == ComponentUtil.HAS_INIT_FALSE
+				|| (cfc.hasInit() == ComponentUtil.HAS_INIT_UNDEFINED && !(cfc.get(pc, KeyConstants._init, null) instanceof UDF)))) {
 			if (objArr.length > (hasType ? 2 : 1)) { // we have arguments passed in
 				Object arg1 = objArr[0];
 				if (arg1 instanceof FunctionValue) {
@@ -85,7 +88,6 @@ public final class _CreateComponent {
 					EntityNew.setPropeties(pc, cfc, args, true);
 				}
 			}
-
 			return cfc;
 		}
 

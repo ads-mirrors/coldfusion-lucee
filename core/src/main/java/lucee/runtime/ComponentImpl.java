@@ -170,6 +170,8 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 
 	private ImportDefintion[] importDefintions;
 
+	private short hasInit;
+
 	private static ThreadLocalConstrCall statConstr = new ThreadLocalConstrCall();
 
 	/**
@@ -270,6 +272,10 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 		catch (IOException ioe) {
 			return false;
 		}
+	}
+
+	public short hasInit() {
+		return hasInit;
 	}
 
 	@Override
@@ -452,6 +458,8 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 			}
 		}
 
+		hasInit = componentPage.hasInit();
+
 		if (base != null) {
 			this.dataMemberDefaultAccess = base.dataMemberDefaultAccess;
 			this._static = new StaticScope(base._static, this, componentPage, dataMemberDefaultAccess);
@@ -460,6 +468,9 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 			_data = base._data;
 			_udfs = new HashMap<Key, UDF>(base._udfs);
 			setTop(this, base);
+			if (hasInit != ComponentUtil.HAS_INIT_TRUE) {
+				hasInit = base.hasInit();
+			}
 		}
 		else {
 			this.dataMemberDefaultAccess = pageContext.getConfig().getComponentDataMemberDefaultAccess();
@@ -611,7 +622,16 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 			throw new ApplicationException(_getErrorMessage(cUdf, iUdf), "access [" + ComponentUtil.toStringAccess(cUdf.getAccess()) + "] has to be at least [public]");
 		}
 
-		// return type
+		// return type (on case the return type is not one of the base types or does not match)
+		if (iUdf.getReturnType() == CFTypes.TYPE_UNKNOW || iUdf.getReturnType() != cUdf.getReturnType()) {
+
+			if (iUdf.getReturnType() == CFTypes.TYPE_UNKNOW && !iUdf.getReturnTypeAsString().equalsIgnoreCase(cUdf.getReturnTypeAsString())) {
+				throw new ApplicationException(_getErrorMessage(cUdf, iUdf), "return type [" + cUdf.getReturnTypeAsString() + "] does not match the "
+						+ ("abstract component/interface") + " function return type [" + iUdf.getReturnTypeAsString() + "]");
+			}
+
+		}
+
 		if (iUdf.getReturnType() != cUdf.getReturnType()) {
 			throw new ApplicationException(_getErrorMessage(cUdf, iUdf), "return type [" + cUdf.getReturnTypeAsString() + "] does not match the " + ("abstract component/interface")
 					+ " function return type [" + iUdf.getReturnTypeAsString() + "]");

@@ -108,6 +108,9 @@ public final class ComponentUtil {
 	private static final Method INVOKE = new Method("invoke", Types.OBJECT, new Type[] { Types.STRING, Types.OBJECT_ARRAY });
 
 	public static final Type SERVER_WSUTIL = Type.getType(WSUtil.class);
+	public static final short HAS_INIT_UNDEFINED = (short) 0;
+	public static final short HAS_INIT_TRUE = (short) 1;
+	public static final short HAS_INIT_FALSE = (short) 2;
 
 	/**
 	 * generate a ComponentJavaAccess (CJA) class from a component a CJA is a dynamic genarted java

@@ -87,6 +87,7 @@ import lucee.transformer.bytecode.visitor.ConditionVisitor;
 import lucee.transformer.bytecode.visitor.DecisionIntVisitor;
 import lucee.transformer.bytecode.visitor.OnFinally;
 import lucee.transformer.bytecode.visitor.TryCatchFinallyVisitor;
+import lucee.transformer.expression.ExprString;
 import lucee.transformer.expression.Expression;
 import lucee.transformer.expression.literal.LitString;
 import lucee.transformer.expression.literal.Literal;
@@ -146,6 +147,7 @@ public final class Page extends BodyBase implements Root {
 
 	// long getSourceLastModified()
 	private final static Method LAST_MOD = new Method("getSourceLastModified", Types.LONG_VALUE, new Type[] {});
+	private final static Method HAS_INIT = new Method("hasInit", Types.SHORT_VALUE, new Type[] {});
 
 	private final static Method COMPILE_TIME = new Method("getCompileTime", Types.LONG_VALUE, new Type[] {});
 
@@ -479,6 +481,30 @@ public final class Page extends BodyBase implements Root {
 			}
 			tmpFunctions = tmps;
 		}
+
+		// hasInit
+		boolean hasInit = false;
+		if (isComponent(comp)) {
+			ExprString name;
+			for (Function f: tmpFunctions) {
+				name = f.getName();
+				if (!(name instanceof Literal)) {
+					hasInit = true;
+					break;
+				}
+				if ("init".equalsIgnoreCase(((Literal) name).getString())) {
+					hasInit = true;
+					break;
+				}
+
+			}
+		}
+
+		adapter = new GeneratorAdapter(Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL, HAS_INIT, null, null, cw);
+		adapter.push(hasInit ? ComponentUtil.HAS_INIT_TRUE : ComponentUtil.HAS_INIT_FALSE);
+		adapter.returnValue();
+		adapter.endMethod();
+
 		Function[] functions = tmpFunctions.toArray(new Function[tmpFunctions.size()]);
 
 		List<IFunction> funcs;

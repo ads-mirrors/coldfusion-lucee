@@ -29,7 +29,7 @@ import lucee.runtime.type.util.ArrayUtil;
 
 public final class Constants {
 	private static final String CFML_SCRIPT_EXTENSION = "cfs";
-	private static final String CFML_COMPONENT_EXTENSION = "cfc";
+	public static final String CFML_COMPONENT_EXTENSION = "cfc";
 
 	public static final String CFML_NAME = "CFML";
 
