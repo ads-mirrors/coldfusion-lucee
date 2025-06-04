@@ -969,6 +969,7 @@ public final class KeyConstants {
 	public static final Key _mails = KeyImpl._const("mails");
 	public static final Key _mailServer = KeyImpl._const("mailServer");
 	public static final Key _mailServers = KeyImpl._const("mailServers");
+	public static final Key _smtp = KeyImpl._const("smtp");	
 	public static final Key _smtpServerSettings = KeyImpl._const("smtpServerSettings");
 	public static final Key _serialization = KeyImpl._const("serialization");
 	public static final Key _serializationSettings = KeyImpl._const("serializationSettings");

@@ -791,6 +791,7 @@ public final class AppListenerUtil {
 	public static Server toMailServer(Config config, Struct data, Server defaultValue) {
 		String hostName = Caster.toString(data.get(KeyConstants._host, null), null);
 		if (StringUtil.isEmpty(hostName, true)) hostName = Caster.toString(data.get(KeyConstants._server, null), null);
+		if (StringUtil.isEmpty(hostName, true)) hostName = Caster.toString(data.get(KeyConstants._smtp, null), null);
 		if (StringUtil.isEmpty(hostName, true)) return defaultValue;
 
 		int port = Caster.toIntValue(data.get(KeyConstants._port, null), 25);
