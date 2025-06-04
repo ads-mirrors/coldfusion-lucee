@@ -308,7 +308,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="mail" {
 				}
 			});
 
-			xit(title="test smtp as application.cfc mailserver config param", body = function( currentSpec ) {
+			it(title="test smtp as application.cfc mailserver config param", body = function( currentSpec ) {
 				_testViaApplicationCFC("smtp", "using smtp");
 			});
 
