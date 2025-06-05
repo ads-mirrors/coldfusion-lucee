@@ -1136,22 +1136,8 @@ public final class Page extends BodyBase implements Root {
 		}
 	}
 
-	private List<IFunction> writeOutInitComponent(ConstrBytecodeContext constr, Function[] functions, List<LitString> keys, ClassWriter cw, Tag component, String name)
-			throws TransformerException {
-		final GeneratorAdapter adapter = new GeneratorAdapter(Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL, INIT_COMPONENT3, null, new Type[] { Types.PAGE_EXCEPTION }, cw);
-		BytecodeContext bc = new BytecodeContext(config, null, constr, this, keys, cw, name, adapter, INIT_COMPONENT3, writeLog(), suppressWSbeforeArg, output, returnValue);
-		Label methodBegin = new Label();
-		Label methodEnd = new Label();
-
-		adapter.visitLocalVariable("this", "L" + name + ";", null, methodBegin, methodEnd, 0);
-		adapter.visitLabel(methodBegin);
-
-		// Scope oldData=null;
-		final int oldData = adapter.newLocal(Types.VARIABLES);
-		ASMConstants.NULL(adapter);
-		adapter.storeLocal(oldData);
-
-		int localBC = adapter.newLocal(Types.BODY_CONTENT);
+	private int pushBody(BytecodeContext bc, final GeneratorAdapter adapter, boolean store) {
+		int localBC = store ? adapter.newLocal(Types.BODY_CONTENT) : 0;
 		ConditionVisitor cv = new ConditionVisitor();
 		cv.visitBefore();
 		cv.visitWhenBeforeExpr();
@@ -1166,82 +1152,110 @@ public final class Page extends BodyBase implements Root {
 		adapter.invokeVirtual(Types.PAGE_CONTEXT, PUSH_BODY);
 		cv.visitOtherviseAfterBody();
 		cv.visitAfter(bc);
-		adapter.storeLocal(localBC);
+		if (store) adapter.storeLocal(localBC);
+		return localBC;
+	}
 
-		// c.init(pc,this);
-		adapter.loadArg(1);
-		adapter.loadArg(0);
-		adapter.loadThis();
-		adapter.loadArg(2);
-		// adapter.visitVarInsn(Opcodes.ALOAD, 0);
-		adapter.invokeVirtual(Types.COMPONENT_IMPL, INIT_COMPONENT);
+	private List<IFunction> writeOutInitComponent(ConstrBytecodeContext constr, Function[] functions, List<LitString> keys, ClassWriter cw, Tag component, String name)
+			throws TransformerException {
 
-		// return when executeConstr is false
+		boolean hasStatements = ASMUtil.countNoneFunctionsStatements(component.getBody()) > 0;
+
+		final GeneratorAdapter adapter = new GeneratorAdapter(Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL, INIT_COMPONENT3, null, new Type[] { Types.PAGE_EXCEPTION }, cw);
+		BytecodeContext bc = new BytecodeContext(config, null, constr, this, keys, cw, name, adapter, INIT_COMPONENT3, writeLog(), suppressWSbeforeArg, output, returnValue);
+		Label methodBegin = new Label();
+		Label methodEnd = new Label();
+
+		adapter.visitLocalVariable("this", "L" + name + ";", null, methodBegin, methodEnd, 0);
+		adapter.visitLabel(methodBegin);
+
+		// Scope oldData=null;
+		final int oldData = adapter.newLocal(Types.VARIABLES);
+		ASMConstants.NULL(adapter);
+		adapter.storeLocal(oldData);
+
+		// INIT - c.init(pc,this);
+		{
+			adapter.loadArg(1);
+			adapter.loadArg(0);
+			adapter.loadThis();
+			adapter.loadArg(2);
+			adapter.invokeVirtual(Types.COMPONENT_IMPL, INIT_COMPONENT);
+		}
+
+		// Check if executeConstr is true, if so execute the main logic
 		adapter.loadArg(2);
 		Label afterIf = new Label();
-		adapter.visitJumpInsn(Opcodes.IFNE, afterIf);
+		adapter.visitJumpInsn(Opcodes.IFEQ, afterIf); // Changed from IFNE to IFEQ
 
-		adapter.loadArg(0);
-		adapter.loadLocal(localBC);
-		adapter.invokeStatic(Types.BODY_CONTENT_UTIL, CLEAR_AND_POP);
+		List<IFunction> funcs;
+		if (hasStatements) {
 
-		adapter.visitInsn(Opcodes.RETURN);
-		adapter.visitLabel(afterIf);
+			// int oldCheckArgs= pc.undefinedScope().setMode(Undefined.MODE_NO_LOCAL_AND_ARGUMENTS);
+			final int oldCheckArgs = adapter.newLocal(Types.INT_VALUE);
+			adapter.loadArg(0);
+			adapter.invokeVirtual(Types.PAGE_CONTEXT, UNDEFINED_SCOPE);
+			adapter.push(Undefined.MODE_NO_LOCAL_AND_ARGUMENTS);
+			adapter.invokeInterface(Types.UNDEFINED, SET_MODE);
+			adapter.storeLocal(oldCheckArgs);
 
-		// int oldCheckArgs= pc.undefinedScope().setMode(Undefined.MODE_NO_LOCAL_AND_ARGUMENTS);
-		final int oldCheckArgs = adapter.newLocal(Types.INT_VALUE);
-		adapter.loadArg(0);
-		adapter.invokeVirtual(Types.PAGE_CONTEXT, UNDEFINED_SCOPE);
-		adapter.push(Undefined.MODE_NO_LOCAL_AND_ARGUMENTS);
-		adapter.invokeInterface(Types.UNDEFINED, SET_MODE);
-		adapter.storeLocal(oldCheckArgs);
+			TryCatchFinallyVisitor tcf = new TryCatchFinallyVisitor(new OnFinally() {
 
-		TryCatchFinallyVisitor tcf = new TryCatchFinallyVisitor(new OnFinally() {
+				@Override
+				public void _writeOut(BytecodeContext bc) {
 
-			@Override
-			public void _writeOut(BytecodeContext bc) {
+					// undefined.setMode(oldMode);
+					adapter.loadArg(0);
+					adapter.invokeVirtual(Types.PAGE_CONTEXT, UNDEFINED_SCOPE);
+					adapter.loadLocal(oldCheckArgs, Types.INT_VALUE);
+					adapter.invokeInterface(Types.UNDEFINED, SET_MODE);
+					adapter.pop();
 
-				// undefined.setMode(oldMode);
-				adapter.loadArg(0);
-				adapter.invokeVirtual(Types.PAGE_CONTEXT, UNDEFINED_SCOPE);
-				adapter.loadLocal(oldCheckArgs, Types.INT_VALUE);
-				adapter.invokeInterface(Types.UNDEFINED, SET_MODE);
-				adapter.pop();
+					// c.afterCall(pc,_oldData);
+					adapter.loadArg(1);
+					adapter.loadArg(0);
+					adapter.loadLocal(oldData);
+					adapter.invokeVirtual(Types.COMPONENT_IMPL, AFTER_CALL);
 
-				// c.afterCall(pc,_oldData);
-				adapter.loadArg(1);
-				adapter.loadArg(0);
-				adapter.loadLocal(oldData);
-				adapter.invokeVirtual(Types.COMPONENT_IMPL, AFTER_CALL);
+				}
+			}, null);
 
-			}
-		}, null);
-		tcf.visitTryBegin(bc);
-		// oldData=c.beforeCall(pc);
-		adapter.loadArg(1);
-		adapter.loadArg(0);
-		adapter.invokeVirtual(Types.COMPONENT_IMPL, BEFORE_CALL);
-		adapter.storeLocal(oldData);
-		bc.visitLine(component.getStart());
+			int localBC = pushBody(bc, adapter, true);
 
-		List<IFunction> funcs = writeOutCallBody(bc, component.getBody(), IFunction.PAGE_TYPE_COMPONENT);
+			tcf.visitTryBegin(bc);
+			// oldData=c.beforeCall(pc);
+			adapter.loadArg(1);
+			adapter.loadArg(0);
+			adapter.invokeVirtual(Types.COMPONENT_IMPL, BEFORE_CALL);
+			adapter.storeLocal(oldData);
+			bc.visitLine(component.getStart());
 
-		bc.visitLine(component.getEnd());
-		int t = tcf.visitTryEndCatchBeging(bc);
-		// BodyContentUtil.flushAndPop(pc,bc);
-		adapter.loadArg(0);
-		adapter.loadLocal(localBC);
-		adapter.invokeStatic(Types.BODY_CONTENT_UTIL, FLUSH_AND_POP);
+			funcs = writeOutCallBody(bc, component.getBody(), IFunction.PAGE_TYPE_COMPONENT, false);
 
-		// throw Caster.toPageException(t);
-		adapter.loadLocal(t);
-		adapter.invokeStatic(Types.CASTER, TO_PAGE_EXCEPTION);
-		adapter.throwException();
-		tcf.visitCatchEnd(bc);
+			bc.visitLine(component.getEnd());
+			int t = tcf.visitTryEndCatchBeging(bc);
+			// BodyContentUtil.flushAndPop(pc,bc);
+			adapter.loadArg(0);
+			adapter.loadLocal(localBC);
+			adapter.invokeStatic(Types.BODY_CONTENT_UTIL, FLUSH_AND_POP);
 
-		adapter.loadArg(0);
-		adapter.loadLocal(localBC);
-		adapter.invokeStatic(Types.BODY_CONTENT_UTIL, CLEAR_AND_POP);
+			// throw Caster.toPageException(t);
+			adapter.loadLocal(t);
+			adapter.invokeStatic(Types.CASTER, TO_PAGE_EXCEPTION);
+			adapter.throwException();
+			tcf.visitCatchEnd(bc);
+
+			adapter.loadArg(0);
+			adapter.loadLocal(localBC);
+			adapter.invokeStatic(Types.BODY_CONTENT_UTIL, CLEAR_AND_POP);
+		}
+		else {
+			bc.visitLine(component.getStart());
+			funcs = writeOutCallBody(bc, component.getBody(), IFunction.PAGE_TYPE_COMPONENT, false);
+			bc.visitLine(component.getEnd());
+		}
+
+		adapter.visitLabel(afterIf); // Move this label after the main logic
 
 		adapter.returnValue();
 		adapter.visitLabel(methodEnd);
@@ -1260,7 +1274,7 @@ public final class Page extends BodyBase implements Root {
 		adapter.visitLabel(methodBegin);
 
 		bc.visitLine(interf.getStart());
-		List<IFunction> funcs = writeOutCallBody(bc, interf.getBody(), IFunction.PAGE_TYPE_INTERFACE);
+		List<IFunction> funcs = writeOutCallBody(bc, interf.getBody(), IFunction.PAGE_TYPE_INTERFACE, false);
 		bc.visitLine(interf.getEnd());
 
 		adapter.returnValue();
@@ -1599,7 +1613,7 @@ public final class Page extends BodyBase implements Root {
 
 		List<IFunction> funcs = writeOutCallBody(
 				new BytecodeContext(config, null, constr, this, keys, cw, name, adapter, CALL1, writeLog(), suppressWSbeforeArg, output, returnValue), this,
-				IFunction.PAGE_TYPE_REGULAR);
+				IFunction.PAGE_TYPE_REGULAR, true);
 
 		adapter.visitLabel(methodEnd);
 		adapter.returnValue();
@@ -1607,7 +1621,7 @@ public final class Page extends BodyBase implements Root {
 		return funcs;
 	}
 
-	private List<IFunction> writeOutCallBody(BytecodeContext bc, Body body, int pageType) throws TransformerException {
+	private List<IFunction> writeOutCallBody(BytecodeContext bc, Body body, int pageType, boolean needReturn) throws TransformerException {
 		List<IFunction> funcs = new ArrayList<IFunction>();
 		extractFunctions(bc, body, funcs, pageType);
 		writeUDFProperties(bc, funcs, pageType);
@@ -1626,7 +1640,7 @@ public final class Page extends BodyBase implements Root {
 			BodyBase.writeOut(bc, body);
 
 			if (rtn != -1) bc.getAdapter().loadLocal(rtn);
-			else ASMConstants.NULL(bc.getAdapter());
+			else if (needReturn) ASMConstants.NULL(bc.getAdapter());
 		}
 
 		// checkInterface

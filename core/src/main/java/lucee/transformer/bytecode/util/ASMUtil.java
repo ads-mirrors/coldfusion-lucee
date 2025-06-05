@@ -84,7 +84,9 @@ import lucee.transformer.bytecode.statement.FlowControlBreak;
 import lucee.transformer.bytecode.statement.FlowControlContinue;
 import lucee.transformer.bytecode.statement.FlowControlFinal;
 import lucee.transformer.bytecode.statement.FlowControlRetry;
+import lucee.transformer.bytecode.statement.HasBodies;
 import lucee.transformer.bytecode.statement.HasBody;
+import lucee.transformer.bytecode.statement.IFunction;
 import lucee.transformer.bytecode.statement.PrintOut;
 import lucee.transformer.bytecode.statement.Switch;
 import lucee.transformer.bytecode.statement.TryCatchFinally;
@@ -1382,5 +1384,31 @@ public final class ASMUtil {
 		if (p instanceof TagComponent) return inRoot(p, false);
 
 		return false;
+	}
+
+	public static int countNoneFunctionsStatements(Body body) throws TransformerException {
+		if (ASMUtil.isEmpty(body)) return 0;
+
+		int count = 0;
+		Statement stat;
+		List<Statement> stats = body.getStatements();
+		int len = stats.size();
+		for (int i = 0; i < len; i++) {
+			stat = stats.get(i);
+			if (stat instanceof IFunction) {
+				continue;
+			}
+			count++;
+			if (stat instanceof HasBody) {
+				count += countNoneFunctionsStatements(((HasBody) stat).getBody());
+			}
+			else if (stat instanceof HasBodies) {
+				Body[] bodies = ((HasBodies) stat).getBodies();
+				for (int y = 0; y < bodies.length; y++) {
+					count += countNoneFunctionsStatements(bodies[y]);
+				}
+			}
+		}
+		return count;
 	}
 }
