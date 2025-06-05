@@ -1037,6 +1037,9 @@ public final class Page extends BodyBase implements Root {
 
 	private void writeOutStaticConstructor(ConstrBytecodeContext constr, List<LitString> keys, ClassWriter cw, TagCIObject component, String name) throws TransformerException {
 
+		List<StaticBody> staticBodies = component.getStaticBodies();
+		if (ArrayUtil.isEmpty(staticBodies)) return;
+
 		// if(true) return;
 		final GeneratorAdapter adapter = new GeneratorAdapter(Opcodes.ACC_PUBLIC + Opcodes.ACC_FINAL, STATIC_COMPONENT_CONSTR, null, new Type[] { Types.PAGE_EXCEPTION }, cw);
 		BytecodeContext bc = new BytecodeContext(config, null, constr, this, keys, cw, name, adapter, STATIC_COMPONENT_CONSTR, writeLog(), suppressWSbeforeArg, output,
@@ -1091,10 +1094,9 @@ public final class Page extends BodyBase implements Root {
 		adapter.invokeVirtual(Types.COMPONENT_IMPL, BEFORE_STATIC_CONSTR);
 		adapter.storeLocal(oldData);
 		// ExpressionUtil.visitLine(bc, component.getStart());
-		List<StaticBody> list = component.getStaticBodies();
-		if (list != null) {
-			writeOutConstrBody(bc, list, IFunction.PAGE_TYPE_COMPONENT);
-		}
+
+		writeOutConstrBody(bc, staticBodies, IFunction.PAGE_TYPE_COMPONENT);
+
 		// ExpressionUtil.visitLine(bc, component.getEnd());
 		int t = tcf.visitTryEndCatchBeging(bc);
 		// BodyContentUtil.flushAndPop(pc,bc);
