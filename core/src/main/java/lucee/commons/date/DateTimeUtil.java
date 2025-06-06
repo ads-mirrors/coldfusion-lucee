@@ -45,7 +45,7 @@ public abstract class DateTimeUtil {
 		HTTP_TIME_STRING_FORMAT_OLD.setTimeZone(TimeZone.getTimeZone("GMT"));
 
 		HTTP_TIME_STRING_FORMAT = new SimpleDateFormat("EE, dd-MMM-yyyy HH:mm:ss zz", Locale.ENGLISH);
-		HTTP_TIME_STRING_FORMAT.setTimeZone(TimeZoneConstants.UTC);
+		HTTP_TIME_STRING_FORMAT.setTimeZone(TimeZoneConstants.GMT);
 	}
 
 	private static final double DAY_MILLIS = 86400000D;
