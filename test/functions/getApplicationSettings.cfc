@@ -7,7 +7,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				local.result = _InternalRequest(
 					template: createURI("unSupported.cfm" )
 				);
-				expect( result.filecontent.deserializeJSON() ).toBe( [ "nonStandardSetting", "useJavaAsRegexEngine"] );
+				var arr=result.filecontent.deserializeJSON();
+				arraySort(arr,"textnocase");
+				expect( arr ).toBe( [ "nonStandardSetting", "useJavaAsRegexEngine"] );
 			});
 
 			it( title="getApplicationSettings(onlySupported=true)", body=function( currentSpec ) {
