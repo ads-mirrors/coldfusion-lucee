@@ -19,6 +19,8 @@ import lucee.commons.lang.StringUtil;
 import lucee.commons.lock.KeyLock;
 import lucee.commons.lock.KeyLockImpl;
 import lucee.runtime.CIPage;
+import lucee.runtime.ComponentImpl;
+import lucee.runtime.ComponentPageImpl;
 import lucee.runtime.Mapping;
 import lucee.runtime.MappingImpl;
 import lucee.runtime.PageContext;
@@ -26,6 +28,7 @@ import lucee.runtime.PageSource;
 import lucee.runtime.cache.tag.CacheHandlerCollection;
 import lucee.runtime.cache.tag.CacheHandlerCollections;
 import lucee.runtime.compiler.CFMLCompilerImpl;
+import lucee.runtime.component.ComponentLoader;
 import lucee.runtime.config.gateway.GatewayMap;
 import lucee.runtime.db.ClassDefinition;
 import lucee.runtime.debug.DebuggerPool;
@@ -58,6 +61,8 @@ public final class ConfigWebHelper {
 	private CacheHandlerCollections cacheHandlerCollections;
 	private Map<String, SoftReference<Mapping>> applicationMappings = new ConcurrentHashMap<String, SoftReference<Mapping>>();
 	private CIPage baseComponentPageCFML;
+	private ComponentImpl baseComponenInstanceExeConstr;
+	private ComponentImpl baseComponenInstanceNonExeConstr;
 	private final CFMLCompilerImpl compiler = new CFMLCompilerImpl();
 	private WSHandler wsHandler;
 	private GatewayEngineImpl gatewayEngine;
@@ -267,8 +272,26 @@ public final class ConfigWebHelper {
 		return base;
 	}
 
+	public ComponentImpl getBaseComponentInstance(PageContext pc, ComponentPageImpl exclude, boolean executeConstr) throws PageException {
+		ComponentImpl base = executeConstr ? baseComponenInstanceExeConstr : baseComponenInstanceNonExeConstr;
+		CIPage p = getBaseComponentPage(pc);
+		if (base == null) {
+			if (p != null) {
+				if (exclude.getPageSource().equals(p.getPageSource())) return null;
+
+				base = ComponentLoader.loadComponent(pc, p, "Component", false, false, true, executeConstr);
+				if (executeConstr) baseComponenInstanceExeConstr = base;
+				else baseComponenInstanceNonExeConstr = base;
+			}
+		}
+		if (base == null || exclude.getPageSource().equals(p.getPageSource())) return null;
+		return base._duplicate(false, false);
+	}
+
 	public void resetBaseComponentPage() {
 		baseComponentPageCFML = null;
+		baseComponenInstanceExeConstr = null;
+		baseComponenInstanceNonExeConstr = null;
 	}
 
 	public Mapping[] getApplicationMappings() {

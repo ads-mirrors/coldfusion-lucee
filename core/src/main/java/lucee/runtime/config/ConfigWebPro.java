@@ -10,6 +10,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lucee.commons.lock.KeyLock;
 import lucee.runtime.CIPage;
+import lucee.runtime.ComponentImpl;
+import lucee.runtime.ComponentPageImpl;
 import lucee.runtime.Mapping;
 import lucee.runtime.PageContext;
 import lucee.runtime.compiler.CFMLCompilerImpl;
@@ -68,4 +70,6 @@ public interface ConfigWebPro extends ConfigWeb, ConfigPro {
 	public void setIdentification(IdentificationWeb id);
 
 	public void checkMappings();
+
+	public ComponentImpl getBaseComponentInstance(PageContext pc, ComponentPageImpl exclude, boolean executeConstr) throws PageException;
 }

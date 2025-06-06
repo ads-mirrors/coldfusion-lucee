@@ -279,14 +279,14 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 	}
 
 	@Override
-	public Collection duplicate(boolean deepCopy) {
+	public ComponentImpl duplicate(boolean deepCopy) {
 		ComponentImpl top = _duplicate(deepCopy, true);
 		setTop(top, top);
 
 		return top;
 	}
 
-	private ComponentImpl _duplicate(boolean deepCopy, boolean isTop) {
+	public ComponentImpl _duplicate(boolean deepCopy, boolean isTop) {
 		ComponentImpl trg = new ComponentImpl();
 		boolean inside = ThreadLocalDuplication.set(this, trg);
 		try {
@@ -326,7 +326,7 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 
 				if (useShadow) {
 					ComponentScopeShadow css = (ComponentScopeShadow) scope;
-					trg.scope = new ComponentScopeShadow(trg, duplicateDataMember(trg, css.getShadow(), MapFactory.getConcurrentMap(), deepCopy));
+					trg.scope = new ComponentScopeShadow(trg, duplicateDataMember(trg, css.getShadow(), MapFactory.<Key, Member>getConcurrentMap(), deepCopy));
 				}
 			}
 
@@ -355,37 +355,39 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 	}
 
 	private static void addUDFS(ComponentImpl trgComp, Map src, Map trg) {
-		Iterator it = src.entrySet().iterator();
-		Map.Entry entry;
-		Object key, value;
-		UDF udf;
-		ComponentImpl comp, owner;
-		boolean done;
-		while (it.hasNext()) {
-			entry = (Entry) it.next();
-			key = entry.getKey();
-			value = entry.getValue();
-			if (value instanceof UDF) {
-				udf = (UDF) value;
-				done = false;
-				// get udf from _udf
-				owner = (ComponentImpl) udf.getOwnerComponent();
-				if (owner != null) {
-					comp = trgComp;
-					do {
-						if (owner.pageSource == comp.pageSource) break;
+		if (!src.isEmpty()) {
+			Iterator it = src.entrySet().iterator();
+			Map.Entry entry;
+			Object key, value;
+			UDF udf;
+			ComponentImpl comp, owner;
+			boolean done;
+			while (it.hasNext()) {
+				entry = (Entry) it.next();
+				key = entry.getKey();
+				value = entry.getValue();
+				if (value instanceof UDF) {
+					udf = (UDF) value;
+					done = false;
+					// get udf from _udf
+					owner = (ComponentImpl) udf.getOwnerComponent();
+					if (owner != null) {
+						comp = trgComp;
+						do {
+							if (owner.pageSource == comp.pageSource) break;
+						}
+						while ((comp = comp.base) != null);
+						if (comp != null) {
+							value = comp._udfs.get(key);
+							trg.put(key, value);
+							done = true;
+						}
 					}
-					while ((comp = comp.base) != null);
-					if (comp != null) {
-						value = comp._udfs.get(key);
-						trg.put(key, value);
-						done = true;
-					}
-				}
-				// udf with no owner
-				if (!done) trg.put(key, udf.duplicate());
+					// udf with no owner
+					if (!done) trg.put(key, udf.duplicate());
 
-				// print.o(owner.pageSource.getComponentName()+":"+udf.getFunctionName());
+					// print.o(owner.pageSource.getComponentName()+":"+udf.getFunctionName());
+				}
 			}
 		}
 	}
@@ -400,39 +402,40 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 	 * @return
 	 */
 	public static Map duplicateDataMember(ComponentImpl c, Map map, Map newMap, boolean deepCopy) {
-		Iterator it = map.entrySet().iterator();
-		Map.Entry entry;
-		Object value;
-		while (it.hasNext()) {
-			entry = (Entry) it.next();
-			value = entry.getValue();
+		if (!map.isEmpty()) {
+			Iterator it = map.entrySet().iterator();
+			Map.Entry entry;
+			Object value;
+			while (it.hasNext()) {
+				entry = (Entry) it.next();
+				value = entry.getValue();
 
-			if (!(value instanceof UDF)) {
-				if (deepCopy) value = Duplicator.duplicate(value, deepCopy);
-				newMap.put(entry.getKey(), value);
+				if (!(value instanceof UDF)) {
+					if (deepCopy) value = Duplicator.duplicate(value, deepCopy);
+					newMap.put(entry.getKey(), value);
+				}
 			}
 		}
 		return newMap;
 	}
 
 	public static Map<Key, UDF> duplicateUTFMap(ComponentImpl src, ComponentImpl trg, Map<Key, UDF> srcMap, Map<Key, UDF> trgMap) {
-		Iterator<Entry<Key, UDF>> it = srcMap.entrySet().iterator();
-		Entry<Key, UDF> entry;
-		UDF udf;
-		while (it.hasNext()) {
-			entry = it.next();
-			udf = entry.getValue();
+		if (!srcMap.isEmpty()) {
+			UDF udf;
+			for (Entry<Key, UDF> e: srcMap.entrySet()) {
+				udf = e.getValue();
 
-			if (udf.getOwnerComponent() == src) {
-				UDF clone = entry.getValue().duplicate();
-				if (clone instanceof UDFPlus) {
-					UDFPlus cp = (UDFPlus) clone;
-					cp.setOwnerComponent(trg);
-					cp.setAccess(udf.getAccess());
+				if (udf.getOwnerComponent() == src) {
+					UDF clone = e.getValue().duplicate();
+					if (clone instanceof UDFPlus) {
+						UDFPlus cp = (UDFPlus) clone;
+						cp.setOwnerComponent(trg);
+						cp.setAccess(udf.getAccess());
+					}
+					trgMap.put(e.getKey(), clone);
 				}
-				trgMap.put(entry.getKey(), clone);
-			}
 
+			}
 		}
 		return trgMap;
 	}
@@ -452,12 +455,8 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 			base = ComponentLoader.searchComponent(pageContext, componentPage.getPageSource(), properties.extend, Boolean.TRUE, null, true, executeConstr);
 		}
 		else {
-			CIPage p = ((ConfigWebPro) pageContext.getConfig()).getBaseComponentPage(pageContext);
-			if (p != null && !componentPage.getPageSource().equals(p.getPageSource())) {
-				base = ComponentLoader.loadComponent(pageContext, p, "Component", false, false, true, executeConstr);
-			}
+			base = ((ConfigWebPro) pageContext.getConfig()).getBaseComponentInstance(pageContext, componentPage, executeConstr);
 		}
-
 		hasInit = componentPage.hasInit();
 
 		if (base != null) {
@@ -501,13 +500,16 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 		else {
 			scope = new ComponentScopeThis(this);
 		}
+
 		initProperties();
+
 		StaticStruct ss = componentPage.getStaticStruct(); // this method get overwritten by the compiled componentpage
 		if (!ss.isInit() || indexBase > ss.index()) {
 			synchronized (ss) {
 				// invoke static constructor
 				boolean baseChanged = false;
 				if (!ss.isInit() || (baseChanged = (indexBase > ss.index()))) {
+
 					Map<String, Boolean> map = statConstr.get();
 					String id = "" + componentPage.getHash();
 					if (!Caster.toBooleanValue(map.get(id), false)) {
@@ -515,7 +517,7 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 
 						// this needs to happen before the call
 						try {
-							if (baseChanged) ss.clear();
+							if (baseChanged && !ss.isEmpty()) ss.clear();
 							componentPage.staticConstructor(pageContext, this);
 						}
 						catch (NoSuchMethodError nsme) {

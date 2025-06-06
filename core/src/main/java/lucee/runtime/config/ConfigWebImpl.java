@@ -42,6 +42,8 @@ import lucee.loader.engine.CFMLEngine;
 import lucee.runtime.CFMLFactory;
 import lucee.runtime.CFMLFactoryImpl;
 import lucee.runtime.CIPage;
+import lucee.runtime.ComponentImpl;
+import lucee.runtime.ComponentPageImpl;
 import lucee.runtime.Mapping;
 import lucee.runtime.MappingImpl;
 import lucee.runtime.PageContext;
@@ -1588,6 +1590,11 @@ public final class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	@Override
 	public CIPage getBaseComponentPage(PageContext pc) throws PageException {
 		return helper.getBaseComponentPage(pc);
+	}
+
+	@Override
+	public ComponentImpl getBaseComponentInstance(PageContext pc, ComponentPageImpl exclude, boolean executeConstr) throws PageException {
+		return helper.getBaseComponentInstance(pc, exclude, executeConstr);
 	}
 
 	@Override
