@@ -71,9 +71,15 @@ import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.ResourceProvider;
 import lucee.commons.io.res.ResourcesImpl;
 import lucee.commons.io.res.filter.ExtensionResourceFilter;
+import lucee.commons.io.res.type.cache.CacheResourceProvider;
 import lucee.commons.io.res.type.cfml.CFMLResourceProvider;
 import lucee.commons.io.res.type.file.FileResource;
+import lucee.commons.io.res.type.ftp.FTPResourceProvider;
+import lucee.commons.io.res.type.http.HTTPResourceProvider;
+import lucee.commons.io.res.type.http.HTTPSResourceProvider;
 import lucee.commons.io.res.type.s3.DummyS3ResourceProvider;
+import lucee.commons.io.res.type.tar.TarResourceProvider;
+import lucee.commons.io.res.type.tgz.TGZResourceProvider;
 import lucee.commons.io.res.type.zip.ZipResourceProvider;
 import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.io.retirement.RetireOutputStream;
@@ -557,14 +563,19 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		try {
 			Array providers = ConfigUtil.getAsArray("resourceProviders", root);
 			// Resource Provider
-			boolean hasZip = false, hasS3 = false;
+			boolean hasFTP = false;
+			boolean hasTGZ = false;
+			boolean hasTAR = false;
+			boolean hasHTTP = false;
+			boolean hasHTTPs = false;
+			boolean hasRAM = false;
+			boolean hasZip = false;
+			boolean hasS3 = false;
+
 			if (providers != null && providers.size() > 0) {
 				ClassDefinition prov;
 				String strProviderCFC;
 				String strProviderScheme;
-				ClassDefinition httpClass = null;
-				Map httpArgs = null;
-				boolean hasHTTPs = false;
 				Iterator<?> pit = providers.getIterator();
 				Struct provider;
 				while (pit.hasNext()) {
@@ -582,13 +593,15 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 							config.addResourceProvider(strProviderScheme, prov, toArguments(provider, "arguments", true, false));
 
 							// patch for user not having
-							if ("http".equalsIgnoreCase(strProviderScheme)) {
-								httpClass = prov;
-								httpArgs = toArguments(provider, "arguments", true, false);
-							}
+							if ("http".equalsIgnoreCase(strProviderScheme)) hasHTTP = true;
 							else if ("https".equalsIgnoreCase(strProviderScheme)) hasHTTPs = true;
-							else if ("zip".equalsIgnoreCase(strProviderScheme)) hasZip = true;
+							else if ("ftp".equalsIgnoreCase(strProviderScheme)) hasFTP = true;
+							else if ("ram".equalsIgnoreCase(strProviderScheme)) hasRAM = true;
 							else if ("s3".equalsIgnoreCase(strProviderScheme)) hasS3 = true;
+							else if ("tar".equalsIgnoreCase(strProviderScheme)) hasTAR = true;
+							else if ("tgz".equalsIgnoreCase(strProviderScheme)) hasTGZ = true;
+							else if ("zip".equalsIgnoreCase(strProviderScheme)) hasZip = true;
+
 						}
 
 						// cfc
@@ -605,27 +618,56 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 						log(config, t);
 					}
 				}
-
-				// adding https when not exist
-				if (!hasHTTPs && httpClass != null) {
-					config.addResourceProvider("https", httpClass, httpArgs);
-				}
-
 			}
 			// adding zip when not exist
+			if (!hasHTTP) {
+				Map<String, String> args = new HashMap<>();
+				args.put("lock-timeout", "10000");
+				args.put("case-sensitive", "false");
+				config.addResourceProvider("http", new ClassDefinitionImpl<>(HTTPResourceProvider.class), args);
+			}
+			if (!hasHTTPs) {
+				Map<String, String> args = new HashMap<>();
+				args.put("lock-timeout", "10000");
+				args.put("case-sensitive", "false");
+				config.addResourceProvider("https", new ClassDefinitionImpl<>(HTTPSResourceProvider.class), args);
+			}
+			if (!hasFTP) {
+				Map<String, String> args = new HashMap<>();
+				args.put("lock-timeout", "20000");
+				args.put("socket-timeout", "-1");
+				args.put("client-timeout", "60000");
+				config.addResourceProvider("ftp", new ClassDefinitionImpl<>(FTPResourceProvider.class), args);
+			}
+			if (!hasRAM) {
+				Map<String, String> args = new HashMap<>();
+				args.put("lock-timeout", "1000");
+				args.put("case-sensitive", "true");
+				config.addResourceProvider("tar", new ClassDefinitionImpl<>(CacheResourceProvider.class), args);
+			}
+			if (!hasTGZ) {
+				Map<String, String> args = new HashMap<>();
+				args.put("lock-timeout", "1000");
+				args.put("case-sensitive", "true");
+				config.addResourceProvider("tgz", new ClassDefinitionImpl<>(TGZResourceProvider.class), args);
+			}
+			if (!hasTAR) {
+				Map<String, String> args = new HashMap<>();
+				args.put("lock-timeout", "1000");
+				args.put("case-sensitive", "true");
+				config.addResourceProvider("tar", new ClassDefinitionImpl<>(TarResourceProvider.class), args);
+			}
+			if (!hasS3) {
+				ClassDefinition s3Class = new ClassDefinitionImpl(DummyS3ResourceProvider.class);
+				Map<String, String> args = new HashMap<>();
+				args.put("lock-timeout", "10000");
+				config.addResourceProvider("s3", s3Class, args);
+			}
 			if (!hasZip) {
 				Map<String, String> args = new HashMap<>();
 				args.put("lock-timeout", "1000");
 				args.put("case-sensitive", "1000");
 				config.addResourceProvider("zip", new ClassDefinitionImpl<>(ZipResourceProvider.class), args);
-			}
-
-			if (!hasS3) {
-
-				ClassDefinition s3Class = new ClassDefinitionImpl(DummyS3ResourceProvider.class);
-				Map<String, String> args = new HashMap<>();
-				args.put("lock-timeout", "10000");
-				config.addResourceProvider("s3", s3Class, args);
 			}
 		}
 		catch (Throwable t) {
