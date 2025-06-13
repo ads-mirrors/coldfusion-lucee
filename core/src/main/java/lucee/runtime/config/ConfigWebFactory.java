@@ -2021,7 +2021,8 @@ public final class ConfigWebFactory extends ConfigFactory {
 	}
 
 	private static short inspectTemplate(Struct data) {
-		String strInsTemp = getAttr(data, "inspectTemplate");
+		String strInsTemp = SystemUtil.getSystemPropOrEnvVar("lucee.inspect.template", null);
+		if (StringUtil.isEmpty(strInsTemp)) strInsTemp = getAttr(data, "inspectTemplate");
 		if (StringUtil.isEmpty(strInsTemp)) strInsTemp = getAttr(data, "inspect");
 		if (StringUtil.isEmpty(strInsTemp)) {
 			Boolean trusted = Caster.toBoolean(getAttr(data, "trusted"), null);
@@ -2031,10 +2032,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 			}
 			return ConfigPro.INSPECT_UNDEFINED;
 		}
-		if (StringUtil.isEmpty(strInsTemp)) {
-			strInsTemp = SystemUtil.getSystemPropOrEnvVar("lucee.inspect.template", null);
-		}
-
 		return ConfigWebUtil.inspectTemplate(strInsTemp, ConfigPro.INSPECT_UNDEFINED);
 	}
 
