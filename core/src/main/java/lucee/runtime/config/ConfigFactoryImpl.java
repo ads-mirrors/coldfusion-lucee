@@ -406,7 +406,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		// load PW
 		try {
 			if (createSaltAndPW(root, config, essentialOnly)) reload = true;
-			if (LOG) log(config, Log.LEVEL_INFO, "fixed salt");
+			if (LOG) log(config, Log.LEVEL_INFO, "set salt");
 
 			// reload when an old version of xml got updated
 			if (reload) {
@@ -1407,18 +1407,16 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 	}
 
 	private static short inspectTemplate(Struct data) {
-		String strInsTemp = getAttr(data, "inspectTemplate");
-		if (StringUtil.isEmpty(strInsTemp)) strInsTemp = getAttr(data, "inspect");
-		if (StringUtil.isEmpty(strInsTemp)) {
+		String strInsTemp = SystemUtil.getSystemPropOrEnvVar("lucee.inspect.template", null);
+		if (StringUtil.isEmpty(strInsTemp, true)) strInsTemp = getAttr(data, "inspectTemplate");
+		if (StringUtil.isEmpty(strInsTemp, true)) strInsTemp = getAttr(data, "inspect");
+		if (StringUtil.isEmpty(strInsTemp, true)) {
 			Boolean trusted = Caster.toBoolean(getAttr(data, "trusted"), null);
 			if (trusted != null) {
 				if (trusted.booleanValue()) return ConfigPro.INSPECT_AUTO;
 				return ConfigPro.INSPECT_ALWAYS;
 			}
 			return ConfigPro.INSPECT_UNDEFINED;
-		}
-		if (StringUtil.isEmpty(strInsTemp)) {
-			strInsTemp = SystemUtil.getSystemPropOrEnvVar("lucee.inspect.template", null);
 		}
 
 		return ConfigUtil.inspectTemplate(strInsTemp, ConfigPro.INSPECT_UNDEFINED);
@@ -3194,73 +3192,73 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 			String strDebugOption = SystemUtil.getSystemPropOrEnvVar("lucee.debugging.options", null);
 			String[] debugOptions = StringUtil.isEmpty(strDebugOption) ? null : ListUtil.listToStringArray(strDebugOption, ',');
 
-			String str = getAttr(root, "debuggingDatabase");
+			String str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.debuggingDatabase", null);
 			if (StringUtil.isEmpty(str)) str = getAttr(root, "debuggingShowDatabase");
-			if (StringUtil.isEmpty(str)) str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.debuggingDatabase", null);
+			if (StringUtil.isEmpty(str)) str = getAttr(root, "debuggingDatabase");
 			if (hasAccess && !StringUtil.isEmpty(str)) {
 				if (toBoolean(str, false)) options += ConfigPro.DEBUG_DATABASE;
 			}
 			else if (debugOptions != null && extractDebugOption("database", debugOptions)) options += ConfigPro.DEBUG_DATABASE;
 
-			str = getAttr(root, "debuggingException");
+			str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.debuggingException", null);
 			if (StringUtil.isEmpty(str)) str = getAttr(root, "debuggingShowException");
-			if (StringUtil.isEmpty(str)) str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.debuggingException", null);
+			if (StringUtil.isEmpty(str)) str = getAttr(root, "debuggingException");
 			if (hasAccess && !StringUtil.isEmpty(str)) {
 				if (toBoolean(str, false)) options += ConfigPro.DEBUG_EXCEPTION;
 			}
 			else if (debugOptions != null && extractDebugOption("exception", debugOptions)) options += ConfigPro.DEBUG_EXCEPTION;
 
-			str = getAttr(root, "debuggingTemplate");
+			str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.debuggingTemplate", null);
 			if (StringUtil.isEmpty(str)) str = getAttr(root, "debuggingShowTemplate");
-			if (StringUtil.isEmpty(str)) str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.debuggingTemplate", null);
+			if (StringUtil.isEmpty(str)) str = getAttr(root, "debuggingTemplate");
 			if (hasAccess && !StringUtil.isEmpty(str)) {
 				if (toBoolean(str, false)) options += ConfigPro.DEBUG_TEMPLATE;
 			}
 			else if (debugOptions != null && extractDebugOption("template", debugOptions)) options += ConfigPro.DEBUG_TEMPLATE;
 
-			str = getAttr(root, "debuggingDump");
+			str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.debuggingDump", null);
 			if (StringUtil.isEmpty(str)) str = getAttr(root, "debuggingShowDump");
-			if (StringUtil.isEmpty(str)) str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.debuggingDump", null);
+			if (StringUtil.isEmpty(str)) str = getAttr(root, "debuggingDump");
 			if (hasAccess && !StringUtil.isEmpty(str)) {
 				if (toBoolean(str, false)) options += ConfigPro.DEBUG_DUMP;
 			}
 			else if (debugOptions != null && extractDebugOption("dump", debugOptions)) options += ConfigPro.DEBUG_DUMP;
 
-			str = getAttr(root, "debuggingTracing");
+			str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.debuggingTracing", null);
 			if (StringUtil.isEmpty(str)) str = getAttr(root, "debuggingShowTracing");
 			if (StringUtil.isEmpty(str)) str = getAttr(root, "debuggingShowTrace");
-			if (StringUtil.isEmpty(str)) str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.debuggingTracing", null);
+			if (StringUtil.isEmpty(str)) str = getAttr(root, "debuggingTracing");
 			if (hasAccess && !StringUtil.isEmpty(str)) {
 				if (toBoolean(str, false)) options += ConfigPro.DEBUG_TRACING;
 			}
 			else if (debugOptions != null && extractDebugOption("tracing", debugOptions)) options += ConfigPro.DEBUG_TRACING;
 
-			str = getAttr(root, "debuggingTimer");
+			str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.debuggingTimer", null);
 			if (StringUtil.isEmpty(str)) str = getAttr(root, "debuggingShowTimer");
-			if (StringUtil.isEmpty(str)) str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.debuggingTimer", null);
+			if (StringUtil.isEmpty(str)) str = getAttr(root, "debuggingTimer");
 			if (hasAccess && !StringUtil.isEmpty(str)) {
 				if (toBoolean(str, false)) options += ConfigPro.DEBUG_TIMER;
 			}
 			else if (debugOptions != null && extractDebugOption("timer", debugOptions)) options += ConfigPro.DEBUG_TIMER;
 
-			str = getAttr(root, "debuggingImplicitAccess");
+			str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.debuggingImplicitAccess", null);
 			if (StringUtil.isEmpty(str)) str = getAttr(root, "debuggingShowImplicitAccess");
-			if (StringUtil.isEmpty(str)) str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.debuggingImplicitAccess", null);
+			if (StringUtil.isEmpty(str)) str = getAttr(root, "debuggingImplicitAccess");
 			if (hasAccess && !StringUtil.isEmpty(str)) {
 				if (toBoolean(str, false)) options += ConfigPro.DEBUG_IMPLICIT_ACCESS;
 			}
 			else if (debugOptions != null && extractDebugOption("implicit-access", debugOptions)) options += ConfigPro.DEBUG_IMPLICIT_ACCESS;
 
-			str = getAttr(root, "debuggingQueryUsage");
+			str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.debuggingQueryUsage", null);
 			if (StringUtil.isEmpty(str)) str = getAttr(root, "debuggingShowQueryUsage");
-			if (StringUtil.isEmpty(str)) str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.debuggingQueryUsage", null);
+			if (StringUtil.isEmpty(str)) str = getAttr(root, "debuggingQueryUsage");
 			if (hasAccess && !StringUtil.isEmpty(str)) {
 				if (toBoolean(str, false)) options += ConfigPro.DEBUG_QUERY_USAGE;
 			}
 			else if (debugOptions != null && extractDebugOption("queryUsage", debugOptions)) options += ConfigPro.DEBUG_QUERY_USAGE;
 
-			str = getAttr(root, "debuggingThread");
-			if (StringUtil.isEmpty(str)) str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.debuggingThread", null);
+			str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.debuggingThread", null);
+			if (StringUtil.isEmpty(str)) str = getAttr(root, "debuggingThread");
 			if (hasAccess && !StringUtil.isEmpty(str)) {
 				if (toBoolean(str, false)) options += ConfigPro.DEBUG_THREAD;
 			}

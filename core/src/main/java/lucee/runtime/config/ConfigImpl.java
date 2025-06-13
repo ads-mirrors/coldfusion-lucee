@@ -1181,8 +1181,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getShowDebug")) {
 				if (showDebug == null) {
 					// monitoring debug
-					String str = ConfigFactoryImpl.getAttr(root, "showDebug");
-					if (StringUtil.isEmpty(str, true)) str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.showDebug", null);
+					String str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.showDebug", null);
+					if (StringUtil.isEmpty(str, true)) str = ConfigFactoryImpl.getAttr(root, "showDebug");
 
 					if (!StringUtil.isEmpty(str)) {
 						showDebug = Caster.toBoolean(str, Boolean.FALSE);
@@ -1210,12 +1210,12 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (showDoc == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getShowDoc")) {
 				if (showDoc == null) {
-					String str = ConfigFactoryImpl.getAttr(root, "showDoc");
+					String str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.showDoc", null);
 					if (StringUtil.isEmpty(str, true)) str = ConfigFactoryImpl.getAttr(root, "showReference");
 					if (StringUtil.isEmpty(str, true)) str = ConfigFactoryImpl.getAttr(root, "doc");
 					if (StringUtil.isEmpty(str, true)) str = ConfigFactoryImpl.getAttr(root, "documentation");
 					if (StringUtil.isEmpty(str, true)) str = ConfigFactoryImpl.getAttr(root, "reference");
-					if (StringUtil.isEmpty(str, true)) str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.showDoc", null);
+					if (StringUtil.isEmpty(str, true)) str = ConfigFactoryImpl.getAttr(root, "showDoc");
 					if (!StringUtil.isEmpty(str)) {
 						showDoc = Caster.toBoolean(str, Boolean.FALSE);
 					}
@@ -1242,11 +1242,11 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (showMetric == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getShowMetric")) {
 				if (showMetric == null) {
-					String str = ConfigFactoryImpl.getAttr(root, "showMetric");
+					String str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.showMetric", null);
 					if (StringUtil.isEmpty(str, true)) str = ConfigFactoryImpl.getAttr(root, "showMetrics");
 					if (StringUtil.isEmpty(str, true)) str = ConfigFactoryImpl.getAttr(root, "metric");
 					if (StringUtil.isEmpty(str, true)) str = ConfigFactoryImpl.getAttr(root, "metrics");
-					if (StringUtil.isEmpty(str, true)) str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.showMetric", null);
+					if (StringUtil.isEmpty(str, true)) str = ConfigFactoryImpl.getAttr(root, "showMetric");
 					if (!StringUtil.isEmpty(str)) {
 						showMetric = Caster.toBoolean(str, Boolean.FALSE);
 					}
@@ -1273,10 +1273,10 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (showTest == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getShowTest")) {
 				if (showTest == null) {
-					String str = ConfigFactoryImpl.getAttr(root, "showTest");
+					String str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.showTest", null);
 					if (StringUtil.isEmpty(str, true)) str = ConfigFactoryImpl.getAttr(root, "showTests");
 					if (StringUtil.isEmpty(str, true)) str = ConfigFactoryImpl.getAttr(root, "test");
-					if (StringUtil.isEmpty(str, true)) str = SystemUtil.getSystemPropOrEnvVar("lucee.monitoring.showTest", null);
+					if (StringUtil.isEmpty(str, true)) str = ConfigFactoryImpl.getAttr(root, "showTest");
 					if (!StringUtil.isEmpty(str)) {
 						showTest = Caster.toBoolean(str, false);
 					}
@@ -5998,8 +5998,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getFullNullSupport")) {
 				if (fullNullSupport == null) {
 					boolean fns = false;
-					String str = ConfigFactoryImpl.getAttr(root, new String[] { "nullSupport", "fullNullSupport" });
-					if (StringUtil.isEmpty(str, true)) str = SystemUtil.getSystemPropOrEnvVar("lucee.full.null.support", null);
+					String str = SystemUtil.getSystemPropOrEnvVar("lucee.full.null.support", null);
+					if (StringUtil.isEmpty(str, true)) str = ConfigFactoryImpl.getAttr(root, new String[] { "nullSupport", "fullNullSupport" });
 
 					if (!StringUtil.isEmpty(str, true)) {
 						fns = Caster.toBooleanValue(str, false);
@@ -6114,8 +6114,8 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getPreciseMath")) {
 				if (preciseMath == null) {
 					boolean pm = false;
-					String str = ConfigFactoryImpl.getAttr(root, "preciseMath");
-					if (StringUtil.isEmpty(str, true)) str = SystemUtil.getSystemPropOrEnvVar("lucee.precise.math", null);
+					String str = SystemUtil.getSystemPropOrEnvVar("lucee.precise.math", null);
+					if (StringUtil.isEmpty(str, true)) str = ConfigFactoryImpl.getAttr(root, "preciseMath");
 
 					if (!StringUtil.isEmpty(str, true)) {
 						pm = Caster.toBooleanValue(str, false);
@@ -6150,12 +6150,12 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 					try {
 
 						// main logger
-						String mainLogger = ConfigFactoryImpl.getAttr(root, "mainLogger");
+						String mainLogger = SystemUtil.getSystemPropOrEnvVar("lucee.logging.main", null);
 						if (!StringUtil.isEmpty(mainLogger, true)) {
 							mainLoggerName = mainLogger.trim();
 						}
 						else {
-							mainLogger = SystemUtil.getSystemPropOrEnvVar("lucee.logging.main", null);
+							mainLogger = ConfigFactoryImpl.getAttr(root, "mainLogger");
 							if (!StringUtil.isEmpty(mainLogger, true)) {
 								mainLoggerName = mainLogger.trim();
 							}
