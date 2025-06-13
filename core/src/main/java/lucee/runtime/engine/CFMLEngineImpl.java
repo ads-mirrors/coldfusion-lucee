@@ -872,7 +872,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 	 * @param countExistingContextes
 	 * @return return path to directory
 	 */
-	private Resource getConfigDirectory(ServletConfig sg, ConfigServerImpl configServer, int countExistingContextes, RefBoolean isCustomSetting) throws PageServletException {
+	public static Resource getConfigDirectory(ServletConfig sg, ConfigServerImpl configServer, int countExistingContextes, RefBoolean isCustomSetting) throws PageServletException {
 		isCustomSetting.setValue(true);
 		ServletContext sc = sg.getServletContext();
 		String strConfig = sg.getInitParameter("configuration");

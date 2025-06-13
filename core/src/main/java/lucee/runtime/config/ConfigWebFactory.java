@@ -78,6 +78,7 @@ import lucee.commons.lang.ClassException;
 import lucee.commons.lang.ClassUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
+import lucee.commons.lang.types.RefBooleanImpl;
 import lucee.commons.net.URLDecoder;
 import lucee.loader.engine.CFMLEngine;
 import lucee.loader.engine.CFMLEngineFactory;
@@ -127,6 +128,7 @@ import lucee.runtime.engine.ThreadQueuePro;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.PageException;
+import lucee.runtime.exp.PageServletException;
 import lucee.runtime.exp.SecurityException;
 import lucee.runtime.extension.ExtensionDefintion;
 import lucee.runtime.extension.RHExtension;
@@ -398,12 +400,20 @@ public final class ConfigWebFactory extends ConfigFactory {
 		boolean isSingle = cs.getAdminMode() == ConfigImpl.ADMINMODE_SINGLE;
 		boolean isWebSingle = cwi.isSingle();
 		if (isWebSingle) {
-			// changed from single to mult1
+			// changed from single to multi
 			if (isSingle != isWebSingle) {
 				// Resource configDir, boolean isConfigDirACustomSetting,
 				// ServletConfig servletConfig
 				try {
-					newInstanceMulti(engine, (CFMLFactoryImpl) cwi.getFactory(), cs, cwi.getWebConfigDir(), cwi.getServletConfig(), cwi);
+					// for a reload countExistingContextes does not matter
+					Resource dir;
+					try {
+						dir = CFMLEngineImpl.getConfigDirectory(cwi.getServletConfig(), cs, 0, new RefBooleanImpl());
+					}
+					catch (PageServletException e) {
+						throw e.getPageException();
+					}
+					newInstanceMulti(engine, (CFMLFactoryImpl) cwi.getFactory(), cs, dir, cwi.getServletConfig(), cwi);
 					return;
 				}
 				catch (NoSuchAlgorithmException e) {
@@ -1375,7 +1385,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		sm.setAccess(SecurityManager.TYPE_ACCESS_WRITE, _attr2(el, "access_write", SecurityManager.ACCESS_PROTECTED));
 		sm.setAccess(SecurityManager.TYPE_REMOTE, _attr(el, "remote", SecurityManager.VALUE_YES));
 		sm.setAccess(SecurityManager.TYPE_FILE, _attr(el, "file", SecurityManager.VALUE_ALL));
-		sm.setAccess(SecurityManager.TYPE_TAG_EXECUTE,_attr(el, "tag_execute", SecurityManager.VALUE_YES));
+		sm.setAccess(SecurityManager.TYPE_TAG_EXECUTE, _attr(el, "tag_execute", SecurityManager.VALUE_YES));
 		sm.setAccess(SecurityManager.TYPE_TAG_IMPORT, _attr(el, "tag_import", SecurityManager.VALUE_YES));
 		sm.setAccess(SecurityManager.TYPE_TAG_OBJECT, _attr(el, "tag_object", SecurityManager.VALUE_YES));
 		sm.setAccess(SecurityManager.TYPE_TAG_REGISTRY, _attr(el, "tag_registry", SecurityManager.VALUE_YES));
