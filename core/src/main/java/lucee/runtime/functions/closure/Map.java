@@ -29,6 +29,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import lucee.runtime.PageContext;
+import lucee.runtime.PageContextImpl;
 import lucee.runtime.concurrency.Data;
 import lucee.runtime.concurrency.UDFCaller2;
 import lucee.runtime.exp.CasterException;
@@ -78,6 +79,7 @@ public class Map extends BIF implements ClosureFunc {
 
 	private static Collection _call(PageContext pc, Object obj, UDF udf, boolean parallel, int maxThreads, Query resQry, short type) throws PageException {
 
+		Thread thread = null;
 		ExecutorService execute = null;
 		List<Future<Data<Object>>> futures = null;
 		// 0 or less == default
@@ -87,6 +89,7 @@ public class Map extends BIF implements ClosureFunc {
 		if (parallel) {
 			execute = ThreadUtil.createExecutorService(maxThreads);
 			futures = new ArrayList<Future<Data<Object>>>();
+			thread = ((PageContextImpl) pc).getThread();
 		}
 
 		Collection coll;
@@ -142,7 +145,7 @@ public class Map extends BIF implements ClosureFunc {
 		}
 		else throw new FunctionException(pc, "Map", 1, "data", "Cannot iterate over this type [" + Caster.toTypeName(obj.getClass()) + "]");
 
-		if (parallel) afterCall(pc, coll, futures, execute);
+		if (parallel) afterCall(pc, coll, futures, execute, thread);
 
 		return coll;
 	}
@@ -334,7 +337,7 @@ public class Map extends BIF implements ClosureFunc {
 		return null;
 	}
 
-	public static void afterCall(PageContext pc, Collection coll, List<Future<Data<Object>>> futures, ExecutorService es) throws PageException {
+	public static void afterCall(PageContext pc, Collection coll, List<Future<Data<Object>>> futures, ExecutorService es, Thread thread) throws PageException {
 		boolean isQuery = coll instanceof Query;
 		try {
 			Iterator<Future<Data<Object>>> it = futures.iterator();
@@ -350,7 +353,8 @@ public class Map extends BIF implements ClosureFunc {
 			throw Caster.toPageException(e);
 		}
 		finally {
-			es.shutdown();
+			((PageContextImpl) pc).setThread(thread);
+			if (es != null) es.shutdown();
 		}
 	}
 
