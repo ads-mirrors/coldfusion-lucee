@@ -212,7 +212,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
         var arr=listToArray(raw,'.');
         if(arr[1]==1) // version 1-9
             return arr[2];
-        return arr[1];
+        return listFirst( arr[1], "-" ); // return 25 from java 25-ea
     }
 }
 
