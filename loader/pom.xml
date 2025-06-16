@@ -3,7 +3,7 @@
 
   <groupId>org.lucee</groupId>
   <artifactId>lucee</artifactId>
-  <version>7.0.0.260-SNAPSHOT</version>
+  <version>7.0.0.261-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>Lucee Loader Build</name>
@@ -590,30 +590,30 @@
       <dependency>
 	    <groupId>org.ow2.asm</groupId>
 	    <artifactId>asm</artifactId>
-	    <version>9.7.1</version>
+	    <version>9.8</version>
       <scope>provided</scope>
     </dependency>
      <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm-commons</artifactId>
-      <version>9.7.1</version>
+      <version>9.8</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm-util</artifactId>
-      <version>9.7.1</version>
+      <version>9.8</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
 	    <groupId>org.ow2.asm</groupId>
 	    <artifactId>asm-analysis</artifactId>
-	    <version>9.7.1</version>
+	    <version>9.8</version>
 	</dependency>
 <dependency>
     <groupId>org.ow2.asm</groupId>
     <artifactId>asm-tree</artifactId>
-    <version>9.7.1</version>
+    <version>9.8</version>
 </dependency>
 
   <dependency>
