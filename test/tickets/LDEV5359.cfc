@@ -4,18 +4,22 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 		describe( title='ExpandPath regressions ("*.*")' , body=function(){
 
-			it( title='ExpandPath fails with ("*.*")', body=function() {
+			it( title='ExpandPath fails with ("*.*")', skip=isWindows(), body=function() {
 				var starDotStar = ExpandPath("*.*");
 				var root = ExpandPath("/");
 				expect(starDotStar).toBe(root & "*.*");
 			});
 
-			it( title='ExpandPath ("*")', body=function() {
+			it( title='ExpandPath ("*")', skip=isWindows(), body=function() {
 				var starDotStar = ExpandPath("*");
 				var root = ExpandPath("/");
 				expect(starDotStar).toBe(root & "*");
 			});
 
 		});
+	}
+
+	private function isWindows(){
+		return (server.os.name contains "windows");
 	}
 }
