@@ -23,6 +23,7 @@ import java.util.TimeZone;
 
 import lucee.commons.i18n.FormatUtil;
 import lucee.commons.i18n.FormatterWrapper;
+import lucee.commons.io.SystemUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.engine.ThreadLocalPageContext;
@@ -36,6 +37,13 @@ import lucee.runtime.type.dt.DateTime;
  * Implements the CFML Function dateformat
  */
 public final class DateTimeFormat extends BIF {
+
+	private static final boolean useClassic;
+
+	static {
+		String tmp = SystemUtil.getSystemPropOrEnvVar("lucee.datetimeformat.mode", null);
+		useClassic = !StringUtil.isEmpty(tmp, true) && "classic".equalsIgnoreCase(tmp.trim());
+	}
 
 	private static final long serialVersionUID = 134840879454373440L;
 	public static final String DEFAULT_MASK = "dd-MMM-yyyy HH:mm:ss";// this is already a SimpleDateFormat mask!
@@ -79,7 +87,7 @@ public final class DateTimeFormat extends BIF {
 	}
 
 	public static String invoke(DateTime datetime, String mask, Locale locale, TimeZone tz) {
-
+		if (useClassic) return DateTimeFormatClassic.invoke(datetime, mask, locale, tz);
 		if (locale == null) locale = Locale.US;
 
 		if ("epoch".equalsIgnoreCase(mask)) {
