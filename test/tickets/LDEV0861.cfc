@@ -5,8 +5,6 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
         describe( 'LDEV-861' , function() {
             it( 'Able to invoke class via Java URL Class Loader', function()  {
 				if(getJavaVersion()>8) return; // java version 9 and higher no longer allow "setAccessible" 
-
-				systemOutput(getJavaVersion(), true);
 				var urls = [];
 				var file = createObject( "java", "java.io.File" ).init( '/tmp/' );
 			    arrayAppend( urls, file.toURI().toURL() );
