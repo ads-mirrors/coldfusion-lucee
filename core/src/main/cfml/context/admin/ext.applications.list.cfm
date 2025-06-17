@@ -209,8 +209,7 @@ Latest version: #latest.v#</cfif>"><cfif hasUpdates>
 
 	loop query=unInstalledExt {
 		versions = duplicate(unInstalledExt.otherVersions);
-		if(isSimpleValue(versions) && isEmpty(versions))  versions=[];
-		ArrayPrepend(versions, unInstalledExt.version);
+		if (isSimpleValue(versions ?: "") && isEmpty(versions)) versions=[];
 		t = { snap: 0, pre: 0, rel: 0 };
 		loop array=versions item="variables.v" {
 			if(findNoCase("-ALPHA", v) || findNoCase("-BETA", v) || findNoCase("-RC", v)) {
