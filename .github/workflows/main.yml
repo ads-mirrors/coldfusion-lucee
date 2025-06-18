@@ -303,5 +303,5 @@ jobs:
       uses: EnricoMi/publish-unit-test-result-action@v2
       if: always()
       with:
-        junit_files: test/reports/*.xml
+        files: test/reports/*.xml
         check_name: "Lucee Test Results"
