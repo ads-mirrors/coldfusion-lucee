@@ -282,7 +282,7 @@ public final class Util {
 			}
 		}
 		try {
-			final File tmp = File.createTempFile("a", "a");
+			final File tmp = File.createTempFile("util-check-temp-dir", ".tmp");
 			tempFile = tmp.getParentFile();
 			tempFile = getCanonicalFileEL(tempFile);
 			tmp.delete();

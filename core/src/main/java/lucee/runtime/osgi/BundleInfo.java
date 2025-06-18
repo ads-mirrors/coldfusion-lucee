@@ -95,8 +95,8 @@ public class BundleInfo implements Serializable {
 		catch (Exception e) {
 		}
 
-		// create a temp file to read data from it (using the stream direclty did not work properly)
-		File tmp = File.createTempFile("temp-extension", "lex");
+		// create a temp file to read data from it (using the stream directly did not work properly)
+		File tmp = File.createTempFile("temp-extension-" + id + "-", ".lex");
 		try {
 			FileOutputStream os = new FileOutputStream(tmp);
 			IOUtil.copy(is, os, closeStream, true);
@@ -151,7 +151,7 @@ public class BundleInfo implements Serializable {
 				else if (!StringUtil.isEmpty(exportPackage, true) || !StringUtil.isEmpty(fragementHost, true)) {
 					valid = true;
 				}
-				// has no exportPackage, fine wjhen it has other files than just class files or has no class files
+				// has no exportPackage, fine when it has other files than just class files or has no class files
 				// at all
 				else {
 					valid = true;
