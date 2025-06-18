@@ -9,7 +9,33 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" {
 	}
 
 	function run( testResults, textbox ) {
-		describe(title="testcase for LDEV-5650", body=function(){
+
+		describe(title="LDEV-5650 testcase for historical date conversion", body=function(){
+			beforeEach( function(){
+				variables.startingTZ=getTimeZone();
+				setTimeZone("Europe/Helsinki");
+				_purge();
+			});
+			afterEach( function(){
+				setTimeZone(variables.startingTZ?:"UTC");
+				_purge();
+			});
+
+			xit(title = "Checking historical date conversion - Europe/Helsinki", body = function ( currentSpec ){
+				setTimeZone( "Europe/Helsinki" );
+				var ts = createTime( 23, 39, 49 );
+				expect( datetimeformat( ts, "iso" ) ).toBe( "1899-12-30T23:39:49+02:00" ); // returns 1899-12-30T23:19:38+01:39
+			});
+
+			it(title = "Checking historical date conversion - Europe/Berlin", body = function ( currentSpec ){
+				setTimeZone( "Europe/Berlin" );
+				var ts = createTime( 23, 39, 49 );
+				expect( datetimeformat( ts, "iso" ) ).toBe( "1899-12-30T23:39:49+01:00" );
+			});
+
+		});
+
+		describe(title="LDEV-5650 testcase for scheduled tasks", body=function(){
 			beforeEach( function(){
 				variables.startingTZ=getTimeZone();
 				setTimeZone("Europe/Helsinki");
@@ -35,6 +61,24 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" {
 				configImport( task, "server", request.serverAdminPassword );
 
 				var q = _checkStartTime( createTime( 0, 0, 18 ) ); // throws [{t '23:40:07'}] but received [{t '00:40:07'}]
+			});
+
+			it(title = "Checking Scheduled task start times are consistent in Europe/Berlin timezone- configImport", body = function ( currentSpec ){
+
+				var task = {
+					"scheduledTasks": [{
+						"name": "ldev5650",
+						"startDate": "{d '2025-06-18'}",
+						"startTime": "{t '00:00:18'}",
+						"url": "http://127.0.0.1",
+						"port": 8888,
+						"interval": "3600"
+					}]
+				};
+				setTimeZone("Europe/Berlin");
+				configImport( task, "server", request.serverAdminPassword );
+
+				var q = _checkStartTime( createTime( 0, 0, 18 ) );
 			});
 
 			xit(title = "Checking Scheduled task start times are consistent in Europe/Helsinki timezone - configImport", body = function ( currentSpec ){
