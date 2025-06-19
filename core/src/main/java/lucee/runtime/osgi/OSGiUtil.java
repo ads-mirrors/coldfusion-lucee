@@ -2074,19 +2074,19 @@ public final class OSGiUtil {
 
 		public BundleDefinition(String name, String version) throws BundleException {
 			this.name = name;
-			if (name == null) throw new IllegalArgumentException("Name cannot be null");
+			if (name == null) throw new IllegalArgumentException("Bundle Symbolic Name should not be null");
 			if (!StringUtil.isEmpty(version, true)) setVersion(VersionDefinition.EQ, version);
 		}
 
 		public BundleDefinition(String name, Version version) {
 			this.name = name;
-			if (name == null) throw new IllegalArgumentException("Name cannot be null");
+			if (name == null) throw new IllegalArgumentException("Bundle Symbolic Name should not be null");
 			if (version != null) setVersion(VersionDefinition.EQ, version);
 		}
 
 		public BundleDefinition(Bundle bundle) {
 			this.name = bundle.getSymbolicName();
-			if (name == null) throw new IllegalArgumentException("Name cannot be null");
+			if (name == null) throw new IllegalArgumentException("Bundle Symbolic Name should not be null [" + bundle.getLocation() + "]");
 
 			if (bundle.getVersion() != null) setVersion(VersionDefinition.EQ, bundle.getVersion());
 			this.bundle = bundle;
