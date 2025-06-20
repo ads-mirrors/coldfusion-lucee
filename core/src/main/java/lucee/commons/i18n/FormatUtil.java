@@ -699,11 +699,11 @@ public class FormatUtil {
 	}
 
 	public static String format(DateTimeFormatter formatter, Date date, TimeZone timeZone) {
-		return date.toInstant().atZone(timeZone != null ? timeZone.toZoneId() : ZoneId.systemDefault()).format(formatter);
+		return date.toInstant().atZone(DateTimeUtil.toOffsetIfNeeded(timeZone != null ? timeZone.toZoneId() : ZoneId.systemDefault(), date)).format(formatter);
 	}
 
 	public static String format(DateTimeFormatter formatter, long millis, TimeZone timeZone) {
-		return Instant.ofEpochMilli(millis).atZone(timeZone != null ? timeZone.toZoneId() : ZoneId.systemDefault()).format(formatter);
+		return Instant.ofEpochMilli(millis).atZone(DateTimeUtil.toOffsetIfNeeded(timeZone != null ? timeZone.toZoneId() : ZoneId.systemDefault(), millis)).format(formatter);
 	}
 
 	public static long parseSimple(DateTimeFormatter formatter, String date, TimeZone timeZone) throws DateTimeParseException {
