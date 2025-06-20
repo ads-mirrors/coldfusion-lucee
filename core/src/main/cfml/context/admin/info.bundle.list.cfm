@@ -97,16 +97,22 @@
 								
 							</td> ---->
 							<!--- subject --->
-							<td>
+							<td #len(bundles.version)==0?echo("class='notinstalled'"):''#>
 								<input type="hidden" name="virtual_#bundles.currentrow#" value="#bundles.title#">
 								#bundles.title#<cfif bundles.symbolicName != bundles.title> (#bundles.symbolicName#)</cfif>
 								<cfif len(bundles.description)><br><span class="comment">#trim(bundles.description)#</span></cfif>
 							</td>
 							
 							<!--- version --->
-							<td nowrap="nowrap">
-								#bundles.version#
-							</td>
+							<cfif len(bundles.version) gt 0>
+								<td nowrap="nowrap">
+									#bundles.version#
+								</td>
+							<cfelse>
+								<td nowrap="nowrap" class="notinstalled">
+									Invalid OSGI Bundle
+								</td>
+							</cfif>
 
 							<!--- Created --->
 							<td nowrap="nowrap">
