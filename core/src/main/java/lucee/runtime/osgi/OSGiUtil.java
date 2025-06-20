@@ -1314,8 +1314,14 @@ public final class OSGiUtil {
 		List<BundleDefinition> list = new ArrayList<>();
 		Bundle[] bundles = bc.getBundles();
 		for (Bundle b: bundles) {
-			list.add(new BundleDefinition(b));
-			set.add(b.getSymbolicName() + ":" + b.getVersion());
+			try {
+				list.add(new BundleDefinition(b));
+				set.add(b.getSymbolicName() + ":" + b.getVersion());
+			} catch( IllegalArgumentException iea ){
+				list.add(new BundleDefinition(b.getLocation()));
+				set.add(b.getLocation());
+			}
+			
 		}
 		// is it in jar directory but not loaded
 		CFMLEngineFactory factory = ConfigUtil.getCFMLEngineFactory(ThreadLocalPageContext.getConfig());
