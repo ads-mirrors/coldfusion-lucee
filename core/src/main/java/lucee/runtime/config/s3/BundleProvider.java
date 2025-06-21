@@ -162,15 +162,7 @@ public final class BundleProvider extends DefaultHandler {
 	private static Map<String, Pair<Long, BundleProvider>> readers = new HashMap<>();
 
 	private BundleProvider(URL list, URL[] details) throws MalformedURLException {
-		Bundle bundle = null;
-		try {
-			bundle = CFMLEngineFactory.getInstance().getBundleContext().getBundle();
-		}
-		catch (Exception e) {
-
-		}
-
-		mappings = readIniFile(SystemUtil.getResourceAsStream(bundle, "META-INF/osgi-maven-mapping.ini"));
+		mappings = getMappings();
 		if (!list.toExternalForm().endsWith("/")) this.url = new URL(list.toExternalForm() + "/");
 		else this.url = list;
 
@@ -178,6 +170,17 @@ public final class BundleProvider extends DefaultHandler {
 			if (!details[i].toExternalForm().endsWith("/")) details[i] = new URL(details[i].toExternalForm() + "/");
 		}
 		this.details = details;
+	}
+
+	public static Map<String, List<Info>> getMappings() {
+		Bundle bundle = null;
+		try {
+			bundle = CFMLEngineFactory.getInstance().getBundleContext().getBundle();
+		}
+		catch (Exception e) {
+
+		}
+		return readIniFile(SystemUtil.getResourceAsStream(bundle, "META-INF/osgi-maven-mapping.ini"));
 	}
 
 	public static BundleProvider getInstance() throws MalformedURLException {
