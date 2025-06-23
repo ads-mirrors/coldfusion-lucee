@@ -123,56 +123,55 @@ public class Cryptor {
 				byte[] keyBytes;
 
 				if ("AES".equalsIgnoreCase(algo) || "DES".equalsIgnoreCase(algo) || "DESEDE".equalsIgnoreCase(algo) || "BLOWFISH".equalsIgnoreCase(algo)) {
-					// Try to determine if this is a Base64-encoded key or a raw string
-					try {
-						// First, try to decode as Base64
-						byte[] decodedKey = Coder.decode(Coder.ENCODING_BASE64, key, precise);
 
-						// Check if the decoded length makes sense for the algorithm
-						boolean isValidLength = false;
-						if ("DES".equalsIgnoreCase(algo) && decodedKey.length == 8) isValidLength = true;
-						if ("DESEDE".equalsIgnoreCase(algo) && (decodedKey.length == 16 || decodedKey.length == 24)) isValidLength = true;
-						if ("AES".equalsIgnoreCase(algo) && (decodedKey.length == 16 || decodedKey.length == 24 || decodedKey.length == 32)) isValidLength = true;
-						if ("BLOWFISH".equalsIgnoreCase(algo) && decodedKey.length >= 4 && decodedKey.length <= 56) isValidLength = true;
+					// Check if this looks like a Base64 string (contains typical Base64 chars and/or padding)
+					boolean looksLikeBase64 = key.matches("^[A-Za-z0-9+/]*={0,2}.*$") && key.length() > 8;
 
-						if (isValidLength) {
-							// This looks like a properly generated Base64 key
-							keyBytes = decodedKey;
+					if (looksLikeBase64) {
+						try {
+							// Try to decode as Base64
+							byte[] decodedKey = Coder.decode(Coder.ENCODING_BASE64, key, precise);
+
+							// Check if the decoded length makes sense for the algorithm
+							boolean isValidLength = false;
+							if ("DES".equalsIgnoreCase(algo) && decodedKey.length == 8) isValidLength = true;
+							if ("DESEDE".equalsIgnoreCase(algo) && (decodedKey.length == 16 || decodedKey.length == 24)) isValidLength = true;
+							if ("AES".equalsIgnoreCase(algo) && (decodedKey.length == 16 || decodedKey.length == 24 || decodedKey.length == 32)) isValidLength = true;
+							if ("BLOWFISH".equalsIgnoreCase(algo) && decodedKey.length >= 4 && decodedKey.length <= 56) isValidLength = true;
+
+							if (isValidLength) {
+								keyBytes = decodedKey;
+							}
+							else {
+								// Valid Base64 but wrong length for algorithm
+								if (precise) {
+									// Let the original error propagate
+									throw new RuntimeException("Invalid key length for " + algo + ": " + decodedKey.length + " bytes");
+								}
+								// Fall back to raw UTF-8 with padding
+								keyBytes = key.getBytes(DEFAULT_CHARSET);
+								keyBytes = adjustKeyLength(keyBytes, getTargetKeyLength(algo));
+							}
 						}
-						else {
-							// Base64 decoded but wrong length - treat as raw UTF-8
+						catch (Exception e) {
+							// Base64 decode failed
+							if (precise) {
+								// Re-throw the original Base64 decode error when precise=true
+								throw e;
+							}
+							// Fall back to raw UTF-8 when precise=false
 							keyBytes = key.getBytes(DEFAULT_CHARSET);
-
-							// Apply padding/truncation for raw keys
-							if ("AES".equalsIgnoreCase(algo)) {
-								keyBytes = adjustKeyLength(keyBytes, 16); // Pad to 16 bytes
-							}
-							else if ("DES".equalsIgnoreCase(algo)) {
-								keyBytes = adjustKeyLength(keyBytes, 8); // Pad to 8 bytes
-							}
-							else if ("DESEDE".equalsIgnoreCase(algo)) {
-								keyBytes = adjustKeyLength(keyBytes, 24); // Pad to 24 bytes
-							}
+							keyBytes = adjustKeyLength(keyBytes, getTargetKeyLength(algo));
 						}
 					}
-					catch (Exception e) {
-						// Base64 decode failed - definitely a raw string key
+					else {
+						// Doesn't look like Base64 - treat as raw UTF-8
 						keyBytes = key.getBytes(DEFAULT_CHARSET);
-
-						// Apply padding/truncation for raw keys
-						if ("AES".equalsIgnoreCase(algo)) {
-							keyBytes = adjustKeyLength(keyBytes, 16);
-						}
-						else if ("DES".equalsIgnoreCase(algo)) {
-							keyBytes = adjustKeyLength(keyBytes, 8);
-						}
-						else if ("DESEDE".equalsIgnoreCase(algo)) {
-							keyBytes = adjustKeyLength(keyBytes, 24);
-						}
+						keyBytes = adjustKeyLength(keyBytes, getTargetKeyLength(algo));
 					}
 				}
 				else {
-					// For other algorithms, keep the original Base64 decoding behavior
+					// For other algorithms, keep original behavior
 					keyBytes = Coder.decode(Coder.ENCODING_BASE64, key, precise);
 				}
 
@@ -205,18 +204,23 @@ public class Cryptor {
 		}
 	}
 
+	private static int getTargetKeyLength(String algo) {
+		if ("AES".equalsIgnoreCase(algo)) return 16;
+		if ("DES".equalsIgnoreCase(algo)) return 8;
+		if ("DESEDE".equalsIgnoreCase(algo)) return 24;
+		return 16; // default
+	}
+
 	private static byte[] adjustKeyLength(byte[] originalKey, int targetLength) {
 		if (originalKey.length == targetLength) {
 			return originalKey;
 		}
 		else if (originalKey.length < targetLength) {
-			// Pad with zeros
 			byte[] paddedKey = new byte[targetLength];
 			System.arraycopy(originalKey, 0, paddedKey, 0, originalKey.length);
 			return paddedKey;
 		}
 		else {
-			// Truncate
 			byte[] truncatedKey = new byte[targetLength];
 			System.arraycopy(originalKey, 0, truncatedKey, 0, targetLength);
 			return truncatedKey;
