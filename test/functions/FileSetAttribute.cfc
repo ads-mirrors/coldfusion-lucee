@@ -14,6 +14,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 
 	function afterAll(){
 		if ( directoryExists( variables.path ) ){
+			var files = directoryList(path=variables.path, type="file");
+			arrayEach( files, function( path ) {
+				fileSetAttribute( path, 'Normal' );
+			});
 			directoryDelete( variables.path, true );
 		}
 	}
@@ -21,15 +25,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 		describe( title="Testcase for LDEV-1880", skip=isNotSupported(),  body = function() {
 
 			beforeEach( function( currentSpec ) {
-				if ( !fileExists( path & "/example_LDEV1880.txt" ) ){
-					variables.myfile = FileOpen(path, "write" );
-					FileWrite( path & "/example_LDEV1880.txt","This is a sample file content" );
-				}
-			});
-			afterEach( function( currentSpec ) {
 				if ( fileExists( path & "/example_LDEV1880.txt" ) ){
+					fileSetAttribute( path & "/example_LDEV1880.txt", 'Normal' );
 					fileDelete( path & "/example_LDEV1880.txt" );
 				}
+				FileWrite( path & "/example_LDEV1880.txt","This is a sample file content" );
 			});
 
 			it( title = "checking the file with Archive Attribute", body = function( currentSpec ) {
@@ -60,6 +60,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				expect( info.isArchive ).toBeFalse();
 			});
 		});
+
 		describe( "Testcase for LDEV-2410", function() {
 			it( title = "Checking changing file attribute between NORMAL and READONLY", body = function( currentSpec ) {
 				var testFile = path & "\ro_normal_LDEV2410_#CreateUUID()#.txt";
@@ -83,6 +84,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 				
 			});
 		});
+
 		describe( title="Testcase for LDEV-2349", body=function() {
 			it( title="Checking FileCopy- Destination file access mode with file attribute [readonly]",body=function( currentSpec ) {
 				var testFile =  path & "\newfile_#CreateUUID()#.txt";

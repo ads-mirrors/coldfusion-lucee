@@ -471,12 +471,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 			if(directoryExists(arguments.data.directory)) 
 				directoryDelete(arguments.data.directory, true);
 		} catch( e ){
-			if (!isWindows() || e.message does not contain "delete file") {
+			if (!isWindows() || (e.message does not contain "delete file" && e.message does not contain "another process")) {
 				rethrow;
 			} else if (isWindows()) {
 				systemOutput("ERROR: LDEV-5145 Windows locked jars", true);
+				systemOutput( e.message, true );
 				//systemOutput( e.stacktrace, true );
-				rethrow;
+				//rethrow;
 				
 			}
 		}
@@ -510,6 +511,6 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 		var arr=listToArray(raw,'.');
 		if(arr[1]==1) // version 1-9
 			return arr[2];
-		return arr[1];
+		return listFirst( arr[1], "-" ); // return 25 from java 25-ea
 	}
 }

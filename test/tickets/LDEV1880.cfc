@@ -14,22 +14,22 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 	}
 	function afterAll(){
 		if(directoryExists(base&"LDEV1880")){
+			var files = directoryList(path=variables.path, type="file");
+			arrayEach( files, function( path ) {
+				fileSetAttribute( path, 'Normal' );
+			});
 			directoryDelete(base&"LDEV1880",true);
 		}
 	}
 	function run( testResults , testBox ) {
 		describe( title="test suite for fileSetAttribute()", skip=isNotSupported(),  body = function() {
-			
+
 			beforeEach( function( currentSpec ) {
-				if(!fileExists(path)){
-					variables.myfile = FileOpen(path, "write");
-					FileWrite(path,"This is a sample file content");
-				}
-			});
-			afterEach( function( currentSpec ) {
 				if(fileExists(path)){
-					filedelete(path);
+					fileSetAttribute(path,'Normal');
+					fileDelete(path);
 				}
+				fileWrite(path,"This is a sample file content");
 			});
 
 			it(title = "checking the file with Archive Attribute", body = function( currentSpec ) {
