@@ -2611,7 +2611,7 @@ public final class OSGiUtil {
 					Attributes mainAttributes = manifest.getMainAttributes();
 					mainAttributes.put(Attributes.Name.MANIFEST_VERSION, "1.0");
 					mainAttributes.putValue("Bundle-ManifestVersion", "2");
-					mainAttributes.putValue("Bundle-SymbolicName", "empty.bundle." + System.currentTimeMillis());
+					mainAttributes.putValue("Bundle-SymbolicName", "lucee.loader.bundle." + System.currentTimeMillis());
 					mainAttributes.putValue("Bundle-Version", "1.0.0");
 
 					// Create empty JAR with just the manifest
@@ -2621,7 +2621,7 @@ public final class OSGiUtil {
 					}
 					try {
 						// Install the empty bundle
-						Bundle emptyBundle = bc.installBundle("empty-bundle-" + System.currentTimeMillis(), new ByteArrayInputStream(baos.toByteArray()));
+						Bundle emptyBundle = bc.installBundle("lucee-loader-bundle-" + System.currentTimeMillis(), new ByteArrayInputStream(baos.toByteArray()));
 
 						// Start it to get active classloader
 						emptyBundle.start();
