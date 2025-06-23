@@ -1,4 +1,4 @@
-component extends="org.lucee.cfml.test.LuceeTestCase" skip=true labels="thread" {
+component extends="org.lucee.cfml.test.LuceeTestCase" labels="thread" {
 
 	function run( testResults, testBox ){
 

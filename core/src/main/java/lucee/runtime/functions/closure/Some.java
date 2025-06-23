@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import lucee.runtime.PageContext;
+import lucee.runtime.PageContextImpl;
 import lucee.runtime.concurrency.Data;
 import lucee.runtime.concurrency.UDFCaller2;
 import lucee.runtime.exp.CasterException;
@@ -72,6 +73,7 @@ public final class Some extends BIF implements ClosureFunc {
 
 	private static boolean _call(PageContext pc, Object obj, UDF udf, boolean parallel, int maxThreads, short type) throws PageException {
 
+		Thread thread = null;
 		ExecutorService execute = null;
 		List<Future<Data<Object>>> futures = null;
 		// 0 or less == default
@@ -81,6 +83,7 @@ public final class Some extends BIF implements ClosureFunc {
 		if (parallel) {
 			execute = ThreadUtil.createExecutorService(maxThreads);
 			futures = new ArrayList<Future<Data<Object>>>();
+			thread = ((PageContextImpl) pc).getThread();
 		}
 
 		boolean res;
@@ -135,7 +138,7 @@ public final class Some extends BIF implements ClosureFunc {
 		}
 		else throw new FunctionException(pc, "Some", 1, "data", "Cannot iterate over this type [" + Caster.toTypeName(obj.getClass()) + "]");
 
-		if (parallel) res = afterCall(pc, futures, execute);
+		if (parallel) res = afterCall(pc, futures, execute, thread);
 
 		return res;
 	}
@@ -299,7 +302,7 @@ public final class Some extends BIF implements ClosureFunc {
 		return null;
 	}
 
-	public static boolean afterCall(PageContext pc, List<Future<Data<Object>>> futures, ExecutorService es) throws PageException {
+	public static boolean afterCall(PageContext pc, List<Future<Data<Object>>> futures, ExecutorService es, Thread thread) throws PageException {
 		try {
 			Iterator<Future<Data<Object>>> it = futures.iterator();
 			Data<Object> d;
@@ -314,7 +317,8 @@ public final class Some extends BIF implements ClosureFunc {
 			throw Caster.toPageException(e);
 		}
 		finally {
-			es.shutdown();
+			((PageContextImpl) pc).setThread(thread);
+			if (es != null) es.shutdown();
 		}
 	}
 

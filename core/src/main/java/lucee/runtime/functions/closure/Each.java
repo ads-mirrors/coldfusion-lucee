@@ -33,6 +33,7 @@ import java.util.concurrent.Future;
 
 import lucee.commons.io.SystemUtil;
 import lucee.runtime.PageContext;
+import lucee.runtime.PageContextImpl;
 import lucee.runtime.concurrency.Data;
 import lucee.runtime.concurrency.UDFCaller2;
 import lucee.runtime.exp.FunctionException;
@@ -73,6 +74,7 @@ public final class Each extends BIF implements ClosureFunc {
 	private static String _call(PageContext pc, Object obj, UDF udf, boolean parallel, int maxThreads, short type) throws PageException {
 		ExecutorService execute = null;
 		List<Future<Data<Object>>> futures = null;
+		Thread thread = null;
 		// 0 or less == default
 		if (maxThreads < 1) maxThreads = DEFAULT_MAX_THREAD;
 		// 1 == not parallel
@@ -81,6 +83,7 @@ public final class Each extends BIF implements ClosureFunc {
 		if (parallel) {
 			execute = ThreadUtil.createExecutorService(maxThreads);
 			futures = new ArrayList<Future<Data<Object>>>();
+			thread = ((PageContextImpl) pc).getThread();
 		}
 
 		// !!!! Don't combine the first 2 ifs with the ifs below, type overrules instanceof check
@@ -153,12 +156,12 @@ public final class Each extends BIF implements ClosureFunc {
 		}
 		else throw new FunctionException(pc, "Each", 1, "data", "Cannot iterate over this type [" + Caster.toTypeName(obj.getClass()) + "]");
 
-		if (parallel) afterCall(pc, futures, execute);
+		if (parallel) afterCall(pc, futures, execute, thread);
 
 		return null;
 	}
 
-	public static void afterCall(PageContext pc, List<Future<Data<Object>>> futures, ExecutorService es) throws PageException {
+	public static void afterCall(PageContext pc, List<Future<Data<Object>>> futures, ExecutorService es, Thread thread) throws PageException {
 		try {
 			Iterator<Future<Data<Object>>> it = futures.iterator();
 			// Future<String> f;
@@ -170,6 +173,7 @@ public final class Each extends BIF implements ClosureFunc {
 			throw Caster.toPageException(e);
 		}
 		finally {
+			((PageContextImpl) pc).setThread(thread);
 			if (es != null) es.shutdown();
 		}
 	}
