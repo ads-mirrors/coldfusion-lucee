@@ -1342,6 +1342,10 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 		return pageSource;
 	}
 
+	public ComponentPageImpl _getComponentPageImpl() {
+		return cp;
+	}
+
 	public ImportDefintion[] _getImportDefintions() {
 		return importDefintions;
 	}
