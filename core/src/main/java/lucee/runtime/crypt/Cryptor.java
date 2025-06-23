@@ -120,7 +120,36 @@ public final class Cryptor {
 				params = new PBEParameterSpec(ivOrSalt, iterations > 0 ? iterations : DEFAULT_ITERATIONS); // set Salt and Iterations for PasswordBasedEncryption
 			}
 			else {
-				secretKey = new SecretKeySpec(Coder.decode(Coder.ENCODING_BASE64, key, precise), algo);
+				byte[] keyBytes;
+
+				// For AES and similar algorithms, treat string keys as raw UTF-8 bytes
+				// For algorithms that expect Base64-encoded keys, decode them
+				if ("AES".equalsIgnoreCase(algo) || "DES".equalsIgnoreCase(algo) || "DESEDE".equalsIgnoreCase(algo) || "BLOWFISH".equalsIgnoreCase(algo)) {
+					// Raw UTF-8 bytes for symmetric algorithms
+					keyBytes = key.getBytes(DEFAULT_CHARSET);
+
+					// Ensure proper key length for AES
+					if ("AES".equalsIgnoreCase(algo)) {
+						if (keyBytes.length < 16) {
+							// Pad short keys to 16 bytes
+							byte[] paddedKey = new byte[16];
+							System.arraycopy(keyBytes, 0, paddedKey, 0, Math.min(keyBytes.length, 16));
+							keyBytes = paddedKey;
+						}
+						else if (keyBytes.length > 16 && keyBytes.length != 24 && keyBytes.length != 32) {
+							// Truncate to 16 bytes if not 24 or 32
+							byte[] truncatedKey = new byte[16];
+							System.arraycopy(keyBytes, 0, truncatedKey, 0, 16);
+							keyBytes = truncatedKey;
+						}
+					}
+				}
+				else {
+					// For other algorithms, keep the Base64 decoding behavior
+					keyBytes = Coder.decode(Coder.ENCODING_BASE64, key, precise);
+				}
+
+				secretKey = new SecretKeySpec(keyBytes, algo);
 				if (isFBM) params = new IvParameterSpec(ivOrSalt); // set Initialization Vector for non-ECB Feedback Mode
 			}
 

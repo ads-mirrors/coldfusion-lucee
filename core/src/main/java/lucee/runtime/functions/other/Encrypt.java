@@ -30,6 +30,7 @@ import lucee.runtime.crypt.Cryptor;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.Function;
 import lucee.runtime.op.Caster;
+import lucee.runtime.op.Decision;
 
 public final class Encrypt implements Function {
 
@@ -69,7 +70,7 @@ public final class Encrypt implements Function {
 				return Coder.encode(encoding, new CFMXCompat().transformString(Caster.toString(key), input.getBytes(Cryptor.DEFAULT_CHARSET)));
 
 			byte[] baIVS = null;
-			if (ivOrSalt instanceof String) baIVS = ((String) ivOrSalt).getBytes(Cryptor.DEFAULT_CHARSET);
+			if (Decision.isSimpleValue(ivOrSalt)) baIVS = Caster.toString(ivOrSalt).getBytes(Cryptor.DEFAULT_CHARSET);
 			else if (ivOrSalt != null) baIVS = Caster.toBinary(ivOrSalt);
 
 			return Cryptor.encrypt(input, Caster.toString(key), algorithm, baIVS, iterations, encoding, Cryptor.DEFAULT_CHARSET, precise);
