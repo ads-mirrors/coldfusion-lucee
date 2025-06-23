@@ -122,35 +122,62 @@ public class Cryptor {
 			else {
 				byte[] keyBytes;
 
-				// For AES and similar algorithms, treat string keys as raw UTF-8 bytes
-				// For algorithms that expect Base64-encoded keys, decode them
 				if ("AES".equalsIgnoreCase(algo) || "DES".equalsIgnoreCase(algo) || "DESEDE".equalsIgnoreCase(algo) || "BLOWFISH".equalsIgnoreCase(algo)) {
-					// Raw UTF-8 bytes for symmetric algorithms
-					keyBytes = key.getBytes(DEFAULT_CHARSET);
+					// Try to determine if this is a Base64-encoded key or a raw string
+					try {
+						// First, try to decode as Base64
+						byte[] decodedKey = Coder.decode(Coder.ENCODING_BASE64, key, precise);
 
-					// Ensure proper key length for AES
-					if ("AES".equalsIgnoreCase(algo)) {
-						if (keyBytes.length < 16) {
-							// Pad short keys to 16 bytes
-							byte[] paddedKey = new byte[16];
-							System.arraycopy(keyBytes, 0, paddedKey, 0, Math.min(keyBytes.length, 16));
-							keyBytes = paddedKey;
+						// Check if the decoded length makes sense for the algorithm
+						boolean isValidLength = false;
+						if ("DES".equalsIgnoreCase(algo) && decodedKey.length == 8) isValidLength = true;
+						if ("DESEDE".equalsIgnoreCase(algo) && (decodedKey.length == 16 || decodedKey.length == 24)) isValidLength = true;
+						if ("AES".equalsIgnoreCase(algo) && (decodedKey.length == 16 || decodedKey.length == 24 || decodedKey.length == 32)) isValidLength = true;
+						if ("BLOWFISH".equalsIgnoreCase(algo) && decodedKey.length >= 4 && decodedKey.length <= 56) isValidLength = true;
+
+						if (isValidLength) {
+							// This looks like a properly generated Base64 key
+							keyBytes = decodedKey;
 						}
-						else if (keyBytes.length > 16 && keyBytes.length != 24 && keyBytes.length != 32) {
-							// Truncate to 16 bytes if not 24 or 32
-							byte[] truncatedKey = new byte[16];
-							System.arraycopy(keyBytes, 0, truncatedKey, 0, 16);
-							keyBytes = truncatedKey;
+						else {
+							// Base64 decoded but wrong length - treat as raw UTF-8
+							keyBytes = key.getBytes(DEFAULT_CHARSET);
+
+							// Apply padding/truncation for raw keys
+							if ("AES".equalsIgnoreCase(algo)) {
+								keyBytes = adjustKeyLength(keyBytes, 16); // Pad to 16 bytes
+							}
+							else if ("DES".equalsIgnoreCase(algo)) {
+								keyBytes = adjustKeyLength(keyBytes, 8); // Pad to 8 bytes
+							}
+							else if ("DESEDE".equalsIgnoreCase(algo)) {
+								keyBytes = adjustKeyLength(keyBytes, 24); // Pad to 24 bytes
+							}
+						}
+					}
+					catch (Exception e) {
+						// Base64 decode failed - definitely a raw string key
+						keyBytes = key.getBytes(DEFAULT_CHARSET);
+
+						// Apply padding/truncation for raw keys
+						if ("AES".equalsIgnoreCase(algo)) {
+							keyBytes = adjustKeyLength(keyBytes, 16);
+						}
+						else if ("DES".equalsIgnoreCase(algo)) {
+							keyBytes = adjustKeyLength(keyBytes, 8);
+						}
+						else if ("DESEDE".equalsIgnoreCase(algo)) {
+							keyBytes = adjustKeyLength(keyBytes, 24);
 						}
 					}
 				}
 				else {
-					// For other algorithms, keep the Base64 decoding behavior
+					// For other algorithms, keep the original Base64 decoding behavior
 					keyBytes = Coder.decode(Coder.ENCODING_BASE64, key, precise);
 				}
 
 				secretKey = new SecretKeySpec(keyBytes, algo);
-				if (isFBM) params = new IvParameterSpec(ivOrSalt); // set Initialization Vector for non-ECB Feedback Mode
+				if (isFBM) params = new IvParameterSpec(ivOrSalt);
 			}
 
 			if (doDecrypt) {
@@ -175,6 +202,24 @@ public class Cryptor {
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
 			throw Caster.toPageException(t);
+		}
+	}
+
+	private static byte[] adjustKeyLength(byte[] originalKey, int targetLength) {
+		if (originalKey.length == targetLength) {
+			return originalKey;
+		}
+		else if (originalKey.length < targetLength) {
+			// Pad with zeros
+			byte[] paddedKey = new byte[targetLength];
+			System.arraycopy(originalKey, 0, paddedKey, 0, originalKey.length);
+			return paddedKey;
+		}
+		else {
+			// Truncate
+			byte[] truncatedKey = new byte[targetLength];
+			System.arraycopy(originalKey, 0, truncatedKey, 0, targetLength);
+			return truncatedKey;
 		}
 	}
 

@@ -57,29 +57,24 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				var decrypted = "";
 				var errorMessage = "";
 				
-				try {
-					// Step 1: Encrypt
-					encrypted = Encrypt(
-						String=originalString,
-						key=key,
-						algorithm=algorithm,
-						encoding=encoding,
-						ivorsalt=ivorsalt
-					);
-					
-					// Step 2: Decrypt
-					decrypted = Decrypt(
-						String=encrypted,
-						key=key,
-						algorithm=algorithm,
-						encoding=encoding,
-						ivorsalt=ivorsalt
-					);
-					
-				} catch ( e ) {
-					errorMessage = e.message;
-				}
+				// Step 1: Encrypt
+				encrypted = Encrypt(
+					String=originalString,
+					key=key,
+					algorithm=algorithm,
+					encoding=encoding,
+					ivorsalt=ivorsalt
+				);
 				
+				// Step 2: Decrypt
+				decrypted = Decrypt(
+					String=encrypted,
+					key=key,
+					algorithm=algorithm,
+					encoding=encoding,
+					ivorsalt=ivorsalt
+				);
+					
 				// Assertions
 				expect( errorMessage ).toBe( "" ); // Should not throw any error after fix
 				expect( encrypted ).toBe( expectedEncrypted ); // Should produce same result as string "3"
