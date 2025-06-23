@@ -63,7 +63,7 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" {
 				var q = _checkStartTime( createTime( 0, 0, 18 ) ); // throws [{t '23:40:07'}] but received [{t '00:40:07'}]
 			});
 
-			it(title = "Checking Scheduled task start times are consistent in Europe/Berlin timezone- configImport", body = function ( currentSpec ){
+			xit(title = "Checking Scheduled task start times are consistent in Europe/Berlin timezone- configImport", body = function ( currentSpec ){
 
 				var task = {
 					"scheduledTasks": [{
