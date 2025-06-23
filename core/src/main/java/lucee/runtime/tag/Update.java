@@ -47,7 +47,6 @@ import lucee.runtime.op.Decision;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.QueryImpl;
 import lucee.runtime.type.Struct;
-import lucee.runtime.type.scope.Form;
 import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.type.util.CollectionUtil;
 import lucee.runtime.type.util.ListUtil;
@@ -312,12 +311,13 @@ public final class Update extends TagImpl {
 					set.append(field);
 					set.append("=?");
 					ColumnInfo ci = (ColumnInfo) meta.get(fieldKey);
-					if (ci != null){ 
+					if (ci != null) {
 						Object val = src.get(fieldKey, null);
 						SQLItemImpl item = new SQLItemImpl(val, ci.getType());
 						if (ci.isNullable() && StringUtil.isEmpty(val)) item.setNulls(true);
 						setItems.add(item);
-					} else {
+					}
+					else {
 						setItems.add(new SQLItemImpl(src.get(fieldKey, null)));
 					}
 				}

@@ -49,7 +49,6 @@ import lucee.runtime.type.QueryImpl;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.query.QueryResult;
-import lucee.runtime.type.scope.Form;
 import lucee.runtime.type.util.CollectionUtil;
 import lucee.runtime.type.util.ListUtil;
 import lucee.runtime.util.PageContextUtil;
@@ -313,13 +312,13 @@ public final class Insert extends TagImpl {
 				values.append('?');
 				Key fieldKey = Caster.toKey(field);
 				ColumnInfo ci = (ColumnInfo) meta.get(fieldKey, null);
-				if (ci != null){ 
+				if (ci != null) {
 					Object val = src.get(fieldKey, null);
 					SQLItemImpl item = new SQLItemImpl(val, ci.getType());
-					if (ci.isNullable() && StringUtil.isEmpty(val))
-						item.setNulls(true);
+					if (ci.isNullable() && StringUtil.isEmpty(val)) item.setNulls(true);
 					items.add(item);
-				} else {
+				}
+				else {
 					items.add(new SQLItemImpl(src.get(fieldKey, null)));
 				}
 			}
