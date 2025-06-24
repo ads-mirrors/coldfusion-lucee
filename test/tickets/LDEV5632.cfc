@@ -17,8 +17,9 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
                                 (structKeyExists(server.system.environment, "CATALINA_OPTS") && server.system.environment["CATALINA_OPTS"] == agentOpts)
                             );
                 // Check if the environment variable or system property is set correctly
-                expect(envMatch).toBeTrue();
+                
                 expect(result.filecontent.trim()).toBe("success");
+                expect(envMatch).toBeTrue();
             });
 
         });
