@@ -599,7 +599,7 @@ component {
 					return {
 						class: 'org.postgresql.Driver'
 						, bundleName: 'org.postgresql.jdbc'
-						, bundleVersion: server.getDefaultBundleVersion( 'org.postgresql.jdbc', '42.7.5' )
+						, bundleVersion: server.getDefaultBundleVersion( 'org.postgresql.jdbc', '42.7.7' )
 						, connectionString: 'jdbc:postgresql://#pgsql.server#:#pgsql.port#/#pgsql.database#' & arguments.connectionString
 						, username: pgsql.username
 						, password: pgsql.password
