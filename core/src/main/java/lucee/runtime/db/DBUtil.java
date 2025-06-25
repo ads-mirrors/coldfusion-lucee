@@ -83,7 +83,7 @@ public final class DBUtil {
 		}
 		if ("postgresql".equals(type) || "postgre".equals(type)) {
 			if (POSTGRESQL == null) {
-				JDBCDriver jdbc = getJDBCDriver(config, "postgresql", "org.postgresql.Driver", "org.postgresql.jdbc", "42.7.5", "jdbc:postgresql://{host}:{port}/{database}");
+				JDBCDriver jdbc = getJDBCDriver(config, "postgresql", "org.postgresql.Driver", "org.postgresql.jdbc", "42.7.7", "jdbc:postgresql://{host}:{port}/{database}");
 				POSTGRESQL = new DataSourceDefintion(jdbc.cd, jdbc.connStr, 5432);
 			}
 			return POSTGRESQL;
