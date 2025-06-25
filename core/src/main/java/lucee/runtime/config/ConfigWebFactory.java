@@ -5126,7 +5126,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 			// uninstall extensions no longer used
 			Resource[] installed = RHExtension.getExtensionInstalledDir(config).listResources(new ExtensionResourceFilter("lex"));
-			if (installed != null) {
+			if (!changed && installed != null) { // we only clean up if we have no switch from multi to single
 				for (Resource r: installed) {
 					if (!installedFiles.contains(r)) {
 
