@@ -57,6 +57,7 @@ import lucee.runtime.net.smtp.SMTPConnectionPool;
 import lucee.runtime.op.Caster;
 import lucee.runtime.schedule.Scheduler;
 import lucee.runtime.schedule.SchedulerImpl;
+import lucee.runtime.timer.Stopwatch;
 import lucee.runtime.type.scope.storage.StorageScopeFile;
 import lucee.runtime.type.util.ArrayUtil;
 import lucee.transformer.dynamic.DynamicInvoker;
@@ -67,6 +68,7 @@ import lucee.transformer.dynamic.DynamicInvoker;
 public final class Controler extends ParentThreasRefThread {
 
 	private static final long TIMEOUT = 50 * 1000;
+	private static final long STEP_REPORT_THRESHOLD_MS =  1000 * Caster.toLongValue(SystemUtil.getSystemPropOrEnvVar("lucee.controller.log.threshold", ""), 20); // threshold for reporting out how long controller steps took
 
 	private static final ControllerState INACTIVE = new ControllerStateImpl(false);
 
@@ -276,9 +278,12 @@ public final class Controler extends ParentThreasRefThread {
 				if (log != null) log.error("controler", t);
 			}
 		}
-
+		Stopwatch stopwatch = new Stopwatch(Stopwatch.UNIT_MILLI);
 		for (int i = 0; i < factories.length; i++) {
+			stopwatch.start();
+			ConfigWeb config = factories[i].getConfig();
 			control(factories[i], do10Seconds, doMinute, doHour, firstRun, log);
+			checkStopWatch(config, stopwatch, "Web Context [" + config.getRootDirectory().getAbsolutePath() + "]" );
 		}
 
 		if (firstRun) {
@@ -318,13 +323,14 @@ public final class Controler extends ParentThreasRefThread {
 				cfmlFactory.checkTimeout();
 			}
 			ConfigWeb config = null;
+			Stopwatch stopwatch = new Stopwatch(Stopwatch.UNIT_MILLI);
 
 			if (firstRun) {
 				config = cfmlFactory.getConfig();
 				ThreadLocalConfig.register(config);
 
 				checkOldClientFile(config, log);
-
+				stopwatch.start();
 				try {
 					checkTempDirectorySize(config);
 				}
@@ -332,6 +338,9 @@ public final class Controler extends ParentThreasRefThread {
 					ExceptionUtil.rethrowIfNecessary(t);
 					if (log != null) log.error("controler", t);
 				}
+				checkStopWatch(config, stopwatch, "checkTempDirectorySize");
+
+				stopwatch.start();
 				try {
 					checkCacheFileSize(config);
 				}
@@ -339,6 +348,9 @@ public final class Controler extends ParentThreasRefThread {
 					ExceptionUtil.rethrowIfNecessary(t);
 					if (log != null) log.error("controler", t);
 				}
+				checkStopWatch(config, stopwatch, "checkCacheFileSize");
+
+				stopwatch.start();
 				try {
 					cfmlFactory.getScopeContext().clearUnused();
 				}
@@ -346,6 +358,7 @@ public final class Controler extends ParentThreasRefThread {
 					ExceptionUtil.rethrowIfNecessary(t);
 					if (log != null) log.error("controler", t);
 				}
+				checkStopWatch(config, stopwatch, "clearUnused");
 			}
 
 			if (config == null) {
@@ -365,6 +378,7 @@ public final class Controler extends ParentThreasRefThread {
 
 				LogUtil.log(ThreadLocalPageContext.getConfig(config), Log.LEVEL_TRACE, Controler.class.getName(), "Running background Controller maintenance (every minute).");
 
+				stopwatch.start();
 				try {
 					Scheduler scheduler = config.getScheduler();
 					if (scheduler != null) ((SchedulerImpl) scheduler).startIfNecessary();
@@ -372,15 +386,19 @@ public final class Controler extends ParentThreasRefThread {
 				catch (Exception e) {
 					if (log != null) log.error("controler", e);
 				}
+				checkStopWatch(config, stopwatch, "checkScheduler");
 
 				// double check templates
+				stopwatch.start();
 				try {
 					((ConfigWebPro) config).getCompiler().checkWatched();
 				}
 				catch (Exception e) {
 					if (log != null) log.error("controler", e);
 				}
+				checkStopWatch(config, stopwatch, "checkTemplates");
 
+				stopwatch.start();
 				// deploy extensions, archives ...
 				try {
 					DeployHandler.deploy(config, ThreadLocalPageContext.getLog(config, "deploy"), false);
@@ -389,8 +407,10 @@ public final class Controler extends ParentThreasRefThread {
 					ExceptionUtil.rethrowIfNecessary(t);
 					if (log != null) log.error("controler", t);
 				}
+				checkStopWatch(config, stopwatch, "deploy");
 
 				// clear unused DB Connections
+				stopwatch.start();
 				try {
 					for (DatasourceConnPool pool: ((ConfigPro) config).getDatasourceConnectionPools()) {
 						try {
@@ -404,7 +424,9 @@ public final class Controler extends ParentThreasRefThread {
 				catch (Exception e) {
 					if (log != null) log.error("controler", e);
 				}
+				checkStopWatch(config, stopwatch, "clearUnusedDBConnections");
 
+				stopwatch.start();
 				// Clear unused http connections
 				try {
 					HTTPEngine4Impl.closeIdleConnections();
@@ -412,8 +434,10 @@ public final class Controler extends ParentThreasRefThread {
 				catch (Exception e) {
 					if (log != null) log.error("controler", e);
 				}
+				checkStopWatch(config, stopwatch, "clearUnusedHttpConnections");
 
 				// clear all unused scopes
+				stopwatch.start();
 				try {
 					cfmlFactory.getScopeContext().clearUnused();
 				}
@@ -421,6 +445,8 @@ public final class Controler extends ParentThreasRefThread {
 					ExceptionUtil.rethrowIfNecessary(t);
 					if (log != null) log.error("controler", t);
 				}
+				checkStopWatch(config, stopwatch, "clearUnusedScopes");
+
 				// Memory usage
 				// clear Query Cache
 				/*
@@ -430,7 +456,7 @@ public final class Controler extends ParentThreasRefThread {
 				 * //cfmlFactory.getDefaultQueryCache().clearUnused(null); }catch(Throwable
 				 * t){ExceptionUtil.rethrowIfNecessary(t);}
 				 */
-
+				stopwatch.start();
 				try {
 					doCheckMappings(config);
 				}
@@ -438,6 +464,9 @@ public final class Controler extends ParentThreasRefThread {
 					ExceptionUtil.rethrowIfNecessary(t);
 					if (log != null) log.error("controler", t);
 				}
+				checkStopWatch(config, stopwatch, "checkMappings");
+
+				stopwatch.start();
 				try {
 					doClearMailConnections();
 				}
@@ -445,7 +474,10 @@ public final class Controler extends ParentThreasRefThread {
 					ExceptionUtil.rethrowIfNecessary(t);
 					if (log != null) log.error("controler", t);
 				}
+				checkStopWatch(config, stopwatch, "clearMailConnections");
+
 				// clean LockManager
+				stopwatch.start();
 				if (cfmlFactory.getUsedPageContextLength() == 0) try {
 					((LockManagerImpl) config.getLockManager()).clean();
 				}
@@ -453,7 +485,9 @@ public final class Controler extends ParentThreasRefThread {
 					ExceptionUtil.rethrowIfNecessary(t);
 					if (log != null) log.error("controler", t);
 				}
-
+				checkStopWatch(config, stopwatch, "cleanLockManager");
+				
+				stopwatch.start();
 				try {
 					ConfigAdmin.checkForChangesInConfigFile(config);
 				}
@@ -461,6 +495,7 @@ public final class Controler extends ParentThreasRefThread {
 					ExceptionUtil.rethrowIfNecessary(t);
 					if (log != null) log.error("controler", t);
 				}
+				checkStopWatch(config, stopwatch, "checkForChangesInConfigFile");
 
 			}
 			// every hour
@@ -474,6 +509,7 @@ public final class Controler extends ParentThreasRefThread {
 				ThreadLocalConfig.register(config);
 
 				// check temp directory
+				stopwatch.start();
 				try {
 					checkTempDirectorySize(config);
 				}
@@ -481,7 +517,10 @@ public final class Controler extends ParentThreasRefThread {
 					ExceptionUtil.rethrowIfNecessary(t);
 					if (log != null) log.error("controler", t);
 				}
+				checkStopWatch(config, stopwatch, "checkTempDirectorySize");
+
 				// check cache directory
+				stopwatch.start();
 				try {
 					checkCacheFileSize(config);
 				}
@@ -489,8 +528,10 @@ public final class Controler extends ParentThreasRefThread {
 					ExceptionUtil.rethrowIfNecessary(t);
 					if (log != null) log.error("controler", t);
 				}
+				checkStopWatch(config, stopwatch, "checkCacheFileSize");
 
 				// clean up dynclasses
+				stopwatch.start();
 				try {
 					DynamicInvoker di = DynamicInvoker.getExistingInstance();
 					if (di != null) di.cleanup();
@@ -499,6 +540,7 @@ public final class Controler extends ParentThreasRefThread {
 					ExceptionUtil.rethrowIfNecessary(t);
 					if (log != null) log.error("controler", t);
 				}
+				checkStopWatch(config, stopwatch, "cleanupDynamicInvoker");
 			}
 		}
 		catch (Throwable t) {
@@ -597,6 +639,12 @@ public final class Controler extends ParentThreasRefThread {
 			res = null;
 		}
 
+	}
+
+	private void checkStopWatch(ConfigWeb config, Stopwatch stopwatch, String name){
+		long time = stopwatch.stop();
+		stopwatch.reset();
+		if (STEP_REPORT_THRESHOLD_MS > 0 && time > STEP_REPORT_THRESHOLD_MS) LogUtil.log(ThreadLocalPageContext.getConfig(config), Log.LEVEL_INFO, Controler.class.getName(), name + " took " + time + "ms");
 	}
 
 	private void doCheckMappings(ConfigWeb config) {
