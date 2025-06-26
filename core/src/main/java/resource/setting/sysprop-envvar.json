@@ -433,5 +433,10 @@
         "sysprop": "lucee.maven.default.repositories",
         "envvar": "LUCEE_MAVEN_DEFAULT_REPOSITORIES",
         "desc": "Specifies a comma-separated list of Maven repository URLs to use before the default repositories (Maven Central, Sonatype, JCenter). This allows customizing the Maven repositories used by Lucee for downloading dependencies. URL must include a trailing /"
+    },
+    {
+        "sysprop": "lucee.controller.log.threshold",
+        "envvar": "LUCEE_CONTROLLER_LOG_THRESHOLD",
+        "desc": "Enables logging out when a step in the background controller thread exceeds a certain threshold in seconds. Default is 20, set 0 to disable, entries are logged out in the application.log file"
     }
 ]
