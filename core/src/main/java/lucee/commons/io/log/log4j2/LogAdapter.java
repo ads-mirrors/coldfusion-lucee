@@ -11,7 +11,6 @@ import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.config.Config;
-import lucee.runtime.config.ConfigImpl;
 import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.engine.ThreadLocalPageContext;
@@ -131,7 +130,7 @@ public final class LogAdapter implements Log {
 		if (StringUtil.isEmpty(application)) return message;
 		if (logWebContextInfo) {
 			Config c = ThreadLocalPageContext.getConfig();
-			if (c instanceof ConfigWebPro && ((ConfigWebPro) c).getAdminMode() == ConfigImpl.ADMINMODE_SINGLE) {
+			if (c instanceof ConfigWebPro) {
 				String l = LogUtil.getWebContextLabel((ConfigWeb) c);
 				if (StringUtil.isEmpty(application, true)) return l + "->" + message;
 				return l + "|" + application + "->" + message;
