@@ -5,11 +5,25 @@ import java.lang.reflect.InvocationTargetException;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 
+import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
+import lucee.runtime.config.Config;
+import lucee.runtime.config.ConfigImpl;
+import lucee.runtime.config.ConfigWeb;
+import lucee.runtime.config.ConfigWebPro;
+import lucee.runtime.engine.ThreadLocalPageContext;
+import lucee.runtime.op.Caster;
 
 public final class LogAdapter implements Log {
+
+	private static final boolean logWebContextInfo;
+
+	static {
+		logWebContextInfo = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.log.webcontext", null), false);
+	}
 
 	private Logger logger;
 	private Level level;
@@ -115,6 +129,14 @@ public final class LogAdapter implements Log {
 
 	private String merge(String application, String message) {
 		if (StringUtil.isEmpty(application)) return message;
+		if (logWebContextInfo) {
+			Config c = ThreadLocalPageContext.getConfig();
+			if (c instanceof ConfigWebPro && ((ConfigWebPro) c).getAdminMode() == ConfigImpl.ADMINMODE_SINGLE) {
+				String l = LogUtil.getWebContextLabel((ConfigWeb) c);
+				if (StringUtil.isEmpty(application, true)) return l + "->" + message;
+				return l + "|" + application + "->" + message;
+			}
+		}
 		return application + "->" + message;
 	}
 
