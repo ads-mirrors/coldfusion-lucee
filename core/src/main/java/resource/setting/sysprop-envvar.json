@@ -438,5 +438,10 @@
         "sysprop": "lucee.controller.log.threshold",
         "envvar": "LUCEE_CONTROLLER_LOG_THRESHOLD",
         "desc": "Enables logging out when a step in the background controller thread exceeds a certain threshold in seconds. Default is 20, set 0 to disable, entries are logged out in the application.log file"
+    },
+    {
+        "sysprop": "lucee.log.webcontext",
+        "envvar": "LUCEE_LOG_WEBCONTEXT",
+        "desc": "A boolean value that enables web context identification in log entries when running in single mode. When enabled, log entries include web context labels (e.g., http://localhost:8886|engine) to distinguish which web context generated the log entry. Only active in single mode where all web contexts share the same log directory. In multi mode, this setting has no effect as each web context has its own log directory. Added in Lucee 6.2.2.63"
     }
 ]
