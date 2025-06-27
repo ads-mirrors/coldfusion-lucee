@@ -559,6 +559,21 @@ public final class ReqRspUtil {
 		return root;
 	}
 
+	public static String getRootPath(ServletContext sc, String defaultValue) {
+
+		if (sc == null) return defaultValue;
+		String id = new StringBuilder().append(sc.getContextPath()).append(':').append(sc.hashCode()).toString();
+		String root = rootPathes.get(id);
+		if (!StringUtil.isEmpty(root, true)) return root;
+
+		root = sc.getRealPath("/");
+		if (root == null) return defaultValue;
+
+		root = FileUtil.getNormalizedPath(new File(root));
+		rootPathes.put(id, root);
+		return root;
+	}
+
 	public static Object toObject(PageContext pc, byte[] data, int format, Charset charset, Object defaultValue) {
 
 		switch (format) {
