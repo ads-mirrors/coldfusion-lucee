@@ -193,6 +193,8 @@ public final class CFMLEngineImpl implements CFMLEngine {
 
 	public static final PrintStream CONSOLE_ERR = System.err;
 	public static final PrintStream CONSOLE_OUT = System.out;
+	private static final String LOG_NAME = "deploy";
+	private static final String LOG_TYPE_NAME = "engine";
 
 	private static Map<String, CFMLFactory> initContextes = MapFactory.<String, CFMLFactory>getConcurrentMap();
 	private static Map<String, CFMLFactory> contextes = MapFactory.<String, CFMLFactory>getConcurrentMap();
@@ -345,7 +347,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 		// copy bundled extension to local extension directory (if never done before)
 		if (installExtensions && updateInfo.updateType != ConfigFactory.NEW_NONE) {
 			int count = deployBundledExtension(cs, false);
-			LogUtil.log(Log.LEVEL_INFO, "deploy", "controller",
+			LogUtil.log(Log.LEVEL_INFO, LOG_NAME, LOG_TYPE_NAME,
 					count == 0 ? "No new extension available to add to local extension directory" : "Copied [" + count + "] bundled extension(s) to local extension directory");
 		}
 		// required extensions
@@ -357,7 +359,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 		if (installExtensions && (updateInfo.updateType == ConfigFactory.NEW_FRESH || updateInfo.updateType == ConfigFactory.NEW_FROM4)) {
 			List<ExtensionDefintion> ext = info.getRequiredExtension();
 			extensions = toSet(null, ext);
-			LogUtil.log(Log.LEVEL_INFO, "deploy", "controller", "Found Extensions to install (new;" + updateInfo.getUpdateTypeAsString() + "):" + toList(extensions));
+			LogUtil.log(Log.LEVEL_INFO, LOG_NAME, LOG_TYPE_NAME, "Found Extensions to install (new;" + updateInfo.getUpdateTypeAsString() + "):" + toList(extensions));
 		}
 		// if we have an update we update the extension that re installed and we have an older version as
 		// defined in the manifest
@@ -384,27 +386,27 @@ public final class CFMLEngineImpl implements CFMLEngine {
 						Version since = ed.getSince();
 						if (since == null || updateInfo.oldVersion == null || !OSGiUtil.isNewerThan(since, updateInfo.oldVersion)) continue; // not installed we do not update
 
-						LogUtil.log(Log.LEVEL_INFO, "deploy", "controller", "Detected newer [" + since + ":" + updateInfo.oldVersion + "] Extension version [" + ed + "]");
+						LogUtil.log(Log.LEVEL_INFO, LOG_NAME, LOG_TYPE_NAME, "Detected newer [" + since + ":" + updateInfo.oldVersion + "] Extension version [" + ed + "]");
 						extensions.add(ed);
 					}
 					else rheVersion = OSGiUtil.toVersion(rhe.getVersion(), null);
 					// if the installed is older than the one defined in the manifest we update (if possible)
 					if (rheVersion != null && OSGiUtil.isNewerThan(edVersion, rheVersion)) { // TODO do none OSGi version number comparsion
-						LogUtil.log(Log.LEVEL_INFO, "deploy", "controller", "Detected newer [" + edVersion + ":" + rheVersion + "] Extension version [" + ed + "]");
+						LogUtil.log(Log.LEVEL_INFO, LOG_NAME, LOG_TYPE_NAME, "Detected newer [" + edVersion + ":" + rheVersion + "] Extension version [" + ed + "]");
 						extensions.add(ed);
 					}
 				}
 				catch (Exception e) {
-					LogUtil.log("deploy", "controller", e);
+					LogUtil.log(LOG_NAME, LOG_TYPE_NAME, e);
 					extensions.add(ed);
 				}
 			}
 			if (!extensions.isEmpty()) {
-				LogUtil.log(Log.LEVEL_INFO, "deploy", "controller", "Detected Extensions to install (minor;" + updateInfo.getUpdateTypeAsString() + "):" + toList(extensions));
+				LogUtil.log(Log.LEVEL_INFO, LOG_NAME, LOG_TYPE_NAME, "Detected Extensions to install (minor;" + updateInfo.getUpdateTypeAsString() + "):" + toList(extensions));
 			}
 		}
 		else {
-			LogUtil.log(Log.LEVEL_INFO, "deploy", "controller", "No extension(s) found to add/install");
+			LogUtil.log(Log.LEVEL_INFO, LOG_NAME, LOG_TYPE_NAME, "No extension(s) found to add/install");
 
 			extensions = new HashSet<ExtensionDefintion>();
 		}
@@ -416,7 +418,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 		this.envExt = null;
 		if (!StringUtil.isEmpty(extensionIds, true)) {
 			this.envExt = extensionIds;
-			LogUtil.log(Log.LEVEL_INFO, "deploy", "controller", "Extensions to install defined in env variable or system property:" + extensionIds);
+			LogUtil.log(Log.LEVEL_INFO, LOG_NAME, LOG_TYPE_NAME, "Extensions to install defined in env variable or system property:" + extensionIds);
 			extensions = toSet(extensions, RHExtension.toExtensionDefinitions(extensionIds));
 		}
 
@@ -448,12 +450,12 @@ public final class CFMLEngineImpl implements CFMLEngine {
 
 			}
 			catch (PageException e) {
-				LogUtil.log("deploy", "controller", e);
+				LogUtil.log(LOG_NAME, LOG_TYPE_NAME, e);
 				sucess = false;
 			}
 			if (sucess && configDir != null) ConfigFactory.updateRequiredExtension(this, configDir, null);
-			if (successSB.length() > 0) LogUtil.log(Log.LEVEL_INFO, "deploy", "controller", "Successfully installed the following extensions: " + successSB);
-			if (failedSB.length() > 0) LogUtil.log(Log.LEVEL_ERROR, "deploy", "controller", "Failed to install the following extensions: " + failedSB);
+			if (successSB.length() > 0) LogUtil.log(Log.LEVEL_INFO, LOG_NAME, LOG_TYPE_NAME, "Successfully installed the following extensions: " + successSB);
+			if (failedSB.length() > 0) LogUtil.log(Log.LEVEL_ERROR, LOG_NAME, LOG_TYPE_NAME, "Failed to install the following extensions: " + failedSB);
 		}
 		else if (configDir != null) ConfigFactory.updateRequiredExtension(this, configDir, null);
 
@@ -961,7 +963,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 					ResourceUtil.removeEL(railoRoot, true);
 				}
 				catch (Exception e) {
-					LogUtil.log(configServer, "controller", e);
+					LogUtil.log(configServer, LOG_TYPE_NAME, e);
 				}
 			}
 			else if (!configDir.exists()) {
@@ -969,7 +971,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 					configDir.createDirectory(true);
 				}
 				catch (IOException e) {
-					LogUtil.log(configServer, "controller", e);
+					LogUtil.log(configServer, LOG_TYPE_NAME, e);
 				}
 			}
 		}
@@ -1137,7 +1139,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 				catch (Throwable t) {
 					ExceptionUtil.rethrowIfNecessary(t);
 					if (t instanceof Exception && !Abort.isSilentAbort(t))
-						LogUtil.log(configServer, "controller", t, t instanceof MissingIncludeException ? Log.LEVEL_WARN : Log.LEVEL_ERROR, "application");
+						LogUtil.log(configServer, LOG_TYPE_NAME, t, t instanceof MissingIncludeException ? Log.LEVEL_WARN : Log.LEVEL_ERROR, "application");
 				}
 			}
 		}
@@ -1273,7 +1275,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 						cfmlFactory.getScopeContext().clear();
 					}
 					catch (Exception ee) {
-						LogUtil.log(configServer, "controller", ee);
+						LogUtil.log(configServer, LOG_TYPE_NAME, ee);
 					}
 
 					// PageContext
@@ -1281,7 +1283,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 						cfmlFactory.resetPageContext();
 					}
 					catch (Exception ee) {
-						LogUtil.log(configServer, "controller", ee);
+						LogUtil.log(configServer, LOG_TYPE_NAME, ee);
 					}
 
 					// Query Cache
@@ -1295,7 +1297,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 						// cfmlFactory.getDefaultQueryCache().clear(null);
 					}
 					catch (Exception ee) {
-						LogUtil.log(configServer, "controller", ee);
+						LogUtil.log(configServer, LOG_TYPE_NAME, ee);
 					}
 
 					// Gateway
@@ -1303,7 +1305,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 						((GatewayEngineImpl) ((ConfigWebPro) cfmlFactory.getConfig()).getGatewayEngine()).reset(false);
 					}
 					catch (Exception ee) {
-						LogUtil.log(configServer, "controller", ee);
+						LogUtil.log(configServer, LOG_TYPE_NAME, ee);
 					}
 
 					// Cache
@@ -1311,7 +1313,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 
 				}
 				catch (Exception ex) {
-					LogUtil.log(configServer, "controller", ex);
+					LogUtil.log(configServer, LOG_TYPE_NAME, ex);
 				}
 			}
 
@@ -1342,7 +1344,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 			getCFMLEngineFactory().shutdownFelix();
 		}
 		catch (Exception e) {
-			LogUtil.log(configServer, "controller", e);
+			LogUtil.log(configServer, LOG_TYPE_NAME, e);
 		}
 	}
 
@@ -1483,7 +1485,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 			}
 		}
 		catch (Exception e) {
-			LogUtil.log(configServer, "controller", e);
+			LogUtil.log(configServer, LOG_TYPE_NAME, e);
 		}
 		return controlerState.active();
 	}

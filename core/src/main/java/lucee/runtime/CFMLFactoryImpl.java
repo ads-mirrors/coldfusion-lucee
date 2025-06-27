@@ -88,6 +88,7 @@ public final class CFMLFactoryImpl extends CFMLFactory {
 
 	private static final long MAX_AGE = 5 * 60000; // 5 minutes
 	private static final int MAX_SIZE = 10000;
+	private static final String LOG_TYPE_NAME = "factory";
 	private static JspEngineInfo info = new JspEngineInfoImpl("1.0");
 	private ConfigWebPro config;
 	ConcurrentLinkedDeque<PageContextImpl> pcs = new ConcurrentLinkedDeque<PageContextImpl>();
@@ -355,8 +356,8 @@ public final class CFMLFactoryImpl extends CFMLFactory {
 									+ getActiveRequests() + " active request(s) and " + getActiveThreads() + " active cfthreads " + getPath(pc) + "."
 									+ MonitorState.getBlockedThreads(pc) + RequestTimeoutException.locks(pc);
 							Thread thread = pc.getThread();
-							if (thread != null) log.log(Log.LEVEL_ERROR, "controller", msg, ExceptionUtil.toThrowable(thread.getStackTrace()));
-							else log.log(Log.LEVEL_ERROR, "controller", msg);
+							if (thread != null) log.log(Log.LEVEL_ERROR, LOG_TYPE_NAME, msg, ExceptionUtil.toThrowable(thread.getStackTrace()));
+							else log.log(Log.LEVEL_ERROR, LOG_TYPE_NAME, msg);
 						}
 						terminate(pc, true);
 						runningPcs.remove(Integer.valueOf(pc.getId()));
@@ -373,8 +374,8 @@ public final class CFMLFactoryImpl extends CFMLFactory {
 									+ RequestTimeoutException.locks(pc);
 
 							Thread thread = pc.getThread();
-							if (thread != null) log.log(first ? Log.LEVEL_WARN : Log.LEVEL_INFO, "controller", msg, ExceptionUtil.toThrowable(thread.getStackTrace()));
-							else log.log(first ? Log.LEVEL_WARN : Log.LEVEL_INFO, "controller", msg);
+							if (thread != null) log.log(first ? Log.LEVEL_WARN : Log.LEVEL_INFO, LOG_TYPE_NAME, msg, ExceptionUtil.toThrowable(thread.getStackTrace()));
+							else log.log(first ? Log.LEVEL_WARN : Log.LEVEL_INFO, LOG_TYPE_NAME, msg);
 						}
 					}
 				}
@@ -386,8 +387,8 @@ public final class CFMLFactoryImpl extends CFMLFactory {
 						String msg = "downgrade priority of the a " + (root != null && root != pc ? "thread" : "request") + " at " + getPath(pc) + ". "
 								+ MonitorState.getBlockedThreads(pc) + RequestTimeoutException.locks(pc);
 						Thread thread = pc.getThread();
-						if (thread != null) log.log(Log.LEVEL_INFO, "controller", msg, ExceptionUtil.toThrowable(pc.getThread().getStackTrace()));
-						else log.log(Log.LEVEL_WARN, "controller", msg);
+						if (thread != null) log.log(Log.LEVEL_INFO, LOG_TYPE_NAME, msg, ExceptionUtil.toThrowable(pc.getThread().getStackTrace()));
+						else log.log(Log.LEVEL_WARN, LOG_TYPE_NAME, msg);
 					}
 					try {
 						pc.getThread().setPriority(Thread.MIN_PRIORITY);
