@@ -5,12 +5,20 @@ import java.lang.reflect.InvocationTargetException;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 
+import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.config.ConfigWebPro;
+import lucee.runtime.op.Caster;
 
 public final class LogAdapter implements Log {
+
+	public static final boolean logWebContextInfo;
+
+	static {
+		logWebContextInfo = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.log.webcontext", null), true);
+	}
 
 	private Logger logger;
 	private Level level;

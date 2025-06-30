@@ -13,6 +13,7 @@ import lucee.commons.i18n.FormatUtil;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.log.log4j2.ContextualMessage;
+import lucee.commons.io.log.log4j2.LogAdapter;
 import lucee.loader.engine.CFMLEngine;
 import lucee.loader.engine.CFMLEngineFactory;
 import lucee.loader.util.Util;
@@ -92,7 +93,7 @@ public final class DataDogLayout extends AbstractStringLayout {
 		// Throwable
 		Throwable t = event.getThrown();
 		Struct sct = engine.getCreationUtil().createStruct(StructImpl.TYPE_LINKED);
-		sct.setEL(KeyConstants._context, context);
+		if (LogAdapter.logWebContextInfo) sct.setEL(KeyConstants._context, context);
 		sct.setEL(KeyConstants._application, application);
 		sct.setEL(KeyConstants._message, ClassicLayout.getFormattedMessage(t, msg));
 		sct.setEL("stack", getStacktrace(t, false, true));

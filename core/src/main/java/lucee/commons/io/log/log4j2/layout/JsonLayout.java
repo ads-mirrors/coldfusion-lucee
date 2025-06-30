@@ -32,6 +32,7 @@ import org.apache.logging.log4j.message.Message;
 
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.log4j2.ContextualMessage;
+import lucee.commons.io.log.log4j2.LogAdapter;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.loader.engine.CFMLEngineFactory;
@@ -167,7 +168,7 @@ public final class JsonLayout extends AbstractStringLayout { // TODO <Serializab
 			}
 
 			Throwable thrown = event.getThrown();
-			root.setEL(KeyConstants._context, context);
+			if (LogAdapter.logWebContextInfo) root.setEL(KeyConstants._context, context);
 			root.setEL(KeyConstants._application, application);
 			root.setEL(KeyConstants._message, toJson(msg, msg));
 

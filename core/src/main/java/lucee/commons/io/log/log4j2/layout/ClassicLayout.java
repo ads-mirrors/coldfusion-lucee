@@ -27,6 +27,7 @@ import org.apache.logging.log4j.message.Message;
 
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.log.log4j2.ContextualMessage;
+import lucee.commons.io.log.log4j2.LogAdapter;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.loader.util.Util;
@@ -38,7 +39,10 @@ public final class ClassicLayout extends AbstractStringLayout { // TODO <Seriali
 
 	public ClassicLayout() {
 		// TODO custom charset?
-		super(CharsetUtil.UTF8, ("\"Severity\",\"ThreadID\",\"Date\",\"Time\",\"Context\",\"Application\",\"Message\"" + LINE_SEPARATOR).getBytes(CharsetUtil.UTF8), new byte[0]);
+		super(CharsetUtil.UTF8, (LogAdapter.logWebContextInfo ?
+
+				"\"Severity\",\"ThreadID\",\"Date\",\"Time\",\"Context\",\"Application\",\"Message\"" + LINE_SEPARATOR
+				: "\"Severity\",\"ThreadID\",\"Date\",\"Time\",\"Application\",\"Message\"" + LINE_SEPARATOR).getBytes(CharsetUtil.UTF8), new byte[0]);
 	}
 
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
@@ -97,11 +101,12 @@ public final class ClassicLayout extends AbstractStringLayout { // TODO <Seriali
 		data.append(',');
 
 		// Context
-		data.append('"');
-		data.append(StringUtil.replace(context, "\"", "\"\"", false));
-		data.append('"');
-
-		data.append(',');
+		if (LogAdapter.logWebContextInfo) {
+			data.append('"');
+			data.append(StringUtil.replace(context, "\"", "\"\"", false));
+			data.append('"');
+			data.append(',');
+		}
 
 		// Application
 		data.append('"');
