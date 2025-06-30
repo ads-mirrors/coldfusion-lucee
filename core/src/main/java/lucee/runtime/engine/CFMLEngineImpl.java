@@ -194,7 +194,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 	public static final PrintStream CONSOLE_ERR = System.err;
 	public static final PrintStream CONSOLE_OUT = System.out;
 	private static final String LOG_NAME = "deploy";
-	private static final String LOG_TYPE_NAME = "engine";
+	private static final String LOG_TYPE_NAME = "request";
 
 	private static Map<String, CFMLFactory> initContextes = MapFactory.<String, CFMLFactory>getConcurrentMap();
 	private static Map<String, CFMLFactory> contextes = MapFactory.<String, CFMLFactory>getConcurrentMap();
