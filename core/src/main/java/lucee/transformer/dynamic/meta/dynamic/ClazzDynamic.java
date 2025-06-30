@@ -52,6 +52,7 @@ import lucee.transformer.dynamic.meta.Clazz;
 import lucee.transformer.dynamic.meta.Constructor;
 import lucee.transformer.dynamic.meta.FunctionMember;
 import lucee.transformer.dynamic.meta.Method;
+import lucee.transformer.dynamic.meta.reflection.ClazzReflection;
 
 public final class ClazzDynamic extends Clazz {
 
@@ -70,7 +71,7 @@ public final class ClazzDynamic extends Clazz {
 	private static Map<ClassLoader, String> clids = new IdentityHashMap<>();
 	private static String systemId;
 
-	private static Map<Class, SoftReference<ClazzDynamic>> classes = new IdentityHashMap<>();
+	private static Map<Class, SoftReference<? extends Clazz>> classes = new IdentityHashMap<>();
 	// private static Map<String, SoftReference<ClazzDynamic>> classes = new ConcurrentHashMap<>();
 
 	/*
@@ -83,16 +84,22 @@ public final class ClazzDynamic extends Clazz {
 		DEBUG = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.NoSuchMethodException.list", null), false);
 	}
 
-	public static ClazzDynamic getInstance(Class clazz, Resource dir, Log log) throws IOException {
-		ClazzDynamic cd = null;
-		Reference<ClazzDynamic> sr = classes.get(clazz);
+	public static Clazz getInstance(Class clazz, Resource dir, Log log) {
+		Clazz cd = null;
+		Reference<? extends Clazz> sr = classes.get(clazz);
 		if (sr == null || (cd = sr.get()) == null) {
 			synchronized (clazz) {
 				sr = classes.get(clazz);
 				if (sr == null || (cd = sr.get()) == null) {
 					if (LogUtil.doesDebug(log)) log.debug("dynamic", "extract metadata from [" + clazz.getName() + "]");
-					cd = new ClazzDynamic(clazz, log);
-					classes.put(clazz, new SoftReference<ClazzDynamic>(cd));
+					try {
+						cd = new ClazzDynamic(clazz, log);
+					}
+					catch (IOException ioe) {
+						if (log != null) log.error("dynamic", ioe);
+						cd = new ClazzReflection(clazz);
+					}
+					classes.put(clazz, new SoftReference<Clazz>(cd));
 				}
 			}
 		}

@@ -83,14 +83,12 @@ public abstract class Clazz implements Serializable {
 	}
 
 	public static Clazz getClazz(Class clazz, Resource root, Log log) {
-		try {
-			return ClazzDynamic.getInstance(clazz, root, log);
-		}
-		catch (Exception e) {
-			if (log != null) log.error("dynamic", e);
-			if (allowReflection()) return new ClazzReflection(clazz);
-			else throw new RuntimeException(e);
-		}
+		// try {
+		return ClazzDynamic.getInstance(clazz, root, log);
+		/*
+		 * } catch (Exception e) { if (log != null) log.error("dynamic", e); if (allowReflection()) return
+		 * new ClazzReflection(clazz); else throw new RuntimeException(e); }
+		 */
 	}
 
 	private static RefInteger nirvana = new RefIntegerImpl();
