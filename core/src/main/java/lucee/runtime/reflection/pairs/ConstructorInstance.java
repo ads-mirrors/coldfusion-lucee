@@ -109,7 +109,7 @@ public final class ConstructorInstance {
 		if (instance == null) {
 			try {
 				DynamicInvoker di = DynamicInvoker.getExistingInstance();
-				ClazzDynamic clazzz = di.toClazzDynamic(clazz);
+				Clazz clazzz = di.toClazz(clazz);
 				if (fm == null) {
 					fm = clazzz.getConstructor(args, true, convertComparsion);
 				}

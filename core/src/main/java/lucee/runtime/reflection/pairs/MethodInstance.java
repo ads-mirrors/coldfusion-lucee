@@ -91,7 +91,7 @@ public final class MethodInstance {
 		// if (Clazz.allowReflection()) print.e(Clazz.allowReflection());
 		try {
 			DynamicInvoker di = DynamicInvoker.getExistingInstance();
-			ClazzDynamic clazzz = di.toClazzDynamic(obj.getClass());
+			Clazz clazzz = di.toClazz(obj.getClass());
 			return ((BiFunction<Object, Object, Object>) di.getInstance(clazzz, clazzz.getMethod(methodName.getString(), args, nameCaseSensitive, true, convertComparsion), args))
 					.apply(obj, args);
 		}
@@ -152,7 +152,7 @@ public final class MethodInstance {
 		if (instance == null) {
 			try {
 				DynamicInvoker di = DynamicInvoker.getExistingInstance();
-				ClazzDynamic clazzz = di.toClazzDynamic(clazz);
+				Clazz clazzz = di.toClazz(clazz);
 				if (method == null) {
 					method = clazzz.getMethod(methodName.getString(), args, nameCaseSensitive, true, convertComparsion);
 				}
@@ -170,7 +170,7 @@ public final class MethodInstance {
 		if (instance == null) {
 			try {
 				DynamicInvoker di = DynamicInvoker.getExistingInstance();
-				ClazzDynamic clazzz = di.toClazzDynamic(clazz);
+				Clazz clazzz = di.toClazz(clazz);
 				if (method == null) {
 					method = clazzz.getMethod(methodName.getString(), args, nameCaseSensitive, true, convertComparsion, null);
 					if (method == null) return null;
