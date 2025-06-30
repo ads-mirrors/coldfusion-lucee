@@ -24,6 +24,9 @@ import java.util.Map;
 
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.layout.AbstractStringLayout;
+import org.apache.logging.log4j.message.Message;
+
+import lucee.commons.io.log.log4j2.ContextualMessage;
 
 public final class XMLLayout extends AbstractStringLayout { // TODO <Serializable>
 
@@ -88,6 +91,20 @@ public final class XMLLayout extends AbstractStringLayout { // TODO <Serializabl
 	@Override
 	public String toSerializable(final LogEvent event) {
 
+		String msg, application, context;
+		Message message = event.getMessage();
+		if (message instanceof ContextualMessage) {
+			ContextualMessage cm = (ContextualMessage) message;
+			msg = cm.getFormattedMessage();
+			application = cm.getApplication();
+			context = cm.getContext();
+		}
+		else {
+			msg = message != null ? message.getFormattedMessage() : "";
+			application = "";
+			context = "";
+		}
+
 		final StringBuilder buf = new StringBuilder();
 		buf.append("	<log4j:event logger=\"");
 		buf.append(lucee.commons.io.log.log4j2.layout.Util.getLoggerName(event));
@@ -101,7 +118,7 @@ public final class XMLLayout extends AbstractStringLayout { // TODO <Serializabl
 		buf.append(LINE_SEPARATOR);
 
 		buf.append("		<log4j:message>");
-		buf.append(createCDATASection(event.getMessage().toString())); // TODO cdata escape
+		buf.append(createCDATASection(ClassicLayout.getFormattedMessage(event.getThrown(), msg))); // TODO cdata escape
 		buf.append("</log4j:message>");
 		buf.append(LINE_SEPARATOR);
 

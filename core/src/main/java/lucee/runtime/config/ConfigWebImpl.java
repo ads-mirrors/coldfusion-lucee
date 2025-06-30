@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.osgi.framework.Version;
 
@@ -25,8 +26,9 @@ import lucee.commons.io.SystemUtil;
 import lucee.commons.io.cache.Cache;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogEngine;
+import lucee.commons.io.log.LogReference;
 import lucee.commons.io.log.LogUtil;
-import lucee.commons.io.log.LoggerAndSourceData;
+import lucee.commons.io.log.log4j2.LogAdapter;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.ResourceProvider;
 import lucee.commons.io.res.ResourcesImpl;
@@ -124,6 +126,7 @@ public final class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 
 	private Mapping[] mappings;
 	private ComponentPathCache componentPathCache = new ComponentPathCache();
+	private Map<String, Log> logs = new ConcurrentHashMap<>();
 
 	public ConfigWebImpl(CFMLFactoryImpl factory, ConfigServerImpl cs, ServletConfig config) {
 		setInstance(factory, cs, config, false);
@@ -1184,18 +1187,24 @@ public final class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	}
 
 	@Override
-	public Map<String, LoggerAndSourceData> getLoggers() {
-		return cs.getLoggers();
-	}
-
-	@Override
 	public Log getLog(String name) {
-		return cs.getLog(name);
+		try {
+			return getLog(name, true);
+		}
+		catch (PageException e) {
+			throw new PageRuntimeException(e);
+		}
 	}
 
 	@Override
 	public Log getLog(String name, boolean createIfNecessary) throws PageException {
-		return cs.getLog(name, createIfNecessary);
+		Log log = logs.get(name);
+		if (log == null) {
+			LogAdapter tmp = (LogAdapter) cs.getLog(name, createIfNecessary);
+			if (tmp == null) return null;
+			logs.put(name, log = new LogReference(this, tmp));
+		}
+		return log;
 	}
 
 	@Override

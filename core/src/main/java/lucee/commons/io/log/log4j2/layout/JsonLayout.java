@@ -29,9 +29,9 @@ import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.layout.AbstractStringLayout;
 import org.apache.logging.log4j.core.time.Instant;
 import org.apache.logging.log4j.message.Message;
-import org.apache.logging.log4j.message.MultiformatMessage;
 
 import lucee.commons.io.SystemUtil;
+import lucee.commons.io.log.log4j2.ContextualMessage;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.loader.engine.CFMLEngineFactory;
@@ -49,6 +49,7 @@ import lucee.runtime.security.Credential;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.util.Creation;
 
 public final class JsonLayout extends AbstractStringLayout { // TODO <Serializable>
@@ -151,49 +152,32 @@ public final class JsonLayout extends AbstractStringLayout { // TODO <Serializab
 
 			}
 
-			// Message
-			Message msg = event.getMessage();
-			if (msg != null) {
-				boolean jsonSupported = false;
-				if (msg instanceof MultiformatMessage) {
-					final String[] formats = ((MultiformatMessage) msg).getFormats();
-					for (final String format: formats) {
-						if (format.equalsIgnoreCase("JSON")) {
-							jsonSupported = true;
-							break;
-						}
-					}
-				}
-				// extract message
-				String strMSG;
-				if (jsonSupported) {
-					strMSG = ((MultiformatMessage) msg).getFormattedMessage(FORMATS);
-				}
-				else {
-					strMSG = msg.getFormattedMessage();
-				}
-				if (strMSG == null) strMSG = "";
-
-				// split application name
-				int index = strMSG.indexOf("->");
-				String application;
-				if (index > -1) {
-					application = strMSG.substring(0, index);
-					strMSG = strMSG.substring(index + 2);
-				}
-				else application = "";
-				root.setEL("application", application);
-				root.setEL("message", toJson(strMSG, strMSG));
+			String msg, application, context;
+			Message message = event.getMessage();
+			if (message instanceof ContextualMessage) {
+				ContextualMessage cm = (ContextualMessage) message;
+				msg = cm.getFormattedMessage();
+				application = cm.getApplication();
+				context = cm.getContext();
+			}
+			else {
+				msg = message.getFormattedMessage();
+				application = "";
+				context = "";
 			}
 
-			// Thrown
 			Throwable thrown = event.getThrown();
+			root.setEL(KeyConstants._context, context);
+			root.setEL(KeyConstants._application, application);
+			root.setEL(KeyConstants._message, toJson(msg, msg));
+
+			// Thrown
 			if (thrown != null) {
 				Struct sct = util.createStruct("linked");
 				root.setEL("thrown", sct);
 				sct.setEL("commonElementCount", 0D); // TODO
-				sct.setEL("message", thrown.getMessage());
-				sct.setEL("name", thrown.getClass().getName());
+				sct.setEL(KeyConstants._message, thrown.getMessage());
+				sct.setEL(KeyConstants._name, thrown.getClass().getName());
 				if (includeStacktrace) {
 					root.setEL("extendedStackTrace", createStacktrace(util, thrown.getStackTrace(), stacktraceAsString));
 				}

@@ -5481,7 +5481,6 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		}
 	}
 
-	@Override
 	public Map<String, LoggerAndSourceData> getLoggers() {
 		if (loggers == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "loggers")) {

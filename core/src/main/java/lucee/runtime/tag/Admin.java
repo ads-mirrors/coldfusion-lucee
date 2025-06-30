@@ -3169,7 +3169,8 @@ public final class Admin extends TagImpl implements DynamicAttributes {
 	}
 
 	private Query _doGetLogSettings() throws PageException {
-		Map<String, LoggerAndSourceData> loggers = config.getLoggers();
+		// TODO no longer go via getLoggers
+		Map<String, LoggerAndSourceData> loggers = ConfigUtil.getConfigServerImpl(config).getLoggers();
 		Query qry = new QueryImpl(new String[] { "name", "level", "appenderClass", "appenderBundleName", "appenderBundleVersion", "appenderArgs", "layoutClass", "layoutBundleName",
 				"layoutBundleVersion", "layoutArgs", "readonly" }, 0, lucee.runtime.type.util.ListUtil.last("logs", '.'));
 		int row = 0;

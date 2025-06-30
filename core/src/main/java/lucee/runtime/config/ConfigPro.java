@@ -11,7 +11,6 @@ import org.osgi.framework.Version;
 
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogEngine;
-import lucee.commons.io.log.LoggerAndSourceData;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.ResourcesImpl.ResourceProviderFactory;
 import lucee.commons.io.res.type.compress.Compress;
@@ -185,8 +184,6 @@ public interface ConfigPro extends Config {
 	public TimeSpan getCachedAfterTimeRange();
 
 	public Log getLog(String name, boolean createIfNecessary) throws PageException;
-
-	public Map<String, LoggerAndSourceData> getLoggers();
 
 	public boolean isSuppressContent();
 

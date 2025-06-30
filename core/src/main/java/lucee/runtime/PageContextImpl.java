@@ -4186,7 +4186,7 @@ public final class PageContextImpl extends PageContext {
 	}
 
 	public java.util.Collection<String> getLogNames() throws PageException {
-		java.util.Collection<String> cnames = config.getLoggers().keySet();
+		String[] cnames = config.getLogNames();
 		java.util.Collection<Collection.Key> anames = getApplicationContext().getLogNames();
 		java.util.Collection<String> names = new HashSet<String>();
 		copy(cnames, names);
@@ -4198,6 +4198,12 @@ public final class PageContextImpl extends PageContext {
 		java.util.Iterator it = src.iterator();
 		while (it.hasNext()) {
 			trg.add(it.next().toString());
+		}
+	}
+
+	private void copy(String[] src, java.util.Collection<String> trg) {
+		for (String s: src) {
+			trg.add(s);
 		}
 	}
 

@@ -24,14 +24,17 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import lucee.commons.io.log.Log;
+import lucee.commons.io.log.LogReference;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.log.LoggerAndSourceData;
+import lucee.commons.io.log.log4j2.LogAdapter;
 import lucee.commons.lang.Pair;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.ConfigWeb;
+import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.db.ClassDefinition;
 import lucee.runtime.db.DataSource;
 import lucee.runtime.exp.ApplicationException;
@@ -332,10 +335,12 @@ public abstract class ApplicationContextSupport implements ApplicationContext {
 					Map<String, String> appArgs = toMap(sctAppArgs);
 					if (cdLay != null && cdLay.hasClass()) {
 						Map<String, String> layArgs = toMap(sctLayArgs);
-						las = addLogger(name, level, cdApp, appArgs, cdLay, layArgs, readOnly);
+						las = addLogger(config, name, level, cdApp, appArgs, cdLay, layArgs, readOnly);
 					}
-					else las = addLogger(name, level, cdApp, appArgs, null, null, readOnly);
-					rtn.put(name, new Pair<Log, Struct>(las.getLog(false), v));
+					else las = addLogger(config, name, level, cdApp, appArgs, null, null, readOnly);
+
+					rtn.put(name,
+							new Pair<Log, Struct>(config instanceof ConfigWebPro ? new LogReference((ConfigWebPro) config, (LogAdapter) las.getLog(false)) : las.getLog(false), v));
 				}
 			}
 		}
@@ -353,7 +358,7 @@ public abstract class ApplicationContextSupport implements ApplicationContext {
 		return map;
 	}
 
-	private static LoggerAndSourceData addLogger(Collection.Key name, int level, ClassDefinition appender, Map<String, String> appenderArgs, ClassDefinition layout,
+	private static LoggerAndSourceData addLogger(Config config, Collection.Key name, int level, ClassDefinition appender, Map<String, String> appenderArgs, ClassDefinition layout,
 			Map<String, String> layoutArgs, boolean readOnly) throws PageException {
 		LoggerAndSourceData existing = _loggers.get(name);
 		String id = LoggerAndSourceData.id(name.getLowerString(), appender, appenderArgs, layout, layoutArgs, level, readOnly);
@@ -365,7 +370,7 @@ public abstract class ApplicationContextSupport implements ApplicationContext {
 			existing.close();
 		}
 
-		LoggerAndSourceData las = new LoggerAndSourceData(null, id, name.getLowerString(), appender, appenderArgs, layout, layoutArgs, level, readOnly, true);
+		LoggerAndSourceData las = new LoggerAndSourceData(config, id, name.getLowerString(), appender, appenderArgs, layout, layoutArgs, level, readOnly, true);
 		_loggers.put(name, las);
 		return las;
 	}

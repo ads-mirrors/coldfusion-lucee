@@ -442,7 +442,7 @@ public final class MavenUtil {
 					}
 				}
 				catch (IOException ioe) {
-					LogUtil.log(null, "mvn", ioe, Log.LEVEL_WARN, "application");
+					LogUtil.log((Config) null, "mvn", ioe, Log.LEVEL_WARN, "application");
 				}
 			}
 		}
@@ -470,7 +470,7 @@ public final class MavenUtil {
 					gavso = getDependency(rd, current, properties, true);
 				}
 				catch (IOException ioe) {
-					LogUtil.log(null, "mvn", ioe, Log.LEVEL_WARN, "application");
+					LogUtil.log((Config) null, "mvn", ioe, Log.LEVEL_WARN, "application");
 				}
 				if (gavso == null) continue;
 				POM p = POM.getInstance(localDirectory, current.getRepositories(), gavso.g, gavso.a, gavso.v, gavso.s, gavso.o, gavso.c, current.getDependencyScope(),

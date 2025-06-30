@@ -1139,7 +1139,7 @@ public final class CFMLEngineImpl implements CFMLEngine {
 				catch (Throwable t) {
 					ExceptionUtil.rethrowIfNecessary(t);
 					if (t instanceof Exception && !Abort.isSilentAbort(t))
-						LogUtil.log(configServer, LOG_TYPE_NAME, t, t instanceof MissingIncludeException ? Log.LEVEL_WARN : Log.LEVEL_ERROR, "application");
+						LogUtil.log(pc, LOG_TYPE_NAME, t, t instanceof MissingIncludeException ? Log.LEVEL_WARN : Log.LEVEL_ERROR, "application");
 				}
 			}
 		}

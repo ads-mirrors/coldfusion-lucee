@@ -5,24 +5,12 @@ import java.lang.reflect.InvocationTargetException;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 
-import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
-import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
-import lucee.runtime.config.Config;
-import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.config.ConfigWebPro;
-import lucee.runtime.engine.ThreadLocalPageContext;
-import lucee.runtime.op.Caster;
 
 public final class LogAdapter implements Log {
-
-	private static final boolean logWebContextInfo;
-
-	static {
-		logWebContextInfo = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.log.webcontext", null), false);
-	}
 
 	private Logger logger;
 	private Level level;
@@ -41,67 +29,78 @@ public final class LogAdapter implements Log {
 
 	@Override
 	public void log(int level, String application, String message) {
-		logger.log(toLevel(level), merge(application, message));
+		logger.log(toLevel(level), ContextualMessage.create(null, application, message, null));
+
+	}
+
+	public void log(ConfigWebPro config, Level level, String application, String message) {
+		logger.log(level, ContextualMessage.create(config, application, message, null));
 
 	}
 
 	@Override
 	public void log(int level, String application, String message, Throwable t) {
 		if (StringUtil.isEmpty(message)) logger.log(toLevel(level), application, t);
-		else logger.log(toLevel(level), merge(application, message), t);
+		else logger.log(toLevel(level), ContextualMessage.create(null, application, message, t), t);
+	}
+
+	public void log(ConfigWebPro config, Level level, String application, String message, Throwable t) {
+		if (StringUtil.isEmpty(message)) {
+			logger.log(level, ContextualMessage.create(config, application, null, t), t);
+		}
+		else {
+			logger.log(level, ContextualMessage.create(config, application, message, t), t);
+		}
 	}
 
 	@Override
 	public void log(int level, String application, Throwable t) {
 		t = toThrowable(t);
-		String msg = t.getMessage();
-		if (StringUtil.isEmpty(msg)) msg = t.getClass().getName();
-		log(level, application, msg, t);
+		logger.log(toLevel(level), ContextualMessage.create(null, application, null, t), t);
 	}
 
 	@Override
 	public void trace(String application, String message) {
-		log(Log.LEVEL_TRACE, application, message);
+		logger.log(Level.TRACE, ContextualMessage.create(null, application, message, null));
 	}
 
 	@Override
 	public void info(String application, String message) {
-		log(Log.LEVEL_INFO, application, message);
+		logger.log(Level.INFO, ContextualMessage.create(null, application, message, null));
 	}
 
 	@Override
 	public void debug(String application, String message) {
-		log(Log.LEVEL_DEBUG, application, message);
+		logger.log(Level.DEBUG, ContextualMessage.create(null, application, message, null));
 	}
 
 	@Override
 	public void warn(String application, String message) {
-		log(Log.LEVEL_WARN, application, message);
+		logger.log(Level.WARN, ContextualMessage.create(null, application, message, null));
 	}
 
 	@Override
 	public void error(String application, String message) {
-		log(Log.LEVEL_ERROR, application, message);
+		logger.log(Level.ERROR, ContextualMessage.create(null, application, message, null));
 	}
 
 	@Override
 	public void fatal(String application, String message) {
-		log(Log.LEVEL_FATAL, application, message);
+		logger.log(Level.FATAL, ContextualMessage.create(null, application, message, null));
 	}
 
 	@Override
 	public void error(String application, Throwable t) {
-		log(LEVEL_ERROR, application, t);
+		logger.log(Level.ERROR, ContextualMessage.create(null, application, null, t));
 	}
 
 	@Override
 	public void error(String application, String message, Throwable t) {
-		log(LEVEL_ERROR, application, message, t);
+		logger.log(Level.ERROR, ContextualMessage.create(null, application, message, t));
 	}
 
 	@Override
 	public int getLogLevel() {
-
 		return toLevel(logger.getLevel());
 	}
 
@@ -120,26 +119,20 @@ public final class LogAdapter implements Log {
 		return logger;
 	}
 
-	private Throwable toThrowable(Throwable t) {
+	private static Throwable toThrowable(Throwable t) {
 		ExceptionUtil.rethrowIfNecessary(t);
 		if (t instanceof InvocationTargetException) return ((InvocationTargetException) t).getTargetException();
 		return t;
 	}
 
-	private String merge(String application, String message) {
-		if (StringUtil.isEmpty(application)) return message;
-		if (logWebContextInfo) {
-			Config c = ThreadLocalPageContext.getConfig();
-			if (c instanceof ConfigWebPro) {
-				String l = LogUtil.getWebContextLabel((ConfigWeb) c);
-				if (StringUtil.isEmpty(application, true)) return l + "->" + message;
-				return l + "|" + application + "->" + message;
-			}
-		}
-		return application + "->" + message;
+	public static String getMessage(Throwable t) {
+		t = toThrowable(t);
+		String msg = t.getMessage();
+		if (StringUtil.isEmpty(msg, true)) return t.getClass().getName();
+		return msg;
 	}
 
-	static Level toLevel(int level) {
+	public static Level toLevel(int level) {
 		switch (level) {
 		case Log.LEVEL_FATAL:
 			return Level.FATAL;

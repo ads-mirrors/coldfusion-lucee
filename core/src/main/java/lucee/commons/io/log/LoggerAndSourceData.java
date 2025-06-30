@@ -52,7 +52,6 @@ public final class LoggerAndSourceData {
 
 	public LoggerAndSourceData(Config config, String id, String name, ClassDefinition appender, Map<String, String> appenderArgs, ClassDefinition layout,
 			Map<String, String> layoutArgs, int level, boolean readOnly, boolean dyn) {
-		// this.log=new LogAdapter(logger);
 		this.config = config;
 		this.id = id;
 		this.name = name;
@@ -158,11 +157,6 @@ public final class LoggerAndSourceData {
 	private LogEngine eng() {
 		return ((ConfigPro) config).getLogEngine();
 	}
-
-	/*
-	 * public Logger getLogger() { getLog();// make sure it exists return
-	 * ((LogAdapter)_log).getLogger(); }
-	 */
 
 	public static String id(String name, ClassDefinition appender, Map<String, String> appenderArgs, ClassDefinition layout, Map<String, String> layoutArgs, int level,
 			boolean readOnly) {

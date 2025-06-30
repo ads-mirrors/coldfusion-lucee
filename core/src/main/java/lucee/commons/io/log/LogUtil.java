@@ -25,22 +25,18 @@ import lucee.aprint;
 import lucee.commons.i18n.FormatUtil;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.IOUtil;
-import lucee.commons.io.SystemUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.lang.SystemOut;
 import lucee.loader.engine.CFMLEngineFactory;
-import lucee.runtime.CFMLFactoryImpl;
 import lucee.runtime.PageContext;
 import lucee.runtime.PageContextImpl;
 import lucee.runtime.PageSource;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigUtil;
-import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.engine.ThreadLocalPageContext;
-import lucee.runtime.net.http.ReqRspUtil;
 
 /**
  * Helper class for the logs
@@ -176,6 +172,20 @@ public final class LogUtil {
 
 	public static void log(PageContext pc, String logName, String type, Throwable t, int logLevel) {
 		Log log = ThreadLocalPageContext.getLog(pc, logName);
+		if (log != null) {
+			if (Log.LEVEL_ERROR == logLevel) log.error(type, t);
+			else log.log(logLevel, type, t);
+		}
+		else logGlobal(ThreadLocalPageContext.getConfig(pc), logLevel, type, ExceptionUtil.getStacktrace(t, true));
+	}
+
+	public static void log(PageContext pc, String type, Throwable t, int logLevel, String... logNames) {
+		Log log = null;
+		for (String ln: logNames) {
+			log = ThreadLocalPageContext.getLog(pc, ln, false);
+			if (log != null) break;
+		}
+
 		if (log != null) {
 			if (Log.LEVEL_ERROR == logLevel) log.error(type, t);
 			else log.log(logLevel, type, t);
@@ -364,19 +374,5 @@ public final class LogUtil {
 			if (log != null) return log;
 		}
 		return null;
-	}
-
-	public static String getWebContextLabel(ConfigWeb config) {
-		// get URL
-		CFMLFactoryImpl factory = (CFMLFactoryImpl) config.getFactory();
-		if (factory.getURL() != null) return factory.getURL().toExternalForm();
-		// if no URL, get webroot
-		String path = ReqRspUtil.getRootPath(factory.getConfig().getServletContext(), null);
-		if (path != null) return path;
-		// if no webroot, get the label
-		if (!StringUtil.isEmpty(factory.getLabel(), true)) return factory.getLabel().toString();
-		// if no label, get the hash
-		return SystemUtil.hash(factory.getConfig().getServletContext());
-
 	}
 }

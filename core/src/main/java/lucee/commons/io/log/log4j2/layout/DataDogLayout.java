@@ -7,10 +7,12 @@ import java.time.format.DateTimeFormatter;
 
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.layout.AbstractStringLayout;
+import org.apache.logging.log4j.message.Message;
 
 import lucee.commons.i18n.FormatUtil;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.log.LogUtil;
+import lucee.commons.io.log.log4j2.ContextualMessage;
 import lucee.loader.engine.CFMLEngine;
 import lucee.loader.engine.CFMLEngineFactory;
 import lucee.loader.util.Util;
@@ -19,6 +21,8 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.BIF;
 import lucee.runtime.reflection.Reflector;
 import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.util.Cast;
 import lucee.transformer.dynamic.meta.Method;
 
@@ -71,41 +75,34 @@ public final class DataDogLayout extends AbstractStringLayout {
 		data.append(id[1]);
 		data.append(" - ");
 
-		String application;
-		String msg = caster.toString(event.getMessage(), null);
-		int index = msg.indexOf("->");
-		if (index > -1) {
-			application = msg.substring(0, index);
-			msg = msg.substring(index + 2);
+		String msg, application, context;
+		Message message = event.getMessage();
+		if (message instanceof ContextualMessage) {
+			ContextualMessage cm = (ContextualMessage) message;
+			msg = cm.getFormattedMessage();
+			application = cm.getApplication();
+			context = cm.getContext();
 		}
-		else application = "";
-		// StringUtil.replace(application, "\"", "\"\"", false)
-
-		// Message
-		if (msg == null && event.getMessage() != null) msg = event.getMessage().toString();
+		else {
+			msg = message != null ? message.getFormattedMessage() : "";
+			application = "";
+			context = "";
+		}
 
 		// Throwable
 		Throwable t = event.getThrown();
-		if (t != null) {
-
-			String em = getMessage(t);
-			if (!Util.isEmpty(em, true)) {
-				if (!em.trim().equals(msg.trim())) msg += ";" + em;
-			}
-
-			Struct sct = engine.getCreationUtil().createStruct();
-			sct.setEL("message", msg);
-			sct.setEL("stack", getStacktrace(t, false, true));
-			sct.setEL("kind", t.getClass().getName());
-			try {
-				data.append(serializeJSON(sct));
-			}
-			catch (PageException e) {
-				data.append(msg);
-			}
-
+		Struct sct = engine.getCreationUtil().createStruct(StructImpl.TYPE_LINKED);
+		sct.setEL(KeyConstants._context, context);
+		sct.setEL(KeyConstants._application, application);
+		sct.setEL(KeyConstants._message, ClassicLayout.getFormattedMessage(t, msg));
+		sct.setEL("stack", getStacktrace(t, false, true));
+		sct.setEL("kind", t.getClass().getName());
+		try {
+			data.append(serializeJSON(sct));
 		}
-		else data.append(msg);
+		catch (PageException e) {
+			data.append(msg);
+		}
 
 		return data.append(LINE_SEPARATOR).toString();
 
@@ -233,23 +230,6 @@ public final class DataDogLayout extends AbstractStringLayout {
 			if (line > 0) return line;
 		}
 		return 0;
-	}
-
-	public static String getMessage(Throwable t) {
-		String msg = t.getMessage();
-		if (Util.isEmpty(msg, true)) msg = t.getClass().getName();
-
-		StringBuilder sb = new StringBuilder(msg);
-
-		if (t instanceof PageException) {
-			PageException pe = (PageException) t;
-			String detail = pe.getDetail();
-			if (!Util.isEmpty(detail, true)) {
-				sb.append('\n');
-				sb.append(detail);
-			}
-		}
-		return sb.toString();
 	}
 
 	public static String getStacktrace(Throwable t, boolean addMessage, boolean onlyLuceePart) {

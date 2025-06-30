@@ -23,19 +23,22 @@ import java.util.TimeZone;
 
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.layout.AbstractStringLayout;
+import org.apache.logging.log4j.message.Message;
 
 import lucee.commons.io.CharsetUtil;
+import lucee.commons.io.log.log4j2.ContextualMessage;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
+import lucee.loader.util.Util;
+import lucee.runtime.exp.PageException;
 import lucee.runtime.format.DateFormat;
 import lucee.runtime.format.TimeFormat;
-import lucee.runtime.op.Caster;
 
 public final class ClassicLayout extends AbstractStringLayout { // TODO <Serializable>
 
 	public ClassicLayout() {
 		// TODO custom charset?
-		super(CharsetUtil.UTF8, ("\"Severity\",\"ThreadID\",\"Date\",\"Time\",\"Application\",\"Message\"" + LINE_SEPARATOR).getBytes(CharsetUtil.UTF8), new byte[0]);
+		super(CharsetUtil.UTF8, ("\"Severity\",\"ThreadID\",\"Date\",\"Time\",\"Context\",\"Application\",\"Message\"" + LINE_SEPARATOR).getBytes(CharsetUtil.UTF8), new byte[0]);
 	}
 
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
@@ -53,19 +56,19 @@ public final class ClassicLayout extends AbstractStringLayout { // TODO <Seriali
 	public String toSerializable(final LogEvent event) {
 
 		StringBuilder data = new StringBuilder();
-		String application;
-
-		String msg = Caster.toString(event.getMessage(), null);
-		int index = msg.indexOf("->");
-		if (index > -1) {
-			application = msg.substring(0, index);
-			msg = msg.substring(index + 2);
+		String msg, application, context;
+		Message message = event.getMessage();
+		if (message instanceof ContextualMessage) {
+			ContextualMessage cm = (ContextualMessage) message;
+			msg = cm.getFormattedMessage();
+			application = cm.getApplication();
+			context = cm.getContext();
 		}
-		else application = "";
-
-		// if(!ArrayUtil.isEmpty(params))
-		// application=Caster.toString(params[0],"");
-		// Severity
+		else {
+			msg = message != null ? message.getFormattedMessage() : "";
+			application = "";
+			context = "";
+		}
 		data.append('"');
 		data.append(event.getLevel().toString());
 		data.append('"');
@@ -93,6 +96,13 @@ public final class ClassicLayout extends AbstractStringLayout { // TODO <Seriali
 
 		data.append(',');
 
+		// Context
+		data.append('"');
+		data.append(StringUtil.replace(context, "\"", "\"\"", false));
+		data.append('"');
+
+		data.append(',');
+
 		// Application
 		data.append('"');
 		data.append(StringUtil.replace(application, "\"", "\"\"", false));
@@ -101,26 +111,40 @@ public final class ClassicLayout extends AbstractStringLayout { // TODO <Seriali
 		data.append(',');
 
 		// Message
-		data.append('"');
-		if (msg == null && event.getMessage() != null) msg = event.getMessage().toString();
-		msg = StringUtil.replace(msg, "\"", "\"\"", false);
-		data.append(msg);
 		Throwable t = event.getThrown();
+		data.append('"');
+		data.append(StringUtil.replace(getFormattedMessage(t, msg), "\"", "\"\"", false));
 		if (t != null) {
-			data.append(';');
-			String em = StringUtil.replace(ExceptionUtil.getMessage(t, true), "\"", "\"\"", false);
-			if (!em.equals(msg)) {
-				data.append(em);
-				data.append(';');
-			}
 			String est = ExceptionUtil.getStacktrace(t, false, true);
 			data.append(StringUtil.replace(est, "\"", "\"\"", false));
 		}
-
 		data.append('"');
 
 		return data.append(LINE_SEPARATOR).toString();
 
 	}
 
+	public static String getFormattedMessage(Throwable throwable, String message) {
+		if (throwable != null) {
+
+			String expMessage = throwable.getMessage();
+			if (throwable instanceof PageException) {
+				PageException pe = (PageException) throwable;
+				String detail = pe.getDetail();
+				if (!Util.isEmpty(detail, true)) {
+					expMessage += "\n" + detail;
+					expMessage = expMessage.trim();
+				}
+			}
+			if (StringUtil.isEmpty(expMessage, true)) expMessage = throwable.getClass().getName();
+			if (StringUtil.isEmpty(message, true)) {
+				return expMessage;
+			}
+			if (expMessage.indexOf(message) != -1) return expMessage;
+			else if (message.indexOf(expMessage) != -1) return message;
+			return expMessage + ";" + message;
+
+		}
+		return message;
+	}
 }
