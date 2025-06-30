@@ -50,6 +50,7 @@ import lucee.runtime.converter.JavaConverter;
 import lucee.runtime.converter.ScriptConverter;
 import lucee.runtime.converter.WDDXConverter;
 import lucee.runtime.converter.XMLConverter;
+import lucee.runtime.debug.DebuggerUtil;
 import lucee.runtime.dump.DumpUtil;
 import lucee.runtime.dump.DumpWriter;
 import lucee.runtime.engine.ThreadLocalPageContext;
@@ -276,6 +277,9 @@ public abstract class ComponentPageImpl extends ComponentPage implements PagePro
 		catch (Throwable t) {
 			throw Caster.toPageException(t);// Exception Handler.castAnd
 			// Stack(t, this, pc);
+		}
+		finally {
+			DebuggerUtil.show(pc, false);
 		}
 		return null;
 	}

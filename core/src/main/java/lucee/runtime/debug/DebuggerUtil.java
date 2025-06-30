@@ -25,6 +25,7 @@ import lucee.runtime.PageContext;
 import lucee.runtime.PageContextImpl;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.exp.PageException;
+import lucee.runtime.listener.ApplicationContextSupport;
 import lucee.runtime.type.Query;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
@@ -84,5 +85,15 @@ public class DebuggerUtil {
 		return pci.hasDebugOptions(ConfigPro.DEBUG_DATABASE) || pci.hasDebugOptions(ConfigPro.DEBUG_DUMP) || pci.hasDebugOptions(ConfigPro.DEBUG_EXCEPTION)
 				|| pci.hasDebugOptions(ConfigPro.DEBUG_IMPLICIT_ACCESS) || pci.hasDebugOptions(ConfigPro.DEBUG_QUERY_USAGE) || pci.hasDebugOptions(ConfigPro.DEBUG_TEMPLATE)
 				|| pci.hasDebugOptions(ConfigPro.DEBUG_THREAD) || pci.hasDebugOptions(ConfigPro.DEBUG_TIMER) || pci.hasDebugOptions(ConfigPro.DEBUG_TRACING);
+	}
+
+	public static void show(PageContext pc, boolean show) {
+		ApplicationContextSupport acs = (ApplicationContextSupport) pc.getApplicationContext();
+		if (acs != null) {
+			acs.setShowDebug(show);
+			acs.setShowDoc(show);
+			acs.setShowMetric(show);
+			acs.setShowTest(show);
+		}
 	}
 }
