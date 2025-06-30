@@ -65,13 +65,7 @@ public final class Setting extends BodyTagImpl {
 	}
 
 	public void setShow(boolean show) {
-		ApplicationContextSupport acs = (ApplicationContextSupport) pageContext.getApplicationContext();
-		if (acs != null) {
-			acs.setShowDebug(show);
-			acs.setShowDoc(show);
-			acs.setShowMetric(show);
-			acs.setShowTest(show);
-		}
+		DebuggerUtil.show(pageContext, show);
 	}
 
 	public void setShowdebug(boolean show) {
