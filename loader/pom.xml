@@ -92,14 +92,13 @@
       <plugins>
         <!-- publish to central maven -->
       <plugin>
-        <groupId>org.sonatype.plugins</groupId>
-        <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.6.13</version>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>0.8.0</version>
         <extensions>true</extensions>
         <configuration>
-          <serverId>ossrh</serverId>
-          <nexusUrl>https://ossrh-staging-api.central.sonatype.com/</nexusUrl>
-          <autoReleaseAfterClose>true</autoReleaseAfterClose>
+          <publishingServerId>ossrh</publishingServerId>
+          <autoPublish>true</autoPublish>
         </configuration>
       </plugin>
 
@@ -725,7 +724,7 @@
     <tag>${project.version}</tag>
   </scm>
 
-<distributionManagement>
+<!-- <distributionManagement>
   <repository>
     <id>ossrh</id>
     <url>https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/</url>
@@ -734,6 +733,6 @@
     <id>ossrh</id>
     <url>https://ossrh-staging-api.central.sonatype.com/content/repositories/snapshots/</url>
   </snapshotRepository>
-</distributionManagement>
+</distributionManagement> -->
 
 </project>
