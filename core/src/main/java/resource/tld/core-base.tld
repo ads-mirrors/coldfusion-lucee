@@ -2132,20 +2132,18 @@ To use cached data, the tag must be called with the exact same arguments. Only u
 			<name>method</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Supported methods
+			<description>HTTP method to use for the request. Supported methods:
 
-- GET
-- POST
-- HEAD
-- PUT
-- DELETE
-- OPTIONS
-- TRACE
-- PATCH
+- **GET**: Download content or create queries from text files
+- **POST**: Send data to server (requires cfhttpparam tags)  
+- **HEAD**: Retrieve headers only, no body content
+- **PUT**: Upload/replace resource on server
+- **DELETE**: Remove resource from server
+- **OPTIONS**: Get allowed methods for resource
+- **TRACE**: Diagnostic method for request/response chain
+- **PATCH**: Partially update existing resource
 
-Use GET to download a text or binary file or to create a query from the contents of a text file.
-
-Use POST to send information to a server page or a CGI program for processing. POST	requires the use of a cfhttpparam tag.</description>
+Default is GET.</description>
 		</attribute>
 		<attribute>
 			<type>string</type>
@@ -2191,10 +2189,13 @@ Use POST to send information to a server page or a CGI program for processing. P
 			<name>getAsBinary</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>
-- false: If CFML does not recognize the response body type as text, convert it to a CFML object.
-- auto: If CFML does not recognize the response body type as text, convert it to CFML Binary type data.
-- true: always convert the response body content into CFML Binary type data, even if CFML recognizes the response body type as text.</description>
+			<description>Controls how response content is handled:
+
+- **false** (default): Auto-detect content type - convert to CFML object if not recognized as text
+- **auto**: Convert unrecognized content to binary data  
+- **true**: Always return content as binary data, even for text responses
+
+Affects the `filecontent` key in the result struct.</description>
 		</attribute>
 		<attribute>
 			<type>string</type>
@@ -2297,38 +2298,61 @@ Use POST to send information to a server page or a CGI program for processing. P
 			<name>throwOnError</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Boolean indicating whether to throw an exception that can be caught by using the cftry and
-	cfcatch tags. The default is NO.
-	An error is thrown when a connection failure, lookup etc is encountered, or the response status code isn't between 200 and 299
-	The CFHTTP / RESULT struct always contains a key ERROR indicating if an error would be thrown, even if set to NO.
-</description>
+			<description>Whether to throw an exception on HTTP errors that can be caught with `cftry`/`cfcatch`.
+
+When **true**: Throws exceptions for connection failures, lookup errors, or non-2xx status codes.
+When **false** (default): Populates the result struct with error information instead.
+
+The result struct always contains an `ERROR` key indicating if an error occurred, regardless of this setting.</description>
 		</attribute>
 		<attribute>
 			<type>boolean</type>
 			<name>redirect</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Boolean indicating whether to redirect execution or stop execution. The default is Yes. If set
-	to No and throwOnError = "yes", execution stops if cfhttp fails, and the status code and associated
-	error message are returned in the variable cfhttp.statusCode. To see where execution would have been
-	redirected, use the variable cfhttp.responseHeader[LOCATION]. The key LOCATION identifies the path of
-	redirection. Lucee will follow up to five redirections on a request. if this limit is exceeded,
-	Lucee behaves as if redirect = "no".</description>
+			<description>Whether to automatically follow HTTP redirects (3xx status codes).
+
+When **true** (default): Automatically follows up to 15 redirects.
+When **false**: Stops at the first redirect response. Use `cfhttp.responseHeader.LOCATION` to see the redirect target.
+
+If redirect limit is exceeded, behaves as if set to false.</description>
 		</attribute>
 		<attribute>
 			<type>any</type>
 			<name>timeout</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>A value, in seconds or a TimeSpan object. When a URL timeout is specified in the browser, the timeout attribute setting
-		takes precedence over the Lucee Administrator timeout. The server then uses the lesser
-		of the URL timeout and the timeout passed in the timeout attribute, so that the request always times
-		out before or at the same time as the page times out. If there is no URL timeout specified, Lucee
-		takes the lesser of the Lucee Administrator timeout and the timeout passed in the timeout attribute.
-		If there is no timeout set on the URL in the browser, no timeout set in the Lucee Administrator,
-		and no timeout set with the timeout attribute, Lucee waits indefinitely for the cfhttp request to
-		process.</description>
+<description>**General timeout value** in seconds or as a TimeSpan object that serves as a fallback for connection and socket timeouts. 
+
+When `connectionTimeout` or `socketTimeout` are not specified, this value is used for those timeouts.
+
+If no timeout is set, Lucee uses the **remaining request timeout** from the current page context. 
+The request will always timeout at or before the page timeout, using whichever is smaller: the specified timeout or remaining request time.</description>
 		</attribute>
+		<attribute>
+			<type>any</type>
+			<name>connectionTimeout</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>**Connection establishment timeout** in seconds or as a TimeSpan object. Controls how long to wait while establishing the initial TCP connection to the server.
+
+This timeout triggers during the TCP handshake phase, before any HTTP data is sent. Useful when the target server is unreachable, experiencing network issues, or is overwhelmed and not accepting new connections.
+
+If not specified, falls back to the `timeout` attribute value.</description>
+		</attribute>
+		<attribute>
+			<type>any</type>
+			<name>socketTimeout</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>**Socket read timeout** in seconds or as a TimeSpan object. Controls how long to wait for data between consecutive data packets after the connection is established.
+
+This timeout triggers while waiting for the server's response or if the server stops sending data mid-response. Different from connection timeout as it applies to data transfer, not connection establishment.
+
+If not specified, falls back to the `timeout` attribute value.</description>
+		</attribute>
+		
+		
 		<attribute>
 			<type>string</type>
 			<name>charset</name>

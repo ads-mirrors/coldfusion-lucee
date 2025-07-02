@@ -42,6 +42,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.config.RequestConfig.Builder;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpOptions;
@@ -216,6 +217,8 @@ public final class Http extends BodyTagImpl {
 
 	/** A value, in seconds. When a URL timeout is specified in the browser */
 	private TimeSpan timeout = null;
+	private TimeSpan socketTimeout = null;
+	private TimeSpan connectionTimeout = null;
 
 	/** Host name or IP address of a proxy server. */
 	private String proxyserver;
@@ -335,6 +338,8 @@ public final class Http extends BodyTagImpl {
 		delimiter = ',';
 		resolveurl = false;
 		timeout = null;
+		connectionTimeout = null;
+		socketTimeout = null;
 		proxyserver = null;
 		proxyport = 80;
 		proxyuser = null;
@@ -436,14 +441,25 @@ public final class Http extends BodyTagImpl {
 	 * @throws ExpressionException
 	 **/
 	public void setTimeout(Object timeout) throws PageException {
-		if (timeout instanceof TimeSpan) this.timeout = (TimeSpan) timeout;
-		// seconds
-		else {
-			int i = Caster.toIntValue(timeout);
-			if (i < 0) throw new ApplicationException("invalid value [" + i + "] for attribute timeout, value must be a positive integer greater or equal than 0");
+		this.timeout = toTimeout(timeout, "timeout");
+	}
 
-			this.timeout = new TimeSpanImpl(0, 0, 0, i);
-		}
+	public void setConnectiontimeout(Object timeout) throws PageException {
+		this.connectionTimeout = toTimeout(timeout, "connectionTimeout");
+	}
+
+	public void setSockettimeout(Object timeout) throws PageException {
+		this.socketTimeout = toTimeout(timeout, "socketTimeout");
+	}
+
+	private static TimeSpan toTimeout(Object timeout, String label) throws PageException {
+		if (StringUtil.isEmpty(timeout)) return null;
+		if (timeout instanceof TimeSpan) return (TimeSpan) timeout;
+		int i = Caster.toIntValue(timeout);
+		if (i < 0) throw new ApplicationException("invalid value [" + i + "] for attribute " + label + ", value must be a positive integer greater or equal than 0");
+
+		return new TimeSpanImpl(0, 0, 0, i);
+
 	}
 
 	/**
@@ -1058,8 +1074,7 @@ public final class Http extends BodyTagImpl {
 			if (!hasHeaderIgnoreCase(req, "User-Agent")) req.setHeader("User-Agent", this.useragent);
 
 			// set timeout
-			setTimeout(builder, Http.checkRemainingTimeout(pageContext, this.timeout));
-
+			setTimeout(this, builder, Http.checkRemainingTimeout(pageContext, this.timeout), connectionTimeout, socketTimeout);
 			// set Username and Password
 			if (this.username != null) {
 
@@ -1103,7 +1118,7 @@ public final class Http extends BodyTagImpl {
 			client = builder.build();
 			Executor4 e = new Executor4(pageContext, this, client, httpContext, req, redirect);
 
-			if (timeout == null || timeout.getMillis() <= 0) {
+			if (socketTimeout == null || socketTimeout.getMillis() <= 0) {
 				try {
 					rsp = e.execute(httpContext);
 				}
@@ -1124,7 +1139,7 @@ public final class Http extends BodyTagImpl {
 				e.start();
 				try {
 					synchronized (this) {// print.err(timeout);
-						this.wait(timeout.getMillis());
+						this.wait(socketTimeout.getMillis());
 					}
 				}
 				catch (InterruptedException ie) {
@@ -1282,7 +1297,7 @@ public final class Http extends BodyTagImpl {
 				file = ResourceUtil.toResourceNotExisting(pageContext, strPath);
 				// Resource dir = file.getParentResource();
 				if (file.isDirectory()) {
-					file = file.getRealResource(GetFileFromPath.call(pageContext,req.getURI().getPath()));
+					file = file.getRealResource(GetFileFromPath.call(pageContext, req.getURI().getPath()));
 				}
 
 			}
@@ -1439,17 +1454,18 @@ public final class Http extends BodyTagImpl {
 			}
 			try {
 				try {
-					str = is == null ? "" : IOUtil.toString(is, responseCharset, Http.checkRemainingTimeout(pageContext, this.timeout).getMillis());
+					str = is == null ? "" : IOUtil.toString(is, responseCharset, Http.checkRemainingTimeout(pageContext, this.socketTimeout).getMillis());
 				}
 				catch (EOFException eof) {
 					if (is instanceof CachingGZIPInputStream) {
-						str = IOUtil.toString(is = ((CachingGZIPInputStream) is).getRawData(), responseCharset, Http.checkRemainingTimeout(pageContext, this.timeout).getMillis());
+						str = IOUtil.toString(is = ((CachingGZIPInputStream) is).getRawData(), responseCharset,
+								Http.checkRemainingTimeout(pageContext, this.socketTimeout).getMillis());
 					}
 					else throw eof;
 				}
 			}
 			catch (UnsupportedEncodingException uee) {
-				str = IOUtil.toString(is, (Charset) null, Http.checkRemainingTimeout(pageContext, this.timeout).getMillis());
+				str = IOUtil.toString(is, (Charset) null, Http.checkRemainingTimeout(pageContext, this.socketTimeout).getMillis());
 			}
 		}
 		catch (IOException ioe) {
@@ -1871,18 +1887,36 @@ public final class Http extends BodyTagImpl {
 	}
 
 	public static void setTimeout(HttpClientBuilder builder, TimeSpan timeout) {
-		if (timeout == null || timeout.getMillis() <= 0) {
-			builder.setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build());
-			return;
+		setTimeout(null, builder, timeout, null, null);
+	}
+
+	private static void setTimeout(Http http, HttpClientBuilder builder, TimeSpan timeout, TimeSpan connectionTimeout, TimeSpan socketTimeout) {
+
+		// timeout is only of interest if we miss the others
+		if (connectionTimeout == null && timeout != null) connectionTimeout = timeout;
+		if (socketTimeout == null && timeout != null) socketTimeout = timeout;
+		if (http != null) {
+			http.timeout = timeout;
+			http.connectionTimeout = connectionTimeout;
+			http.socketTimeout = socketTimeout;
 		}
 
-		int ms = (int) timeout.getMillis();
-		if (ms < 0) ms = Integer.MAX_VALUE;
+		Builder b = RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD);
 
-		builder.setDefaultRequestConfig(
-				RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).setConnectionRequestTimeout(ms).setConnectTimeout(ms).setSocketTimeout(ms).build());
+		// connection timeout
+		if ((connectionTimeout != null && connectionTimeout.getMillis() > 0)) {
+			int ms = (int) connectionTimeout.getMillis();
+			if (ms < 0) ms = Integer.MAX_VALUE;
+			b = b.setConnectionRequestTimeout(ms).setConnectTimeout(ms);
+		}
+		// socket timeout
+		if ((socketTimeout != null && socketTimeout.getMillis() > 0)) {
+			int ms = (int) socketTimeout.getMillis();
+			if (ms < 0) ms = Integer.MAX_VALUE;
+			b = b.setSocketTimeout(ms);
+		}
 
-		// builder.setConnectionTimeToLive(ms, TimeUnit.MILLISECONDS);
+		builder.setDefaultRequestConfig(b.build());
 	}
 
 }
