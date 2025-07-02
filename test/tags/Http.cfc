@@ -31,7 +31,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="http" {
 		expect( res.status_code ).toBe(  200 );
 		
 		http url="https://httpbin.org/delay/1" sockettimeout=createTimespan(0,0,0,0,1) result="local.res";
-		expect( res.status_code ).toBe(  0 );
+		expect( res.status_code ).toBe(  408 );
 	}
 
 	function testTimeout() {
