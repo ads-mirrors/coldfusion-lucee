@@ -1485,7 +1485,7 @@ public final class Http extends BodyTagImpl {
 
 	public static TimeSpan checkRemainingTimeout(PageContext pc, TimeSpan timeout) throws RequestTimeoutException {
 		TimeSpan remaining = PageContextUtil.remainingTime(pc, true);
-		if (timeout == null || ((int) timeout.getSeconds()) <= 0 || (timeout.getSeconds() > remaining.getSeconds() && remaining.getSeconds() > 0)) { // not set
+		if (timeout == null || ((int) timeout.getMillis()) <= 0 || (timeout.getMillis() > remaining.getMillis() && remaining.getMillis() > 0)) { // not set
 			return remaining;
 		}
 		return timeout;
