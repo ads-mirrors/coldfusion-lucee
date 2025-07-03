@@ -2392,6 +2392,7 @@ The request will always timeout at or before the page timeout, using whichever i
 		<attribute>
 			<type>any</type>
 			<name>connectionTimeout</name>
+			<introduced>6.2.2.66</introduced>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 			<description>**Connection establishment timeout** in seconds or as a TimeSpan object. Controls how long to wait while establishing the initial TCP connection to the server.
@@ -2403,6 +2404,7 @@ If not specified, falls back to the `timeout` attribute value.</description>
 		<attribute>
 			<type>any</type>
 			<name>socketTimeout</name>
+			<introduced>6.2.2.66</introduced>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 			<description>**Socket read timeout** in seconds or as a TimeSpan object. Controls how long to wait for data between consecutive data packets after the connection is established.
