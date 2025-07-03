@@ -56,17 +56,30 @@
 
     <build>
         <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-            <resource>
-                <directory>src/main/java</directory>
-            </resource>
+          <resource>
+            <directory>src/main/resources</directory>
+          </resource>
+          <resource>
+            <directory>src/main/java</directory>
+          </resource>
         </resources>
+
+      <plugins>
+        <plugin>
+          <groupId>org.sonatype.central</groupId>
+          <artifactId>central-publishing-maven-plugin</artifactId>
+          <version>0.8.0</version>
+          <extensions>true</extensions>
+          <configuration>
+            <publishingServerId>ossrh</publishingServerId>
+            <autoPublish>true</autoPublish>
+          </configuration>
+        </plugin>
+      </plugins>
     </build>
 
 	<dependencies>
-   <dependency>
+    <dependency>
       <groupId>org.lucee</groupId>
       <artifactId>lucee</artifactId>
       <version>7.0.0.211-BETA</version>
@@ -78,7 +91,6 @@
       <version>7.0.5</version>
       <scope>compile</scope>
     </dependency>
-   
     <dependency>
       <groupId>javax.el</groupId>
       <artifactId>javax.el-api</artifactId>
@@ -137,7 +149,6 @@
     <artifactId>commons-fileupload2-core</artifactId>
     <version>2.0.0-M2</version>
 </dependency>
-
   	<dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
@@ -300,7 +311,7 @@
       <artifactId>asm-util</artifactId>
       <version>9.8</version>
       <scope>provided</scope>
-    </dependency>
+    </dependency>    
     <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm-util</artifactId>
@@ -378,18 +389,18 @@
   </dependencies>
 
   <repositories>
-      <repository>
-         <id>repo</id>
-         <url>https://raw.githubusercontent.com/lucee/mvn/master/releases</url>
-      </repository>
-      <repository>
-        <id>snapi</id>
-        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-      </repository>
-      <repository>
-        <id>res</id>
-        <url>https://oss.sonatype.org/content/repositories/releases/</url>
-      </repository>
+    <repository>
+       <id>repo</id>
+       <url>https://raw.githubusercontent.com/lucee/mvn/master/releases</url>
+    </repository>
+    <repository>
+      <id>snapi</id>
+      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+    </repository>
+    <repository>
+      <id>res</id>
+      <url>https://repo1.maven.org/maven2/</url>
+    </repository>
   </repositories>
 
   <scm>
@@ -399,15 +410,15 @@
     <tag>Plugin to create Lucee Core files.</tag>
   </scm>
 
-  <distributionManagement>
+  <!-- <distributionManagement>
     <repository>
       <id>ossrh</id>
       <url>https://central.sonatype.com/api/v1/publisher/upload</url>
     </repository>
     <snapshotRepository>
       <id>ossrh</id>
-      <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+      <url>https://ossrh-staging-api.central.sonatype.com/content/repositories/snapshots/</url>
     </snapshotRepository>
-  </distributionManagement>
+  </distributionManagement> -->
 
 </project>
