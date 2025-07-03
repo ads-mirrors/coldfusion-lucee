@@ -18,6 +18,27 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="http" {
 
 	variables.updateProvider =  server.getTestService("updateProvider").url;
 
+	function testConnectionTimeout() {
+		http url="https://httpbin.org/delay/1" result="local.res";
+		expect( res.status_code ).toBe(  200 );
+		
+		http url="https://lucee.org" connectionTimeout=createTimespan(0,0,0,0,1) result="local.res";
+		expect( res.status_code ).toBe(  0 );
+	}
+
+	function testSocketTimeout() {
+		http url="https://httpbin.org/delay/1" result="local.res";
+		expect( res.status_code ).toBe(  200 );
+		
+		http url="https://httpbin.org/delay/1" sockettimeout=createTimespan(0,0,0,0,1) result="local.res";
+		expect( res.status_code ).toBe(  408 );
+	}
+
+	function testTimeout() {
+  		http url="https://httpbin.org/delay/10" timeout=createTimespan(0,0,0,0,1) result="local.res";
+  		expect( res.status_code ).toBe(  408 );
+	}
+
 	public function testHTTP() localmode="true"{
 		http url="http://www.google.com";
 		expect( cfhttp.error ).toBe(  false );
