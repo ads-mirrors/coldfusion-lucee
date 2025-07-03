@@ -73,7 +73,9 @@ public final class MethodInstance {
 			DynamicInvoker di = DynamicInvoker.getExistingInstance();
 			try {
 				lucee.transformer.dynamic.meta.Method method = di.getClazz(clazz, true).getMethod(methodName.getString(), args, nameCaseSensitive, true, true);
-				return ((LegacyMethod) method).getMethod().invoke(o, args);
+				java.lang.reflect.Method mi = ((LegacyMethod) method).getMethod();
+				if (!mi.isAccessible()) mi.setAccessible(true);
+				return mi.invoke(o, args);
 			}
 			catch (Exception e1) {
 				if (e1 instanceof InvocationTargetException) {
@@ -101,7 +103,9 @@ public final class MethodInstance {
 			DynamicInvoker di = DynamicInvoker.getExistingInstance();
 			try {
 				lucee.transformer.dynamic.meta.Method method = di.getClazz(obj.getClass(), true).getMethod(methodName.getString(), args, nameCaseSensitive, true, true);
-				return ((LegacyMethod) method).getMethod().invoke(obj, args);
+				java.lang.reflect.Method mi = ((LegacyMethod) method).getMethod();
+				if (!mi.isAccessible()) mi.setAccessible(true);
+				return mi.invoke(obj, args);
 			}
 			catch (Exception e1) {
 				if (e1 instanceof InvocationTargetException) {

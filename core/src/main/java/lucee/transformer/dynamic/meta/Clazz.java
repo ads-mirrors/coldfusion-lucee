@@ -18,7 +18,9 @@ import lucee.commons.lang.ClassUtil;
 import lucee.commons.lang.Pair;
 import lucee.commons.lang.types.RefInteger;
 import lucee.commons.lang.types.RefIntegerImpl;
+import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
+import lucee.runtime.reflection.Reflector;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.dynamic.DynamicClassLoader;
 import lucee.transformer.dynamic.DynamicInvoker;
@@ -26,13 +28,17 @@ import lucee.transformer.dynamic.meta.dynamic.ClazzDynamic;
 import lucee.transformer.dynamic.meta.reflection.ClazzReflection;
 
 public abstract class Clazz implements Serializable {
-	private static final boolean debug = false;
 	public static final int VERSION = 4;
+	public static final boolean DEBUG;
 
 	private static final long serialVersionUID = 4236939474343760825L;
 	private static Boolean allowReflection = null;
-
+	static {
+		DEBUG = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.NoSuchMethodException.list", null), false);
+	}
 	private DynamicClassLoader dcl;
+	protected final Class clazz;
+	protected final Log log;
 
 	public abstract List<Method> getMethods(String methodName, boolean nameCaseSensitive, int argumentLength) throws IOException;
 
@@ -44,19 +50,15 @@ public abstract class Clazz implements Serializable {
 
 	public abstract Method getDeclaredMethod(String methodName, Class[] arguments, boolean nameCaseSensitive) throws IOException, NoSuchMethodException;
 
+	public abstract Method[] getMethods();
+
 	public abstract Method getMethod(String methodName, Class[] arguments, boolean nameCaseSensitive) throws IOException, NoSuchMethodException;
 
 	public abstract Method getMethod(String methodName, Class[] arguments, boolean nameCaseSensitive, Method defaultValue);
 
-	public abstract Method getMethod(String methodName, Object[] args, boolean nameCaseSensitive, boolean convertArgument, boolean convertComparsion) throws NoSuchMethodException;
-
-	public abstract Method getMethod(String methodName, Object[] args, boolean nameCaseSensitive, boolean convertArgument, boolean convertComparsion, Method defaultValue);
+	public abstract Constructor[] getConstructors();
 
 	public abstract Constructor getConstructor(Class[] arguments) throws IOException, NoSuchMethodException;
-
-	public abstract Constructor getConstructor(Object[] args, boolean convertArgument, boolean convertComparsion) throws NoSuchMethodException;
-
-	public abstract Constructor getConstructor(Object[] args, boolean convertArgument, boolean convertComparsion, Constructor defaultValue);
 
 	public abstract Constructor getDeclaredConstructor(Class[] arguments) throws IOException, NoSuchMethodException;
 
@@ -66,6 +68,45 @@ public abstract class Clazz implements Serializable {
 
 	public abstract String id();
 
+	public Clazz(Class clazz, Log log) {
+		this.clazz = clazz;
+		this.log = log;
+	}
+
+	public final Constructor getConstructor(Object[] args, boolean convertArgument, boolean convertComparsion, Constructor defaultValue) {
+		return getConstructor(clazz, getConstructors(), args, convertArgument, convertComparsion, defaultValue);
+	}
+
+	public final Constructor getConstructor(Object[] args, boolean convertArgument, boolean convertComparsion) throws NoSuchMethodException {
+		Constructor constructor = getConstructor(clazz, getConstructors(), args, convertArgument, convertComparsion, null);
+		if (constructor != null) return constructor;
+
+		throw new NoSuchMethodException("No matching Constructor for " + clazz.getName() + "(" + Reflector.getDspMethods(Reflector.getClasses(args)) + ") found.");
+	}
+
+	public final Method getMethod(String methodName, Object[] args, boolean nameCaseSensitive, boolean convertArgument, boolean convertComparsion, Method defaultValue) {
+		return getMethod(clazz, getMethods(), cachedMethods, methodName, args, nameCaseSensitive, convertArgument, convertComparsion, defaultValue);
+	}
+
+	public final Method getMethod(String methodName, Object[] args, boolean nameCaseSensitive, boolean convertArgument, boolean convertComparsion) throws NoSuchMethodException {
+		Method method = getMethod(clazz, getMethods(), cachedMethods, methodName, args, nameCaseSensitive, convertArgument, convertComparsion, null);
+		if (method != null) return method;
+		if (DEBUG) {
+			try {
+				StringBuilder sb = new StringBuilder();
+				for (Method m: getMethods(null, true, -1)) {
+					sb.append(m.toString()).append(";");
+				}
+				throw new NoSuchMethodException("No matching method for " + clazz.getName() + "." + methodName + "(" + Reflector.getDspMethods(Reflector.getClasses(args))
+						+ ") found. Available methods are [" + sb + "]");
+			}
+			catch (IOException ioe) {
+
+			}
+		}
+		throw new NoSuchMethodException("No matching method for " + clazz.getName() + "." + methodName + "(" + Reflector.getDspMethods(Reflector.getClasses(args)) + ") found.");
+	}
+
 	public static boolean allowReflection() {
 		if (allowReflection == null) {
 			allowReflection = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.allow.reflection", null), false);
@@ -74,21 +115,23 @@ public abstract class Clazz implements Serializable {
 	}
 
 	public static Clazz getClazzReflection(Class clazz) {
-		return new ClazzReflection(clazz);
+		return new ClazzReflection(clazz, null);
 	}
 
 	public static Clazz getClazz(Class clazz, Resource root, Log log, boolean useReflection) {
-		if (useReflection) return new ClazzReflection(clazz);
+		if (useReflection) return new ClazzReflection(clazz, log);
 		return getClazz(clazz, root, log);
 	}
 
 	public static Clazz getClazz(Class clazz, Resource root, Log log) {
-		// try {
-		return ClazzDynamic.getInstance(clazz, root, log);
-		/*
-		 * } catch (Exception e) { if (log != null) log.error("dynamic", e); if (allowReflection()) return
-		 * new ClazzReflection(clazz); else throw new RuntimeException(e); }
-		 */
+		try {
+			return ClazzDynamic.getInstance(clazz, root, log);
+		}
+		catch (Exception e) {
+			if (log != null) log.error("dynamic", e);
+			if (allowReflection()) return new ClazzReflection(clazz, log);
+			else throw new RuntimeException(e);
+		}
 	}
 
 	private static RefInteger nirvana = new RefIntegerImpl();
@@ -216,4 +259,144 @@ public abstract class Clazz implements Serializable {
 		return "lucee/invoc/wrap/v" + VERSION + "/";
 	}
 
+	public static Constructor getConstructor(Class clazz, Constructor[] constructors, Object[] args, boolean convertArgument, boolean convertComparsion, Constructor defaultValue) {
+		// like
+		Class[] parameterTypes;
+		outer: for (Constructor fm: constructors) {
+			if ((args.length == fm.getArgumentCount()) && clazz.getName().equals(fm.getDeclaringClassName())) {
+				parameterTypes = fm.getArgumentClasses();
+				for (int y = 0; y < parameterTypes.length; y++) {
+					if (!Reflector.toReferenceClass(parameterTypes[y]).isAssignableFrom(args[y] == null ? Object.class : args[y].getClass())) continue outer;
+				}
+				return fm;
+			}
+		}
+
+		// in case there are no arguments the code below will not find any match, nothing to convert
+		if (args.length == 0) return defaultValue;
+
+		// convert comparsion
+		Pair<Constructor, Object[]> result = null;
+		int _rating = 0;
+		if (convertComparsion) {
+			outer: for (Constructor fm: constructors) {
+				if ((args.length == fm.getArgumentCount()) && clazz.getName().equals(fm.getDeclaringClassName())) {
+					RefInteger rating = (constructors.length > 1) ? new RefIntegerImpl(0) : null;
+					parameterTypes = fm.getArgumentClasses();
+					Object[] newArgs = new Object[args.length];
+					for (int y = 0; y < parameterTypes.length; y++) {
+						try {
+							newArgs[y] = Reflector.convert(args[y], Reflector.toReferenceClass(parameterTypes[y]), rating);
+						}
+						catch (PageException e) {
+							continue outer;
+						}
+					}
+					if (result == null || rating.toInt() > _rating) {
+						if (rating != null) _rating = rating.toInt();
+						result = new Pair<Constructor, Object[]>(fm, newArgs);
+					}
+					// return new ConstructorInstance(constructors[i],newArgs);
+				}
+			}
+		}
+
+		if (result != null) {
+			if (convertArgument) {
+				Object[] newArgs = result.getValue();
+				for (int x = 0; x < args.length; x++) {
+					args[x] = newArgs[x];
+				}
+			}
+			return result.getName();
+		}
+		return defaultValue;
+	}
+
+	public static Method getMethod(Class clazz, Method[] methods, Map<String, SoftReference<Pair<Method, Boolean>>> cachedMethods, String methodName, Object[] args,
+			boolean nameCaseSensitive, boolean convertArgument, boolean convertComparsion, Method defaultValue) {
+
+		// like
+		Class[] parameterTypes;
+		outer: for (Method fm: methods) {
+			if ((args.length == fm.getArgumentCount()) && (nameCaseSensitive ? methodName.equals(fm.getName()) : methodName.equalsIgnoreCase(fm.getName()))) {
+				parameterTypes = fm.getArgumentClasses();
+				for (int y = 0; y < parameterTypes.length; y++) {
+					if (!Reflector.toReferenceClass(parameterTypes[y]).isAssignableFrom(args[y] == null ? Object.class : args[y].getClass())) continue outer;
+				}
+				return fm;
+			}
+		}
+
+		// in case there are no arguments the code below will not find any match, nothing to convert
+		if (args.length == 0) return defaultValue;
+
+		// cache
+		StringBuilder sb = new StringBuilder(100).append(methodName).append(';'); // append(id()).
+		for (Object arg: args) {
+			sb.append((arg == null ? Object.class : arg.getClass()).getName()).append(';');
+		}
+		String key = sb.toString();
+
+		// get match from cache
+		if (cachedMethods != null) {
+			SoftReference<Pair<Method, Boolean>> sr = cachedMethods.get(key);
+			if (sr != null) {
+				Pair<Method, Boolean> p = sr.get();
+				if (p != null) {
+					// print.e("used cached match(" + p.getValue() + "):" + key + ":" + cachedMethods.size());
+					// convert arguments
+					if (p.getValue()) {
+						Class[] trgArgs = p.getName().getArgumentClasses();
+						for (int x = 0; x < trgArgs.length; x++) {
+							if (args[x] != null) {
+								// we can ignore a fail here, because this was done before, otherwisse it would not be in the cache
+								args[x] = Reflector.convert(args[x], Reflector.toReferenceClass(trgArgs[x]), nirvana, null);
+							}
+						}
+					}
+					return p.getName();
+				}
+			}
+		}
+
+		// convert comparsion
+		Pair<Method, Object[]> result = null;
+		int _rating = 0;
+		if (convertComparsion) {
+			outer: for (Method fm: methods) {
+				if ((args.length == fm.getArgumentCount()) && ((nameCaseSensitive ? methodName.equals(fm.getName()) : methodName.equalsIgnoreCase(fm.getName())))) {
+					RefInteger rating = (methods.length > 1) ? new RefIntegerImpl(0) : null;
+					parameterTypes = fm.getArgumentClasses();
+					Object[] newArgs = new Object[args.length];
+
+					for (int y = 0; y < parameterTypes.length; y++) {
+						try {
+							newArgs[y] = Reflector.convert(args[y], Reflector.toReferenceClass(parameterTypes[y]), rating);
+						}
+						catch (PageException e) {
+							continue outer;
+						}
+					}
+					if (result == null || rating.toInt() > _rating) {
+						if (rating != null) _rating = rating.toInt();
+						result = new Pair<Method, Object[]>(fm, newArgs);
+					}
+				}
+			}
+		}
+
+		if (result != null) {
+			if (convertArgument) {
+				Object[] newArgs = result.getValue();
+				for (int x = 0; x < args.length; x++) {
+					args[x] = newArgs[x];
+				}
+			}
+			if (cachedMethods == null) cachedMethods = new ConcurrentHashMap<>();
+			cachedMethods.put(key, new SoftReference<Pair<Method, Boolean>>(new Pair<Method, Boolean>(result.getName(), Boolean.TRUE)));
+			return result.getName();
+		}
+		return defaultValue;
+	}
 }
