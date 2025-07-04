@@ -17,8 +17,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.http.HttpEntity;
@@ -164,9 +162,8 @@ public final class MavenUtil {
 	}
 
 	public static List<POM> getDependencies(List<POMReader.Dependency> rawDependencies, POM current, POM parent, Map<String, String> properties, Resource localDirectory,
-			boolean management, Log log) throws IOException {
+			final boolean management, Log log) throws IOException {
 		List<POM> dependencies = new ArrayList<>();
-		ExecutorService executor = ThreadUtil.createExecutorService(Runtime.getRuntime().availableProcessors());
 
 		if (parent != null) {
 			List<POM> tmp = parent.getDependencies();
@@ -177,33 +174,22 @@ public final class MavenUtil {
 			}
 		}
 		if (rawDependencies != null) {
-			List<Future<POM>> futures = new ArrayList<>();
+			// List<Future<POM>> futures = new ArrayList<>();
 			for (POMReader.Dependency rd: rawDependencies) {
-				GAVSO gavso = getDependency(rd, current, properties, management);
-				if (gavso == null) continue;
+				final POM pom = getDependency(localDirectory, rd, current, properties, management, log);
+				if (pom != null) dependencies.add(pom);
+				// Future<POM> future = executor.submit(() -> {
+				// if (!management) pom.initXML();
+				// return pom;
+				// });
+				// futures.add(future);
+			}
 
-				Future<POM> future = executor.submit(() -> {
-					POM p = POM.getInstance(localDirectory, current.getRepositories(), gavso.g, gavso.a, gavso.v, gavso.s, gavso.o, gavso.c, current.getDependencyScope(),
-							current.getDependencyScopeManagement(), log);
-					p.initXML();
-					return p;
-				});
-				futures.add(future);
-			}
-			try {
-				for (Future<POM> future: futures) {
-					dependencies.add(future.get()); // Wait for init to complete
-				}
-			}
-			catch (Exception e) {
-				throw ExceptionUtil.toIOException(e);
-			}
 		}
-		executor.shutdown();
 		return dependencies;
 	}
 
-	public static GAVSO getDependency(POMReader.Dependency rd, POM current, Map<String, String> properties, boolean management) throws IOException {
+	public static POM getDependency(Resource localDirectory, POMReader.Dependency rd, POM current, Map<String, String> properties, boolean management, Log log) throws IOException {
 		POM pdm = null;// TODO move out of here so multiple loop elements can profit
 		boolean loadedPDM = false;
 		String g = resolvePlaceholders(current, rd.groupId, properties);
@@ -213,13 +199,7 @@ public final class MavenUtil {
 		if (s != null) {
 			s = resolvePlaceholders(current, s, properties);
 		}
-		else {
-			pdm = getDependency(current.getDependencyManagement(), g, a);
-			loadedPDM = true;
-			if (pdm != null) {
-				s = pdm.getScopeAsString();
-			}
-		}
+
 		// scope allowed?
 		if (!allowed(management ? current.getDependencyScopeManagement() : current.getDependencyScope(), toScope(s, POM.SCOPE_COMPILE))) {
 			return null;
@@ -239,7 +219,6 @@ public final class MavenUtil {
 				v = pdm.getVersion();
 				// v = resolvePlaceholders(pdm, v, pdm.getProperties());
 			}
-
 			if (v == null) {
 				throw new IOException("could not find version for dependency [" + g + ":" + a + "] in [" + current + "]");
 			}
@@ -255,21 +234,8 @@ public final class MavenUtil {
 		if (o != null) {
 			o = resolvePlaceholders(current, o, properties);
 		}
-		else {
-			if (!loadedPDM) {
-				pdm = getDependency(current.getDependencyManagement(), g, a);
-				loadedPDM = true;
-			}
-			if (pdm != null) {
-				o = pdm.getOptionalAsString();
-			}
-		}
 
-		return new GAVSO(g, a, v, s, o, null);
-		// p = POM.getInstance(localDirectory, g, a, v, s, o, current.getDependencyScope(),
-		// current.getDependencyScopeManagement());
-
-		// dependencies.add(p);
+		return POM.getInstance(localDirectory, current.getRepositories(), g, a, v, s, o, null, current.getDependencyScope(), current.getDependencyScopeManagement(), false, log);
 	}
 
 	public static class GAVSO implements Serializable {
@@ -465,17 +431,16 @@ public final class MavenUtil {
 
 		if (rawDependencies != null) {
 			for (Dependency rd: rawDependencies) {
-				GAVSO gavso = null;
+				POM pom = null;
 				try {
-					gavso = getDependency(rd, current, properties, true);
+					pom = getDependency(localDirectory, rd, current, properties, true, log);
 				}
 				catch (IOException ioe) {
 					LogUtil.log((Config) null, "mvn", ioe, Log.LEVEL_WARN, "application");
 				}
-				if (gavso == null) continue;
-				POM p = POM.getInstance(localDirectory, current.getRepositories(), gavso.g, gavso.a, gavso.v, gavso.s, gavso.o, gavso.c, current.getDependencyScope(),
-						current.getDependencyScopeManagement(), false, log);
-				dependencies.add(p);
+				if (pom == null) continue;
+
+				dependencies.add(pom);
 			}
 		}
 		return dependencies;
@@ -506,12 +471,12 @@ public final class MavenUtil {
 					value = p.getVersion();
 					modifed = true;
 				}
-				else if ("scope".equals(placeholder) && p.getScopeUnresolved() != null) {
-					value = p.getScopeUnresolved();
+				else if ("scope".equals(placeholder) && p.getScopeAsString() != null) {
+					value = p.getScopeAsString();
 					modifed = true;
 				}
 				else if ("optional".equals(placeholder)) {
-					value = p.getOptionaUnresolved();
+					value = p.getOptionalAsString();
 					modifed = true;
 				}
 				// TODO is there more?
@@ -562,6 +527,7 @@ public final class MavenUtil {
 
 		// file is empty or does not exist
 		if (!res.isFile()) {
+			// print.ds("--->" + pom.toString());
 			synchronized (SystemUtil.createToken("mvn", res.getAbsolutePath())) {
 				// file is empty or does not exist
 				if (!res.isFile()) {

@@ -5,6 +5,7 @@ import java.util.Map.Entry;
 import lucee.aprint;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.ResourcesImpl;
+import lucee.commons.io.res.util.ResourceUtil;
 import lucee.runtime.mvn.MavenUtil.GAVSO;
 
 public final class Test {
@@ -86,56 +87,64 @@ public final class Test {
 
 				// new GAVSO("com.github.tjake", "jlama-core", "0.7.0")
 				// new GAVSO("org.jboss.ejb3", "jboss-ejb3-api", "3.1.0")
-				new GAVSO("com.google.guava", "guava", "25.0-jre")
+				new GAVSO("org.apache.pdfbox", "pdfbox", "3.0.3"), new GAVSO("org.apache.logging.log4j", "log4j-api", "2.20.0"),
+				new GAVSO("org.apache.logging.log4j", "log4j-core", "2.20.0")
 				// new GAVSO("commons-beanutils", "commons-beanutils", "1.9.4", null, null,
 				// "sha1:d52b9abcd97f38c81342bb7e7ae1eee9b73cba51")
 				// new GAVSO("org.apache.commons", "commons-jexl3", "3.4.0")
 
 		};
-		// groupID:org.jboss.ejb3;artifactId:jboss-ejb3-api;version:3.1.0
-		// groupID:org.eclipse.sisu;artifactId:org.eclipse.sisu.plexus;version:0.3.4
-		/*
-		 * new Artifact("org.hibernate.orm", "hibernate-core", "6.5.2.Final"), new Artifact("com.amazonaws",
-		 * "aws-java-sdk-s3", "1.12.756"),
-		 * 
-		 * new Artifact("org.apache.maven", "maven-plugin-api", "3.9.8"),
-		 * 
-		 * new Artifact("org.apache.maven", "maven-core", "3.9.8"), // new Artifact(,,),new Artifact(,,),new
-		 * Artifact(,,),new Artifact(,,), xception in thread "main" java.io.IOException: cannot resolve
-		 * [${sisuVersion}] for [groupID:org.apache.maven;artifactId:maven-parent;version:40], available
-		 * properties are [version.apache-rat-plugin, version.maven-help-plugin,
-		 * version.maven-source-plugin, distMgmtReleasesUrl, version.maven-plugin-tools,
-		 * distMgmtSnapshotsUrl, version.maven-ear-plugin, version.maven-deploy-plugin, surefire.version,
-		 * sourceReleaseAssemblyDescriptor, organization.logo, version.maven-compiler-plugin, twitter,
-		 * version.maven-shade-plugin, version.maven-gpg-plugin, project.build.sourceEncoding,
-		 * version.maven-enforcer-plugin, version.maven-invoker-plugin, distMgmtSnapshotsName,
-		 * assembly.tarLongFileMode, version.maven-scm-publish-plugin,
-		 * version.maven-remote-resources-plugin, version.maven-war-plugin, version.apache-resource-bundles,
-		 * distMgmtReleasesName, minimalJavaBuildVersion, maven.plugin.tools.version,
-		 * version.checksum-maven-plugin, version.maven-fluido-skin, maven.compiler.source,
-		 * version.maven-assembly-plugin, version.maven-resources-plugin, minimalMavenBuildVersion,
-		 * project.reporting.outputEncoding, version.maven-jar-plugin, version.maven-scm-plugin,
-		 * maven.compiler.target, version.maven-dependency-plugin, version.maven-clean-plugin,
-		 * version.maven-javadoc-plugin, version.maven-site-plugin, project.build.outputTimestamp,
-		 * version.maven-release-plugin, gpg.useagent, version.maven-antrun-plugin, version.maven-surefire,
-		 * version.maven-install-plugin, version.maven-project-info-reports-plugin]
-		 * 
-		 * };
-		 */
-		/*
-		 * for (Artifact a: examples) { print.e("------------ " + a); print.e(maven.download(a.groupId,
-		 * a.artifactId, a.version, true, false)); }
-		 */
+		arr = new GAVSO[] {
+				// groupID:com.github.tjake;artifactId:jlama-core;version:0.7.0
+
+				// new GAVSO("com.github.tjake", "jlama-core", "0.7.0")
+				// new GAVSO("org.jboss.ejb3", "jboss-ejb3-api", "3.1.0")
+				new GAVSO("org.apache.pdfbox", "pdfbox", "3.0.3")
+				// new GAVSO("commons-beanutils", "commons-beanutils", "1.9.4", null, null,
+				// "sha1:d52b9abcd97f38c81342bb7e7ae1eee9b73cba51")
+				// new GAVSO("org.apache.commons", "commons-jexl3", "3.4.0")
+
+		};
+
+		arr = new GAVSO[] {
+				// groupID:com.github.tjake;artifactId:jlama-core;version:0.7.0
+
+				// new GAVSO("com.github.tjake", "jlama-core", "0.7.0")
+				// new GAVSO("org.jboss.ejb3", "jboss-ejb3-api", "3.1.0")
+				new GAVSO("org.apache.maven", "maven-core", "3.8.1")
+				// new GAVSO("commons-beanutils", "commons-beanutils", "1.9.4", null, null,
+				// "sha1:d52b9abcd97f38c81342bb7e7ae1eee9b73cba51")
+				// new GAVSO("org.apache.commons", "commons-jexl3", "3.4.0")
+
+		};
+		arr = new GAVSO[] {
+				// groupID:com.github.tjake;artifactId:jlama-core;version:0.7.0
+
+				// new GAVSO("com.github.tjake", "jlama-core", "0.7.0")
+				// new GAVSO("org.jboss.ejb3", "jboss-ejb3-api", "3.1.0")
+				new GAVSO("com.google.inject", "guice", "4.2.1")
+				// new GAVSO("commons-beanutils", "commons-beanutils", "1.9.4", null, null,
+				// "sha1:d52b9abcd97f38c81342bb7e7ae1eee9b73cba51")
+				// new GAVSO("org.apache.commons", "commons-jexl3", "3.4.0")
+
+		};
+
 		long start = System.currentTimeMillis();
-		// ResourceUtil.deleteContent(dir, null);
+		ResourceUtil.deleteContent(dir, null);
 		for (GAVSO gav: arr) {
-			POM pom = POM.getInstance(dir, null, gav.g, gav.a, gav.v, null, null, gav.c, POM.SCOPE_NOT_TEST, POM.SCOPE_ALL, null);
+			POM pom = POM.getInstance(dir, null, gav.g, gav.a, gav.v, null, null, gav.c, POM.SCOPE_NOT_TEST, POM.SCOPE_ALL, true, null);
 
 			aprint.e("==========================================");
 			aprint.e(pom.getName());
 			aprint.e(pom.getChecksum());
 			aprint.e(pom);
 			aprint.e("==========================================");
+
+			aprint.e("--- jars ---");
+			// print.e(getDependenciesAsTrees(pom, true));
+			aprint.e(pom.getJarPOMs(true));
+
+			if (true) break;
 
 			// print.e("--- properties ---");
 			// print.e(pom.getAllParentsAsTree());
@@ -159,12 +168,6 @@ public final class Test {
 			// print.e(pom.getAllParentsAsTree());
 			aprint.e(pom.getRepositories());
 
-			aprint.e("--- dependencies management ---");
-			aprint.e(pom.getDependencyManagement());
-
-			aprint.e("--- all dependencies management ---");
-			aprint.e(pom.getAllDependencyManagement());
-
 			aprint.e("--- dependencies ---");
 			// print.e(getDependenciesAsTrees(pom, true));
 			aprint.e(pom.getAllDependencies(true));
@@ -173,6 +176,12 @@ public final class Test {
 			// print.e(getDependenciesAsTrees(pom, true));
 			aprint.e(pom.getJars());
 			aprint.e(System.currentTimeMillis() - start);
+
+			// aprint.e("--- dependencies management ---");
+			// aprint.e(pom.getDependencyManagement());
+
+			// aprint.e("--- all dependencies management ---");
+			// aprint.e(pom.getAllDependencyManagement());
 
 			// pom.getScope();
 			// print.e(pom.getDependencyManagement());

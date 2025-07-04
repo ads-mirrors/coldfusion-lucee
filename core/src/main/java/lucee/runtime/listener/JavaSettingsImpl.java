@@ -78,6 +78,7 @@ public final class JavaSettingsImpl implements JavaSettings {
 	private List<Resource> bundlesTranslated;
 	private final boolean loadCFMLClassPath;
 	private final boolean reloadOnChange;
+	private final boolean loadOptionalResources = false;
 	private final int watchInterval;
 	private final String[] watchedExtensions;
 	private boolean hasBundlesTranslated;
@@ -250,12 +251,12 @@ public final class JavaSettingsImpl implements JavaSettings {
 
 		// maven
 		if (poms != null) {
-			List<POM> jarPoms;
+			Collection<POM> jarPoms;
 			Map<String, POM> map = new HashMap<>();
 			String key;
 			POM existing;
 			for (POM pom: poms) {
-				jarPoms = pom.getJarPOMs(true);
+				jarPoms = pom.getJarPOMs(loadOptionalResources);
 				if (jarPoms != null) {
 
 					for (POM p: jarPoms) {
@@ -403,7 +404,7 @@ public final class JavaSettingsImpl implements JavaSettings {
 				Log log = LogUtil.getLog(config, "mvn", "application");
 				for (GAVSO gavso: gavsoArr) {
 					if (gavso != null) {
-						POM tmp = POM.getInstance(dir, gavso.g, gavso.a, gavso.v, MavenUtil.toScopes(gavso.s, POM.SCOPE_COMPILE), log);
+						POM tmp = POM.getInstance(dir, gavso.g, gavso.a, gavso.v, MavenUtil.toScopes(gavso.s, POM.SCOPES_FOR_RUNTIME), log);
 						mapPoms.put("maven:" + tmp.getGroupId() + ":" + tmp.getArtifactId() + ":" + tmp.getVersion(), tmp);
 					}
 				}
@@ -462,7 +463,7 @@ public final class JavaSettingsImpl implements JavaSettings {
 					while (it.hasNext()) {
 						MavenUtil.GAVSO gavso = MavenUtil.toGAVSO(it.next(), null);
 						if (gavso != null) {
-							POM tmp = POM.getInstance(dir, gavso.g, gavso.a, gavso.v, MavenUtil.toScopes(gavso.s, POM.SCOPE_COMPILE), log);
+							POM tmp = POM.getInstance(dir, gavso.g, gavso.a, gavso.v, MavenUtil.toScopes(gavso.s, POM.SCOPES_FOR_RUNTIME), log);
 							mapPoms.put("maven:" + tmp.getGroupId() + ":" + tmp.getArtifactId() + ":" + tmp.getVersion(), tmp);
 						}
 

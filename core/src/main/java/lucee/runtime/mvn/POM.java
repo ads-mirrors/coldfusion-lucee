@@ -88,15 +88,17 @@ public final class POM {
 	public static final int SCOPE_NONE = 0;
 	public static final int SCOPE_NOT_TEST = SCOPE_COMPILE + SCOPE_PROVIDED + SCOPE_RUNTIME + SCOPE_SYSTEM + SCOPE_IMPORT;
 	public static final int SCOPE_ALL = SCOPE_NOT_TEST + SCOPE_TEST;
+	public static final int SCOPES_FOR_RUNTIME = SCOPE_COMPILE + SCOPE_RUNTIME;
+	public static final int SCOPES_FOR_MANAGEMENT = SCOPE_ALL;
 
 	private Resource localDirectory;
 	private final String groupId;
 	private final String artifactId;
 	private final String version;
-	private String scope;
-	private String optional;
-	private int dependencyScope = SCOPE_ALL;
-	private int dependencyScopeManagement = SCOPE_ALL;
+	private final String scope;
+	private final String optional;
+	private final int dependencyScope;
+	private final int dependencyScopeManagement;
 
 	private List<POM> dependencies;
 	private List<POM> dependencyManagement;
@@ -123,17 +125,16 @@ public final class POM {
 	private Log log;
 	private String artifactExtension;
 	private String hash;
-	private String checksum;
+	private final String checksum;
 	private boolean custom;
 	private boolean artifactDownloaded;
 
-	public static POM getInstance(Resource localDirectory, String groupId, String artifactId, String version, int dependencyScope, Log log) {
-		return getInstance(localDirectory, null, groupId, artifactId, version, null, null, null, dependencyScope, SCOPE_ALL, true, log);
+	public static POM getInstance(Resource localDirectory, String groupId, String artifactId, String version, Log log) {
+		return getInstance(localDirectory, null, groupId, artifactId, version, null, null, null, SCOPES_FOR_RUNTIME, SCOPES_FOR_MANAGEMENT, true, log);
 	}
 
-	public static POM getInstance(Resource localDirectory, Collection<Repository> repositories, String groupId, String artifactId, String version, int dependencyScope,
-			int dependencyScopeManagement, Log log) {
-		return getInstance(localDirectory, null, groupId, artifactId, version, null, null, null, dependencyScope, dependencyScopeManagement, true, log);
+	public static POM getInstance(Resource localDirectory, String groupId, String artifactId, String version, int dependencyScope, Log log) {
+		return getInstance(localDirectory, null, groupId, artifactId, version, null, null, null, dependencyScope, SCOPES_FOR_MANAGEMENT, true, log);
 	}
 
 	static POM getInstance(Resource localDirectory, Collection<Repository> repositories, String groupId, String artifactId, String version, String scope, String optional,
@@ -143,6 +144,7 @@ public final class POM {
 
 	static POM getInstance(Resource localDirectory, Collection<Repository> repositories, String groupId, String artifactId, String version, String scope, String optional,
 			String checksum, int dependencyScope, int dependencyScopeManagement, boolean triggeerLoad, Log log) {
+		triggeerLoad = false;
 		String id = toId(localDirectory, groupId, artifactId, version, scope, optional, dependencyScope, dependencyScopeManagement);
 		POM pom = cache.get(id);
 		if (pom != null) {
@@ -162,6 +164,7 @@ public final class POM {
 
 	private POM(Resource localDirectory, Collection<Repository> repositories, String groupId, String artifactId, String version, String scope, String optional, String checksum,
 			int dependencyScope, int dependencyScopeManagement, boolean triggeerLoad, Log log) {
+
 		if (groupId == null) throw new IllegalArgumentException("groupId cannot be null");
 		if (artifactId == null) throw new IllegalArgumentException("artifactId cannot be null");
 		if (version == null) throw new IllegalArgumentException("version cannot be null");
@@ -183,7 +186,6 @@ public final class POM {
 		this.dependencyScopeManagement = dependencyScopeManagement;
 		this.dependencyScope = dependencyScope;
 		this.log = log;
-
 		if (triggeerLoad) initXMLAsync();
 		cache.put(id(), this);
 
@@ -206,7 +208,6 @@ public final class POM {
 			synchronized (token) {
 				if (!isInitXML) {
 					MavenUtil.download(this, initRepositories, "pom", log);
-
 					try {
 						reader = POMReader.getInstance(getPath());
 					}
@@ -234,69 +235,87 @@ public final class POM {
 	}
 
 	private void initParent() throws IOException {
-		if (isInitParent) return;
-		isInitParent = true;
-		if (log != null) log.debug("maven", "int parent for " + this);
-		initXML();
+		if (!isInitParent) {
+			synchronized (token) {
+				if (!isInitParent) {
+					if (log != null) log.debug("maven", "int parent for " + this);
+					initXML();
 
-		Dependency p = reader.getParent();
-		if (p != null) {
-			// chicken egg, because there is no parent yet, this cannot use properties from parent
-			this.parent = MavenUtil.toPOM(this.localDirectory, initRepositories, p, reader.getProperties(), dependencyScope, dependencyScopeManagement, log);
-			parent.init();
-		}
-	}
-
-	private void initProperties() throws IOException {
-		if (isInitProperties) return;
-		isInitProperties = true;
-		initParent();
-		if (log != null) log.debug("maven", "int properties for " + this);
-		properties = MavenUtil.getProperties(reader.getProperties(), parent);
-
-	}
-
-	private void initRepositories() throws IOException {
-		if (isInitRepositories) return;
-		isInitRepositories = true;
-		if (log != null) log.debug("maven", "int repositories for " + this);
-		initProperties();
-		childRepositories = MavenUtil.getRepositories(reader.getRepositories(), this, parent, properties, initRepositories);
-	}
-
-	private void initDependencies() throws IOException {
-		if (isInitDependencies) return;
-		isInitDependencies = true;
-		if (log != null) log.debug("maven", "int dependencies for " + this);
-		initProperties();
-		if (dependencyScope > 0) dependencies = MavenUtil.getDependencies(reader.getDependencies(), this, parent, properties, localDirectory, false, log);
-	}
-
-	private void initDependencyManagement() throws IOException {
-		if (isInitDependencyManagement) return;
-		isInitDependencyManagement = true;
-		if (log != null) log.debug("maven", "int dependencx management for " + this);
-		initProperties();
-
-		if (dependencyScopeManagement > 0)
-			dependencyManagement = MavenUtil.getDependencyManagement(reader.getDependencyManagements(), this, parent, properties, localDirectory, log);
-
-	}
-
-	private void init() throws IOException {
-		if (!isInit) {
-			synchronized (SystemUtil.createToken("POM", groupId + ":" + artifactId + ":" + version)) {
-				if (!isInit) {
-					if (log != null) log.debug("maven", "int for " + this);
-					initProperties();
-					initRepositories();
-					initDependencyManagement();
-					initDependencies();
-					isInit = true;
+					Dependency p = reader.getParent();
+					if (p != null) {
+						// chicken egg, because there is no parent yet, this cannot use properties from parent
+						this.parent = MavenUtil.toPOM(this.localDirectory, initRepositories, p, reader.getProperties(), dependencyScope, dependencyScopeManagement, log);
+						// parent.init();
+					}
+					isInitParent = true;
 				}
 			}
 		}
 	}
+
+	private void initProperties() throws IOException {
+		if (!isInitProperties) {
+			synchronized (token) {
+				if (!isInitProperties) {
+					initParent();
+					if (log != null) log.debug("maven", "int properties for " + this);
+					properties = MavenUtil.getProperties(reader.getProperties(), parent);
+					isInitProperties = true;
+				}
+			}
+		}
+	}
+
+	private void initRepositories() throws IOException {
+		if (!isInitRepositories) {
+			synchronized (token) {
+				if (!isInitRepositories) {
+					if (log != null) log.debug("maven", "int repositories for " + this);
+					initProperties();
+					childRepositories = MavenUtil.getRepositories(reader.getRepositories(), this, parent, properties, initRepositories);
+					isInitRepositories = true;
+				}
+			}
+		}
+	}
+
+	private void initDependencies() throws IOException {
+		if (!isInitDependencies) {
+			synchronized (token) {
+				if (!isInitDependencies) {
+					if (log != null) log.debug("maven", "int dependencies for " + this);
+
+					initProperties();
+					if (reader == null) SystemUtil.sleep(1000);
+					if (dependencyScope > 0) dependencies = MavenUtil.getDependencies(reader.getDependencies(), this, parent, properties, localDirectory, false, log);
+					isInitDependencies = true;
+				}
+			}
+		}
+	}
+
+	private void initDependencyManagement() throws IOException {
+		if (!isInitDependencyManagement) {
+			synchronized (token) {
+				if (!isInitDependencyManagement) {
+					if (log != null) log.debug("maven", "init dependency management for " + this);
+
+					initProperties();
+
+					if (dependencyScopeManagement > 0)
+						dependencyManagement = MavenUtil.getDependencyManagement(reader.getDependencyManagements(), this, parent, properties, localDirectory, log);
+					isInitDependencyManagement = true;
+				}
+			}
+		}
+	}
+
+	/*
+	 * private void init() throws IOException { if (!isInit) { synchronized
+	 * (SystemUtil.createToken("POM", groupId + ":" + artifactId + ":" + version)) { if (!isInit) { if
+	 * (log != null) log.debug("maven", "int for " + this); initProperties(); initRepositories();
+	 * initDependencyManagement(); initDependencies(); isInit = true; } } } }
+	 */
 
 	public String getGroupId() {
 		return groupId;
@@ -338,31 +357,19 @@ public final class POM {
 		return dependencyScope;
 	}
 
-	public String getScopeUnresolved() {
+	public String getScopeAsString() {
 		return scope;
 	}
 
-	public String getScopeAsString() throws IOException {
-		initProperties();
-		return scope;
-	}
-
-	public int getScope() throws IOException {
-		initProperties();
+	public int getScope() {
 		return MavenUtil.toScope(getScopeAsString(), SCOPE_COMPILE);
 	}
 
-	public String getOptionaUnresolved() {
+	public String getOptionalAsString() {
 		return optional;
 	}
 
-	public String getOptionalAsString() throws IOException {
-		initProperties();
-		return optional;
-	}
-
-	public boolean getOptional() throws IOException {
-		initProperties();
+	public boolean getOptional() {
 		return Boolean.TRUE.equals(Caster.toBoolean(optional, null));
 	}
 
@@ -618,8 +625,8 @@ public final class POM {
 				executor = ThreadUtil.createExecutorService(deps.size(), false);
 				List<Future<Pair<IOException, POM>>> futures = new ArrayList<>();
 				for (POM p: deps) {
-					if (!node.addChild(p) || (!optional && p.getOptional())) continue;
 
+					if ((!optional && p.getOptional()) || !node.addChild(p)) continue;
 					// Handle recursive processing in a separate thread
 					if (recursive) {
 						Future<Pair<IOException, POM>> future = executor.submit(() -> {
@@ -743,7 +750,7 @@ public final class POM {
 	}
 
 	public Resource[] getJars(boolean optional) throws IOException {
-		List<POM> poms = getJarPOMs(optional);
+		Collection<POM> poms = getJarPOMs(optional);
 		Resource[] jars = new Resource[poms.size()];
 		int index = 0;
 		for (POM p: poms) {
@@ -752,13 +759,15 @@ public final class POM {
 		return jars;
 	}
 
-	public List<POM> getJarPOMs(boolean optional) throws IOException {
-		List<POM> poms = new ArrayList<>();
+	public Collection<POM> getJarPOMs(boolean optional) throws IOException {
+		// List<POM> poms = new ArrayList<>();
+		Map<String, POM> map = new HashMap<>();
 		initXML();
 		// current
 		if ("jar".equalsIgnoreCase(this.artifactExtension)) {
 			if (getArtifact() != null) {
-				poms.add(this);
+				// poms.add(this);
+				map.put(this.id(), this);
 			}
 		}
 
@@ -767,12 +776,13 @@ public final class POM {
 			for (POM p: dependencies) {
 				if ("jar".equalsIgnoreCase(p.artifactExtension)) {
 					if (p.getArtifact() != null) {
-						poms.add(p);
+						// poms.add(p);
+						map.put(p.id(), p);
 					}
 				}
 			}
 		}
-		return poms;
+		return map.values();
 	}
 
 	public String getChecksum() {

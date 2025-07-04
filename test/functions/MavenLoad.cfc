@@ -7,7 +7,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					"com.github.tjake:jlama-core:0.7.0",
 					"com.github.tjake:jlama-native:0.7.0"
 				]));
-				expect(l).toBe(37);
+				expect(l).toBe(40);
 			});
 
 			it(title="load org.apache.commons", body=function( currentSpec ) {

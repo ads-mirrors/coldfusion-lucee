@@ -66,7 +66,7 @@ public class MavenInfo implements Function {
 				throw Caster.toPageException(e);
 			}
 		}
-		else scopes = POM.SCOPE_NOT_TEST;
+		else scopes = POM.SCOPES_FOR_RUNTIME;
 
 		// validate returntype
 
