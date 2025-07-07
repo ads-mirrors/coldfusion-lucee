@@ -30,12 +30,12 @@
 		ArrayAppend(variables.params,arguments);
 		variables.params.each(
 			function(param) {
-				if (structKeyExists(param, "list") && param.list) {
+				if (structKeyExists(arguments.param, "list") && arguments.param.list) {
 					// Check if the 'value' is empty
-					if (structKeyExists(param, "value") && trim(param.value) == '') {
-						var errorMsg = structKeyExists(param, "name") 
-							? "param [#param.name#] may not be empty" 
-							: "param with list [#param.list#] Value may not be empty";
+					if (structKeyExists(arguments.param, "value") && trim(arguments.param.value) == '') {
+						var errorMsg = structKeyExists(arguments.param, "name") 
+							? "param [#arguments.param.name#] may not be empty" 
+							: "param with list [#arguments.list#] Value may not be empty";
 
 						throw(errorMsg, "expression");
 					}
