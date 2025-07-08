@@ -1360,6 +1360,7 @@
         "snapShotDesc": "Snapshots are generated automatically with every push to the repository, when all bundled test cases pass successfully. Snapshots are NOT recommended for production environments.",
         "titleDesc": "Upgrade or Downgrade the version by selecting from the drop-down box below.",
         "loaderMinVersion": "You cannot downgrade below {min-version} because your lucee.jar has bundled this version.",
+        "loaderUpgradeVersion": "To upgrade to Lucee 7, you will need to upgrade your lucee.jar, found at [ {loaderPath} ] to version 7, which also requires a Jakarta Servlet Engine, i.e.Tomcat 10 or newer",
         "loaderPath": "To downgrade below this version you need to replace your lucee.jar, found at [ {loaderPath} ] with an older version.",
         "type": "Type",
         "type_auto": "Automatic",

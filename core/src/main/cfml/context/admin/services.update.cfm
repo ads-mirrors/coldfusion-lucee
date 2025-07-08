@@ -47,6 +47,13 @@
 	
 	hasOptions=false;
 
+	admin
+		action="getMinVersion"
+		type="#request.adminType#"
+		password="#session["password"&request.adminType]#"
+		returnvariable="minVersion";
+
+	hasLoader7 = listFirst(minVersion, ".") GTE 7;
 
 	stText.services.update.downUpDesc=replace(stText.services.update.downUpDesc,'{version}',server.lucee.version);
 
@@ -75,11 +82,6 @@
 			}
 		}
 		
-		admin
-			action="getMinVersion"
-			type="#request.adminType#"
-			password="#session["password"&request.adminType]#"
-			returnvariable="minVersion";
 		minVs = toVersionSortable(minVersion);
 		try {
 			otherVersions=LuceeVersionsList();
@@ -93,7 +95,7 @@
 			for(versions in otherVersions ){
 				if(versions EQ server.lucee.version) cfcontinue;
 				vs=toVersionSortable(versions);
-				// if(vs LT minVS) cfcontinue;
+				if ( !hasLoader7 && listFirst(vs, "." ) gt 6 ) cfcontinue;
 				if(FindNoCase("SNAPSHOT", versions)){
 					if(vs LTE toVersionSortable(server.lucee.version)){
 						arrayPrepend(versionsStr.SNAPSHOT.downgrade, versions);
@@ -357,6 +359,7 @@
 	<cfscript>
 		loaderText = replaceNoCase(stText.services.update.loaderMinVersion,"{min-version}", "<b>#minVersion#</b>");
 		loaderPath = replaceNoCase(stText.services.update.loaderPath,"{loaderPath}", '<b>'& loaderInfo.LoaderPath & '</b>' );
+		loaderUpgrade = replaceNoCase(stText.services.update.loaderUpgradeVersion,"{loaderPath}", '<b>'& loaderInfo.LoaderPath & '</b>' );
 		//replace(stText.services.update.titleDesc2,'{context}',"<b class='error'>"&#expandPath("{lucee-server}\patches")#&"</b>");
 	</cfscript>
 <!--- 
@@ -374,5 +377,6 @@
 	
 	<h2>Limitation</h2>
 	<p class="comment">#loaderText#</p>
+	<p class="comment">#loaderUpgrade#</p>
 	<p class="comment">#loaderPath#</p>	
 </cfoutput>
