@@ -136,14 +136,15 @@ function luceeSpinner(index) {
 	setTimeout(luceeSpinner, 200, index)
 }
 
-
-<cfoutput>luceeCatchData=#luceeCatchToString()#;</cfoutput>
+<cfif LuceeAIHas('default:exception')>
+	<cfoutput>luceeCatchData=#luceeCatchToString(catch)#;</cfoutput>
+</cfif>
 </script>
 
 <cfscript>
 function luceeMonoBlock(input,tablengt=1) {
 	try {
-		var lines=listToArray(HTMLEditFormat( trim( input ) ),chr(10));
+		var lines=listToArray(HTMLEditFormat( trim( arguments.input ) ),chr(10));
 		var rtn="";
 		// we make any whitespace not breaking at the begin of a line
 		loop array=lines item="local.line" {
@@ -154,7 +155,7 @@ function luceeMonoBlock(input,tablengt=1) {
 			if(finds.pos[1]==1) {
 				var len=finds.len[1];
 				var match=finds.match[1];
-				var replacement=replace( replace( match, ' ', '&nbsp;', 'all'), '	', repeatString('&nbsp;', tablengt), 'all');
+				var replacement=replace( replace( match, ' ', '&nbsp;', 'all'), '	', repeatString('&nbsp;', arguments.tablengt), 'all');
 				line=replacement&mid(line,len+1);
 			}
 			rtn &= line;
@@ -165,8 +166,8 @@ function luceeMonoBlock(input,tablengt=1) {
 	}
 	return rtn;
 }
-function luceeCatchToString() {try{
-	var catchi=duplicate(catch,true);
+function luceeCatchToString(caughtError) {try{
+	var catchi=duplicate(arguments.caughtError,true);
 	var path=catch.TagContext[1].template?:"";
 	var line=catch.TagContext[1].line?:"";
 	
