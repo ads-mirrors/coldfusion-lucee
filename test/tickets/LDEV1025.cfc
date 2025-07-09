@@ -1,7 +1,7 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function beforeALL(){
-		dateandtime = createDateTime(2009,8,9,11,22,33);
-		serverTZ = {
+		variables.dateandtime = createDateTime(2009,8,9,11,22,33);
+		variables.serverTZ = {
 			TZ: dateTimeFormat(dateandtime, "z"),
 			Offset: dateTimeFormat(dateandtime, "Z")
 		};

@@ -1,7 +1,7 @@
 <cfcomponent extends="org.lucee.cfml.test.LuceeTestCase">
 	<cfscript>
 		function beforeAll(){
-			MyQuery = queryNew('Manager, Employee', 'varchar,varchar');
+			variables.MyQuery = queryNew('Manager, Employee', 'varchar,varchar');
 			queryAddRow(MyQuery);
 			querySetCell(MyQuery, 'Manager', 'Bill Smith');
 			querySetCell(MyQuery, 'Employee', 'Susan Jones');
@@ -12,7 +12,7 @@
 			querySetCell(MyQuery, 'Manager', 'Jane Doe');
 			querySetCell(MyQuery, 'Employee', 'Chewbacca');
 
-			resultQuery = QueryExecute(
+			variables.resultQuery = QueryExecute(
 				options = {
 					dbtype: 'query'
 				},
@@ -21,7 +21,7 @@
 				ORDER BY Manager, Employee"
 			);
 
-			ManagerCount = QueryExecute(
+			variables.ManagerCount = QueryExecute(
 				options = {
 					dbtype: 'query'
 				},
@@ -47,9 +47,10 @@
 			});
 		}
 	</cfscript>
+
 	<cffunction name="directAttributesforcfoutput">
-		<cfset  countofManager = 0>
-		<cfset  listofEmployees = 0>
+		<cfset var countofManager = 0>
+		<cfset var listofEmployees = 0>
 		<cfoutput query="resultQuery" group="Manager">
 			<cfset  countofManager++>
 				<cfoutput>
@@ -58,21 +59,23 @@
 		</cfoutput>
 		<cfset expect( countofManager EQ ManagerCount.RecordCount && listofEmployees EQ resultQuery.RecordCount ).toBeTrue()>
 	</cffunction>
+
 	<cffunction name="attributesCollectionforcfoutput">
-		<cfset OutputAttributes = {query='Results', group='Manager'}>
-		<cfset  countofManager = 0>
-		<cfset  listofEmployees = 0>
-		<cfoutput  attributeCollection="#OutputAttributes#">
-			<cfset  countofManager++>
-				<cfoutput>
-					<cfset listofEmployees++>
-				</cfoutput>
+		<cfset var OutputAttributes = {query='Results', group='Manager'}>
+		<cfset var countofManager = 0>
+		<cfset var listofEmployees = 0>
+		<cfoutput attributeCollection="#OutputAttributes#">
+			<cfset countofManager++>
+			<cfoutput>
+				<cfset listofEmployees++>
+			</cfoutput>
 		</cfoutput>
 		<cfset expect( countofManager EQ ManagerCount.RecordCount && listofEmployees EQ resultQuery.RecordCount ).toBeTrue()>
 	</cffunction>
+
 	<cffunction name="directAttributesforcfloop">
-		<cfset  countofManager = 0>
-		<cfset  listofEmployees = 0>
+		<cfset var countofManager = 0>
+		<cfset var listofEmployees = 0>
 		<cfloop query="resultQuery" group="Manager">
 			<cfset  countofManager++>
 			<cfloop>
@@ -81,10 +84,11 @@
 		</cfloop>
 		<cfset expect( countofManager EQ ManagerCount.RecordCount && listofEmployees EQ resultQuery.RecordCount ).toBeTrue()>
 	</cffunction>
+
 	<cffunction name="attributesCollectionforcfloop">
-		<cfset OutputAttributes = {query='Results', group='Manager'}>
-		<cfset  countofManager = 0>
-		<cfset  listofEmployees = 0>
+		<cfset var OutputAttributes = {query='Results', group='Manager'}>
+		<cfset var countofManager = 0>
+		<cfset var listofEmployees = 0>
 		<cfloop attributeCollection="#OutputAttributes#">
 			<cfset  countofManager++>
 			<cfloop>

@@ -3,7 +3,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="xml" {
 		describe( "Checking XMLTransform()", function() {
 			xit('With xsl:include',  function( currentSpec ) {
 				try {
-					uri=createURI("LDEV0228/test.cfm");
+					local.uri=createURI("LDEV0228/test.cfm");
 					local.result = _InternalRequest(
 						template:uri,
 						forms:{Scene=1}
@@ -16,7 +16,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="xml" {
 			});
 			it('Without xsl:include',  function( currentSpec ) {
 				try {
-					uri=createURI("LDEV0228/test.cfm");
+					local.uri=createURI("LDEV0228/test.cfm");
 					local.result = _InternalRequest(
 						template:uri,
 						forms:{Scene=2}

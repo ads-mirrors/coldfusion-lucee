@@ -27,7 +27,7 @@
 		}
 
 		private any function MakeRequest(Scene){
-			uri=createURI("LDEV0590/test.cfm");
+			local.uri=createURI("LDEV0590/test.cfm");
 			local.result = _InternalRequest(
 				template:uri,
 				forms:{Scene=arguments.Scene}

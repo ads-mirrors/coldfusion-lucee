@@ -126,7 +126,7 @@
 	</cfscript>
 
 	<cffunction name="DummyFunction" access="private">
-		<cfset query = queryNew("ID, DateJoined", "INT, TIMESTAMP", [{ID=1, DateJoined="2017-01-03 10:57:54"}, {ID=2, DateJoined="2017-01-03 10:57:54"}, {ID=3, DateJoined="2017-01-03 10:57:54"}])>
+		<cfset var query = queryNew("ID, DateJoined", "INT, TIMESTAMP", [{ID=1, DateJoined="2017-01-03 10:57:54"}, {ID=2, DateJoined="2017-01-03 10:57:54"}, {ID=3, DateJoined="2017-01-03 10:57:54"}])>
 		<cfreturn query>
 	</cffunction>
 </cfcomponent>

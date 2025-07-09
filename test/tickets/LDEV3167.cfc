@@ -45,7 +45,7 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" {
 					var errorMsg = date.tokey();
 				}
 				catch (any e){
-					errorMsg = e.message;
+					var errorMsg = e.message;
 					var errorDetail = e.Detail;
 				}
 				expect(findNocase("does not exist in the Datetime",errorMsg)>0).toBe(true);

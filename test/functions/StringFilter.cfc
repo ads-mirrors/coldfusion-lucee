@@ -21,7 +21,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 
 	public void function testStringFilter(){
         local.myStr = "diamonds";
-        callback=function(chr){ 
+        var callback=function(chr){ 
             return chr!="d"; 
         } 
         assertEquals('iamons', StringFilter( local.myStr, callback ));

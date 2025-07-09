@@ -43,7 +43,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 	}
 
 	public void function test() {
-		q = new Query(
+		var q = new Query(
 			sql = "insert into T1031(id, i, vc) values(1,2,'3')"
 		);
 		q.execute();

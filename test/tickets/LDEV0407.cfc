@@ -31,7 +31,7 @@
 	
 	
 	<cffunction name="cfhttptag" access="private" returntype="Any">
-		<cfset result = "">
+		<cfset var result = "">
 		<cftry>
 			<cfhttp url="http://httpbin.org/delay/3" throwonerror="true" timeout="1">
 			</cfhttp>

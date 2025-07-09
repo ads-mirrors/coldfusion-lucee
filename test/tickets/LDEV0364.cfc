@@ -118,7 +118,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 
 				q.addParam( type: 'integer' , value: 1 , null: true );
 
-				actual = q.execute( 
+				var actual = q.execute( 
 					sql = "
 						SELECT 
 							COALESCE( ? , 'isnull' ) AS value,

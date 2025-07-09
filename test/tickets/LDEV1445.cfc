@@ -6,7 +6,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 	function run( testResults,testBox ){
 		describe("Testcase for LDEV-1445", function() {
 			it( title = "Create datasource for MySQL with default connectionLimit", skip=checkMySqlEnvVarsAvailable(), body = function( currentSpec ){
-				adm = new Administrator('server', request.SERVERADMINPASSWORD?:server.SERVERADMINPASSWORD);
+				variables.adm = new Administrator('server', request.SERVERADMINPASSWORD?:server.SERVERADMINPASSWORD);
 				adm.updateDatasource(
 					name: 'datasource1',
 					newname: 'datasource1',

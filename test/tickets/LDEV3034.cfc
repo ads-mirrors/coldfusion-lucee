@@ -14,20 +14,20 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" {
             it(title="toBinary() with invalid base64 data",body=function( currentSpec ){
                 try{
                     var res = toBinary(base64Invalid);
-                    var hasError = false;      
+                    var hasError = false;
                 }
                 catch(any e){
-                    hasError = true;
+                    var hasError = true;
                 }
                 expect(hasError).toBe(true);
             });
             it(title="binaryDecode() with invalid base64 data", body=function( currentSpec ){
                 try{
-                    var res = binaryDecode(base64Invalid, "base64");  
+                    var res = binaryDecode(base64Invalid, "base64");
                     var hasError = false;
                 }
                 catch(any e){
-                    hasError = true;
+                    var hasError = true;
                 }
                 expect(hasError).toBe(true);
             });

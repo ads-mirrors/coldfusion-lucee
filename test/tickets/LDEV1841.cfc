@@ -2,7 +2,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 	function run( testResults , testBox ) {
 		describe( "Test suite for LDEV-1841", function() {
 			it( title='Checking Asynchronous programming with normal function call', body=function( currentSpec ) {
-				getAccountBalance = function(){
+				var getAccountBalance = function(){
 					var balance = 120000;
 					return balance;
 				}

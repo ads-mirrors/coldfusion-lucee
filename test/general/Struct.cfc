@@ -95,7 +95,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 					_InternalRequest(template:uri);
 				}
 				catch(template e) {
-					error=true;
+					var error=true;
 				}
 				expect(error).toBeTrue();
 			});
@@ -106,7 +106,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 					_InternalRequest(template:uri);
 				}
 				catch(template e) {
-					error=true;
+					var error=true;
 				}
 				expect(error).toBeTrue();
 
