@@ -15,7 +15,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 					return value EQ "world";
 				};
 
-				res=ArrayFind(arr,doFind);
+				var res=ArrayFind(arr,doFind);
 				assertEquals(2, res);
 			});
 		});

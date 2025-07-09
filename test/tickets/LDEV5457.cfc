@@ -4,7 +4,7 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" {
 
 			it( "test AWS library", function() {
 				
-				aws = new Component javasettings='{maven:["software.amazon.awssdk:auth:2.31.16", "software.amazon.awssdk:identity-spi:2.31.16"]}'{
+				var aws = new Component javasettings='{maven:["software.amazon.awssdk:auth:2.31.16", "software.amazon.awssdk:identity-spi:2.31.16"]}'{
 					import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 					import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
 					import software.amazon.awssdk.identity.spi.AwsCredentialsIdentity;

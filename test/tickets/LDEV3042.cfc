@@ -1,7 +1,7 @@
 component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 
 	function beforeAll() {
-			employees = queryNew( 'name,age,email,department,isContract,yearsEmployed,sickDaysLeft,hireDate,isActive,empID,favoriteColor', 'varchar,integer,varchar,varchar,boolean,integer,integer,date,boolean,varchar,varchar', [
+		variables.employees = queryNew( 'name,age,email,department,isContract,yearsEmployed,sickDaysLeft,hireDate,isActive,empID,favoriteColor', 'varchar,integer,varchar,varchar,boolean,integer,integer,date,boolean,varchar,varchar', [
 				[ 'John Doe',28,'John@company.com','Acounting',false,2,4,createDate(2010,1,21),true,'sdf','red' ],
 				[ 'Jane Doe',22,'Jane@company.com','Acounting',false,0,8,createDate(2011,2,21),true,'hdfg','blue' ],
 				[ 'Bane Doe',28,'Bane@company.com','Acounting',true,3,2,createDate(2012,3,21),true,'sdsfsff','green' ],

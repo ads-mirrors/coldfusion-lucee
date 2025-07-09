@@ -20,7 +20,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
             it( title="reFind() no matches with regex type perl", body=function( currentSpec ){
                 try{
                     cfapplication(regex = {type="perl"});
-                    res = [];
+                    var res = [];
                     res[1] = reFind("(f)(oo)", "bar", 1, false);
                     res[2] = reFind("(f)(oo)", "bar", 1, false,"all");
                 }

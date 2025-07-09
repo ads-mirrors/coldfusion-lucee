@@ -17,7 +17,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="image" {
 				try {
 					cfimage(
 						source="#ImageReadBase64(variables.base64)#",  
-						name="originalImg", 
+						name="local.originalImg", 
 						destination=imgPath, 
 						action="resize", 
 						width="50%", 

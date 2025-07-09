@@ -55,7 +55,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			});
 
 			it(title = "Checking include with runonce attribute, tag as function syntax", body = function( currentSpec ) {
-				result = _InternalRequest(
+				var result = _InternalRequest(
 					template:"#variables.uri#/includePage983TagAsFunction.cfm"
 				);
 				expect( result.filecontent.trim() ).toBe( 1 );
@@ -74,7 +74,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			});
 
 			it(title = "Checking include with runonce attribute, with a function", body = function( currentSpec ) {
-				result = _InternalRequest(
+				var result = _InternalRequest(
 					template:"#variables.uri#/includeWithfunction983.cfm"
 				);
 				expect( result.filecontent.trim() ).toBe( 3 );

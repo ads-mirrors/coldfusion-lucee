@@ -10,8 +10,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
             });
             it( title="Checking member-functions with named arguments", body=function( currentSpec ){
                 // dateTime functions
-                dateValue = now(); 
-                dateValue2 = ParseDateTime("01/01/2020"); 
+                var dateValue = now(); 
+                var dateValue2 = ParseDateTime("01/01/2020"); 
                 assertEquals(dateValue.compare(dateValue2, "d"), dateValue.compare(date2=dateValue2, datePart="d"));
                 assertEquals(dateValue.diff("d", dateValue2), dateValue.diff(date1=dateValue2, datePart="d"));
                 assertEquals(dateValue.add("d", 1), dateValue.add(number="1", datePart="d"));

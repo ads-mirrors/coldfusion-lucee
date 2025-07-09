@@ -60,12 +60,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase"  labels="json" {
                 expect(didThrow).toBe(false, "Did not throw during `serializeJSON(<circular-array>)`")
             });
             it ( title="CF engine reflective call to `System.identityHashCode` for 'arrays that contain themselves'", body = function() {
-                x = createObject("java", "java.util.ArrayList").init();
-                y = createObject("java", "java.util.ArrayList").init();
+                var x = createObject("java", "java.util.ArrayList").init();
+                var y = createObject("java", "java.util.ArrayList").init();
                 x.add(y);
                 y.add(x);
-                System = createObject("java", "java.lang.System");
-                hc = System.identityHashCode(x);
+                var System = createObject("java", "java.lang.System");
+                var hc = System.identityHashCode(x);
                 expect(isValid("integer", hc)).toBe(true);
             });
             it( title="LDEV-3333 using Circular references with arrays in serializeJSON() & deserializeJSON()", skip=true, body=function(){

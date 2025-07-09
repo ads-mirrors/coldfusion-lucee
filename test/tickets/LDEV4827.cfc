@@ -7,7 +7,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
     function run( testResults , testBox ) {
         describe( "Test suite for LDEV-4827", function() {
             it( title='Checking Query with real result on mssql', skip=checkMySqlEnvVarsAvailable(), body=function( currentSpec ) {
-                adm = new Administrator('server', request.SERVERADMINPASSWORD?:server.SERVERADMINPASSWORD);
+                var adm = new Administrator('server', request.SERVERADMINPASSWORD?:server.SERVERADMINPASSWORD);
                 adm.updateDatasource(
                     name: 'datasource4827',
                     newname: 'datasource4827',
@@ -25,7 +25,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
                 ```
                     <!--- mssql --->
-                    <cfquery name="test" datasource="datasource4827">
+                    <cfquery name="local.test" datasource="datasource4827">
                         SELECT CAST(17.8 AS REAL) AS testReal
                     </cfquery>
                 ```

@@ -20,11 +20,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 
 	public void function testLoadingClassicExternalJarsUsingContextClassloaderToLoadRes(){
 		
-	jars=directoryList("LDEV0762");
+	var jars=directoryList("LDEV0762");
 
 	createObject("java", "org.apache.lucene.util.NamedSPILoader",jars);
-	charArraySet = createObject("java", "org.apache.lucene.analysis.util.CharArraySet",jars);
-	analyzer = createObject("java","org.apache.lucene.analysis.standard.StandardAnalyzer",jars).init(charArraySet.EMPTY_SET);
+	var charArraySet = createObject("java", "org.apache.lucene.analysis.util.CharArraySet",jars);
+	var analyzer = createObject("java","org.apache.lucene.analysis.standard.StandardAnalyzer",jars).init(charArraySet.EMPTY_SET);
 	createObject("java", "org.apache.lucene.index.IndexWriterConfig",jars).getClass().getCLassLoader();
 	createObject("java", "org.apache.lucene.index.IndexWriterConfig",jars).init(analyzer);
 	}

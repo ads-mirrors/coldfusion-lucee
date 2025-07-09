@@ -49,7 +49,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				fileWrite("#newDir#\testFileForceUnique.txt","LDEV-3122");
 
 				file action="copy"  source="#newDir#\testFileForceUnique.txt" destination=newDir nameConflict="forceUnique";
-				directory action="list" directory=newDir name="list" listInfo="name";
+				directory action="list" directory=newDir name="local.list" listInfo="name";
 
 				expect( serializeJson( list ) ).toInclude( "testFileForceUnique-");
 				expect( list.recordcount ).toBe("2");
