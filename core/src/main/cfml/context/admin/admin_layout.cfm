@@ -13,7 +13,7 @@
 
 		ad=request.adminType;
 		hasNavigation = len(attributes.navigation) GT 0;
-		home = request.adminType & ".cfm";
+		home = request.singlemode ? "index.cfm" : request.adminType & ".cfm";
 		homeQS = URL.keyExists("action") ? "?action=" & url.action : "";
 		request.mode = "full";
 		resNameAppendix = hash(server.lucee.version & server.lucee["release-date"], "quick");
