@@ -37,7 +37,8 @@ function checkTheBox(field) {
 	<cfswitch expression="#url.action2#">
 	<!--- UPDATE --->
 		<cfcase value="updateDefaultSecurityManager">
-        	<cfif not request.singlemode>
+			<!--- Lucee 7.0 Only having single mode --->
+        	<!--- <cfif not request.singlemode>
 				<cfadmin 
 					action="updateDefaultSecurityManager"
 					type="#request.adminType#"
@@ -67,7 +68,7 @@ function checkTheBox(field) {
 					access_read="#form.defaultaccess_read#"
 					access_write="#form.defaultaccess_write#"
 				remoteClients="#request.getRemoteClients()#">
-			<cfelse>
+			<cfelse> --->
 				<cfadmin 
 					action="updateDefaultSecurityManager"
 					type="#request.adminType#"
@@ -83,7 +84,7 @@ function checkTheBox(field) {
 					access_read="#form.defaultaccess_read#"
 					access_write="#form.defaultaccess_write#"
 					remoteClients="#request.getRemoteClients()#">
-			</cfif>
+			<!--- </cfif> --->
 		</cfcase>
 		<cfcase value="updateSecurityManager">
 			<cfadmin 
