@@ -838,12 +838,13 @@ public final class CFMLTransformer {
 								TagLibTag endTag = tagLibEnd.getTag(strNameEnd);
 								if (endTag != null && !endTag.getHasBody()) throw new TemplateException(data.srcCode,
 										"End Tag [" + tagLibEnd.getNameSpaceAndSeparator() + strNameEnd + "] is not allowed, for this tag only a Start Tag is allowed");
+								int closeTagLine = data.srcCode.getLine();
 								data.srcCode.setPos(start);
 								if (tagLibEnd.getIgnoreUnknowTags() && (tagLibEnd.getTag(strNameEnd)) == null) {
 									data.srcCode.setPos(_start);
 								}
-								else throw new TemplateException(data.srcCode, "Start and End Tag has not the same Name [" + tagLib.getNameSpaceAndSeparator() + strName + "-"
-										+ tagLibEnd.getNameSpaceAndSeparator() + strNameEnd + "]");
+								else throw new TemplateException(data.srcCode, "Start and End Tag do not match [" + tagLib.getNameSpaceAndSeparator() + strName + "-"
+										+ tagLibEnd.getNameSpaceAndSeparator() + strNameEnd + "], mismatched closing Tag at line ["+ closeTagLine + "]");
 							}
 							else {
 								body.moveStatmentsTo(parent);
