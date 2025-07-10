@@ -64,9 +64,9 @@
 						<div id="content">
 							 <div id="maintitle">
 								<cfif hasNavigation && application.adminfunctions.canAccessContext()>
-									<!-- <div id="logouts">
-									<a class="sprite tooltipMe logout" href="#request.self#?action=logout" title="Logout"></a>
-									</div> -->
+									<div id="logouts">
+										<a class="sprite tooltipMe logout" href="#request.self#?action=logout" title="Logout"></a>
+									</div> 
 									<!--- Favorites --->
 									<cfparam name="url.action" default="">
 									<cfset pageIsFavorite = application.adminfunctions.isFavorite(url.action)>
