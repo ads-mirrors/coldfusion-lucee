@@ -914,11 +914,30 @@ div.ok {
     margin: 1px;
 }
 
-#logouts>a {
-    width: 17px;
-    height: 17px;
-    display: block;
-    background-position: -33px 0px;
+.logout {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    background: rgba(95, 135, 49, 0.2);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 1000;
+    font-size: 18px;
+    text-align: center;
+    background-image: url('../img/logout.png.cfm');
+    background-repeat: no-repeat;
+    background-size: 32px 32px;
+    filter: brightness(0) saturate(100%) invert(49%) sepia(18%) saturate(1102%) hue-rotate(53deg) brightness(94%) contrast(92%);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+.logout:hover {
+    transform: scale(1.4);
+    z-index: 2;
+    border-radius: 50%;
+    outline: none; 
 }
 
 /* Misc Layout */
