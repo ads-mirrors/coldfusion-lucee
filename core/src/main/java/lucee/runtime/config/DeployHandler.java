@@ -245,7 +245,7 @@ public class DeployHandler {
 	public static RHExtension deployExtension(Config config, ExtensionDefintion ed, Log log, boolean reload, boolean force, boolean throwOnError, RefBoolean installDone)
 			throws PageException {
 		ConfigPro ci = (ConfigPro) config;
-		String coreVersion = ConfigWebUtil.getCFMLEngine(config).getInfo().getVersion().toString();
+		String coreVersion = ConfigWebUtil.getEngine(config).getInfo().getVersion().toString();
 		// is the extension already installed
 		try {
 			RHExtension installed = ConfigAdmin.hasRHExtensionInstalled(ci, ed);
@@ -393,8 +393,7 @@ public class DeployHandler {
 	}
 
 	public static Resource downloadExtension(Config config, ExtensionDefintion ed, Log log) {
-
-		String coreVersion = ConfigWebUtil.getCFMLEngine(config).getInfo().getVersion().toString();
+		String coreVersion = ConfigWebUtil.getEngine(config).getInfo().getVersion().toString();
 		Identification id = config.getIdentification();
 		String apiKey = id == null ? null : id.getApiKey();
 		URL url;
