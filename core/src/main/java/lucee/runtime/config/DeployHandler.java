@@ -245,6 +245,7 @@ public class DeployHandler {
 	public static RHExtension deployExtension(Config config, ExtensionDefintion ed, Log log, boolean reload, boolean force, boolean throwOnError, RefBoolean installDone)
 			throws PageException {
 		ConfigPro ci = (ConfigPro) config;
+		String coreVersion = ConfigWebUtil.getCFMLEngine(config).getInfo().getVersion().toString();
 		// is the extension already installed
 		try {
 			RHExtension installed = ConfigAdmin.hasRHExtensionInstalled(ci, ed);
@@ -319,6 +320,7 @@ public class DeployHandler {
 					StringBuilder qs = new StringBuilder();
 					qs.append("?withLogo=false");
 					if (ed.getVersion() != null) qs.append("&version=").append(ed.getVersion());
+					else qs.append("&coreVersion=").append(coreVersion);
 					if (apiKey != null) qs.append("&ioid=").append(apiKey);
 
 					url = new URL(url, "/rest/extension/provider/info/" + ed.getId() + qs);
@@ -392,6 +394,7 @@ public class DeployHandler {
 
 	public static Resource downloadExtension(Config config, ExtensionDefintion ed, Log log) {
 
+		String coreVersion = ConfigWebUtil.getCFMLEngine(config).getInfo().getVersion().toString();
 		Identification id = config.getIdentification();
 		String apiKey = id == null ? null : id.getApiKey();
 		URL url;
@@ -403,7 +406,8 @@ public class DeployHandler {
 				url = providers[i].getURL();
 				StringBuilder qs = new StringBuilder();
 				if (apiKey != null) addQueryParam(qs, "ioid", apiKey);
-				addQueryParam(qs, "version", ed.getVersion());
+				if (ed.getVersion() != null) addQueryParam(qs, "version", ed.getVersion());
+				else addQueryParam(qs, "coreVersion", coreVersion);
 
 				url = new URL(url, "/rest/extension/provider/full/" + ed.getId() + qs);
 				if (log != null) log.info("main", "Check for extension at [" + url + "]");
