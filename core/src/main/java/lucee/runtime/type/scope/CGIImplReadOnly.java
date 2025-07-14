@@ -169,28 +169,24 @@ public final class CGIImplReadOnly extends ReadOnlyStruct implements CGI, Script
 			return disconnectedData.getOrDefault(key, defaultValue);
 		}
 
-		if (https == null) {
-			https = new StructImpl();
-			headers = new StructImpl();
-			String k, v;
+		String lkey = key.getLowerString();
+		char first = lkey.charAt(0);
+
+		if (first == 'h' && https == null) {
+			https = new StructImpl(StructImpl.DEFAULT_TYPE, 64);
+			String k;
 			try {
 				Enumeration e = req.getHeaderNames();
 
 				while (e.hasMoreElements()) {
 					k = (String) e.nextElement();
-					v = req.getHeader(k);
-					// print.err(k.length()+":"+k);
-					headers.setEL(KeyImpl.init(k), v);
-					headers.setEL(KeyImpl.init(k = k.replace('-', '_')), v);
-					https.setEL(KeyImpl.init("http_" + k), v);
+					https.setEL(KeyImpl.init("http_" + k.replace('-', '_')), req.getHeader(k));
 				}
 			}
 			catch (Exception e) {
 			}
 		}
 
-		String lkey = key.getLowerString();
-		char first = lkey.charAt(0);
 		try {
 			if (first == 'a') {
 				if (key.equals(KeyConstants._auth_type)) return toString(req.getAuthType());
@@ -282,6 +278,24 @@ public final class CGIImplReadOnly extends ReadOnlyStruct implements CGI, Script
 		}
 		catch (Exception e) {
 			return other(key, defaultValue);
+		}
+
+		if (headers == null) {
+			headers = new StructImpl(StructImpl.DEFAULT_TYPE, 128);
+			String k, v;
+			try {
+				Enumeration e = req.getHeaderNames();
+
+				while (e.hasMoreElements()) {
+					k = (String) e.nextElement();
+					v = req.getHeader(k);
+					// print.err(k.length()+":"+k);
+					headers.setEL(KeyImpl.init(k), v);
+					headers.setEL(KeyImpl.init(k = k.replace('-', '_')), v);
+				}
+			}
+			catch (Exception e) {
+			}
 		}
 
 		// check header
