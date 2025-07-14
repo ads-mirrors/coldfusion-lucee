@@ -13293,9 +13293,10 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 		<argument>
 			<name>compact</name>
 			<type>boolean</type>
+			<introduced>6.0.0.405</introduced>
 			<required>No</required>
 			<default>No</default>
-			<description>If true, it does not use end-of-lines and indentation. Defaults to true.</description>
+			<description>If true, it does not use end-of-lines and indentation. Defaults to true. Commonly called Pretty Printing.</description>
 		</argument>
 		<return>
 			<type>string</type>
