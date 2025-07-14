@@ -311,6 +311,16 @@ public final class CGIImpl extends StructSupport implements CGI, ScriptProtected
 			}
 		}
 
+		// check servlet request attributes
+		Enumeration<String> names = req.getAttributeNames();
+		String k;
+		while (names.hasMoreElements()) {
+			k = names.nextElement();
+			if (k.equalsIgnoreCase(key.getString())) {
+				return toString(req.getAttribute(k));
+			}
+		}
+
 		return other(key, defaultValue);
 	}
 

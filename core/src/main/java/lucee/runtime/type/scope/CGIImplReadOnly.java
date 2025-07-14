@@ -302,6 +302,16 @@ public final class CGIImplReadOnly extends ReadOnlyStruct implements CGI, Script
 		String headerValue = (String) (headers == null ? null : headers.get(key, null));// req.getHeader(key.getString());
 		if (headerValue != null) return doScriptProtect(headerValue);
 
+		// check servlet request attributes
+		Enumeration<String> names = req.getAttributeNames();
+		String k;
+		while (names.hasMoreElements()) {
+			k = names.nextElement();
+			if (k.equalsIgnoreCase(key.getString())) {
+				return toString(req.getAttribute(k));
+			}
+		}
+
 		return other(key, defaultValue);
 	}
 
