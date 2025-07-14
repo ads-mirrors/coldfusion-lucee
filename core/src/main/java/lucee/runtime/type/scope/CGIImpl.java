@@ -312,6 +312,7 @@ public final class CGIImpl extends StructSupport implements CGI, ScriptProtected
 		}
 
 		// check servlet request attributes
+		/*
 		Enumeration<String> names = req.getAttributeNames();
 		String k;
 		while (names.hasMoreElements()) {
@@ -320,6 +321,7 @@ public final class CGIImpl extends StructSupport implements CGI, ScriptProtected
 				return toString(req.getAttribute(k));
 			}
 		}
+		*/
 
 		return other(key, defaultValue);
 	}

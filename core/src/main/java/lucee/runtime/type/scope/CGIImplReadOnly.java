@@ -303,6 +303,7 @@ public final class CGIImplReadOnly extends ReadOnlyStruct implements CGI, Script
 		if (headerValue != null) return doScriptProtect(headerValue);
 
 		// check servlet request attributes
+		/*
 		Enumeration<String> names = req.getAttributeNames();
 		String k;
 		while (names.hasMoreElements()) {
@@ -311,6 +312,7 @@ public final class CGIImplReadOnly extends ReadOnlyStruct implements CGI, Script
 				return toString(req.getAttribute(k));
 			}
 		}
+		*/
 
 		return other(key, defaultValue);
 	}
