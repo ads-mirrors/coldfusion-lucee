@@ -5,7 +5,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="pdf" {
 
 			xit(title="cfdocument with cfdocumentSection with marginTop", body = function( currentSpec ) {
 				var tmpFile = getTempFile("", "ldev-5711", "pdf");
-				cfDocument(	overwrite=true,	filename = "#tmpFile#" ) {
+				cfDocument(	overwrite=true,
+						filename = "#tmpFile#",
+						margintop = "1"   // remove this line, no exception
+					) {
 					cfdocumentsection(
 						margintop = "0", // remove this line, no exception
 						name = "pageName" ) {
