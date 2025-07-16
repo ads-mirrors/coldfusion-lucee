@@ -5845,7 +5845,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (cgiScopeReadonly == null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getCGIScopeReadonly")) {
 				if (cgiScopeReadonly == null) {
-					String strCGIReadonly = ConfigFactoryImpl.getAttr(root, "cgiReadonly");
+					String strCGIReadonly = ConfigFactoryImpl.getAttr(root, "cgiScopeReadOnly");
 					if (!StringUtil.isEmpty(strCGIReadonly, true)) {
 						cgiScopeReadonly = Caster.toBooleanValue(strCGIReadonly.trim(), true);
 					}
