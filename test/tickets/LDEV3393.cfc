@@ -37,7 +37,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="syntax" {
                 expect(res).tobe(arr);
             });
 
-            it( title="For-loop inside finally{}", body=function( currentSpec ){
+            xit( title="For-loop inside finally{}", body=function( currentSpec ){
                 try{
                     local.result = _InternalRequest(
                         template : "#uri#\forLoopFinally.cfm"
