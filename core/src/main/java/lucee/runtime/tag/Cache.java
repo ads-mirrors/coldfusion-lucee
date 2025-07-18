@@ -112,6 +112,7 @@ public final class Cache extends BodyTagImpl {
 	private String metadata;
 	private boolean useQueryString = true;
 	private boolean useCache = true;
+	private boolean stripWhiteSpace = false;
 
 	private static final int CACHE = 0;
 	private static final int CACHE_SERVER = 1;
@@ -148,6 +149,7 @@ public final class Cache extends BodyTagImpl {
 		metadata = null;
 		useQueryString = true;
 		useCache = true;
+		stripWhiteSpace = false;
 	}
 
 	/**
@@ -290,6 +292,13 @@ public final class Cache extends BodyTagImpl {
 		this.useCache = useCache;
 	}
 
+	/**
+	 * @param stripWhiteSpace whether to strip whitespace from content.
+	 */
+	public void setStripwhitespace(boolean stripWhiteSpace) {
+		this.stripWhiteSpace = stripWhiteSpace;
+	}
+
 	@Override
 	public int doStartTag() throws PageException {
 		now = new DateTimeImpl();
@@ -321,7 +330,7 @@ public final class Cache extends BodyTagImpl {
 	@Override
 	public int doAfterBody() {
 		// print.out("doAfterBody");
-		if (bodyContent != null) body = bodyContent.getString();
+		if (bodyContent != null) body = stripWhiteSpace ? bodyContent.getString().trim() : bodyContent.getString();
 		return SKIP_BODY;
 	}
 

@@ -354,8 +354,16 @@ A return value from the CreateTimeSpan function, for example, "#CreateTimeSpan(0
 			<name>useCache</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Whether to use the cache, default is true. When false the cache is still updated</description>
+			<description>Whether to use the cache, default is true. When false the cache is still updated.</description>
 		</attribute>
+		<attribute>
+			<type>boolean</type>
+			<name>stripWhiteSpace</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Whether to strip stripWhiteSpace, default is false.</description>
+		</attribute>
+		
 	</tag>
 
 	<!-- Case -->

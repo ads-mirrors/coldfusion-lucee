@@ -65,7 +65,19 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect( result.filecontent ).toInclude( "cacheAnyway" ); // cached from previous
 				expect( result.filecontent ).toInclude( "three=3" );
 			});
+		});
 
+		describe( title="Test stripWhiteSpace", body=function() {
+			it(title="checking cfcache - stripWhiteSpace=false", body = function( currentSpec ) {
+				var result=_test( "whitespace", "", "stripWhiteSpace=false" );
+				expect( result.filecontent ).toInclude( "[#chr(9)#  lucee  #chr(9)#]" );
+			});
+
+			it(title="checking cfcache - stripWhiteSpace=true", body = function( currentSpec ) {
+				var result=_test( "whitespace", "", "stripWhiteSpace=true" );
+				expect( result.filecontent ).notToInclude( " [#chr(9)#  lucee  #chr(9)#] " );
+
+			});
 		});
 	}
 
