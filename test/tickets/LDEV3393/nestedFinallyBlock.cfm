@@ -5,7 +5,7 @@
     finally {
         try {
             try {
-                throw "b";
+                throw "LDEV-4451-nestedfinally";
             }
             finally {}
         }
