@@ -110,6 +110,10 @@ public final class Cache extends BodyTagImpl {
 	private Object value;
 	private boolean throwOnError;
 	private String metadata;
+	private boolean useQueryString = true;
+	private boolean useCache = true;
+	private boolean stripWhiteSpace = false;
+	private String dependsOn;
 
 	private static final int CACHE = 0;
 	private static final int CACHE_SERVER = 1;
@@ -144,6 +148,10 @@ public final class Cache extends BodyTagImpl {
 		throwOnError = false;
 		value = null;
 		metadata = null;
+		useQueryString = true;
+		useCache = true;
+		stripWhiteSpace = false;
+		dependsOn = null;
 	}
 
 	/**
@@ -272,6 +280,34 @@ public final class Cache extends BodyTagImpl {
 		this.timespan = timespan;
 	}
 
+	/**
+	 * @param useQueryString whether to ignore the query string.
+	 */
+	public void setUsequerystring(boolean useQueryString) {
+		this.useQueryString = useQueryString;
+	}
+
+	/**
+	 * @param useCache whether to use the cache.
+	 */
+	public void setUsecache(boolean useCache) {
+		this.useCache = useCache;
+	}
+
+	/**
+	 * @param stripWhiteSpace whether to strip whitespace from content.
+	 */
+	public void setStripwhitespace(boolean stripWhiteSpace) {
+		this.stripWhiteSpace = stripWhiteSpace;
+	}
+
+	/**
+	 * @param dependsOn a list of variables to include in the cache key.
+	 */
+	public void setDependson(String dependsOn) {
+		this.dependsOn = dependsOn;
+	}
+
 	@Override
 	public int doStartTag() throws PageException {
 		now = new DateTimeImpl();
@@ -302,8 +338,8 @@ public final class Cache extends BodyTagImpl {
 
 	@Override
 	public int doAfterBody() {
-		// print.out("doAfterBody");
-		if (bodyContent != null) body = bodyContent.getString();
+		// TODO use smart whitespace management
+		if (bodyContent != null) body = stripWhiteSpace ? bodyContent.getString().trim() : bodyContent.getString();
 		return SKIP_BODY;
 	}
 
@@ -372,14 +408,15 @@ public final class Cache extends BodyTagImpl {
 	 */
 
 	private int doContentCache() throws IOException {
-
 		// file
 		cacheItem = generateCacheResource(key, true);
-		// use cache
-		if (cacheItem.isValid(timespan)) {
-			pageContext.write(cacheItem.getValue());
-			doCaching = false;
-			return SKIP_BODY;
+		if (useCache){
+			// use cache
+			if (cacheItem.isValid(timespan)) {
+				pageContext.write(cacheItem.getValue());
+				doCaching = false;
+				return SKIP_BODY;
+			}
 		}
 		doCaching = true;
 		return EVAL_BODY_BUFFERED;
@@ -432,7 +469,7 @@ public final class Cache extends BodyTagImpl {
 	}
 
 	private CacheItem generateCacheResource(String key, boolean useId) throws IOException {
-		return CacheItem.getInstance(pageContext, _id, key, useId, directory, cachename, timespan);
+		return CacheItem.getInstance(pageContext, _id, key, useId, directory, cachename, timespan, useQueryString);
 	}
 
 	private void writeCacheResource(CacheItem cacheItem, String result) throws IOException {

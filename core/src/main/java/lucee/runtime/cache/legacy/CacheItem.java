@@ -35,17 +35,25 @@ public abstract class CacheItem {
 	protected final String fileName;
 
 	public static CacheItem getInstance(PageContext pc, String id, String key, boolean useId, Resource dir, String cacheName, TimeSpan timespan) throws IOException {
+		return getInstance(pc, id, key, useId, dir, cacheName, timespan, true);
+	}
+
+	public static CacheItem getInstance(PageContext pc, String id, String key, boolean useId, Resource dir, String cacheName, TimeSpan timespan, boolean useQueryString) throws IOException {
 		HttpServletRequest req = pc.getHttpServletRequest();
 		Cache cache = CacheUtil.getCache(pc, cacheName, Config.CACHE_TYPE_TEMPLATE, null);
-		if (cache != null) return new CacheItemCache(pc, req, id, key, useId, cache, timespan);
-		return new CacheItemFS(pc, req, id, key, useId, dir);
+		if (cache != null) return new CacheItemCache(pc, req, id, key, useId, cache, timespan, useQueryString);
+		return new CacheItemFS(pc, req, id, key, useId, dir, useQueryString);
 	}
 
 	public CacheItem(PageContext pc, HttpServletRequest req, String id, String key, boolean useId) {
+		this(pc, req, id, key, useId, true);
+	}
+
+	public CacheItem(PageContext pc, HttpServletRequest req, String id, String key, boolean useId, boolean useQueryString) {
 
 		// raw
 		String filename = req.getServletPath();
-		if (!StringUtil.isEmpty(req.getQueryString())) {
+		if (useQueryString & !StringUtil.isEmpty(req.getQueryString())) {
 			filename += "?" + req.getQueryString();
 			if (useId) filename += "&cfcache_id=" + id;
 		}

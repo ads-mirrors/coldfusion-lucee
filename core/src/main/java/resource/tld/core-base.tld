@@ -342,6 +342,36 @@ A return value from the CreateTimeSpan function, for example, "#CreateTimeSpan(0
 			<description>Port number of the web server from which the URL for the cached page is requested.
 			In the internal call from cfcache to cfhttp, Lucee resolves each URL variable in the page; this ensures that links in the page remain functional.</description>
 		</attribute>
+		<attribute>
+			<type>boolean</type>
+			<name>useQueryString</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Whether to consider the query_string when caching</description>
+		</attribute>
+		<attribute>
+			<type>boolean</type>
+			<name>useCache</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Whether to use the cache, default is true. When false the cache is still updated.</description>
+		</attribute>
+		<attribute>
+			<type>boolean</type>
+			<name>stripWhiteSpace</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>Whether to strip stripWhiteSpace, default is false.</description>
+		</attribute>
+		<attribute>
+			<type>string</type>
+			<name>dependsOn</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>A list of additional variables which invalidate the cache when changed.</description>
+			<status>unimplemented</status>
+		</attribute>
+		
 	</tag>
 
 	<!-- Case -->
