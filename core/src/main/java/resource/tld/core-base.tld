@@ -344,6 +344,7 @@ A return value from the CreateTimeSpan function, for example, "#CreateTimeSpan(0
 		</attribute>
 		<attribute>
 			<type>boolean</type>
+			<introduced>7.0.0.300</introduced>
 			<name>useQueryString</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
@@ -352,6 +353,7 @@ A return value from the CreateTimeSpan function, for example, "#CreateTimeSpan(0
 		<attribute>
 			<type>boolean</type>
 			<name>useCache</name>
+			<introduced>7.0.0.300</introduced>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
 			<description>Whether to use the cache, default is true. When false the cache is still updated.</description>
@@ -359,9 +361,10 @@ A return value from the CreateTimeSpan function, for example, "#CreateTimeSpan(0
 		<attribute>
 			<type>boolean</type>
 			<name>stripWhiteSpace</name>
+			<introduced>7.0.0.300</introduced>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Whether to strip stripWhiteSpace, default is false.</description>
+			<description>Whether to strip stripWhiteSpace, default is false. currently only trims</description>
 		</attribute>
 		<attribute>
 			<type>string</type>
