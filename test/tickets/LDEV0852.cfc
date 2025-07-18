@@ -23,7 +23,7 @@
 					try {
 						var myVar=file;
 						var count = 0;
-						cfdocument(format="PDF" name="myVar"){
+						cfdocument(format="PDF" name="local.myVar"){
 							DocumentSectionWithDynamicVariable("");
 						}
 						cfpdf(action="merge" destination="test852.pdf" overwrite="yes"){
@@ -40,7 +40,7 @@
 						var count = 0;
 						var i = 1;
 						var myVar1=file;
-						cfDocument(format="PDF" name="myVar#i#"){
+						cfDocument(format="PDF" name="local.myVar#i#"){
 							DocumentSectionWithDynamicVariable(i);
 						}
 						cfpdf(action="merge" destination="test852.pdf" overwrite="yes"){
@@ -61,7 +61,7 @@
 						var x = '1,2,3,4,5';
 						for (var i = 1; i <= ListLen(x); i++) {
 							var variables['myVar#i#']=file;
-							cfDocument(format="PDF" name="myVar#i#"){
+							cfDocument(format="PDF" name="local.myVar#i#"){
 								DocumentSectionWithDynamicVariable(i);
 							}
 							cfpdf(action="merge" destination="test852.pdf" overwrite="yes"){
@@ -78,9 +78,9 @@
 					try{
 						var count = 0;
 						var x = ["a","b","c","d","e"];
-						for (i in x){
+						for (var i in x){
 							var variables['myVar#i#']=file;
-							cfDocument(format="PDF" name="myVar#i#"){
+							cfDocument(format="PDF" name="local.myVar#i#"){
 								DocumentSectionWithDynamicVariable(i);
 							}
 							cfpdf(action="merge" destination="test852.pdf" overwrite="yes"){

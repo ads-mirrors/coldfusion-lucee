@@ -105,7 +105,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="zip" {
 	public function testInvalidEntryName() {
 		var curr = server._getTempDir( "tag-zip-invalid" );
 		var trg=curr & "/zip/"
-		trg2 = trg & "sub/sub/";
+		var trg2 = trg & "sub/sub/";
 		if ( directoryExists( trg ) ) 
 			directoryDelete( trg, true );
 		directoryCreate( trg );

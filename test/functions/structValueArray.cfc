@@ -2,13 +2,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 
 	function run(testResults, testBox) {
         
-        animals = {
+        variables.animals = {
 			cow: "moo",
 			pig: "oink",
 			cat: "meow"
         };
         
-        orderedStruct = [
+        variables.orderedStruct = [
             one:   1,
             two:   2,
             three: 3,
@@ -39,7 +39,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 			});
 
 			it(title="Test function structValueArray() on Ordered Struct", body=function(currentSpec) {
-				orderedValues = orderedStruct.valueArray();
+				var orderedValues = orderedStruct.valueArray();
                 assertEquals(7, arrayLen(orderedValues));
 				loop array=orderedValues index="local.ix" item="local.el" {
                     assertEquals(ix, el);

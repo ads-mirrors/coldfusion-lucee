@@ -5,7 +5,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 		describe( 'QoQ rand() function' , () =>{
 
 			it( 'can generate totally random values' , ()=>{
-				qry = queryNew( 'col', 'varchar', [['foo'],['bar']] );
+				var qry = queryNew( 'col', 'varchar', [['foo'],['bar']] );
 				var actual = QueryExecute(
 					sql = "
 						SELECT  rand() rand
@@ -20,7 +20,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" {
 			});
 
 			it( 'can generate seeded random values' , ()=>{
-				qry = queryNew( 'col', 'varchar', [['foo'],['bar']] );
+				var qry = queryNew( 'col', 'varchar', [['foo'],['bar']] );
 				var actual = QueryExecute(
 					sql = "
 						SELECT  rand(3) rand, rand() rand2, rand() rand3

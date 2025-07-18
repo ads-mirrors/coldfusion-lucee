@@ -26,7 +26,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 	        {id=3,name="Three"} 
 	      ]); 
 
-		var=qoq = new Query(
+		var qoq = new Query(
 		    dbtype = "query",
 		    sql = "SELECT * FROM q WHERE id <> 3 ",
 		    q = q1

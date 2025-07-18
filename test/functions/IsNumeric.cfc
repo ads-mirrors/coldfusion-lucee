@@ -28,7 +28,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
                 expect(isNumeric(true)).tobe(false);
                 expect(isNumeric("6/2017")).tobe(false);
                 expect(isNumeric(arrayNew(1))).tobe(false);
-                str = "Susi";
+                var str = "Susi";
                 expect(isNumeric(str.length())).tobe(true);
                 expect(isNumeric(' 123 ')).tobe(true);
 

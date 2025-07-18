@@ -9,8 +9,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
                 setTimeZone(variables.startingTZ?:"UTC");
             });
             it( 'Create date object from member function.' , function() {
-                dateAsString = "2011-03-24";
-  				actual = dateAsString.parseDateTime();
+                var dateAsString = "2011-03-24";
+                var actual = dateAsString.parseDateTime();
                 expect( actual ).toBe( '{ts ''2011-03-24 00:00:00''}' );
             });
         });

@@ -25,7 +25,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 	//public function setUp(){}
 
 	public void function testArrayClear(){
-		arr=arrayNew(1);
+		var arr=arrayNew(1);
 		ArrayAppend( arr, 1 );
 		ArrayAppend( arr, 2 );
 		ArrayAppend( arr, 3 );

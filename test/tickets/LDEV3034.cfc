@@ -4,30 +4,30 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" {
             var base64Valid = "dmFsaWQ=";
             var base64Invalid = "@@@@";
             it(title="binaryDecode() with valid base64 data", body=function( currentSpec ){
-                res = (toString(binaryDecode(base64Valid, "base64")));
+                var res = (toString(binaryDecode(base64Valid, "base64")));
                 expect(res).toBe("valid");
             });
             it(title="binaryEncode with valid binary data",body=function( currentSpec ){
-                res = binaryEncode(toBinary(base64Valid), "base64");
+                var res = binaryEncode(toBinary(base64Valid), "base64");
                 expect(res).toBe("dmFsaWQ=");
             });
             it(title="toBinary() with invalid base64 data",body=function( currentSpec ){
                 try{
-                    res = toBinary(base64Invalid);
-                    hasError = false;      
+                    var res = toBinary(base64Invalid);
+                    var hasError = false;
                 }
                 catch(any e){
-                    hasError = true;
+                    var hasError = true;
                 }
                 expect(hasError).toBe(true);
             });
             it(title="binaryDecode() with invalid base64 data", body=function( currentSpec ){
                 try{
-                    res = binaryDecode(base64Invalid, "base64");  
-                    hasError = false;
+                    var res = binaryDecode(base64Invalid, "base64");
+                    var hasError = false;
                 }
                 catch(any e){
-                    hasError = true;
+                    var hasError = true;
                 }
                 expect(hasError).toBe(true);
             });

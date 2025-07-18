@@ -213,6 +213,9 @@ img,
 a img {
     border: 0;
 }
+.ext-logo {
+    background-color: #fff !important;
+}
 
 form,
 div {
@@ -914,11 +917,30 @@ div.ok {
     margin: 1px;
 }
 
-#logouts>a {
-    width: 17px;
-    height: 17px;
-    display: block;
-    background-position: -33px 0px;
+.logout {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    width: 32px;
+    height: 32px;
+    background: rgba(95, 135, 49, 0.2);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 1000;
+    font-size: 18px;
+    text-align: center;
+    background-image: url('../img/logout.png.cfm');
+    background-repeat: no-repeat;
+    background-size: 32px 32px;
+    filter: brightness(0) saturate(100%) invert(49%) sepia(18%) saturate(1102%) hue-rotate(53deg) brightness(94%) contrast(92%);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+.logout:hover {
+    transform: scale(1.4);
+    z-index: 2;
+    border-radius: 50%;
+    outline: none; 
 }
 
 /* Misc Layout */
@@ -1155,18 +1177,25 @@ tbody#extproviderlist td {
 
 .extensionthumb {
     width: 146px;
-    height: 140px;
+    height: 153px; /* Increase if needed */
     overflow: hidden;
-    margin: 2px 2px 2px 2px;
+    margin: 2px;
     float: left;
     text-align: center;
     position: relative;
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
 .extensionthumb a {
     display: block;
     padding: 0px;
-    height: 130px;
+    height: 170px;
     text-decoration: none !important;
     border: 5px solid #dcdad3;
     background-color: #fff;

@@ -9,7 +9,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
                     loop key = "local.key" value = "local.value" struct = structNew() {
                             if ( variables?.value ) { }
                     }
-                    res = "itsCompiled";
+                    var res = "itsCompiled";
                 }
                 catch(any e){
                     res = e.message;

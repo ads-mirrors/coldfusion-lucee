@@ -5,7 +5,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="orm"{
 	function run( testResults , testBox ) {
 		describe( 'Running hql query' , function() {
 			it('With OrmExecuteQuery',  function( currentSpec ) {
-				uri=createURI("LDEV1214/index.cfm");
+				local.uri=createURI("LDEV1214/index.cfm");
 				local.result=_InternalRequest(
 					template:uri
 				);

@@ -2,8 +2,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 	function run( testResults , testBox ) {
 		describe( "test case for LDEV-2608", function() {
 			it(title = "Regression in struct implementation causing stack overflow", body = function( currentSpec ) {
-				struct1 = {};
-				struct2 = {};
+				var struct1 = {};
+				var struct2 = {};
 				struct1.struct2 = struct2;
 				struct2.struct1 = struct1;
 
@@ -11,8 +11,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 			});
 
 			it(title = "Regression in struct implementation causing stack overflow", body = function( currentSpec ) {
-				struct1 = {};
-				struct2 = {};
+				var struct1 = {};
+				var struct2 = {};
 				struct1.struct2 = struct2;
 				struct2.struct1 = struct1;
 

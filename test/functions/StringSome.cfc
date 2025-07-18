@@ -20,7 +20,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 	
 
 	public void function testStringSome(){
-		myString="123456789"; 
+		var myString="123456789"; 
     	var callback=function(num){ 
         	return num>5;
     	}
@@ -29,7 +29,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
     	var myString="Hello";
     	callback=(x)=>x >= 'a';
     	assertEquals(true, StringSome(myString, callback));
-    	callback_1=(x)=>x >= 'z';
+    	var callback_1=(x)=>x >= 'z';
     	assertEquals(false, myString.some(callback_1));
 	}
 } 

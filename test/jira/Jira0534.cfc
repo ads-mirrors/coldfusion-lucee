@@ -22,12 +22,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 	}
 
 	public void function test(){
-		qry=queryNew('a');
+		var qry=queryNew('a');
 		QueryAddRow(qry);
 		QuerySetCell(qry,'a','x');
 		QueryAddRow(qry);
 		QuerySetCell(qry,'a','y');
-		col="a";
+		var col="a";
   
 		assertEquals("x,y",ArrayToList(qry.a));
 		assertEquals("x,y",ArrayToList(qry[col])); 

@@ -281,7 +281,7 @@ public final class ParserString {
 
 	public boolean isCurrentWhiteSpace() {
 		if (!isValidIndex()) return false;
-		return (lcText[pos] == ' ' || lcText[pos] == '\t' || lcText[pos] == '\b' || lcText[pos] == '\r' || lcText[pos] == '\n');
+		return (lcText[pos] == ' ' || lcText[pos] == '\b');
 		// return lcText[pos]>='a' && lcText[pos]<='z';
 	}
 
@@ -296,22 +296,22 @@ public final class ParserString {
 
 	public boolean isNextWhiteSpace() {
 		if (!hasNext()) return false;
-		return (lcText[pos + 1] == ' ' || lcText[pos + 1] == '\t' || lcText[pos + 1] == '\b' || lcText[pos + 1] == '\r' || lcText[pos + 1] == '\n');
+		return (lcText[pos + 1] == ' ' || lcText[pos + 1] == '\b');
 	}
 
 	public boolean isNextNextWhiteSpace() {
 		if (!hasNextNext()) return false;
-		return (lcText[pos + 2] == ' ' || lcText[pos + 2] == '\t' || lcText[pos + 2] == '\b' || lcText[pos + 2] == '\r' || lcText[pos + 2] == '\n');
+		return (lcText[pos + 2] == ' ' || lcText[pos + 2] == '\b');
 	}
 
 	public boolean isPreviousWhiteSpace() {
 		if (!hasPrevious()) return false;
-		return (lcText[pos - 1] == ' ' || lcText[pos - 1] == '\t' || lcText[pos - 1] == '\b' || lcText[pos - 1] == '\r' || lcText[pos - 1] == '\n');
+		return (lcText[pos - 1] == ' ' || lcText[pos - 1] == '\b');
 	}
 
 	public boolean isPreviousPreviousWhiteSpace() {
 		if (!hasPreviousPrevious()) return false;
-		return (lcText[pos - 2] == ' ' || lcText[pos - 2] == '\t' || lcText[pos - 2] == '\b' || lcText[pos - 2] == '\r' || lcText[pos - 2] == '\n');
+		return (lcText[pos - 2] == ' ' || lcText[pos - 2] == '\b');
 	}
 
 	/**

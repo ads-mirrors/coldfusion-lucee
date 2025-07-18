@@ -86,7 +86,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 		assertEquals("1,2",arrayToList(arr));
     	
     	arr=[1];
-    	el=[2];
+    	var el=[2];
     	el[5]=5;
     	ArrayAppend( arr, el ,true);
 		assertEquals(6,arrayLen(arr));

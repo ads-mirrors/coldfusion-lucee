@@ -11,10 +11,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="currency" {
             });
 			it(title="checking LSEuroCurrencyFormat() function", body = function( currentSpec ) {
 				<!--- begin old test code --->
-				orgLocale=getLocale();
+				var orgLocale=getLocale();
 				setLocale("German (Swiss)");
-				dt=CreateDateTime(2004,1,2,4,5,6);
-				euro=chr(8364);
+				var dt=CreateDateTime(2004,1,2,4,5,6);
+				var euro=chr(8364);
 
 				if(getJavaVersion()>=9) {
 					assertEquals("CHF 1.00", "#LSEuroCurrencyFormat(1)#");

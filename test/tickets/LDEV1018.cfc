@@ -3,6 +3,7 @@
     function run( testResults, testBox ){
         describe( "Testcase for LDEV-1018", function(){
             it( title="test cfcatch data", body=function( currentSpec ) {
+                var data = {};
             	try{throw "abc";}
 				catch (any local.e) {data=local.e}
 			

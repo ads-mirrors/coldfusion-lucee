@@ -6,11 +6,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase"  {
 			it( title="use empty constructor on the JavaProxy class based on a component", body=function( currentSpec ) {
 				
 				// first we load the cfc with relative path
-				cfc=new LDEV4972.MyString("four");
+				var cfc=new LDEV4972.MyString("four");
 				expect( cfc.length() ).toBe(4);
 
 				// create a java proxy class of type CharSequence
-				obj=JavaCast("java.lang.CharSequence",cfc);
+				var obj=JavaCast("java.lang.CharSequence",cfc);
 				expect( obj.length() ).toBe(4);
 				
 				// get the class and load a new instance with the default constructor
@@ -21,11 +21,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase"  {
 			it( title="use empty constructor on the JavaProxy class based on a sub component", body=function( currentSpec ) {
 				
 				// first we load the cfc with relative path
-				cfc=new LDEV4972.MyString$Sub("four");
+				var cfc=new LDEV4972.MyString$Sub("four");
 				expect( cfc.length() ).toBe(4);
 
 				// create a java proxy class of type CharSequence
-				obj=JavaCast("java.lang.CharSequence",cfc);
+				var obj=JavaCast("java.lang.CharSequence",cfc);
 				expect( obj.length() ).toBe(4);
 				
 				// get the class and load a new instance with the default constructor

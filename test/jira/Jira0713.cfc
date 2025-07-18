@@ -19,13 +19,13 @@
 component extends="org.lucee.cfml.test.LuceeTestCase"	{
 
 	public function setUp(){
-		cfc=createObject( "component", "Jira0713.Test").init();
+		variables.cfc=createObject( "component", "Jira0713.Test").init();
 	}
 
 	public void function test(){
 		
 		assertEquals("Brett",cfc.getName());
-		cfcc=duplicate(cfc);
+		var cfcc=duplicate(cfc);
 		assertEquals("Brett",cfcc.getName());
 		cfcc.setName('qqq');
 		assertEquals("qqq",cfcc.getName());

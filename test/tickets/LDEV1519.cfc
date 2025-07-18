@@ -11,7 +11,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"  labels="pdf"{
             source ="test"
             image="LDEV1519/lucee-screens-500px.jpg"
             pages="1"
-            name="watermarkedPDF"
+            name="local.watermarkedPDF"
             overwrite="true"
             position="0,0" 
             rotation="45";

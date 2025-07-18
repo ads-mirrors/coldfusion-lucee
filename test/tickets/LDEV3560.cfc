@@ -3,8 +3,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="metadata" {
         describe(title="Testcase for LDEV-3560", body=function( currentSpec ) {
             it(title="getComponentMetadata() with abstract Component", body=function( currentSpec )  {
                     try {
-                        metadata = getComponentMetadata("LDEV3560.testAbstract");
-                        res = metadata.abstract;
+                        var metadata = getComponentMetadata("LDEV3560.testAbstract");
+                        var res = metadata.abstract;
                     }
                     catch(any e) {
                         res = e.message;

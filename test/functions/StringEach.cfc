@@ -22,7 +22,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
     public void function testStringEach() {
 		
 		local.testString = "MEANINGLESS_VALUE";
-		callback = function( c ) {
+		var callback = function( c ) {
             data&=c;
 			return c & "TEST"; 
     	}

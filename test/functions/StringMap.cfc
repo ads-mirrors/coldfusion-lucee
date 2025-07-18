@@ -21,7 +21,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"	{
 
 	public void function testStringMap(){
 		var myStr="123456789";       
-        closure=function(item){ 
+        var closure=function(item){ 
             return item+5; 
         }
     	assertEquals('67891011121314', myStr.map(closure));

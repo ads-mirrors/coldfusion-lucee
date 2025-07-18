@@ -13,8 +13,6 @@
 
 		ad=request.adminType;
 		hasNavigation = len(attributes.navigation) GT 0;
-		home = request.adminType & ".cfm";
-		homeQS = URL.keyExists("action") ? "?action=" & url.action : "";
 		request.mode = "full";
 		resNameAppendix = hash(server.lucee.version & server.lucee["release-date"], "quick");
 		
@@ -34,7 +32,6 @@
 </head>
 
 <cfparam name="attributes.onload" default="">
-<cfset mode=request.singleMode?"single":request.adminType>
 <body id="body" class="admin-single single full" onload="#attributes.onload#">
 	<div id="<cfif !hasNavigation>login<cfelse>layout</cfif>">
 		<table id="layouttbl">
@@ -42,7 +39,7 @@
 				<tr id="tr-header">	<!--- TODO: not sure where height of 275px is coming from? forcing here 113px/63px !--->
 					<td colspan="2">
 						<div id="header">
-								<a id="logo" <!--- class="scale-up" ---> href="#home#"></a>
+								<a id="logo" <!--- class="scale-up" ---> href="index.cfm"></a>
 								
 						</div>	<!--- #header !---><div class="version-number">#server.lucee.version#</div>
 					</td>
@@ -67,9 +64,9 @@
 						<div id="content">
 							 <div id="maintitle">
 								<cfif hasNavigation && application.adminfunctions.canAccessContext()>
-									<!-- <div id="logouts">
-									<a class="sprite tooltipMe logout" href="#request.self#?action=logout" title="Logout"></a>
-									</div> -->
+									<div id="logouts">
+										<a class="sprite tooltipMe logout" href="#request.self#?action=logout" title="Logout"></a>
+									</div> 
 									<!--- Favorites --->
 									<cfparam name="url.action" default="">
 									<cfset pageIsFavorite = application.adminfunctions.isFavorite(url.action)>

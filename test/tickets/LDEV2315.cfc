@@ -12,7 +12,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
             it( title='Checking getLocaleInfo() function', body=function( currentSpec ) {
 
-                res = getLocaleInfo();
+                var res = getLocaleInfo();
 
                 expect(res).toHaveKey("country");
                 expect(res).toHaveKey("currency");
@@ -26,11 +26,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
             it( title='Checking getLocaleInfo() function with en_US timeZone', body=function( currentSpec ) {
 
-                origLocale = getLocale();
+                var origLocale = getLocale();
 
                 // en_US
                 setLocale("english (united states)");
-                res = getLocaleInfo();
+                var res = getLocaleInfo();
                 expect(res.country).toBe("US");
                 expect(res.currency.code).toBe("USD");
                 expect(res.currency.symbol).toBe("$"); // $
@@ -43,11 +43,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
             it( title='Checking getLocaleInfo() function with ja_JP_JP timeZone', body=function( currentSpec ) {
 
-                origLocale = getLocale();
+                var origLocale = getLocale();
 
                 // jpn
                 setLocale("ja_JP_JP");
-                res = getLocaleInfo();
+                var res = getLocaleInfo();
                 expect(res.country).toBe("JP");
                 expect(res.currency.code).toBe("JPY");
                 expect(Asc(res.currency.symbol)).toBe("65509"); // د.ج.
@@ -58,11 +58,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
             it( title='Checking getLocaleInfo() function with dutch (belgium) timeZone', body=function( currentSpec ) {
 
-                origLocale = getLocale();
+                var origLocale = getLocale();
 
                 // dutch (belgium)
                 setLocale("dutch (belgium)");
-                res = getLocaleInfo();
+                var res = getLocaleInfo();
                 expect(res.country).toBe("BE");
                 expect(res.currency.code).toBe("EUR");
                 expect(Asc(res.currency.symbol)).toBe("8364"); // €
@@ -75,11 +75,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
             it( title='Checking getLocaleInfo() function with spanish (argentina) timeZone', body=function( currentSpec ) {
 
-                origLocale = getLocale();
+                var origLocale = getLocale();
 
                 // spanish (argentina)
                 setLocale("spanish (argentina)");
-                res = getLocaleInfo();
+                var res = getLocaleInfo();
                 expect(res.country).toBe("AR");
                 expect(res.currency.code).toBe("ARS");
                 expect(Asc(res.currency.symbol)).toBe("36"); // $

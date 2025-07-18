@@ -103,7 +103,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase"{
 			  
 				var after=arrayLen(c.getMappings());
 				var has=false;
-				loop array=c.getMappings() item="mapping" {
+				loop array=c.getMappings() item="local.mapping" {
 					if(virtual==mapping.virtual)has=true;
 				}
 
