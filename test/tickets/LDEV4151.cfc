@@ -1,4 +1,4 @@
-component extends="org.lucee.cfml.test.LuceeTestCase" skip="true" {
+component extends="org.lucee.cfml.test.LuceeTestCase" {
 	function run( testResults , testBox ) {
 		describe( "Test suite for LDEV-4151", function() {
 			it( title="concatenation operator(&) in finally without local scope prefix", body = function( currentSpec ) {
@@ -13,7 +13,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip="true" {
 				expect(testLocalPrefixInFinally(3)).toBe("Start-Try-Finally-End");
 			});
 			
-			it( title="compound concatenation operator(&=) in finally with local scope prefix", body = function( currentSpec ) {
+			xit( title="compound concatenation operator(&=) in finally with local scope prefix", body = function( currentSpec ) {
 				try {
 					var res = testLocalPrefixInFinally(4);
 				}
