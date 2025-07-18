@@ -78,6 +78,6 @@ public final class VariableRef extends ExpressionBase {
 
 	@Override
 	public void dump(Struct sct) {
-		super.dump(sct);// MUSTTT
+		variable.dump(sct);
 	}
 }

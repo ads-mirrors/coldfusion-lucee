@@ -1034,6 +1034,9 @@ public abstract class PageContext extends jakarta.servlet.jsp.PageContext {
 	 */
 	public abstract void compile(PageSource pageSource) throws PageException;
 
+	// FUTURE
+	// public abstract Struct transform(PageSource pageSource) throws PageException;
+
 	/**
 	 * init body of a tag
 	 * 

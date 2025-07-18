@@ -21,6 +21,8 @@ package lucee.transformer.bytecode.expression.var;
 import org.objectweb.asm.Type;
 
 import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.expression.ExpressionBase;
@@ -90,6 +92,10 @@ public class ArgumentImpl extends ExpressionBase implements Argument {
 
 	@Override
 	public void dump(Struct sct) {
-		super.dump(sct);// MUSTTT
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, type);
+		Struct val = new StructImpl(Struct.TYPE_LINKED);
+		sct.setEL(KeyConstants._value, val);
+		raw.dump(val);
 	}
 }

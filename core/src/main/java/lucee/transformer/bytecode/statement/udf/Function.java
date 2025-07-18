@@ -36,6 +36,7 @@ import lucee.runtime.exp.TemplateException;
 import lucee.runtime.listener.AppListenerUtil;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.ArrayImpl;
+import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.FuncArgLite;
 import lucee.runtime.type.FunctionArgument;
 import lucee.runtime.type.FunctionArgumentImpl;
@@ -720,22 +721,12 @@ public abstract class Function extends StatementBaseNoFinal implements Opcodes, 
 			params.appendEL(param);
 
 			Expression expr = arg.getType();
-			if (expr != null) param.setEL(KeyConstants._type, expr);
-
-			expr = arg.getName();
-			if (expr != null) param.setEL(KeyConstants._name, expr);
-
-			expr = arg.getRequired();
-			if (expr != null) param.setEL(KeyConstants._required, expr);
-
-			expr = arg.getDefaultValue();
-			if (expr != null) param.setEL(KeyConstants._defaultValue, expr);
-
-			expr = arg.getDisplayName();
-			if (expr != null) param.setEL(KeyConstants._displayName, expr);
-
-			expr = arg.getHint();
-			if (expr != null) param.setEL(KeyConstants._hint, expr);
+			set(param, arg.getType(), KeyConstants._type);
+			set(param, arg.getName(), KeyConstants._name);
+			set(param, arg.getRequired(), KeyConstants._required);
+			set(param, arg.getDefaultValue(), KeyConstants._defaultValue);
+			set(param, arg.getDisplayName(), KeyConstants._displayName);
+			set(param, arg.getHint(), KeyConstants._hint);
 		}
 
 		// body
@@ -743,6 +734,14 @@ public abstract class Function extends StatementBaseNoFinal implements Opcodes, 
 			Struct s = new StructImpl(Struct.TYPE_LINKED);
 			body.dump(s);
 			sct.setEL(KeyConstants._body, s);
+		}
+	}
+
+	private void set(Struct param, Expression expr, Key key) {
+		if (expr != null) {
+			Struct s = new StructImpl(Struct.TYPE_LINKED);
+			expr.dump(s);
+			param.setEL(key, s);
 		}
 	}
 

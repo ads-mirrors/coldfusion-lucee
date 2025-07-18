@@ -22,6 +22,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import lucee.runtime.type.Struct;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
@@ -61,6 +62,9 @@ public final class CollectionKeyArray extends ExpressionBase {
 
 	@Override
 	public void dump(Struct sct) {
-		super.dump(sct);// MUSTTT
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "StringArrayLiteral");
+		sct.setEL(KeyConstants._value, arr);
+
 	}
 }
