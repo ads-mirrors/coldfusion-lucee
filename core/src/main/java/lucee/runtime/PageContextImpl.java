@@ -686,6 +686,7 @@ public final class PageContextImpl extends PageContext {
 			currentThread = null;
 			cgiR = new CGIImplReadOnly();
 			cgiRW = new CGIImpl();
+			if (lastStanding) cookie.release(this);
 		}
 		else {
 
@@ -715,11 +716,11 @@ public final class PageContextImpl extends PageContext {
 			request.release(this);
 			cgiR.release(this);
 			cgiRW.release(this);
+			cookie.release(this);
 		}
 		argument.release(this);
 		local = localUnsupportedScope;
-
-		cookie.release(this);
+		
 		application = null;// not needed at the moment -> application.releaseAfterRequest();
 		applicationContext = null;// do not release may used by child threads
 
