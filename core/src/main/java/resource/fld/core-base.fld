@@ -1579,6 +1579,7 @@ sort direction:
 		<name>astFromPath</name>
 		<class>lucee.runtime.functions.ast.AstFromPath</class>
 		<keywords>ast,transform,compile</keywords>
+		<introduced>7.0.0.296</introduced>
 		<description>Parses a CFML file and returns its Abstract Syntax Tree (AST) representation.
 
 The AST is a structured tree that represents the syntactic structure of the CFML code, making it useful for:
@@ -1606,6 +1607,7 @@ The returned AST uses **neutral, language-agnostic node types** following ESTree
 		<name>astFromString</name>
 		<class>lucee.runtime.functions.ast.AstFromString</class>
 		<keywords>ast,transform,compile</keywords>
+		<introduced>7.0.0.296</introduced>
 		<description>**Parses CFML source code from a string and returns its Abstract Syntax Tree (AST) representation.**
 
 The AST is a structured tree that represents the syntactic structure of the CFML code, making it useful for:
