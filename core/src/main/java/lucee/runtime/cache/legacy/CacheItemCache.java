@@ -40,8 +40,8 @@ public final class CacheItemCache extends CacheItem {
 	private TimeSpan timespan;
 	private String lcFileName;
 
-	public CacheItemCache(PageContext pc, HttpServletRequest req, String id, String key, boolean useId, Cache cache, TimeSpan timespan) {
-		super(pc, req, id, key, useId);
+	public CacheItemCache(PageContext pc, HttpServletRequest req, String id, String key, boolean useId, Cache cache, TimeSpan timespan, boolean useQueryString) {
+		super(pc, req, id, key, useId, useQueryString);
 		this.cache = cache;
 		this.timespan = timespan;
 		lcFileName = fileName;
