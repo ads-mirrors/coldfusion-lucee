@@ -18,13 +18,11 @@
  **/
 package lucee.runtime.type.util;
 
-import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
-import lucee.commons.io.SystemUtil;
-import lucee.commons.lang.ExceptionUtil;
+import lucee.print;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.KeyImpl;
 
@@ -3083,33 +3081,32 @@ public final class KeyConstants {
 
 	private static Map<String, Key> _____keys;
 
-	public static Map<String, Key> getKeys() {
-		if (_____keys == null) {
-			synchronized (SystemUtil.createToken("KeyConstants", "getKeys")) {
-				if (_____keys == null) {
-					Field[] fields = KeyConstants.class.getFields();
-					_____keys = new ConcurrentHashMap<String, Key>();
-					for (int i = 0; i < fields.length; i++) {
-						if (fields[i].getType() != Key.class || !fields[i].getName().startsWith("_")) continue;
-						try {
-							_____keys.put(fields[i].getName().substring(1), (Key) fields[i].get(null));
-						}
-						catch (Throwable t) {
-							ExceptionUtil.rethrowIfNecessary(t);
-						}
-					}
+	static {
+		_____keys = clone(KeyImpl.getKeys());
 
-					copyTo(KeyImpl.getKeys());
-				}
-			}
-		}
+	}
+
+	public static Map<String, Key> getKeys() {
 		return _____keys;
 	}
 
-	private static void copyTo(Map<String, Key> target) {
-		for (Entry<String, Key> e: _____keys.entrySet()) {
+	public static void main(String[] args) {
+		long start = System.currentTimeMillis();
+		getKeys();
+		print.e(System.currentTimeMillis() - start);
+
+		start = System.currentTimeMillis();
+		getKeys();
+		print.e(System.currentTimeMillis() - start);
+		print.e(getKeys().size());
+	}
+
+	private static Map<String, Key> clone(Map<String, Key> source) {
+		Map<String, Key> target = new ConcurrentHashMap<>();
+		for (Entry<String, Key> e: source.entrySet()) {
 			target.put(e.getKey(), e.getValue());
 		}
+		return target;
 	}
 
 	public static String getFieldName(String key) {
