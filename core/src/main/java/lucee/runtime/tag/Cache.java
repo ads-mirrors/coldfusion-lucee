@@ -111,6 +111,7 @@ public final class Cache extends BodyTagImpl {
 	private boolean throwOnError;
 	private String metadata;
 	private boolean useQueryString = true;
+	private boolean useCache = true;
 
 	private static final int CACHE = 0;
 	private static final int CACHE_SERVER = 1;
@@ -146,6 +147,7 @@ public final class Cache extends BodyTagImpl {
 		value = null;
 		metadata = null;
 		useQueryString = true;
+		useCache = true;
 	}
 
 	/**
@@ -274,12 +276,18 @@ public final class Cache extends BodyTagImpl {
 		this.timespan = timespan;
 	}
 
-
 	/**
 	 * @param useQueryString whether to ignore the query string.
 	 */
 	public void setUsequerystring(boolean useQueryString) {
 		this.useQueryString = useQueryString;
+	}
+
+	/**
+	 * @param useCache whether to use the cache.
+	 */
+	public void setUsecache(boolean useCache) {
+		this.useCache = useCache;
 	}
 
 	@Override
@@ -382,7 +390,7 @@ public final class Cache extends BodyTagImpl {
 	 */
 
 	private int doContentCache() throws IOException {
-
+		if (!useCache) return EVAL_BODY_BUFFERED;
 		// file
 		cacheItem = generateCacheResource(key, true);
 		// use cache
