@@ -1,4 +1,4 @@
-component extends="org.lucee.cfml.test.LuceeTestCase" labels="syntax" skip=true {
+component extends="org.lucee.cfml.test.LuceeTestCase" labels="syntax" {
     function beforeAll(){
         variables.uri = createURI("LDEV3393");
     }
@@ -36,10 +36,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="syntax" skip=true 
                 }
                 expect(res).tobe(arr);
             });
+
             it( title="For-loop inside finally{}", body=function( currentSpec ){
                 try{
                     local.result = _InternalRequest(
-                        template : "#uri#\test.cfm"
+                        template : "#uri#\forLoopFinally.cfm"
                     );
                 }
                 catch(any e){
@@ -69,6 +70,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="syntax" skip=true 
                     result.fileContent = e.message;
                 }
                 expect(trim(result.fileContent)).notToInclude("java.lang.NullPointerException");
+                expect(trim(result.fileContent)).toInclude("LDEV-4451-nestedfinally");
             });
         });
     }
