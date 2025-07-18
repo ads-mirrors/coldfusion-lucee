@@ -390,14 +390,15 @@ public final class Cache extends BodyTagImpl {
 	 */
 
 	private int doContentCache() throws IOException {
-		if (!useCache) return EVAL_BODY_BUFFERED;
 		// file
 		cacheItem = generateCacheResource(key, true);
-		// use cache
-		if (cacheItem.isValid(timespan)) {
-			pageContext.write(cacheItem.getValue());
-			doCaching = false;
-			return SKIP_BODY;
+		if (useCache){
+			// use cache
+			if (cacheItem.isValid(timespan)) {
+				pageContext.write(cacheItem.getValue());
+				doCaching = false;
+				return SKIP_BODY;
+			}
 		}
 		doCaching = true;
 		return EVAL_BODY_BUFFERED;

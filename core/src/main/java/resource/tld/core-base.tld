@@ -347,14 +347,14 @@ A return value from the CreateTimeSpan function, for example, "#CreateTimeSpan(0
 			<name>useQueryString</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>whether to include the query_string when caching</description>
+			<description>Whether to consider the query_string when caching</description>
 		</attribute>
 		<attribute>
 			<type>boolean</type>
 			<name>useCache</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>whether to use the cache, default is true</description>
+			<description>Whether to use the cache, default is true. When false the cache is still updated</description>
 		</attribute>
 	</tag>
 

@@ -38,14 +38,18 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect( result.filecontent ).toInclude( "four=4" );
 			});
 		});
-		
+
 		describe( title="Test useCache", body=function() {
 			it(title="checking cfcache - useCache=false && useQueryString=false", body = function( currentSpec ) {
 				var result=_test( "useQueryString", "three=3", "useQueryString=false&wasCached=true" );
 				expect( result.filecontent ).toInclude( "three=3" );
 
-				result=_test( "useQueryString", "four=4", "useQueryString=false&useCache=false" );
-				expect( result.filecontent ).notToInclude( "wasCached=true" ); // not cached
+				result=_test( "useQueryString", "four=4", "useQueryString=false&useCache=false&cacheAnyway=true" );
+				expect( result.filecontent ).notToInclude( "wasCached=true" ); // not cached, but overwrites cache
+				expect( result.filecontent ).toInclude( "four=4" );
+
+				result=_test( "useQueryString", "four=4", "useQueryString=false" );
+				expect( result.filecontent ).toInclude( "cacheAnyway" ); // cached from previous
 				expect( result.filecontent ).toInclude( "four=4" );
 			});
 
@@ -53,8 +57,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				var result=_test( "useQueryString", "three=3", "useQueryString=true&wasCached=true" );
 				expect( result.filecontent ).toInclude( "three=3" );
 
-				result=_test( "useQueryString", "three=3", "useQueryString=true&useCache=false" );
-				expect( result.filecontent ).notToInclude( "wasCached=true" ); // not cached
+				result=_test( "useQueryString", "three=3", "useQueryString=true&useCache=false&cacheAnyway=true" );
+				expect( result.filecontent ).notToInclude( "wasCached=true" ); // not cached, but overwrites cache
+				expect( result.filecontent ).toInclude( "three=3" );
+
+				result=_test( "useQueryString", "three=3", "useQueryString=true" );
+				expect( result.filecontent ).toInclude( "cacheAnyway" ); // cached from previous
 				expect( result.filecontent ).toInclude( "three=3" );
 			});
 
@@ -68,7 +76,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 			url: qs,
 			form: f
 		);
-		systemOutput(result.fileContent, true);
+		// systemOutput(result.fileContent, true);
 		return result;
 	}
 
