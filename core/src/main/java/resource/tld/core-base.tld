@@ -363,6 +363,14 @@ A return value from the CreateTimeSpan function, for example, "#CreateTimeSpan(0
 			<rtexprvalue>true</rtexprvalue>
 			<description>Whether to strip stripWhiteSpace, default is false.</description>
 		</attribute>
+		<attribute>
+			<type>string</type>
+			<name>dependsOn</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<description>A list of additional variables which invalidate the cache when changed.</description>
+			<status>unimplemented</status>
+		</attribute>
 		
 	</tag>
 
