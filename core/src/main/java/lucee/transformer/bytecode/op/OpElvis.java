@@ -30,13 +30,16 @@ import org.objectweb.asm.commons.Method;
 
 import lucee.runtime.functions.other.CreateUniqueId;
 import lucee.runtime.op.Elvis;
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
-import lucee.transformer.bytecode.expression.AsExpression;
 import lucee.transformer.bytecode.expression.ExpressionBase;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.bytecode.util.Types;
 import lucee.transformer.bytecode.visitor.ArrayVisitor;
+import lucee.transformer.expression.AsExpression;
 import lucee.transformer.expression.Expression;
 import lucee.transformer.expression.literal.Literal;
 import lucee.transformer.expression.var.DataMember;
@@ -196,5 +199,24 @@ public final class OpElvis extends ExpressionBase {
 
 	public static Expression toExpr(Variable left, Expression right) {
 		return new OpElvis(left, right);
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "BinaryExpression");
+		sct.setEL(KeyConstants._operator, "ELVIS");
+		// left
+		{
+			Struct sctLeft = new StructImpl(Struct.TYPE_LINKED);
+			left.dump(sctLeft);
+			sct.setEL(KeyConstants._left, sctLeft);
+		}
+		// right
+		{
+			Struct sctRight = new StructImpl(Struct.TYPE_LINKED);
+			right.dump(sctRight);
+			sct.setEL(KeyConstants._right, sctRight);
+		}
 	}
 }

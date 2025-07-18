@@ -33,6 +33,8 @@ import lucee.transformer.expression.literal.LitString;
 import lucee.transformer.expression.literal.Literal;
 import lucee.transformer.expression.var.DataMember;
 import lucee.transformer.expression.var.Variable;
+import lucee.transformer.statement.Statement;
+import lucee.transformer.util.SourceCode;
 
 public abstract class Factory {
 
@@ -184,4 +186,10 @@ public abstract class Factory {
 	public static boolean canRegisterKey(Expression name) {
 		return name instanceof LitString;
 	}
+
+	public abstract Page createPage(SourceCode sc, long sourceLastModified, boolean returnValue, boolean ignoreScopes);
+
+	public abstract Body createBody();
+
+	public abstract Statement createPrintOut(Expression expr, Position start, Position end);
 }

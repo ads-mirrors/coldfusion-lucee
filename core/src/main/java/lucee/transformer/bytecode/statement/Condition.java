@@ -21,15 +21,19 @@ package lucee.transformer.bytecode.statement;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
+import lucee.transformer.Body;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
-import lucee.transformer.bytecode.Body;
 import lucee.transformer.bytecode.BytecodeContext;
-import lucee.transformer.bytecode.Statement;
 import lucee.transformer.bytecode.visitor.ConditionVisitor;
 import lucee.transformer.expression.ExprBoolean;
 import lucee.transformer.expression.Expression;
+import lucee.transformer.statement.HasBodies;
+import lucee.transformer.statement.Statement;
 
 public final class Condition extends StatementBaseNoFinal implements HasBodies {
 
@@ -74,7 +78,7 @@ public final class Condition extends StatementBaseNoFinal implements HasBodies {
 	 * @param body
 	 * @param start
 	 * @param end
-	 
+	 * 
 	 */
 	public Pair addElseIf(ExprBoolean condition, Statement body, Position start, Position end) {
 		Pair pair;
@@ -138,7 +142,7 @@ public final class Condition extends StatementBaseNoFinal implements HasBodies {
 	}
 
 	/**
-	 * @see lucee.transformer.bytecode.statement.HasBodies#getBodies()
+	 * @see lucee.transformer.statement.HasBodies#getBodies()
 	 */
 	@Override
 	public Body[] getBodies() {
@@ -154,5 +158,49 @@ public final class Condition extends StatementBaseNoFinal implements HasBodies {
 		if (_else != null) bodies[count++] = (Body) _else.body;
 
 		return bodies;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "IfStatement");
+
+		// Build the nested if-else if-else structure
+		if (ifs != null && ifs.size() > 0) {
+			Struct currentIf = sct;
+
+			for (int i = 0; i < ifs.size(); i++) {
+				Pair pair = ifs.get(i);
+
+				// test
+				Struct test = new StructImpl(Struct.TYPE_LINKED);
+				pair.condition.dump(test);
+				currentIf.setEL(KeyConstants._test, test);
+
+				// consequent
+				Struct consequent = new StructImpl(Struct.TYPE_LINKED);
+				pair.body.dump(consequent);
+				currentIf.setEL(KeyConstants._consequent, consequent);
+
+				// Check if there's another if (else-if) or else coming
+				if (i + 1 < ifs.size()) {
+					// Create nested IfStatement for else-if
+					Struct alternate = new StructImpl(Struct.TYPE_LINKED);
+					alternate.setEL(KeyConstants._type, "IfStatement");
+					currentIf.setEL(KeyConstants._alternate, alternate);
+					currentIf = alternate;
+				}
+				else if (_else != null) {
+					// Add else block
+					Struct alternate = new StructImpl(Struct.TYPE_LINKED);
+					_else.body.dump(alternate);
+					currentIf.setEL(KeyConstants._alternate, alternate);
+				}
+				else {
+					// No else, set alternate to null
+					currentIf.setEL(KeyConstants._alternate, null);
+				}
+			}
+		}
 	}
 }

@@ -26,12 +26,14 @@ import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.op.Caster;
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
+import lucee.transformer.Range;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
-import lucee.transformer.bytecode.Page;
-import lucee.transformer.bytecode.Range;
+import lucee.transformer.bytecode.PageImpl;
 import lucee.transformer.bytecode.expression.ExpressionBase;
 import lucee.transformer.bytecode.util.Types;
 import lucee.transformer.expression.ExprString;
@@ -73,6 +75,11 @@ public class LitStringImpl extends ExpressionBase implements LitString, ExprStri
 	}
 
 	@Override
+	public Object getValue() {
+		return str;
+	}
+
+	@Override
 	public String getString() {
 		return str;
 	}
@@ -89,7 +96,7 @@ public class LitStringImpl extends ExpressionBase implements LitString, ExprStri
 		if (externalizeStringGTE > 0 && str.length() > externalizeStringGTE && StringUtil.indexOfIgnoreCase(bc.getMethod().getName(), "call") != -1) {
 			try {
 				GeneratorAdapter ga = bc.getAdapter();
-				Page page = bc.getPage();
+				PageImpl page = (PageImpl) bc.getPage();
 				Range range = page.registerString(bc, str);
 				if (range != null) {
 					ga.visitVarInsn(Opcodes.ALOAD, 0);
@@ -186,5 +193,12 @@ public class LitStringImpl extends ExpressionBase implements LitString, ExprStri
 	@Override
 	public boolean fromBracket() {
 		return fromBracket;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "StringLiteral");
+		sct.setEL(KeyConstants._value, str);
 	}
 }

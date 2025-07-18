@@ -26,12 +26,13 @@ import lucee.runtime.type.scope.Scope;
 import lucee.runtime.type.util.ArrayUtil;
 import lucee.transformer.bytecode.expression.type.CollectionKey;
 import lucee.transformer.bytecode.expression.type.CollectionKeyArray;
-import lucee.transformer.bytecode.expression.var.Argument;
+import lucee.transformer.bytecode.expression.var.ArgumentImpl;
 import lucee.transformer.bytecode.expression.var.BIF;
 import lucee.transformer.cfml.evaluator.EvaluatorException;
 import lucee.transformer.cfml.evaluator.FunctionEvaluator;
 import lucee.transformer.expression.Expression;
 import lucee.transformer.expression.literal.LitString;
+import lucee.transformer.expression.var.Argument;
 import lucee.transformer.library.function.FunctionLibFunction;
 
 public final class IsDefined implements FunctionEvaluator {
@@ -61,13 +62,13 @@ public final class IsDefined implements FunctionEvaluator {
 
 				if (arr.length == 1) {
 					Expression expr = new CollectionKey(bif.getFactory(), arr[0]);// LitString.toExprString(str);
-					arg = new Argument(expr, Collection.Key.class.getName());
+					arg = new ArgumentImpl(expr, Collection.Key.class.getName());
 					bif.addArgument(arg);
 				}
 				else {
 					CollectionKeyArray expr = new CollectionKeyArray(bif.getFactory(), arr);
 					// LiteralStringArray expr = new LiteralStringArray(arr);
-					arg = new Argument(expr, Collection.Key[].class.getName());
+					arg = new ArgumentImpl(expr, Collection.Key[].class.getName());
 					bif.addArgument(arg);
 				}
 

@@ -18,11 +18,11 @@
  **/
 package lucee.transformer.cfml.evaluator.impl;
 
-import lucee.transformer.bytecode.statement.tag.Tag;
-import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.cfml.evaluator.EvaluatorException;
 import lucee.transformer.cfml.evaluator.EvaluatorSupport;
 import lucee.transformer.library.tag.TagLibTag;
+import lucee.transformer.statement.tag.Tag;
+import lucee.transformer.util.TransformerUtil;
 
 /**
  * Prueft den Kontext des Tag mailpart. Das Tag <code>mailPart</code> darf nur innerhalb des Tag
@@ -37,6 +37,7 @@ public final class MailPart extends EvaluatorSupport {
 		String ns = libTag.getTagLib().getNameSpaceAndSeparator();
 		String mailName = ns + "mail";
 
-		if (!ASMUtil.hasAncestorTag(tag, mailName)) throw new EvaluatorException("Wrong Context, tag [" + libTag.getFullName() + "] must be inside a [" + mailName + "] tag");
+		if (!TransformerUtil.hasAncestorTag(tag, mailName))
+			throw new EvaluatorException("Wrong Context, tag [" + libTag.getFullName() + "] must be inside a [" + mailName + "] tag");
 	}
 }

@@ -23,8 +23,8 @@ import java.util.Map;
 
 import lucee.commons.lang.StringUtil;
 import lucee.transformer.Factory;
-import lucee.transformer.bytecode.statement.tag.Attribute;
 import lucee.transformer.expression.literal.Literal;
+import lucee.transformer.statement.tag.Attribute;
 
 public final class DocComment {
 

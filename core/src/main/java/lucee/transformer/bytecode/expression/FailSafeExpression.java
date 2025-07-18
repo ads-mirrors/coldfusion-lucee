@@ -23,6 +23,9 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.util.Types;
@@ -74,6 +77,25 @@ public final class FailSafeExpression extends ExpressionBase implements Opcodes 
 		}
 
 		return Types.OBJECT;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "BinaryExpression");
+		sct.setEL(KeyConstants._operator, "FAILSAVE");
+		// left
+		{
+			Struct sctLeft = new StructImpl(Struct.TYPE_LINKED);
+			expr.dump(sctLeft);
+			sct.setEL(KeyConstants._left, sctLeft);
+		}
+		// right
+		{
+			Struct sctRight = new StructImpl(Struct.TYPE_LINKED);
+			defaultValue.dump(sctRight);
+			sct.setEL(KeyConstants._right, sctRight);
+		}
 	}
 
 }

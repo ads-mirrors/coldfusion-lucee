@@ -34,8 +34,6 @@ import lucee.runtime.PageSource;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.exp.TemplateException;
-import lucee.transformer.bytecode.statement.tag.Attribute;
-import lucee.transformer.bytecode.statement.tag.Tag;
 import lucee.transformer.bytecode.statement.tag.TagImport;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.cfml.Data;
@@ -47,6 +45,8 @@ import lucee.transformer.library.tag.TagLib;
 import lucee.transformer.library.tag.TagLibException;
 import lucee.transformer.library.tag.TagLibFactory;
 import lucee.transformer.library.tag.TagLibTag;
+import lucee.transformer.statement.tag.Attribute;
+import lucee.transformer.statement.tag.Tag;
 import lucee.transformer.util.PageSourceCode;
 import lucee.transformer.util.SourceCode;
 

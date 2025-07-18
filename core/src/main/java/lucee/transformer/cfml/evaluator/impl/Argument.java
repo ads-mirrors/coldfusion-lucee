@@ -19,8 +19,6 @@
 package lucee.transformer.cfml.evaluator.impl;
 
 import lucee.runtime.op.Caster;
-import lucee.transformer.bytecode.statement.tag.Attribute;
-import lucee.transformer.bytecode.statement.tag.Tag;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.cfml.evaluator.EvaluatorException;
 import lucee.transformer.cfml.evaluator.EvaluatorSupport;
@@ -28,6 +26,8 @@ import lucee.transformer.expression.ExprString;
 import lucee.transformer.expression.Expression;
 import lucee.transformer.expression.literal.LitString;
 import lucee.transformer.library.tag.TagLibTag;
+import lucee.transformer.statement.tag.Attribute;
+import lucee.transformer.statement.tag.Tag;
 
 /**
  *

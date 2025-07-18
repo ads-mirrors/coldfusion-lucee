@@ -3,6 +3,8 @@ package lucee.transformer.bytecode.literal;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.Method;
 
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
@@ -23,5 +25,11 @@ public final class Empty extends ExpressionBase {
 		bc.getAdapter().loadArg(0);
 		bc.getAdapter().invokeStatic(Types.NULL_SUPPORT_HELPER, EMPTY);
 		return Types.OBJECT;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "EmptyLiteral");
 	}
 }

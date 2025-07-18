@@ -22,12 +22,16 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
+import lucee.transformer.Body;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
-import lucee.transformer.bytecode.Body;
 import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.expression.ExprBoolean;
 import lucee.transformer.expression.Expression;
+import lucee.transformer.statement.HasBody;
 
 public final class While extends StatementBaseNoFinal implements FlowControlBreak, FlowControlContinue, HasBody {
 
@@ -100,5 +104,24 @@ public final class While extends StatementBaseNoFinal implements FlowControlBrea
 	@Override
 	public String getLabel() {
 		return label;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "WhileStatement");
+
+		// test
+		{
+			Struct test = new StructImpl(Struct.TYPE_LINKED);
+			expr.dump(test);
+			sct.setEL(KeyConstants._test, test);
+		}
+		// body
+		{
+			Struct body = new StructImpl(Struct.TYPE_LINKED);
+			this.body.dump(body);
+			sct.setEL(KeyConstants._body, body);
+		}
 	}
 }

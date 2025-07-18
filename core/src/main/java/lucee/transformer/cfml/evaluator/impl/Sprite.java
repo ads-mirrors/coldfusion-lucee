@@ -28,15 +28,15 @@ import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.IDGenerator;
 import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.op.Caster;
-import lucee.transformer.bytecode.Page;
-import lucee.transformer.bytecode.statement.tag.Attribute;
-import lucee.transformer.bytecode.statement.tag.Tag;
+import lucee.transformer.Page;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.cfml.evaluator.EvaluatorException;
 import lucee.transformer.cfml.evaluator.EvaluatorSupport;
 import lucee.transformer.expression.Expression;
 import lucee.transformer.library.function.FunctionLib;
 import lucee.transformer.library.tag.TagLibTag;
+import lucee.transformer.statement.tag.Attribute;
+import lucee.transformer.statement.tag.Tag;
 import lucee.transformer.util.SourceCode;
 
 public final class Sprite extends EvaluatorSupport {

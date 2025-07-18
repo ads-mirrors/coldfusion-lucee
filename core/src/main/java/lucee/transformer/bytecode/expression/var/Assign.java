@@ -22,8 +22,11 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.scope.Scope;
 import lucee.runtime.type.scope.ScopeFactory;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
@@ -333,6 +336,22 @@ public class Assign extends ExpressionBase {
 
 	public void setFinal(boolean _final) {
 		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "AssignmentExpression");
+		sct.setEL(KeyConstants._operator, "ASSIGN");
+
+		Struct left = new StructImpl(Struct.TYPE_LINKED);
+		sct.setEL(KeyConstants._left, left);
+		variable.dump(left);
+
+		Struct right = new StructImpl(Struct.TYPE_LINKED);
+		sct.setEL(KeyConstants._right, right);
+		value.dump(right);
 
 	}
 }

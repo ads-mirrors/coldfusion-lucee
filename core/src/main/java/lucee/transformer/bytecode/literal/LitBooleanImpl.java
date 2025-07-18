@@ -24,6 +24,8 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import lucee.runtime.op.Caster;
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.bytecode.BytecodeContext;
@@ -58,6 +60,11 @@ public final class LitBooleanImpl extends ExpressionBase implements LitBoolean, 
 	public LitBooleanImpl(Factory f, boolean b, Position start, Position end) {
 		super(f, start, end);
 		this.b = b;
+	}
+
+	@Override
+	public Object getValue() {
+		return getBoolean();
 	}
 
 	@Override
@@ -122,5 +129,12 @@ public final class LitBooleanImpl extends ExpressionBase implements LitBoolean, 
 	@Override
 	public Boolean getBoolean(Boolean defaultValue) {
 		return getBoolean();
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "BooleanLiteral");
+		sct.setEL(KeyConstants._value, this.b);
 	}
 }

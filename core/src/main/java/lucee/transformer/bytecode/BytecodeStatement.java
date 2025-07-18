@@ -16,12 +16,19 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  * 
  **/
-package lucee.transformer.bytecode.statement;
+package lucee.transformer.bytecode;
 
-import lucee.transformer.bytecode.Body;
+import lucee.transformer.bytecode.statement.FlowControlFinal;
+import lucee.transformer.statement.Statement;
 
-public interface HasBodies {
+/**
+ * A single Statement
+ */
+public interface BytecodeStatement extends Statement {
 
-	public Body[] getBodies();
-
+	/**
+	 * @return return the label where the finally block of this tags starts, IF there is a finally
+	 *         block, otherwise return null;
+	 */
+	public FlowControlFinal getFlowControlFinal();
 }

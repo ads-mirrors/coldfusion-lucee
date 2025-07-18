@@ -67,31 +67,25 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.dt.TimeSpanImpl;
 import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.type.util.ListUtil;
+import lucee.transformer.Body;
+import lucee.transformer.Page;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
-import lucee.transformer.bytecode.Body;
 import lucee.transformer.bytecode.BodyBase;
 import lucee.transformer.bytecode.BytecodeContext;
-import lucee.transformer.bytecode.Page;
+import lucee.transformer.bytecode.BytecodeStatement;
+import lucee.transformer.bytecode.PageImpl;
 import lucee.transformer.bytecode.ScriptBody;
-import lucee.transformer.bytecode.Statement;
-import lucee.transformer.bytecode.expression.var.Argument;
 import lucee.transformer.bytecode.expression.var.BIF;
 import lucee.transformer.bytecode.expression.var.VariableString;
 import lucee.transformer.bytecode.literal.Identifier;
-import lucee.transformer.bytecode.statement.FlowControl;
 import lucee.transformer.bytecode.statement.FlowControlBreak;
 import lucee.transformer.bytecode.statement.FlowControlContinue;
 import lucee.transformer.bytecode.statement.FlowControlFinal;
 import lucee.transformer.bytecode.statement.FlowControlRetry;
-import lucee.transformer.bytecode.statement.HasBodies;
-import lucee.transformer.bytecode.statement.HasBody;
-import lucee.transformer.bytecode.statement.IFunction;
 import lucee.transformer.bytecode.statement.PrintOut;
 import lucee.transformer.bytecode.statement.Switch;
 import lucee.transformer.bytecode.statement.TryCatchFinally;
-import lucee.transformer.bytecode.statement.tag.Attribute;
-import lucee.transformer.bytecode.statement.tag.Tag;
 import lucee.transformer.bytecode.statement.tag.TagComponent;
 import lucee.transformer.bytecode.statement.tag.TagScript;
 import lucee.transformer.bytecode.statement.tag.TagTry;
@@ -110,6 +104,13 @@ import lucee.transformer.expression.var.DataMember;
 import lucee.transformer.expression.var.Member;
 import lucee.transformer.expression.var.Variable;
 import lucee.transformer.library.function.FunctionLibFunction;
+import lucee.transformer.statement.FlowControl;
+import lucee.transformer.statement.HasBodies;
+import lucee.transformer.statement.HasBody;
+import lucee.transformer.statement.IFunction;
+import lucee.transformer.statement.Statement;
+import lucee.transformer.statement.tag.Attribute;
+import lucee.transformer.statement.tag.Tag;
 
 public final class ASMUtil {
 
@@ -134,18 +135,6 @@ public final class ASMUtil {
 	// update your jar files";
 	private static long id = 0;
 	private static Boolean verifyBytecode = null;
-
-	/**
-	 * Gibt zurueck ob das direkt uebergeordnete Tag mit dem uebergebenen Full-Name (Namespace und Name)
-	 * existiert.
-	 * 
-	 * @param stat Startelement, von wo aus gesucht werden soll.
-	 * @param fullName Name des gesuchten Tags.
-	 * @return Existiert ein solches Tag oder nicht.
-	 */
-	public static boolean hasAncestorTag(Statement stat, String fullName) {
-		return getAncestorTag(stat, fullName) != null;
-	}
 
 	/**
 	 * Gibt das uebergeordnete CFXD Tag Element zurueck, falls dies nicht existiert wird null
@@ -201,6 +190,8 @@ public final class ASMUtil {
 	}
 
 	private static FlowControl getAncestorFCStatement(Statement stat, List<FlowControlFinal> finallyLabels, int flowType, String label) {
+		// FUTURE remove and add flow control to Statement
+		if (!(stat instanceof BytecodeStatement)) throw new RuntimeException("this method can only be used with BytecodeStatement");
 		Statement parent = stat;
 		FlowControlFinal fcf;
 		while (true) {
@@ -228,7 +219,7 @@ public final class ASMUtil {
 
 			// only if not last
 			if (finallyLabels != null) {
-				fcf = parent.getFlowControlFinal();
+				fcf = ((BytecodeStatement) parent).getFlowControlFinal();
 				if (fcf != null) {
 					finallyLabels.add(fcf);
 				}
@@ -308,27 +299,6 @@ public final class ASMUtil {
 			}
 			else if (parent instanceof TryCatchFinally) {
 				return parent;
-			}
-		}
-	}
-
-	/**
-	 * Gibt ein uebergeordnetes Tag mit dem uebergebenen Full-Name (Namespace und Name) zurueck, falls
-	 * ein solches existiert, andernfalls wird null zurueckgegeben.
-	 * 
-	 * @param stat Startelement, von wo aus gesucht werden soll.
-	 * @param fullName Name des gesuchten Tags.
-	 * @return uebergeornetes Element oder null.
-	 */
-	public static Tag getAncestorTag(Statement stat, String fullName) {
-		Statement parent = stat;
-		Tag tag;
-		while (true) {
-			parent = parent.getParent();
-			if (parent == null) return null;
-			if (parent instanceof Tag) {
-				tag = (Tag) parent;
-				if (tag.getFullname().equalsIgnoreCase(fullName)) return tag;
 			}
 		}
 	}
@@ -1049,7 +1019,7 @@ public final class ASMUtil {
 				if (first instanceof BIF) {
 					BIF bif = (BIF) first;
 					if ("createTimeSpan".equalsIgnoreCase(bif.getFlf().getName())) {
-						Argument[] args = bif.getArguments();
+						lucee.transformer.expression.var.Argument[] args = bif.getArguments();
 						int len = ArrayUtil.size(args);
 						if (len >= 4 && len <= 5) {
 							double days = toDouble(args[0].getValue());
@@ -1202,7 +1172,7 @@ public final class ASMUtil {
 	public static void createEmptyStruct(GeneratorAdapter adapter) {
 		adapter.newInstance(Types.STRUCT_IMPL);
 		adapter.dup();
-		adapter.invokeConstructor(Types.STRUCT_IMPL, Page.INIT_STRUCT_IMPL);
+		adapter.invokeConstructor(Types.STRUCT_IMPL, PageImpl.INIT_STRUCT_IMPL);
 	}
 
 	public static void createEmptyArray(GeneratorAdapter adapter) {

@@ -24,6 +24,9 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
@@ -85,5 +88,19 @@ public final class OpNegateNumber extends ExpressionBase implements ExprNumber {
 		expr.writeOut(bc, MODE_REF);
 		adapter.invokeStatic(Types.CASTER, Methods.METHOD_NEGATE_NUMBER);
 		return Types.NUMBER;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "UnaryExpression");
+		sct.setEL(KeyConstants._operator, "NEGATE");
+		sct.setEL(KeyConstants._prefix, Boolean.TRUE);
+		// argument
+		{
+			Struct sctArg = new StructImpl(Struct.TYPE_LINKED);
+			expr.dump(sctArg);
+			sct.setEL(KeyConstants._argument, sctArg);
+		}
 	}
 }

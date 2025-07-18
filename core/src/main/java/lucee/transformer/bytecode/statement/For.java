@@ -22,13 +22,17 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
+import lucee.transformer.Body;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
-import lucee.transformer.bytecode.Body;
 import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.expression.Expression;
+import lucee.transformer.statement.HasBody;
 
 public final class For extends StatementBaseNoFinal implements FlowControlBreak, FlowControlContinue, HasBody {
 
@@ -119,5 +123,36 @@ public final class For extends StatementBaseNoFinal implements FlowControlBreak,
 	@Override
 	public String getLabel() {
 		return label;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "ForStatement");
+
+		// init
+		{
+			Struct init = new StructImpl(Struct.TYPE_LINKED);
+			this.init.dump(init);
+			sct.setEL(KeyConstants._init, init);
+		}
+		// test
+		{
+			Struct test = new StructImpl(Struct.TYPE_LINKED);
+			condition.dump(test);
+			sct.setEL(KeyConstants._test, test);
+		}
+		// alternate
+		{
+			Struct update = new StructImpl(Struct.TYPE_LINKED);
+			this.update.dump(update);
+			sct.setEL(KeyConstants._update, update);
+		}
+		// body
+		{
+			Struct body = new StructImpl(Struct.TYPE_LINKED);
+			this.body.dump(body);
+			sct.setEL(KeyConstants._body, body);
+		}
 	}
 }

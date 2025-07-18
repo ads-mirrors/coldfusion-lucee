@@ -21,6 +21,8 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import lucee.runtime.op.Caster;
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.bytecode.BytecodeContext;
@@ -48,6 +50,11 @@ public final class LitIntegerImpl extends ExpressionBase implements LitInteger, 
 	public LitIntegerImpl(Factory f, int i, Position start, Position end) {
 		super(f, start, end);
 		this.i = i;
+	}
+
+	@Override
+	public Object getValue() {
+		return getNumber();
 	}
 
 	/**
@@ -116,5 +123,12 @@ public final class LitIntegerImpl extends ExpressionBase implements LitInteger, 
 	@Override
 	public Boolean getBoolean(Boolean defaultValue) {
 		return getBoolean();
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "IntegerLiteral");
+		sct.setEL(KeyConstants._value, i);
 	}
 }

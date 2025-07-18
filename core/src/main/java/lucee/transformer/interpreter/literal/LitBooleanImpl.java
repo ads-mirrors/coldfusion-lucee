@@ -40,6 +40,11 @@ public final class LitBooleanImpl extends ExpressionBase implements LitBoolean, 
 		return boolean.class;
 	}
 
+	@Override
+	public Object getValue() {
+		return getBoolean();
+	}
+
 	/**
 	 * @return return value as double value
 	 */

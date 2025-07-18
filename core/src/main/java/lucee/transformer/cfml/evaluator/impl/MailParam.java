@@ -18,10 +18,10 @@
  **/
 package lucee.transformer.cfml.evaluator.impl;
 
-import lucee.transformer.bytecode.statement.tag.Tag;
 import lucee.transformer.cfml.evaluator.ChildEvaluator;
 import lucee.transformer.cfml.evaluator.EvaluatorException;
 import lucee.transformer.library.tag.TagLibTag;
+import lucee.transformer.statement.tag.Tag;
 
 /**
  * Prueft den Kontext des Tag mailparam. Das Tag <code>mailParam</code> darf nur innerhalb des Tag

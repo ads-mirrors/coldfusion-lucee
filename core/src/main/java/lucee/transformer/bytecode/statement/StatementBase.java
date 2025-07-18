@@ -18,17 +18,21 @@
  */
 package lucee.transformer.bytecode.statement;
 
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Context;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
-import lucee.transformer.bytecode.Statement;
+import lucee.transformer.bytecode.BytecodeStatement;
+import lucee.transformer.statement.Statement;
 
 /**
  * A single Statement
  */
-public abstract class StatementBase implements Statement {
+public abstract class StatementBase implements BytecodeStatement {
 
 	private Position start;
 	private Position end;
@@ -60,7 +64,7 @@ public abstract class StatementBase implements Statement {
 	}
 
 	/**
-	 * @see lucee.transformer.bytecode.Statement#setParent(lucee.transformer.bytecode.Statement)
+	 * @see lucee.lucee.transformer.statement.Statement#setParent(lucee.lucee.transformer.statement.Statement)
 	 */
 	@Override
 	public void setParent(Statement parent) {
@@ -125,5 +129,25 @@ public abstract class StatementBase implements Statement {
 	public void setHasFlowController(boolean hasReturnChild) {
 		if (parent != null) parent.setHasFlowController(hasReturnChild);
 		this.hasReturnChild = hasReturnChild ? 1 : 0;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		// start
+		if (start != null) {
+			Struct sctStart = new StructImpl(Struct.TYPE_LINKED);
+			sctStart.setEL(KeyConstants._line, start.line);
+			sctStart.setEL(KeyConstants._column, start.column);
+			sctStart.setEL(KeyConstants._offset, start.pos);
+			sct.setEL(KeyConstants._start, sctStart);
+		}
+		// end
+		if (end != null) {
+			Struct sctEnd = new StructImpl(Struct.TYPE_LINKED);
+			sctEnd.setEL(KeyConstants._line, end.line);
+			sctEnd.setEL(KeyConstants._column, end.column);
+			sctEnd.setEL(KeyConstants._offset, end.pos);
+			sct.setEL(KeyConstants._end, sctEnd);
+		}
 	}
 }

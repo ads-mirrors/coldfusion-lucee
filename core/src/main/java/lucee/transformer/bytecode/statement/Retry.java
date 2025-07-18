@@ -18,12 +18,15 @@
  **/
 package lucee.transformer.bytecode.statement;
 
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
-import lucee.transformer.bytecode.Statement;
 import lucee.transformer.bytecode.util.ASMUtil;
+import lucee.transformer.statement.FlowControl;
+import lucee.transformer.statement.Statement;
 
 public final class Retry extends StatementBaseNoFinal {
 
@@ -43,11 +46,17 @@ public final class Retry extends StatementBaseNoFinal {
 
 	/**
 	 *
-	 * @see lucee.transformer.bytecode.statement.StatementBase#setParent(lucee.transformer.bytecode.Statement)
+	 * @see lucee.transformer.bytecode.statement.StatementBase#setParent(lucee.lucee.transformer.statement.Statement)
 	 */
 	@Override
 	public void setParent(Statement parent) {
 		super.setParent(parent);
 		parent.setHasFlowController(true);
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "RetryStatement");
 	}
 }

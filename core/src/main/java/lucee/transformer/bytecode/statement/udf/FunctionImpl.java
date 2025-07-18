@@ -20,9 +20,10 @@ package lucee.transformer.bytecode.statement.udf;
 
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import lucee.runtime.type.Struct;
+import lucee.transformer.Body;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
-import lucee.transformer.bytecode.Body;
 import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.util.Types;
 import lucee.transformer.expression.Expression;
@@ -107,4 +108,8 @@ public final class FunctionImpl extends Function {
 		return TYPE_UDF;
 	}
 
+	@Override
+	public void dump(Struct sct) {
+		dump(sct, "FunctionDeclaration");
+	}
 }

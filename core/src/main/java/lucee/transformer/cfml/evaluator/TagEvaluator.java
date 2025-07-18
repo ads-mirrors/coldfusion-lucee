@@ -21,11 +21,11 @@ package lucee.transformer.cfml.evaluator;
 
 import lucee.runtime.config.Config;
 import lucee.runtime.exp.TemplateException;
-import lucee.transformer.bytecode.statement.tag.Tag;
 import lucee.transformer.cfml.Data;
 import lucee.transformer.library.function.FunctionLib;
 import lucee.transformer.library.tag.TagLib;
 import lucee.transformer.library.tag.TagLibTag;
+import lucee.transformer.statement.tag.Tag;
 
 /**
  * evaluator interface for tags, this allows tags to check their environment and themself.

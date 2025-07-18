@@ -25,12 +25,18 @@ import java.util.List;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import lucee.runtime.type.Array;
+import lucee.runtime.type.ArrayImpl;
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
+import lucee.transformer.Body;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
-import lucee.transformer.bytecode.Body;
 import lucee.transformer.bytecode.BytecodeContext;
-import lucee.transformer.bytecode.Statement;
+import lucee.transformer.statement.HasBodies;
+import lucee.transformer.statement.Statement;
 
 public final class NativeSwitch extends StatementBaseNoFinal implements FlowControlBreak, FlowControlContinue, HasBodies {
 
@@ -38,7 +44,7 @@ public final class NativeSwitch extends StatementBaseNoFinal implements FlowCont
 	public static final short ARG_REF = 1;
 	public static final short PRIMITIVE = 1;
 
-	private int value;
+	private final int value;
 	private Label end;
 	private Statement defaultCase;
 	List<Case> cases = new ArrayList<Case>();
@@ -138,7 +144,7 @@ public final class NativeSwitch extends StatementBaseNoFinal implements FlowCont
 
 	/**
 	 *
-	 * @see lucee.transformer.bytecode.statement.FlowControl#getLabel()
+	 * @see lucee.transformer.statement.FlowControl#getLabel()
 	 */
 	@Override
 	public Label getBreakLabel() {
@@ -147,7 +153,7 @@ public final class NativeSwitch extends StatementBaseNoFinal implements FlowCont
 
 	/**
 	 *
-	 * @see lucee.transformer.bytecode.statement.FlowControl#getLabel()
+	 * @see lucee.transformer.statement.FlowControl#getLabel()
 	 */
 	@Override
 	public Label getContinueLabel() {
@@ -155,7 +161,7 @@ public final class NativeSwitch extends StatementBaseNoFinal implements FlowCont
 	}
 
 	/**
-	 * @see lucee.transformer.bytecode.statement.HasBodies#getBodies()
+	 * @see lucee.transformer.statement.HasBodies#getBodies()
 	 */
 	@Override
 	public Body[] getBodies() {
@@ -181,5 +187,55 @@ public final class NativeSwitch extends StatementBaseNoFinal implements FlowCont
 	@Override
 	public String getLabel() {
 		return null;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "SwitchStatement");
+
+		// discriminant
+		{
+			Struct discriminant = new StructImpl(Struct.TYPE_LINKED);
+			getFactory().createLitInteger(value).dump(discriminant);
+			sct.setEL(KeyConstants._discriminant, discriminant);
+		}
+		Array arrCases = new ArrayImpl();
+		sct.setEL(KeyConstants._cases, arrCases);
+		// cases
+		if (cases != null && cases.size() > 0) {
+			for (Case c: cases) {
+				Struct sctCase = new StructImpl(Struct.TYPE_LINKED);
+				sctCase.setEL(KeyConstants._type, "SwitchCase");
+
+				// test
+				Struct sctTest = new StructImpl(Struct.TYPE_LINKED);
+				getFactory().createLitInteger(c.value).dump(sctTest);
+				sctCase.setEL(KeyConstants._test, sctTest);
+
+				// consequent
+				Struct sctConsequent = new StructImpl(Struct.TYPE_LINKED);
+				c.body.dump(sctConsequent);
+				sctCase.setEL(KeyConstants._consequent, sctConsequent);
+
+				arrCases.appendEL(sctCase);
+
+			}
+		}
+		// default
+		if (defaultCase != null) {
+			Struct sctCase = new StructImpl(Struct.TYPE_LINKED);
+			sctCase.setEL(KeyConstants._type, "SwitchCase");
+
+			// test
+			sctCase.setEL(KeyConstants._test, null);
+
+			// consequent
+			Struct sctConsequent = new StructImpl(Struct.TYPE_LINKED);
+			defaultCase.dump(sctConsequent);
+			sctCase.setEL(KeyConstants._consequent, sctConsequent);
+
+			arrCases.appendEL(sctCase);
+		}
 	}
 }

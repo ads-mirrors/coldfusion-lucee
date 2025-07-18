@@ -94,6 +94,7 @@ import lucee.runtime.type.UDF;
 import lucee.runtime.type.UDFPropertiesBase;
 import lucee.runtime.type.dt.DateTime;
 import lucee.transformer.bytecode.BytecodeContext;
+import lucee.transformer.bytecode.PageImpl;
 import lucee.transformer.bytecode.ConstrBytecodeContext;
 import lucee.transformer.bytecode.util.ASMProperty;
 import lucee.transformer.bytecode.util.ASMPropertyImpl;
@@ -189,8 +190,8 @@ public final class ComponentUtil {
 		GeneratorAdapter adapter = new GeneratorAdapter(Opcodes.ACC_PUBLIC, CONSTRUCTOR_OBJECT, null, null, cw);
 		adapter.loadThis();
 		adapter.invokeConstructor(Types.OBJECT, CONSTRUCTOR_OBJECT);
-		lucee.transformer.bytecode.Page.registerFields(new BytecodeContext(ThreadLocalPageContext.getConfig(pc), null, constr, getPage(constr), _keys, cw, real, adapter,
-				CONSTRUCTOR_OBJECT, writeLog, suppressWSbeforeArg, output, returnValue), _keys);
+		PageImpl.registerFields(new BytecodeContext(ThreadLocalPageContext.getConfig(pc), null, constr, getPage(constr), _keys, cw, real, adapter, CONSTRUCTOR_OBJECT, writeLog,
+				suppressWSbeforeArg, output, returnValue), _keys);
 		adapter.returnValue();
 		adapter.endMethod();
 
@@ -211,10 +212,10 @@ public final class ComponentUtil {
 		}
 	}
 
-	private static lucee.transformer.bytecode.Page getPage(BytecodeContext bc2) {
-		lucee.transformer.bytecode.Page page = null;
+	private static PageImpl getPage(BytecodeContext bc2) {
+		PageImpl page = null;
 		// if(bc1!=null)page=bc1.getPage();
-		if (bc2 != null) page = bc2.getPage();
+		if (bc2 != null) page = (PageImpl) bc2.getPage();
 		return page;
 	}
 

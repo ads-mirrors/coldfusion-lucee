@@ -31,9 +31,10 @@ import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BodyBase;
 import lucee.transformer.bytecode.BytecodeContext;
-import lucee.transformer.bytecode.Statement;
 import lucee.transformer.expression.ExprBoolean;
 import lucee.transformer.expression.Expression;
+import lucee.transformer.statement.Statement;
+import lucee.transformer.statement.tag.Tag;
 
 public final class TagIf extends TagBaseNoFinal {
 

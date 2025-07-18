@@ -16,15 +16,15 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  * 
  **/
-package lucee.transformer.bytecode.statement.tag;
+package lucee.transformer.statement.tag;
 
 import java.util.Map;
 
-import lucee.transformer.bytecode.Body;
-import lucee.transformer.bytecode.Statement;
-import lucee.transformer.bytecode.statement.HasBody;
+import lucee.transformer.Body;
 import lucee.transformer.library.tag.TagLibTag;
 import lucee.transformer.library.tag.TagLibTagAttr;
+import lucee.transformer.statement.HasBody;
+import lucee.transformer.statement.Statement;
 
 public interface Tag extends Statement, HasBody {
 

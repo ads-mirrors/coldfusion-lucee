@@ -36,18 +36,22 @@ import lucee.runtime.db.ClassDefinition;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.TemplateException;
 import lucee.runtime.tag.TagUtil;
+import lucee.runtime.type.Array;
+import lucee.runtime.type.ArrayImpl;
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.scope.Scope;
 import lucee.runtime.type.util.ArrayUtil;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.UDFUtil;
+import lucee.transformer.Body;
 import lucee.transformer.Context;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
-import lucee.transformer.bytecode.Body;
 import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.expression.ExpressionBase;
 import lucee.transformer.bytecode.statement.TryCatch;
-import lucee.transformer.bytecode.statement.tag.Attribute;
 import lucee.transformer.bytecode.statement.tag.TagThread;
 import lucee.transformer.bytecode.util.ASMConstants;
 import lucee.transformer.bytecode.util.ASMUtil;
@@ -60,12 +64,15 @@ import lucee.transformer.dynamic.meta.Clazz;
 import lucee.transformer.expression.ExprString;
 import lucee.transformer.expression.Expression;
 import lucee.transformer.expression.literal.LitString;
+import lucee.transformer.expression.var.Argument;
 import lucee.transformer.expression.var.DataMember;
 import lucee.transformer.expression.var.Member;
+import lucee.transformer.expression.var.NamedArgument;
 import lucee.transformer.expression.var.Variable;
 import lucee.transformer.library.function.FunctionLibFunction;
 import lucee.transformer.library.function.FunctionLibFunctionArg;
 import lucee.transformer.library.tag.TagLibTag;
+import lucee.transformer.statement.tag.Attribute;
 
 public final class VariableImpl extends ExpressionBase implements Variable {
 
@@ -607,7 +614,7 @@ public final class VariableImpl extends ExpressionBase implements Variable {
 					rtnType = m.getReturnType();
 					// first argument is PC that is already written
 					for (int i = 1; i < argTypes.length; i++) {
-						args[i - 1].writeOutValue(bc, Types.isPrimitiveType(argTypes[i]) ? MODE_VALUE : MODE_REF);
+						((ArgumentImpl) args[i - 1]).writeOutValue(bc, Types.isPrimitiveType(argTypes[i]) ? MODE_VALUE : MODE_REF);
 					}
 				}
 
@@ -634,7 +641,7 @@ public final class VariableImpl extends ExpressionBase implements Variable {
 					for (int i = 1; i < argTypes.length; i++) {
 						// we do have an argument for it
 						if (args.length >= i) {
-							args[i - 1].writeOutValue(bc, Types.isPrimitiveType(argTypes[i]) ? MODE_VALUE : MODE_REF);
+							((ArgumentImpl) args[i - 1]).writeOutValue(bc, Types.isPrimitiveType(argTypes[i]) ? MODE_VALUE : MODE_REF);
 						}
 						else {
 							def = getDefaultValue(bc.getFactory(), fargs.get(i - 1));
@@ -663,8 +670,8 @@ public final class VariableImpl extends ExpressionBase implements Variable {
 						flfa = it.next();
 						vt = getMatchingValueAndType(bc, bc.getFactory(), flfa, nargs, names, line);
 						if (vt.index != -1) names[vt.index] = null;
-						if (vt.value == null) tmpArgs.add(new Argument(bif.getFactory().createNull(), "any")); // has to by any otherwise a caster is set
-						else tmpArgs.add(new Argument(vt.value, vt.type));
+						if (vt.value == null) tmpArgs.add(new ArgumentImpl(bif.getFactory().createNull(), "any")); // has to by any otherwise a caster is set
+						else tmpArgs.add(new ArgumentImpl(vt.value, vt.type));
 
 						nulls.add(vt.value == null);
 					}
@@ -1064,6 +1071,60 @@ public final class VariableImpl extends ExpressionBase implements Variable {
 	@Override
 	public void addListener(Expression listener) {
 		this.listener = listener;
+	}
+
+	private static String toString(int scope) {
+		if (Scope.SCOPE_APPLICATION == scope) return "APPLICATION";
+		if (Scope.SCOPE_ARGUMENTS == scope) return "ARGUMENTS";
+		if (Scope.SCOPE_CALLER == scope) return "CALLER";
+		if (Scope.SCOPE_CGI == scope) return "CGI";
+		if (Scope.SCOPE_CLIENT == scope) return "CLIENT";
+		if (Scope.SCOPE_CLUSTER == scope) return "CLUSTER";
+		if (Scope.SCOPE_COOKIE == scope) return "COOKIE";
+		if (Scope.SCOPE_FORM == scope) return "FORM";
+		if (Scope.SCOPE_LOCAL == scope) return "LOCAL";
+		if (Scope.SCOPE_REQUEST == scope) return "REQUEST";
+		if (Scope.SCOPE_SERVER == scope) return "SERVER";
+		if (Scope.SCOPE_SESSION == scope) return "SESSION";
+		if (Scope.SCOPE_THREAD == scope) return "THREAD";
+		if (Scope.SCOPE_UNDEFINED == scope) return "UNDEFINED";
+		if (Scope.SCOPE_URL == scope) return "URL";
+		if (Scope.SCOPE_VAR == scope) return "VAR";
+		if (Scope.SCOPE_VARIABLES == scope) return "VARIABLES";
+		return "UNKNOWN";
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "VariableExpression");
+		sct.setEL(KeyConstants._scope, toString(scope));
+
+		// member
+		Array arr = new ArrayImpl();
+		sct.setEL(KeyConstants._members, arr);
+		for (Member m: members) {
+			Struct mem = new StructImpl(Struct.TYPE_LINKED);
+			arr.appendEL(mem);
+			mem.setEL(KeyConstants._safeNavigated, m.getSafeNavigated());
+			if (m.getSafeNavigated()) mem.setEL(KeyConstants._safeNavigatedValue, m.getSafeNavigatedValue());
+
+			// id
+			Struct id = new StructImpl(Struct.TYPE_LINKED);
+			if (m instanceof DataMember) {
+				((DataMember) m).getName().dump(id);
+				mem.setEL(KeyConstants._name, id);
+				mem.setEL(KeyConstants._type, "DataMember");
+
+			}
+			else if (m instanceof FunctionMember) {
+				((FunctionMember) m).getName().dump(id);
+				mem.setEL(KeyConstants._name, id);
+				mem.setEL(KeyConstants._type, "FunctionMember");
+				mem.setEL("todo", "more coming soon"); // MUSTT
+			}
+		}
+
 	}
 
 }

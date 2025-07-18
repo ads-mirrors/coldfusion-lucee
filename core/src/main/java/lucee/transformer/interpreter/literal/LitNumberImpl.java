@@ -41,6 +41,11 @@ public final class LitNumberImpl extends ExpressionBase implements LitNumber, Ex
 	}
 
 	@Override
+	public Object getValue() {
+		return getNumber();
+	}
+
+	@Override
 	public Number getNumber() {
 		return n;
 	}

@@ -6,9 +6,11 @@ import lucee.runtime.config.Config;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
+import lucee.transformer.Body;
 import lucee.transformer.Context;
 import lucee.transformer.Factory;
 import lucee.transformer.FactoryBase;
+import lucee.transformer.Page;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
 import lucee.transformer.expression.ExprBoolean;
@@ -46,6 +48,8 @@ import lucee.transformer.interpreter.op.OpNegate;
 import lucee.transformer.interpreter.op.OpNegateNumber;
 import lucee.transformer.interpreter.op.OpNumber;
 import lucee.transformer.interpreter.op.OpString;
+import lucee.transformer.statement.Statement;
+import lucee.transformer.util.SourceCode;
 
 public final class InterpreterFactory extends FactoryBase {
 
@@ -317,5 +321,23 @@ public final class InterpreterFactory extends FactoryBase {
 	public void registerKey(Context bc, Expression name, boolean doUpperCase) throws TransformerException {
 		// TODO Auto-generated method stub
 
+	}
+
+	@Override
+	public Page createPage(SourceCode sc, long sourceLastModified, boolean returnValue, boolean ignoreScopes) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Body createBody() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Statement createPrintOut(Expression expr, Position start, Position end) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

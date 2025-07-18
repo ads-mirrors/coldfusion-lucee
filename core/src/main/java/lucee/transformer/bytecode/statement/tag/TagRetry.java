@@ -22,10 +22,10 @@ import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
-import lucee.transformer.bytecode.Statement;
-import lucee.transformer.bytecode.statement.FlowControl;
 import lucee.transformer.bytecode.statement.FlowControlFinal;
 import lucee.transformer.bytecode.util.ASMUtil;
+import lucee.transformer.statement.FlowControl;
+import lucee.transformer.statement.Statement;
 
 public final class TagRetry extends TagBase {
 
@@ -44,7 +44,7 @@ public final class TagRetry extends TagBase {
 
 	/**
 	 *
-	 * @see lucee.transformer.bytecode.statement.StatementBase#setParent(lucee.transformer.bytecode.Statement)
+	 * @see lucee.transformer.bytecode.statement.StatementBase#setParent(lucee.lucee.transformer.statement.Statement)
 	 */
 	@Override
 	public void setParent(Statement parent) {

@@ -10,6 +10,8 @@ import lucee.runtime.exp.CasterException;
 import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.LiteralValue;
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
@@ -57,6 +59,11 @@ public final class LitNumberImpl extends ExpressionBase implements LitNumber, Ex
 		super(f, start, end);
 		this.nbr = nbr;
 		this.number = Caster.toString(nbr);
+	}
+
+	@Override
+	public Object getValue() {
+		return getNumber();
 	}
 
 	@Override
@@ -149,6 +156,13 @@ public final class LitNumberImpl extends ExpressionBase implements LitNumber, Ex
 		}
 
 		return true;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "NumberLiteral");
+		sct.setEL(KeyConstants._value, nbr);
 	}
 
 }

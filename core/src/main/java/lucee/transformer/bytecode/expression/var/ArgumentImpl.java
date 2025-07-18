@@ -20,17 +20,19 @@ package lucee.transformer.bytecode.expression.var;
 
 import org.objectweb.asm.Type;
 
+import lucee.runtime.type.Struct;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.expression.ExpressionBase;
 import lucee.transformer.expression.Expression;
+import lucee.transformer.expression.var.Argument;
 
-public class Argument extends ExpressionBase {
+public class ArgumentImpl extends ExpressionBase implements Argument {
 
 	private Expression raw;
 	private String type;
 
-	public Argument(Expression value, String type) {
+	public ArgumentImpl(Expression value, String type) {
 		super(value.getFactory(), value.getStart(), value.getEnd());
 		this.raw = value;// Cast.toExpression(value,type);
 		this.type = type;
@@ -39,6 +41,7 @@ public class Argument extends ExpressionBase {
 	/**
 	 * @return the value
 	 */
+	@Override
 	public Expression getValue() {
 		return raw.getFactory().toExpression(raw, type);
 	}
@@ -48,10 +51,12 @@ public class Argument extends ExpressionBase {
 	 * 
 	 * @return
 	 */
+	@Override
 	public Expression getRawValue() {
 		return raw;
 	}
 
+	@Override
 	public void setValue(Expression value, String type) {
 		this.raw = value;
 		this.type = type;
@@ -78,7 +83,13 @@ public class Argument extends ExpressionBase {
 	/**
 	 * @return the type
 	 */
+	@Override
 	public String getStringType() {
 		return type;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);// MUSTTT
 	}
 }

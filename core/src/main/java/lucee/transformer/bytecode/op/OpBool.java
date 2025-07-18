@@ -23,6 +23,9 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Factory;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
@@ -156,5 +159,24 @@ public final class OpBool extends ExpressionBase implements ExprBoolean {
 		if (Factory.OP_BOOL_EQV == operation) return "eqv";
 		if (Factory.OP_BOOL_IMP == operation) return "imp";
 		return operation + "";
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "BinaryExpression");
+		sct.setEL(KeyConstants._operator, toStringOperation().toUpperCase());
+		// left
+		{
+			Struct sctLeft = new StructImpl(Struct.TYPE_LINKED);
+			left.dump(sctLeft);
+			sct.setEL(KeyConstants._left, sctLeft);
+		}
+		// right
+		{
+			Struct sctRight = new StructImpl(Struct.TYPE_LINKED);
+			right.dump(sctRight);
+			sct.setEL(KeyConstants._right, sctRight);
+		}
 	}
 }

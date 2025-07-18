@@ -28,11 +28,16 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
+import lucee.runtime.type.Array;
+import lucee.runtime.type.ArrayImpl;
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.scope.Scope;
+import lucee.runtime.type.util.KeyConstants;
+import lucee.transformer.Body;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
-import lucee.transformer.bytecode.Body;
 import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.expression.var.VariableRef;
 import lucee.transformer.bytecode.expression.var.VariableString;
@@ -44,6 +49,7 @@ import lucee.transformer.expression.ExprString;
 import lucee.transformer.expression.Expression;
 import lucee.transformer.expression.literal.LitString;
 import lucee.transformer.expression.var.Variable;
+import lucee.transformer.statement.HasBodies;
 
 /**
  * produce try-catch-finally
@@ -345,7 +351,7 @@ public final class TryCatchFinally extends StatementBase implements Opcodes, Has
 	}
 
 	/**
-	 * @see lucee.transformer.bytecode.statement.HasBodies#getBodies()
+	 * @see lucee.transformer.statement.HasBodies#getBodies()
 	 */
 	@Override
 	public Body[] getBodies() {
@@ -380,5 +386,61 @@ public final class TryCatchFinally extends StatementBase implements Opcodes, Has
 	@Override
 	public String getLabel() {
 		return null;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "TryStatement");
+
+		// body
+		{
+			Struct body = new StructImpl(Struct.TYPE_LINKED);
+			tryBody.dump(body);
+			sct.setEL(KeyConstants._body, body);
+		}
+		// handlers
+		if (catches != null && catches.size() > 0) {
+			Array handlers = new ArrayImpl();
+			for (Catch c: catches) {
+				Struct sctCatch = new StructImpl(Struct.TYPE_LINKED);
+				sctCatch.setEL(KeyConstants._type, "CatchClause");
+
+				// param
+				Struct sctParam = new StructImpl(Struct.TYPE_LINKED);
+				sctCatch.setEL(KeyConstants._param, sctParam);
+				if (c.type instanceof LitString) {
+					sctParam.setEL(KeyConstants._type, ((LitString) c.type).getString());
+				}
+				else if (c.type != null) {
+					Struct sctType = new StructImpl(Struct.TYPE_LINKED);
+					c.type.dump(sctType);
+					sctParam.setEL(KeyConstants._type, sctType);
+				}
+				if (c.name != null) {
+					Struct sctName = new StructImpl(Struct.TYPE_LINKED);
+					c.name.dump(sctName);
+					sctParam.setEL(KeyConstants._name, sctName);
+				}
+				// body
+				if (c.body != null) {
+					Struct sctBody = new StructImpl(Struct.TYPE_LINKED);
+					c.body.dump(sctBody);
+					sctCatch.setEL(KeyConstants._body, sctBody);
+				}
+
+				handlers.appendEL(sctCatch);
+				// "typeAnnotation": "template"
+				// expr.dump(test);
+
+			}
+			sct.setEL(KeyConstants._handlers, handlers);
+		}
+		// finalizer
+		if (finallyBody != null) {
+			Struct finalizer = new StructImpl(Struct.TYPE_LINKED);
+			finallyBody.dump(finalizer);
+			sct.setEL(KeyConstants._finalizer, finalizer);
+		}
 	}
 }

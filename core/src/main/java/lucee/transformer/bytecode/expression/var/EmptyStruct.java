@@ -20,6 +20,9 @@ package lucee.transformer.bytecode.expression.var;
 
 import org.objectweb.asm.Type;
 
+import lucee.runtime.type.ArrayImpl;
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Factory;
 import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.expression.ExpressionBase;
@@ -32,9 +35,16 @@ public final class EmptyStruct extends ExpressionBase {
 		super(factory, null, null);
 	}
 
+	@Override
 	public Type _writeOut(BytecodeContext bc, int mode) {
 		ASMUtil.createEmptyStruct(bc.getAdapter());
 		return Types.STRUCT;
 	}
 
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "ObjectExpression");
+		sct.setEL(KeyConstants._properties, new ArrayImpl());
+	}
 }

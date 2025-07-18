@@ -16,25 +16,12 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  * 
  **/
-package lucee.transformer.bytecode.statement;
+package lucee.transformer.statement;
 
-import lucee.transformer.TransformerException;
-import lucee.transformer.bytecode.BytecodeContext;
+import lucee.transformer.Body;
 
-public interface IFunction {
+public interface HasBodies {
 
-	public static final int PAGE_TYPE_REGULAR = 0;
-	public static final int PAGE_TYPE_COMPONENT = 1;
-	public static final int PAGE_TYPE_INTERFACE = 2;
+	public Body[] getBodies();
 
-	public static final int TYPE_CLOSURE = 1;
-	public static final int TYPE_LAMBDA = 2;
-	public static final int TYPE_UDF = 3;
-
-	public static final int ARRAY_INDEX = 0;
-	public static final int VALUE_INDEX = 1;
-
-	public void writeOut(BytecodeContext bc, int type) throws TransformerException;
-
-	public abstract int getType();
 }

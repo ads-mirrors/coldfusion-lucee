@@ -52,7 +52,7 @@ public final class TagWhile extends TagBaseNoFinal implements FlowControlBreak, 
 	}
 
 	/**
-	 * @see lucee.transformer.bytecode.statement.FlowControl#getLabel()
+	 * @see lucee.transformer.statement.FlowControl#getLabel()
 	 */
 	@Override
 	public Label getBreakLabel() {
@@ -60,7 +60,7 @@ public final class TagWhile extends TagBaseNoFinal implements FlowControlBreak, 
 	}
 
 	/**
-	 * @see lucee.transformer.bytecode.statement.FlowControl#getLabel()
+	 * @see lucee.transformer.statement.FlowControl#getLabel()
 	 */
 	@Override
 	public Label getContinueLabel() {

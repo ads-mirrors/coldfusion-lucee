@@ -21,6 +21,9 @@ package lucee.transformer.bytecode.cast;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.expression.ExpressionBase;
@@ -64,7 +67,7 @@ public final class CastString extends ExpressionBase implements ExprString, Cast
 
 	/**
 	 * lucee.transformer.expression.Expression#_writeOut(lucee.transformer.bytecode.BytecodeContext,
-	 *      int)
+	 * int)
 	 */
 	@Override
 	public Type _writeOut(BytecodeContext bc, int mode) throws TransformerException {
@@ -92,4 +95,17 @@ public final class CastString extends ExpressionBase implements ExprString, Cast
 		return expr;
 	}
 
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "CastExpression");
+		sct.setEL(KeyConstants._typeAnnotation, "string");
+
+		// argument
+		{
+			Struct sctArg = new StructImpl(Struct.TYPE_LINKED);
+			expr.dump(sctArg);
+			sct.setEL(KeyConstants._argument, sctArg);
+		}
+	}
 }

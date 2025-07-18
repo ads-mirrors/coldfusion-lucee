@@ -22,6 +22,9 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Factory;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
@@ -137,6 +140,50 @@ public final class OpNumber extends ExpressionBase implements ExprNumber {
 		}
 		if (mode == MODE_VALUE) return Types.DOUBLE_VALUE;
 		return Types.NUMBER;
+	}
+
+	static String toString(int op) {
+		if (op == Factory.OP_DBL_EXP) {
+			return "EXPONENT";
+		}
+		else if (op == Factory.OP_DBL_DIVIDE) {
+			return "DIVIDE";
+		}
+		else if (op == Factory.OP_DBL_INTDIV) {
+			return "DIVIDE";
+		}
+		else if (op == Factory.OP_DBL_PLUS) {
+			return "PLUS";
+		}
+		else if (op == Factory.OP_DBL_MINUS) {
+			return "MINUS";
+		}
+		else if (op == Factory.OP_DBL_MODULUS) {
+			return "MODULUS";
+		}
+		else if (op == Factory.OP_DBL_MULTIPLY) {
+			return "MULTIPLY";
+		}
+		return "UNKOWN";
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "BinaryExpression");
+		sct.setEL(KeyConstants._operator, toString(op));
+		// left
+		{
+			Struct sctLeft = new StructImpl(Struct.TYPE_LINKED);
+			getLeft().dump(sctLeft);
+			sct.setEL(KeyConstants._left, sctLeft);
+		}
+		// right
+		{
+			Struct sctRight = new StructImpl(Struct.TYPE_LINKED);
+			getRight().dump(sctRight);
+			sct.setEL(KeyConstants._right, sctRight);
+		}
 	}
 
 }

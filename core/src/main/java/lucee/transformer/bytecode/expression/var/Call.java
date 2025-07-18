@@ -8,12 +8,16 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
+import lucee.runtime.type.Struct;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.expression.ExpressionBase;
 import lucee.transformer.bytecode.util.ExpressionUtil;
 import lucee.transformer.bytecode.util.Types;
 import lucee.transformer.expression.Expression;
+import lucee.transformer.expression.var.Argument;
+import lucee.transformer.expression.var.Func;
+import lucee.transformer.expression.var.NamedArgument;
 
 public final class Call extends ExpressionBase implements Func {
 
@@ -61,5 +65,10 @@ public final class Call extends ExpressionBase implements Func {
 		}
 
 		return named;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);// MUSTTT
 	}
 }

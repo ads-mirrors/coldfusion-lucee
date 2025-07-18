@@ -27,12 +27,18 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
+import lucee.runtime.type.Array;
+import lucee.runtime.type.ArrayImpl;
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
+import lucee.transformer.Body;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
-import lucee.transformer.bytecode.Body;
 import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.util.Types;
 import lucee.transformer.expression.Expression;
+import lucee.transformer.statement.HasBodies;
 
 public final class Switch extends StatementBaseNoFinal implements FlowControlBreak, HasBodies {
 
@@ -131,7 +137,7 @@ public final class Switch extends StatementBaseNoFinal implements FlowControlBre
 
 	/**
 	 *
-	 * @see lucee.transformer.bytecode.statement.FlowControl#getLabel()
+	 * @see lucee.transformer.statement.FlowControl#getLabel()
 	 */
 	@Override
 	public Label getBreakLabel() {
@@ -140,14 +146,14 @@ public final class Switch extends StatementBaseNoFinal implements FlowControlBre
 
 	/**
 	 *
-	 * @see lucee.transformer.bytecode.statement.FlowControl#getLabel()
+	 * @see lucee.transformer.statement.FlowControl#getLabel()
 	 */
 	public Label getContinueLabel() {
 		return ns.getContinueLabel();
 	}
 
 	/**
-	 * @see lucee.transformer.bytecode.statement.HasBodies#getBodies()
+	 * @see lucee.transformer.statement.HasBodies#getBodies()
 	 */
 	@Override
 	public Body[] getBodies() {
@@ -175,4 +181,53 @@ public final class Switch extends StatementBaseNoFinal implements FlowControlBre
 		return null;
 	}
 
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "SwitchStatement");
+
+		// discriminant
+		{
+			Struct discriminant = new StructImpl(Struct.TYPE_LINKED);
+			expr.dump(discriminant);
+			sct.setEL(KeyConstants._discriminant, discriminant);
+		}
+		Array arrCases = new ArrayImpl();
+		sct.setEL(KeyConstants._cases, arrCases);
+		// cases
+		if (cases != null && cases.size() > 0) {
+			for (Case c: cases) {
+				Struct sctCase = new StructImpl(Struct.TYPE_LINKED);
+				sctCase.setEL(KeyConstants._type, "SwitchCase");
+
+				// test
+				Struct sctTest = new StructImpl(Struct.TYPE_LINKED);
+				c.expression.dump(sctTest);
+				sctCase.setEL(KeyConstants._test, sctTest);
+
+				// consequent
+				Struct sctConsequent = new StructImpl(Struct.TYPE_LINKED);
+				c.body.dump(sctConsequent);
+				sctCase.setEL(KeyConstants._consequent, sctConsequent);
+
+				arrCases.appendEL(sctCase);
+
+			}
+		}
+		// default
+		if (defaultCase != null) {
+			Struct sctCase = new StructImpl(Struct.TYPE_LINKED);
+			sctCase.setEL(KeyConstants._type, "SwitchCase");
+
+			// test
+			sctCase.setEL(KeyConstants._test, null);
+
+			// consequent
+			Struct sctConsequent = new StructImpl(Struct.TYPE_LINKED);
+			defaultCase.dump(sctConsequent);
+			sctCase.setEL(KeyConstants._consequent, sctConsequent);
+
+			arrCases.appendEL(sctCase);
+		}
+	}
 }

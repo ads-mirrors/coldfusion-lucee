@@ -52,6 +52,7 @@ import lucee.transformer.bytecode.visitor.TryFinallyVisitor;
 import lucee.transformer.bytecode.visitor.WhileVisitor;
 import lucee.transformer.expression.ExprInt;
 import lucee.transformer.expression.Expression;
+import lucee.transformer.statement.tag.Attribute;
 
 public final class TagLoop extends TagGroup implements FlowControlBreak, FlowControlContinue {
 
@@ -840,7 +841,7 @@ public final class TagLoop extends TagGroup implements FlowControlBreak, FlowCon
 	}
 
 	/**
-	 * @see lucee.transformer.bytecode.statement.FlowControl#getLabel()
+	 * @see lucee.transformer.statement.FlowControl#getLabel()
 	 */
 	@Override
 	public Label getBreakLabel() {
@@ -848,7 +849,7 @@ public final class TagLoop extends TagGroup implements FlowControlBreak, FlowCon
 	}
 
 	/**
-	 * @see lucee.transformer.bytecode.statement.FlowControl#getLabel()
+	 * @see lucee.transformer.statement.FlowControl#getLabel()
 	 */
 	@Override
 	public Label getContinueLabel() {

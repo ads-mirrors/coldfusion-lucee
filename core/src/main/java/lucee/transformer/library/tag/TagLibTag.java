@@ -45,8 +45,6 @@ import lucee.runtime.type.util.ArrayUtil;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.bytecode.cast.CastOther;
-import lucee.transformer.bytecode.statement.tag.Attribute;
-import lucee.transformer.bytecode.statement.tag.Tag;
 import lucee.transformer.bytecode.statement.tag.TagOther;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.cfml.attributes.AttributeEvaluator;
@@ -57,6 +55,8 @@ import lucee.transformer.cfml.tag.TagDependentBodyTransformer;
 import lucee.transformer.dynamic.meta.Method;
 import lucee.transformer.expression.Expression;
 import lucee.transformer.library.ClassDefinitionImpl;
+import lucee.transformer.statement.tag.Attribute;
+import lucee.transformer.statement.tag.Tag;
 
 /**
  * Die Klasse TagLibTag repaesentiert ein einzelne Tag Definition einer TagLib, beschreibt also alle

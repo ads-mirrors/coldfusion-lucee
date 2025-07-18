@@ -23,6 +23,9 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.expression.ExpressionBase;
@@ -82,10 +85,28 @@ public final class OpContional extends ExpressionBase {
 		return new OpContional(cont, left, right);
 	}
 
-	/*
-	 * *
-	 * 
-	 * @see lucee.transformer.bytecode.expression.Expression#getType() / public int getType() { return
-	 * Types._BOOLEAN; }
-	 */
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "ConditionalExpression");
+
+		// test
+		{
+			Struct test = new StructImpl(Struct.TYPE_LINKED);
+			cont.dump(test);
+			sct.setEL(KeyConstants._test, test);
+		}
+		// consequent
+		{
+			Struct consequent = new StructImpl(Struct.TYPE_LINKED);
+			left.dump(consequent);
+			sct.setEL(KeyConstants._consequent, consequent);
+		}
+		// alternate
+		{
+			Struct alternate = new StructImpl(Struct.TYPE_LINKED);
+			left.dump(alternate);
+			sct.setEL(KeyConstants._alternate, alternate);
+		}
+	}
 }

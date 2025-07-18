@@ -20,6 +20,8 @@ package lucee.transformer.bytecode.statement;
 
 import org.objectweb.asm.Label;
 
+import lucee.transformer.statement.FlowControl;
+
 public interface FlowControlContinue extends FlowControl {
 	public Label getContinueLabel();
 }

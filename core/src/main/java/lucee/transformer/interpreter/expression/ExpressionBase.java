@@ -2,6 +2,7 @@ package lucee.transformer.interpreter.expression;
 
 import lucee.runtime.exp.PageException;
 import lucee.runtime.exp.PageRuntimeException;
+import lucee.runtime.type.Struct;
 import lucee.transformer.Context;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
@@ -24,6 +25,7 @@ public abstract class ExpressionBase implements Expression {
 		this.factory = factory;
 	}
 
+	@Override
 	public final Class<?> writeOut(Context c, int mode) throws TransformerException {
 		try {
 			return _writeOut((InterpreterContext) c, mode);
@@ -69,6 +71,11 @@ public abstract class ExpressionBase implements Expression {
 			this.type = type;
 			this.value = value;
 		}
+
+	}
+
+	@Override
+	public void dump(Struct sct) {
 
 	}
 }

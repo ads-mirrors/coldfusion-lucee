@@ -23,10 +23,7 @@ import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.exp.TemplateException;
 import lucee.transformer.bytecode.BytecodeFactory;
-import lucee.transformer.bytecode.Page;
-import lucee.transformer.bytecode.Statement;
-import lucee.transformer.bytecode.statement.tag.Attribute;
-import lucee.transformer.bytecode.statement.tag.Tag;
+import lucee.transformer.bytecode.PageImpl;
 import lucee.transformer.bytecode.statement.tag.TagLoop;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.cfml.Data;
@@ -40,6 +37,9 @@ import lucee.transformer.expression.literal.LitString;
 import lucee.transformer.library.function.FunctionLib;
 import lucee.transformer.library.tag.TagLib;
 import lucee.transformer.library.tag.TagLibTag;
+import lucee.transformer.statement.Statement;
+import lucee.transformer.statement.tag.Attribute;
+import lucee.transformer.statement.tag.Tag;
 import lucee.transformer.util.SourceCode;
 
 public final class Loop extends EvaluatorSupport {
@@ -188,7 +188,7 @@ public final class Loop extends EvaluatorSupport {
 
 			try {
 				transformer = tagLib.getExprTransfomer();
-				Page page = ASMUtil.getAncestorPage(null, tag);
+				PageImpl page = (PageImpl) ASMUtil.getAncestorPage(null, tag);
 				ConfigPro config = (ConfigPro) page.getConfig();
 				Data data = new Data(BytecodeFactory.getInstance(config), config, page, new SourceCode(null, text, false), new EvaluatorPool(),
 						new TransfomerSettings(config.getDotNotationUpperCase(), config.getHandleUnQuotedAttrValueAsString(), page.ignoreScopes), null, flibs,

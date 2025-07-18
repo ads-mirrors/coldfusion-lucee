@@ -24,12 +24,14 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
+import lucee.runtime.type.Struct;
 import lucee.runtime.type.scope.Scope;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
-import lucee.transformer.bytecode.Page;
+import lucee.transformer.bytecode.PageImpl;
 import lucee.transformer.bytecode.expression.ExpressionBase;
 import lucee.transformer.bytecode.util.ASMConstants;
 import lucee.transformer.bytecode.util.Types;
@@ -59,7 +61,7 @@ public final class NullConstant extends ExpressionBase {
 		a.visitJumpInsn(Opcodes.IFNE, beforeNull);
 		a.visitLabel(beforeGet);
 		a.loadArg(0);
-		a.invokeVirtual(Types.PAGE_CONTEXT, Page.UNDEFINED_SCOPE);
+		a.invokeVirtual(Types.PAGE_CONTEXT, PageImpl.UNDEFINED_SCOPE);
 		a.getStatic(Types.KEY_CONSTANTS, "_NULL", Types.COLLECTION_KEY);
 		a.invokeInterface(Types.UNDEFINED, GET);
 		a.visitJumpInsn(Opcodes.GOTO, end);
@@ -73,5 +75,11 @@ public final class NullConstant extends ExpressionBase {
 		Variable v = getFactory().createVariable(Scope.SCOPE_UNDEFINED, getStart(), getEnd());
 		v.addMember(getFactory().createDataMember(getFactory().createLitString("null")));
 		return v;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "NullLiteral");
 	}
 }

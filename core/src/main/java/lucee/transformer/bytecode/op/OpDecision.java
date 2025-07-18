@@ -24,6 +24,9 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Factory;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
@@ -145,5 +148,38 @@ public final class OpDecision extends ExpressionBase implements ExprBoolean {
 
 	public int getOperation() {
 		return op;
+	}
+
+	private static String toString(int op) {
+		if (Factory.OP_DEC_LT == op) return "LT";
+		if (Factory.OP_DEC_LTE == op) return "LTE";
+		if (Factory.OP_DEC_GT == op) return "GT";
+		if (Factory.OP_DEC_GTE == op) return "GTE";
+		if (Factory.OP_DEC_EQ == op) return "EQ";
+		if (Factory.OP_DEC_NEQ == op) return "NEQ";
+		if (Factory.OP_DEC_CT == op) return "CONTAINS";
+		if (Factory.OP_DEC_NCT == op) return "NOT_CONTAINS";
+		if (Factory.OP_DEC_EEQ == op) return "STRICT_EQ";
+		if (Factory.OP_DEC_NEEQ == op) return "STRICT_NEQ";
+		return "UNKNOWN";
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "BinaryExpression");
+		sct.setEL(KeyConstants._operator, toString(op));
+		// left
+		{
+			Struct sctLeft = new StructImpl(Struct.TYPE_LINKED);
+			left.dump(sctLeft);
+			sct.setEL(KeyConstants._left, sctLeft);
+		}
+		// right
+		{
+			Struct sctRight = new StructImpl(Struct.TYPE_LINKED);
+			right.dump(sctRight);
+			sct.setEL(KeyConstants._right, sctRight);
+		}
 	}
 }

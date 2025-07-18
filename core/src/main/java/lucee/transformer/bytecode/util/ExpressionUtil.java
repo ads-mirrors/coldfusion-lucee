@@ -37,12 +37,12 @@ import lucee.runtime.op.Caster;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
-import lucee.transformer.bytecode.Statement;
 import lucee.transformer.bytecode.visitor.OnFinally;
 import lucee.transformer.bytecode.visitor.TryFinallyVisitor;
 import lucee.transformer.expression.ExprString;
 import lucee.transformer.expression.Expression;
 import lucee.transformer.expression.literal.LitString;
+import lucee.transformer.statement.Statement;
 
 public final class ExpressionUtil {
 

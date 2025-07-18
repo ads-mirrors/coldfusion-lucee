@@ -38,6 +38,11 @@ public final class LitIntegerImpl extends ExpressionBase implements LitInteger, 
 		return int.class;
 	}
 
+	@Override
+	public Object getValue() {
+		return getNumber();
+	}
+
 	/**
 	 * @return return value as int
 	 */

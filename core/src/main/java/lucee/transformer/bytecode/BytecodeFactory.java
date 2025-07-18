@@ -25,12 +25,15 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
 import lucee.runtime.config.Config;
+import lucee.runtime.config.ConfigPro;
+import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.CasterException;
 import lucee.runtime.type.util.KeyConstants;
+import lucee.transformer.Body;
 import lucee.transformer.Context;
-import lucee.transformer.Factory;
 import lucee.transformer.FactoryBase;
+import lucee.transformer.Page;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.cast.CastBoolean;
@@ -60,6 +63,7 @@ import lucee.transformer.bytecode.op.OpNumber;
 import lucee.transformer.bytecode.op.OpString;
 import lucee.transformer.bytecode.op.OpUnaryNumber;
 import lucee.transformer.bytecode.op.OpUnaryString;
+import lucee.transformer.bytecode.statement.PrintOut;
 import lucee.transformer.bytecode.util.Types;
 import lucee.transformer.expression.ExprBoolean;
 import lucee.transformer.expression.ExprInt;
@@ -74,6 +78,8 @@ import lucee.transformer.expression.literal.LitString;
 import lucee.transformer.expression.literal.Literal;
 import lucee.transformer.expression.var.DataMember;
 import lucee.transformer.expression.var.Variable;
+import lucee.transformer.statement.Statement;
+import lucee.transformer.util.SourceCode;
 
 public final class BytecodeFactory extends FactoryBase {
 
@@ -81,7 +87,7 @@ public final class BytecodeFactory extends FactoryBase {
 
 	private static Map<String, BytecodeFactory> instances = new ConcurrentHashMap<>();
 
-	public static Factory getInstance(Config config) {
+	public static BytecodeFactory getInstance(Config config) {
 		if (config == null) config = ThreadLocalPageContext.getConfig();
 		String key = config.hashCode() + ":" + config.getIdentification().getId();
 		BytecodeFactory instance = instances.get(key);
@@ -89,7 +95,7 @@ public final class BytecodeFactory extends FactoryBase {
 			synchronized (instances) {
 				instance = instances.get(key);
 				if (instance == null) {
-					instances.put(key, instance = new BytecodeFactory());
+					instances.put(key, instance = new BytecodeFactory(config));
 				}
 			}
 		}
@@ -103,13 +109,16 @@ public final class BytecodeFactory extends FactoryBase {
 	private final LitNumber NUMBER_ZERO;
 	private final LitNumber NUMBER_ONE;
 
-	public BytecodeFactory() {
+	private Config config;
+
+	public BytecodeFactory(Config config) {
 		TRUE = createLitBoolean(true);
 		FALSE = createLitBoolean(false);
 		EMPTY = createLitString("");
 		NULL = Null.getSingleInstance(this);
 		NUMBER_ZERO = createLitNumber(0);
 		NUMBER_ONE = createLitNumber(1);
+		this.config = config;
 	}
 
 	@Override
@@ -342,7 +351,7 @@ public final class BytecodeFactory extends FactoryBase {
 			return;
 		}
 		name.writeOut(bc, Expression.MODE_REF);
-		bc.getAdapter().invokeStatic(Page.KEY_IMPL, Page.KEY_SOURCE);
+		bc.getAdapter().invokeStatic(PageImpl.KEY_IMPL, PageImpl.KEY_SOURCE);
 		// bc.getAdapter().invokeStatic(Types.CASTER, TO_KEY);
 		return;
 	}
@@ -385,5 +394,22 @@ public final class BytecodeFactory extends FactoryBase {
 	@Override
 	public ExprNumber opNegateNumber(Expression expr, int operation, Position start, Position end) {
 		return OpNegateNumber.toExprNumber(expr, operation, start, end);
+	}
+
+	@Override
+	public Page createPage(SourceCode sc, long sourceLastModified, boolean returnValue, boolean ignoreScopes) {
+		ConfigPro cp = config instanceof ConfigPro ? (ConfigPro) config : (ConfigPro) ThreadLocalPageContext.getConfig();
+		return new PageImpl(this, config, sc, null, ConfigUtil.getCFMLEngine(config).getInfo().getFullVersionInfo(), sourceLastModified, sc.getWriteLog(),
+				cp.getSuppressWSBeforeArg(), cp.getDefaultFunctionOutput(), returnValue, ignoreScopes);
+	}
+
+	@Override
+	public Body createBody() {
+		return new BodyBase(this);
+	}
+
+	@Override
+	public Statement createPrintOut(Expression expr, Position start, Position end) {
+		return new PrintOut(expr, start, end);
 	}
 }

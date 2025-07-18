@@ -22,6 +22,8 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
@@ -46,5 +48,11 @@ public final class Abort extends StatementBaseNoFinal {
 		adapter.invokeStatic(ABORT, NEW_INSTANCE);
 		adapter.throwException();
 
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "AbortStatement");
 	}
 }

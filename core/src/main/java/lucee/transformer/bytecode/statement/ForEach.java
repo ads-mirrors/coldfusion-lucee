@@ -24,10 +24,13 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.util.ForEachUtil;
+import lucee.transformer.Body;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
-import lucee.transformer.bytecode.Body;
 import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.expression.var.VariableRef;
 import lucee.transformer.bytecode.util.Types;
@@ -35,6 +38,7 @@ import lucee.transformer.bytecode.visitor.OnFinally;
 import lucee.transformer.bytecode.visitor.TryFinallyVisitor;
 import lucee.transformer.expression.Expression;
 import lucee.transformer.expression.var.Variable;
+import lucee.transformer.statement.HasBody;
 
 public final class ForEach extends StatementBase implements FlowControlBreak, FlowControlContinue, HasBody {
 
@@ -162,5 +166,30 @@ public final class ForEach extends StatementBase implements FlowControlBreak, Fl
 	@Override
 	public String getLabel() {
 		return label;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "ForOfStatement");
+
+		// left
+		{
+			Struct left = new StructImpl(Struct.TYPE_LINKED);
+			key.dump(left);
+			sct.setEL(KeyConstants._left, left);
+		}
+		// right
+		{
+			Struct right = new StructImpl(Struct.TYPE_LINKED);
+			value.dump(right);
+			sct.setEL(KeyConstants._right, right);
+		}
+		// body
+		{
+			Struct body = new StructImpl(Struct.TYPE_LINKED);
+			this.body.dump(body);
+			sct.setEL(KeyConstants._body, body);
+		}
 	}
 }

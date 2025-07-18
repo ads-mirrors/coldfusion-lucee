@@ -1,5 +1,6 @@
 /**
- * Copyright (c) 2015, Lucee Association Switzerland. All rights reserved.
+ *
+ * Copyright (c) 2014, the Railo Company Ltd. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -14,21 +15,11 @@
  * You should have received a copy of the GNU Lesser General Public 
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  * 
- */
-package lucee.transformer.bytecode;
+ **/
+package lucee.transformer.statement;
 
-public final class Range {
+import lucee.transformer.Body;
 
-	public final int from;
-	public final int to;
-
-	public Range(int from, int to) {
-		this.from = from;
-		this.to = to;
-	}
-
-	@Override
-	public String toString() {
-		return "from:" + from + ";to:" + to + ";";
-	}
+public interface HasBody {
+	public Body getBody();
 }

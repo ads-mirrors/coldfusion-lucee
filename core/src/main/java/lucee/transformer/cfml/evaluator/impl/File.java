@@ -18,9 +18,9 @@
  **/
 package lucee.transformer.cfml.evaluator.impl;
 
-import lucee.transformer.bytecode.statement.tag.Tag;
 import lucee.transformer.cfml.evaluator.EvaluatorException;
 import lucee.transformer.cfml.evaluator.EvaluatorSupport;
+import lucee.transformer.statement.tag.Tag;
 
 /**
  * Prueft den Kontext des Tag file. Jenachdem welche action definiert ist sind unterschiedliche

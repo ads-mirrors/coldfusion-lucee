@@ -57,6 +57,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.util.PageContextUtil;
 import lucee.runtime.writer.BodyContentUtil;
+import lucee.transformer.bytecode.PageImpl;
 
 public final class ComponentLoader {
 
@@ -543,7 +544,7 @@ public final class ComponentLoader {
 
 	private static CIPage loadSub(CIPage page, String sub) throws ApplicationException {
 		// TODO find a better way to create that class name
-		String subClassName = lucee.transformer.bytecode.Page.createSubClass(page.getPageSource().getClassName(), sub);
+		String subClassName = PageImpl.createSubClass(page.getPageSource().getClassName(), sub);
 
 		CIPage[] subs = page.getSubPages();
 		for (int i = 0; i < subs.length; i++) {

@@ -34,6 +34,7 @@ import lucee.transformer.bytecode.util.ASMConstants;
 import lucee.transformer.bytecode.util.Types;
 import lucee.transformer.cfml.evaluator.impl.Argument;
 import lucee.transformer.expression.Expression;
+import lucee.transformer.statement.tag.Attribute;
 
 public final class TagParam extends TagBaseNoFinal {
 	//

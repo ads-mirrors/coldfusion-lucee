@@ -20,8 +20,8 @@ package lucee.transformer.cfml;
 
 import lucee.runtime.config.Config;
 import lucee.transformer.Factory;
-import lucee.transformer.bytecode.Body;
-import lucee.transformer.bytecode.Page;
+import lucee.transformer.Body;
+import lucee.transformer.Page;
 import lucee.transformer.cfml.evaluator.EvaluatorPool;
 import lucee.transformer.cfml.expression.SimpleExprTransformer;
 import lucee.transformer.cfml.script.DocComment;

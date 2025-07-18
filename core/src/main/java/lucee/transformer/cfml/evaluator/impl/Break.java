@@ -21,8 +21,6 @@ package lucee.transformer.cfml.evaluator.impl;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.transformer.bytecode.expression.var.VariableString;
-import lucee.transformer.bytecode.statement.tag.Attribute;
-import lucee.transformer.bytecode.statement.tag.Tag;
 import lucee.transformer.bytecode.statement.tag.TagBreak;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.cast.Cast;
@@ -32,6 +30,8 @@ import lucee.transformer.expression.Expression;
 import lucee.transformer.expression.literal.LitString;
 import lucee.transformer.expression.var.Variable;
 import lucee.transformer.library.tag.TagLibTag;
+import lucee.transformer.statement.tag.Attribute;
+import lucee.transformer.statement.tag.Tag;
 
 /**
  * Prueft den Kontext des Tag break. Das Tag <code>break</code> darf nur innerhalb des Tag

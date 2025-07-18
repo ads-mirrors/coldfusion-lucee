@@ -26,20 +26,20 @@ import lucee.runtime.functions.list.ListQualify;
 import lucee.runtime.functions.other.PreserveSingleQuotes;
 import lucee.runtime.functions.other.QuotedValueList;
 import lucee.runtime.functions.query.ValueList;
-import lucee.transformer.bytecode.Body;
-import lucee.transformer.bytecode.Statement;
-import lucee.transformer.bytecode.expression.var.Argument;
+import lucee.transformer.Body;
+import lucee.transformer.bytecode.expression.var.ArgumentImpl;
 import lucee.transformer.bytecode.expression.var.BIF;
 import lucee.transformer.bytecode.expression.var.UDF;
 import lucee.transformer.bytecode.statement.PrintOut;
-import lucee.transformer.bytecode.statement.tag.Attribute;
-import lucee.transformer.bytecode.statement.tag.Tag;
 import lucee.transformer.cfml.evaluator.EvaluatorException;
 import lucee.transformer.cfml.evaluator.EvaluatorSupport;
 import lucee.transformer.expression.Expression;
 import lucee.transformer.expression.literal.Literal;
 import lucee.transformer.expression.var.Member;
 import lucee.transformer.expression.var.Variable;
+import lucee.transformer.statement.Statement;
+import lucee.transformer.statement.tag.Attribute;
+import lucee.transformer.statement.tag.Tag;
 
 /**
  * sign print outs for preserver
@@ -83,22 +83,22 @@ public final class Query extends EvaluatorSupport {
 								continue;
 							}
 							else if (bif.getClassDefinition().getClassName().equals(ListQualify.class.getName())) {
-								Argument[] args = bif.getArguments();
-								List<Argument> arr = new ArrayList<Argument>();
+								lucee.transformer.expression.var.Argument[] args = bif.getArguments();
+								List<lucee.transformer.expression.var.Argument> arr = new ArrayList<>();
 
 								// first get existing arguments
 								arr.add(args[0]);
 								arr.add(args[1]);
 								if (args.length >= 3) arr.add(args[2]);
-								else arr.add(new Argument(expr.getFactory().createLitString(","), "string"));
+								else arr.add(new ArgumentImpl(expr.getFactory().createLitString(","), "string"));
 								if (args.length >= 4) arr.add(args[3]);
-								else arr.add(new Argument(expr.getFactory().createLitString("all"), "string"));
+								else arr.add(new ArgumentImpl(expr.getFactory().createLitString("all"), "string"));
 								if (args.length >= 5) arr.add(args[4]);
-								else arr.add(new Argument(expr.getFactory().createLitBoolean(false), "boolean"));
+								else arr.add(new ArgumentImpl(expr.getFactory().createLitBoolean(false), "boolean"));
 
 								// PSQ-BIF DO NOT REMOVE THIS COMMENT
-								arr.add(new Argument(expr.getFactory().createLitBoolean(true), "boolean"));
-								bif.setArguments(arr.toArray(new Argument[arr.size()]));
+								arr.add(new ArgumentImpl(expr.getFactory().createLitBoolean(true), "boolean"));
+								bif.setArguments(arr.toArray(new lucee.transformer.expression.var.Argument[arr.size()]));
 								continue;
 							}
 							else if (bif.getClassDefinition().getClassName().equals(QuotedValueList.class.getName())

@@ -23,6 +23,9 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
@@ -58,7 +61,7 @@ public final class PrintOut extends StatementBaseNoFinal {
 	}
 
 	/**
-	 * @see lucee.transformer.bytecode.Statement#writeOut(BytecodeContext)
+	 * @see lucee.lucee.transformer.statement.Statement#writeOut(BytecodeContext)
 	 */
 	@Override
 	public void _writeOut(BytecodeContext bc) throws TransformerException {
@@ -108,5 +111,18 @@ public final class PrintOut extends StatementBaseNoFinal {
 
 	public void setEncodeFor(Expression encodeFor) {
 		this.encodeFor = expr.getFactory().toExprString(encodeFor);
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "PrintOutStatement");
+
+		// argument
+		{
+			Struct argument = new StructImpl(Struct.TYPE_LINKED);
+			expr.dump(argument);
+			sct.setEL(KeyConstants._argument, argument);
+		}
 	}
 }

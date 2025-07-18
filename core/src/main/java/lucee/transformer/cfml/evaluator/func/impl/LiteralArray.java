@@ -1,11 +1,11 @@
 package lucee.transformer.cfml.evaluator.func.impl;
 
 import lucee.runtime.exp.TemplateException;
-import lucee.transformer.bytecode.expression.var.Argument;
 import lucee.transformer.bytecode.expression.var.BIF;
-import lucee.transformer.bytecode.expression.var.NamedArgument;
 import lucee.transformer.cfml.evaluator.EvaluatorException;
 import lucee.transformer.cfml.evaluator.FunctionEvaluator;
+import lucee.transformer.expression.var.Argument;
+import lucee.transformer.expression.var.NamedArgument;
 import lucee.transformer.library.function.FunctionLibFunction;
 
 public final class LiteralArray implements FunctionEvaluator {

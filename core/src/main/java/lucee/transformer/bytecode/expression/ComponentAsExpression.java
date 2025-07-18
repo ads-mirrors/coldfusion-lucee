@@ -8,14 +8,17 @@ import org.objectweb.asm.commons.Method;
 import lucee.runtime.component.ComponentLoader;
 import lucee.runtime.config.Constants;
 import lucee.runtime.functions.other.CreateUniqueId;
+import lucee.runtime.type.Struct;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
-import lucee.transformer.bytecode.Statement;
-import lucee.transformer.bytecode.statement.tag.Attribute;
+import lucee.transformer.bytecode.PageImpl;
 import lucee.transformer.bytecode.statement.tag.TagComponent;
 import lucee.transformer.bytecode.util.Types;
 import lucee.transformer.cfml.Data;
 import lucee.transformer.cfml.evaluator.EvaluatorException;
+import lucee.transformer.expression.AsExpression;
+import lucee.transformer.statement.Statement;
+import lucee.transformer.statement.tag.Attribute;
 
 public final class ComponentAsExpression extends ExpressionBase implements AsExpression {
 	private static final Type COMPONENT_LOADER = Type.getType(ComponentLoader.class);
@@ -48,7 +51,7 @@ public final class ComponentAsExpression extends ExpressionBase implements AsExp
 		// load the component
 		GeneratorAdapter adapter = bc.getAdapter();
 
-		String pageClassName = bc.getPage().getClassName();
+		String pageClassName = ((PageImpl) bc.getPage()).getClassName();
 		String inlineClassName = tc.getSubClassName(bc.getPage());
 		// ASMConstants.NULL(adapter);
 		adapter.visitTypeInsn(Opcodes.NEW, inlineClassName);
@@ -78,5 +81,10 @@ public final class ComponentAsExpression extends ExpressionBase implements AsExp
 	@Override
 	public Statement getStatement() {
 		return tc;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		tc.dump(sct);
 	}
 }

@@ -33,7 +33,6 @@ import lucee.commons.lang.types.RefBooleanImpl;
 import lucee.runtime.MappingImpl;
 import lucee.runtime.PageSource;
 import lucee.runtime.config.ConfigPro;
-import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.config.Constants;
 import lucee.runtime.config.Identification;
 import lucee.runtime.exp.ApplicationException;
@@ -43,17 +42,12 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
+import lucee.transformer.Body;
 import lucee.transformer.Factory;
+import lucee.transformer.Page;
 import lucee.transformer.Position;
-import lucee.transformer.bytecode.Body;
-import lucee.transformer.bytecode.BodyBase;
-import lucee.transformer.bytecode.Page;
-import lucee.transformer.bytecode.statement.PrintOut;
 import lucee.transformer.bytecode.statement.StatementBase;
-import lucee.transformer.bytecode.statement.tag.Attribute;
-import lucee.transformer.bytecode.statement.tag.Tag;
 import lucee.transformer.bytecode.statement.tag.TagFunction;
-import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.cfml.Data;
 import lucee.transformer.cfml.ExprTransformer;
 import lucee.transformer.cfml.TransfomerSettings;
@@ -73,8 +67,12 @@ import lucee.transformer.library.tag.TagLibException;
 import lucee.transformer.library.tag.TagLibFactory;
 import lucee.transformer.library.tag.TagLibTag;
 import lucee.transformer.library.tag.TagLibTagAttr;
+import lucee.transformer.statement.Statement;
+import lucee.transformer.statement.tag.Attribute;
+import lucee.transformer.statement.tag.Tag;
 import lucee.transformer.util.PageSourceCode;
 import lucee.transformer.util.SourceCode;
+import lucee.transformer.util.TransformerUtil;
 
 /**
  * <pre>
@@ -331,8 +329,12 @@ public final class CFMLTransformer {
 			_tlibs[TAG_LIB_PAGE] = new TagLib[0];
 		}
 
-		Page page = new Page(factory, config, sc, null, ConfigUtil.getEngine(config).getInfo().getFullVersionInfo(), sourceLastModified, sc.getWriteLog(),
-				config.getSuppressWSBeforeArg(), config.getDefaultFunctionOutput(), returnValue, ignoreScope);
+		Page page = factory.createPage(sc, sourceLastModified, returnValue, ignoreScope);
+
+		// Page page = new PageImpl(factory, config, sc, null,
+		// ConfigUtil.getEngine(config).getInfo().getFullVersionInfo(), sourceLastModified,
+		// sc.getWriteLog(),config.getSuppressWSBeforeArg(), config.getDefaultFunctionOutput(), returnValue,
+		// ignoreScope);
 
 		TransfomerSettings settings = new TransfomerSettings(dnuc, config.getHandleUnQuotedAttrValueAsString(), ignoreScope);
 		Data data = new Data(factory, config, page, sc, new EvaluatorPool(), settings, _tlibs, flibs, config.getCoreTagLib().getScriptTags(), false, hasWriteLog, hasUpper,
@@ -517,8 +519,8 @@ public final class CFMLTransformer {
 						Position end = data.srcCode.getPosition();
 						Position start = data.srcCode.getPosition(end.pos - text.length());
 
-						PrintOut po;
-						parent.addStatement(po = new PrintOut(data.transformer.transform(data), start, end));
+						Statement po = data.factory.createPrintOut(data.transformer.transform(data), start, end);
+						parent.addStatement(po);
 						po.setEnd(data.srcCode.getPosition());
 
 						if (!data.srcCode.isCurrent('#')) throw new TemplateException(data.srcCode, "missing terminating [#] for expression");
@@ -715,7 +717,7 @@ public final class CFMLTransformer {
 				hasBody = tagLibTag.getHasBody();
 			}
 			else if (data.srcCode.forwardIfCurrent('/', '>')) {
-				if (tagLibTag.getHasBody()) tag.setBody(new BodyBase(data.factory));
+				if (tagLibTag.getHasBody()) tag.setBody(data.factory.createBody());
 			}
 			else {
 				throw createTemplateException(data.srcCode, "tag [" + tagLibTag.getFullName() + "] is not closed", tagLibTag);
@@ -745,7 +747,8 @@ public final class CFMLTransformer {
 					if (!data.srcCode.forwardIfCurrent("</")) {
 						// MUST this is a patch, do a more proper implementation
 						TemplateException te = new TemplateException(data.srcCode, "invalid construct");
-						if (tdbt instanceof CFMLScriptTransformer && ASMUtil.containsComponent(tag.getBody())) {
+
+						if (tdbt instanceof CFMLScriptTransformer && TransformerUtil.containsComponent(tag.getBody())) {
 							throw new CFMLScriptTransformer.ComponentTemplateException(te);
 						}
 						throw te;
@@ -770,7 +773,7 @@ public final class CFMLTransformer {
 				}
 				else {
 					// get body of Tag
-					BodyBase body = new BodyBase(data.factory);
+					Body body = data.factory.createBody();
 					body.setParent(tag);
 					// tag.setBody(body);
 					// parseExpression=(tagLibTag.getParseBody())?true:parseExpression;

@@ -32,21 +32,20 @@ import lucee.runtime.functions.other.CreateUniqueId;
 import lucee.runtime.type.scope.Scope;
 import lucee.runtime.type.scope.ScopeSupport;
 import lucee.runtime.type.util.UDFUtil;
+import lucee.transformer.Body;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
-import lucee.transformer.bytecode.Body;
 import lucee.transformer.bytecode.expression.ComponentAsExpression;
 import lucee.transformer.bytecode.expression.ExpressionInvoker;
 import lucee.transformer.bytecode.expression.FunctionAsExpression;
-import lucee.transformer.bytecode.expression.var.Argument;
+import lucee.transformer.bytecode.expression.var.ArgumentImpl;
 import lucee.transformer.bytecode.expression.var.Assign;
 import lucee.transformer.bytecode.expression.var.BIF;
 import lucee.transformer.bytecode.expression.var.Call;
 import lucee.transformer.bytecode.expression.var.DynAssign;
-import lucee.transformer.bytecode.expression.var.Func;
 import lucee.transformer.bytecode.expression.var.FunctionMember;
-import lucee.transformer.bytecode.expression.var.NamedArgument;
+import lucee.transformer.bytecode.expression.var.NamedArgumentImpl;
 import lucee.transformer.bytecode.expression.var.UDF;
 import lucee.transformer.bytecode.literal.Identifier;
 import lucee.transformer.bytecode.literal.Null;
@@ -67,7 +66,9 @@ import lucee.transformer.expression.literal.LitBoolean;
 import lucee.transformer.expression.literal.LitNumber;
 import lucee.transformer.expression.literal.LitString;
 import lucee.transformer.expression.literal.Literal;
+import lucee.transformer.expression.var.Argument;
 import lucee.transformer.expression.var.DataMember;
+import lucee.transformer.expression.var.Func;
 import lucee.transformer.expression.var.Member;
 import lucee.transformer.expression.var.Variable;
 import lucee.transformer.library.function.FunctionLibFunction;
@@ -294,21 +295,21 @@ public abstract class AbstrCFMLExprTransformer {
 		try {
 			if (data.srcCode.forwardIfCurrent(":")) {
 				comments(data);
-				return new NamedArgument(expr, assignOp(data), type, varKeyUpperCase);
+				return new NamedArgumentImpl(expr, assignOp(data), type, varKeyUpperCase);
 			}
 			else if (expr instanceof DynAssign) {
 				DynAssign da = (DynAssign) expr;
-				return new NamedArgument(da.getName(), da.getValue(), type, varKeyUpperCase);
+				return new NamedArgumentImpl(da.getName(), da.getValue(), type, varKeyUpperCase);
 			}
 			else if (expr instanceof Assign && !(expr instanceof OpVariable)) {
 				Assign a = (Assign) expr;
-				return new NamedArgument(a.getVariable(), a.getValue(), type, varKeyUpperCase);
+				return new NamedArgumentImpl(a.getVariable(), a.getValue(), type, varKeyUpperCase);
 			}
 		}
 		catch (TransformerException be) {
 			throw new TemplateException(data.srcCode, be.getMessage());
 		}
-		return new Argument(expr, type);
+		return new ArgumentImpl(expr, type);
 	}
 
 	/**
@@ -1023,7 +1024,7 @@ public abstract class AbstrCFMLExprTransformer {
 							String str = ((LitString) tmp).getString();
 							str.indexOf(':');
 							str = str.substring(str.indexOf(':') + 1);
-							((BIF) member).addArgument(new Argument(expr.getFactory().createLitString(str), "string"));
+							((BIF) member).addArgument(new ArgumentImpl(expr.getFactory().createLitString(str), "string"));
 							isMatch = true;
 						}
 					}
@@ -1416,7 +1417,7 @@ public abstract class AbstrCFMLExprTransformer {
 	private Expression lambda(Data data) throws TemplateException {
 		int pos = data.srcCode.getPos();
 		if (!data.srcCode.forwardIfCurrent("(")) return null;
-		ArrayList<lucee.transformer.bytecode.statement.Argument> args = null;
+		ArrayList<lucee.transformer.statement.Argument> args = null;
 		// data.cfml.previous();
 		try {
 			args = getScriptFunctionArguments(data);
@@ -1446,9 +1447,9 @@ public abstract class AbstrCFMLExprTransformer {
 	}
 
 	protected abstract Function lambdaPart(Data data, String id, int access, int modifier, String rtnType, Position line,
-			ArrayList<lucee.transformer.bytecode.statement.Argument> args) throws TemplateException;
+			ArrayList<lucee.transformer.statement.Argument> args) throws TemplateException;
 
-	protected abstract ArrayList<lucee.transformer.bytecode.statement.Argument> getScriptFunctionArguments(Data data) throws TemplateException;
+	protected abstract ArrayList<lucee.transformer.statement.Argument> getScriptFunctionArguments(Data data) throws TemplateException;
 
 	protected FunctionLibFunction getFLF(Data data, String name) {
 		return data.flibs.getFunction(name);
@@ -1576,7 +1577,7 @@ public abstract class AbstrCFMLExprTransformer {
 			// now we generate a _getStaticScope function call with that path
 			if (bif == null) {
 				bif = ASMUtil.createBif(data, GET_STATIC_SCOPE);
-				bif.addArgument(new Argument(componentPath, "string"));
+				bif.addArgument(new ArgumentImpl(componentPath, "string"));
 			}
 
 			Variable var = data.factory.createVariable(old.getStart(), data.srcCode.getPosition());
@@ -1619,8 +1620,8 @@ public abstract class AbstrCFMLExprTransformer {
 		if (data.srcCode.isCurrent('(')) {
 			FunctionMember func = getFunctionMember(data, Identifier.toIdentifier(data.factory, "_createComponent", Identifier.CASE_ORIGNAL, null, null), true);
 			// Expression listener = getListener(data);
-			func.addArgument(new Argument(exprName, "string"));
-			func.addArgument(new Argument(data.factory.createLitString(type), "string"));
+			func.addArgument(new ArgumentImpl(exprName, "string"));
+			func.addArgument(new ArgumentImpl(data.factory.createLitString(type), "string"));
 			Variable v = expr.getFactory().createVariable(expr.getStart(), expr.getEnd());
 			v.addMember(func);
 			// if (listener != null) v.addListener(listener);
@@ -1863,8 +1864,8 @@ public abstract class AbstrCFMLExprTransformer {
 					FunctionLibFunctionArg arg;
 					while (it.hasNext()) {
 						arg = it.next();
-						if (arg.getDefaultValue() != null) bif.addArgument(
-								new NamedArgument(data.factory.createLitString(arg.getName()), data.factory.createLitString(arg.getDefaultValue()), arg.getTypeAsString(), false));
+						if (arg.getDefaultValue() != null) bif.addArgument(new NamedArgumentImpl(data.factory.createLitString(arg.getName()),
+								data.factory.createLitString(arg.getDefaultValue()), arg.getTypeAsString(), false));
 					}
 				}
 			}

@@ -34,22 +34,25 @@ import lucee.commons.lang.compiler.JavaFunction;
 import lucee.runtime.Component;
 import lucee.runtime.exp.TemplateException;
 import lucee.runtime.listener.AppListenerUtil;
+import lucee.runtime.type.Array;
+import lucee.runtime.type.ArrayImpl;
 import lucee.runtime.type.FuncArgLite;
 import lucee.runtime.type.FunctionArgument;
 import lucee.runtime.type.FunctionArgumentImpl;
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.ComponentUtil;
+import lucee.runtime.type.util.KeyConstants;
+import lucee.transformer.Body;
+import lucee.transformer.Context;
 import lucee.transformer.Factory;
+import lucee.transformer.Page;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
-import lucee.transformer.bytecode.Body;
 import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.ConstrBytecodeContext;
-import lucee.transformer.bytecode.Page;
-import lucee.transformer.bytecode.statement.Argument;
-import lucee.transformer.bytecode.statement.HasBody;
-import lucee.transformer.bytecode.statement.IFunction;
+import lucee.transformer.bytecode.PageImpl;
 import lucee.transformer.bytecode.statement.StatementBaseNoFinal;
-import lucee.transformer.bytecode.statement.tag.Attribute;
 import lucee.transformer.bytecode.util.ASMConstants;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.bytecode.util.ExpressionUtil;
@@ -63,6 +66,10 @@ import lucee.transformer.expression.literal.LitBoolean;
 import lucee.transformer.expression.literal.LitInteger;
 import lucee.transformer.expression.literal.LitString;
 import lucee.transformer.expression.literal.Literal;
+import lucee.transformer.statement.Argument;
+import lucee.transformer.statement.HasBody;
+import lucee.transformer.statement.IFunction;
+import lucee.transformer.statement.tag.Attribute;
 
 public abstract class Function extends StatementBaseNoFinal implements Opcodes, IFunction, HasBody {
 
@@ -142,8 +149,8 @@ public abstract class Function extends StatementBaseNoFinal implements Opcodes, 
 	ExprBoolean verifyClient;
 	ExprInt localMode;
 	// protected int localIndex = -1;
-	private Literal cachedWithin;
-	private int modifier;
+	Literal cachedWithin;
+	int modifier;
 	protected JavaFunction jf;
 	// private final Root root;
 	protected int index = -1;
@@ -202,7 +209,9 @@ public abstract class Function extends StatementBaseNoFinal implements Opcodes, 
 	}
 
 	@Override
-	public final void writeOut(BytecodeContext bc, int type) throws TransformerException {
+	public final void writeOut(Context context, int type) throws TransformerException {
+		BytecodeContext bc = (BytecodeContext) context;
+
 		// register(bc.getPage());
 		bc.visitLine(getStart());
 		_writeOut(bc, type);
@@ -289,7 +298,7 @@ public abstract class Function extends StatementBaseNoFinal implements Opcodes, 
 		if (light && bufferOutput != null) light = false;
 		if (light && localMode != null) light = false;
 		if (light && modifier != Component.MODIFIER_NONE) light = false;
-		if (light && Page.hasMetaDataStruct(metadata, null)) light = false;
+		if (light && PageImpl.hasMetaDataStruct(metadata, null)) light = false;
 		if (light) {
 			adapter.invokeConstructor(Types.UDF_PROPERTIES_IMPL, INIT_UDF_PROPERTIES_SHORTTYPE_LIGHT);
 			return;
@@ -331,7 +340,7 @@ public abstract class Function extends StatementBaseNoFinal implements Opcodes, 
 		adapter.push(modifier);
 
 		// meta
-		Page.createMetaDataStruct(bc, metadata, null);
+		PageImpl.createMetaDataStruct(bc, metadata, null);
 
 		adapter.invokeConstructor(Types.UDF_PROPERTIES_IMPL, sType == -1 ? INIT_UDF_PROPERTIES_STRTYPE : INIT_UDF_PROPERTIES_SHORTTYPE);
 
@@ -458,7 +467,7 @@ public abstract class Function extends StatementBaseNoFinal implements Opcodes, 
 			// hint
 			if (functionIndex >= INIT_FAI_KEY.length - 2) _hint.writeOut(bc, Expression.MODE_REF);
 			// meta
-			if (functionIndex == INIT_FAI_KEY.length - 1) Page.createMetaDataStruct(bc, _meta, null);
+			if (functionIndex == INIT_FAI_KEY.length - 1) PageImpl.createMetaDataStruct(bc, _meta, null);
 
 			if (functionIndex < INIT_FAI_KEY_LIGHT.length) ga.invokeConstructor(FUNCTION_ARGUMENT_LIGHT, INIT_FAI_KEY[functionIndex]);
 			else ga.invokeConstructor(FUNCTION_ARGUMENT_IMPL, INIT_FAI_KEY[functionIndex]);
@@ -616,4 +625,140 @@ public abstract class Function extends StatementBaseNoFinal implements Opcodes, 
 		return name;
 	}
 
+	public void dump(Struct sct, String type) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, type);
+
+		// name
+		{
+			Struct s = new StructImpl(Struct.TYPE_LINKED);
+			name.dump(s);
+			sct.setEL(KeyConstants._name, s);
+		}
+		// access
+		String a = toAccess(access);
+		if (a != null) {
+			sct.setEL(KeyConstants._access, a);
+		}
+		// modifier
+		String m = toModifier(modifier);
+		if (m != null) {
+			sct.setEL(KeyConstants._modifier, m);
+		}
+		// returnType
+		if (returnType != null) {
+			Struct s = new StructImpl(Struct.TYPE_LINKED);
+			returnType.dump(s);
+			sct.setEL(KeyConstants._returnType, s);
+		}
+		// returnFormat
+		if (returnFormat != null) {
+			Struct s = new StructImpl(Struct.TYPE_LINKED);
+			returnFormat.dump(s);
+			sct.setEL(KeyConstants._returnFormat, s);
+		}
+		// output
+		if (output != null) {
+			Struct s = new StructImpl(Struct.TYPE_LINKED);
+			output.dump(s);
+			sct.setEL(KeyConstants._output, s);
+		}
+		// bufferOutput
+		if (bufferOutput != null) {
+			Struct s = new StructImpl(Struct.TYPE_LINKED);
+			bufferOutput.dump(s);
+			sct.setEL(KeyConstants._bufferOutput, s);
+		}
+		// displayName
+		if (displayName != null) {
+			Struct s = new StructImpl(Struct.TYPE_LINKED);
+			displayName.dump(s);
+			sct.setEL(KeyConstants._displayName, s);
+		}
+		// description
+		if (description != null) {
+			Struct s = new StructImpl(Struct.TYPE_LINKED);
+			description.dump(s);
+			sct.setEL(KeyConstants._description, s);
+		}
+		// hint
+		if (hint != null) {
+			Struct s = new StructImpl(Struct.TYPE_LINKED);
+			hint.dump(s);
+			sct.setEL(KeyConstants._hint, s);
+		}
+		// secureJson
+		if (secureJson != null) {
+			Struct s = new StructImpl(Struct.TYPE_LINKED);
+			secureJson.dump(s);
+			sct.setEL(KeyConstants._secureJson, s);
+		}
+		// verifyClient
+		if (verifyClient != null) {
+			Struct s = new StructImpl(Struct.TYPE_LINKED);
+			verifyClient.dump(s);
+			sct.setEL(KeyConstants._verifyClient, s);
+		}
+		// localMode
+		if (localMode != null) {
+			Struct s = new StructImpl(Struct.TYPE_LINKED);
+			localMode.dump(s);
+			sct.setEL(KeyConstants._localMode, s);
+		}
+		// cachedWithin
+		if (cachedWithin != null) {
+			Struct s = new StructImpl(Struct.TYPE_LINKED);
+			cachedWithin.dump(s);
+			sct.setEL(KeyConstants._cachedWithin, s);
+		}
+
+		// params
+		Array params = new ArrayImpl();
+		sct.setEL(KeyConstants._params, params);
+		for (Argument arg: arguments) {
+			Struct param = new StructImpl(Struct.TYPE_LINKED);
+			params.appendEL(param);
+
+			Expression expr = arg.getType();
+			if (expr != null) param.setEL(KeyConstants._type, expr);
+
+			expr = arg.getName();
+			if (expr != null) param.setEL(KeyConstants._name, expr);
+
+			expr = arg.getRequired();
+			if (expr != null) param.setEL(KeyConstants._required, expr);
+
+			expr = arg.getDefaultValue();
+			if (expr != null) param.setEL(KeyConstants._defaultValue, expr);
+
+			expr = arg.getDisplayName();
+			if (expr != null) param.setEL(KeyConstants._displayName, expr);
+
+			expr = arg.getHint();
+			if (expr != null) param.setEL(KeyConstants._hint, expr);
+		}
+
+		// body
+		if (body != null) {
+			Struct s = new StructImpl(Struct.TYPE_LINKED);
+			body.dump(s);
+			sct.setEL(KeyConstants._body, s);
+		}
+	}
+
+	private String toModifier(int modifier) {
+		if (Component.MODIFIER_ABSTRACT == modifier) return "ABSTRACT";
+		if (Component.MODIFIER_FINAL == modifier) return "FINAL";
+		if (Component.MODIFIER_NONE == modifier) return null;
+
+		return null;
+	}
+
+	private static String toAccess(int access) {
+		if (Component.ACCESS_PRIVATE == access) return "PRIVATE";
+		if (Component.ACCESS_PACKAGE == access) return "PACKAGE";
+		if (Component.ACCESS_PUBLIC == access) return "PUBLIC";
+		if (Component.ACCESS_REMOTE == access) return "REMOTE";
+		return null;
+	}
 }

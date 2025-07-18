@@ -18,11 +18,11 @@
  **/
 package lucee.transformer.cfml.evaluator.impl;
 
-import lucee.transformer.bytecode.statement.tag.Tag;
 import lucee.transformer.cfml.evaluator.EvaluatorException;
 import lucee.transformer.cfml.evaluator.EvaluatorSupport;
 import lucee.transformer.library.function.FunctionLib;
 import lucee.transformer.library.tag.TagLibTag;
+import lucee.transformer.statement.tag.Tag;
 
 public final class Log extends EvaluatorSupport {
 

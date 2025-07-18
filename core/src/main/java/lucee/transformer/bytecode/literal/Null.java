@@ -23,7 +23,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.objectweb.asm.Type;
 
+import lucee.runtime.type.Struct;
 import lucee.runtime.type.scope.Scope;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
@@ -54,6 +56,11 @@ public final class Null extends ExpressionBase implements Literal {
 	}
 
 	@Override
+	public Object getValue() {
+		return null;
+	}
+
+	@Override
 	public String getString() {
 		return null;
 	}
@@ -75,5 +82,11 @@ public final class Null extends ExpressionBase implements Literal {
 			instances.put(f, n = new Null(f, null, null));
 		}
 		return n;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "NullLiteral");
 	}
 }

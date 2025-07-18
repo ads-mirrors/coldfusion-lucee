@@ -18,15 +18,13 @@
 package lucee.transformer.expression;
 
 import lucee.transformer.Context;
-import lucee.transformer.Factory;
-import lucee.transformer.Position;
+import lucee.transformer.Node;
 import lucee.transformer.TransformerException;
 
 /**
  * An Expression (Operation, Literal aso.)
  */
-public interface Expression {
-
+public interface Expression extends Node {
 	/**
 	 * Field <code>MODE_REF</code>
 	 */
@@ -46,13 +44,4 @@ public interface Expression {
 	 */
 	public Class<?> writeOut(Context bc, int mode) throws TransformerException;
 
-	public Position getStart();
-
-	public Position getEnd();
-
-	public void setStart(Position start);
-
-	public void setEnd(Position end);
-
-	public Factory getFactory();
 }

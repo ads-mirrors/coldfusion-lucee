@@ -28,18 +28,19 @@ import lucee.commons.io.res.Resource;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.loader.engine.CFMLEngineFactory;
 import lucee.runtime.op.Decision;
+import lucee.transformer.Body;
 import lucee.transformer.Factory;
+import lucee.transformer.Page;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
-import lucee.transformer.bytecode.Body;
 import lucee.transformer.bytecode.BytecodeContext;
-import lucee.transformer.bytecode.Page;
-import lucee.transformer.bytecode.Statement;
+import lucee.transformer.bytecode.PageImpl;
 import lucee.transformer.bytecode.StaticBody;
 import lucee.transformer.bytecode.statement.FlowControlFinal;
 import lucee.transformer.bytecode.statement.udf.Function;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.cfml.evaluator.EvaluatorException;
+import lucee.transformer.statement.Statement;
 import lucee.transformer.util.PageSourceCode;
 import lucee.transformer.util.SourceCode;
 
@@ -74,7 +75,9 @@ public abstract class TagCIObject extends TagBase {
 	 * 
 	 * @param parent
 	 */
-	public void initDetachedComponent(Page parent) {
+	public void initDetachedComponent(final Page parent) {
+		if (!(parent instanceof PageImpl)) return;
+		PageImpl bparent = (PageImpl) parent;
 		// create source code just for that component
 		psc = null;
 		{
@@ -89,14 +92,14 @@ public abstract class TagCIObject extends TagBase {
 		SourceCode sc = parent.getSourceCode().subCFMLString(getStart().pos, getEnd().pos - getStart().pos);
 
 		// create page for that component
-		page = new Page(parent.getFactory(), parent.getConfig(), sc, this, CFMLEngineFactory.getInstance().getInfo().getFullVersionInfo(), parent.getLastModifed(),
-				parent.writeLog(), parent.getSupressWSbeforeArg(), parent.getOutput(), parent.returnValue(), parent.ignoreScopes);
+		page = new PageImpl(parent.getFactory(), parent.getConfig(), sc, this, CFMLEngineFactory.getInstance().getInfo().getFullVersionInfo(), parent.getLastModifed(),
+				bparent.writeLog(), bparent.getSupressWSbeforeArg(), bparent.getOutput(), bparent.returnValue(), bparent.ignoreScopes);
 
 		// move functions over from root page to this page
-		final List<Function> functions = parent.getFunctions();
+		final List<Function> functions = bparent.getFunctions();
 		for (Function f: functions) {
 			if (ASMUtil.getAncestorComponent(f) == this) {
-				parent.removeFunction(f);
+				bparent.removeFunction(f);
 				page.addFunction(f);
 			}
 		}
@@ -109,7 +112,7 @@ public abstract class TagCIObject extends TagBase {
 		// write the file
 		byte[] barr = page.execute(className);
 
-		Resource classFile = ((PageSourceCode) psc).getPageSource().getMapping().getClassRootDirectory().getRealResource(page.getClassName() + ".class");
+		Resource classFile = ((PageSourceCode) psc).getPageSource().getMapping().getClassRootDirectory().getRealResource(((PageImpl) page).getClassName() + ".class");
 
 		// delete all old inline files
 		if (inline) {
@@ -146,7 +149,7 @@ public abstract class TagCIObject extends TagBase {
 	}
 
 	public String getSubClassName(Page parent) {
-		if (subClassName == null) subClassName = Page.createSubClass(parent.getClassName(), getName());
+		if (subClassName == null) subClassName = PageImpl.createSubClass(((PageImpl) parent).getClassName(), getName());
 		return subClassName;
 	}
 

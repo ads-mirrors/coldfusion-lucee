@@ -25,10 +25,10 @@ import java.util.List;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.runtime.exp.TemplateException;
 import lucee.transformer.bytecode.expression.var.BIF;
-import lucee.transformer.bytecode.statement.tag.Tag;
 import lucee.transformer.library.function.FunctionLib;
 import lucee.transformer.library.function.FunctionLibFunction;
 import lucee.transformer.library.tag.TagLibTag;
+import lucee.transformer.statement.tag.Tag;
 import lucee.transformer.util.SourceCode;
 
 /**

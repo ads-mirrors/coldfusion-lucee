@@ -19,11 +19,13 @@ package lucee.transformer.bytecode.expression;
 
 import org.objectweb.asm.Type;
 
+import lucee.runtime.type.Struct;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
-import lucee.transformer.bytecode.Statement;
 import lucee.transformer.bytecode.statement.udf.Function;
 import lucee.transformer.bytecode.util.Types;
+import lucee.transformer.expression.AsExpression;
+import lucee.transformer.statement.Statement;
 
 public class FunctionAsExpression extends ExpressionBase implements AsExpression {
 
@@ -50,5 +52,10 @@ public class FunctionAsExpression extends ExpressionBase implements AsExpression
 	@Override
 	public Statement getStatement() {
 		return function;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		function.dump(sct);
 	}
 }

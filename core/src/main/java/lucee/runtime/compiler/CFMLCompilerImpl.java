@@ -38,12 +38,14 @@ import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.Constants;
 import lucee.runtime.exp.TemplateException;
 import lucee.runtime.op.Caster;
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.ListUtil;
-import lucee.transformer.Factory;
+import lucee.transformer.Page;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeFactory;
-import lucee.transformer.bytecode.Page;
+import lucee.transformer.bytecode.PageImpl;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.bytecode.util.ClassRenamer;
 import lucee.transformer.cfml.tag.CFMLTransformer;
@@ -68,6 +70,27 @@ public final class CFMLCompilerImpl implements CFMLCompiler {
 		cfmlTransformer = new CFMLTransformer();
 	}
 
+	public Struct ast(ConfigPro config, PageSource ps, boolean ignoreScopes) throws TemplateException, IOException {
+
+		BytecodeFactory factory = BytecodeFactory.getInstance(config);
+		// , cwi.getFLDs()
+		PageImpl page = ((PageImpl) cfmlTransformer.transform(factory, config, ps, config.getTLDs(), config.getFLDs(), false, ignoreScopes));
+		Struct sct = new StructImpl();
+		page.dump(sct);
+		return sct;
+	}
+
+	public Struct ast(ConfigPro config, SourceCode sc, boolean ignoreScopes) throws TemplateException {
+
+		BytecodeFactory factory = BytecodeFactory.getInstance(config);
+		// , cwi.getFLDs()
+		PageImpl page = ((PageImpl) cfmlTransformer.transform(factory, config, sc, config.getTLDs(), config.getFLDs(), System.currentTimeMillis(), config.getDotNotationUpperCase(),
+				false, ignoreScopes, false, false, false));
+		Struct sct = new StructImpl();
+		page.dump(sct);
+		return sct;
+	}
+
 	public Result compile(ConfigPro config, PageSource ps, TagLib[] tld, FunctionLib fld, Resource classRootDir, boolean returnValue, boolean ignoreScopes)
 			throws TemplateException, IOException {
 		return _compile(config, ps, null, null, tld, fld, classRootDir, returnValue, ignoreScopes);
@@ -84,6 +107,7 @@ public final class CFMLCompilerImpl implements CFMLCompiler {
 
 	private Result _compile(ConfigPro config, PageSource ps, SourceCode sc, String className, TagLib[] tld, FunctionLib fld, Resource classRootDir, boolean returnValue,
 			boolean ignoreScopes) throws TemplateException, IOException {
+
 		String javaName;
 		if (className == null) {
 			javaName = ListUtil.trim(ps.getJavaName(), "\\/", false);
@@ -95,13 +119,18 @@ public final class CFMLCompilerImpl implements CFMLCompiler {
 
 		Result result = null;
 		// byte[] barr = null;
-		Page page = null;
-		Factory factory = BytecodeFactory.getInstance(config);
+		PageImpl page = null;
+		BytecodeFactory factory = BytecodeFactory.getInstance(config);
 		try {
-			page = sc == null ? cfmlTransformer.transform(factory, config, ps, tld, fld, returnValue, ignoreScopes)
-					: cfmlTransformer.transform(factory, config, sc, tld, fld, System.currentTimeMillis(), config.getDotNotationUpperCase(), returnValue, ignoreScopes, false,
-							false, false);
+			page = sc == null ? ((PageImpl) cfmlTransformer.transform(factory, config, ps, tld, fld, returnValue, ignoreScopes))
+					: ((PageImpl) cfmlTransformer.transform(factory, config, sc, tld, fld, System.currentTimeMillis(), config.getDotNotationUpperCase(), returnValue, ignoreScopes,
+							false, false, false));
 			page.setSplitIfNecessary(false);
+
+			// StructImpl sct = new StructImpl(Struct.TYPE_LINKED);
+			// page.dump(sct);
+			// print.e(sct);
+
 			try {
 				byte[] barr = page.execute(className);
 				result = new Result(page, barr, page.getJavaFunctions());
@@ -197,7 +226,7 @@ public final class CFMLCompilerImpl implements CFMLCompiler {
 				Resource classFile = classRootDir.getRealResource(javaName + ".class");
 				Resource classFileDirectory = classFile.getParentResource();
 				if (!classFileDirectory.exists()) classFileDirectory.mkdirs();
-				result = new Result(result.page, Page.setSourceLastModified(result.barr, ps != null ? ps.getPhyscalFile().lastModified() : System.currentTimeMillis()), null);// TODO
+				result = new Result(result.page, PageImpl.setSourceLastModified(result.barr, ps != null ? ps.getPhyscalFile().lastModified() : System.currentTimeMillis()), null);// TODO
 				// handle
 				// java
 				// functions

@@ -5,15 +5,16 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
 import lucee.runtime.tag.Timeout;
+import lucee.transformer.Body;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
-import lucee.transformer.bytecode.Body;
 import lucee.transformer.bytecode.BodyBase;
 import lucee.transformer.bytecode.BytecodeContext;
-import lucee.transformer.bytecode.Page;
+import lucee.transformer.bytecode.PageImpl;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.bytecode.util.Types;
+import lucee.transformer.statement.tag.ATagThread;
 
 public final class TagTimeout extends TagBaseNoFinal implements ATagThread {
 
@@ -29,7 +30,7 @@ public final class TagTimeout extends TagBaseNoFinal implements ATagThread {
 	}
 
 	public void init() throws TransformerException {
-		Page page = ASMUtil.getAncestorPage(null, this);
+		PageImpl page = (PageImpl) ASMUtil.getAncestorPage(null, this);
 		index = page.addThread(this);
 
 	}

@@ -5,15 +5,16 @@ import java.util.List;
 import lucee.runtime.exp.TemplateException;
 import lucee.runtime.type.scope.Scope;
 import lucee.transformer.TransformerException;
-import lucee.transformer.bytecode.expression.var.Argument;
 import lucee.transformer.bytecode.expression.var.BIF;
-import lucee.transformer.bytecode.expression.var.NamedArgument;
+import lucee.transformer.bytecode.expression.var.NamedArgumentImpl;
 import lucee.transformer.bytecode.expression.var.VariableString;
 import lucee.transformer.cfml.evaluator.EvaluatorException;
 import lucee.transformer.cfml.evaluator.FunctionEvaluator;
 import lucee.transformer.expression.Expression;
+import lucee.transformer.expression.var.Argument;
 import lucee.transformer.expression.var.DataMember;
 import lucee.transformer.expression.var.Member;
+import lucee.transformer.expression.var.NamedArgument;
 import lucee.transformer.expression.var.Variable;
 import lucee.transformer.library.function.FunctionLibFunction;
 
@@ -70,7 +71,7 @@ public final class LiteralStruct implements FunctionEvaluator {
 					}
 
 					modified = true;
-					args[i] = new NamedArgument(((DataMember) m).getName(), val, arg.getStringType(), false);
+					args[i] = new NamedArgumentImpl(((DataMember) m).getName(), val, arg.getStringType(), false);
 
 				}
 				else {

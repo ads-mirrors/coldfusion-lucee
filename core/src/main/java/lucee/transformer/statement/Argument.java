@@ -16,7 +16,7 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  * 
  **/
-package lucee.transformer.bytecode.statement;
+package lucee.transformer.statement;
 
 import java.util.Map;
 
@@ -53,6 +53,7 @@ public final class Argument {
 	 */
 	public Argument(Expression name, Expression type, Expression required, Expression defaultValue, ExprBoolean passByReference, Expression displayName, Expression hint,
 			Map meta) {
+
 		LitString re = name.getFactory().createLitString("[runtime expression]");
 
 		this.name = name.getFactory().toExprString(name);

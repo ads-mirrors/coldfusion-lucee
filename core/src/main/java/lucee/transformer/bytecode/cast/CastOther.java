@@ -25,6 +25,9 @@ import org.objectweb.asm.commons.Method;
 import lucee.commons.lang.ClassException;
 import lucee.commons.lang.ClassUtil;
 import lucee.commons.lang.StringUtil;
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.expression.ExpressionBase;
@@ -546,6 +549,20 @@ public final class CastOther extends ExpressionBase implements Cast {
 	 */
 	public String getType() {
 		return type;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "CastExpression");
+		sct.setEL(KeyConstants._typeAnnotation, type);
+
+		// argument
+		{
+			Struct sctArg = new StructImpl(Struct.TYPE_LINKED);
+			expr.dump(sctArg);
+			sct.setEL(KeyConstants._argument, sctArg);
+		}
 	}
 
 }

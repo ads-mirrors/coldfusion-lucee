@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.objectweb.asm.Type;
 
+import lucee.runtime.type.Struct;
 import lucee.runtime.type.scope.Scope;
 import lucee.runtime.type.scope.ScopeFactory;
 import lucee.transformer.TransformerException;
@@ -98,5 +99,10 @@ public final class VariableString extends ExpressionBase implements ExprString {
 
 	public String castToString(BytecodeContext bc) throws TransformerException {
 		return translateVariableToString(bc, expr, false);
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);// MUSTTT
 	}
 }

@@ -28,7 +28,6 @@ import lucee.runtime.type.scope.Undefined;
 import lucee.runtime.util.NumberIterator;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
-import lucee.transformer.bytecode.Statement;
 import lucee.transformer.bytecode.util.Types;
 import lucee.transformer.bytecode.visitor.DecisionIntVisitor;
 import lucee.transformer.bytecode.visitor.NotVisitor;
@@ -38,6 +37,8 @@ import lucee.transformer.bytecode.visitor.TryFinallyVisitor;
 import lucee.transformer.bytecode.visitor.WhileVisitor;
 import lucee.transformer.expression.Expression;
 import lucee.transformer.expression.literal.LitString;
+import lucee.transformer.statement.Statement;
+import lucee.transformer.statement.tag.Attribute;
 
 public final class TagGroupUtil {
 

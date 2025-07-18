@@ -18,8 +18,8 @@
  **/
 package lucee.transformer.cfml.attributes;
 
-import lucee.transformer.bytecode.statement.tag.Tag;
 import lucee.transformer.library.tag.TagLibTag;
+import lucee.transformer.statement.tag.Tag;
 
 /**
  * to make additional evaluations of the attributes of a tag

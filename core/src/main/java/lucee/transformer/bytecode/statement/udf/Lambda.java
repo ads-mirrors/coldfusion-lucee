@@ -17,11 +17,12 @@
  */
 package lucee.transformer.bytecode.statement.udf;
 
+import lucee.runtime.type.Struct;
+import lucee.transformer.Body;
 import lucee.transformer.Position;
+import lucee.transformer.Root;
 import lucee.transformer.TransformerException;
-import lucee.transformer.bytecode.Body;
 import lucee.transformer.bytecode.BytecodeContext;
-import lucee.transformer.bytecode.Root;
 import lucee.transformer.expression.Expression;
 import lucee.transformer.expression.literal.Literal;
 
@@ -47,5 +48,10 @@ public final class Lambda extends Function {
 	@Override
 	public int getType() {
 		return TYPE_LAMBDA;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		dump(sct, "LambdaDeclaration");
 	}
 }

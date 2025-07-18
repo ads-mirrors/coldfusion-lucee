@@ -52,6 +52,8 @@ import lucee.transformer.expression.ExprNumber;
 import lucee.transformer.expression.Expression;
 import lucee.transformer.library.tag.TagLibTag;
 import lucee.transformer.library.tag.TagLibTagAttr;
+import lucee.transformer.statement.tag.Attribute;
+import lucee.transformer.statement.tag.Tag;
 
 public final class TagHelper {
 	private static final Type MISSING_ATTRIBUTE = Type.getType(MissingAttribute.class);

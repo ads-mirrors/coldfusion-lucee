@@ -15,17 +15,20 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  * 
  */
-package lucee.transformer.bytecode;
+package lucee.transformer;
 
-import lucee.transformer.TransformerException;
-import lucee.transformer.bytecode.statement.IFunction;
+public final class Range {
 
-public interface Root {
+	public final int from;
+	public final int to;
 
-	public int addFunction(IFunction function);
+	public Range(int from, int to) {
+		this.from = from;
+		this.to = to;
+	}
 
-	public byte[] execute(String className) throws TransformerException;
-
-	public String registerJavaFunctionName(String functionName);
-
+	@Override
+	public String toString() {
+		return "from:" + from + ";to:" + to + ";";
+	}
 }

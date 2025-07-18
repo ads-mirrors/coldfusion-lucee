@@ -27,6 +27,12 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
+import lucee.runtime.type.Array;
+import lucee.runtime.type.ArrayImpl;
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
+import lucee.transformer.Body;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
@@ -37,6 +43,7 @@ import lucee.transformer.bytecode.util.ExpressionUtil;
 import lucee.transformer.bytecode.util.Types;
 import lucee.transformer.expression.Expression;
 import lucee.transformer.expression.literal.LitString;
+import lucee.transformer.statement.Statement;
 
 /**
  * Base Body implementation
@@ -57,7 +64,7 @@ public class BodyBase extends StatementBaseNoFinal implements Body {
 
 	/**
 	 *
-	 * @see lucee.transformer.bytecode.Body#addStatement(lucee.transformer.bytecode.Statement)
+	 * @see lucee.transformer.bytecode.Body#addStatement(lucee.lucee.transformer.statement.Statement)
 	 */
 	@Override
 	public void addStatement(Statement statement) {
@@ -153,7 +160,7 @@ public class BodyBase extends StatementBaseNoFinal implements Body {
 		Method m;
 		BytecodeContext _bc = bc;
 		Iterator<Statement> it = statements.iterator();
-		boolean split = bc.getPage().getSplitIfNecessary();
+		boolean split = ((PageImpl) bc.getPage()).getSplitIfNecessary();
 
 		// int lastLine=-1;
 		while (it.hasNext()) {
@@ -165,7 +172,7 @@ public class BodyBase extends StatementBaseNoFinal implements Body {
 					a.endMethod();
 				}
 				// ExpressionUtil.visitLine(bc, s.getLine());
-				String method = ASMUtil.createOverfowMethod(bc.getMethod().getName(), bc.getPage().getMethodCount());
+				String method = ASMUtil.createOverfowMethod(bc.getMethod().getName(), ((PageImpl) bc.getPage()).getMethodCount());
 				bc.visitLine(s.getStart());
 				// ExpressionUtil.lastLine(bc);
 				m = new Method(method, Types.VOID, new Type[] { Types.PAGE_CONTEXT });
@@ -245,7 +252,7 @@ public class BodyBase extends StatementBaseNoFinal implements Body {
 		if (statements == null || statements.length == 0) return;
 
 		GeneratorAdapter callerAdapter = callerBC.getAdapter();
-		String method = ASMUtil.createOverfowMethod(callerBC.getMethod().getName(), callerBC.getPage().getMethodCount());
+		String method = ASMUtil.createOverfowMethod(callerBC.getMethod().getName(), ((PageImpl) callerBC.getPage()).getMethodCount());
 
 		for (int i = 0; i < statements.length; i++) {
 			if (statements[i].getStart() != null) {
@@ -281,5 +288,18 @@ public class BodyBase extends StatementBaseNoFinal implements Body {
 	@Override
 	public boolean isEmpty() {
 		return statements.isEmpty();
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "BlockStatement");
+		Array arr = new ArrayImpl();
+		for (Statement stat: statements) {
+			Struct s = new StructImpl(Struct.TYPE_LINKED);
+			stat.dump(s);
+			arr.appendEL(s);
+		}
+		sct.setEL(KeyConstants._body, arr);
 	}
 }

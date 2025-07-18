@@ -19,7 +19,10 @@
 package lucee.transformer.bytecode.expression.var;
 
 import lucee.transformer.expression.Expression;
+import lucee.transformer.expression.var.Argument;
+import lucee.transformer.expression.var.Func;
 import lucee.transformer.expression.var.Member;
+import lucee.transformer.expression.var.NamedArgument;
 import lucee.transformer.expression.var.NamedMember;
 import lucee.transformer.expression.var.Variable;
 

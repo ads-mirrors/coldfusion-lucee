@@ -21,10 +21,10 @@ package lucee.transformer.cfml.evaluator.impl;
 import java.util.concurrent.ThreadLocalRandom;
 
 import lucee.runtime.op.Caster;
-import lucee.transformer.bytecode.statement.tag.Attribute;
-import lucee.transformer.bytecode.statement.tag.Tag;
 import lucee.transformer.cfml.evaluator.EvaluatorException;
 import lucee.transformer.cfml.evaluator.EvaluatorSupport;
+import lucee.transformer.statement.tag.Attribute;
+import lucee.transformer.statement.tag.Tag;
 
 public final class Lock extends EvaluatorSupport {
 

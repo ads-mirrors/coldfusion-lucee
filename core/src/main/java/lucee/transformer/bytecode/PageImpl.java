@@ -62,17 +62,15 @@ import lucee.runtime.type.scope.Undefined;
 import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.type.util.ComponentUtil;
 import lucee.runtime.type.util.KeyConstants;
+import lucee.transformer.Body;
 import lucee.transformer.Factory;
+import lucee.transformer.Page;
+import lucee.transformer.Range;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.ConstrBytecodeContext.Data;
-import lucee.transformer.bytecode.statement.Argument;
-import lucee.transformer.bytecode.statement.HasBodies;
-import lucee.transformer.bytecode.statement.HasBody;
-import lucee.transformer.bytecode.statement.IFunction;
+import lucee.transformer.statement.IFunction;
+import lucee.transformer.statement.Statement;
 import lucee.transformer.bytecode.statement.NativeSwitch;
-import lucee.transformer.bytecode.statement.tag.ATagThread;
-import lucee.transformer.bytecode.statement.tag.Attribute;
-import lucee.transformer.bytecode.statement.tag.Tag;
 import lucee.transformer.bytecode.statement.tag.TagCIObject;
 import lucee.transformer.bytecode.statement.tag.TagComponent;
 import lucee.transformer.bytecode.statement.tag.TagImport;
@@ -91,13 +89,19 @@ import lucee.transformer.expression.ExprString;
 import lucee.transformer.expression.Expression;
 import lucee.transformer.expression.literal.LitString;
 import lucee.transformer.expression.literal.Literal;
+import lucee.transformer.statement.Argument;
+import lucee.transformer.statement.HasBodies;
+import lucee.transformer.statement.HasBody;
+import lucee.transformer.statement.tag.ATagThread;
+import lucee.transformer.statement.tag.Attribute;
+import lucee.transformer.statement.tag.Tag;
 import lucee.transformer.util.PageSourceCode;
 import lucee.transformer.util.SourceCode;
 
 /**
  * represent a single Page
  */
-public final class Page extends BodyBase implements Root {
+public final class PageImpl extends BodyBase implements Page {
 
 	private static final long MIN_AGE_TO_CLEAR = 5000l;
 
@@ -272,8 +276,8 @@ public final class Page extends BodyBase implements Root {
 	 * @param returnValue
 	 * @param ignoreScopes
 	 */
-	public Page(Factory factory, Config config, SourceCode sc, TagCIObject tc, long version, long lastModifed, boolean writeLog, boolean suppressWSbeforeArg, boolean output,
-			boolean returnValue, boolean ignoreScopes) {
+	public PageImpl(Factory factory, Config config, SourceCode sc, TagCIObject tc, long version, long lastModifed, boolean writeLog, boolean suppressWSbeforeArg,
+			boolean output, boolean returnValue, boolean ignoreScopes) {
 		super(factory);
 		this._comp = tc;
 		this.version = version;
@@ -1726,6 +1730,7 @@ public final class Page extends BodyBase implements Root {
 	/**
 	 * @return if it is a component
 	 */
+	@Override
 	public boolean isComponent() {
 		return isComponent(null);
 	}
@@ -1733,6 +1738,7 @@ public final class Page extends BodyBase implements Root {
 	/**
 	 * @return if it is an interface
 	 */
+	@Override
 	public boolean isInterface() {
 		return isInterface(null);
 	}
@@ -1751,6 +1757,7 @@ public final class Page extends BodyBase implements Root {
 		return cio instanceof TagInterface;
 	}
 
+	@Override
 	public boolean isPage() {
 		return getTagCFObject(null) == null;
 	}
@@ -1758,6 +1765,7 @@ public final class Page extends BodyBase implements Root {
 	/**
 	 * @return the lastModifed
 	 */
+	@Override
 	public long getLastModifed() {
 		return lastModifed;
 	}
@@ -1846,6 +1854,7 @@ public final class Page extends BodyBase implements Root {
 		return ++methodCount;
 	}
 
+	@Override
 	public SourceCode getSourceCode() {
 		return sourceCode;
 	}
@@ -1858,18 +1867,22 @@ public final class Page extends BodyBase implements Root {
 		return splitIfNecessary;
 	}
 
+	@Override
 	public boolean getSupressWSbeforeArg() {
 		return suppressWSbeforeArg;
 	}
 
+	@Override
 	public boolean getOutput() {
 		return output;
 	}
 
+	@Override
 	public boolean returnValue() {
 		return returnValue;
 	}
 
+	@Override
 	public Config getConfig() {
 		return config;
 	}

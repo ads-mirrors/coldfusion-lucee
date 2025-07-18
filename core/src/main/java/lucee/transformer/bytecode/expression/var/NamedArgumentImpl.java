@@ -29,9 +29,10 @@ import lucee.transformer.bytecode.literal.NullConstant;
 import lucee.transformer.bytecode.util.Types;
 import lucee.transformer.bytecode.visitor.ArrayVisitor;
 import lucee.transformer.expression.Expression;
+import lucee.transformer.expression.var.NamedArgument;
 import lucee.transformer.expression.var.Variable;
 
-public final class NamedArgument extends Argument {
+public final class NamedArgumentImpl extends ArgumentImpl implements NamedArgument {
 
 	private static final int VALUE = 0;
 	private static final int ARRAY = 1;
@@ -47,7 +48,7 @@ public final class NamedArgument extends Argument {
 	private Expression name;
 	private boolean varKeyUpperCase;
 
-	public NamedArgument(Expression name, Expression value, String type, boolean varKeyUpperCase) {
+	public NamedArgumentImpl(Expression name, Expression value, String type, boolean varKeyUpperCase) {
 		super(value, type);
 		this.name = name instanceof Null || name instanceof NullConstant ? name.getFactory().createLitString(varKeyUpperCase ? "NULL" : "null") : name;
 		this.varKeyUpperCase = varKeyUpperCase;
@@ -99,6 +100,7 @@ public final class NamedArgument extends Argument {
 	/**
 	 * @return the name
 	 */
+	@Override
 	public Expression getName() {
 		return name;
 	}

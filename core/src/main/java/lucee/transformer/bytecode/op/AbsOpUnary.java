@@ -26,6 +26,9 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
 import lucee.runtime.interpreter.VariableInterpreter;
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
@@ -214,5 +217,35 @@ public abstract class AbsOpUnary extends ExpressionBase {
 			return Types.DOUBLE_VALUE;
 		}
 		return Types.NUMBER;
+	}
+
+	private static String toString(int operation) {
+		if (operation == Factory.OP_UNARY_PLUS) return "PLUS";
+		else if (operation == Factory.OP_UNARY_MINUS) return "MINUS";
+		else if (operation == Factory.OP_UNARY_DIVIDE) return "DIVIDE";
+		else if (operation == Factory.OP_UNARY_MULTIPLY) return "MULTIPLY";
+		else if (operation == Factory.OP_UNARY_CONCAT) return "CONCAT";
+		else if (operation == Factory.OP_UNARY_CONCAT) return "CONCAT";
+		return "UNKNOWN";
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "UnaryExpression");
+		sct.setEL(KeyConstants._operator, toString(operation));
+		sct.setEL(KeyConstants._prefix, (type == Factory.OP_UNARY_PRE) ? Boolean.TRUE : Boolean.FALSE);
+		// variable
+		{
+			Struct sctVar = new StructImpl(Struct.TYPE_LINKED);
+			var.dump(sctVar);
+			sct.setEL(KeyConstants._variable, sctVar);
+		}
+		// value
+		{
+			Struct sctVal = new StructImpl(Struct.TYPE_LINKED);
+			value.dump(sctVal);
+			sct.setEL(KeyConstants._value, sctVal);
+		}
 	}
 }

@@ -21,6 +21,8 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
 import lucee.runtime.op.Caster;
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.bytecode.BytecodeContext;
@@ -47,6 +49,11 @@ public final class LitLongImpl extends ExpressionBase implements LitLong {
 	public LitLongImpl(Factory f, long l, Position start, Position end) {
 		super(f, start, end);
 		this.l = l;
+	}
+
+	@Override
+	public Object getValue() {
+		return getNumber();
 	}
 
 	@Override
@@ -90,7 +97,7 @@ public final class LitLongImpl extends ExpressionBase implements LitLong {
 
 	/**
 	 * lucee.transformer.expression.Expression#_writeOut(lucee.transformer.bytecode.BytecodeContext,
-	 *      int)
+	 * int)
 	 */
 	@Override
 	public Type _writeOut(BytecodeContext bc, int mode) {
@@ -106,5 +113,12 @@ public final class LitLongImpl extends ExpressionBase implements LitLong {
 	@Override
 	public Boolean getBoolean(Boolean defaultValue) {
 		return getBoolean();
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "LongLiteral");
+		sct.setEL(KeyConstants._value, l);
 	}
 }

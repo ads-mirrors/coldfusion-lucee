@@ -4,7 +4,7 @@ import java.util.List;
 
 import lucee.commons.lang.compiler.SourceCode;
 import lucee.runtime.PageSource;
-import lucee.transformer.bytecode.statement.Argument;
+import lucee.transformer.statement.Argument;
 
 public interface FunctionDef {
 

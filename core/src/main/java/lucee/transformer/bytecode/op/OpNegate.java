@@ -23,6 +23,9 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
@@ -91,8 +94,18 @@ public final class OpNegate extends ExpressionBase implements ExprBoolean {
 
 	}
 
-	/*
-	 * public int getType() { return Types._BOOLEAN; }
-	 */
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "UnaryExpression");
+		sct.setEL(KeyConstants._operator, "NOT");
+		sct.setEL(KeyConstants._prefix, Boolean.TRUE);
+		// argument
+		{
+			Struct sctArg = new StructImpl(Struct.TYPE_LINKED);
+			expr.dump(sctArg);
+			sct.setEL(KeyConstants._argument, sctArg);
+		}
+	}
 
 }

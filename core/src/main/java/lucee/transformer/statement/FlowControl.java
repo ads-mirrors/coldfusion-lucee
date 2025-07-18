@@ -16,7 +16,7 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  * 
  **/
-package lucee.transformer.bytecode.statement;
+package lucee.transformer.statement;
 
 public interface FlowControl {
 

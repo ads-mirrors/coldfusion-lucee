@@ -22,9 +22,9 @@ import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.ParserString;
 import lucee.commons.lang.StringUtil;
 import lucee.transformer.Factory;
-import lucee.transformer.bytecode.statement.tag.Attribute;
 import lucee.transformer.expression.Expression;
 import lucee.transformer.expression.literal.LitBoolean;
+import lucee.transformer.statement.tag.Attribute;
 
 public final class DocCommentTransformer {
 

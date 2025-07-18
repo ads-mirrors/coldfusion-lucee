@@ -22,6 +22,9 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.expression.ExpressionBase;
@@ -124,5 +127,19 @@ public final class CastBoolean extends ExpressionBase implements ExprBoolean, Ca
 	@Override
 	public Expression getExpr() {
 		return expr;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "CastExpression");
+		sct.setEL(KeyConstants._typeAnnotation, "boolean");
+
+		// argument
+		{
+			Struct sctArg = new StructImpl(Struct.TYPE_LINKED);
+			expr.dump(sctArg);
+			sct.setEL(KeyConstants._argument, sctArg);
+		}
 	}
 }

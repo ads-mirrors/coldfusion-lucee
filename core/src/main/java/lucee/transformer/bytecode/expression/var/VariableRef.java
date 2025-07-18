@@ -22,6 +22,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
+import lucee.runtime.type.Struct;
 import lucee.runtime.type.scope.Scope;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
@@ -73,5 +74,10 @@ public final class VariableRef extends ExpressionBase {
 			adapter.invokeVirtual(Types.PAGE_CONTEXT, isLast ? GET_REFERENCE_KEY : TOUCH_KEY);
 		}
 		return Types.REFERENCE;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);// MUSTTT
 	}
 }

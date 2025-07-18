@@ -23,15 +23,18 @@ import java.util.Stack;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
-import lucee.transformer.bytecode.Statement;
 import lucee.transformer.bytecode.util.ASMConstants;
 import lucee.transformer.bytecode.util.Types;
 import lucee.transformer.bytecode.visitor.OnFinally;
 import lucee.transformer.expression.Expression;
+import lucee.transformer.statement.Statement;
 
 /**
  * Return Statement
@@ -95,11 +98,27 @@ public final class Return extends StatementBaseNoFinal {
 
 	/**
 	 *
-	 * @see lucee.transformer.bytecode.statement.StatementBase#setParent(lucee.transformer.bytecode.Statement)
+	 * @see lucee.transformer.bytecode.statement.StatementBase#setParent(lucee.lucee.transformer.statement.Statement)
 	 */
 	@Override
 	public void setParent(Statement parent) {
 		super.setParent(parent);
 		parent.setHasFlowController(true);
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "ReturnStatement");
+
+		// argument
+		if (expr != null) {
+			Struct argument = new StructImpl(Struct.TYPE_LINKED);
+			expr.dump(argument);
+			sct.setEL(KeyConstants._argument, argument);
+		}
+		else {
+			sct.setEL(KeyConstants._argument, null);
+		}
 	}
 }

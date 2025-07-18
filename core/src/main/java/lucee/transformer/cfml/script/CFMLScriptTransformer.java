@@ -19,7 +19,7 @@
 package lucee.transformer.cfml.script;
 
 import lucee.runtime.exp.TemplateException;
-import lucee.transformer.bytecode.Body;
+import lucee.transformer.Body;
 import lucee.transformer.cfml.Data;
 import lucee.transformer.cfml.tag.TagDependentBodyTransformer;
 import lucee.transformer.expression.Expression;

@@ -29,16 +29,15 @@ import lucee.commons.lang.types.RefBoolean;
 import lucee.commons.lang.types.RefBooleanImpl;
 import lucee.runtime.Component;
 import lucee.runtime.type.util.ComponentUtil;
+import lucee.transformer.Body;
+import lucee.transformer.Context;
 import lucee.transformer.Factory;
+import lucee.transformer.Page;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
-import lucee.transformer.bytecode.Body;
 import lucee.transformer.bytecode.BodyBase;
 import lucee.transformer.bytecode.BytecodeContext;
-import lucee.transformer.bytecode.Page;
-import lucee.transformer.bytecode.Statement;
 import lucee.transformer.bytecode.statement.FlowControlFinal;
-import lucee.transformer.bytecode.statement.IFunction;
 import lucee.transformer.bytecode.statement.PrintOut;
 import lucee.transformer.bytecode.statement.udf.Function;
 import lucee.transformer.bytecode.statement.udf.FunctionImpl;
@@ -47,6 +46,10 @@ import lucee.transformer.expression.Expression;
 import lucee.transformer.expression.literal.LitBoolean;
 import lucee.transformer.expression.literal.LitString;
 import lucee.transformer.expression.literal.Literal;
+import lucee.transformer.statement.IFunction;
+import lucee.transformer.statement.Statement;
+import lucee.transformer.statement.tag.Attribute;
+import lucee.transformer.statement.tag.Tag;
 
 public final class TagFunction extends TagBase implements IFunction {
 
@@ -64,9 +67,9 @@ public final class TagFunction extends TagBase implements IFunction {
 	}
 
 	@Override
-	public void writeOut(BytecodeContext bc, int type) throws TransformerException {
+	public void writeOut(Context bc, int type) throws TransformerException {
 		// ExpressionUtil.visitLine(bc, getStartLine());
-		_writeOut(bc, type);
+		_writeOut((BytecodeContext) bc, type);
 		// ExpressionUtil.visitLine(bc, getEndLine());
 	}
 

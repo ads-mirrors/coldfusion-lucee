@@ -16,7 +16,7 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  * 
  **/
-package lucee.transformer.bytecode.statement.tag;
+package lucee.transformer.statement.tag;
 
 import lucee.transformer.expression.Expression;
 

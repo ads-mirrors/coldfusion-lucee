@@ -22,15 +22,15 @@ import java.util.Iterator;
 import java.util.List;
 
 import lucee.commons.lang.StringUtil;
-import lucee.transformer.bytecode.Body;
-import lucee.transformer.bytecode.Statement;
+import lucee.transformer.Body;
 import lucee.transformer.bytecode.StaticBody;
-import lucee.transformer.bytecode.statement.tag.Tag;
 import lucee.transformer.bytecode.statement.tag.TagComponent;
 import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.cfml.evaluator.EvaluatorException;
 import lucee.transformer.cfml.evaluator.EvaluatorSupport;
 import lucee.transformer.library.tag.TagLibTag;
+import lucee.transformer.statement.Statement;
+import lucee.transformer.statement.tag.Tag;
 
 /**
  * Prueft den Kontext des Tag case. Das Tag <code>httpparam</code> darf nur innerhalb des Tag

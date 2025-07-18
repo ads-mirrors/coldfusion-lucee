@@ -48,6 +48,11 @@ public final class LitLongImpl extends ExpressionBase implements LitLong {
 	}
 
 	@Override
+	public Object getValue() {
+		return getNumber();
+	}
+
+	@Override
 	public Number getNumber() {
 		return getLong();
 	}

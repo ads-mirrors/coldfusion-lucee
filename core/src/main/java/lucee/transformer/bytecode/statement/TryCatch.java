@@ -5,6 +5,11 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
+import lucee.runtime.type.Array;
+import lucee.runtime.type.ArrayImpl;
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
@@ -73,6 +78,42 @@ public final class TryCatch extends StatementBaseNoFinal {
 		// Specify the try-catch block details
 		ga.visitTryCatchBlock(tryStart, tryEnd, catchBlock, Type.getType(Exception.class).getInternalName());
 		// ASMConstants.NULL(ga);
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "TryStatement");
+
+		// body
+		{
+			Struct body = new StructImpl(Struct.TYPE_LINKED);
+			var.dump(body);
+			sct.setEL(KeyConstants._body, body);
+		}
+		// handlers
+		if (listener != null) {
+			Array handlers = new ArrayImpl();
+			{
+				Struct sctCatch = new StructImpl(Struct.TYPE_LINKED);
+				sctCatch.setEL(KeyConstants._type, "CatchClause");
+
+				// param
+				Struct sctParam = new StructImpl(Struct.TYPE_LINKED);
+				sctCatch.setEL(KeyConstants._param, sctParam);
+
+				// body
+				if (listener != null) {
+					Struct sctBody = new StructImpl(Struct.TYPE_LINKED);
+					listener.dump(sctBody);
+					sctCatch.setEL(KeyConstants._body, sctBody);
+				}
+
+				handlers.appendEL(sctCatch);
+
+			}
+			sct.setEL(KeyConstants._handlers, handlers);
+		}
 	}
 
 }

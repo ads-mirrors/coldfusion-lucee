@@ -22,18 +22,26 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import lucee.runtime.op.Caster;
+import lucee.runtime.type.Array;
+import lucee.runtime.type.ArrayImpl;
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
+import lucee.transformer.Body;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
-import lucee.transformer.bytecode.Body;
 import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.statement.FlowControlFinal;
 import lucee.transformer.bytecode.statement.StatementBase;
 import lucee.transformer.bytecode.visitor.ParseBodyVisitor;
 import lucee.transformer.library.tag.TagLibTag;
 import lucee.transformer.library.tag.TagLibTagAttr;
+import lucee.transformer.statement.tag.Attribute;
+import lucee.transformer.statement.tag.Tag;
 
 public abstract class TagBase extends StatementBase implements Tag {
 
@@ -54,7 +62,7 @@ public abstract class TagBase extends StatementBase implements Tag {
 	}
 
 	/**
-	 * @see lucee.transformer.bytecode.statement.tag.Tag#getAppendix()
+	 * @see lucee.transformer.statement.tag.Tag#getAppendix()
 	 */
 	@Override
 	public String getAppendix() {
@@ -181,4 +189,35 @@ public abstract class TagBase extends StatementBase implements Tag {
 		return metadata;
 	}
 
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "CFMLTag");
+		sct.setEL(KeyConstants._name, tagLibTag.getName());
+		sct.setEL(KeyConstants._nameSpace, tagLibTag.getTagLib().getNameSpace());
+		sct.setEL(KeyConstants._nameSpaceSeparator, tagLibTag.getTagLib().getNameSpaceSeparator());
+		if (appendix != null) sct.setEL(KeyConstants._appendix, appendix);
+		if (fullname != null) sct.setEL(KeyConstants._fullname, fullname);
+
+		// attributes
+		Array arrAttrs = new ArrayImpl();
+		sct.setEL(KeyConstants._attributes, arrAttrs);
+		for (Entry<String, Attribute> entry: attributes.entrySet()) {
+			Attribute attr = entry.getValue();
+			Struct sctAttr = new StructImpl(Struct.TYPE_LINKED);
+			arrAttrs.appendEL(sctAttr);
+			sctAttr.setEL(KeyConstants._name, attr.getName());
+			sctAttr.setEL(KeyConstants._type, attr.getType());
+
+			Struct val = new StructImpl(Struct.TYPE_LINKED);
+			attr.getValue().dump(val);
+			sctAttr.setEL(KeyConstants._value, val);
+		}
+		// body
+		if (this.body != null) {
+			Struct body = new StructImpl(Struct.TYPE_LINKED);
+			this.body.dump(body);
+			sct.setEL(KeyConstants._body, body);
+		}
+	}
 }

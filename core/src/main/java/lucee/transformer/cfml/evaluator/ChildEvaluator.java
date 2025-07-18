@@ -18,9 +18,9 @@
  **/
 package lucee.transformer.cfml.evaluator;
 
-import lucee.transformer.bytecode.statement.tag.Tag;
-import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.library.tag.TagLibTag;
+import lucee.transformer.statement.tag.Tag;
+import lucee.transformer.util.TransformerUtil;
 
 /**
  * checks the if a child tag is inside his parent
@@ -40,7 +40,7 @@ public class ChildEvaluator extends EvaluatorSupport {
 		String ns = libTag.getTagLib().getNameSpaceAndSeparator();
 		String name = ns + parentName;
 
-		if (!ASMUtil.hasAncestorTag(tag, name)) throw new EvaluatorException("Wrong Context, tag [" + libTag.getFullName() + "] must be inside a [" + name + "] tag");
+		if (!TransformerUtil.hasAncestorTag(tag, name)) throw new EvaluatorException("Wrong Context, tag [" + libTag.getFullName() + "] must be inside a [" + name + "] tag");
 
 	}
 

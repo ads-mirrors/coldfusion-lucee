@@ -837,6 +837,7 @@ public final class KeyConstants {
 	public static final Key _encodevalue = KeyImpl._const("encodevalue");
 	public static final Key _each = KeyImpl._const("each");
 	public static final Key _member = KeyImpl._const("member");
+	public static final Key _members = KeyImpl._const("members");
 	public static final Key _resource = KeyImpl._const("resource");
 	public static final Key _img = KeyImpl._const("img");
 	public static final Key _cfcLocation = KeyImpl._const("cfcLocation");
@@ -969,7 +970,7 @@ public final class KeyConstants {
 	public static final Key _mails = KeyImpl._const("mails");
 	public static final Key _mailServer = KeyImpl._const("mailServer");
 	public static final Key _mailServers = KeyImpl._const("mailServers");
-	public static final Key _smtp = KeyImpl._const("smtp");	
+	public static final Key _smtp = KeyImpl._const("smtp");
 	public static final Key _smtpServerSettings = KeyImpl._const("smtpServerSettings");
 	public static final Key _serialization = KeyImpl._const("serialization");
 	public static final Key _serializationSettings = KeyImpl._const("serializationSettings");
@@ -3063,6 +3064,22 @@ public final class KeyConstants {
 	public static final Key _conversationSizeLimit = KeyImpl._const("conversationSizeLimit");
 	public static final Key _socketTimeout = KeyImpl._const("socketTimeout");
 	public static final Key _componentMappings = KeyImpl._const("componentMappings");
+	public static final Key _operator = KeyImpl._const("operator");
+	public static final Key _argument = KeyImpl._const("argument");
+	public static final Key _variable = KeyImpl._const("variable");
+	public static final Key _consequent = KeyImpl._const("consequent");
+	public static final Key _alternate = KeyImpl._const("alternate");
+	public static final Key _typeAnnotation = KeyImpl._const("typeAnnotation");
+	public static final Key _finalizer = KeyImpl._const("finalizer");
+	public static final Key _handlers = KeyImpl._const("handlers");
+	public static final Key _discriminant = KeyImpl._const("discriminant");
+	public static final Key _cases = KeyImpl._const("cases");
+	public static final Key _verifyClient = KeyImpl._const("verifyClient");
+	public static final Key _appendix = KeyImpl._const("appendix");
+	public static final Key _safeNavigated = KeyImpl._const("safeNavigated");
+	public static final Key _safeNavigatedValue = KeyImpl._const("safeNavigatedValue");
+	public static final Key _nameSpace = KeyImpl._const("nameSpace");
+	public static final Key _nameSpaceSeparator = KeyImpl._const("nameSpaceSeparator");
 
 	private static Map<String, Key> _____keys;
 

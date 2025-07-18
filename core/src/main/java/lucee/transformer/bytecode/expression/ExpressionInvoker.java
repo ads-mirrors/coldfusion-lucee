@@ -25,6 +25,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
+import lucee.runtime.type.Struct;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.expression.var.UDF;
@@ -118,5 +119,10 @@ public final class ExpressionInvoker extends ExpressionBase implements Invoker {
 	public void addListener(Expression listener) {
 		if (expr instanceof Variable) ((Variable) expr).addListener(listener);
 		else if (expr instanceof Invoker) ((Invoker) expr).addListener(listener);
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);// MUSTTT
 	}
 }

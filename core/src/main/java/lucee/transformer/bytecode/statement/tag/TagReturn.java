@@ -22,9 +22,10 @@ import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
-import lucee.transformer.bytecode.Statement;
 import lucee.transformer.bytecode.statement.Return;
 import lucee.transformer.expression.Expression;
+import lucee.transformer.statement.Statement;
+import lucee.transformer.statement.tag.Attribute;
 
 public final class TagReturn extends TagBaseNoFinal {
 
@@ -47,7 +48,7 @@ public final class TagReturn extends TagBaseNoFinal {
 
 	/**
 	 *
-	 * @see lucee.transformer.bytecode.statement.StatementBase#setParent(lucee.transformer.bytecode.Statement)
+	 * @see lucee.transformer.bytecode.statement.StatementBase#setParent(lucee.lucee.transformer.statement.Statement)
 	 */
 	@Override
 	public void setParent(Statement parent) {

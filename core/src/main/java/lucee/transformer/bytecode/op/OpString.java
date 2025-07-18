@@ -21,6 +21,9 @@ package lucee.transformer.bytecode.op;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.Method;
 
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.expression.ExpressionBase;
@@ -59,5 +62,24 @@ public final class OpString extends ExpressionBase implements ExprString {
 		right.writeOut(bc, MODE_REF);
 		bc.getAdapter().invokeVirtual(Types.STRING, METHOD_CONCAT);
 		return Types.STRING;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "BinaryExpression");
+		sct.setEL(KeyConstants._operator, "CONCAT");
+		// left
+		{
+			Struct sctLeft = new StructImpl(Struct.TYPE_LINKED);
+			left.dump(sctLeft);
+			sct.setEL(KeyConstants._left, sctLeft);
+		}
+		// right
+		{
+			Struct sctRight = new StructImpl(Struct.TYPE_LINKED);
+			right.dump(sctRight);
+			sct.setEL(KeyConstants._right, sctRight);
+		}
 	}
 }

@@ -21,6 +21,7 @@ package lucee.transformer.bytecode.statement;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 
+import lucee.runtime.type.Struct;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.expression.ExpressionBase;
@@ -71,5 +72,10 @@ public final class ExpressionAsStatement extends StatementBaseNoFinal {
 	 */
 	public Expression getExpr() {
 		return expr;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		expr.dump(sct);
 	}
 }

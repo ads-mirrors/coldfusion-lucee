@@ -36,6 +36,11 @@ public final class LitStringImpl extends ExpressionBase implements LitString, Ex
 	}
 
 	@Override
+	public Object getValue() {
+		return str;
+	}
+
+	@Override
 	public String getString() {
 		return str;
 	}

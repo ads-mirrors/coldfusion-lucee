@@ -22,6 +22,9 @@ import org.objectweb.asm.Type;
 
 import lucee.commons.lang.ClassException;
 import lucee.runtime.exp.TemplateException;
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Context;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
@@ -96,6 +99,27 @@ public abstract class ExpressionBase implements Expression {
 	@Override
 	public void setEnd(Position end) {
 		this.end = end;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		// start
+		if (start != null) {
+			Struct sctStart = new StructImpl(Struct.TYPE_LINKED);
+			sctStart.setEL(KeyConstants._line, start.line);
+			sctStart.setEL(KeyConstants._column, start.column);
+			sctStart.setEL(KeyConstants._offset, start.pos);
+			sct.setEL(KeyConstants._start, sctStart);
+		}
+
+		// end
+		if (end != null) {
+			Struct sctEnd = new StructImpl(Struct.TYPE_LINKED);
+			sctEnd.setEL(KeyConstants._line, end.line);
+			sctEnd.setEL(KeyConstants._column, end.column);
+			sctEnd.setEL(KeyConstants._offset, end.pos);
+			sct.setEL(KeyConstants._end, sctEnd);
+		}
 	}
 
 }

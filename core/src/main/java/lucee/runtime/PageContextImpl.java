@@ -226,6 +226,7 @@ import lucee.runtime.util.VariableUtilImpl;
 import lucee.runtime.writer.BodyContentUtil;
 import lucee.runtime.writer.CFMLWriter;
 import lucee.runtime.writer.DevNullBodyContent;
+import lucee.transformer.util.SourceCode;
 
 /**
  * page context for every page object. the PageContext is a jsp page context expanded by CFML
@@ -3644,6 +3645,28 @@ public final class PageContextImpl extends PageContext {
 		catch (Exception e) {
 			throw Caster.toPageException(e);
 		}
+	}
+
+	public Struct ast(PageSource pageSource) throws PageException {
+		try {
+			return config.getCompiler().ast(config, pageSource, ignoreScopes());
+		}
+		catch (Exception e) {
+			throw Caster.toPageException(e);
+		}
+	}
+
+	public Struct ast(SourceCode sc) throws PageException {
+		try {
+			return config.getCompiler().ast(config, sc, ignoreScopes());
+		}
+		catch (Exception e) {
+			throw Caster.toPageException(e);
+		}
+	}
+
+	public Struct ast(String realPath) throws PageException {
+		return ast(PageSourceImpl.best(getRelativePageSources(realPath)));
 	}
 
 	@Override

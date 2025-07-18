@@ -24,6 +24,9 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
+import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
@@ -58,5 +61,18 @@ public final class SystemOut extends StatementBaseNoFinal {
 		adapter.getStatic(Type.getType(System.class), "out", Type.getType(PrintStream.class));
 		expr.writeOut(bc, Expression.MODE_REF);
 		adapter.invokeVirtual(Type.getType(PrintStream.class), METHOD_PRINTLN);
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "SystemOutStatement");
+
+		// argument
+		{
+			Struct argument = new StructImpl(Struct.TYPE_LINKED);
+			expr.dump(argument);
+			sct.setEL(KeyConstants._argument, argument);
+		}
 	}
 }

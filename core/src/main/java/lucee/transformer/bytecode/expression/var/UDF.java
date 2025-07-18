@@ -18,7 +18,7 @@
  **/
 package lucee.transformer.bytecode.expression.var;
 
-import lucee.transformer.bytecode.Page;
+import lucee.transformer.Page;
 import lucee.transformer.expression.ExprString;
 import lucee.transformer.expression.Expression;
 

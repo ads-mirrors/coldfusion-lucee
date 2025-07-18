@@ -58,10 +58,10 @@ import lucee.runtime.type.Array;
 import lucee.runtime.type.Query;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.dt.TimeSpan;
-import lucee.transformer.bytecode.statement.Argument;
 import lucee.transformer.cfml.script.java.JavaSourceException;
 import lucee.transformer.expression.ExprString;
 import lucee.transformer.expression.literal.LitString;
+import lucee.transformer.statement.Argument;
 
 public final class FunctionDefFactory {
 	private static Map<Class<?>, JavaFunctionDef[]> map = new HashMap<>();

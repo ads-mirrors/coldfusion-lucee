@@ -29,6 +29,7 @@ import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.util.Types;
 import lucee.transformer.expression.ExprBoolean;
 import lucee.transformer.expression.Expression;
+import lucee.transformer.statement.tag.Attribute;
 
 public final class TagInclude extends TagBaseNoFinal {
 

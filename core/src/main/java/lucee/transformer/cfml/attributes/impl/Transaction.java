@@ -18,12 +18,12 @@
  **/
 package lucee.transformer.cfml.attributes.impl;
 
-import lucee.transformer.bytecode.statement.tag.Attribute;
-import lucee.transformer.bytecode.statement.tag.Tag;
-import lucee.transformer.bytecode.util.ASMUtil;
 import lucee.transformer.cfml.attributes.AttributeEvaluator;
 import lucee.transformer.cfml.attributes.AttributeEvaluatorException;
 import lucee.transformer.library.tag.TagLibTag;
+import lucee.transformer.statement.tag.Attribute;
+import lucee.transformer.statement.tag.Tag;
+import lucee.transformer.util.TransformerUtil;
 
 public final class Transaction implements AttributeEvaluator {
 
@@ -32,7 +32,7 @@ public final class Transaction implements AttributeEvaluator {
 		Attribute action = tag.getAttribute("action");
 
 		if (action != null) {
-			Tag parent = ASMUtil.getAncestorTag(tag, tag.getFullname());
+			Tag parent = TransformerUtil.getAncestorTag(tag, tag.getFullname());
 			if (parent != null) {
 				tagLibTag = tagLibTag.duplicate(false);
 				tagLibTag.setBodyContent("empty");
