@@ -23,6 +23,8 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
 import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.Factory;
 import lucee.transformer.Position;
 import lucee.transformer.TransformerException;
@@ -89,6 +91,16 @@ public final class DynAssign extends ExpressionBase {
 
 	@Override
 	public void dump(Struct sct) {
-		super.dump(sct);// MUSTTT
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "CallExpression");
+		sct.setEL(KeyConstants._operator, "AssignmentExpression");
+
+		Struct left = new StructImpl(Struct.TYPE_LINKED);
+		sct.setEL(KeyConstants._left, left);
+		name.dump(sct);
+
+		Struct right = new StructImpl(Struct.TYPE_LINKED);
+		sct.setEL(KeyConstants._right, right);
+		value.dump(sct);
 	}
 }

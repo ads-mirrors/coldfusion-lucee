@@ -1118,10 +1118,20 @@ public final class VariableImpl extends ExpressionBase implements Variable {
 
 			}
 			else if (m instanceof FunctionMember) {
-				((FunctionMember) m).getName().dump(id);
+				FunctionMember fm = ((FunctionMember) m);
+				fm.getName().dump(id);
 				mem.setEL(KeyConstants._name, id);
 				mem.setEL(KeyConstants._type, "FunctionMember");
-				mem.setEL("todo", "more coming soon"); // MUSTT
+
+				// arguments
+				Array arrArgs = new ArrayImpl();
+				mem.setEL(KeyConstants._arguments, arrArgs);
+				for (Argument arg: fm.getArguments()) {
+					Struct sctArg = new StructImpl(Struct.TYPE_LINKED);
+					arrArgs.appendEL(sctArg);
+					arg.dump(sctArg);
+				}
+
 			}
 		}
 

@@ -8,7 +8,11 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
+import lucee.runtime.type.Array;
+import lucee.runtime.type.ArrayImpl;
 import lucee.runtime.type.Struct;
+import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.BytecodeContext;
 import lucee.transformer.bytecode.expression.ExpressionBase;
@@ -69,6 +73,20 @@ public final class Call extends ExpressionBase implements Func {
 
 	@Override
 	public void dump(Struct sct) {
-		super.dump(sct);// MUSTTT
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "CallExpression");
+
+		Struct callee = new StructImpl(Struct.TYPE_LINKED);
+		sct.setEL("callee", callee);
+		expr.dump(callee);
+
+		// arguments
+		Array arrArgs = new ArrayImpl();
+		sct.setEL(KeyConstants._arguments, arrArgs);
+		for (Argument arg: args) {
+			Struct sctArg = new StructImpl(Struct.TYPE_LINKED);
+			arrArgs.appendEL(sctArg);
+			arg.dump(sctArg);
+		}
 	}
 }

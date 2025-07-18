@@ -123,6 +123,6 @@ public final class ExpressionInvoker extends ExpressionBase implements Invoker {
 
 	@Override
 	public void dump(Struct sct) {
-		super.dump(sct);// MUSTTT
+		expr.dump(sct);
 	}
 }

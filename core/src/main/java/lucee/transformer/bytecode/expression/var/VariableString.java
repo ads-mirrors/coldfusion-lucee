@@ -103,6 +103,6 @@ public final class VariableString extends ExpressionBase implements ExprString {
 
 	@Override
 	public void dump(Struct sct) {
-		super.dump(sct);// MUSTTT
+		expr.dump(sct);
 	}
 }

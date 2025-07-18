@@ -3647,7 +3647,7 @@ public final class PageContextImpl extends PageContext {
 		}
 	}
 
-	public Struct ast(PageSource pageSource) throws PageException {
+	public Struct transform(PageSource pageSource) throws PageException {
 		try {
 			return config.getCompiler().ast(config, pageSource, ignoreScopes());
 		}
@@ -3656,7 +3656,7 @@ public final class PageContextImpl extends PageContext {
 		}
 	}
 
-	public Struct ast(SourceCode sc) throws PageException {
+	public Struct transform(SourceCode sc) throws PageException {
 		try {
 			return config.getCompiler().ast(config, sc, ignoreScopes());
 		}
@@ -3665,8 +3665,8 @@ public final class PageContextImpl extends PageContext {
 		}
 	}
 
-	public Struct ast(String realPath) throws PageException {
-		return ast(PageSourceImpl.best(getRelativePageSources(realPath)));
+	public Struct transform(String realPath) throws PageException {
+		return transform(PageSourceImpl.best(getRelativePageSources(realPath)));
 	}
 
 	@Override

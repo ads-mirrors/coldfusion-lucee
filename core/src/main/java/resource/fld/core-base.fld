@@ -1572,6 +1572,63 @@ sort direction:
 			<type>number</type>
 		</return>
 	</function>
+	
+	
+<!-- astFromPath -->
+	<function>
+		<name>astFromPath</name>
+		<class>lucee.runtime.functions.ast.AstFromPath</class>
+		<keywords>ast,transform,compile</keywords>
+		<description>Parses a CFML file and returns its Abstract Syntax Tree (AST) representation.
+
+The AST is a structured tree that represents the syntactic structure of the CFML code, making it useful for:
+- **Code Analysis**: Static analysis, complexity metrics, dependency tracking
+- **IDE Tooling**: Syntax highlighting, autocomplete, refactoring support  
+- **Transformation**: Code generation, minification, transpilation
+- **Documentation**: Automatic API documentation generation
+- **Quality Assurance**: Linting, code style enforcement, security scanning
+
+The returned AST uses **neutral, language-agnostic node types** following ESTree conventions such as `BinaryExpression`, `IfStatement`, `FunctionDeclaration`, and literal types. Each node includes **source position information** (line, column, offset) for precise error reporting and IDE integration.</description>
+		<argument>
+			<name>path</name>
+			<type>any</type>
+			<required>Yes</required>
+		<description>reference to a cfml template, can be a string containing a rel or absolute path, or any other kind of file (java.io.File,lucee.commons.io.res.Resource) or a file stream open with help of the function fileopen</description>
+    </argument>
+		<return>
+			<type>struct</type>
+			<description>A struct representing the complete Abstract Syntax Tree of the parsed CFML file. The struct contains nested structures representing language constructs like expressions, statements, functions, and control flow using neutral node types with source position information. The root node is of type &quot;Program&quot; containing a &quot;body&quot; array of top-level statements.</description>
+		</return>
+	</function>
+	
+		<!-- astFromString -->
+	<function>
+		<name>astFromString</name>
+		<class>lucee.runtime.functions.ast.AstFromString</class>
+		<keywords>ast,transform,compile</keywords>
+		<description>**Parses CFML source code from a string and returns its Abstract Syntax Tree (AST) representation.**
+
+The AST is a structured tree that represents the syntactic structure of the CFML code, making it useful for:
+- **Code Analysis**: Static analysis, complexity metrics, dependency tracking
+- **IDE Tooling**: Syntax highlighting, autocomplete, refactoring support  
+- **Transformation**: Code generation, minification, transpilation
+- **Documentation**: Automatic API documentation generation
+- **Quality Assurance**: Linting, code style enforcement, security scanning
+
+The returned AST uses **neutral, language-agnostic node types** following ESTree conventions such as `BinaryExpression`, `IfStatement`, `FunctionDeclaration`, and literal types. Each node includes **source position information** for precise error reporting and IDE integration.</description>
+		<argument>
+			<name>cfmlCode</name>
+			<type>string</type>
+			<required>Yes</required>
+		<description>a string containing CFML code to be parsed into an AST structure</description>
+    </argument>
+		<return>
+			<type>struct</type>
+			<description>A struct representing the complete Abstract Syntax Tree of the parsed CFML code. The struct contains nested structures representing language constructs like expressions, statements, functions, and control flow using neutral node types with source position information. The root node is of type &quot;Program&quot; containing a &quot;body&quot; array of top-level statements.</description>
+		</return>
+	</function>
+	
+	
 	<!-- binaryDecode -->
 	<function>
 		<name>binaryDecode</name>
