@@ -81,6 +81,11 @@ public final class ThreadUtil {
 		return dest;
 	}
 
+	public static PageContextImpl createPageContext(ConfigWeb config, String serverName, String requestURI, String queryString, byte[] body, boolean register, long timeout) {
+		return createPageContext(config, DevNullOutputStream.DEV_NULL_OUTPUT_STREAM, serverName, requestURI, queryString, new Cookie[] {}, new Pair[] {}, body, new Pair[] {}, null,
+				register, timeout, null, null);
+	}
+
 	@Deprecated
 	public static PageContextImpl createPageContext(ConfigWeb config, OutputStream os, String serverName, String requestURI, String queryString, Cookie[] cookies, Pair[] headers,
 			byte[] body, Pair[] parameters, Struct attributes, boolean register, long timeout) {
@@ -289,7 +294,7 @@ public final class ThreadUtil {
 	 */
 	public static void close(ExecutorService executor) throws Exception {
 		if (executor instanceof AutoCloseable) {
-			((AutoCloseable) executor).close();
+			 ((AutoCloseable) executor).close();
 		}
 		else {
 			boolean terminated = executor.isTerminated();
