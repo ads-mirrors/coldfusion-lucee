@@ -37,8 +37,8 @@ class CacheItemFS extends CacheItem {
 	private final Resource res, directory;
 	private String name;
 
-	public CacheItemFS(PageContext pc, HttpServletRequest req, String id, String key, boolean useId, Resource dir) throws IOException {
-		super(pc, req, id, key, useId);
+	public CacheItemFS(PageContext pc, HttpServletRequest req, String id, String key, boolean useId, Resource dir, boolean useQueryString) throws IOException {
+		super(pc, req, id, key, useId, useQueryString);
 		// directory
 		directory = dir != null ? dir : getDirectory(pc);
 
