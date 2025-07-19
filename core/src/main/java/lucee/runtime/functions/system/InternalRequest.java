@@ -57,8 +57,6 @@ public class InternalRequest implements Function {
 	private static final long serialVersionUID = -8163856691035353577L;
 
 	public static boolean cookieAsQuery = false;
-	public static final Key FILECONTENT_BYNARY = KeyImpl.getInstance("filecontent_binary");
-	public static final Key STATUS_CODE = KeyImpl.getInstance("status_code");
 
 	private static final Key CONTENT_TYPE = KeyImpl.getInstance("content-type");
 	private static final Key CONTENT_LENGTH = KeyImpl.getInstance("content-length");
@@ -192,7 +190,7 @@ public class InternalRequest implements Function {
 
 		byte[] barr = baos.toByteArray();
 		if (isText) rst.set(KeyConstants._filecontent, new String(barr, _charset == null ? reqCharset : _charset));
-		else rst.set(FILECONTENT_BYNARY, barr);
+		else rst.set(KeyConstants._filecontent_binary, barr);
 		rst.set(KeyConstants._cookies, rspCookies);
 		rst.set(KeyConstants._request, request);
 		if (session != null) rst.set(KeyConstants._session, session);
@@ -200,7 +198,7 @@ public class InternalRequest implements Function {
 		// rst.put(KeyConstants._debugging, debugging);
 		rst.set(KeyConstants._executionTime, Double.valueOf(exeTime));
 		rst.set(KeyConstants._status, Double.valueOf(status));
-		rst.set(STATUS_CODE, Double.valueOf(status));
+		rst.set(KeyConstants._status_code, Double.valueOf(status));
 		if (pe != null) rst.set(KeyConstants._error, pe.getCatchBlock(pc.getConfig()));
 		return rst;
 	}

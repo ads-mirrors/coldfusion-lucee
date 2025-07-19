@@ -38,7 +38,6 @@ import lucee.runtime.op.OpUtil;
 import lucee.runtime.op.date.DateCaster;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.dt.DateTime;
-import lucee.runtime.type.util.KeyConstants;
 
 public class KeyImpl implements Collection.Key, Castable, Comparable, Externalizable, WangJenkins, CharSequence {
 
@@ -62,11 +61,6 @@ public class KeyImpl implements Collection.Key, Castable, Comparable, Externaliz
 	public KeyImpl() {
 		// DO NOT USE, JUST FOR UNSERIALIZE
 
-	}
-
-	static {
-		// trigger static constructor from keyConstants
-		Key x = KeyConstants._0;
 	}
 
 	public KeyImpl(String key) {
@@ -149,9 +143,9 @@ public class KeyImpl implements Collection.Key, Castable, Comparable, Externaliz
 	 * @param key
 	 * @return
 	 */
-	public static Collection.Key _const(String key) {
-		Key k;
-		keys.put(key, k = new KeyImpl(key));
+	public static Collection.Key _const(Map<String, Key> keys, String key) {
+		Key k = new KeyImpl(key);
+		keys.put(key, k);
 		return k;
 	}
 
