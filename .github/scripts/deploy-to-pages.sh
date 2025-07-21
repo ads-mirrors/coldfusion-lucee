@@ -1,17 +1,26 @@
 #!/bin/bash
 set -e
 
+# Get version from parameter, environment, or extract from Maven
 VERSION="$1"
-if [ -z "$VERSION" ]; then
-    echo "Usage: $0 <version>"
-    exit 1
+if [ -z "$VERSION" ] || [ "$VERSION" = "1" ]; then
+    echo "Parameter version invalid or empty, extracting from Maven..."
+    VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout -f loader/pom.xml)
 fi
 
 echo "Deploying Lucee $VERSION artifacts to GitHub Pages..."
 
-# Setup git
-git config user.name "GitHub Actions"
-git config user.email "actions@github.com"
+# Validate we got a proper version
+if [ -z "$VERSION" ] || [ "$VERSION" = "1" ]; then
+    echo "Error: Could not determine version"
+    exit 1
+fi
+
+# Setup git globally to avoid identity issues
+git config --global user.name "GitHub Actions"
+git config --global user.email "actions@github.com"
+git config --global init.defaultBranch "gh-pages"
+git config --global advice.defaultBranchName false
 
 # Create temporary directory for gh-pages
 PAGES_DIR="gh-pages-temp"

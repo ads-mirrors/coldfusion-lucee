@@ -278,6 +278,7 @@ jobs:
       #run: ant -noinput -buildfile loader/build.xml
       run: |
         echo "-------DO_DEPLOY: ${{ env.DO_DEPLOY }} -------";
+        echo "-------VERSION: $VERSION -------";
         if [ "${{ secrets.GPG_PASSPHRASE }}" == "" ]; then
           echo "------- Maven Test on ${{ github.event_name }} ---------";
           mvn -B -e -f loader/pom.xml test -DtestJavaVersionExec="${{ env.LUCEE_TEST_JAVA_EXEC }}"
@@ -286,13 +287,13 @@ jobs:
           mvn -B -e -f loader/pom.xml clean deploy -DtestJavaVersionExec="${{ env.LUCEE_TEST_JAVA_EXEC }}" && \
           echo "------- Creating GitHub Pages backup ---------" && \
           chmod +x ./.github/scripts/deploy-to-pages.sh && \
-          ./.github/scripts/deploy-to-pages.sh "$VERSION"
+          ./.github/scripts/deploy-to-pages.sh "${VERSION}"
         else
           echo "------- Maven Deploy RELEASE on ${{ github.event_name }} -------";
           mvn -B -e -f loader/pom.xml clean deploy --settings maven-settings.xml -DperformRelease=true -DtestJavaVersionExec="${{ env.LUCEE_TEST_JAVA_EXEC }}" && \
           echo "------- Creating GitHub Pages backup ---------" && \
           chmod +x ./.github/scripts/deploy-to-pages.sh && \
-          ./.github/scripts/deploy-to-pages.sh "$VERSION"
+          ./.github/scripts/deploy-to-pages.sh "${VERSION}"
         fi
     - name: clean github.ref_name
       uses: mad9000/actions-find-and-replace-string@5
