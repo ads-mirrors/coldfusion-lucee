@@ -283,7 +283,7 @@ jobs:
           mvn -B -e -f loader/pom.xml clean deploy --settings maven-settings.xml -DperformRelease=true -DtestJavaVersionExec="${{ env.LUCEE_TEST_JAVA_EXEC }}";
         fi
     - name: Deploy snapshots to GitHub Packages (backup)
-      if: ${{ env.DO_DEPLOY == 'true' && endsWith(env.VERSION, '-SNAPSHOT') }}
+      #if: ${{ env.DO_DEPLOY == 'true' && endsWith(env.VERSION, '-SNAPSHOT') }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_ACTOR: ${{ github.actor }}
