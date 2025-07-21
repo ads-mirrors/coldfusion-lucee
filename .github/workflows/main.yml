@@ -285,11 +285,13 @@ jobs:
           echo "------- Maven Deploy SNAPSHOT on ${{ github.event_name }} ---------";
           mvn -B -e -f loader/pom.xml clean deploy -DtestJavaVersionExec="${{ env.LUCEE_TEST_JAVA_EXEC }}" && \
           echo "------- Creating GitHub Pages backup ---------" && \
+          chmod +x ./.github/scripts/deploy-to-pages.sh && \
           ./.github/scripts/deploy-to-pages.sh "$VERSION"
         else
           echo "------- Maven Deploy RELEASE on ${{ github.event_name }} -------";
           mvn -B -e -f loader/pom.xml clean deploy --settings maven-settings.xml -DperformRelease=true -DtestJavaVersionExec="${{ env.LUCEE_TEST_JAVA_EXEC }}" && \
           echo "------- Creating GitHub Pages backup ---------" && \
+          chmod +x ./.github/scripts/deploy-to-pages.sh && \
           ./.github/scripts/deploy-to-pages.sh "$VERSION"
         fi
     - name: clean github.ref_name
