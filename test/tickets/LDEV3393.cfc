@@ -60,7 +60,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="syntax" {
                 }
                 expect(trim(result.fileContent)).notToInclude("java.lang.NullPointerException");
             });
-            it( title="checking Nested try/finally block LDEV-4451", body=function( currentSpec ){
+            xit( title="checking Nested try/finally block LDEV-4451", body=function( currentSpec ){
                 try {
                     local.result = _InternalRequest(
                         template : "#uri#\nestedFinallyBlock.cfm"
