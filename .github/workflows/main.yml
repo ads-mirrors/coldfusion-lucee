@@ -269,6 +269,10 @@ jobs:
         GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_ACTOR: ${{ github.actor }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+        GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+        GITHUB_RUN_NUMBER: ${{ github.run_number }}
+        GITHUB_SHA: ${{ github.sha }}
         LUCEE_DOCKER_FILES_PAT_TOKEN: ${{ secrets.LUCEE_DOCKER_FILES_PAT_TOKEN }}
         LUCEE_BUILD_FAIL_CONFIGURED_SERVICES_FATAL: true
       #run: ant -noinput -buildfile loader/build.xml
@@ -278,11 +282,15 @@ jobs:
           echo "------- Maven Test on ${{ github.event_name }} ---------";
           mvn -B -e -f loader/pom.xml test -DtestJavaVersionExec="${{ env.LUCEE_TEST_JAVA_EXEC }}"
         elif [[ "$VERSION" == *-SNAPSHOT ]]; then
-          echo "------- Maven Deploy SNAPSHOT (Central Portal + GitHub Packages) on ${{ github.event_name }} ---------";
-          mvn -B -e -f loader/pom.xml clean deploy -DtestJavaVersionExec="${{ env.LUCEE_TEST_JAVA_EXEC }}"
+          echo "------- Maven Deploy SNAPSHOT on ${{ github.event_name }} ---------";
+          mvn -B -e -f loader/pom.xml clean deploy -DtestJavaVersionExec="${{ env.LUCEE_TEST_JAVA_EXEC }}" && \
+          echo "------- Creating GitHub Pages backup ---------" && \
+          ./.github/scripts/deploy-to-pages.sh "$VERSION"
         else
-          echo "------- Maven Deploy RELEASE (Central Portal + GitHub Packages) on ${{ github.event_name }} -------";
-          mvn -B -e -f loader/pom.xml clean deploy --settings maven-settings.xml -DperformRelease=true -DtestJavaVersionExec="${{ env.LUCEE_TEST_JAVA_EXEC }}"
+          echo "------- Maven Deploy RELEASE on ${{ github.event_name }} -------";
+          mvn -B -e -f loader/pom.xml clean deploy --settings maven-settings.xml -DperformRelease=true -DtestJavaVersionExec="${{ env.LUCEE_TEST_JAVA_EXEC }}" && \
+          echo "------- Creating GitHub Pages backup ---------" && \
+          ./.github/scripts/deploy-to-pages.sh "$VERSION"
         fi
     - name: clean github.ref_name
       uses: mad9000/actions-find-and-replace-string@5
