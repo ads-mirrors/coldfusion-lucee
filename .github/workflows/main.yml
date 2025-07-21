@@ -282,6 +282,18 @@ jobs:
           echo "------- Maven Deploy RELEASE on ${{ github.event_name }} -------";
           mvn -B -e -f loader/pom.xml clean deploy --settings maven-settings.xml -DperformRelease=true -DtestJavaVersionExec="${{ env.LUCEE_TEST_JAVA_EXEC }}";
         fi
+    - name: Deploy snapshots to GitHub Packages (backup)
+      if: ${{ env.DO_DEPLOY == 'true' && endsWith(env.VERSION, '-SNAPSHOT') }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_ACTOR: ${{ github.actor }}
+        GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      run: |
+        echo "------- Deploying SNAPSHOT to GitHub Packages (backup) ---------";
+        mvn -B -e -f loader/pom.xml deploy \
+          -Pgithub-packages \
+          --settings maven-settings.xml \
+          -DskipTests=true
     - name: clean github.ref_name
       uses: mad9000/actions-find-and-replace-string@5
       id: cleanrefname
