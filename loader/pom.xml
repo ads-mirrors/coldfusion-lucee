@@ -343,24 +343,6 @@
                   </execution>
               </executions>
           </plugin>
-          
-              <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>3.1.1</version>
-                <executions>
-                    <execution>
-                        <id>deploy-github-packages</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>deploy</goal>
-                        </goals>
-                        <configuration>
-                            <altDeploymentRepository>github::default::https://maven.pkg.github.com/lucee/lucee</altDeploymentRepository>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
       </plugins>
       <pluginManagement>
         <plugins>
