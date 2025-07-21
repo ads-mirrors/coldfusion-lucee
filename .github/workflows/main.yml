@@ -273,32 +273,16 @@ jobs:
         LUCEE_BUILD_FAIL_CONFIGURED_SERVICES_FATAL: true
       #run: ant -noinput -buildfile loader/build.xml
       run: |
-        set -e  # Exit immediately if any command fails
         echo "-------DO_DEPLOY: ${{ env.DO_DEPLOY }} -------";
         if [ "${{ secrets.GPG_PASSPHRASE }}" == "" ]; then
           echo "------- Maven Test on ${{ github.event_name }} ---------";
           mvn -B -e -f loader/pom.xml test -DtestJavaVersionExec="${{ env.LUCEE_TEST_JAVA_EXEC }}"
         elif [[ "$VERSION" == *-SNAPSHOT ]]; then
-          echo "------- Maven Deploy SNAPSHOT on ${{ github.event_name }} ---------";
+          echo "------- Maven Deploy SNAPSHOT (Central Portal + GitHub Packages) on ${{ github.event_name }} ---------";
           mvn -B -e -f loader/pom.xml clean deploy -DtestJavaVersionExec="${{ env.LUCEE_TEST_JAVA_EXEC }}"
-          
-          # Backup SNAPSHOT to GitHub Packages
-          echo "------- Backing up SNAPSHOT to GitHub Packages ---------";
-          mvn -B -e -f loader/pom.xml deploy \
-            -Pgithub-packages \
-            --settings maven-settings.xml \
-            -DskipTests=true
         else
-          echo "------- Maven Deploy RELEASE on ${{ github.event_name }} -------";
-          mvn -B -e -f loader/pom.xml clean deploy --settings maven-settings.xml -DperformRelease=true -DtestJavaVersionExec="${{ env.LUCEE_TEST_JAVA_EXEC }}";
-          
-          # Backup RELEASE to GitHub Packages
-          echo "------- Backing up RELEASE to GitHub Packages ---------";
-          mvn -B -e -f loader/pom.xml deploy \
-            -Pgithub-packages \
-            --settings maven-settings.xml \
-            -DperformRelease=true \
-            -DskipTests=true
+          echo "------- Maven Deploy RELEASE (Central Portal + GitHub Packages) on ${{ github.event_name }} -------";
+          mvn -B -e -f loader/pom.xml clean deploy --settings maven-settings.xml -DperformRelease=true -DtestJavaVersionExec="${{ env.LUCEE_TEST_JAVA_EXEC }}"
         fi
     - name: clean github.ref_name
       uses: mad9000/actions-find-and-replace-string@5
