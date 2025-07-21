@@ -362,8 +362,8 @@ public final class UndefinedImpl extends StructSupport implements Undefined, Obj
 
 		// thread scopes
 		if (pc.hasFamily()) {
-			Threads t = (Threads) pc.getThreadScope(key, _null);
-			if (rtn != _null) return t;
+			rtn = pc.getThreadScope(key, _null);
+			if (rtn != _null) return (Threads) rtn;
 		}
 
 		for (int i = 0; i < scopes.length; i++) {
