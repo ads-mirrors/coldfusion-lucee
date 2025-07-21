@@ -14,12 +14,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 			});
 			
 			it( title="compound concatenation operator(&=) in finally with local scope prefix", body = function( currentSpec ) {
-				try {
-					var res = testLocalPrefixInFinally(4);
-				}
-				catch(any e) {
-					var res = e.message;
-				}
+				var res = testLocalPrefixInFinally(4);
 				expect(res).toBe("Start-Try-Finally-End");
 			});
 		});
