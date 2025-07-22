@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>org.lucee</groupId>
+  <artifactId>lucee</artifactId>
+  <versioning>
+    <latest>6.2.2.79-SNAPSHOT</latest>
+    <release>6.2.2.79-SNAPSHOT</release>
+    <versions>
+      <version>6.2.2.79-SNAPSHOT</version>
+    </versions>
+    <lastUpdated>20250722111558</lastUpdated>
+  </versioning>
+</metadata>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lucee Maven Repository</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        h1 { color: #2c3e50; }
+        .code { background: #f4f4f4; padding: 15px; border-radius: 5px; font-family: monospace; }
+        .info { background: #e8f4f8; padding: 15px; border-radius: 5px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Lucee Public Maven Repository</h1>
+    
+    <div class="info">
+        <p><strong>Repository URL:</strong> <code>https://lucee.github.io/Lucee/</code></p>
+        <p><strong>Latest Version:</strong> 6.2.2.79-SNAPSHOT</p>
+        <p><strong>Powered by:</strong> Lucee CDN + GitHub Pages</p>
+    </div>
+
+    <h2>📦 Maven Configuration</h2>
+    <div class="code">
+&lt;repositories&gt;
+    &lt;repository&gt;
+        &lt;id&gt;lucee-public&lt;/id&gt;
+        &lt;url&gt;https://lucee.github.io/Lucee/&lt;/url&gt;
+        &lt;releases&gt;&lt;enabled&gt;true&lt;/enabled&gt;&lt;/releases&gt;
+        &lt;snapshots&gt;&lt;enabled&gt;true&lt;/enabled&gt;&lt;/snapshots&gt;
+    &lt;/repository&gt;
+&lt;/repositories&gt;
+
+&lt;dependencies&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.lucee&lt;/groupId&gt;
+        &lt;artifactId&gt;lucee&lt;/artifactId&gt;
+        &lt;version&gt;6.2.2.79-SNAPSHOT&lt;/version&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;
+    </div>
+
+    <h2>🔗 Browse Artifacts</h2>
+    <ul>
+        <li><a href="org/lucee/lucee/">Browse all versions</a></li>
+        <li><a href="org/lucee/lucee/6.2.2.79-SNAPSHOT/">Latest version (6.2.2.79-SNAPSHOT)</a></li>
+        <li><a href="https://cdn.lucee.org/">Direct CDN access</a></li>
+    </ul>
+
+    <p><em>Artifacts are served from Lucee's high-performance CDN at <a href="https://cdn.lucee.org">cdn.lucee.org</a></em></p>
+</body>
+</html>

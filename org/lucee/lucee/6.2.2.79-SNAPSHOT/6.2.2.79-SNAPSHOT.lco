@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Redirecting to Lucee CDN</title>
+    <meta http-equiv="refresh" content="0; url=https://cdn.lucee.org/6.2.2.79-SNAPSHOT.lco">
+    <script>window.location.href="https://cdn.lucee.org/6.2.2.79-SNAPSHOT.lco";</script>
+</head>
+<body>
+    <p>Redirecting to <a href="https://cdn.lucee.org/6.2.2.79-SNAPSHOT.lco">https://cdn.lucee.org/6.2.2.79-SNAPSHOT.lco</a></p>
+</body>
+</html>
