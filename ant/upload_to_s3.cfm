@@ -38,7 +38,7 @@
 
 	src.mvnJarName = "lucee-"&src.version&".jar";
 	src.mvnJarLightName = "lucee-"&src.version&"-light.jar";
-	src.mvnJarLightName = "lucee-"&src.version&"-zero.jar";
+	src.mvnJarZeroName = "lucee-"&src.version&"-zero.jar";
 	src.mvnLCOName = "lucee-"&src.version&".lco";
 	src.mvnMetadataName = "maven-metadata.xml";
 	// lucee-6.2.2.78-SNAPSHOT.jar
@@ -56,14 +56,21 @@
 		trg.dir = "s3://#server.system.environment.S3_ACCESS_ID_DOWNLOAD#:#server.system.environment.S3_SECRET_KEY_DOWNLOAD#@/#s3_bucket#/";
 		trg.mvnRootDir = trg.dir & "org/lucee/lucee/";
 		trg.mvnDir = trg.dir & "org/lucee/lucee/#src.version#/";
+		trg.mvnDirRel =  "org/lucee/lucee/#src.version#/";
+		
 		trg.jar = trg.dir & src.jarName;
 		trg.core = trg.dir & src.coreName;
 
 		_logger( "Testing S3 Bucket Access" );
 		// it usually will throw an error, rather than even reach this throw, if it fails
-		if (! DirectoryExists( trg.dir ) )
+		if (! DirectoryExists( trg.dir ) ) {
 			_logger( "DirectoryExists failed for s3 bucket [#s3_bucket#]", true );
-	} else {
+		}
+		else {
+			_logger( "S3 Bucket Access OK: [#s3_bucket#]" );
+		}
+	} 
+	else {
 		_logger( "Not publishing to S3 as DO_DEPLOY is false, only building Light and Zero" );
 	}
 
@@ -77,12 +84,12 @@
 	if ( DO_DEPLOY && !buildExistsOnS3 ){
 		// copy jar
 		publishToS3( src.jar, trg.jar, "Publish [#src.jar#] to S3: ");
-		publishToS3( src.jar, trg.mvnDir & src.mvnJarName, "Publish [#src.jar#] to S3 maven dir: ");
+		publishToS3( src.jar, trg.mvnDir & src.mvnJarName, "Publish [#src.jar#] to [#trg.mvnDirRel & src.mvnJarName#] on S3: ");
 
 
 		// copy core
 		publishToS3( src.core, trg.core, "Publish [#src.core#] to S3: ");
-		publishToS3( src.core, trg.mvnDir & src.mvnLCOName, "Publish [#src.core#] to S3 maven dir: ");
+		publishToS3( src.core, trg.mvnDir & src.mvnLCOName, "Publish [#src.core#] to [#trg.mvnDirRel & src.mvnLCOName#] on S3: ");
 	}
 
 	// Lucee light build (no extensions)
@@ -102,7 +109,7 @@
 	if ( DO_DEPLOY && !buildExistsOnS3 ){
 		trg.light = trg.dir & src.lightName;
 		publishToS3( src.light, trg.light, "Publish Light build to s3: ");
-		publishToS3( src.light, trg.mvnDir & src.mvnJarLightName, "Publish Light build  [#src.light#] to S3 maven dir: ");
+		publishToS3( src.light, trg.mvnDir & src.mvnJarLightName, "Publish [#src.light#] to [#trg.mvnDirRel & src.mvnJarLightName#] on S3: ");
 	}
 
 	// Lucee zero build, built from light but also no admin or docs
@@ -123,13 +130,11 @@
 	if ( DO_DEPLOY && !buildExistsOnS3 ) {
 		trg.zero = trg.dir & src.zeroName;
 		publishToS3( src.zero, trg.zero, "Publish Zero build to s3: " );
-		publishToS3( src.zero, trg.mvnDir & src.mvnJarZeroName, "Publish Zero build  [#src.zero#] to S3 maven dir: ");
+		publishToS3( src.zero, trg.mvnDir & src.mvnJarZeroName, "Publish [#src.zero#] to [#trg.mvnDirRel & src.mvnJarZeroName#] on S3");
 	}
 
 	// metadata
 	if ( DO_DEPLOY) {
-		trg.zero = trg.dir & src.zeroName;
-
 		publishMetadataToS3( src.version ,trg.mvnDir & src.mvnMetadataName ,trg.mvnRootDir& src.mvnMetadataName,"Publish Metadata to S3: ");
 	}
 
