@@ -16,6 +16,14 @@ function logWarning(message) {
 
 async function run() {
   try {
+    // Debug: Log all INPUT_ environment variables
+    log('Environment variables:');
+    Object.keys(process.env)
+      .filter(key => key.startsWith('INPUT_'))
+      .forEach(key => {
+        log(`  ${key}=${process.env[key]}`);
+      });
+
     // Get inputs from environment variables
     const versionsInput = process.env.INPUT_VERSIONS;
     const operation = process.env.INPUT_OPERATION || 'move';
@@ -25,8 +33,10 @@ async function run() {
     const bucket = process.env.INPUT_S3_BUCKET || 'lucee-downloads';
     const region = process.env.INPUT_S3_REGION || 'us-east-1';
 
-    if (!versionsInput) {
-      throw new Error('Versions list is required');
+    log(`Versions input: "${versionsInput}"`);
+
+    if (!versionsInput || versionsInput.trim() === '') {
+      throw new Error('Versions list is required and cannot be empty');
     }
     
     if (!accessKeyId || !secretAccessKey) {
@@ -244,7 +254,24 @@ async function processVersion(s3Client, bucket, version, operation, dryRun) {
   // Generate and upload version-specific maven-metadata.xml
   if (!dryRun && processedCount > 0) {
     try {
-      const versionMetadata = generateVersionMetadata(version);
+      // Get the timestamp from the main JAR file for metadata
+      const mainJarKey = `lucee-${version}.jar`;
+      let artifactTimestamp;
+      
+      try {
+        const headResponse = await s3Client.send(new HeadObjectCommand({
+          Bucket: bucket,
+          Key: mainJarKey
+        }));
+        artifactTimestamp = headResponse.LastModified;
+        log(`  ✓ Using timestamp from ${mainJarKey}: ${artifactTimestamp}`);
+      } catch (error) {
+        // If main JAR doesn't exist, try to get timestamp from any processed file
+        artifactTimestamp = new Date();
+        log(`  ⚠ Could not get timestamp from ${mainJarKey}, using current time`);
+      }
+      
+      const versionMetadata = generateVersionMetadata(version, artifactTimestamp);
       await uploadMetadata(s3Client, bucket, `org/lucee/lucee/${version}/maven-metadata.xml`, versionMetadata);
       log(`  ✓ Generated version-specific maven-metadata.xml for ${version}`);
     } catch (error) {
@@ -254,7 +281,21 @@ async function processVersion(s3Client, bucket, version, operation, dryRun) {
 
     // Update parent maven-metadata.xml
     try {
-      await updateParentMetadata(s3Client, bucket, version);
+      // For parent metadata, also try to use the artifact timestamp
+      const mainJarKey = `lucee-${version}.jar`;
+      let artifactTimestamp;
+      
+      try {
+        const headResponse = await s3Client.send(new HeadObjectCommand({
+          Bucket: bucket,
+          Key: mainJarKey
+        }));
+        artifactTimestamp = headResponse.LastModified;
+      } catch (error) {
+        artifactTimestamp = new Date();
+      }
+      
+      await updateParentMetadata(s3Client, bucket, version, artifactTimestamp);
       log(`  ✓ Updated parent maven-metadata.xml with version ${version}`);
     } catch (error) {
       errorCount++;
@@ -349,8 +390,9 @@ async function processFile(s3Client, bucket, sourceKey, targetKey, operation, dr
   }
 }
 
-function generateVersionMetadata(version) {
-  const timestamp = new Date().toISOString().replace(/[-:T]/g, '').split('.')[0];
+function generateVersionMetadata(version, artifactTimestamp) {
+  // Convert timestamp to the format Maven metadata expects (YYYYMMDDHHMMSS)
+  const timestamp = artifactTimestamp.toISOString().replace(/[-:T]/g, '').split('.')[0];
   
   return `<?xml version="1.0" encoding="UTF-8"?>
 <metadata>
@@ -419,7 +461,7 @@ async function uploadMetadata(s3Client, bucket, key, content) {
   }));
 }
 
-async function updateParentMetadata(s3Client, bucket, newVersion) {
+async function updateParentMetadata(s3Client, bucket, newVersion, artifactTimestamp) {
   const metadataKey = 'org/lucee/lucee/maven-metadata.xml';
   let existingMetadata = null;
   
@@ -438,7 +480,8 @@ async function updateParentMetadata(s3Client, bucket, newVersion) {
     }
   }
 
-  const timestamp = new Date().toISOString().replace(/[-:T]/g, '').split('.')[0];
+  // Convert artifact timestamp to Maven format
+  const timestamp = artifactTimestamp.toISOString().replace(/[-:T]/g, '').split('.')[0];
   let updatedMetadata;
 
   if (existingMetadata) {
