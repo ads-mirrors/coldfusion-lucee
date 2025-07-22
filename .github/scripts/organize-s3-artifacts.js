@@ -35,6 +35,18 @@ async function run() {
 
     log(`Starting ${dryRun ? 'DRY RUN of ' : ''}${operation} operation for version ${version}`);
     log(`S3 Bucket: ${bucket}, Region: ${region}`);
+    
+    // Test S3 connectivity
+    try {
+      log('Testing S3 connectivity...');
+      await s3Client.send(new ListObjectsV2Command({
+        Bucket: bucket,
+        MaxKeys: 1
+      }));
+      log('✓ S3 connectivity successful');
+    } catch (error) {
+      throw new Error(`S3 connectivity test failed: ${error.name} - ${error.message}. Check bucket name and credentials.`);
+    }
 
     // Initialize S3 client
     const s3Client = new S3Client({
@@ -82,6 +94,27 @@ async function run() {
     ];
 
     log(`Found ${fileMappings.length} file mappings to process`);
+
+    // In dry run mode, also list files in bucket to help with debugging
+    if (dryRun) {
+      try {
+        log('Listing files in S3 bucket (first 50 files):');
+        const listResponse = await s3Client.send(new ListObjectsV2Command({
+          Bucket: bucket,
+          MaxKeys: 50
+        }));
+        
+        if (listResponse.Contents && listResponse.Contents.length > 0) {
+          listResponse.Contents.forEach(obj => {
+            log(`  - ${obj.Key} (${obj.Size} bytes, modified: ${obj.LastModified})`);
+          });
+        } else {
+          log('  No files found in bucket');
+        }
+      } catch (error) {
+        logWarning(`Could not list bucket contents: ${error.message}`);
+      }
+    }
 
     // Process each file mapping
     let processedCount = 0;
@@ -153,29 +186,40 @@ async function run() {
 async function processFile(s3Client, bucket, sourceKey, targetKey, operation, dryRun) {
   // Check if source file exists
   try {
+    log(`Checking if source file exists: ${sourceKey}`);
     await s3Client.send(new HeadObjectCommand({
       Bucket: bucket,
       Key: sourceKey
     }));
+    log(`✓ Source file exists: ${sourceKey}`);
   } catch (error) {
-    if (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404) {
+    log(`Source file check failed for ${sourceKey}: ${error.name} - ${error.message}`);
+    if (error.name === 'NotFound' || error.name === 'NoSuchKey' || error.$metadata?.httpStatusCode === 404) {
       return { processed: false, reason: 'source file not found' };
     }
-    throw error;
+    if (error.name === 'AccessDenied' || error.$metadata?.httpStatusCode === 403) {
+      throw new Error(`Access denied to ${sourceKey}. Check S3 permissions.`);
+    }
+    throw new Error(`Failed to check source file ${sourceKey}: ${error.name} - ${error.message}`);
   }
 
   // Check if target file already exists
   try {
+    log(`Checking if target file already exists: ${targetKey}`);
     await s3Client.send(new HeadObjectCommand({
       Bucket: bucket,
       Key: targetKey
     }));
+    log(`Target file already exists: ${targetKey}`);
     return { processed: false, reason: 'target file already exists' };
   } catch (error) {
-    if (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404) {
+    if (error.name === 'NotFound' || error.name === 'NoSuchKey' || error.$metadata?.httpStatusCode === 404) {
       // Target doesn't exist, proceed
+      log(`✓ Target location is available: ${targetKey}`);
+    } else if (error.name === 'AccessDenied' || error.$metadata?.httpStatusCode === 403) {
+      throw new Error(`Access denied to ${targetKey}. Check S3 permissions.`);
     } else {
-      throw error;
+      throw new Error(`Failed to check target file ${targetKey}: ${error.name} - ${error.message}`);
     }
   }
 
@@ -183,23 +227,29 @@ async function processFile(s3Client, bucket, sourceKey, targetKey, operation, dr
     return { processed: true, action: `[DRY RUN] Would ${operation}` };
   }
 
-  // Copy file to new location
-  await s3Client.send(new CopyObjectCommand({
-    Bucket: bucket,
-    CopySource: `${bucket}/${sourceKey}`,
-    Key: targetKey,
-    MetadataDirective: 'COPY'
-  }));
-
-  // Delete original file if operation is 'move'
-  if (operation === 'move') {
-    await s3Client.send(new DeleteObjectCommand({
+  try {
+    // Copy file to new location
+    log(`Copying ${sourceKey} to ${targetKey}`);
+    await s3Client.send(new CopyObjectCommand({
       Bucket: bucket,
-      Key: sourceKey
+      CopySource: `${bucket}/${sourceKey}`,
+      Key: targetKey,
+      MetadataDirective: 'COPY'
     }));
-    return { processed: true, action: 'Moved' };
-  } else {
-    return { processed: true, action: 'Copied' };
+
+    // Delete original file if operation is 'move'
+    if (operation === 'move') {
+      log(`Deleting original file: ${sourceKey}`);
+      await s3Client.send(new DeleteObjectCommand({
+        Bucket: bucket,
+        Key: sourceKey
+      }));
+      return { processed: true, action: 'Moved' };
+    } else {
+      return { processed: true, action: 'Copied' };
+    }
+  } catch (error) {
+    throw new Error(`Failed to ${operation} ${sourceKey}: ${error.name} - ${error.message}`);
   }
 }
 
