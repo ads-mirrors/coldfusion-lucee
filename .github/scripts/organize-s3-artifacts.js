@@ -35,6 +35,15 @@ async function run() {
 
     log(`Starting ${dryRun ? 'DRY RUN of ' : ''}${operation} operation for version ${version}`);
     log(`S3 Bucket: ${bucket}, Region: ${region}`);
+
+    // Initialize S3 client
+    const s3Client = new S3Client({
+      region,
+      credentials: {
+        accessKeyId,
+        secretAccessKey
+      }
+    });
     
     // Test S3 connectivity
     try {
@@ -47,15 +56,6 @@ async function run() {
     } catch (error) {
       throw new Error(`S3 connectivity test failed: ${error.name} - ${error.message}. Check bucket name and credentials.`);
     }
-
-    // Initialize S3 client
-    const s3Client = new S3Client({
-      region,
-      credentials: {
-        accessKeyId,
-        secretAccessKey
-      }
-    });
 
     // Define file mappings from source to target
     const fileMappings = [
