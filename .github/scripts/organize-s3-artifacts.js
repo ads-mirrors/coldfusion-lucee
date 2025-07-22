@@ -1,4 +1,4 @@
-import { S3Client, ListObjectsV2Command, CopyObjectCommand, DeleteObjectCommand, PutObjectCommand, GetObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, ListObjectsV2Command, CopyObjectCommand, DeleteObjectCommand, PutObjectCommand, GetObjectCommand, HeadObjectCommand, GetBucketLocationCommand } from '@aws-sdk/client-s3';
 
 // Helper function to log with timestamp
 function log(message, level = 'INFO') {
@@ -34,10 +34,10 @@ async function run() {
     }
 
     log(`Starting ${dryRun ? 'DRY RUN of ' : ''}${operation} operation for version ${version}`);
-    log(`S3 Bucket: ${bucket}, Region: ${region}`);
+    log(`S3 Bucket: ${bucket}, Initial Region: ${region}`);
 
-    // Initialize S3 client
-    const s3Client = new S3Client({
+    // Create initial S3 client to detect bucket region
+    let s3Client = new S3Client({
       region,
       credentials: {
         accessKeyId,
@@ -45,16 +45,44 @@ async function run() {
       }
     });
     
-    // Test S3 connectivity
+    // Test S3 connectivity and detect correct region
     try {
-      log('Testing S3 connectivity...');
+      log('Testing S3 connectivity and detecting bucket region...');
       await s3Client.send(new ListObjectsV2Command({
         Bucket: bucket,
         MaxKeys: 1
       }));
       log('✓ S3 connectivity successful');
     } catch (error) {
-      throw new Error(`S3 connectivity test failed: ${error.name} - ${error.message}. Check bucket name and credentials.`);
+      if (error.name === 'PermanentRedirect') {
+        // Try to get the correct region
+        try {
+          log('Bucket is in different region, detecting correct region...');
+          const locationResponse = await s3Client.send(new GetBucketLocationCommand({ Bucket: bucket }));
+          const correctRegion = locationResponse.LocationConstraint || 'us-east-1';
+          log(`✓ Detected bucket region: ${correctRegion}`);
+          
+          // Create new client with correct region
+          s3Client = new S3Client({
+            region: correctRegion,
+            credentials: {
+              accessKeyId,
+              secretAccessKey
+            }
+          });
+          
+          // Test again with correct region
+          await s3Client.send(new ListObjectsV2Command({
+            Bucket: bucket,
+            MaxKeys: 1
+          }));
+          log('✓ S3 connectivity successful with correct region');
+        } catch (regionError) {
+          throw new Error(`Failed to detect bucket region: ${regionError.name} - ${regionError.message}`);
+        }
+      } else {
+        throw new Error(`S3 connectivity test failed: ${error.name} - ${error.message}. Check bucket name and credentials.`);
+      }
     }
 
     // Define file mappings from source to target
