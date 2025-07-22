@@ -78,22 +78,34 @@ if [ -f "../$ARTIFACT_DIR/lucee-${VERSION}.pom" ]; then
     echo "Copied POM file to GitHub Pages"
 fi
 
-# Generate maven-metadata.xml for the version
-cat > "$VERSION_DIR/maven-metadata.xml" << EOF
+# Generate maven-metadata.xml for the version (without timestamps for simplicity)
+if [[ "$VERSION" == *-SNAPSHOT ]]; then
+  # For snapshots, don't use timestamps - just simple version names
+  cat > "$VERSION_DIR/maven-metadata.xml" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata>
   <groupId>org.lucee</groupId>
   <artifactId>lucee</artifactId>
   <version>$VERSION</version>
   <versioning>
-    <snapshot>
-      <timestamp>$(date +%Y%m%d.%H%M%S)</timestamp>
-      <buildNumber>${GITHUB_RUN_NUMBER:-1}</buildNumber>
-    </snapshot>
     <lastUpdated>$(date +%Y%m%d%H%M%S)</lastUpdated>
   </versioning>
 </metadata>
 EOF
+else
+  # For releases, standard metadata
+  cat > "$VERSION_DIR/maven-metadata.xml" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>org.lucee</groupId>
+  <artifactId>lucee</artifactId>
+  <version>$VERSION</version>
+  <versioning>
+    <lastUpdated>$(date +%Y%m%d%H%M%S)</lastUpdated>
+  </versioning>
+</metadata>
+EOF
+fi
 
 # Generate main maven-metadata.xml (aggregate all versions)
 if [ -f "$MAVEN_PATH/maven-metadata.xml" ]; then
