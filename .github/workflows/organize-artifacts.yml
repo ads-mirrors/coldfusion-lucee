@@ -12,9 +12,9 @@ on:
         required: true
         type: choice
         options:
-          - move
           - copy
-        default: move
+          - move
+        default: copy
       dry_run:
         description: 'Dry run - only show what would be done'
         required: false
