@@ -17,7 +17,7 @@ function logWarning(message) {
 async function run() {
   try {
     // Get inputs from environment variables
-    const version = process.env.INPUT_VERSION;
+    const versionsInput = process.env.INPUT_VERSIONS;
     const operation = process.env.INPUT_OPERATION || 'move';
     const dryRun = process.env.INPUT_DRY_RUN === 'true';
     const accessKeyId = process.env.INPUT_S3_ACCESS_KEY;
@@ -25,15 +25,22 @@ async function run() {
     const bucket = process.env.INPUT_S3_BUCKET || 'lucee-downloads';
     const region = process.env.INPUT_S3_REGION || 'us-east-1';
 
-    if (!version) {
-      throw new Error('Version is required');
+    if (!versionsInput) {
+      throw new Error('Versions list is required');
     }
     
     if (!accessKeyId || !secretAccessKey) {
       throw new Error('S3 credentials are required');
     }
 
-    log(`Starting ${dryRun ? 'DRY RUN of ' : ''}${operation} operation for version ${version}`);
+    // Parse versions from comma-separated input
+    const versions = versionsInput.split(',').map(v => v.trim()).filter(v => v.length > 0);
+    
+    if (versions.length === 0) {
+      throw new Error('No valid versions found in input');
+    }
+
+    log(`Starting ${dryRun ? 'DRY RUN of ' : ''}${operation} operation for ${versions.length} version(s): ${versions.join(', ')}`);
     log(`S3 Bucket: ${bucket}, Initial Region: ${region}`);
 
     // Create initial S3 client to detect bucket region
@@ -85,130 +92,191 @@ async function run() {
       }
     }
 
-    // Define file mappings from source to target
-    const fileMappings = [
-      {
-        source: `lucee-${version}.jar`,
-        target: `org/lucee/lucee/${version}/lucee-${version}.jar`
-      },
-      {
-        source: `${version}.lco`,
-        target: `org/lucee/lucee/${version}/lucee-${version}.lco`
-      },
-      {
-        source: `lucee-light-${version}.jar`,
-        target: `org/lucee/lucee/${version}/lucee-${version}-light.jar`
-      },
-      {
-        source: `lucee-zero-${version}.jar`,
-        target: `org/lucee/lucee/${version}/lucee-${version}-zero.jar`
-      },
-      {
-        source: `lucee-${version}.war`,
-        target: `org/lucee/lucee/${version}/lucee-${version}.war`
-      },
-      {
-        source: `lucee-express-${version}.zip`,
-        target: `org/lucee/lucee/${version}/lucee-${version}-express.zip`
-      },
-      {
-        source: `forgebox-${version}.zip`,
-        target: `org/lucee/lucee/${version}/lucee-${version}-forgebox.zip`
-      },
-      {
-        source: `forgebox-light-${version}.zip`,
-        target: `org/lucee/lucee/${version}/lucee-${version}-forgebox-light.zip`
-      }
-    ];
+    // Overall statistics
+    let totalProcessed = 0;
+    let totalMissing = 0;
+    let totalSkipped = 0;
+    let totalErrors = 0;
+    let successfulVersions = 0;
 
-    log(`Found ${fileMappings.length} file mappings to process`);
+    // Process each version
+    for (let i = 0; i < versions.length; i++) {
+      const version = versions[i];
+      log(`\n${'='.repeat(60)}`);
+      log(`Processing version ${i + 1}/${versions.length}: ${version}`);
+      log(`${'='.repeat(60)}`);
 
-    // In dry run mode, also list files in bucket to help with debugging
-    if (dryRun) {
       try {
-        log('Listing files in S3 bucket (first 50 files):');
-        const listResponse = await s3Client.send(new ListObjectsV2Command({
-          Bucket: bucket,
-          MaxKeys: 50
-        }));
+        const versionStats = await processVersion(s3Client, bucket, version, operation, dryRun);
+        totalProcessed += versionStats.processed;
+        totalMissing += versionStats.missing;
+        totalSkipped += versionStats.skipped;
+        totalErrors += versionStats.errors;
         
-        if (listResponse.Contents && listResponse.Contents.length > 0) {
-          listResponse.Contents.forEach(obj => {
-            log(`  - ${obj.Key} (${obj.Size} bytes, modified: ${obj.LastModified})`);
-          });
+        if (versionStats.errors === 0) {
+          successfulVersions++;
+          log(`✅ Version ${version} completed successfully`);
         } else {
-          log('  No files found in bucket');
+          log(`⚠️  Version ${version} completed with ${versionStats.errors} errors`);
         }
       } catch (error) {
-        logWarning(`Could not list bucket contents: ${error.message}`);
+        totalErrors++;
+        logError(`❌ Version ${version} failed: ${error.message}`);
       }
     }
 
-    // Process each file mapping
-    let processedCount = 0;
-    let skippedCount = 0;
-    let errorCount = 0;
-
-    for (const mapping of fileMappings) {
-      try {
-        const result = await processFile(s3Client, bucket, mapping.source, mapping.target, operation, dryRun);
-        if (result.processed) {
-          processedCount++;
-          log(`✓ ${result.action}: ${mapping.source} -> ${mapping.target}`);
-        } else {
-          skippedCount++;
-          logWarning(`⚠ Skipped: ${mapping.source} (${result.reason})`);
-        }
-      } catch (error) {
-        errorCount++;
-        logError(`✗ Failed to process ${mapping.source}: ${error.message}`);
-      }
-    }
-
-    // Generate and upload version-specific maven-metadata.xml
-    if (!dryRun && processedCount > 0) {
-      try {
-        const versionMetadata = generateVersionMetadata(version);
-        await uploadMetadata(s3Client, bucket, `org/lucee/lucee/${version}/maven-metadata.xml`, versionMetadata);
-        log(`✓ Generated version-specific maven-metadata.xml for ${version}`);
-      } catch (error) {
-        errorCount++;
-        logError(`✗ Failed to generate version metadata: ${error.message}`);
-      }
-
-      // Update parent maven-metadata.xml
-      try {
-        await updateParentMetadata(s3Client, bucket, version);
-        log(`✓ Updated parent maven-metadata.xml with version ${version}`);
-      } catch (error) {
-        errorCount++;
-        logError(`✗ Failed to update parent metadata: ${error.message}`);
-      }
-    } else if (dryRun) {
-      log(`[DRY RUN] Would generate maven-metadata.xml files for version ${version}`);
-    }
-
-    // Summary
-    log('=== SUMMARY ===');
-    log(`Processed: ${processedCount}`);
-    log(`Skipped: ${skippedCount}`);
-    log(`Errors: ${errorCount}`);
+    // Overall summary
+    log(`\n${'='.repeat(60)}`);
+    log('OVERALL SUMMARY');
+    log(`${'='.repeat(60)}`);
+    log(`Versions processed: ${successfulVersions}/${versions.length}`);
+    log(`Total files processed: ${totalProcessed}`);
+    log(`Total missing files (skipped): ${totalMissing}`);
+    log(`Total already organized (skipped): ${totalSkipped}`);
+    log(`Total errors: ${totalErrors}`);
     
     if (dryRun) {
       log('This was a dry run - no actual changes were made');
     }
     
-    if (errorCount > 0) {
-      logWarning(`Completed with ${errorCount} errors`);
+    if (totalErrors > 0 || successfulVersions < versions.length) {
+      logWarning(`Completed with issues. ${successfulVersions}/${versions.length} versions processed successfully.`);
       process.exit(1);
     } else {
-      log('Artifact organization completed successfully');
+      log('🎉 All versions processed successfully!');
     }
 
   } catch (error) {
     logError(`Script failed: ${error.message}`);
     process.exit(1);
   }
+}
+
+async function processVersion(s3Client, bucket, version, operation, dryRun) {
+  log(`Starting processing for version: ${version}`);
+
+  // Define file mappings from source to target for this version
+  const fileMappings = [
+    {
+      source: `lucee-${version}.jar`,
+      target: `org/lucee/lucee/${version}/lucee-${version}.jar`
+    },
+    {
+      source: `${version}.lco`,
+      target: `org/lucee/lucee/${version}/lucee-${version}.lco`
+    },
+    {
+      source: `lucee-light-${version}.jar`,
+      target: `org/lucee/lucee/${version}/lucee-${version}-light.jar`
+    },
+    {
+      source: `lucee-zero-${version}.jar`,
+      target: `org/lucee/lucee/${version}/lucee-${version}-zero.jar`
+    },
+    {
+      source: `lucee-${version}.war`,
+      target: `org/lucee/lucee/${version}/lucee-${version}.war`
+    },
+    {
+      source: `lucee-express-${version}.zip`,
+      target: `org/lucee/lucee/${version}/lucee-${version}-express.zip`
+    },
+    {
+      source: `forgebox-${version}.zip`,
+      target: `org/lucee/lucee/${version}/lucee-${version}-forgebox.zip`
+    },
+    {
+      source: `forgebox-light-${version}.zip`,
+      target: `org/lucee/lucee/${version}/lucee-${version}-forgebox-light.zip`
+    }
+  ];
+
+  log(`Found ${fileMappings.length} file mappings to process for version ${version}`);
+
+  // In dry run mode, also list files in bucket to help with debugging (only for first version)
+  if (dryRun && version === versions[0]) {
+    try {
+      log('Listing files in S3 bucket (first 50 files):');
+      const listResponse = await s3Client.send(new ListObjectsV2Command({
+        Bucket: bucket,
+        MaxKeys: 50
+      }));
+      
+      if (listResponse.Contents && listResponse.Contents.length > 0) {
+        listResponse.Contents.forEach(obj => {
+          log(`  - ${obj.Key} (${obj.Size} bytes, modified: ${obj.LastModified})`);
+        });
+      } else {
+        log('  No files found in bucket');
+      }
+    } catch (error) {
+      logWarning(`Could not list bucket contents: ${error.message}`);
+    }
+  }
+
+  // Process each file mapping for this version
+  let processedCount = 0;
+  let skippedCount = 0;
+  let errorCount = 0;
+  let missingCount = 0;
+
+  for (const mapping of fileMappings) {
+    try {
+      const result = await processFile(s3Client, bucket, mapping.source, mapping.target, operation, dryRun);
+      if (result.processed) {
+        processedCount++;
+        log(`  ✓ ${result.action}: ${mapping.source} -> ${mapping.target}`);
+      } else {
+        if (result.reason === 'source file not found') {
+          missingCount++;
+          log(`  ⚠ Missing: ${mapping.source} (file does not exist in S3)`);
+        } else {
+          skippedCount++;
+          logWarning(`  ⚠ Skipped: ${mapping.source} (${result.reason})`);
+        }
+      }
+    } catch (error) {
+      errorCount++;
+      logError(`  ✗ Failed to process ${mapping.source}: ${error.message}`);
+    }
+  }
+
+  // Generate and upload version-specific maven-metadata.xml
+  if (!dryRun && processedCount > 0) {
+    try {
+      const versionMetadata = generateVersionMetadata(version);
+      await uploadMetadata(s3Client, bucket, `org/lucee/lucee/${version}/maven-metadata.xml`, versionMetadata);
+      log(`  ✓ Generated version-specific maven-metadata.xml for ${version}`);
+    } catch (error) {
+      errorCount++;
+      logError(`  ✗ Failed to generate version metadata: ${error.message}`);
+    }
+
+    // Update parent maven-metadata.xml
+    try {
+      await updateParentMetadata(s3Client, bucket, version);
+      log(`  ✓ Updated parent maven-metadata.xml with version ${version}`);
+    } catch (error) {
+      errorCount++;
+      logError(`  ✗ Failed to update parent metadata: ${error.message}`);
+    }
+  } else if (dryRun) {
+    log(`  [DRY RUN] Would generate maven-metadata.xml files for version ${version}`);
+  }
+
+  // Version summary
+  log(`--- Version ${version} Summary ---`);
+  log(`  Processed: ${processedCount}`);
+  log(`  Missing files (skipped): ${missingCount}`);
+  log(`  Already organized (skipped): ${skippedCount}`);
+  log(`  Errors: ${errorCount}`);
+
+  return {
+    processed: processedCount,
+    missing: missingCount,
+    skipped: skippedCount,
+    errors: errorCount
+  };
 }
 
 async function processFile(s3Client, bucket, sourceKey, targetKey, operation, dryRun) {
@@ -221,8 +289,8 @@ async function processFile(s3Client, bucket, sourceKey, targetKey, operation, dr
     }));
     log(`✓ Source file exists: ${sourceKey}`);
   } catch (error) {
-    log(`Source file check failed for ${sourceKey}: ${error.name} - ${error.message}`);
     if (error.name === 'NotFound' || error.name === 'NoSuchKey' || error.$metadata?.httpStatusCode === 404) {
+      log(`Source file not found: ${sourceKey} - this is normal, some versions don't have all file types`);
       return { processed: false, reason: 'source file not found' };
     }
     if (error.name === 'AccessDenied' || error.$metadata?.httpStatusCode === 403) {
@@ -397,26 +465,51 @@ async function updateParentMetadata(s3Client, bucket, newVersion) {
 }
 
 function addVersionToMetadata(existingXml, newVersion, timestamp) {
-  // Simple XML manipulation - handles basic cases
-  let updated = existingXml;
+  // Extract existing versions from the XML
+  const versionRegex = /<version>([^<]+)<\/version>/g;
+  const existingVersions = [];
+  let match;
   
-  // Update lastUpdated
-  updated = updated.replace(/<lastUpdated>\d*<\/lastUpdated>/, `<lastUpdated>${timestamp}</lastUpdated>`);
-  
-  // Update latest
-  updated = updated.replace(/<latest>.*?<\/latest>/, `<latest>${newVersion}</latest>`);
-  
-  // Update release if it's not a SNAPSHOT
-  if (!newVersion.includes('SNAPSHOT')) {
-    updated = updated.replace(/<release>.*?<\/release>/, `<release>${newVersion}</release>`);
+  while ((match = versionRegex.exec(existingXml)) !== null) {
+    existingVersions.push(match[1]);
   }
   
-  // Add version if it doesn't exist
-  if (!updated.includes(`<version>${newVersion}</version>`)) {
-    updated = updated.replace('</versions>', `      <version>${newVersion}</version>\n    </versions>`);
+  // Add new version if it doesn't exist
+  if (!existingVersions.includes(newVersion)) {
+    existingVersions.push(newVersion);
   }
   
-  return updated;
+  // Sort versions (simple string sort, which works reasonably well for semantic versions)
+  existingVersions.sort();
+  
+  // Determine latest and release versions
+  const latest = newVersion; // Always set the new version as latest
+  let release = '';
+  
+  // Find the latest non-SNAPSHOT version for release
+  for (let i = existingVersions.length - 1; i >= 0; i--) {
+    if (!existingVersions[i].includes('SNAPSHOT')) {
+      release = existingVersions[i];
+      break;
+    }
+  }
+  
+  // Generate properly formatted XML
+  const versionsXml = existingVersions.map(v => `      <version>${v}</version>`).join('\n');
+  
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>org.lucee</groupId>
+  <artifactId>lucee</artifactId>
+  <versioning>
+    <latest>${latest}</latest>
+    <release>${release}</release>
+    <versions>
+${versionsXml}
+    </versions>
+    <lastUpdated>${timestamp}</lastUpdated>
+  </versioning>
+</metadata>`;
 }
 
 // Run the script
