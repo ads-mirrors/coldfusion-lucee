@@ -6,7 +6,9 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Stack;
 
 import org.osgi.framework.Version;
@@ -41,7 +43,7 @@ public final class RepoReader extends DefaultHandler {
 	private String key;
 	private boolean insideSnapshotVersion;
 	private Map<String, Object> snapshot;
-	private Map<String, Map<String, Object>> snapshots = new HashMap<>();
+	private Map<String, Map<String, Object>> artifacts = new HashMap<>();
 	private String base;
 
 	RepoReader(String repo, String group, String artifact, Version version) {
@@ -52,39 +54,42 @@ public final class RepoReader extends DefaultHandler {
 		this.key = repo + ":" + group + ":" + artifact + ":" + version;
 	}
 
-	public Map<String, Map<String, Object>> read() throws IOException, GeneralSecurityException, SAXException {
-
+	public Map<String, Object> read() throws IOException, GeneralSecurityException, SAXException {
 		String g = group.replace('.', '/');
 		String a = artifact.replace('.', '/');
 		String v = version.toString();
 
 		base = repo + (repo.endsWith("/") ? "" : "/") + g + "/" + a + "/" + v + "/";
+
 		URL url = new URL(base + "maven-metadata.xml");
+
 		HTTPResponse rsp = HTTPEngine4Impl.get(url, null, null, MavenUpdateProvider.CONNECTION_TIMEOUT, true, null, null, null, null);
 		if (rsp != null) {
 			int sc = rsp.getStatusCode();
-			if (sc < 200 || sc >= 300) throw new IOException("unable to invoke [" + url + "], status code [" + sc + "]");
+			if (sc < 200 || sc >= 300) return null;
 		}
 		else {
-			throw new IOException("unable to invoke [" + repo + "], no response.");
+			return null;
 		}
 
 		Reader r = null;
 		try {
+
 			init(new InputSource(r = IOUtil.getReader(rsp.getContentAsStream(), (Charset) null)));
 		}
 		finally {
 			IOUtil.close(r);
 		}
+		Map<String, Object> res = new LinkedHashMap<>();
+		String key;
+		for (Entry<String, Map<String, Object>> e: artifacts.entrySet()) {
+			key = Caster.toString(e.getValue().get("classifier"), null);
+			if (StringUtil.isEmpty(key, true)) key = Caster.toString(e.getValue().get("extension"), null);
+			if (StringUtil.isEmpty(key, true)) key = e.getKey();
+			res.put(key, e.getValue().get("url"));
+		}
+		return res;
 
-		/*
-		 * Header[] headers = rsp.getAllHeaders(); for (Header h: headers) { if
-		 * ("Last-Modified".equals(h.getName()) || "Date".equals(h.getName())) print.e(h.getName() + ":" +
-		 * DateCaster.toDateAdvanced(h.getValue(), null)); // tmpMeta.put(h.getName(), //
-		 * DateCaster.toDateAdvanced(h.getValue(), // null)); else print.e(h.getName() + ":" +
-		 * h.getValue()); // tmpMeta.put(h.getName(), h.getValue()); } print.e(snapshots);
-		 */
-		return snapshots;
 	}
 
 	/**
@@ -153,7 +158,7 @@ public final class RepoReader extends DefaultHandler {
 			}
 			String key = StringUtil.isEmpty(classifier) ? extension : classifier + "." + extension;
 			snapshot.put("url", base + artifact + "-" + value + (StringUtil.isEmpty(classifier) ? "" : "-" + classifier) + "." + extension);
-			snapshots.put(key, snapshot);
+			artifacts.put(key, snapshot);
 			snapshot = null;
 
 		}
