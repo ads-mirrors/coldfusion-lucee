@@ -1,0 +1,53 @@
+name: Organize Lucee S3 Artifacts
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Lucee version to organize (e.g., 6.2.2.78-SNAPSHOT)'
+        required: true
+        type: string
+      operation:
+        description: 'Copy or move files'
+        required: true
+        type: choice
+        options:
+          - move
+          - copy
+        default: move
+      dry_run:
+        description: 'Dry run - only show what would be done'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  organize:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        
+    - name: Install dependencies
+      run: |
+        cd .github/scripts
+        npm install
+        
+    - name: Organize S3 Artifacts
+      run: |
+        cd .github/scripts
+        node organize-s3-artifacts.js
+      env:
+        INPUT_VERSION: ${{ inputs.version }}
+        INPUT_OPERATION: ${{ inputs.operation }}
+        INPUT_DRY_RUN: ${{ inputs.dry_run }}
+        INPUT_S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_ID_DOWNLOAD }}
+        INPUT_S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY_DOWNLOAD }}
+        INPUT_S3_BUCKET: 'lucee-downloads'
+        INPUT_S3_REGION: 'us-east-1'
