@@ -311,7 +311,6 @@ public class MavenUpdateProvider {
 			}
 			catch (Exception e) {
 				cacheRootDirectory = SystemUtil.getTempDirectory();
-				cacheRootDirectory = SystemUtil.getHomeDirectory();
 			}
 		}
 
