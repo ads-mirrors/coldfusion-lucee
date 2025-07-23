@@ -8,23 +8,27 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.osgi.framework.Version;
 import org.xml.sax.SAXException;
 
+import lucee.commons.digest.HashUtil;
 import lucee.commons.io.SystemUtil;
+import lucee.commons.io.res.Resource;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.net.http.HTTPResponse;
 import lucee.commons.net.http.Header;
 import lucee.commons.net.http.httpclient.HTTPEngine4Impl;
+import lucee.loader.engine.CFMLEngineFactory;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.date.DateCaster;
@@ -58,6 +62,7 @@ public class MavenUpdateProvider {
 	private String artifact;
 	private Repository[] repoSnapshots;
 	private Repository[] repoReleases;
+	private List<Repository> repos;
 
 	public static Repository[] getDefaultRepositoryReleases() {
 		if (defaultRepositoryReleases == null) {
@@ -98,8 +103,21 @@ public class MavenUpdateProvider {
 	public MavenUpdateProvider() {
 		this.repoSnapshots = getDefaultRepositorySnapshots();
 		this.repoReleases = getDefaultRepositoryReleases();
+		this.repos = merge(repoSnapshots, repoReleases);
 		this.group = DEFAULT_GROUP;
 		this.artifact = DEFAULT_ARTIFACT;
+	}
+
+	private List<Repository> merge(Repository[] left, Repository[] right) {
+		List<Repository> list = new ArrayList<>();
+		for (Repository repo: left) {
+			list.add(repo);
+		}
+		for (Repository repo: right) {
+			list.add(repo);
+		}
+
+		return list;
 	}
 
 	public MavenUpdateProvider(Repository[] repoSnapshots, Repository[] repoReleases, String group, String artifact) {
@@ -112,17 +130,16 @@ public class MavenUpdateProvider {
 	public List<Version> list() throws IOException, GeneralSecurityException, SAXException {
 		try {
 			MetadataReader mr;
-			Collection<Version> versions = null;
-			for (Repository repo: repoReleases) {
-				mr = new MetadataReader(repo.url, group, artifact, versions);
-				versions = mr.read();
+			Set<Version> versions = new HashSet<>();
+			for (Repository repo: repos) {
+				mr = new MetadataReader(repo, group, artifact);
+				for (Version v: mr.read()) {
+					versions.add(v);
+				}
+
 			}
 
-			for (Repository repo: repoSnapshots) {
-				mr = new MetadataReader(repo.url, group, artifact, versions);
-				versions = mr.read();
-			}
-			if (versions != null) {
+			if (versions.size() > 0) {
 				List<Version> sortedList = new ArrayList<>(versions);
 				Collections.sort(sortedList, OSGiUtil::compare);
 				return sortedList;
@@ -275,21 +292,38 @@ public class MavenUpdateProvider {
 		throw new FileNotFoundException("core/core.lco not found in zip");
 	}
 
-	public static class Repository {
+	public final static class Repository {
 
-		private final String label;
-		private final String url;
-		private final int timeout;
+		public static final long TIMEOUT_1HOUR = 60 * 60 * 1000;
+		public static final long TIMEOUT_NEVER = Long.MAX_VALUE;
+		public static final long TIMEOUT_5MINUTES = 60 * 5 * 1000;
 
-		public Repository(String label, String url, int timeout) {
+		private static Resource cacheRootDirectory;
+
+		public final String label;
+		public final String url;
+		public final long timeout;
+		public final Resource cacheDirectory;
+
+		static {
+			try {
+				cacheRootDirectory = CFMLEngineFactory.getInstance().getThreadConfig().getConfigDir();
+			}
+			catch (Exception e) {
+				cacheRootDirectory = SystemUtil.getTempDirectory();
+				cacheRootDirectory = SystemUtil.getHomeDirectory();
+			}
+		}
+
+		public Repository(String label, String url, long timeout) {
 			if (!url.endsWith("/")) url += "/";
 			this.label = label;
 			this.url = url;
 			this.timeout = timeout;
-		}
 
-		public static final int TIMEOUT_1HOUR = 60 * 60;
-		public static final int TIMEOUT_NEVER = Integer.MAX_VALUE;
-		public static final int TIMEOUT_5MINUTES = 60 * 5;
+			cacheDirectory = cacheRootDirectory.getRealResource("mvn/cache/" + HashUtil.create64BitHashAsString(url, Character.MAX_RADIX) + "/");
+			cacheDirectory.mkdirs();
+		}
 	}
+
 }
