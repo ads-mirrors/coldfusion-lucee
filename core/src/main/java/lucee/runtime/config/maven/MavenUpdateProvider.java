@@ -268,7 +268,7 @@ public class MavenUpdateProvider {
 	private String toList(Repository[] repos) {
 		StringBuilder sb = new StringBuilder();
 		for (Repository r: repos) {
-			if (sb.isEmpty()) sb.append(", ");
+			if (sb.length() > 0) sb.append(", ");
 			sb.append(r.url);
 		}
 		return sb.toString();
