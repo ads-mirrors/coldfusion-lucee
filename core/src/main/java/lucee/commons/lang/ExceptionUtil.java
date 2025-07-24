@@ -86,6 +86,52 @@ public final class ExceptionUtil {
 
 	}
 
+	public static String getStacktraceLine(Throwable t) {
+		Throwable cause;
+		if (t == null) {
+			t = new Throwable();
+		}
+		else {
+			cause = t.getCause();
+			if (cause != null) return getStacktraceLine(cause);
+		}
+
+		StackTraceElement[] traces = t.getStackTrace();
+		String template;
+		int line;
+		StringBuilder sb = new StringBuilder();
+		for (StackTraceElement trace: traces) {
+			template = trace.getFileName();
+			line = trace.getLineNumber();
+			if (line <= 0 || template == null) continue;
+			sb.append(template).append(':').append(trace.getLineNumber()).append(';');
+		}
+		return sb.toString();
+	}
+
+	public static String getTagContextLine(Throwable t) {
+		Throwable cause;
+		if (t == null) {
+			t = new Throwable();
+		}
+		else {
+			cause = t.getCause();
+			if (cause != null) return getTagContextLine(cause);
+		}
+
+		StackTraceElement[] traces = t.getStackTrace();
+		String template;
+		int line;
+		StringBuilder sb = new StringBuilder();
+		for (StackTraceElement trace: traces) {
+			template = trace.getFileName();
+			line = trace.getLineNumber();
+			if (line <= 0 || template == null || ResourceUtil.getExtension(template, "").equals("java")) continue;
+			sb.append(template).append(':').append(trace.getLineNumber()).append(';');
+		}
+		return sb.toString();
+	}
+
 	public static String getMessage(Throwable t, boolean includeCause) {
 		return _getMessage(new StringBuilder(), t, includeCause).toString();
 

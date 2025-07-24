@@ -124,23 +124,19 @@ public final class ScopeContext {
 	}
 
 	public static void debug(Log log, String msg) {
-		if (log != null) log.log(Log.LEVEL_DEBUG, "scope-context", msg);
-		else LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_DEBUG, "scope", msg);
+		if (LogUtil.doesDebug(log)) log.log(Log.LEVEL_DEBUG, "scope-context", msg + "; " + ExceptionUtil.getStacktraceLine(null));
 	}
 
 	public static void info(Log log, String msg) {
-		if (log != null) log.log(Log.LEVEL_INFO, "scope-context", msg);
-		else LogUtil.log(ThreadLocalPageContext.get(), Log.LEVEL_INFO, "scope", "scope-context", msg);
+		if (LogUtil.doesInfo(log)) log.log(Log.LEVEL_INFO, "scope-context", msg + "; " + ExceptionUtil.getStacktraceLine(null));
 	}
 
 	public static void error(Log log, String msg) {
-		if (log != null) log.log(Log.LEVEL_ERROR, "scope-context", msg);
-		else LogUtil.log(ThreadLocalPageContext.get(), Log.LEVEL_ERROR, "scope", "scope-context", msg);
+		if (LogUtil.doesError(log)) log.log(Log.LEVEL_ERROR, "scope-context", msg + "; " + ExceptionUtil.getStacktraceLine(null));
 	}
 
 	public static void error(Log log, Throwable t) {
-		if (log != null) log.log(Log.LEVEL_ERROR, "scope-context", ExceptionUtil.getStacktrace(t, true));
-		else LogUtil.log(ThreadLocalPageContext.get(), "scope", "scope-context", t);
+		if (LogUtil.doesError(log)) log.log(Log.LEVEL_ERROR, "scope-context", t);
 	}
 
 	/**
