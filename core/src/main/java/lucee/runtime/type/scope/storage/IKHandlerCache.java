@@ -20,8 +20,6 @@ import lucee.runtime.type.scope.ScopeContext;
 
 public class IKHandlerCache implements IKHandler {
 
-	protected static boolean storeEmpty = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.store.empty", null), false);
-
 	private static Map<String, Boolean> supportsSerialisation = new ConcurrentHashMap<>();
 	static {
 		supportsSerialisation.put("org.lucee.extension.cache.eh.EHCache", Boolean.TRUE);
@@ -53,8 +51,7 @@ public class IKHandlerCache implements IKHandler {
 
 	@Override
 	public void store(IKStorageScopeSupport storageScope, PageContext pc, String appName, String name, Map<Collection.Key, IKStorageScopeItem> data, String strType, int type,
-			Boolean storeEmpty, Log log) {
-		if (storeEmpty == null) storeEmpty = IKHandlerCache.storeEmpty;
+			Log log) {
 		try {
 			Cache cache = getCache(ThreadLocalPageContext.get(pc), name);
 			String key = getKey(pc.getCFID(), appName, storageScope.getTypeAsString());
@@ -62,7 +59,7 @@ public class IKHandlerCache implements IKHandler {
 			synchronized (SystemUtil.createToken("IKHandlerCache", key)) {
 				Object existingVal = cache.getValue(key, null);
 
-				if (storeEmpty || storageScope.hasContent()) {
+				if (storageScope.hasContent()) {
 					cache.put(key,
 							deserializeIKStorageValueSupported(cache)
 									? new IKStorageValue(IKStorageScopeSupport.prepareToStore(data, existingVal, storageScope.lastModified(), log, type))

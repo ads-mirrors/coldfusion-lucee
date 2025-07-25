@@ -18,7 +18,6 @@
  */
 package lucee.runtime.type.scope;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -175,11 +174,11 @@ public final class ScopeContext {
 		return server;
 	}
 
-	public Client getClientScope(PageContext pc, boolean createIfNeeded, Boolean storeEmpty) throws PageException {
-		return (Client) getCFScope(pc, createIfNeeded, Scope.SCOPE_CLIENT, storeEmpty);
+	public Client getClientScope(PageContext pc, boolean createIfNeeded) throws PageException {
+		return (Client) getCFScope(pc, createIfNeeded, Scope.SCOPE_CLIENT);
 	}
 
-	private StorageScope getCFScope(PageContext pc, boolean createIfNeeded, int scopeType, Boolean storeEmpty) throws PageException {
+	private StorageScope getCFScope(PageContext pc, boolean createIfNeeded, int scopeType) throws PageException {
 		// if there is no CFID, there can be no existing session or client scope
 		if (!createIfNeeded && !((PageContextImpl) pc).hasCFID()) return null;
 
@@ -253,11 +252,11 @@ public final class ScopeContext {
 						DataSource ds = pc.getDataSource(storage, null);
 						if (ds != null && ds.isStorage()) {
 							scope = (StorageScope) IKStorageScopeSupport.getInstance(scopeType, new IKHandlerDatasource(), appContext.getName(), storage, pc, existing,
-									createIfNeeded, storeEmpty, getLog());
+									createIfNeeded, getLog());
 						}
 						else {
 							scope = (StorageScope) IKStorageScopeSupport.getInstance(scopeType, new IKHandlerCache(), appContext.getName(), storage, pc, existing, createIfNeeded,
-									storeEmpty, getLog());
+									getLog());
 						}
 
 						if (createIfNeeded && scope == null) {
@@ -434,14 +433,14 @@ public final class ScopeContext {
 	 * @throws PageException
 	 */
 	public Session getSessionScope(PageContext pc) throws PageException {
-		if (pc.getSessionType() == Config.SESSION_TYPE_APPLICATION) return (Session) getCFScope(pc, true, Scope.SCOPE_SESSION, null);
+		if (pc.getSessionType() == Config.SESSION_TYPE_APPLICATION) return (Session) getCFScope(pc, true, Scope.SCOPE_SESSION);
 		return getJSessionScope(pc);
 	}
 
 	public boolean hasExistingSessionScope(PageContext pc) {
 		if (pc.getSessionType() == Config.SESSION_TYPE_APPLICATION) {
 			try {
-				return getCFScope(pc, false, Scope.SCOPE_SESSION, null) != null;
+				return getCFScope(pc, false, Scope.SCOPE_SESSION) != null;
 			}
 			catch (PageException e) {
 				return false;
@@ -485,7 +484,7 @@ public final class ScopeContext {
 		Map<String, Scope> context = getSubMap(cfSessionContexts, appContext.getName());
 		if (context != null) {
 			context.remove(pc.getCFID());
-			StorageScope scope = getCFScope(pc, false, Scope.SCOPE_SESSION, null);
+			StorageScope scope = getCFScope(pc, false, Scope.SCOPE_SESSION);
 			if (scope != null) scope.unstore(pc.getConfig());
 		}
 	}
@@ -495,7 +494,7 @@ public final class ScopeContext {
 		Map<String, Scope> context = getSubMap(cfClientContexts, appContext.getName());
 		if (context != null) {
 			context.remove(pc.getCFID());
-			StorageScope scope = getCFScope(pc, false, Scope.SCOPE_CLIENT, null);
+			StorageScope scope = getCFScope(pc, false, Scope.SCOPE_CLIENT);
 			if (scope != null) scope.unstore(pc.getConfig());
 		}
 	}
@@ -550,7 +549,7 @@ public final class ScopeContext {
 			catch (ClassCastException cce) {
 				error(getLog(), cce);
 				// if there is no HTTPSession
-				if (httpSession == null) return (Session) getCFScope(pc, true, Scope.SCOPE_SESSION, null);
+				if (httpSession == null) return (Session) getCFScope(pc, true, Scope.SCOPE_SESSION);
 
 				jSession = new JSession();
 				httpSession.setAttribute(appContext.getName(), jSession);
@@ -558,7 +557,7 @@ public final class ScopeContext {
 		}
 		else {
 			// if there is no HTTPSession
-			if (httpSession == null) return (Session) getCFScope(pc, true, Scope.SCOPE_SESSION, null);
+			if (httpSession == null) return (Session) getCFScope(pc, true, Scope.SCOPE_SESSION);
 			jSession = createNewJSession(pc, httpSession);
 		}
 		jSession.touchBeforeRequest(pc);
@@ -873,24 +872,15 @@ public final class ScopeContext {
 		boolean hasSessionManagement = appContext.isSetSessionManagement();
 
 		// get in memory scopes
-		Map<Key, Object> oldClientDetachedCopy = null;
-		Map<Key, String> clientTokens = null;
+		UserScope oldClient = null;
 		if (hasClientManagement) {
-			UserScope client = getClientScope(pc, false, null);
-			oldClientDetachedCopy = createDetachedCopy(client);
-			if (client instanceof StorageScopePro) {
-				clientTokens = ((StorageScopePro) client).getTokens();
-			}
+			Map<String, Scope> clientContext = getSubMap(cfClientContexts, appContext.getName());
+			oldClient = (UserScope) clientContext.get(pc.getCFID());
 		}
-
-		Map<Key, Object> oldSessionDetachedCopy = null;
-		Map<Key, String> sessionTokens = null;
+		UserScope oldSession = null;
 		if (hasSessionManagement) {
-			Session session = (Session) getCFScope(pc, false, Scope.SCOPE_SESSION, null);
-			oldSessionDetachedCopy = createDetachedCopy(session);
-			if (session instanceof StorageScopePro) {
-				sessionTokens = ((StorageScopePro) session).getTokens();
-			}
+			Map<String, Scope> sessionContext = getSubMap(cfSessionContexts, appContext.getName());
+			oldSession = (UserScope) sessionContext.get(pc.getCFID());
 		}
 
 		if (hasSessionManagement) {
@@ -905,46 +895,35 @@ public final class ScopeContext {
 		}
 
 		// remove Scopes completely
-		// if (hasSessionManagement) removeCFSessionScope(pc);
-		// if (hasClientManagement) removeClientScope(pc);
+		if (hasSessionManagement) removeCFSessionScope(pc);
+		if (hasClientManagement) removeClientScope(pc);
 
 		pc.resetIdAndToken();
 		pc.resetSession();
 		pc.resetClient();
 
-		if (migrateSessionData && oldSessionDetachedCopy != null)
-			migrate(pc, oldSessionDetachedCopy, sessionTokens, (UserScope) getCFScope(pc, true, Scope.SCOPE_SESSION, Boolean.FALSE));
-		if (migrateClientData && oldClientDetachedCopy != null)
-			migrate(pc, oldClientDetachedCopy, clientTokens, (UserScope) getCFScope(pc, true, Scope.SCOPE_CLIENT, Boolean.FALSE));
+		if (oldSession != null) migrate(pc, oldSession, (UserScope) getCFScope(pc, true, Scope.SCOPE_SESSION), migrateSessionData);
+		if (oldClient != null) migrate(pc, oldClient, (UserScope) getCFScope(pc, true, Scope.SCOPE_CLIENT), migrateClientData);
 
 	}
 
-	private static void migrate(PageContextImpl pc, Map<Key, Object> oldDetachedCopy, Map<Key, String> tokens, UserScope newScope) {
-		if (newScope instanceof StorageScopePro) {
-			((StorageScopePro) newScope).setTokens(tokens);
-		}
-
-		for (Entry<Key, Object> e: oldDetachedCopy.entrySet()) {
-			newScope.setEL(e.getKey(), e.getValue());
-		}
-	}
-
-	private static Map<Key, Object> createDetachedCopy(UserScope scope) {
-		if (scope == null) return null;
-		Map<Key, Object> detachedCopy = new HashMap<>();
-
-		try {
-			Iterator<Entry<Key, Object>> it = scope.entryIterator();
+	private static void migrate(PageContextImpl pc, UserScope oldScope, UserScope newScope, boolean migrate) {
+		if (oldScope == null || newScope == null) return;
+		if (!migrate) oldScope.clear();
+		oldScope.resetEnv(pc);
+		Iterator<Entry<Key, Object>> it = oldScope.entryIterator();
+		Entry<Key, Object> e;
+		if (migrate) {
 			while (it.hasNext()) {
-				Entry<Key, Object> e = it.next();
-				// Skip internal framework keys
+				e = it.next();
 				if (StorageScopeImpl.KEYS.contains(e.getKey())) continue;
-				detachedCopy.put(e.getKey(), e.getValue());
+				newScope.setEL(e.getKey(), e.getValue());
 			}
+			if (newScope instanceof StorageScopePro) {
+				((StorageScopePro) newScope).store(pc.getConfig());
+				((StorageScopePro) newScope).setTokens(((StorageScopePro) oldScope).getTokens());
+			}
+
 		}
-		catch (Exception e) {
-			return null;
-		}
-		return detachedCopy;
 	}
 }

@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.runtime.PageContext;
@@ -35,8 +34,6 @@ import lucee.runtime.type.util.KeyConstants;
 public class IKHandlerDatasource implements IKHandler {
 
 	public static final String PREFIX = "cf";
-
-	protected static boolean storeEmpty = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.store.empty", null), true);
 
 	@Override
 	public IKStorageValue loadData(PageContext pc, String appName, String name, String strType, int type, Log log) throws PageException {
@@ -120,9 +117,7 @@ public class IKHandlerDatasource implements IKHandler {
 	}
 
 	@Override
-	public void store(IKStorageScopeSupport storageScope, PageContext pc, String appName, final String name, Map<Key, IKStorageScopeItem> data, String strType, int type,
-			Boolean storeEmpty, Log log) {
-		if (storeEmpty == null) storeEmpty = IKHandlerCache.storeEmpty;
+	public void store(IKStorageScopeSupport storageScope, PageContext pc, String appName, final String name, Map<Key, IKStorageScopeItem> data, String strType, int type, Log log) {
 		DatasourceConnection dc = null;
 		ConfigPro ci = (ConfigPro) ThreadLocalPageContext.getConfig(pc);
 		try {
@@ -135,7 +130,7 @@ public class IKHandlerDatasource implements IKHandler {
 			SQLExecutor executor = SQLExecutionFactory.getInstance(dc);
 			IKStorageValue existingVal = loadData(pc, appName, name, storageScope.getTypeAsString(), storageScope.getType(), log);
 
-			if (storeEmpty || storageScope.hasContent()) {
+			if (storageScope.hasContent()) {
 				IKStorageValue sv = new IKStorageValue(IKStorageScopeSupport.prepareToStore(data, existingVal, storageScope.lastModified(), log, type));
 				executor.update(ci, pc.getCFID(), appName, dc, storageScope.getType(), sv, storageScope.getTimeSpan(), log);
 			}
