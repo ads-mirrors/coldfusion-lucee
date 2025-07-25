@@ -2150,7 +2150,10 @@ class SingleContextConfigWeb extends ConfigBase implements ConfigWebInner {
 	@Override
 	public String getId() {
 		if (_id == null) {
-			_id = HashUtil.create64BitHashAsString(Caster.toString(getRootDirectory().getAbsolutePath()), Character.MAX_RADIX);
+			URL url = getFactory().getURL();
+			String tmp = HashUtil.create64BitHashAsString(url + ":" + Caster.toString(getRootDirectory().getAbsolutePath()), Character.MAX_RADIX);
+			if (url == null) return tmp;
+			_id = tmp;
 		}
 		return _id;
 	}

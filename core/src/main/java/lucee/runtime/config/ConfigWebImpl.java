@@ -1,6 +1,7 @@
 package lucee.runtime.config;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Collection;
 
 import javax.servlet.ServletConfig;
@@ -1973,7 +1974,10 @@ public class ConfigWebImpl implements ConfigWebPro {
 	@Override
 	public String getId() {
 		if (id == null) {
-			id = HashUtil.create64BitHashAsString(Caster.toString(getRootDirectory().getAbsolutePath()), Character.MAX_RADIX);
+			URL url = getFactory().getURL();
+			String tmp = HashUtil.create64BitHashAsString(url + ":" + Caster.toString(getRootDirectory().getAbsolutePath()), Character.MAX_RADIX);
+			if (url == null) return tmp;
+			id = tmp;
 		}
 		return id;
 	}
