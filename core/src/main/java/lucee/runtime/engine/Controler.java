@@ -50,7 +50,6 @@ import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.config.DatasourceConnPool;
 import lucee.runtime.config.DeployHandler;
-import lucee.runtime.config.maven.MavenUpdateProvider;
 import lucee.runtime.extension.RHExtension;
 import lucee.runtime.lock.LockManagerImpl;
 import lucee.runtime.net.smtp.SMTPConnectionPool;
@@ -68,7 +67,10 @@ import lucee.transformer.dynamic.DynamicInvoker;
 public final class Controler extends ParentThreasRefThread {
 
 	private static final long TIMEOUT = 50 * 1000;
-	private static final long STEP_REPORT_THRESHOLD_MS =  1000 * Caster.toLongValue(SystemUtil.getSystemPropOrEnvVar("lucee.controller.log.threshold", ""), 20); // threshold for reporting out how long controller steps took
+	private static final long STEP_REPORT_THRESHOLD_MS = 1000 * Caster.toLongValue(SystemUtil.getSystemPropOrEnvVar("lucee.controller.log.threshold", ""), 20); // threshold for
+																																								// reporting out how
+																																								// long controller
+																																								// steps took
 
 	private static final ControllerState INACTIVE = new ControllerStateImpl(false);
 
@@ -283,21 +285,13 @@ public final class Controler extends ParentThreasRefThread {
 			stopwatch.start();
 			ConfigWeb config = factories[i].getConfig();
 			control(factories[i], do10Seconds, doMinute, doHour, firstRun, log);
-			checkStopWatch(config, stopwatch, "Web Context [" + config.getRootDirectory().getAbsolutePath() + "]" );
+			checkStopWatch(config, stopwatch, "Web Context [" + config.getRootDirectory().getAbsolutePath() + "]");
 		}
 
 		if (firstRun) {
 
 			try {
 				RHExtension.correctExtensions(configServer);
-			}
-			catch (Exception e) {
-				if (log != null) log.error("controler", e);
-			}
-
-			// loading all versions from Maven (if it can be reached)
-			try {
-				new MavenUpdateProvider().list();
 			}
 			catch (Exception e) {
 				if (log != null) log.error("controler", e);
@@ -486,7 +480,7 @@ public final class Controler extends ParentThreasRefThread {
 					if (log != null) log.error("controler", t);
 				}
 				checkStopWatch(config, stopwatch, "cleanLockManager");
-				
+
 				stopwatch.start();
 				try {
 					ConfigAdmin.checkForChangesInConfigFile(config);
@@ -641,10 +635,11 @@ public final class Controler extends ParentThreasRefThread {
 
 	}
 
-	private void checkStopWatch(ConfigWeb config, Stopwatch stopwatch, String name){
+	private void checkStopWatch(ConfigWeb config, Stopwatch stopwatch, String name) {
 		long time = stopwatch.stop();
 		stopwatch.reset();
-		if (STEP_REPORT_THRESHOLD_MS > 0 && time > STEP_REPORT_THRESHOLD_MS) LogUtil.log(ThreadLocalPageContext.getConfig(config), Log.LEVEL_INFO, Controler.class.getName(), name + " took " + time + "ms");
+		if (STEP_REPORT_THRESHOLD_MS > 0 && time > STEP_REPORT_THRESHOLD_MS)
+			LogUtil.log(ThreadLocalPageContext.getConfig(config), Log.LEVEL_INFO, Controler.class.getName(), name + " took " + time + "ms");
 	}
 
 	private void doCheckMappings(ConfigWeb config) {
