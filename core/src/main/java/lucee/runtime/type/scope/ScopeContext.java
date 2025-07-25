@@ -68,6 +68,7 @@ import lucee.runtime.type.scope.storage.StorageScope;
 import lucee.runtime.type.scope.storage.StorageScopeCleaner;
 import lucee.runtime.type.scope.storage.StorageScopeEngine;
 import lucee.runtime.type.scope.storage.StorageScopeImpl;
+import lucee.runtime.type.scope.storage.StorageScopePro;
 import lucee.runtime.type.scope.storage.clean.DatasourceStorageScopeCleaner;
 import lucee.runtime.type.scope.storage.clean.FileStorageScopeCleaner;
 import lucee.runtime.type.util.KeyConstants;
@@ -873,13 +874,23 @@ public final class ScopeContext {
 
 		// get in memory scopes
 		Map<Key, Object> oldClientDetachedCopy = null;
+		Map<Key, String> clientTokens = null;
 		if (hasClientManagement) {
-			oldClientDetachedCopy = createDetachedCopy(getClientScope(pc, false, null));
+			UserScope client = getClientScope(pc, false, null);
+			oldClientDetachedCopy = createDetachedCopy(client);
+			if (client instanceof StorageScopePro) {
+				clientTokens = ((StorageScopePro) client).getTokens();
+			}
 		}
 
 		Map<Key, Object> oldSessionDetachedCopy = null;
+		Map<Key, String> sessionTokens = null;
 		if (hasSessionManagement) {
-			oldSessionDetachedCopy = createDetachedCopy((Session) getCFScope(pc, false, Scope.SCOPE_SESSION, null));
+			Session session = (Session) getCFScope(pc, false, Scope.SCOPE_SESSION, null);
+			oldSessionDetachedCopy = createDetachedCopy(session);
+			if (session instanceof StorageScopePro) {
+				sessionTokens = ((StorageScopePro) session).getTokens();
+			}
 		}
 
 		if (hasSessionManagement) {
@@ -901,12 +912,18 @@ public final class ScopeContext {
 		pc.resetSession();
 		pc.resetClient();
 
-		if (migrateSessionData && oldSessionDetachedCopy != null) migrate(pc, oldSessionDetachedCopy, (UserScope) getCFScope(pc, true, Scope.SCOPE_SESSION, Boolean.FALSE));
-		if (migrateClientData && oldClientDetachedCopy != null) migrate(pc, oldClientDetachedCopy, (UserScope) getCFScope(pc, true, Scope.SCOPE_CLIENT, Boolean.FALSE));
+		if (migrateSessionData && oldSessionDetachedCopy != null)
+			migrate(pc, oldSessionDetachedCopy, sessionTokens, (UserScope) getCFScope(pc, true, Scope.SCOPE_SESSION, Boolean.FALSE));
+		if (migrateClientData && oldClientDetachedCopy != null)
+			migrate(pc, oldClientDetachedCopy, clientTokens, (UserScope) getCFScope(pc, true, Scope.SCOPE_CLIENT, Boolean.FALSE));
 
 	}
 
-	private static void migrate(PageContextImpl pc, Map<Key, Object> oldDetachedCopy, UserScope newScope) {
+	private static void migrate(PageContextImpl pc, Map<Key, Object> oldDetachedCopy, Map<Key, String> tokens, UserScope newScope) {
+		if (newScope instanceof StorageScopePro) {
+			((StorageScopePro) newScope).setTokens(tokens);
+		}
+
 		for (Entry<Key, Object> e: oldDetachedCopy.entrySet()) {
 			newScope.setEL(e.getKey(), e.getValue());
 		}
