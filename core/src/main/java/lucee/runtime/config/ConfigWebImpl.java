@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.osgi.framework.BundleException;
 import org.xml.sax.SAXException;
 
+import lucee.commons.digest.HashUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.ResourcesImpl.ResourceProviderFactory;
 import lucee.commons.lang.PhysicalClassLoader;
@@ -20,10 +21,12 @@ import lucee.runtime.ai.AIEnginePool;
 import lucee.runtime.config.gateway.GatewayMap;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.listener.JavaSettings;
+import lucee.runtime.op.Caster;
 import lucee.runtime.writer.CFMLWriter;
 
 public class ConfigWebImpl implements ConfigWebPro {
 	private ConfigWebInner instance;
+	private String id;
 
 	public ConfigWebImpl(ConfigWebInner instance) {
 		this.instance = instance;
@@ -1965,5 +1968,13 @@ public class ConfigWebImpl implements ConfigWebPro {
 	@Override
 	public CFMLEngine getEngine() {
 		return instance.getEngine();
+	}
+
+	@Override
+	public String getId() {
+		if (id == null) {
+			id = HashUtil.create64BitHashAsString(Caster.toString(getRootDirectory().getAbsolutePath()), Character.MAX_RADIX);
+		}
+		return id;
 	}
 }

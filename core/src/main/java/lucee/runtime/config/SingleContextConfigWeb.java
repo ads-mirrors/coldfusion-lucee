@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.osgi.framework.Version;
 
 import lucee.commons.collection.MapFactory;
+import lucee.commons.digest.HashUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.cache.Cache;
 import lucee.commons.io.log.Log;
@@ -123,6 +124,7 @@ class SingleContextConfigWeb extends ConfigBase implements ConfigWebInner {
 	private ComponentPathCache componentPathCache = new ComponentPathCache();
 	private lucee.runtime.rest.Mapping[] restMappings;
 	private Resource configDirWeb;
+	private String _id;
 
 	public SingleContextConfigWeb(CFMLFactoryImpl factory, ConfigServerImpl cs, ServletConfig config, Resource configDirWeb) {
 		this.factory = factory;
@@ -2143,5 +2145,13 @@ class SingleContextConfigWeb extends ConfigBase implements ConfigWebInner {
 	@Override
 	public CFMLEngine getEngine() {
 		return cs.getEngine();
+	}
+
+	@Override
+	public String getId() {
+		if (_id == null) {
+			_id = HashUtil.create64BitHashAsString(Caster.toString(getRootDirectory().getAbsolutePath()), Character.MAX_RADIX);
+		}
+		return _id;
 	}
 }

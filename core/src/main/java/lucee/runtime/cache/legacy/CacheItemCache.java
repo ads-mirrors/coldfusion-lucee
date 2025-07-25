@@ -31,6 +31,7 @@ import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.cache.util.CacheKeyFilterAll;
 import lucee.runtime.cache.util.WildCardFilter;
+import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.dt.TimeSpan;
@@ -39,19 +40,19 @@ public class CacheItemCache extends CacheItem {
 
 	private Cache cache;
 	private TimeSpan timespan;
-	private String lcFileName;
+	private String key;
 
 	public CacheItemCache(PageContext pc, HttpServletRequest req, String id, String key, boolean useId, Cache cache, TimeSpan timespan) {
 		super(pc, req, id, key, useId);
 		this.cache = cache;
 		this.timespan = timespan;
-		lcFileName = fileName;
+		key = fileName + ":" + ((ConfigWebPro) pc.getConfig()).getId();
 	}
 
 	@Override
 	public boolean isValid() {
 		try {
-			return cache.getValue(lcFileName) != null;
+			return cache.getValue(key) != null;
 		}
 		catch (IOException e) {
 			return false;
@@ -72,7 +73,7 @@ public class CacheItemCache extends CacheItem {
 	@Override
 	public String getValue() throws IOException {
 		try {
-			return Caster.toString(cache.getValue(lcFileName));
+			return Caster.toString(cache.getValue(key));
 		}
 		catch (PageException e) {
 			throw ExceptionUtil.toIOException(e);
@@ -81,7 +82,7 @@ public class CacheItemCache extends CacheItem {
 
 	@Override
 	public void store(String value) throws IOException {
-		cache.put(lcFileName, value, null, valueOf(timespan));
+		cache.put(key, value, null, valueOf(timespan));
 
 	}
 

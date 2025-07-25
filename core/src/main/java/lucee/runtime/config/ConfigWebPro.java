@@ -106,4 +106,6 @@ public interface ConfigWebPro extends ConfigWeb, ConfigPro {
 	public void setIdentification(IdentificationWeb id);
 
 	public void checkMappings();
+
+	public String getId();
 }

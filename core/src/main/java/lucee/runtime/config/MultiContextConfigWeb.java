@@ -29,6 +29,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import lucee.commons.digest.HashUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.ResourceProvider;
@@ -86,6 +87,7 @@ class MultiContextConfigWeb extends ConfigImpl implements ServletConfig, ConfigW
 
 	private final ConfigWebHelper helper;
 	private short passwordSource;
+	private String id;
 
 	// private File deployDirectory;
 
@@ -637,5 +639,13 @@ class MultiContextConfigWeb extends ConfigImpl implements ServletConfig, ConfigW
 	@Override
 	public CFMLEngine getEngine() {
 		return configServer.getEngine();
+	}
+
+	@Override
+	public String getId() {
+		if (id == null) {
+			id = HashUtil.create64BitHashAsString(Caster.toString(getRootDirectory().getAbsolutePath()), Character.MAX_RADIX);
+		}
+		return id;
 	}
 }
