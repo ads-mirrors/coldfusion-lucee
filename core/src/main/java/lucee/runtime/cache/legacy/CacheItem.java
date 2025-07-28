@@ -38,7 +38,8 @@ public abstract class CacheItem {
 		return getInstance(pc, id, key, useId, dir, cacheName, timespan, true);
 	}
 
-	public static CacheItem getInstance(PageContext pc, String id, String key, boolean useId, Resource dir, String cacheName, TimeSpan timespan, boolean useQueryString) throws IOException {
+	public static CacheItem getInstance(PageContext pc, String id, String key, boolean useId, Resource dir, String cacheName, TimeSpan timespan, boolean useQueryString)
+			throws IOException {
 		HttpServletRequest req = pc.getHttpServletRequest();
 		Cache cache = CacheUtil.getCache(pc, cacheName, Config.CACHE_TYPE_TEMPLATE, null);
 		if (cache != null) return new CacheItemCache(pc, req, id, key, useId, cache, timespan, useQueryString);

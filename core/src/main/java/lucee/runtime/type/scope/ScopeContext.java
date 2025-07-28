@@ -22,8 +22,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.servlet.http.HttpSession;
-
+import jakarta.servlet.http.HttpSession;
 import lucee.commons.collection.MapFactory;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;

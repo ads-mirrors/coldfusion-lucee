@@ -44,7 +44,6 @@ import lucee.commons.net.http.httpclient.HTTPEngine4Impl;
 import lucee.runtime.CFMLFactoryImpl;
 import lucee.runtime.Mapping;
 import lucee.runtime.config.ConfigAdmin;
-import lucee.runtime.config.ConfigImpl;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.ConfigServer;
 import lucee.runtime.config.ConfigWeb;
@@ -315,11 +314,10 @@ public final class Controler extends ParentThreasRefThread {
 			}
 			Stopwatch stopwatch = new Stopwatch(Stopwatch.UNIT_MILLI);
 			final ConfigWeb config = cfmlFactory.getConfig();
-			final boolean isSingle = ((ConfigPro) config).getAdminMode() == ConfigImpl.ADMINMODE_SINGLE;
 
 			// when we are in single mode, some service in ConfigWeb point to the same ConfigServer, so we only
 			// need to execute them once.
-			final boolean doit = !isSingle || index == 0;
+			final boolean doit = index == 0;
 
 			ThreadLocalConfig.register(config);
 
