@@ -20,7 +20,7 @@ import lucee.runtime.type.scope.ScopeContext;
 
 public final class IKHandlerCache implements IKHandler {
 
-	protected boolean storeEmpty = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.store.empty", null), true);
+	protected boolean storeEmpty = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.store.empty", null), false);
 
 	private static Map<String, Boolean> supportsSerialisation = new ConcurrentHashMap<>();
 	static {

@@ -35,7 +35,7 @@ public final class IKHandlerDatasource implements IKHandler {
 
 	public static final String PREFIX = "cf";
 
-	protected boolean storeEmpty = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.store.empty", null), true);
+	protected boolean storeEmpty = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.store.empty", null), false);
 
 	@Override
 	public IKStorageValue loadData(PageContext pc, String appName, String name, String strType, int type, Log log) throws PageException {
