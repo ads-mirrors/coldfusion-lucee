@@ -2,7 +2,6 @@
 	// firstly, check are we even deploying to s3
 	DO_DEPLOY = server.system.environment.DO_DEPLOY ?: false;
 
-	
 	_logger( "" );
 	_logger( " #### Publish Builds to S3" );
 
@@ -37,6 +36,12 @@
 	src.coreName = listLast( src.core,"\/" );
 	src.version = mid( src.coreName,1,len( src.coreName )-4 );
 
+	src.mvnJarName = "lucee-"&src.version&".jar";
+	src.mvnJarLightName = "lucee-"&src.version&"-light.jar";
+	src.mvnJarZeroName = "lucee-"&src.version&"-zero.jar";
+	src.mvnLCOName = "lucee-"&src.version&".lco";
+	src.mvnMetadataName = "maven-metadata.xml";
+	// lucee-6.2.2.78-SNAPSHOT.jar
 	if ( ! FileExists( src.jar ) || ! FileExists( src.core ) ){
 		_logger( src.jar & " exists: " & FileExists( src.jar ) );
 		_logger( src.core & " exists: " & FileExists( src.core ) );
@@ -49,22 +54,29 @@
 	if ( DO_DEPLOY ) {
 		s3_bucket = "lucee-downloads";
 		trg.dir = "s3://#server.system.environment.S3_ACCESS_ID_DOWNLOAD#:#server.system.environment.S3_SECRET_KEY_DOWNLOAD#@/#s3_bucket#/";
+		trg.mvnRootDir = trg.dir & "org/lucee/lucee/";
+		trg.mvnDir = trg.dir & "org/lucee/lucee/#src.version#/";
+		trg.mvnDirRel =  "org/lucee/lucee/#src.version#/";
+		
 		trg.jar = trg.dir & src.jarName;
 		trg.core = trg.dir & src.coreName;
 
-		
 		_logger( "Testing S3 Bucket Access" );
 		// it usually will throw an error, rather than even reach this throw, if it fails
-		if (!s3exists( bucketName:s3_bucket, accessKeyId:server.system.environment.S3_ACCESS_ID_DOWNLOAD, secretAccessKey:server.system.environment.S3_SECRET_KEY_DOWNLOAD) &&
-		! DirectoryExists( trg.dir ) )
+		if (! DirectoryExists( trg.dir ) ) {
 			_logger( "DirectoryExists failed for s3 bucket [#s3_bucket#]", true );
-	} else {
+		}
+		else {
+			_logger( "S3 Bucket Access OK: [#s3_bucket#]" );
+		}
+	} 
+	else {
 		_logger( "Not publishing to S3 as DO_DEPLOY is false, only building Light and Zero" );
 	}
 
 	// we only upload / publish artifacts once LDEV-3921
 	buildExistsOnS3 = false;
-	if ( DO_DEPLOY && fileExists( trg.jar ) && fileExists( trg.core ) ){
+	if ( DO_DEPLOY && fileExists( trg.jar ) && fileExists( trg.core ) && fileExists( trg.mvnDir & src.mvnJarName ) ){
 		_logger( "Build artifacts have already been uploaded to s3 for this version" );
 		buildExistsOnS3 = true;
 	}
@@ -72,8 +84,12 @@
 	if ( DO_DEPLOY && !buildExistsOnS3 ){
 		// copy jar
 		publishToS3( src.jar, trg.jar, "Publish [#src.jar#] to S3: ");
+		publishToS3( src.jar, trg.mvnDir & src.mvnJarName, "Publish [#src.jar#] to [#trg.mvnDirRel & src.mvnJarName#] on S3: ");
+
+
 		// copy core
 		publishToS3( src.core, trg.core, "Publish [#src.core#] to S3: ");
+		publishToS3( src.core, trg.mvnDir & src.mvnLCOName, "Publish [#src.core#] to [#trg.mvnDirRel & src.mvnLCOName#] on S3: ");
 	}
 
 	// Lucee light build (no extensions)
@@ -93,6 +109,7 @@
 	if ( DO_DEPLOY && !buildExistsOnS3 ){
 		trg.light = trg.dir & src.lightName;
 		publishToS3( src.light, trg.light, "Publish Light build to s3: ");
+		publishToS3( src.light, trg.mvnDir & src.mvnJarLightName, "Publish [#src.light#] to [#trg.mvnDirRel & src.mvnJarLightName#] on S3: ");
 	}
 
 	// Lucee zero build, built from light but also no admin or docs
@@ -113,6 +130,12 @@
 	if ( DO_DEPLOY && !buildExistsOnS3 ) {
 		trg.zero = trg.dir & src.zeroName;
 		publishToS3( src.zero, trg.zero, "Publish Zero build to s3: " );
+		publishToS3( src.zero, trg.mvnDir & src.mvnJarZeroName, "Publish [#src.zero#] to [#trg.mvnDirRel & src.mvnJarZeroName#] on S3");
+	}
+
+	// metadata
+	if ( DO_DEPLOY) {
+		publishMetadataToS3( src.version ,trg.mvnDir & src.mvnMetadataName ,trg.mvnRootDir& src.mvnMetadataName,"Publish Metadata to S3: ");
 	}
 
 	if ( !DO_DEPLOY ){
@@ -269,6 +292,154 @@
 			_logger( mess & " SUCCESS");
 		}
 	}
+
+	private function publishMetadataToS3( version,trg, mvnRootMetadata, mess ){
+		var dateStr = dateTimeFormat( now(), "yyyyMMddHHnnss" );
+
+
+		var src='<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>org.lucee</groupId>
+  <artifactId>lucee</artifactId>
+  <version>#arguments.version#</version>
+  <versioning>
+    <lastUpdated>#dateStr#</lastUpdated>
+    <snapshotVersions>
+      <snapshotVersion>
+        <extension>jar</extension>
+        <value>#arguments.version#</value>
+        <updated>#dateStr#</updated>
+      </snapshotVersion>
+      <snapshotVersion>
+        <classifier>light</classifier>
+        <extension>jar</extension>
+        <value>#arguments.version#</value>
+        <updated>#dateStr#</updated>
+      </snapshotVersion>
+      <snapshotVersion>
+        <classifier>zero</classifier>
+        <extension>jar</extension>
+        <value>#arguments.version#</value>
+        <updated>#dateStr#</updated>
+      </snapshotVersion>
+      <snapshotVersion>
+        <extension>lco</extension>
+        <value>#arguments.version#</value>
+        <updated>#dateStr#</updated>
+      </snapshotVersion>
+    </snapshotVersions>
+  </versioning>
+</metadata>';
+		var doIt=true;
+		if ( fileExists( trg ) ) {
+			try {
+				fileDelete( trg );
+			}
+			catch(e){
+				_logger( message=mess & " file deleted failed" );
+				doIt=false;
+			}
+		}
+		if( doIt ){
+			try {
+				fileWrite( trg, src );
+				_logger( "Publish Metadata to S3: " & trg );
+			} catch (e){
+				// censored error message due to s3 creds!
+				 _logger( message=mess & " file writing failed", throw=true );
+			}
+		}
+
+
+		// root
+				var srcRoot='<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>org.lucee</groupId>
+  <artifactId>lucee</artifactId>
+  <versioning>
+    <latest>#arguments.version#</latest>
+    <release>#findNoCase("-SNAPSHOT", arguments.version) ? "" : arguments.version#</release>
+    <versions>
+      <version>#arguments.version#</version>
+    </versions>
+    <lastUpdated>#dateStr#</lastUpdated>
+  </versioning>
+</metadata>';
+
+		var doIt=true;
+		// update
+		if ( fileExists( mvnRootMetadata ) ) {
+			try {
+				var existing=fileRead( mvnRootMetadata );
+				existing=updateMetadata(version, existing);
+				fileWrite( mvnRootMetadata, existing );
+			}
+			catch(e){
+				_logger( message=mess & " file updating failed" );
+				doIt=false;
+			}
+		}
+		// insert
+		else {
+			try {
+				fileWrite( mvnRootMetadata, srcRoot );
+				_logger( "Publish Metadata root data to S3: " & mvnRootMetadata );
+			} catch (e){
+				// censored error message due to s3 creds!
+				 _logger( message=mess & " file writing failed", throw=true );
+			}
+		}
+
+
+
+	}
+
+private function updateMetadata(version, existing) {
+	if(find("<version>#version#</version>",existing)) return existing;
+    
+    var dateStr = dateTimeFormat( now(), "yyyyMMddHHnnss" );
+    
+    
+    // lastUpdated
+    var start=find("<lastUpdated>",existing);
+    if(start==0) throw "invalid input:#existing#";
+    var end=find("</lastUpdated>",existing,start+1);
+    if(end==0) throw "invalid input:#existing#";
+    existing=mid(existing,1,start+12)&dateStr&mid(existing,end);
+    
+    
+    // latest
+    var start=find("<latest>",existing);
+    if(start==0) throw "invalid input:#existing#";
+    var end=find("</latest>",existing,start+1);
+    if(end==0) throw "invalid input:#existing#";
+    existing=mid(existing,1,start+7)&arguments.version&mid(existing,end);
+    
+    // release
+    if(!findNoCase("-SNAPSHOT",arguments.version)) {
+        var start=find("<release>",existing);
+        if(start==0) throw "invalid input:#existing#";
+        var end=find("</release>",existing,start+1);
+        if(end==0) throw "invalid input:#existing#";
+        existing=mid(existing,1,start+8)&arguments.version&mid(existing,end);
+    }
+    
+    // add version
+    var start=findLast("</version>",existing);
+    if(start==0) throw "invalid input:#existing#";
+    var end=find("</versions>",existing,start+1);
+    if(end==0) throw "invalid input:#existing#";
+    
+    existing=mid(existing,1,start+9)
+        &"
+        <version>#arguments.version#</version>
+"
+        &mid(existing,end);
+    
+    return existing;
+}
+
+
 
 
 	// not used
