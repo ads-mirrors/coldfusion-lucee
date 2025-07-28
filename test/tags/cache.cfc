@@ -6,14 +6,14 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 			function beforeEach(){
 				cfcache( action="flush" );
 			}
-			// Note - Lucee defaults to useQueryString true, CF since 9 to false
+			// Note - Lucee before 7, defaults to useQueryString true, CF since 9 to false
 
 			it(title="checking cfcache - default", body = function( currentSpec ) {
 				var result=_test( "simple", "one=1" );
 				expect( result.filecontent ).toInclude( "one=1" );
 
 				result=_test( "simple", "one=2");
-				expect( result.filecontent ).toInclude( "one=2" ); // not cached
+				expect( result.filecontent ).toInclude( "one=1" ); // still cached, query string ignored
 			});
 
 		});

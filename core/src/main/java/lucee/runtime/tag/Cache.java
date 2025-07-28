@@ -110,7 +110,7 @@ public final class Cache extends BodyTagImpl {
 	private Object value;
 	private boolean throwOnError;
 	private String metadata;
-	private boolean useQueryString = true;
+	private boolean useQueryString = false;
 	private boolean useCache = true;
 	private boolean stripWhiteSpace = false;
 	private String dependsOn;
@@ -148,7 +148,7 @@ public final class Cache extends BodyTagImpl {
 		throwOnError = false;
 		value = null;
 		metadata = null;
-		useQueryString = true;
+		useQueryString = false;
 		useCache = true;
 		stripWhiteSpace = false;
 		dependsOn = null;

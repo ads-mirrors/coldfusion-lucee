@@ -348,7 +348,7 @@ A return value from the CreateTimeSpan function, for example, "#CreateTimeSpan(0
 			<name>useQueryString</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Whether to consider the query_string when caching</description>
+			<description>Whether to consider the query_string when caching, default is FALSE with Lucee 7, before this was added, it was always effectively TRUE</description>
 		</attribute>
 		<attribute>
 			<type>boolean</type>
@@ -356,7 +356,7 @@ A return value from the CreateTimeSpan function, for example, "#CreateTimeSpan(0
 			<introduced>7.0.0.300</introduced>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Whether to use the cache, default is true. When false the cache is still updated.</description>
+			<description>Whether to use the cache, default is TRUE. When FALSE the cache ignored and still updated.</description>
 		</attribute>
 		<attribute>
 			<type>boolean</type>
@@ -364,7 +364,7 @@ A return value from the CreateTimeSpan function, for example, "#CreateTimeSpan(0
 			<introduced>7.0.0.300</introduced>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Whether to strip stripWhiteSpace, default is false. currently only trims</description>
+			<description>Whether to strip stripWhiteSpace, default is FALSE. currently only trims</description>
 		</attribute>
 		<attribute>
 			<type>string</type>
