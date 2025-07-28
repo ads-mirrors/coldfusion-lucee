@@ -660,7 +660,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 						}
 					}
 					if (b != null) limitEvaluation = b;
-					else limitEvaluation = Boolean.TRUE;
+					else limitEvaluation = Boolean.FALSE;
 
 				}
 			}
