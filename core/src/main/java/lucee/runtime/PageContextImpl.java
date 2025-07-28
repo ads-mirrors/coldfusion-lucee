@@ -726,6 +726,7 @@ public final class PageContextImpl extends PageContext {
 
 		// Properties
 		requestTimeout = -1;
+		enablecfoutputonly = 0;
 		outputState = 0;
 		cfid = null;
 		cftoken = null;
@@ -750,6 +751,7 @@ public final class PageContextImpl extends PageContext {
 		if (!hasFamily) {
 			pathList.clear();
 			includePathList.clear();
+			udfs.clear();
 		}
 		executionTime = 0;
 
@@ -775,6 +777,9 @@ public final class PageContextImpl extends PageContext {
 
 		activeComponent = null;
 		activeUDF = null;
+		activeUDFCalledName = null;
+		if (!activeQueries.isEmpty()) activeQueries.clear();
+		if (!activeLocks.isEmpty()) activeLocks.clear();
 
 		gatewayContext = false;
 		listenerContext = false;
