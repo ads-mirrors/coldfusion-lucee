@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="" basedir=".." name="Lucee">
+
+    <target name="ide-intellij" description="Adds IDE support for IntelliJ IDEA">
+
+        <property name="project.dir" value="${basedir}" />
+        <echo level="info" message="Project dir: ${project.dir}" />
+
+        <property name="ide.dir" value="${project.dir}/ant/res/ide-support/intellij-idea" />        
+        <echo level="info" message="Source dir : ${ide.dir}" />
+
+        <copy todir="${project.dir}" overwrite="true">
+            <fileset dir="${ide.dir}" />
+        </copy>
+
+        <property name="lib.dir" value="${project.dir}/dev/lib" />        
+        <echo level="info" message="Lib dir    : ${lib.dir}" />
+
+        <property name="loader.pom" value="${project.dir}/loader/pom.xml" />        
+        <echo level="info" message="Loader POM : ${loader.pom}" />
+
+        <exec executable="mvn">
+            <arg value="-f" />
+            <arg value="${loader.pom}" />
+            <arg value="dependency:copy-dependencies" />
+            <arg value="-DoutputDirectory=../dev/lib" />
+        </exec>
+
+    </target>
+</project>
