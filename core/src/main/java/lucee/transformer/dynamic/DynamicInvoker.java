@@ -400,7 +400,6 @@ public final class DynamicInvoker {
 			}
 		}
 		for (Resource directory: set) {
-			set.add(directory);
 			if (ResourceUtil.deleteFileOlderThan(directory, System.currentTimeMillis() - MAX_AGE, null)) {
 				try {
 					ResourceUtil.deleteEmptyFolders(directory);
