@@ -720,7 +720,7 @@ public final class PageContextImpl extends PageContext {
 		}
 		argument.release(this);
 		local = localUnsupportedScope;
-		
+
 		application = null;// not needed at the moment -> application.releaseAfterRequest();
 		applicationContext = null;// do not release may used by child threads
 
@@ -1768,7 +1768,7 @@ public final class PageContextImpl extends PageContext {
 				throw new ExpressionException("there is no client context defined for this application", hintAplication("you can define a client context"));
 			if (!getApplicationContext().isSetClientManagement()) throw new ExpressionException("client scope is not enabled", hintAplication("you can enable client scope"));
 
-			client = scopeContext.getClientScope(this, true);
+			client = scopeContext.getClientScope(this, true, null);
 		}
 		return client;
 	}
@@ -1780,7 +1780,7 @@ public final class PageContextImpl extends PageContext {
 			if (!getApplicationContext().isSetClientManagement()) return null;
 
 			try {
-				return client = scopeContext.getClientScope(this, true);
+				return client = scopeContext.getClientScope(this, true, null);
 			}
 			catch (PageException pe) {
 				throw new PageRuntimeException(pe);

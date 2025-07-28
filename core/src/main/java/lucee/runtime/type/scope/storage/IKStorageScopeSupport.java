@@ -59,7 +59,7 @@ import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.StructSupport;
 import lucee.runtime.type.util.StructUtil;
 
-public abstract class IKStorageScopeSupport extends StructSupport implements StorageScopePro, CSRFTokenSupport {
+public abstract class IKStorageScopeSupport extends StructSupport implements StorageScope, CSRFTokenSupport {
 
 	protected static final IKStorageScopeItem ONE = new IKStorageScopeItem("1");
 
@@ -135,7 +135,7 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 		this.timeSpan = timeSpan;
 	}
 
-	public static Scope getInstance(int scope, IKHandler handler, String appName, String name, PageContext pc, Scope existing, boolean createIfNeeded, Log log)
+	public static Scope getInstance(int scope, IKHandler handler, String appName, String name, PageContext pc, Scope existing, boolean createIfNeeded, Boolean storeEmpty, Log log)
 			throws PageException {
 		IKStorageValue sv = null;
 		if (Scope.SCOPE_SESSION == scope) sv = handler.loadData(pc, appName, name, "session", Scope.SCOPE_SESSION, log);
@@ -168,7 +168,7 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 		if (Scope.SCOPE_SESSION == scope) rtn = new IKStorageScopeSession(pc, handler, appName, name, map, 0, getSessionTimeout(pc));
 		else if (Scope.SCOPE_CLIENT == scope) rtn = new IKStorageScopeClient(pc, handler, appName, name, map, 0, getClientTimeout(pc));
 
-		rtn.store(pc);
+		rtn.store(pc, storeEmpty);
 		return rtn;
 	}
 
@@ -276,7 +276,7 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 		if (ac != null && (this.tokens == null || this.tokens.isEmpty()) && ac.getSessionCluster() && isSessionStorage(pc)) {
 			data0.remove(KeyConstants._csrf_token);
 		}
-		store(pc);
+		store(pc, null);
 	}
 
 	@Override
@@ -447,17 +447,23 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 		return size;
 	}
 
-	public void store(PageContext pc) { // FUTURE add to interface
-		handler.store(this, pc, appName, name, data0, strType, type, ThreadLocalPageContext.getLog(pc, "scope"));
+	public void store(PageContext pc, Boolean storeEmpty) { // FUTURE add to interface
+		handler.store(this, pc, appName, name, data0, strType, type, storeEmpty, ThreadLocalPageContext.getLog(pc, "scope"));
 	}
 
+	@Override
+	public void store(PageContext pc) {
+		handler.store(this, pc, appName, name, data0, strType, type, null, ThreadLocalPageContext.getLog(pc, "scope"));
+	}
+
+	@Override
 	public void unstore(PageContext pc) {
 		handler.unstore(this, pc, appName, name, strType, type, ThreadLocalPageContext.getLog(pc, "scope"));
 	}
 
 	@Override
 	public void store(Config config) {
-		store(ThreadLocalPageContext.get());
+		store(ThreadLocalPageContext.get(), null);
 	}
 
 	@Override

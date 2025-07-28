@@ -35,7 +35,7 @@ public final class IKHandlerDatasource implements IKHandler {
 
 	public static final String PREFIX = "cf";
 
-	protected boolean storeEmpty = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.store.empty", null), false);
+	protected static boolean storeEmpty = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.store.empty", null), true);
 
 	@Override
 	public IKStorageValue loadData(PageContext pc, String appName, String name, String strType, int type, Log log) throws PageException {
@@ -119,7 +119,9 @@ public final class IKHandlerDatasource implements IKHandler {
 	}
 
 	@Override
-	public void store(IKStorageScopeSupport storageScope, PageContext pc, String appName, final String name, Map<Key, IKStorageScopeItem> data, String strType, int type, Log log) {
+	public void store(IKStorageScopeSupport storageScope, PageContext pc, String appName, final String name, Map<Key, IKStorageScopeItem> data, String strType, int type,
+			Boolean storeEmpty, Log log) {
+		if (storeEmpty == null) storeEmpty = IKHandlerCache.storeEmpty;
 		DatasourceConnection dc = null;
 		ConfigPro ci = (ConfigPro) ThreadLocalPageContext.getConfig(pc);
 		try {
