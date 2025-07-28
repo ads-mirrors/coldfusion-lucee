@@ -26,6 +26,7 @@ import java.util.Set;
 
 import lucee.commons.collection.MapFactory;
 import lucee.commons.io.log.Log;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.cache.CacheUtil;
@@ -58,7 +59,7 @@ import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.StructSupport;
 import lucee.runtime.type.util.StructUtil;
 
-public abstract class IKStorageScopeSupport extends StructSupport implements StorageScope, CSRFTokenSupport {
+public abstract class IKStorageScopeSupport extends StructSupport implements StorageScopePro, CSRFTokenSupport {
 
 	protected static final IKStorageScopeItem ONE = new IKStorageScopeItem("1");
 
@@ -446,14 +447,12 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 		return size;
 	}
 
-	@Override
-	public void store(PageContext pc) {
-		handler.store(this, pc, appName, name, data0, ThreadLocalPageContext.getLog(pc, "scope"));
+	public void store(PageContext pc) { // FUTURE add to interface
+		handler.store(this, pc, appName, name, data0, strType, type, ThreadLocalPageContext.getLog(pc, "scope"));
 	}
 
-	@Override
 	public void unstore(PageContext pc) {
-		handler.unstore(this, pc, appName, name, ThreadLocalPageContext.getLog(pc, "scope"));
+		handler.unstore(this, pc, appName, name, strType, type, ThreadLocalPageContext.getLog(pc, "scope"));
 	}
 
 	@Override
@@ -617,29 +616,58 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 		}
 	};
 
-	public static void merge(Map<Key, IKStorageScopeItem> local, Map<Key, IKStorageScopeItem> storage) {
+	public static void merge(Map<Key, IKStorageScopeItem> local, Map<Key, IKStorageScopeItem> storage, Log log, int type) {
 		Iterator<Entry<Key, IKStorageScopeItem>> it = local.entrySet().iterator();
 		Entry<Key, IKStorageScopeItem> e;
 		IKStorageScopeItem storageItem;
+
 		while (it.hasNext()) {
 			e = it.next();
-
 			storageItem = storage.get(e.getKey());
+
 			// this entry not exist in the storage
 			if (storageItem == null) {
-				if (!e.getValue().removed()) storage.put(e.getKey(), e.getValue());
+				if (!e.getValue().removed()) {
+					storage.put(e.getKey(), e.getValue());
+					if (LogUtil.doesInfo(log)) {
+						ScopeContext.info(log, "the " + (type == Scope.SCOPE_SESSION ? "session" : "client") + " scope key [" + e.getKey().getString()
+								+ "] does not exist in storage, adding it with timestamp " + e.getValue().lastModified() + ".");
+					}
+				}
+				else {
+					if (LogUtil.doesInfo(log)) {
+						ScopeContext.info(log, "the " + (type == Scope.SCOPE_SESSION ? "session" : "client") + " scope key [" + e.getKey().getString()
+								+ "] is marked for removal and does not exist in storage, ignoring.");
+					}
+				}
 			}
 			// local is newer than storage
 			else if (e.getValue().lastModified() > storageItem.lastModified()) {
-				if (e.getValue().removed()) storage.remove(e.getKey());
+				if (e.getValue().removed()) {
+					storage.remove(e.getKey());
+					if (LogUtil.doesInfo(log)) {
+						ScopeContext.info(log, "the " + (type == Scope.SCOPE_SESSION ? "session" : "client") + " scope key [" + e.getKey().getString() + "] is newer in local (ts="
+								+ e.getValue().lastModified() + ") than storage (ts=" + storageItem.lastModified() + ") and marked for removal, removing from storage.");
+					}
+				}
 				else {
 					storage.put(e.getKey(), e.getValue());
+					if (LogUtil.doesInfo(log)) {
+						ScopeContext.info(log, "the " + (type == Scope.SCOPE_SESSION ? "session" : "client") + " scope key [" + e.getKey().getString() + "] is newer in local (ts="
+								+ e.getValue().lastModified() + ") than storage (ts=" + storageItem.lastModified() + "), updating storage with new value.");
+					}
 				}
 			}
-			// local is older than storage is ignored?
-
+			// local is older than storage is ignored
+			else {
+				if (LogUtil.doesInfo(log)) {
+					ScopeContext.info(log,
+							"the " + (type == Scope.SCOPE_SESSION ? "session" : "client") + " scope key [" + e.getKey().getString() + "] is older in local (ts="
+									+ e.getValue().lastModified() + ") than storage (ts=" + storageItem.lastModified() + "), keeping storage value"
+									+ (e.getValue().removed() ? " (local was marked for removal but storage is newer)" : "") + ".");
+				}
+			}
 		}
-
 	}
 
 	public static Map<Key, IKStorageScopeItem> cleanRemoved(Map<Key, IKStorageScopeItem> local) {
@@ -652,18 +680,27 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 		return local;
 	}
 
-	public static Map<Key, IKStorageScopeItem> prepareToStore(Map<Key, IKStorageScopeItem> local, Object oStorage, long lastModified) throws PageException {
+	public static Map<Key, IKStorageScopeItem> prepareToStore(Map<Key, IKStorageScopeItem> local, Object oStorage, long lastModified, Log log, int type) throws PageException {
 		// cached data changed in meantime
 		if (oStorage instanceof IKStorageValue) {
 			IKStorageValue storage = (IKStorageValue) oStorage;
 			if (storage.lastModified() > lastModified) {
+
+				if (LogUtil.doesInfo(log)) {
+					ScopeContext.info(log, "the " + (type == Scope.SCOPE_SESSION ? "session" : "client")
+							+ " scope in the storage is never than the one we loaded at the beginning of the request and modified, so we have to merge them.");
+				}
 				Map<Key, IKStorageScopeItem> trg = storage.getValue();
-				IKStorageScopeSupport.merge(local, trg);
+				IKStorageScopeSupport.merge(local, trg, log, type);
 				return trg;
 			}
 			else {
-				return IKStorageScopeSupport.cleanRemoved(local);
+				if (LogUtil.doesInfo(log)) {
+					ScopeContext.info(log, "the " + (type == Scope.SCOPE_SESSION ? "session" : "client")
+							+ " scope in the storage is still the same, so we only need to remove keys marked for removal and store it.");
+				}
 
+				return IKStorageScopeSupport.cleanRemoved(local);
 			}
 		}
 		else if (oStorage instanceof byte[][]) {
@@ -671,16 +708,25 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 			if (IKStorageValue.toLong(barrr[1]) > lastModified) {
 				if (barrr[0] == null || barrr[0].length == 0) return local;
 				Map<Key, IKStorageScopeItem> trg = IKStorageValue.deserialize(barrr[0]);
-				IKStorageScopeSupport.merge(local, trg);
+
+				if (LogUtil.doesInfo(log)) {
+					ScopeContext.info(log, "the " + (type == Scope.SCOPE_SESSION ? "session" : "client")
+							+ " scope in the storage is never than the one we loaded at the beginning of the request and modified, so we have to merge them.");
+				}
+
+				IKStorageScopeSupport.merge(local, trg, log, type);
 				return trg;
 			}
 			else {
+				if (LogUtil.doesInfo(log)) {
+					ScopeContext.info(log, "the " + (type == Scope.SCOPE_SESSION ? "session" : "client")
+							+ " scope in the storage is still the same, so we only need to remove keys marked for removal and store it.");
+				}
 				return IKStorageScopeSupport.cleanRemoved(local);
 
 			}
 		}
 		return local;
-
 	}
 
 	@Override

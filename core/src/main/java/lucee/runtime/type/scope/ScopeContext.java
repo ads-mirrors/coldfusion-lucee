@@ -120,23 +120,19 @@ public final class ScopeContext {
 	}
 
 	public static void debug(Log log, String msg) {
-		if (log != null) log.log(Log.LEVEL_DEBUG, "scope-context", msg);
-		else LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_DEBUG, "scope", msg);
+		if (LogUtil.doesDebug(log)) log.log(Log.LEVEL_DEBUG, "scope-context", msg + "; " + ExceptionUtil.getTagContextLine(null));
 	}
 
 	public static void info(Log log, String msg) {
-		if (log != null) log.log(Log.LEVEL_INFO, "scope-context", msg);
-		else LogUtil.log(ThreadLocalPageContext.get(), Log.LEVEL_INFO, "scope", "scope-context", msg);
+		if (LogUtil.doesInfo(log)) log.log(Log.LEVEL_INFO, "scope-context", msg + "; " + ExceptionUtil.getTagContextLine(null));
 	}
 
 	public static void error(Log log, String msg) {
-		if (log != null) log.log(Log.LEVEL_ERROR, "scope-context", msg);
-		else LogUtil.log(ThreadLocalPageContext.get(), Log.LEVEL_ERROR, "scope", "scope-context", msg);
+		if (LogUtil.doesError(log)) log.log(Log.LEVEL_ERROR, "scope-context", msg + "; " + ExceptionUtil.getTagContextLine(null));
 	}
 
 	public static void error(Log log, Throwable t) {
-		if (log != null) log.log(Log.LEVEL_ERROR, "scope-context", ExceptionUtil.getStacktrace(t, true));
-		else LogUtil.log(ThreadLocalPageContext.get(), "scope", "scope-context", t);
+		if (LogUtil.doesError(log)) log.log(Log.LEVEL_ERROR, "scope-context", t);
 	}
 
 	/**
@@ -624,20 +620,19 @@ public final class ScopeContext {
 	public void clearUnused() {
 		clearUnused(false);
 	}
+
 	public void clearUnused(boolean force) {
 		Log log = getLog();
 		try {
 			// create cleaner engine for session/client scope
-			if (session == null) session = new StorageScopeEngine(factory, log, new StorageScopeCleaner[] {
-					new FileStorageScopeCleaner(Scope.SCOPE_SESSION, null)// new
+			if (session == null) session = new StorageScopeEngine(factory, log, new StorageScopeCleaner[] { new FileStorageScopeCleaner(Scope.SCOPE_SESSION, null)// new
 					// SessionEndListener())
 					, new DatasourceStorageScopeCleaner(Scope.SCOPE_SESSION, null)// new
 					// SessionEndListener())
 					// ,new CacheStorageScopeCleaner(Scope.SCOPE_SESSION, new SessionEndListener())
 			});
 			if (client == null) client = new StorageScopeEngine(factory, log,
-					new StorageScopeCleaner[] { new FileStorageScopeCleaner(Scope.SCOPE_CLIENT, null),
-					new DatasourceStorageScopeCleaner(Scope.SCOPE_CLIENT, null)
+					new StorageScopeCleaner[] { new FileStorageScopeCleaner(Scope.SCOPE_CLIENT, null), new DatasourceStorageScopeCleaner(Scope.SCOPE_CLIENT, null)
 					// ,new CacheStorageScopeCleaner(Scope.SCOPE_CLIENT, null) //Cache storage need no control, if
 					// there is no listener
 					});

@@ -52,7 +52,8 @@ public final class IKHandlerCache implements IKHandler {
 	}
 
 	@Override
-	public void store(IKStorageScopeSupport storageScope, PageContext pc, String appName, String name, Map<Collection.Key, IKStorageScopeItem> data, Log log) {
+	public void store(IKStorageScopeSupport storageScope, PageContext pc, String appName, String name, Map<Collection.Key, IKStorageScopeItem> data, String strType, int type,
+			Log log) {
 		try {
 			Cache cache = getCache(ThreadLocalPageContext.get(pc), name);
 			String key = getKey(pc.getCFID(), appName, storageScope.getTypeAsString());
@@ -62,8 +63,9 @@ public final class IKHandlerCache implements IKHandler {
 
 				if (storeEmpty || storageScope.hasContent()) {
 					cache.put(key,
-							deserializeIKStorageValueSupported(cache) ? new IKStorageValue(IKStorageScopeSupport.prepareToStore(data, existingVal, storageScope.lastModified()))
-									: IKStorageValue.toByteRepresentation(IKStorageScopeSupport.prepareToStore(data, existingVal, storageScope.lastModified())),
+							deserializeIKStorageValueSupported(cache)
+									? new IKStorageValue(IKStorageScopeSupport.prepareToStore(data, existingVal, storageScope.lastModified(), log, type))
+									: IKStorageValue.toByteRepresentation(IKStorageScopeSupport.prepareToStore(data, existingVal, storageScope.lastModified(), log, type)),
 							Long.valueOf(storageScope.getTimeSpan()), null);
 				}
 				else if (existingVal != null) {
@@ -96,7 +98,7 @@ public final class IKHandlerCache implements IKHandler {
 	}
 
 	@Override
-	public void unstore(IKStorageScopeSupport storageScope, PageContext pc, String appName, String name, Log log) {
+	public void unstore(IKStorageScopeSupport storageScope, PageContext pc, String appName, String name, String strType, int type, Log log) {
 		try {
 			Cache cache = getCache(pc, name);
 			String key = getKey(pc.getCFID(), appName, storageScope.getTypeAsString());
