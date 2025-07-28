@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.PropertyResourceBundle;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -64,6 +65,7 @@ import lucee.transformer.dynamic.meta.dynamic.ClazzDynamic;
 
 public class DynamicInvoker {
 
+	private static final long MAX_AGE = 30 * 60 * 60 * 1000;
 	private static DynamicInvoker engine;
 	private Map<Integer, DynamicClassLoader> loaders = new ConcurrentHashMap<>();
 	private Resource root;
@@ -392,8 +394,22 @@ public class DynamicInvoker {
 	}
 
 	public void cleanup() {
+		Set<Resource> list = new java.util.HashSet<>();
 		for (DynamicClassLoader cl: loaders.values()) {
-			cl.cleanup();
+			Resource directory = cl.getRootDirectory();
+			if (!list.contains(directory) && directory.isDirectory()) {
+				list.add(directory);
+			}
+		}
+		for (Resource directory: list) {
+			list.add(directory);
+			if (ResourceUtil.deleteFileOlderThan(directory, System.currentTimeMillis() - MAX_AGE, null)) {
+				try {
+					ResourceUtil.deleteEmptyFolders(directory);
+				}
+				catch (IOException e) {
+				}
+			}
 		}
 	}
 
@@ -444,7 +460,7 @@ public class DynamicInvoker {
 		}
 	}
 
-	public static void main(String[] argsw) throws Throwable {
+	public static void mainw(String[] argsw) throws Throwable {
 		System.setProperty("lucee.allow.reflection", "true");
 		Resource classes = ResourcesImpl.getFileResourceProvider().getResource("/Users/mic/tmp8/classes/");
 		ResourceUtil.deleteContent(classes, null);
