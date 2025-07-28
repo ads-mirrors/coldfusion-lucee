@@ -52,6 +52,7 @@ import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.scope.client.ClientCookie;
 import lucee.runtime.type.scope.client.ClientFile;
 import lucee.runtime.type.scope.client.ClientMemory;
 import lucee.runtime.type.scope.session.SessionFile;
@@ -242,6 +243,7 @@ public final class ScopeContext {
 						if (isSession) {
 							throw new ApplicationException("sessionStorage cookie is no longer supported");
 						}
+						else scope = ClientCookie.getInstance(appContext.getName(), pc, createIfNeeded, getLog());
 					}
 
 					// cache/datasource
