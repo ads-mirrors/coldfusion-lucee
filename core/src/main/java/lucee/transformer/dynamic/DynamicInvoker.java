@@ -443,7 +443,7 @@ public final class DynamicInvoker {
 	}
 
 	public static void main(String[] argsw) throws Throwable {
-		System.setProperty("lucee.allow.reflection", "false");
+		System.setProperty("lucee.allow.reflection", "true");
 		Resource classes = ResourcesImpl.getFileResourceProvider().getResource("/Users/mic/tmp8/classes/");
 		ResourceUtil.deleteContent(classes, null);
 
