@@ -394,15 +394,15 @@ public class DynamicInvoker {
 	}
 
 	public void cleanup() {
-		Set<Resource> list = new java.util.HashSet<>();
+		Set<Resource> set = new java.util.HashSet<>();
 		for (DynamicClassLoader cl: loaders.values()) {
 			Resource directory = cl.getRootDirectory();
-			if (!list.contains(directory) && directory.isDirectory()) {
-				list.add(directory);
+			if (!set.contains(directory) && directory.isDirectory()) {
+				set.add(directory);
 			}
 		}
-		for (Resource directory: list) {
-			list.add(directory);
+		for (Resource directory: set) {
+			set.add(directory);
 			if (ResourceUtil.deleteFileOlderThan(directory, System.currentTimeMillis() - MAX_AGE, null)) {
 				try {
 					ResourceUtil.deleteEmptyFolders(directory);
