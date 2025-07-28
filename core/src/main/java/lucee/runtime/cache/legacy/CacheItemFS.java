@@ -25,11 +25,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lucee.commons.digest.HashUtil;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.util.ResourceUtil;
-import lucee.commons.lang.Md5;
 import lucee.runtime.PageContext;
+import lucee.runtime.config.ConfigWebPro;
+import lucee.runtime.op.Caster;
 import lucee.runtime.type.dt.TimeSpan;
 
 class CacheItemFS extends CacheItem {
@@ -37,13 +39,13 @@ class CacheItemFS extends CacheItem {
 	private final Resource res, directory;
 	private String name;
 
-	public CacheItemFS(PageContext pc, HttpServletRequest req, String id, String key, boolean useId, Resource dir, boolean useQueryString) throws IOException {
-		super(pc, req, id, key, useId, useQueryString);
+	public CacheItemFS(PageContext pc, HttpServletRequest req, String id, String key, boolean useId, Resource dir) throws IOException {
+		super(pc, req, id, key, useId);
 		// directory
 		directory = dir != null ? dir : getDirectory(pc);
 
 		// name
-		name = Md5.getDigestAsString(fileName) + ".cache";
+		name = HashUtil.create64BitHashAsString(Caster.toString(fileName), Character.MAX_RADIX) + ".cache";
 
 		// res
 		res = directory.getRealResource(name);
@@ -51,7 +53,8 @@ class CacheItemFS extends CacheItem {
 	}
 
 	private static Resource getDirectory(PageContext pc) throws IOException {
-		Resource dir = pc.getConfig().getCacheDir();
+		Resource dir = pc.getConfig().getCacheDir().getRealResource(((ConfigWebPro) pc.getConfig()).getId());
+
 		if (!dir.exists()) dir.createDirectory(true);
 		return dir;
 	}

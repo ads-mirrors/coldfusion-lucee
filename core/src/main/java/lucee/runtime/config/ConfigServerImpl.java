@@ -523,6 +523,8 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 
 	private AIEnginePool aiEnginePool;
 
+	private String _id;
+
 	public ThreadQueue setThreadQueue(ThreadQueue threadQueue) {
 		return this.threadQueue = threadQueue;
 	}
@@ -1190,4 +1192,13 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		}
 		return aiEnginePool;
 	}
+
+	@Override
+	public String getId() {
+		if (_id == null) {
+			_id = HashUtil.create64BitHashAsString(Caster.toString(getRootDirectory().getAbsolutePath()), Character.MAX_RADIX);
+		}
+		return _id;
+	}
+
 }

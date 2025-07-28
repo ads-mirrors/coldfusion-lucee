@@ -22,6 +22,7 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lucee.commons.collection.MapFactory;
+import lucee.commons.digest.HashUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.cache.Cache;
 import lucee.commons.io.log.Log;
@@ -122,6 +123,7 @@ public final class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	private ServletConfig config;
 	private CFMLFactoryImpl factory;
 	private SCCWIdentificationWeb id;
+	private String _id;
 	private Resource rootDir;
 
 	private Mapping[] mappings;
@@ -2042,5 +2044,13 @@ public final class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	@Override
 	public boolean isLoggingLoaded() {
 		return cs.isLoggingLoaded();
+	}
+
+	@Override
+	public String getId() {
+		if (_id == null) {
+			_id = HashUtil.create64BitHashAsString(Caster.toString(getRootDirectory().getAbsolutePath()), Character.MAX_RADIX);
+		}
+		return _id;
 	}
 }
