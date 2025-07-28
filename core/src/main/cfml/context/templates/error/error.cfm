@@ -162,7 +162,7 @@ function luceeMonoBlock(input,tablengt=1) {
 		}
 	}
 	catch(ex) {
-		return input;
+		return arguments.input;
 	}
 	return rtn;
 }
