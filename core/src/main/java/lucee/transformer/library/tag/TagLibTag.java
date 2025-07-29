@@ -780,7 +780,7 @@ public final class TagLibTag {
 
 	public String getAttributeNames() {
 		Iterator<String> it = attributes.keySet().iterator();
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		while (it.hasNext()) {
 			if (sb.length() > 0) sb.append(", ");
 			sb.append(it.next());

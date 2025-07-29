@@ -371,7 +371,7 @@ public class KeyImpl implements Collection.Key, Castable, Comparable, Externaliz
 
 	public static String toUpperCaseList(Key[] array, String delimiter) {
 		if (array.length == 0) return "";
-		StringBuffer sb = new StringBuffer(((KeyImpl) array[0]).getUpperString());
+		StringBuilder sb = new StringBuilder(((KeyImpl) array[0]).getUpperString());
 
 		if (delimiter.length() == 1) {
 			char c = delimiter.charAt(0);
@@ -411,7 +411,7 @@ public class KeyImpl implements Collection.Key, Castable, Comparable, Externaliz
 
 	public static String toLowerCaseList(Key[] array, String delimiter) {
 		if (array.length == 0) return "";
-		StringBuffer sb = new StringBuffer(((KeyImpl) array[0]).getLowerString());
+		StringBuilder sb = new StringBuilder(((KeyImpl) array[0]).getLowerString());
 
 		if (delimiter.length() == 1) {
 			char c = delimiter.charAt(0);

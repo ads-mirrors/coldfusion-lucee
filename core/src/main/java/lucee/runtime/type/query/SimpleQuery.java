@@ -499,7 +499,7 @@ public final class SimpleQuery implements Query, ResultSet, Objects, QueryResult
 
 	public String getColumnlist(boolean upperCase) {
 		Key[] columnNames = keys();
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < columnNames.length; i++) {
 			if (i > 0) sb.append(',');
 			sb.append(upperCase ? columnNames[i].getUpperString() : columnNames[i].getString());

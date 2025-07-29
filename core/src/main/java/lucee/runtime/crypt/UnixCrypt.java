@@ -315,7 +315,7 @@ public final class UnixCrypt extends Object { //
 		java.util.Random randomGenerator = new java.util.Random();
 		int numSaltChars = saltChars.length;
 		String salt;
-		salt = (new StringBuffer()).append(saltChars[Math.abs(randomGenerator.nextInt()) % numSaltChars]).append(saltChars[Math.abs(randomGenerator.nextInt()) % numSaltChars])
+		salt = (new StringBuilder()).append(saltChars[Math.abs(randomGenerator.nextInt()) % numSaltChars]).append(saltChars[Math.abs(randomGenerator.nextInt()) % numSaltChars])
 				.toString();
 		return crypt(salt, original);
 	}

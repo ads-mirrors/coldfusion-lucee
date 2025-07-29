@@ -633,7 +633,7 @@ public final class ArrayClassic extends ArraySupport {
 	 */
 	public synchronized String toPlain() {
 
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		int length = size();
 		for (int i = 1; i <= length; i++) {
 			sb.append(i);

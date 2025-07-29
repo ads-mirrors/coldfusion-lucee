@@ -1101,7 +1101,7 @@ public final class CFMLTransformer {
 		Expression value = null;
 
 		// Name
-		StringBuffer sbType = new StringBuffer();
+		StringBuilder sbType = new StringBuilder();
 		RefBoolean dynamic = new RefBooleanImpl(false);
 		boolean isDefaultValue = false;
 		boolean[] parseExpression = new boolean[2];
@@ -1162,7 +1162,7 @@ public final class CFMLTransformer {
 	 * @return Attribute Name
 	 * @throws TemplateException
 	 */
-	private static String attributeName(SourceCode cfml, RefBoolean dynamic, ArrayList<String> args, TagLibTag tag, StringBuffer sbType, boolean[] parseExpression,
+	private static String attributeName(SourceCode cfml, RefBoolean dynamic, ArrayList<String> args, TagLibTag tag, StringBuilder sbType, boolean[] parseExpression,
 			boolean allowDefaultValue) throws TemplateException {
 
 		String _id = identifier(cfml, !allowDefaultValue, true);

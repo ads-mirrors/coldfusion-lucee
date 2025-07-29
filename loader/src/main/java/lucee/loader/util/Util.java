@@ -103,7 +103,7 @@ public final class Util {
 	@Deprecated
 	public static String toString(final InputStream is) throws IOException {
 		final BufferedReader br = new BufferedReader(new InputStreamReader(is));
-		final StringBuffer content = new StringBuffer();
+		final StringBuilder content = new StringBuilder();
 
 		String line = br.readLine();
 		if (line != null) {
@@ -180,7 +180,7 @@ public final class Util {
 	@Deprecated
 	public static String getContentAsString(final InputStream is, final String charset) throws IOException, PageException {
 		final BufferedReader br = (charset == null) ? new BufferedReader(new InputStreamReader(is)) : new BufferedReader(new InputStreamReader(is, charset));
-		final StringBuffer content = new StringBuffer();
+		final StringBuilder content = new StringBuilder();
 
 		String line = br.readLine();
 		if (line != null) {
@@ -239,7 +239,7 @@ public final class Util {
 
 		if (!onlyFirst && sub1.length() == 1 && sub2.length() == 1) return str.replace(sub1.charAt(0), sub2.charAt(0));
 
-		final StringBuffer sb = new StringBuffer();
+		final StringBuilder sb = new StringBuilder();
 		int start = 0;
 		int pos;
 		final int sub1Length = sub1.length();

@@ -440,7 +440,7 @@ public final class XMLNodeList extends ArraySupport implements NodeList, XMLObje
 	 * @return returns an output from the content as plain Text
 	 */
 	public String toPlain() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		int length = size();
 		for (int i = 1; i <= length; i++) {
 			sb.append(i);

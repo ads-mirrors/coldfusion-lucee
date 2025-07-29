@@ -654,7 +654,7 @@ public final class ComponentUtil {
 		Key[] keys = cw.keys();
 		Arrays.sort(keys);
 
-		StringBuffer _interface = new StringBuffer();
+		StringBuilder _interface = new StringBuilder();
 
 		Object member;
 		UDF udf;

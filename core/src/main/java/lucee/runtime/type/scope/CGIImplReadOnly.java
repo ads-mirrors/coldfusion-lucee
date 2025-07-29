@@ -427,7 +427,7 @@ public final class CGIImplReadOnly extends ReadOnlyStruct implements CGI, Script
 	}
 
 	public static String getDomain(HttpServletRequest req) { // DIFF 23
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append(req.isSecure() ? "https://" : "http://");
 		sb.append(req.getServerName());
 		sb.append(':');

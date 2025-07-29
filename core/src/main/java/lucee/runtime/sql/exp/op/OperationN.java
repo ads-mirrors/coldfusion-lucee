@@ -37,7 +37,7 @@ public class OperationN extends ExpressionSupport implements Operation {
 	@Override
 	public String toString(boolean noAlias) {
 		if (!hasIndex() || noAlias) {
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			sb.append(operator);
 			sb.append('(');
 			Iterator it = operants.iterator();

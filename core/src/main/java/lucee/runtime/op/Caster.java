@@ -1028,7 +1028,7 @@ public final class Caster {
 		int leftValueLen = leftValue.length();
 		int ends = (StringUtil.startsWith(str, '-')) ? 1 : 0;
 		if (leftValueLen > 3) {
-			StringBuffer tmp = new StringBuffer();
+			StringBuilder tmp = new StringBuilder();
 			int i;
 			for (i = leftValueLen - 3; i > 0; i -= 3) {
 				tmp.insert(0, leftValue.substring(i, i + 3));
@@ -2284,7 +2284,7 @@ public final class Caster {
 	private static String toString(Clob clob) throws ExpressionException {
 		try {
 			Reader in = clob.getCharacterStream();
-			StringBuffer buf = new StringBuffer();
+			StringBuilder buf = new StringBuilder();
 			for (int c = in.read(); c != -1; c = in.read()) {
 				buf.append((char) c);
 			}
@@ -2337,7 +2337,7 @@ public final class Caster {
 		String str = Double.toString(d);
 		int pos;
 		if ((pos = str.indexOf('E')) != -1 && pos == str.length() - 2) {
-			return new StringBuffer(pos + 2).append(str.charAt(0)).append(str.substring(2, toDigit(str.charAt(pos + 1)) + 2)).append('.')
+			return new StringBuilder(pos + 2).append(str.charAt(0)).append(str.substring(2, toDigit(str.charAt(pos + 1)) + 2)).append('.')
 					.append(str.substring(toDigit(str.charAt(pos + 1)) + 2, pos)).toString();
 
 		}

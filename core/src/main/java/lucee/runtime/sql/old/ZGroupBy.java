@@ -46,13 +46,13 @@ public final class ZGroupBy implements Serializable {
 
 	@Override
 	public String toString() {
-		StringBuffer stringbuffer = new StringBuffer("group by ");
-		stringbuffer.append(groupby_.elementAt(0).toString());
+		StringBuilder sb = new StringBuilder("group by ");
+		sb.append(groupby_.elementAt(0).toString());
 		for (int i = 1; i < groupby_.size(); i++)
-			stringbuffer.append(", " + groupby_.elementAt(i).toString());
+			sb.append(", " + groupby_.elementAt(i).toString());
 
-		if (having_ != null) stringbuffer.append(" having " + having_.toString());
-		return stringbuffer.toString();
+		if (having_ != null) sb.append(" having " + having_.toString());
+		return sb.toString();
 	}
 
 	Vector groupby_;

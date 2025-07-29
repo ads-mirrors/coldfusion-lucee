@@ -77,7 +77,7 @@ public final class SensitiveDataSanitizer {
 		// Process each pattern
 		for (PatternInfo patternInfo: PATTERNS) {
 			Matcher matcher = patternInfo.pattern.matcher(sanitizedText);
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 
 			while (matcher.find()) {
 				// Handle the replacement based on the group

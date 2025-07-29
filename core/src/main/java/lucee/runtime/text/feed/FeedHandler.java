@@ -55,7 +55,7 @@ public final class FeedHandler extends DefaultHandler {
 
 	private XMLReader xmlReader;
 
-	// private StringBuffer content=new StringBuffer();
+	// private StringBuilder content=new StringBuilder();
 
 	private int deep = 0;
 	private FeedStruct data;

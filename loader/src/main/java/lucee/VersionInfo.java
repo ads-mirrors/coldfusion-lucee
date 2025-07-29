@@ -90,7 +90,7 @@ public class VersionInfo {
 	private static String getContentAsString(final InputStream is, final String charset) throws IOException {
 
 		final BufferedReader br = (charset == null) ? new BufferedReader(new InputStreamReader(is)) : new BufferedReader(new InputStreamReader(is, charset));
-		final StringBuffer content = new StringBuffer();
+		final StringBuilder content = new StringBuilder();
 
 		String line = br.readLine();
 		if (line != null) {

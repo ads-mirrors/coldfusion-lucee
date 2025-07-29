@@ -410,7 +410,7 @@ public final class VariableUtilImpl implements VariableUtil {
 	}
 
 	private String keyList(Map map) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		Iterator it = map.keySet().iterator();
 		while (it.hasNext()) {
 			if (sb.length() > 0) sb.append(',');

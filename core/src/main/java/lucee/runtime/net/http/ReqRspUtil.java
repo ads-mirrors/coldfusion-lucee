@@ -116,7 +116,7 @@ public final class ReqRspUtil {
 	 * @param req
 	 */
 	public static String self(HttpServletRequest req) {
-		StringBuffer sb = new StringBuffer(req.getServletPath());
+		StringBuilder sb = new StringBuilder(req.getServletPath());
 		String qs = req.getQueryString();
 		if (!StringUtil.isEmpty(qs)) sb.append('?').append(qs);
 		return sb.toString();

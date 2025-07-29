@@ -210,7 +210,7 @@ public final class QueryParam extends TagImpl {
 				}
 
 				int len = arr.size();
-				StringBuffer sb = new StringBuffer();
+				StringBuilder sb = new StringBuilder();
 				for (int i = 1; i <= len; i++) {
 					query.setParam(item.clone(check(arr.getE(i), item.getType(), (int) maxlength, charset)));
 					if (i > 1) sb.append(',');
