@@ -14,11 +14,8 @@ import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.BIF;
 import lucee.runtime.op.Caster;
 import lucee.runtime.osgi.OSGiUtil;
-import lucee.runtime.type.Collection.Key;
-import lucee.runtime.type.KeyImpl;
-import lucee.runtime.type.Query;
-import lucee.runtime.type.QueryImpl;
-import lucee.runtime.type.util.KeyConstants;
+import lucee.runtime.type.Array;
+import lucee.runtime.type.ArrayImpl;
 
 public final class LuceeVersionsListS3 extends BIF {
 
@@ -27,11 +24,11 @@ public final class LuceeVersionsListS3 extends BIF {
 	private static final int TYPE_SNAPSHOT = 1;
 	private static final int TYPE_RELEASE = 2;
 
-	public static Query call(PageContext pc, String type) throws PageException {
+	public static Array call(PageContext pc, String type) throws PageException {
 		return invoke("LuceeVersionsListS3", pc, type);
 	}
 
-	public static Query invoke(String functionName, PageContext pc, String type) throws PageException {
+	public static Array invoke(String functionName, PageContext pc, String type) throws PageException {
 		// validate type
 		int t = TYPE_ALL;
 		boolean latest = false;
@@ -55,7 +52,7 @@ public final class LuceeVersionsListS3 extends BIF {
 			else throw new FunctionException(pc, functionName, 1, "type",
 					"type name [" + type + "] is invalid, valid types names are [all,snapshot,relase,latest,latest:release,latest:snapshot]");
 		}
-		Key ETAG = KeyImpl.init("etag");
+
 		try {
 			S3UpdateProvider sup = S3UpdateProvider.getInstance();
 			String key;
@@ -74,32 +71,23 @@ public final class LuceeVersionsListS3 extends BIF {
 						}
 					}
 				}
-				Query qry = new QueryImpl(new Key[] { ETAG, KeyConstants._lastModified, KeyConstants._size, KeyConstants._version }, map.size(), "versions");
-				int row = 1;
+				Array rtn = new ArrayImpl();
 				for (Element e: map.values()) {
-					qry.setAt(ETAG, row, e.getETag().toString());
-					qry.setAt(KeyConstants._lastModified, row, e.getLastModifed().toString());
-					qry.setAt(KeyConstants._size, row, e.getSize());
-					qry.setAt(KeyConstants._version, row, e.getVersion().toString());
-					row++;
+					rtn.append(LuceeVersionsDetailS3.toStruct(e));
 				}
-				return qry;
+				return rtn;
 			}
 			// all
-			Query qry = new QueryImpl(new Key[] { ETAG, KeyConstants._lastModified, KeyConstants._size, KeyConstants._version }, 0, "versions");
+			Array rtn = new ArrayImpl();
 			Version v;
 			int row;
 			for (Element e: sup.read()) {
 				v = e.getVersion();
 				if (t == TYPE_ALL || (t == TYPE_SNAPSHOT && v.getQualifier().endsWith("-SNAPSHOT")) || (t == TYPE_RELEASE && !v.getQualifier().endsWith("-SNAPSHOT"))) {
-					row = qry.addRow();
-					qry.setAt(ETAG, row, e.getETag().toString());
-					qry.setAt(KeyConstants._lastModified, row, e.getLastModifed().toString());
-					qry.setAt(KeyConstants._size, row, e.getSize());
-					qry.setAt(KeyConstants._version, row, e.getVersion().toString());
+					rtn.append(LuceeVersionsDetailS3.toStruct(e));
 				}
 			}
-			return qry;
+			return rtn;
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);

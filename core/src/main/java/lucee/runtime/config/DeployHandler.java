@@ -45,6 +45,7 @@ import lucee.commons.net.http.Header;
 import lucee.commons.net.http.httpclient.HTTPEngine4Impl;
 import lucee.commons.net.http.httpclient.HeaderImpl;
 import lucee.loader.engine.CFMLEngineFactory;
+import lucee.runtime.config.ConfigAdmin.AlreadyInstalledExtension;
 import lucee.runtime.engine.CFMLEngineImpl;
 import lucee.runtime.engine.ThreadQueuePro;
 import lucee.runtime.exp.ApplicationException;
@@ -126,7 +127,12 @@ public class DeployHandler {
 
 						}
 						catch (Exception e) {
-							log.log(Log.LEVEL_ERROR, "deploy handler", e);
+							if (e instanceof AlreadyInstalledExtension) {
+								log.log(Log.LEVEL_INFO, "deploy handler", e);
+							}
+							else {
+								log.log(Log.LEVEL_ERROR, "deploy handler", e);
+							}
 						}
 					}
 				}

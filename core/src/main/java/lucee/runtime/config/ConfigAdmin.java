@@ -3382,8 +3382,7 @@ public final class ConfigAdmin {
 
 	}
 
-	public void updateDefaultSecurity(short file, Resource[] fileAccess, short directJavaAccess, 
-			short cfxUsage, short tagExecute, short tagImport, short tagObject,
+	public void updateDefaultSecurity(short file, Resource[] fileAccess, short directJavaAccess, short cfxUsage, short tagExecute, short tagImport, short tagObject,
 			short tagRegistry, short accessRead, short accessWrite) throws SecurityException {
 		checkWriteAccess();
 		if (!(config instanceof ConfigServer)) throw new SecurityException("can't change security settings from this context");
@@ -4809,7 +4808,7 @@ public final class ConfigAdmin {
 	public void updateRHExtension(Config config, RHExtension rhext, boolean reload, boolean force) throws PageException {
 		try {
 			if (!force && _hasRHExtensionInstalled((ConfigPro) config, rhext.toExtensionDefinition()) != null) {
-				throw new ApplicationException("the extension " + rhext.getName() + " (id: " + rhext.getId() + ") in version " + rhext.getVersion() + " is already installed");
+				throw new AlreadyInstalledExtension(rhext);
 			}
 		}
 		catch (Exception e) {
@@ -6908,5 +6907,13 @@ public final class ConfigAdmin {
 		checkWriteAccess();
 		if (flushExistingData) root.clear();
 		StructUtil.merge(root, data);
+	}
+
+	public static class AlreadyInstalledExtension extends ApplicationException {
+
+		public AlreadyInstalledExtension(RHExtension ext) {
+			super("the extension " + ext.getName() + " (id: " + ext.getId() + ") in version " + ext.getVersion() + " is already installed");
+		}
+
 	}
 }

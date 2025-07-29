@@ -1,5 +1,7 @@
 package lucee.runtime.functions.system;
 
+import java.util.Iterator;
+
 import lucee.runtime.PageContext;
 import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
@@ -7,7 +9,7 @@ import lucee.runtime.ext.function.BIF;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.ArrayImpl;
-import lucee.runtime.type.Query;
+import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.KeyConstants;
 
 public final class LuceeVersionsList extends BIF {
@@ -19,15 +21,17 @@ public final class LuceeVersionsList extends BIF {
 			return LuceeVersionsListMvn.invoke("LuceeVersionsList", pc, type);
 		}
 		catch (Exception e) {
-			Query qry = LuceeVersionsListS3.call(pc, type);
-			int rows = qry.getRecordcount();
-			Array arr = new ArrayImpl();
-			for (int row = 1; row <= rows; row++) {
-				arr.append(qry.getAt(KeyConstants._version, row));
-			}
-			return arr;
-		}
 
+		}
+		Array data = LuceeVersionsListS3.call(pc, type);
+		Array arr = new ArrayImpl();
+		Struct sct;
+		Iterator<Object> it = data.valueIterator();
+		while (it.hasNext()) {
+			sct = Caster.toStruct(it.next());
+			arr.append(sct.get(KeyConstants._version));
+		}
+		return arr;
 	}
 
 	@Override

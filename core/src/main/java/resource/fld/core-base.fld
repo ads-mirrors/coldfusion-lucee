@@ -10122,7 +10122,7 @@ For exception analysis and debugging, lower temperatures (0.2-0.3) are recommend
 			latest:snapshot: Fetches the most recent snapshot version for each development cycle.</description>
 		</argument>
 		<return>
-			<type>query</type>
+			<type>array</type>
 		</return>
 	</function>
 	
