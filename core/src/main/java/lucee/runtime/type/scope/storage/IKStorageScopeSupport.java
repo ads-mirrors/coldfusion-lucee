@@ -608,7 +608,7 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 		return ScopeUtil.verifyCsrfToken(tokens, token, key);
 	}
 
-	public static void merge(Map<Key, IKStorageScopeItem> local, Map<Key, IKStorageScopeItem> storage, Log log, int type) {
+	public static void merge(Map<Key, IKStorageScopeItem> local, Map<Key, IKStorageScopeItem> storage, Log log, int type, long lastModifiedAtInit) {
 		Iterator<Entry<Key, IKStorageScopeItem>> it = local.entrySet().iterator();
 		Entry<Key, IKStorageScopeItem> e;
 		IKStorageScopeItem storageItem;
@@ -620,10 +620,19 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 			// this entry not exist in the storage
 			if (storageItem == null) {
 				if (!e.getValue().removed()) {
-					storage.put(e.getKey(), e.getValue());
-					if (LogUtil.doesInfo(log)) {
-						ScopeContext.info(log, "the " + (type == Scope.SCOPE_SESSION ? "session" : "client") + " scope key [" + e.getKey().getString()
-								+ "] does not exist in storage, adding it with timestamp " + e.getValue().lastModified() + ".");
+					if (e.getValue().lastModified() < lastModifiedAtInit) {
+						if (LogUtil.doesInfo(log)) {
+							ScopeContext.info(log,
+									"the " + (type == Scope.SCOPE_SESSION ? "session" : "client") + " scope key [" + e.getKey().getString() + "] does not exist in storage ("
+											+ lastModifiedAtInit + "), but it is also older (" + e.getValue().lastModified() + ") than the storage, so we ignore it.");
+						}
+					}
+					else {
+						storage.put(e.getKey(), e.getValue());
+						if (LogUtil.doesInfo(log)) {
+							ScopeContext.info(log, "the " + (type == Scope.SCOPE_SESSION ? "session" : "client") + " scope key [" + e.getKey().getString()
+									+ "] does not exist in storage, adding it with timestamp " + e.getValue().lastModified() + ".");
+						}
 					}
 				}
 				else {
@@ -683,7 +692,7 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 							+ " scope in the storage is never than the one we loaded at the beginning of the request and modified, so we have to merge them.");
 				}
 				Map<Key, IKStorageScopeItem> trg = storage.getValue();
-				IKStorageScopeSupport.merge(local, trg, log, type);
+				IKStorageScopeSupport.merge(local, trg, log, type, lastModified);
 				return trg;
 			}
 			else {
@@ -706,7 +715,7 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 							+ " scope in the storage is never than the one we loaded at the beginning of the request and modified, so we have to merge them.");
 				}
 
-				IKStorageScopeSupport.merge(local, trg, log, type);
+				IKStorageScopeSupport.merge(local, trg, log, type, lastModified);
 				return trg;
 			}
 			else {
