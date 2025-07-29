@@ -114,7 +114,7 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 		_lastvisit = doNowIfNull(config, Caster.toDate(data.getOrDefault(KeyConstants._lastvisit, null), false, pc.getTimeZone(), null));
 
 		if (_lastvisit == null) _lastvisit = timecreated;
-		lastvisit = _lastvisit == null ? 0 : _lastvisit.getTime();
+		lastvisit = _lastvisit == null ? 0L : _lastvisit.getTime();
 		ApplicationContext ac = pc.getApplicationContext();
 		if (ac != null && ac.getSessionCluster() && isSessionStorage(pc)) {
 			IKStorageScopeItem csrfTokens = data.getOrDefault(KeyConstants._csrf_token, null);
@@ -165,8 +165,8 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 
 		IKStorageScopeSupport rtn = null;
 		Map<Key, IKStorageScopeItem> map = MapFactory.getConcurrentMap();
-		if (Scope.SCOPE_SESSION == scope) rtn = new IKStorageScopeSession(pc, handler, appName, name, map, 0, getSessionTimeout(pc));
-		else if (Scope.SCOPE_CLIENT == scope) rtn = new IKStorageScopeClient(pc, handler, appName, name, map, 0, getClientTimeout(pc));
+		if (Scope.SCOPE_SESSION == scope) rtn = new IKStorageScopeSession(pc, handler, appName, name, map, 0L, getSessionTimeout(pc));
+		else if (Scope.SCOPE_CLIENT == scope) rtn = new IKStorageScopeClient(pc, handler, appName, name, map, 0L, getClientTimeout(pc));
 
 		rtn.store(pc);
 		return rtn;
@@ -228,6 +228,7 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 
 	public void resetEnv(PageContext pc) {
 		_lastvisit = new DateTimeImpl();
+		lastvisit = System.currentTimeMillis();
 		timecreated = new DateTimeImpl();
 		touchBeforeRequest(pc);
 
