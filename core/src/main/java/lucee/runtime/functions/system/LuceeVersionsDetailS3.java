@@ -51,7 +51,6 @@ public final class LuceeVersionsDetailS3 extends BIF {
 
 	public static Struct toStruct(Element el) throws PageException {
 		Struct sct = new StructImpl();
-		Artifact jarArt = el.getJAR();
 
 		sct.set(ETAG, el.getETag());
 		sct.set(KeyConstants._lastModified, el.getLastModifed());
