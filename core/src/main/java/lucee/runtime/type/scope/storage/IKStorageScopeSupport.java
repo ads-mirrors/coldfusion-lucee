@@ -388,9 +388,9 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 
 	@Override
 	public Object remove(Key key) throws PageException {
-		hasChanges = true;
 		IKStorageScopeItem existing = data0.get(key);
 		if (existing != null) {
+			hasChanges = true;
 			return existing.remove();
 		}
 		throw new ExpressionException("can't remove key [" + key.getString() + "] from map, key doesn't exist");
@@ -398,9 +398,9 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 
 	@Override
 	public Object removeEL(Key key) {
-		hasChanges = true;
 		IKStorageScopeItem existing = data0.get(key);
 		if (existing != null) {
+			hasChanges = true;
 			return existing.remove();
 		}
 		return null;
