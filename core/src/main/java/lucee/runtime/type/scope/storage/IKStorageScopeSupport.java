@@ -616,7 +616,7 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 		}
 	};
 
-	public static void merge(Map<Key, IKStorageScopeItem> local, Map<Key, IKStorageScopeItem> storage, Log log, int type) {
+	public static void merge(Map<Key, IKStorageScopeItem> local, Map<Key, IKStorageScopeItem> storage, Log log, int type, long lastModifiedAtInit) {
 		Iterator<Entry<Key, IKStorageScopeItem>> it = local.entrySet().iterator();
 		Entry<Key, IKStorageScopeItem> e;
 		IKStorageScopeItem storageItem;
@@ -624,7 +624,7 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 		while (it.hasNext()) {
 			e = it.next();
 			storageItem = storage.get(e.getKey());
-
+			if (e.getValue().lastModified() < lastModifiedAtInit) continue;
 			// this entry not exist in the storage
 			if (storageItem == null) {
 				if (!e.getValue().removed()) {
@@ -691,7 +691,7 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 							+ " scope in the storage is never than the one we loaded at the beginning of the request and modified, so we have to merge them.");
 				}
 				Map<Key, IKStorageScopeItem> trg = storage.getValue();
-				IKStorageScopeSupport.merge(local, trg, log, type);
+				IKStorageScopeSupport.merge(local, trg, log, type, lastModified);
 				return trg;
 			}
 			else {
@@ -714,7 +714,7 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 							+ " scope in the storage is never than the one we loaded at the beginning of the request and modified, so we have to merge them.");
 				}
 
-				IKStorageScopeSupport.merge(local, trg, log, type);
+				IKStorageScopeSupport.merge(local, trg, log, type, lastModified);
 				return trg;
 			}
 			else {
