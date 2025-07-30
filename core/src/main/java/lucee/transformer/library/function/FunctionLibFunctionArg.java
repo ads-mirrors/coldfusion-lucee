@@ -24,6 +24,7 @@ import org.osgi.framework.Version;
 
 import lucee.commons.lang.CFTypes;
 import lucee.commons.lang.Md5;
+import lucee.runtime.type.util.ListUtil;
 import lucee.runtime.osgi.OSGiUtil;
 import lucee.transformer.library.tag.TagLib;
 
@@ -41,6 +42,7 @@ public final class FunctionLibFunctionArg {
 	private String nameWithCase;
 	private String description = "";
 	private String alias = null;
+	private String[] aliases = null;
 	private String defaultValue = null;
 	private boolean hidden;
 	private short status = TagLib.STATUS_IMPLEMENTED;
@@ -66,6 +68,7 @@ public final class FunctionLibFunctionArg {
 		dbl.nameWithCase = nameWithCase;
 		dbl.description = description;
 		dbl.alias = alias;
+		dbl.aliases = aliases;
 		dbl.defaultValue = defaultValue;
 		dbl.hidden = hidden;
 		dbl.status = status;
@@ -246,6 +249,14 @@ public final class FunctionLibFunctionArg {
 	 */
 	public void setAlias(String alias) {
 		this.alias = alias;
+		this.aliases = ListUtil.trimItems(ListUtil.listToStringArray(alias.toLowerCase(), ','));
+	}
+
+	/**
+	 * @return the aliases
+	 */
+	public String[] getAliases() {
+		return aliases;
 	}
 
 	public void setHidden(boolean hidden) {

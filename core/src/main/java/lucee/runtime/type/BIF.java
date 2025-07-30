@@ -143,9 +143,8 @@ public final class BIF extends MemberSupport implements UDFPlus {
 
 			// match by alias
 			if (val == null) {
-				String alias = arg.getAlias();
-				if (!StringUtil.isEmpty(alias, true)) {
-					String[] aliases = lucee.runtime.type.util.ListUtil.trimItems(lucee.runtime.type.util.ListUtil.listToStringArray(alias, ','));
+				String[] aliases = arg.getAliases();
+				if (!ArrayUtil.isEmpty(aliases)){
 					for (int x = 0; x < aliases.length; x++) {
 						val = values.get(aliases[x], null);
 						if (val != null) break;
