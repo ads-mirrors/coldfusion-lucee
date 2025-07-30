@@ -81,6 +81,15 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					expect(GeneratePBKDFKey( 'PBKDF2WithHmacSHA512' , passphrase , salt)).toBe('FOHqEZmtiJU70L07REmppA==');
 				});
 
+				it( 'LDEV-2682 check missing algorithm list' , function() {
+					try {
+						GeneratePBKDFKey( 'PBKmissing' , passphrase , salt);
+					} catch (e){
+						var algos = listLast( e.message, "[]" );
+						expect( listLen( algos ) ).toBeGT( 1 );
+					}
+				});
+
 				/*it( 'for PBKDF2WithSHA1' , function() {
 					expect(
 						GeneratePBKDFKey( 'PBKDF2WithSHA1' , passphrase , salt, iterations , keysize )

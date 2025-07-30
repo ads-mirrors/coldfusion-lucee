@@ -19,7 +19,10 @@
 package lucee.runtime.functions.other;
 
 import java.security.NoSuchAlgorithmException;
+import java.security.Security;
+import java.security.Provider;
 import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
@@ -31,6 +34,7 @@ import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.BIF;
 import lucee.runtime.op.Caster;
+import lucee.runtime.type.util.ListUtil;
 
 public final class GeneratePBKDFKey extends BIF {
 
@@ -49,7 +53,7 @@ public final class GeneratePBKDFKey extends BIF {
 		if (StringUtil.isEmpty(algorithm)) throw new FunctionException(pc, "GeneratePBKDFKey", 1, "algorithm", "Argument [algorithm] is empty.");
 		algorithm = algorithm.trim();
 		if (!StringUtil.startsWithIgnoreCase(algorithm, "PBK"))
-			throw new FunctionException(pc, "GeneratePBKDFKey", 1, "algorithm", "Algorithm [" + algorithm + "] is not supported.");
+			throw new FunctionException(pc, "GeneratePBKDFKey", 1, "algorithm", "The alogrithm [" + algorithm + "] is not supported. Supported algorithms are [ " + getSupportedAlgorithms() + " ]");
 
 		// TODO add provider to support addional keys by addin a provider that is supporting it
 		SecretKeyFactory key = null;
@@ -58,9 +62,8 @@ public final class GeneratePBKDFKey extends BIF {
 		}
 		catch (NoSuchAlgorithmException e) {
 			if (!algorithm.equalsIgnoreCase("PBKDF2WithHmacSHA1"))
-				throw new FunctionException(pc, "GeneratePBKDFKey", 1, "algorithm", "The only supported algorithm is [PBKDF2WithHmacSHA1].");
-			else throw Caster.toPageException(e);
-
+				throw new FunctionException(pc, "GeneratePBKDFKey", 1, "algorithm", "The alogrithm [" + algorithm + "] is not supported. Supported algorithms are [ " + getSupportedAlgorithms() + " ]");
+			throw Caster.toPageException(e);
 		}
 
 		try {
@@ -80,5 +83,16 @@ public final class GeneratePBKDFKey extends BIF {
 		if (args.length == 3) return call(pc, Caster.toString(args[0]), Caster.toString(args[1]), Caster.toString(args[2]));
 
 		throw new FunctionException(pc, "GeneratePBKDFKey", 3, 5, args.length);
+	}
+
+	private static String getSupportedAlgorithms() {
+		ArrayList<String> algorithms = new ArrayList<>();
+		for (Provider provider : Security.getProviders()) {
+			for (Provider.Service service : provider.getServices()) {
+				String algorithm = service.getAlgorithm();
+				if (algorithm.startsWith("PBK")) algorithms.add(algorithm);
+			}
+		}
+		return ListUtil.toList(algorithms, ", ");
 	}
 }
