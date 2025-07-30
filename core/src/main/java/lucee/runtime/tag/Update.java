@@ -294,8 +294,8 @@ public final class Update extends TagImpl {
 		if (formfields != null) fields = ListUtil.toStringArray(ListUtil.listToArrayRemoveEmpty(formfields, ','));
 		else fields = CollectionUtil.keysAsString(src);
 
-		StringBuffer set = new StringBuffer();
-		StringBuffer where = new StringBuffer();
+		StringBuilder set = new StringBuilder();
+		StringBuilder where = new StringBuilder();
 		ArrayList<SQLItem> setItems = new ArrayList<SQLItem>();
 		ArrayList<SQLItem> whereItems = new ArrayList<SQLItem>();
 		String field;
@@ -335,7 +335,7 @@ public final class Update extends TagImpl {
 		if (whereItems.size() == 0)
 			throw new DatabaseException("can't find primary keys [" + ListUtil.arrayToList(keys, ",") + "] of table [" + tablename + "] in source scope", null, null, dc);
 
-		StringBuffer sql = new StringBuffer();
+		StringBuilder sql = new StringBuilder();
 		sql.append("update ");
 		if (tablequalifier != null && tablequalifier.length() > 0) {
 			sql.append(tablequalifier);

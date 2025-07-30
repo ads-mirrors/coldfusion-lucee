@@ -310,7 +310,7 @@ public final class Feed extends TagImpl {
 			throw new ApplicationException("missing attribute [name] or attributes [query] and [properties]");
 		}
 
-		StringBuffer xml = new StringBuffer("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+		StringBuilder xml = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 
 		if (type == TYPE_AUTO) {
 			String version = Caster.toString(props.get("version", "rss"), "rss");
@@ -352,7 +352,7 @@ public final class Feed extends TagImpl {
 
 	}
 
-	private void createAtom(StringBuffer xml, Query query, Struct props, boolean splitString) throws PageException {
+	private void createAtom(StringBuilder xml, Query query, Struct props, boolean splitString) throws PageException {
 		int rows = query.getRowCount();
 
 		append(xml, 0, "<feed xmlns=\"http://www.w3.org/2005/Atom\">");
@@ -413,7 +413,7 @@ public final class Feed extends TagImpl {
 
 	}
 
-	private void createRSS(StringBuffer xml, Query query, Struct props, boolean splitString) throws PageException {
+	private void createRSS(StringBuilder xml, Query query, Struct props, boolean splitString) throws PageException {
 		int rows = query.getRowCount();
 
 		append(xml, 0,
@@ -473,11 +473,11 @@ public final class Feed extends TagImpl {
 
 	}
 
-	private void propTag(Struct props, StringBuffer xml, int count, String[] srcNames, String trgName, String[][] attrNames) throws PageException {
+	private void propTag(Struct props, StringBuilder xml, int count, String[] srcNames, String trgName, String[][] attrNames) throws PageException {
 		propTag(props, xml, count, srcNames, trgName, attrNames, false);
 	}
 
-	private void propTag(Struct props, StringBuffer xml, int count, String[] srcNames, String trgName, String[][] attrNames, boolean childrenAsTag) throws PageException {
+	private void propTag(Struct props, StringBuilder xml, int count, String[] srcNames, String trgName, String[][] attrNames, boolean childrenAsTag) throws PageException {
 		Object value;
 		for (int i = 0; i < srcNames.length; i++) {
 			value = props.get(srcNames[i], null);
@@ -497,7 +497,7 @@ public final class Feed extends TagImpl {
 		}
 	}
 
-	private boolean propTag(StringBuffer xml, int count, Object value, String trgName, String[][] attrNames, boolean childrenAsTag) throws PageException {
+	private boolean propTag(StringBuilder xml, int count, Object value, String trgName, String[][] attrNames, boolean childrenAsTag) throws PageException {
 		if (!StringUtil.isEmpty(value)) {
 			Pair[] attrs;
 			if (value instanceof Struct && attrNames != null) {
@@ -520,11 +520,11 @@ public final class Feed extends TagImpl {
 
 	}
 
-	private void tag(StringBuffer xml, int count, Pair<String, Object> tag, Pair<String, Object>[] attrs, boolean required, boolean splitString) throws PageException {
+	private void tag(StringBuilder xml, int count, Pair<String, Object> tag, Pair<String, Object>[] attrs, boolean required, boolean splitString) throws PageException {
 		tag(xml, count, tag, attrs, required, splitString, false);
 	}
 
-	private void tag(StringBuffer xml, int count, Pair<String, Object> tag, Pair<String, Object>[] attrs, boolean required, boolean splitString, boolean childrenAsTag)
+	private void tag(StringBuilder xml, int count, Pair<String, Object> tag, Pair<String, Object>[] attrs, boolean required, boolean splitString, boolean childrenAsTag)
 			throws PageException {
 		if (!required && StringUtil.isEmpty(tag.getValue())) {
 			if (attrs == null || attrs.length == 0) return;
@@ -560,7 +560,7 @@ public final class Feed extends TagImpl {
 
 	}
 
-	private void _tag(StringBuffer xml, String tagName, Object tagValue, Pair<String, Object>[] attrs, int count, int index, boolean splitString, boolean childrenAsTag)
+	private void _tag(StringBuilder xml, String tagName, Object tagValue, Pair<String, Object>[] attrs, int count, int index, boolean splitString, boolean childrenAsTag)
 			throws PageException {
 		for (int i = 0; i < count; i++)
 			xml.append("\t");
@@ -641,7 +641,7 @@ public final class Feed extends TagImpl {
 		return column.toString();
 	}
 
-	private static void append(StringBuffer xml, int count, String value) {
+	private static void append(StringBuilder xml, int count, String value) {
 		for (int i = 0; i < count; i++)
 			xml.append("\t");
 		xml.append(value);

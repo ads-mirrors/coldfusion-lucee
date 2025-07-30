@@ -138,7 +138,7 @@ public final class FDUtil {
 	 */
 	private static String toVariableName(String str) {
 
-		StringBuffer rtn = new StringBuffer();
+		StringBuilder rtn = new StringBuilder();
 		char[] chars = str.toCharArray();
 		long changes = 0;
 		boolean doCorrect = true;
@@ -166,7 +166,7 @@ public final class FDUtil {
 	 * @return
 	 */
 	public static String toClassName(String str) {
-		StringBuffer javaName = new StringBuffer();
+		StringBuilder javaName = new StringBuilder();
 		String[] arr = lucee.runtime.type.util.ListUtil.listToStringArray(str, '/');
 
 		for (int i = 0; i < arr.length; i++) {

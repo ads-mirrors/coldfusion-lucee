@@ -295,8 +295,8 @@ public final class Insert extends TagImpl {
 		if (formfields != null) fields = ListUtil.toStringArray(ListUtil.listToArrayRemoveEmpty(formfields, ','));
 		else fields = CollectionUtil.keysAsString(src);
 
-		StringBuffer names = new StringBuffer();
-		StringBuffer values = new StringBuffer();
+		StringBuilder names = new StringBuilder();
+		StringBuilder values = new StringBuilder();
 		ArrayList<SQLItem> items = new ArrayList<SQLItem>();
 		String field;
 		for (int i = 0; i < fields.length; i++) {
@@ -325,7 +325,7 @@ public final class Insert extends TagImpl {
 		}
 		if (items.size() == 0) return null;
 
-		StringBuffer sql = new StringBuffer();
+		StringBuilder sql = new StringBuilder();
 		sql.append("insert into ");
 		if (tablequalifier.length() > 0) {
 			sql.append(tablequalifier);

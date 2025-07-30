@@ -48,7 +48,7 @@ public final class ProcessingDirectiveException extends TemplateException {
 	}
 
 	private static String createMessage(SourceCode sc, Charset charset, Boolean writeLog) {
-		StringBuffer msg = new StringBuffer();
+		StringBuilder msg = new StringBuilder();
 		if (charset != null && sc instanceof PageSourceCode && !((PageSourceCode) sc).getCharset().equals(charset))
 			msg.append("change charset from [" + ((PageSourceCode) sc).getCharset() + "] to [" + charset + "].");
 

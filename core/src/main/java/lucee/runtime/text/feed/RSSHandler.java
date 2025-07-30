@@ -64,7 +64,7 @@ public final class RSSHandler extends DefaultHandler {
 	private XMLReader xmlReader;
 
 	private String lcInside;
-	private StringBuffer content = new StringBuffer();
+	private StringBuilder content = new StringBuilder();
 
 	private boolean insideImage;
 	private boolean insideItem;
@@ -179,7 +179,7 @@ public final class RSSHandler extends DefaultHandler {
 	@Override
 	public void endElement(String uri, String name, String qName) {
 		setContent(content.toString().trim());
-		content = new StringBuffer();
+		content = new StringBuilder();
 		inside = null;
 		lcInside = "";
 

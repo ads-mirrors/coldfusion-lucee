@@ -128,7 +128,7 @@ public final class XMLUtilImpl implements XMLUtil {
 	/*
 	 * public String unescapeXMLString2(String str) {
 	 * 
-	 * StringBuffer sb=new StringBuffer(); int index,last=0,indexSemi;
+	 * StringBuilder sb=new StringBuilder(); int index,last=0,indexSemi;
 	 * while((index=str.indexOf('&',last))!=-1) { sb.append(str.substring(last,index));
 	 * indexSemi=str.indexOf(';',index+1);
 	 * 
@@ -150,7 +150,7 @@ public final class XMLUtilImpl implements XMLUtil {
 	@Override
 	public String escapeXMLString(String xmlStr) {
 		char c;
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		int len = xmlStr.length();
 		for (int i = 0; i < len; i++) {
 			c = xmlStr.charAt(i);

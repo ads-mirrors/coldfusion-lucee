@@ -84,19 +84,19 @@ public final class ZUpdate implements ZStatement {
 
 	@Override
 	public String toString() {
-		StringBuffer stringbuffer = new StringBuffer("update " + table_);
-		stringbuffer.append(" set ");
+		StringBuilder sb = new StringBuilder("update " + table_);
+		sb.append(" set ");
 		Enumeration enumeration;
 		if (columns_ != null) enumeration = columns_.elements();
 		else enumeration = set_.keys();
 		for (boolean flag = true; enumeration.hasMoreElements(); flag = false) {
 			String s = enumeration.nextElement().toString();
-			if (!flag) stringbuffer.append(", ");
-			stringbuffer.append(s + "=" + set_.get(s).toString());
+			if (!flag) sb.append(", ");
+			sb.append(s + "=" + set_.get(s).toString());
 		}
 
-		if (where_ != null) stringbuffer.append(" where " + where_.toString());
-		return stringbuffer.toString();
+		if (where_ != null) sb.append(" where " + where_.toString());
+		return sb.toString();
 	}
 
 	String table_;

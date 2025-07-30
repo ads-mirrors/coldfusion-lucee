@@ -301,7 +301,7 @@ public final class TagLibTagAttr {
 	}
 
 	public String getHash() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append(this.getDefaultValue());
 		sb.append(this.getName());
 		sb.append(this.getRtexpr());

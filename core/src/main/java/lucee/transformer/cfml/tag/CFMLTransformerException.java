@@ -72,7 +72,7 @@ public final class CFMLTransformerException extends Exception {
 	@Override
 	public String toString() {
 		boolean hasCFML = sc != null;
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append("Error\n");
 		sb.append("----------------------------------\n");
 		if (hasCFML && sc instanceof PageSourceCode) {

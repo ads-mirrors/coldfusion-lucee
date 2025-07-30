@@ -102,7 +102,7 @@ public final class FDUDF extends FDValueNotMutability {
 
 	public static String toString(UDF udf) {
 		FunctionArgument[] args = udf.getFunctionArguments();
-		StringBuffer sb = new StringBuffer("function ");
+		StringBuilder sb = new StringBuilder("function ");
 		sb.append(udf.getFunctionName());
 		sb.append("(");
 		for (int i = 0; i < args.length; i++) {

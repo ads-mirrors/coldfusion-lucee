@@ -406,7 +406,7 @@ public abstract class MailClient implements PoolItem {
 			qry.setAtEL(SEEN, row, isSetEL(message, Flags.Flag.SEEN));
 		}
 
-		StringBuffer content = new StringBuffer();
+		StringBuilder content = new StringBuilder();
 		try {
 			for (Enumeration enumeration = message.getAllHeaders(); enumeration.hasMoreElements(); content.append('\n')) {
 				Header header = (Header) enumeration.nextElement();
@@ -530,7 +530,7 @@ public abstract class MailClient implements PoolItem {
 	 * @throws IOException
 	 */
 	private void getContent(Query query, Message message, int row) throws MessagingException, IOException {
-		StringBuffer body = new StringBuffer();
+		StringBuilder body = new StringBuilder();
 		Struct cids = new StructImpl();
 		query.setAtEL(CIDS, row, cids);
 		if (message.isMimeType("text/plain")) {
@@ -575,7 +575,7 @@ public abstract class MailClient implements PoolItem {
 		query.setAtEL(BODY, row, body.toString());
 	}
 
-	private void getMultiPart(Query query, int row, Array attachments, Array attachmentFiles, Struct cids, Multipart multiPart, StringBuffer body)
+	private void getMultiPart(Query query, int row, Array attachments, Array attachmentFiles, Struct cids, Multipart multiPart, StringBuilder body)
 			throws MessagingException, IOException {
 		int j = multiPart.getCount();
 
@@ -679,7 +679,7 @@ public abstract class MailClient implements PoolItem {
 	 * @throws IOException
 	 * 
 	 * @throws MessagingException / private void setBody(Query qry, String columnName, int row, BodyPart
-	 * bp, StringBuffer body) throws IOException, MessagingException { String content = getConent(bp);
+	 * bp, StringBuilder body) throws IOException, MessagingException { String content = getConent(bp);
 	 * 
 	 * qry.setAtEL(columnName,row,content); if(body.length()==0)body.append(content);
 	 * 

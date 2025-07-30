@@ -125,7 +125,7 @@ public final class HtmlEmailImpl extends MultiPartEmail {
 
 		setTextMsg(msg);
 
-		setHtmlMsg(new StringBuffer().append("<html><body><pre>").append(msg).append("</pre></body></html>").toString());
+		setHtmlMsg(new StringBuilder().append("<html><body><pre>").append(msg).append("</pre></body></html>").toString());
 
 		return this;
 	}

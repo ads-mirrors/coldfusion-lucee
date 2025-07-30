@@ -115,7 +115,7 @@ public final class MailSpoolerTask extends SpoolerTaskSupport {
 	private static String toString(InternetAddress[] adresses) {
 		if (adresses == null) return "";
 
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < adresses.length; i++) {
 			if (i > 0) sb.append(", ");
 			sb.append(toString(adresses[i]));

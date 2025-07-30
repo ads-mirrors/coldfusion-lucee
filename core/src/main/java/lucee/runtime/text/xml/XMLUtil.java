@@ -155,7 +155,7 @@ public final class XMLUtil {
 
 	public static String unescapeXMLString(String str) {
 
-		StringBuffer rtn = new StringBuffer();
+		StringBuilder rtn = new StringBuilder();
 		int posStart = -1;
 		int posFinish = -1;
 		while ((posStart = str.indexOf('&', posStart)) != -1) {
@@ -179,7 +179,7 @@ public final class XMLUtil {
 
 	public static String unescapeXMLString2(String str) {
 
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		int index, last = 0, indexSemi;
 		while ((index = str.indexOf('&', last)) != -1) {
 			sb.append(str.substring(last, index));
@@ -213,7 +213,7 @@ public final class XMLUtil {
 
 	public static String escapeXMLString(String xmlStr) {
 		char c;
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		int len = xmlStr.length();
 		for (int i = 0; i < len; i++) {
 			c = xmlStr.charAt(i);
@@ -813,7 +813,7 @@ public final class XMLUtil {
 		if (k.getLowerString().startsWith("xml")) {
 			// Comment
 			if (k.equals(XMLCOMMENT)) {
-				StringBuffer sb = new StringBuffer();
+				StringBuilder sb = new StringBuilder();
 				NodeList list = node.getChildNodes();
 				int len = list.getLength();
 				for (int i = 0; i < len; i++) {
@@ -890,7 +890,7 @@ public final class XMLUtil {
 			// CData
 			else if (k.equals(XMLCDATA)) {
 				undefinedInRoot(k, node);
-				StringBuffer sb = new StringBuffer();
+				StringBuilder sb = new StringBuilder();
 				NodeList list = node.getChildNodes();
 				int len = list.getLength();
 				for (int i = 0; i < len; i++) {
@@ -1023,7 +1023,7 @@ public final class XMLUtil {
 		if (k.getLowerString().startsWith("xml")) {
 			// Comment
 			if (k.equals(XMLCOMMENT)) {
-				StringBuffer sb = new StringBuffer();
+				StringBuilder sb = new StringBuilder();
 				NodeList list = node.getChildNodes();
 				int len = list.getLength();
 				for (int i = 0; i < len; i++) {
@@ -1454,6 +1454,9 @@ public final class XMLUtil {
 		}
 		if (value instanceof String) {
 			return toInputSource(pc, (String) value);
+		}
+		if (value instanceof StringBuilder) {
+			return toInputSource(pc, value.toString());
 		}
 		if (value instanceof StringBuffer) {
 			return toInputSource(pc, value.toString());

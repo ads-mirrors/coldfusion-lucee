@@ -108,7 +108,7 @@ public final class Selects {
 	public static String _toString(Selects __selects) {
 		Select[] _selects = __selects.getSelects();
 		Select s;
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 
 		for (int y = 0; y < _selects.length; y++) {
 			s = _selects[y];

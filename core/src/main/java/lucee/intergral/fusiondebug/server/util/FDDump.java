@@ -33,23 +33,23 @@ public final class FDDump {
 	}
 
 	public static String toString(Object value) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		dump(sb, value, 0);
 		return sb.toString();
 	}
 
 	public static String toString(IFDVariable var) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		dump(sb, var, 0);
 		return sb.toString();
 	}
 
-	private static void dump(StringBuffer sb, Object value, int level) {
+	private static void dump(StringBuilder sb, Object value, int level) {
 		if (value instanceof IFDValue) dump(sb, (IFDValue) value, level);
 		else dump(sb, (IFDVariable) value, level);
 	}
 
-	private static void dump(StringBuffer sb, IFDValue value, int level) {
+	private static void dump(StringBuilder sb, IFDValue value, int level) {
 		for (int i = 0; i < level; i++) {
 			sb.append(" - ");
 		}
@@ -65,7 +65,7 @@ public final class FDDump {
 		}
 	}
 
-	private static void dump(StringBuffer sb, IFDVariable var, int level) {
+	private static void dump(StringBuilder sb, IFDVariable var, int level) {
 		for (int i = 0; i < level; i++) {
 			sb.append(" - ");
 		}

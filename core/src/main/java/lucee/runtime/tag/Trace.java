@@ -212,7 +212,7 @@ public final class Trace extends BodyTagImpl {
 		// inline
 		if (inline) {
 			lucee.runtime.format.TimeFormat tf = new lucee.runtime.format.TimeFormat(pageContext.getConfig().getLocale());
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			sb.append("<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" bgcolor=\"white\">");
 			sb.append("<tr>");
 			// sb.append("<td><img src=\"/CFIDE/debug/images/Error_16x16.gif\" alt=\"Error type\">");
@@ -239,7 +239,7 @@ public final class Trace extends BodyTagImpl {
 
 		// log
 		Log log = ThreadLocalPageContext.getLog(pageContext, "trace");
-		StringBuffer msg = new StringBuffer();
+		StringBuilder msg = new StringBuilder();
 		msg.append("[" + trace.getTime() + " ms " + total + "] ");
 		msg.append("[" + trace.getTemplate() + " @ line: " + trace.getLine() + "]");
 		if (hasCat || hasText || hasVar) msg.append("- ");

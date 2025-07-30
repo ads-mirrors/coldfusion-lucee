@@ -1177,7 +1177,7 @@ public abstract class AbstrCFMLExprTransformer {
 		if (!(data.srcCode.isCurrentBetween('0', '9') || data.srcCode.isCurrent('.'))) return null;
 
 		Position line = data.srcCode.getPosition();
-		StringBuffer rtn = new StringBuffer();
+		StringBuilder rtn = new StringBuilder();
 
 		// get digit on the left site of the dot
 		if (data.srcCode.isCurrent('.')) rtn.append('0');
@@ -2038,7 +2038,7 @@ public abstract class AbstrCFMLExprTransformer {
 	 * @throws TemplateException
 	 */
 	private Expression simple(Data data, String[] breakConditions) throws TemplateException {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		Position line = data.srcCode.getPosition();
 		outer: while (data.srcCode.isValidIndex()) {
 			for (int i = 0; i < breakConditions.length; i++) {

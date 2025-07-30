@@ -75,39 +75,39 @@ public final class ZExpression implements ZExp {
 	}
 
 	public String toReversePolish() {
-		StringBuffer stringbuffer = new StringBuffer("(");
-		stringbuffer.append(op_);
+		StringBuilder sb = new StringBuilder("(");
+		sb.append(op_);
 		for (int i = 0; i < nbOperands(); i++) {
 			ZExp zexp = getOperand(i);
-			if (zexp instanceof ZExpression) stringbuffer.append(" " + ((ZExpression) zexp).toReversePolish());
-			else if (zexp instanceof ZQuery) stringbuffer.append(" (" + zexp.toString() + ")");
-			else stringbuffer.append(" " + zexp.toString());
+			if (zexp instanceof ZExpression) sb.append(" " + ((ZExpression) zexp).toReversePolish());
+			else if (zexp instanceof ZQuery) sb.append(" (" + zexp.toString() + ")");
+			else sb.append(" " + zexp.toString());
 		}
 
-		stringbuffer.append(")");
-		return stringbuffer.toString();
+		sb.append(")");
+		return sb.toString();
 	}
 
 	@Override
 	public String toString() {
 		if (op_.equals("?")) return op_;
 		if (ZUtils.isCustomFunction(op_) > 0) return formatFunction();
-		StringBuffer stringbuffer = new StringBuffer();
-		if (needPar(op_)) stringbuffer.append("(");
+		StringBuilder sb = new StringBuilder();
+		if (needPar(op_)) sb.append("(");
 		switch (nbOperands()) {
 		case 1: // '\001'
 			ZExp zexp = getOperand(0);
 			if (zexp instanceof ZConstant) {
-				if (ZUtils.isAggregate(op_)) stringbuffer.append(op_ + "(" + zexp.toString() + ")");
-				else stringbuffer.append(op_ + " " + zexp.toString());
+				if (ZUtils.isAggregate(op_)) sb.append(op_ + "(" + zexp.toString() + ")");
+				else sb.append(op_ + " " + zexp.toString());
 			}
-			else if (zexp instanceof ZQuery) stringbuffer.append(op_ + " (" + zexp.toString() + ")");
-			else stringbuffer.append(op_ + " " + zexp.toString());
+			else if (zexp instanceof ZQuery) sb.append(op_ + " (" + zexp.toString() + ")");
+			else sb.append(op_ + " " + zexp.toString());
 			break;
 
 		case 3: // '\003'
 			if (op_.toUpperCase().endsWith("BETWEEN")) {
-				stringbuffer.append(getOperand(0).toString() + " " + op_ + " " + getOperand(1).toString() + " AND " + getOperand(2).toString());
+				sb.append(getOperand(0).toString() + " " + op_ + " " + getOperand(1).toString() + " AND " + getOperand(2).toString());
 				break;
 			}
 			// fall through
@@ -116,19 +116,19 @@ public final class ZExpression implements ZExp {
 			boolean flag = op_.equals("IN") || op_.equals("NOT IN");
 			int i = nbOperands();
 			for (int j = 0; j < i; j++) {
-				if (flag && j == 1) stringbuffer.append(" " + op_ + " (");
+				if (flag && j == 1) sb.append(" " + op_ + " (");
 				ZExp zexp1 = getOperand(j);
-				if ((zexp1 instanceof ZQuery) && !flag) stringbuffer.append("(" + zexp1.toString() + ")");
-				else stringbuffer.append(zexp1.toString());
-				if (j < i - 1) if (op_.equals(",") || flag && j > 0) stringbuffer.append(", ");
-				else if (!flag) stringbuffer.append(" " + op_ + " ");
+				if ((zexp1 instanceof ZQuery) && !flag) sb.append("(" + zexp1.toString() + ")");
+				else sb.append(zexp1.toString());
+				if (j < i - 1) if (op_.equals(",") || flag && j > 0) sb.append(", ");
+				else if (!flag) sb.append(" " + op_ + " ");
 			}
 
-			if (flag) stringbuffer.append(")");
+			if (flag) sb.append(")");
 			break;
 		}
-		if (needPar(op_)) stringbuffer.append(")");
-		return stringbuffer.toString();
+		if (needPar(op_)) sb.append(")");
+		return sb.toString();
 	}
 
 	private boolean needPar(String s) {
@@ -137,13 +137,13 @@ public final class ZExpression implements ZExp {
 	}
 
 	private String formatFunction() {
-		StringBuffer stringbuffer = new StringBuffer(op_ + "(");
+		StringBuilder sb = new StringBuilder(op_ + "(");
 		int i = nbOperands();
 		for (int j = 0; j < i; j++)
-			stringbuffer.append(getOperand(j).toString() + (j >= i - 1 ? "" : ","));
+			sb.append(getOperand(j).toString() + (j >= i - 1 ? "" : ","));
 
-		stringbuffer.append(")");
-		return stringbuffer.toString();
+		sb.append(")");
+		return sb.toString();
 	}
 
 	String op_;

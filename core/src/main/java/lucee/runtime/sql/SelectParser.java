@@ -657,7 +657,7 @@ public final class SelectParser {
 		// check first character is a number literal representation
 		if (!(raw.isCurrentBetween('0', '9') || raw.isCurrent('.'))) return null;
 
-		StringBuffer rtn = new StringBuffer();
+		StringBuilder rtn = new StringBuilder();
 
 		// get digit on the left site of the dot
 		if (raw.isCurrent('.')) rtn.append('0');
@@ -699,7 +699,7 @@ public final class SelectParser {
 		if (!raw.isCurrent('\'')) return null;
 
 		// Init Parameter
-		StringBuffer str = new StringBuffer();
+		StringBuilder str = new StringBuilder();
 
 		while (raw.hasNext()) {
 			raw.next();

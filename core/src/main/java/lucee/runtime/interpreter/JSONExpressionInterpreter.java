@@ -23,7 +23,7 @@ import lucee.commons.lang.StringUtil;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.interpreter.ref.Ref;
-import lucee.runtime.interpreter.ref.literal.LStringBuffer;
+import lucee.runtime.interpreter.ref.literal.LStringBuilder;
 
 public final class JSONExpressionInterpreter extends CFMLExpressionInterpreter {
 
@@ -49,7 +49,7 @@ public final class JSONExpressionInterpreter extends CFMLExpressionInterpreter {
 
 		// Init Parameter
 		char quoter = cfml.getCurrentLower();
-		LStringBuffer str = new LStringBuffer();
+		LStringBuilder str = new LStringBuilder();
 
 		while (cfml.hasNext()) {
 			cfml.next();

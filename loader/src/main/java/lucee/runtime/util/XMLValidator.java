@@ -77,7 +77,7 @@ class XMLValidator extends XMLEntityResolverDefaultHandler {
 	}
 
 	private void log(SAXParseException spe, String type, Array array) {
-		StringBuffer sb = new StringBuffer("[" + type + "] ");
+		StringBuilder sb = new StringBuilder( "[" + type + "] ");
 
 		String id = spe.getSystemId();
 		if (!Util.isEmpty(id)) {

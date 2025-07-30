@@ -1934,7 +1934,7 @@ public abstract class AbstrCFMLScriptTransformer extends AbstrCFMLExprTransforme
 		String id = identifier(data, firstCanBeNumber);
 		if (id == null) return null;
 
-		StringBuffer rtn = new StringBuffer(id);
+		StringBuilder rtn = new StringBuilder(id);
 		data.srcCode.removeSpace();
 
 		while (data.srcCode.forwardIfCurrent('.')) {
@@ -2085,7 +2085,7 @@ public abstract class AbstrCFMLScriptTransformer extends AbstrCFMLExprTransforme
 		if (tlt.hasTTE()) data.ep.add(tlt, tag, data.flibs, data.srcCode);
 
 		if (!StringUtil.isEmpty(attrName))
-			validateAttributeName(attrName, data.srcCode, new ArrayList<String>(), tlt, new RefBooleanImpl(false), new StringBuffer(), allowTwiceAttr);
+			validateAttributeName(attrName, data.srcCode, new ArrayList<String>(), tlt, new RefBooleanImpl(false), new StringBuilder(), allowTwiceAttr);
 		tag.setEnd(data.srcCode.getPosition());
 		eval(tlt, data, tag);
 		return tag;
@@ -2129,7 +2129,7 @@ public abstract class AbstrCFMLScriptTransformer extends AbstrCFMLExprTransforme
 	 * tag, data.fld, data.srcCode);
 	 * 
 	 * if(!StringUtil.isEmpty(attrName))validateAttributeName(attrName, data.srcCode, new
-	 * ArrayList<String>(), tlt, new RefBooleanImpl(false), new StringBuffer(), allowTwiceAttr);
+	 * ArrayList<String>(), tlt, new RefBooleanImpl(false), new StringBuilder(), allowTwiceAttr);
 	 * 
 	 * eval(tlt,data,tag); return tag; }
 	 */
@@ -2301,7 +2301,7 @@ public abstract class AbstrCFMLScriptTransformer extends AbstrCFMLExprTransforme
 			Position line = data.srcCode.getPosition();
 			Expression name = null, type = null;
 
-			StringBuffer sbType = new StringBuffer();
+			StringBuilder sbType = new StringBuilder();
 			String id;
 			while (true) {
 				id = identifier(data, false);
@@ -2487,7 +2487,7 @@ public abstract class AbstrCFMLScriptTransformer extends AbstrCFMLExprTransforme
 
 	private final Attribute attribute(TagLibTag tlt, Data data, ArrayList<String> args, Expression defaultValue, Object oAllowExpression, boolean allowTwiceAttr,
 			boolean allowColonSeparator) throws TemplateException {
-		StringBuffer sbType = new StringBuffer();
+		StringBuilder sbType = new StringBuilder();
 		RefBoolean dynamic = new RefBooleanImpl(false);
 
 		comments(data);
@@ -2523,13 +2523,13 @@ public abstract class AbstrCFMLScriptTransformer extends AbstrCFMLExprTransforme
 		return new Attribute(dynamic.toBooleanValue(), name, tlta != null ? data.factory.toExpression(value, tlta.getType()) : value, sbType.toString(), !hasValue);
 	}
 
-	private final String attributeName(SourceCode cfml, ArrayList<String> args, TagLibTag tag, RefBoolean dynamic, StringBuffer sbType, boolean allowTwiceAttr, boolean allowColon)
+	private final String attributeName(SourceCode cfml, ArrayList<String> args, TagLibTag tag, RefBoolean dynamic, StringBuilder sbType, boolean allowTwiceAttr, boolean allowColon)
 			throws TemplateException {
 		String id = CFMLTransformer.identifier(cfml, true, allowColon);
 		return validateAttributeName(id, cfml, args, tag, dynamic, sbType, allowTwiceAttr);
 	}
 
-	private final String validateAttributeName(String idOC, SourceCode cfml, ArrayList<String> args, TagLibTag tag, RefBoolean dynamic, StringBuffer sbType, boolean allowTwiceAttr)
+	private final String validateAttributeName(String idOC, SourceCode cfml, ArrayList<String> args, TagLibTag tag, RefBoolean dynamic, StringBuilder sbType, boolean allowTwiceAttr)
 			throws TemplateException {
 		String idLC = idOC.toLowerCase();
 

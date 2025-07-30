@@ -221,7 +221,7 @@ public final class FunctionLibFunctionArg {
 	}
 
 	public String getHash() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		sb.append(this.getDefaultValue());
 		sb.append(this.getName());
 		sb.append(this.getRequired());

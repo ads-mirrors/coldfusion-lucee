@@ -49,7 +49,7 @@ public class CatchBlockModifier {
 
 		Matcher matcher = pattern.matcher(content);
 
-		StringBuffer newContent = new StringBuffer();
+		StringBuilder newContent = new StringBuilder();
 		int fileCount = 0;
 
 		while (matcher.find()) {

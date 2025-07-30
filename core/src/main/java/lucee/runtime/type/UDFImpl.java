@@ -446,7 +446,7 @@ public class UDFImpl extends MemberSupport implements UDFPlus, Externalizable {
 
 	@Override
 	public String toString() {
-		StringBuffer sb = new StringBuffer(properties.getFunctionName());
+		StringBuilder sb = new StringBuilder(properties.getFunctionName());
 		sb.append("(");
 		int optCount = 0;
 		FunctionArgument[] args = properties.getFunctionArguments();

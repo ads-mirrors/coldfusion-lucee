@@ -58,7 +58,7 @@ public final class ListSetAt extends BIF {
 			throw new FunctionException(pc, "listSetAt", 2, "position", "invalid string list index [" + (pos) + "], indexes go from 1 to " + (len));
 		}
 
-		StringBuilder sb = new StringBuilder();// RepeatString.call(new StringBuffer(),delimiter,removedInfo[0]);
+		StringBuilder sb = new StringBuilder();// RepeatString.call(new StringBuilder(),delimiter,removedInfo[0]);
 		boolean hasStart = false;
 		boolean hasSet = false;
 		String v;

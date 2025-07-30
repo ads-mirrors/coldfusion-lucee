@@ -80,8 +80,8 @@ public final class Table extends BodyTagTryCatchFinallyImpl {
 	 */
 	private int headerlines = 2;
 
-	StringBuffer header = new StringBuffer();
-	StringBuffer body = new StringBuffer();
+	StringBuilder header = new StringBuilder();
+	StringBuilder body = new StringBuilder();
 
 	private int initRow;
 
@@ -99,8 +99,8 @@ public final class Table extends BodyTagTryCatchFinallyImpl {
 		colspacing = 2;
 		htmltable = false;
 		headerlines = 2;
-		if (header.length() > 0) header = new StringBuffer();
-		body = new StringBuffer();
+		if (header.length() > 0) header = new StringBuilder();
+		body = new StringBuilder();
 		count = 0;
 	}
 
@@ -292,13 +292,13 @@ public final class Table extends BodyTagTryCatchFinallyImpl {
 		}
 	}
 
-	private void addAlign(StringBuffer data, short align) {
+	private void addAlign(StringBuilder data, short align) {
 		data.append(" align=\"");
 		data.append(toStringAlign(align));
 		data.append("\"");
 	}
 
-	private void addWidth(StringBuffer data, int width) {
+	private void addWidth(StringBuilder data, int width) {
 		if (width >= -1) {
 			data.append(" width=\"");
 			data.append(width);
@@ -306,7 +306,7 @@ public final class Table extends BodyTagTryCatchFinallyImpl {
 		}
 	}
 
-	private void addPre(StringBuffer data, short align, String value, int length) throws ExpressionException {
+	private void addPre(StringBuilder data, short align, String value, int length) throws ExpressionException {
 		if (align == ALIGN_RIGHT) data.append(RJustify.call(pageContext, value, length));
 		else if (align == ALIGN_CENTER) data.append(CJustify.call(pageContext, value, length));
 		else data.append(LJustify.call(pageContext, value, length));

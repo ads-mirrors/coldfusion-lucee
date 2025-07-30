@@ -90,32 +90,32 @@ public final class ZQuery implements ZStatement, ZExp {
 
 	@Override
 	public String toString() {
-		StringBuffer stringbuffer = new StringBuffer("select ");
-		if (distinct_) stringbuffer.append("distinct ");
-		stringbuffer.append(select_.elementAt(0).toString());
+		StringBuilder sb = new StringBuilder("select ");
+		if (distinct_) sb.append("distinct ");
+		sb.append(select_.elementAt(0).toString());
 		for (int i = 1; i < select_.size(); i++)
-			stringbuffer.append(", " + select_.elementAt(i).toString());
+			sb.append(", " + select_.elementAt(i).toString());
 
-		stringbuffer.append(" from ");
-		stringbuffer.append(from_.elementAt(0).toString());
+		sb.append(" from ");
+		sb.append(from_.elementAt(0).toString());
 		for (int j = 1; j < from_.size(); j++)
-			stringbuffer.append(", " + from_.elementAt(j).toString());
+			sb.append(", " + from_.elementAt(j).toString());
 
-		if (where_ != null) stringbuffer.append(" where " + where_.toString());
+		if (where_ != null) sb.append(" where " + where_.toString());
 
-		if (groupby_ != null) stringbuffer.append(" " + groupby_.toString());
+		if (groupby_ != null) sb.append(" " + groupby_.toString());
 
-		if (setclause_ != null) stringbuffer.append(" " + setclause_.toString());
+		if (setclause_ != null) sb.append(" " + setclause_.toString());
 
 		if (orderby_ != null) {
-			stringbuffer.append(" order by ");
-			stringbuffer.append(orderby_.elementAt(0).toString());
+			sb.append(" order by ");
+			sb.append(orderby_.elementAt(0).toString());
 			for (int k = 1; k < orderby_.size(); k++)
-				stringbuffer.append(", " + orderby_.elementAt(k).toString());
+				sb.append(", " + orderby_.elementAt(k).toString());
 
 		}
-		if (forupdate_) stringbuffer.append(" for update");
-		return stringbuffer.toString();
+		if (forupdate_) sb.append(" for update");
+		return sb.toString();
 	}
 
 	Vector select_;

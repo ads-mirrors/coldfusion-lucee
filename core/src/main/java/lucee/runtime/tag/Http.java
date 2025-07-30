@@ -1183,7 +1183,7 @@ public final class Http extends BodyTagImpl {
 
 			// responseHeader
 			lucee.commons.net.http.Header[] headers = rsp.getAllHeaders();
-			StringBuffer raw = new StringBuffer(rsp.getStatusLine() + " ");
+			StringBuilder raw = new StringBuilder(rsp.getStatusLine() + " ");
 			Struct responseHeader = new StructImpl();
 			Struct cookie;
 			Array setCookie = new ArrayImpl();

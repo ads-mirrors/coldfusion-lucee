@@ -1607,7 +1607,7 @@ public final class QueryImpl implements Query, Objects, QueryResult {
 	public String toString() {
 		Collection.Key[] keys = keys();
 
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 
 		sb.append("| Query: ").append(this.name).append("\tRecordCount: ").append(getRecordcount()).append('\n');
 
