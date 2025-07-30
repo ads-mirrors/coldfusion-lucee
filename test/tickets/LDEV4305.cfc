@@ -9,11 +9,11 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" {
 				assertEquals("false", lsIsDate("12-12-2022", "english (uk)"));
 			});
 
-			it(title='Checking lsIsDate() function with locale "english (uk)"', body=function( currentSpec ) {
-				//assertEquals("true", lsIsDate("1999-12-31", "english (uk)"));
-				//assertEquals("true", lsIsDate("12.12.2022", "english (uk)"));
-				//assertEquals("true", lsIsDate("2022-12-31", "english (uk)"));
-				//assertEquals("true", lsIsDate("12-12-22", "english (uk)"));
+			xit(title='Checking lsIsDate() function with locale "english (uk)"', body=function( currentSpec ) {
+				assertEquals("true", lsIsDate("1999-12-31", "english (uk)"));
+				assertEquals("true", lsIsDate("12.12.2022", "english (uk)"));
+				assertEquals("true", lsIsDate("2022-12-31", "english (uk)"));
+				assertEquals("true", lsIsDate("12-12-22", "english (uk)"));
 			});
 		});
 	}
