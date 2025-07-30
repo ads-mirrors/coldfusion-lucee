@@ -428,7 +428,7 @@ public final class ParserString {
 	public boolean forwardIfCurrentAndNoWordNumberAfter(String str) {
 		int c = pos;
 		if (forwardIfCurrent(str)) {
-			if (!isCurrentLetter() && !isCurrentLetter() && !isCurrent('_')) return true;
+			if (!isCurrentLetter() && !isCurrent('_')) return true;
 		}
 		pos = c;
 		return false;
@@ -437,7 +437,7 @@ public final class ParserString {
 	public boolean forwardIfCurrentAndNoWordNumberAfter(String str, String str2) {
 		int c = pos;
 		if (forwardIfCurrent(str, str2)) {
-			if (!isCurrentLetter() && !isCurrentLetter() && !isCurrent('_')) return true;
+			if (!isCurrentLetter() && !isCurrent('_')) return true;
 		}
 		pos = c;
 		return false;
@@ -446,7 +446,7 @@ public final class ParserString {
 	public boolean forwardIfCurrentAndNoWordNumberAfter(String str, String str2, String str3) {
 		int c = pos;
 		if (forwardIfCurrent(str, str2, str3)) {
-			if (!isCurrentLetter() && !isCurrentLetter() && !isCurrent('_')) return true;
+			if (!isCurrentLetter() && !isCurrent('_')) return true;
 		}
 		pos = c;
 		return false;
