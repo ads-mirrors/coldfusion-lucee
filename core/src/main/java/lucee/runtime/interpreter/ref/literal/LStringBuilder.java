@@ -70,7 +70,7 @@ public final class LStringBuilder extends RefSupport implements Literal {
 	public void append(Ref ref) {
 		if (sb.length() > 0) {
 			refs.add(new LString(sb.toString()));
-			sb = new StringBuilder();
+			sb.setLength(0);
 		}
 		refs.add(ref);
 	}
