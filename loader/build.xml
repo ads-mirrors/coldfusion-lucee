@@ -102,4 +102,10 @@
       <delete dir="${outputDir}"/>
   </target>
 
+
+  <!-- Show the properties for the current environment !-->
+  <target name="echoproperties">
+    <echoproperties />
+  </target>
+
 </project>
