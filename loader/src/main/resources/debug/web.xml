@@ -17,7 +17,7 @@
   <servlet id="Lucee">
     <description>Lucee CFML Engine</description>
     <servlet-name>CFMLServlet</servlet-name>
-    <servlet-class>lucee.loader.servlet.CFMLServlet</servlet-class>
+    <servlet-class>lucee.loader.servlet.jakarta.CFMLServlet</servlet-class>
     <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
     <!-- to specify the location of the Lucee Server config and libraries,   -->
     <!-- uncomment the init-param below.  make sure that the param-value     -->
@@ -58,7 +58,7 @@
   <servlet id="LuceeREST">
     <description>Lucee Servlet for RESTful services</description>
     <servlet-name>RESTServlet</servlet-name>
-    <servlet-class>lucee.loader.servlet.RestServlet</servlet-class>
+    <servlet-class>lucee.loader.servlet.jakarta.RestServlet</servlet-class>
     <load-on-startup>2</load-on-startup>
   </servlet>
   <servlet-mapping>

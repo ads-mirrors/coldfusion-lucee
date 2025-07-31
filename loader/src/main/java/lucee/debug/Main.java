@@ -27,8 +27,6 @@ public class Main {
 
 		String s;
 
-		System.setProperty("lucee.controller.disabled", "true");
-
 		s = Util.getSystemPropOrEnvVar(ARG_PROJECT_DIR, "");
 		if (s.isEmpty()) {
 			s = Paths.get("").toAbsolutePath().toString();

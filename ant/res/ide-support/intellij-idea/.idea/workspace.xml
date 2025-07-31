@@ -27,11 +27,13 @@
   }
 }]]></component>
   <component name="RunManager">
-    <configuration name="Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+    <configuration name="Debug Lucee" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <envs>
+        <env name="LUCEE_CONTROLLER_DISABLED" value="true" />
         <env name="LUCEE_DEBUG_BASE" value="" />
         <env name="LUCEE_CLASS_DIR" value="" />
         <env name="LUCEE_SOURCE_DIR" value="" />
+        <env name="ORG_OSGI_FRAMEWORK_STORAGE_CLEAN" value="onFirstInit" />
       </envs>
       <option name="MAIN_CLASS_NAME" value="lucee.debug.Main" />
       <module name="loader" />
