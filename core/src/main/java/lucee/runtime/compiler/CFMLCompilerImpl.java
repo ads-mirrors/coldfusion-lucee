@@ -86,7 +86,7 @@ public final class CFMLCompilerImpl implements CFMLCompiler {
 		// , cwi.getFLDs()
 		PageImpl page = ((PageImpl) cfmlTransformer.transform(factory, config, sc, config.getTLDs(), config.getFLDs(), System.currentTimeMillis(), config.getDotNotationUpperCase(),
 				false, ignoreScopes, false, false, false));
-		Struct sct = new StructImpl();
+		Struct sct = new StructImpl(Struct.TYPE_LINKED);
 		page.dump(sct);
 		return sct;
 	}

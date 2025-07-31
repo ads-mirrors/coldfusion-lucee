@@ -56,7 +56,9 @@ import lucee.runtime.component.ImportDefintionImpl;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.Constants;
 import lucee.runtime.op.Caster;
+import lucee.runtime.type.Array;
 import lucee.runtime.type.KeyImpl;
+import lucee.runtime.type.Struct;
 import lucee.runtime.type.UDF;
 import lucee.runtime.type.scope.Undefined;
 import lucee.runtime.type.util.ArrayUtil;
@@ -68,8 +70,6 @@ import lucee.transformer.Page;
 import lucee.transformer.Range;
 import lucee.transformer.TransformerException;
 import lucee.transformer.bytecode.ConstrBytecodeContext.Data;
-import lucee.transformer.statement.IFunction;
-import lucee.transformer.statement.Statement;
 import lucee.transformer.bytecode.statement.NativeSwitch;
 import lucee.transformer.bytecode.statement.tag.TagCIObject;
 import lucee.transformer.bytecode.statement.tag.TagComponent;
@@ -92,6 +92,8 @@ import lucee.transformer.expression.literal.Literal;
 import lucee.transformer.statement.Argument;
 import lucee.transformer.statement.HasBodies;
 import lucee.transformer.statement.HasBody;
+import lucee.transformer.statement.IFunction;
+import lucee.transformer.statement.Statement;
 import lucee.transformer.statement.tag.ATagThread;
 import lucee.transformer.statement.tag.Attribute;
 import lucee.transformer.statement.tag.Tag;
@@ -276,8 +278,8 @@ public final class PageImpl extends BodyBase implements Page {
 	 * @param returnValue
 	 * @param ignoreScopes
 	 */
-	public PageImpl(Factory factory, Config config, SourceCode sc, TagCIObject tc, long version, long lastModifed, boolean writeLog, boolean suppressWSbeforeArg,
-			boolean output, boolean returnValue, boolean ignoreScopes) {
+	public PageImpl(Factory factory, Config config, SourceCode sc, TagCIObject tc, long version, long lastModifed, boolean writeLog, boolean suppressWSbeforeArg, boolean output,
+			boolean returnValue, boolean ignoreScopes) {
 		super(factory);
 		this._comp = tc;
 		this.version = version;
@@ -1898,6 +1900,42 @@ public final class PageImpl extends BodyBase implements Page {
 
 	public List<JavaFunction> getJavaFunctions() {
 		return javaFunctions;
+	}
+
+	@Override
+	public void dump(Struct sct) {
+		// make sure they are at the start
+		sct.setEL(KeyConstants._start, null);
+		sct.setEL(KeyConstants._end, null);
+
+		super.dump(sct);
+		sct.setEL(KeyConstants._type, "Program");
+
+		Array arr = Caster.toArray(sct.get(KeyConstants._body, null), null);
+		if (arr != null) {
+			Iterator<Object> it = arr.valueIterator();
+			Struct bodyElement, s = null, e, end = null;
+			while (it.hasNext()) {
+				bodyElement = Caster.toStruct(it.next(), null);
+				if (bodyElement != null) {
+					// start
+					if (s == null) {
+						s = Caster.toStruct(bodyElement.get(KeyConstants._start, null), null);
+						if (s != null) {
+							sct.setEL(KeyConstants._start, s);
+						}
+					}
+					// end
+					e = Caster.toStruct(bodyElement.get(KeyConstants._end, null), null);
+					if (e != null) end = e;
+				}
+
+			}
+			if (end != null) {
+				sct.setEL(KeyConstants._end, end);
+			}
+
+		}
 	}
 }
 

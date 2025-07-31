@@ -116,13 +116,12 @@ public final class PrintOut extends StatementBaseNoFinal {
 	@Override
 	public void dump(Struct sct) {
 		super.dump(sct);
-		sct.setEL(KeyConstants._type, "PrintOutStatement");
+		sct.setEL(KeyConstants._type, "ExpressionStatement");
 
-		// argument
 		{
-			Struct argument = new StructImpl(Struct.TYPE_LINKED);
-			expr.dump(argument);
-			sct.setEL(KeyConstants._argument, argument);
+			Struct expression = new StructImpl(Struct.TYPE_LINKED);
+			expr.dump(expression);
+			sct.setEL("expression", expression);
 		}
 	}
 }
