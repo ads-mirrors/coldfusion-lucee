@@ -8,9 +8,15 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect( listLen( q.columnlist) ).toBe( 3 );
 			});
 
-			xit(title="queryAddColumn with named arguments", body = function( currentSpec ) {
+			it(title="queryAddColumn with named arguments", body = function( currentSpec ) {
 				var q = queryNew( names="id,name" );
 				queryAddColumn( query=q ,column="type" );
+				expect( listLen( q.columnlist ) ).toBe( 3 );
+			});
+
+			it(title="queryAddColumn with named arguments", body = function( currentSpec ) {
+				var q = queryNew( names="id,name" );
+				queryAddColumn( query=q ,column="type",datatype="varchar" );
 				expect( listLen( q.columnlist ) ).toBe( 3 );
 			});
 

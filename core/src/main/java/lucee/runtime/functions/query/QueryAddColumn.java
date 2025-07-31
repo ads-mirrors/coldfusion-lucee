@@ -46,6 +46,7 @@ public final class QueryAddColumn extends BIF {
 	}
 
 	public static Number call(PageContext pc, Query query, String string, Object datatype, Object array) throws PageException {
+		if (array == null) array = new ArrayImpl();
 		if (StringUtil.isEmpty(datatype)) query.addColumn(KeyImpl.init(string), Caster.toArray(array));
 		else query.addColumn(KeyImpl.init(string), Caster.toArray(array), SQLCaster.toSQLType(Caster.toString(datatype)));
 		return Caster.toNumber(pc, query.size());
