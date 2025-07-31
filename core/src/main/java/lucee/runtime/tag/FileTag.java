@@ -176,6 +176,12 @@ public final class FileTag extends BodyTagImpl {
 	private ResourceFilter allowedExtensions;
 	private ResourceFilter blockedExtensions;
 
+	private static boolean ALLOW_MIMETYPE_DETECTION;
+
+	static {
+		ALLOW_MIMETYPE_DETECTION = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.fileupload.allow.mimetype.detection", null), true);
+	}
+
 	@Override
 	public void release() {
 		super.release();
@@ -958,9 +964,11 @@ public final class FileTag extends BodyTagImpl {
 			strClientFile = strClientFile.replace('\\', '/');
 		Resource clientFile = pageContext.getConfig().getResource(strClientFile);
 		String clientFileName = clientFile.getName();
-
 		// content type
-		String contentType = ResourceUtil.getMimeType(formItem.getResource(), clientFile.getName(), formItem.getContentType());
+		String contentType;
+		if (ALLOW_MIMETYPE_DETECTION) contentType = ResourceUtil.getMimeType(formItem.getResource(), clientFile.getName(), formItem.getContentType());
+		else contentType = formItem.getContentType();
+
 		cffile.set(KeyConstants._contenttype, ListFirst.call(pageContext, contentType, "/", false, 1));
 		cffile.set(KeyConstants._contentsubtype, ListLast.call(pageContext, contentType, "/", false, 1));
 
