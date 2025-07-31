@@ -443,5 +443,15 @@
         "sysprop": "lucee.log.webcontext",
         "envvar": "LUCEE_LOG_WEBCONTEXT",
         "desc": "A boolean value that enables web context identification in log entries when running in single mode. When enabled, log entries include web context labels (e.g., http://localhost:8886|engine) to distinguish which web context generated the log entry. Only active in single mode where all web contexts share the same log directory. In multi mode, this setting has no effect as each web context has its own log directory. Added in Lucee 6.2.2.63"
+    },
+    {
+        "sysprop": "lucee.allow.reflection",
+        "envvar": "LUCEE_ALLOW_REFLECTION",
+        "desc": "A boolean value that enables java reflection, default is false"
+    },
+    {
+        "sysprop": "lucee.fileupload.allow.mimetype.detection",
+        "envvar": "LUCEE_FILEUPLOAD_ALLOW_MIMETYPE_DETECTION",
+        "desc": "A boolean value that enables using tika to detect the mime type for unknown file uploads, default is false"
     }
 ]
