@@ -1,8 +1,28 @@
 component extends="org.lucee.cfml.test.LuceeTestCase" {
+
 	public function run( testResults, testBox ) {
+
+		variables.algorithms = "";
+		variables.message = 'this is a test';
+		variables.key = 'ABC123'
+			
+		try {
+			hmac( message, key,"I am not a valid algo");
+		} catch (e) {
+			variables.algorithms = ListToArray(listLast( e.message, "[]" ));
+		}
+
+		loop array="#algorithms#" value="local.algo" {
+			describe( title="Testcase for hmac(#algo#) function", body=function() {
+				it(title="Checking the hmac(#algo#) function", 
+						data={ algo=algo },
+						body=function( data ) {
+					expect( isNull( hmac( message, key, trim(data.algo) ) ) ).toBeFalse();
+				});
+			});
+		}
+
 		describe( title="Testcase for hmac() function", body=function() {
-			var message = 'this is a test';
-			var key = 'ABC123'
 			it(title="Checking the hmac() with key argument", body=function( currentSpec ) {
 				expect(hmac( message, key )).toBe("776770430C93778AD6F91B43A4A30B69");
 			});
@@ -21,5 +41,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect(hmac( message, key, "HMACSHA512", "utf-16")).toBe("3D625C3F887D3D02FF4A3EBCD66312524BD5FFD59B00293818B7D925431B78C790E32C0D8D4FB9C11C2D43AFEF6E9B154AAA0F434C7356AAE848C7FAE2495689");
 			});
 		});
+
+
 	}
 }
