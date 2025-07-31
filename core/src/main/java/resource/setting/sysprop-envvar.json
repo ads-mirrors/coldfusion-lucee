@@ -468,5 +468,10 @@
         "sysprop": "lucee.fileupload.allow.mimetype.detection",
         "envvar": "LUCEE_FILEUPLOAD_ALLOW_MIMETYPE_DETECTION",
         "desc": "A boolean value that enables using tika to detect the mime type for unknown file uploads, default is false"
+    },
+    {
+        "sysprop": "lucee.base.config",
+        "envvar": "LUCEE_BASE_CONFIG",
+        "desc": "Specifies a path to an alternate location for your .CFConfig.json file."
     }
 ]
