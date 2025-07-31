@@ -9511,13 +9511,13 @@ The following things are considered to be empty:
 			<type>string</type>
 		</return>
 	</function>
-	<!-- ListRemoveDuplicates -->
+	<!-- ListGetDuplicates -->
 	<function>
 		<name>ListGetDuplicates</name>
 		<class>lucee.runtime.functions.list.ListGetDuplicates</class>
 		<keywords>list,string</keywords>
 		<member-name>listGetDuplicates</member-name>
-		<description>Removes duplicate values from list.</description>
+		<description>Gets a list of duplicate values from a list.</description>
 		<introduced>7.0.0.107</introduced>
 		<argument>
 			<name>list</name>
