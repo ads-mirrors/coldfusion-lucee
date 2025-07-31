@@ -3086,6 +3086,8 @@ public final class KeyConstants {
 	public static final Key _safeNavigatedValue = init("safeNavigatedValue");
 	public static final Key _nameSpace = init("nameSpace");
 	public static final Key _nameSpaceSeparator = init("nameSpaceSeparator");
+	public static final Key _callee = init("callee");
+	public static final Key _computed = init("computed");
 
 	public static Map<String, Key> getKeys() {
 		return keys;

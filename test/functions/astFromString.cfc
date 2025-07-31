@@ -21,7 +21,7 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" {
 			it( title = 'echo literal string', body = function( currentSpec ) {
 				var result = astFromString("Susi");
 				assertEquals(
-					'{"start":{"line":1,"column":0,"offset":0},"end":{"line":1,"column":4,"offset":4},"type":"Program","body":[{"start":{"line":1,"column":0,"offset":0},"end":{"line":1,"column":4,"offset":4},"type":"ExpressionStatement","expression":{"start":{"line":1,"column":0,"offset":0},"end":{"line":1,"column":4,"offset":4},"type":"StringLiteral","value":"Susi"}}]}', 
+					'{"start":{"line":1,"column":0,"offset":0},"end":{"line":1,"column":4,"offset":4},"type":"Program","body":[{"start":{"line":1,"column":0,"offset":0},"end":{"line":1,"column":4,"offset":4},"type":"ExpressionStatement","expression":{"start":{"line":1,"column":0,"offset":0},"end":{"line":1,"column":4,"offset":4},"type":"StringLiteral","value":"Susi","raw":"\"Susi\""}}]}', 
 					serializeJSON(var:result,compact:true)
 					);
 			});
@@ -32,7 +32,34 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" {
 					serializeJSON(var:result,compact:true)
 					);
 			});
-
+			it( title = 'test variable assignment with single data member', body = function( currentSpec ) {
+				var result = astFromString('<cfscript>a.b.c=d;</cfscript>');
+				assertEquals(
+					'{"start":{"line":1,"column":0,"offset":0},"end":{"line":1,"column":29,"offset":29},"type":"Program","body":[{"start":{"line":1,"column":0,"offset":0},"end":{"line":1,"column":29,"offset":29},"type":"CFMLTag","name":"script","nameSpace":"cf","nameSpaceSeparator":"","fullname":"cfscript","attributes":[],"body":{"type":"BlockStatement","body":[{"start":{"line":1,"column":10,"offset":10},"end":{"line":1,"column":17,"offset":17},"type":"AssignmentExpression","operator":"ASSIGN","left":{"start":{"line":1,"column":10,"offset":10},"end":{"line":1,"column":11,"offset":11},"type":"MemberExpression","computed":false,"object":{"type":"MemberExpression","computed":false,"object":{"type":"Identifier","name":"A"},"property":{"type":"Identifier","name":"B"}},"property":{"type":"Identifier","name":"C"}},"right":{"start":{"line":1,"column":16,"offset":16},"end":{"line":1,"column":17,"offset":17},"type":"Identifier","name":"D"}}]}}]}', 
+					serializeJSON(var:result,compact:true)
+					);
+			});
+			it( title = 'test variable assignment with 2 data member', body = function( currentSpec ) {
+				var result = astFromString('<cfscript>a.b.c=d.e;</cfscript>');
+				assertEquals(
+					'{"start":{"line":1,"column":0,"offset":0},"end":{"line":1,"column":31,"offset":31},"type":"Program","body":[{"start":{"line":1,"column":0,"offset":0},"end":{"line":1,"column":31,"offset":31},"type":"CFMLTag","name":"script","nameSpace":"cf","nameSpaceSeparator":"","fullname":"cfscript","attributes":[],"body":{"type":"BlockStatement","body":[{"start":{"line":1,"column":10,"offset":10},"end":{"line":1,"column":19,"offset":19},"type":"AssignmentExpression","operator":"ASSIGN","left":{"start":{"line":1,"column":10,"offset":10},"end":{"line":1,"column":11,"offset":11},"type":"MemberExpression","computed":false,"object":{"type":"MemberExpression","computed":false,"object":{"type":"Identifier","name":"A"},"property":{"type":"Identifier","name":"B"}},"property":{"type":"Identifier","name":"C"}},"right":{"start":{"line":1,"column":16,"offset":16},"end":{"line":1,"column":17,"offset":17},"type":"MemberExpression","computed":false,"object":{"type":"Identifier","name":"D"},"property":{"type":"Identifier","name":"E"}}}]}}]}', 
+					serializeJSON(var:result,compact:true)
+					);
+			});
+			it( title = 'test variable assignment with function call', body = function( currentSpec ) {
+				var result = astFromString('<cfscript>a.b.c=d(1,true,"");</cfscript>');
+				assertEquals(
+					'{"start":{"line":1,"column":0,"offset":0},"end":{"line":1,"column":40,"offset":40},"type":"Program","body":[{"start":{"line":1,"column":0,"offset":0},"end":{"line":1,"column":40,"offset":40},"type":"CFMLTag","name":"script","nameSpace":"cf","nameSpaceSeparator":"","fullname":"cfscript","attributes":[],"body":{"type":"BlockStatement","body":[{"start":{"line":1,"column":10,"offset":10},"end":{"line":1,"column":28,"offset":28},"type":"AssignmentExpression","operator":"ASSIGN","left":{"start":{"line":1,"column":10,"offset":10},"end":{"line":1,"column":11,"offset":11},"type":"MemberExpression","computed":false,"object":{"type":"MemberExpression","computed":false,"object":{"type":"Identifier","name":"A"},"property":{"type":"Identifier","name":"B"}},"property":{"type":"Identifier","name":"C"}},"right":{"start":{"line":1,"column":16,"offset":16},"end":{"line":1,"column":28,"offset":28},"type":"CallExpression","callee":{"type":"Identifier","name":"D"},"arguments":[{"start":{"line":1,"column":18,"offset":18},"end":{"line":1,"column":19,"offset":19},"type":"NumberLiteral","raw":"1","value":1},{"start":{"line":1,"column":20,"offset":20},"end":{"line":1,"column":24,"offset":24},"type":"BooleanLiteral","value":true},{"start":{"line":1,"column":25,"offset":25},"end":{"line":1,"column":27,"offset":27},"type":"StringLiteral","value":"","raw":"\"\""}]}}]}}]}', 
+					serializeJSON(var:result,compact:true)
+					);
+			});
+			it( title = 'test variable assignment with scopes', body = function( currentSpec ) {
+				var result = astFromString('<cfscript>variables.a=url.a;</cfscript>');
+				assertEquals(
+					'{"start":{"line":1,"column":0,"offset":0},"end":{"line":1,"column":39,"offset":39},"type":"Program","body":[{"start":{"line":1,"column":0,"offset":0},"end":{"line":1,"column":39,"offset":39},"type":"CFMLTag","name":"script","nameSpace":"cf","nameSpaceSeparator":"","fullname":"cfscript","attributes":[],"body":{"type":"BlockStatement","body":[{"start":{"line":1,"column":10,"offset":10},"end":{"line":1,"column":27,"offset":27},"type":"AssignmentExpression","operator":"ASSIGN","left":{"start":{"line":1,"column":10,"offset":10},"end":{"line":1,"column":19,"offset":19},"type":"MemberExpression","computed":false,"object":{"type":"Identifier","name":"VARIABLES"},"property":{"type":"Identifier","name":"A"}},"right":{"start":{"line":1,"column":22,"offset":22},"end":{"line":1,"column":25,"offset":25},"type":"MemberExpression","computed":false,"object":{"type":"Identifier","name":"URL"},"property":{"type":"Identifier","name":"A"}}}]}}]}', 
+					serializeJSON(var:result,compact:true)
+					);
+			});
 
 			
 		});

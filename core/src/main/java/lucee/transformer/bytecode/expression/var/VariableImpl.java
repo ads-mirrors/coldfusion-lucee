@@ -28,7 +28,6 @@ import org.objectweb.asm.commons.GeneratorAdapter;
 import org.objectweb.asm.commons.Method;
 
 import lucee.commons.lang.ClassException;
-import lucee.commons.lang.StringUtil;
 import lucee.commons.lang.types.RefInteger;
 import lucee.commons.lang.types.RefIntegerImpl;
 import lucee.runtime.config.ConfigPro;
@@ -64,11 +63,14 @@ import lucee.transformer.dynamic.meta.Clazz;
 import lucee.transformer.expression.ExprString;
 import lucee.transformer.expression.Expression;
 import lucee.transformer.expression.literal.LitString;
+import lucee.transformer.expression.literal.Literal;
 import lucee.transformer.expression.var.Argument;
 import lucee.transformer.expression.var.DataMember;
 import lucee.transformer.expression.var.Member;
 import lucee.transformer.expression.var.NamedArgument;
+import lucee.transformer.expression.var.NamedMember;
 import lucee.transformer.expression.var.Variable;
+import lucee.transformer.interpreter.literal.LitStringImpl;
 import lucee.transformer.library.function.FunctionLibFunction;
 import lucee.transformer.library.function.FunctionLibFunctionArg;
 import lucee.transformer.library.tag.TagLibTag;
@@ -184,6 +186,7 @@ public final class VariableImpl extends ExpressionBase implements Variable {
 	}
 
 	private int scope = Scope.SCOPE_UNDEFINED;
+
 	List<Member> members = new ArrayList<Member>();
 	int countDM = 0;
 	int countFM = 0;
@@ -959,10 +962,10 @@ public final class VariableImpl extends ExpressionBase implements Variable {
 
 		// then check if an alias match
 		String[] aliases = flfa.getAliases();
-		if (!ArrayUtil.isEmpty(aliases)){
+		if (!ArrayUtil.isEmpty(aliases)) {
 			for (int i = 0; i < nargs.length; i++) {
 				if (names[i] != null) {
-					for (String a : aliases) {
+					for (String a: aliases) {
 						if (names[i].equalsIgnoreCase(a)) {
 							nargs[i].setValue(nargs[i].getRawValue(), flfa.getTypeAsString());
 							return new VT(nargs[i].getValue(), flfa.getTypeAsString(), i);
@@ -1074,59 +1077,81 @@ public final class VariableImpl extends ExpressionBase implements Variable {
 		this.listener = listener;
 	}
 
-	private static String toString(int scope) {
-		if (Scope.SCOPE_APPLICATION == scope) return "APPLICATION";
-		if (Scope.SCOPE_ARGUMENTS == scope) return "ARGUMENTS";
-		if (Scope.SCOPE_CALLER == scope) return "CALLER";
-		if (Scope.SCOPE_CGI == scope) return "CGI";
-		if (Scope.SCOPE_CLIENT == scope) return "CLIENT";
-		if (Scope.SCOPE_CLUSTER == scope) return "CLUSTER";
-		if (Scope.SCOPE_COOKIE == scope) return "COOKIE";
-		if (Scope.SCOPE_FORM == scope) return "FORM";
-		if (Scope.SCOPE_LOCAL == scope) return "LOCAL";
-		if (Scope.SCOPE_REQUEST == scope) return "REQUEST";
-		if (Scope.SCOPE_SERVER == scope) return "SERVER";
-		if (Scope.SCOPE_SESSION == scope) return "SESSION";
-		if (Scope.SCOPE_THREAD == scope) return "THREAD";
-		if (Scope.SCOPE_UNDEFINED == scope) return "UNDEFINED";
-		if (Scope.SCOPE_URL == scope) return "URL";
-		if (Scope.SCOPE_VAR == scope) return "VAR";
-		if (Scope.SCOPE_VARIABLES == scope) return "VARIABLES";
-		return "UNKNOWN";
+	private void toDataMember(List<Member> members, int scope) {
+
+		String scopeName;
+		if (Scope.SCOPE_APPLICATION == scope) scopeName = "APPLICATION";
+		else if (Scope.SCOPE_ARGUMENTS == scope) scopeName = "ARGUMENTS";
+		else if (Scope.SCOPE_CALLER == scope) scopeName = "CALLER";
+		else if (Scope.SCOPE_CGI == scope) scopeName = "CGI";
+		else if (Scope.SCOPE_CLIENT == scope) scopeName = "CLIENT";
+		else if (Scope.SCOPE_CLUSTER == scope) scopeName = "CLUSTER";
+		else if (Scope.SCOPE_COOKIE == scope) scopeName = "COOKIE";
+		else if (Scope.SCOPE_FORM == scope) scopeName = "FORM";
+		else if (Scope.SCOPE_LOCAL == scope) scopeName = "LOCAL";
+		else if (Scope.SCOPE_REQUEST == scope) scopeName = "REQUEST";
+		else if (Scope.SCOPE_SERVER == scope) scopeName = "SERVER";
+		else if (Scope.SCOPE_SESSION == scope) scopeName = "SESSION";
+		else if (Scope.SCOPE_THREAD == scope) scopeName = "THREAD";
+		else if (Scope.SCOPE_URL == scope) scopeName = "URL";
+		else if (Scope.SCOPE_VAR == scope) scopeName = "LOCAL";
+		else if (Scope.SCOPE_VARIABLES == scope) scopeName = "VARIABLES";
+		else return; // UNDEFINED
+
+		members.add(new DataMemberImpl(new LitStringImpl(getFactory(), scopeName, getStart(), getEnd())));
 	}
 
 	@Override
 	public void dump(Struct sct) {
 		super.dump(sct);
-		sct.setEL(KeyConstants._type, "VariableExpression");
-		sct.setEL(KeyConstants._scope, toString(scope));
 
-		// member
-		Array arr = new ArrayImpl();
-		sct.setEL(KeyConstants._members, arr);
-		for (Member m: members) {
-			Struct mem = new StructImpl(Struct.TYPE_LINKED);
-			arr.appendEL(mem);
-			mem.setEL(KeyConstants._safeNavigated, m.getSafeNavigated());
-			if (m.getSafeNavigated()) mem.setEL(KeyConstants._safeNavigatedValue, m.getSafeNavigatedValue());
+		// convert scope to a data member to make handling easier;
+		List<Member> members = new ArrayList<>();
+		toDataMember(members, scope);
 
-			// id
-			Struct id = new StructImpl(Struct.TYPE_LINKED);
-			if (m instanceof DataMember) {
-				((DataMember) m).getName().dump(id);
-				mem.setEL(KeyConstants._name, id);
-				mem.setEL(KeyConstants._type, "DataMember");
+		for (Member member: this.members) {
+			members.add(member);
+		}
 
-			}
-			else if (m instanceof FunctionMember) {
-				FunctionMember fm = ((FunctionMember) m);
-				fm.getName().dump(id);
-				mem.setEL(KeyConstants._name, id);
-				mem.setEL(KeyConstants._type, "FunctionMember");
+		if (members.size() == 1 && members.get(0) instanceof DataMember) {
+			// Simple identifier: "a"
+			sct.setEL(KeyConstants._type, "Identifier");
+			sct.setEL(KeyConstants._name, getName((DataMember) members.get(0)));
+		}
+		else {
+			// Build complex expression iteratively
+			buildMemberExpressionIterative(sct, members);
+		}
+	}
 
-				// arguments
+	private static void buildMemberExpressionIterative(Struct sct, List<Member> members) {
+		Struct current = null;
+
+		// Build from left to right
+		for (int i = 0; i < members.size(); i++) {
+			Member member = members.get(i);
+			Struct newNode = new StructImpl(Struct.TYPE_LINKED);
+
+			if (member instanceof FunctionMember) {
+				// Function call
+				newNode.setEL(KeyConstants._type, "CallExpression");
+
+				// Set callee to current chain (or base identifier)
+				if (current == null) {
+					// First element - base identifier
+					Struct callee = new StructImpl(Struct.TYPE_LINKED);
+					callee.setEL(KeyConstants._type, "Identifier");
+					callee.setEL(KeyConstants._name, getName((FunctionMember) member));
+					newNode.setEL(KeyConstants._callee, callee);
+				}
+				else {
+					newNode.setEL(KeyConstants._callee, current);
+				}
+
+				// Add arguments
 				Array arrArgs = new ArrayImpl();
-				mem.setEL(KeyConstants._arguments, arrArgs);
+				newNode.setEL(KeyConstants._arguments, arrArgs);
+				FunctionMember fm = (FunctionMember) member;
 				for (Argument arg: fm.getArguments()) {
 					Struct sctArg = new StructImpl(Struct.TYPE_LINKED);
 					arrArgs.appendEL(sctArg);
@@ -1134,8 +1159,40 @@ public final class VariableImpl extends ExpressionBase implements Variable {
 				}
 
 			}
+			else {
+				// Property access
+				if (current == null) {
+					// First element - just an identifier
+					newNode.setEL(KeyConstants._type, "Identifier");
+					newNode.setEL(KeyConstants._name, getName((DataMember) member));
+				}
+				else {
+					// Member expression
+					newNode.setEL(KeyConstants._type, "MemberExpression");
+					newNode.setEL(KeyConstants._computed, false);
+					newNode.setEL(KeyConstants._object, current);
+
+					Struct property = new StructImpl(Struct.TYPE_LINKED);
+					property.setEL(KeyConstants._type, "Identifier");
+					property.setEL(KeyConstants._name, getName((DataMember) member));
+					newNode.setEL(KeyConstants._property, property);
+				}
+			}
+
+			current = newNode;
 		}
 
+		// Copy final result to output struct
+		sct.putAll(current);
+	}
+
+	private static Object getName(NamedMember dm) {
+		if (dm.getName() instanceof Literal) {
+			return dm.getName().toString();
+		}
+		Struct name = new StructImpl(Struct.TYPE_LINKED);
+		dm.getName().dump(name);
+		return name;
 	}
 
 }
