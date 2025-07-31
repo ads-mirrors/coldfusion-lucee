@@ -171,7 +171,7 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 		if (Scope.SCOPE_SESSION == scope) rtn = new IKStorageScopeSession(pc, handler, appName, name, map, 0L, getSessionTimeout(pc));
 		else if (Scope.SCOPE_CLIENT == scope) rtn = new IKStorageScopeClient(pc, handler, appName, name, map, 0L, getClientTimeout(pc));
 
-		rtn.store(pc);
+		// rtn.store(pc);
 		return rtn;
 	}
 
@@ -416,17 +416,19 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 	@Override
 	public Object set(Key key, Object value) throws PageException {
 		hasChanges = true;
-		IKStorageScopeItem val = data0.put(key, new IKStorageScopeItem(value));
+		IKStorageScopeItem val;
+		IKStorageScopeItem existing = data0.put(key, val = new IKStorageScopeItem(value));
 		lastModified = val.lastModified();
-		return val;
+		return existing;
 	}
 
 	@Override
 	public Object setEL(Key key, Object value) {
 		hasChanges = true;
-		IKStorageScopeItem val = data0.put(key, new IKStorageScopeItem(value));
+		IKStorageScopeItem val;
+		IKStorageScopeItem existing = data0.put(key, val = new IKStorageScopeItem(value));
 		lastModified = val.lastModified();
-		return val;
+		return existing;
 	}
 
 	@Override
