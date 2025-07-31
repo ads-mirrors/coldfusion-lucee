@@ -162,7 +162,7 @@ public final class LitNumberImpl extends ExpressionBase implements LitNumber, Ex
 	public void dump(Struct sct) {
 		super.dump(sct);
 		sct.setEL(KeyConstants._type, "NumberLiteral");
-		sct.setEL(KeyConstants._raw, nbr == null ? number : nbr);
+		sct.setEL(KeyConstants._raw, getString());
 		sct.setEL(KeyConstants._value, getValue());
 	}
 

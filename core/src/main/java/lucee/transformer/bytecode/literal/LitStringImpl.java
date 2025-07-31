@@ -200,5 +200,6 @@ public class LitStringImpl extends ExpressionBase implements LitString, ExprStri
 		super.dump(sct);
 		sct.setEL(KeyConstants._type, "StringLiteral");
 		sct.setEL(KeyConstants._value, str);
+		sct.setEL(KeyConstants._raw, "\"" + str + "\"");
 	}
 }

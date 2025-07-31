@@ -207,7 +207,7 @@ public abstract class TagBase extends StatementBase implements Tag {
 			Struct sctAttr = new StructImpl(Struct.TYPE_LINKED);
 			arrAttrs.appendEL(sctAttr);
 			sctAttr.setEL(KeyConstants._name, attr.getName());
-			sctAttr.setEL(KeyConstants._type, attr.getType());
+			sctAttr.setEL(KeyConstants._type, "Attribute");
 
 			Struct val = new StructImpl(Struct.TYPE_LINKED);
 			attr.getValue().dump(val);

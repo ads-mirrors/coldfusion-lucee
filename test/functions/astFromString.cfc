@@ -18,14 +18,23 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" {
 			});
 
 
-			it( title = 'Test basic variable assignment parsing', body = function( currentSpec ) {
+			it( title = 'echo literal string', body = function( currentSpec ) {
 				var result = astFromString("Susi");
 				assertEquals(
 					'{"start":{"line":1,"column":0,"offset":0},"end":{"line":1,"column":4,"offset":4},"type":"Program","body":[{"start":{"line":1,"column":0,"offset":0},"end":{"line":1,"column":4,"offset":4},"type":"ExpressionStatement","expression":{"start":{"line":1,"column":0,"offset":0},"end":{"line":1,"column":4,"offset":4},"type":"StringLiteral","value":"Susi"}}]}', 
 					serializeJSON(var:result,compact:true)
 					);
 			});
+			it( title = 'test loop tag', body = function( currentSpec ) {
+				var result = astFromString('<cfloop from="1" to="10" index="i"></cfloop>');
+				assertEquals(
+					'{"start":{"line":1,"column":0,"offset":0},"end":{"line":1,"column":44,"offset":44},"type":"Program","body":[{"start":{"line":1,"column":0,"offset":0},"end":{"line":1,"column":44,"offset":44},"type":"CFMLTag","name":"loop","nameSpace":"cf","nameSpaceSeparator":"","fullname":"cfloop","attributes":[{"name":"from","type":"Attribute","value":{"start":{"line":1,"column":13,"offset":13},"end":{"line":1,"column":16,"offset":16},"type":"NumberLiteral","raw":"1","value":1}},{"name":"to","type":"Attribute","value":{"start":{"line":1,"column":20,"offset":20},"end":{"line":1,"column":24,"offset":24},"type":"NumberLiteral","raw":"10","value":10}},{"name":"index","type":"Attribute","value":{"start":{"line":1,"column":31,"offset":31},"end":{"line":1,"column":34,"offset":34},"type":"StringLiteral","value":"i","raw":"\"i\""}}],"body":{"type":"BlockStatement","body":[]}}]}', 
+					serializeJSON(var:result,compact:true)
+					);
+			});
 
+
+			
 		});
 	}
 }
