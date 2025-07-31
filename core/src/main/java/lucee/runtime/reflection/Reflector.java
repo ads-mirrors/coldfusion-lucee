@@ -276,7 +276,7 @@ public final class Reflector {
 	 * @return list
 	 */
 	public static String getDspMethods(Class... clazzArgs) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < clazzArgs.length; i++) {
 			if (i > 0) sb.append(", ");
 			sb.append(Caster.toTypeName(clazzArgs[i]));

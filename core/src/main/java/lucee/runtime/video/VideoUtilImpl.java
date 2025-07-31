@@ -180,7 +180,7 @@ public final class VideoUtilImpl implements VideoUtil {
 		VideoInput source;
 
 		// hash
-		StringBuffer sb = new StringBuffer(strHeight + "-" + strWidth);
+		StringBuilder sb = new StringBuilder(strHeight + "-" + strWidth);
 		for (int i = 0; i < sources.length; i++) {
 			sb.append(sources[i].getResource().toString());
 		}

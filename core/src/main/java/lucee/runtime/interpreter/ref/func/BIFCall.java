@@ -152,11 +152,15 @@ public final class BIFCall extends RefSupport implements Ref {
 		}
 
 		// then check if an alias match
-		String alias = flfa.getAlias();
-		if (!StringUtil.isEmpty(alias)) {
+		String[] aliases = flfa.getAliases();
+		if (!ArrayUtil.isEmpty(aliases)){
 			for (int i = 0; i < names.length; i++) {
-				if (names[i] != null && lucee.runtime.type.util.ListUtil.listFindNoCase(alias, names[i], ",") != -1) {
-					return new VT(fvalues[i].getValue(), flfa.getTypeAsString(), i);
+				if (names[i] != null) {
+					for (String a : aliases) {
+						if (names[i].equalsIgnoreCase(a)) {
+							return new VT(fvalues[i].getValue(), flfa.getTypeAsString(), i);
+						}
+					}
 				}
 			}
 		}

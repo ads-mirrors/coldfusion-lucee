@@ -669,7 +669,7 @@ public final class HttpServletRequestDummy implements HttpServletRequest, Serial
 	}
 
 	private void rewriteQS() {
-		StringBuffer qs = new StringBuffer();
+		StringBuilder qs = new StringBuilder();
 		Pair<String, Object> p;
 		for (int i = 0; i < parameters.length; i++) {
 			if (i > 0) qs.append('&');

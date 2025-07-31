@@ -40,6 +40,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lucee.commons.collection.MapFactory;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.IOUtil;
+import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.util.ResourceUtil;
@@ -87,6 +88,11 @@ public final class FormImpl extends ScopeSupport implements Form, ScriptProtecte
 	private static final int HEADER_APP_URL_ENC = 2;
 
 	private int headerType = HEADER_TYPE_UNKNOWN;
+	private static boolean ALLOW_MIMETYPE_DETECTION;
+
+	static {
+		ALLOW_MIMETYPE_DETECTION = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.fileupload.allow.mimetype.detection", null), true);
+	}
 
 	/**
 	 * standart class Constructor
@@ -208,11 +214,13 @@ public final class FormImpl extends ScopeSupport implements Form, ScriptProtecte
 					tempFile = tempDir.getRealResource(fileName);
 					item.write(ResourceUtil.toPath(tempFile));
 					String ct = item.getContentType();
-					if (StringUtil.isEmpty(ct) && tempFile.length() > 0) {
-						ct = IOUtil.getMimeType(tempFile, null);
-					}
-					else if ("application/octet-stream".equalsIgnoreCase(ct)) {
-						ct = IOUtil.getMimeType(tempFile, ct);
+					if (ALLOW_MIMETYPE_DETECTION){
+						if ( StringUtil.isEmpty(ct) && tempFile.length() > 0) {
+							ct = IOUtil.getMimeType(tempFile, null);
+						}
+						else if ("application/octet-stream".equalsIgnoreCase(ct)) {
+							ct = IOUtil.getMimeType(tempFile, ct);
+						}
 					}
 					if (StringUtil.isEmpty(ct)) {
 						is = tempFile.getInputStream();

@@ -680,7 +680,7 @@ public final class Blowfish {
 		nNumOfBytes &= -2;
 		int nAvailCapacity = data.length - nStartPos;
 		if (nAvailCapacity < nNumOfBytes) nNumOfBytes = nAvailCapacity;
-		StringBuffer sbuf = new StringBuffer();
+		StringBuilder sbuf = new StringBuilder();
 		sbuf.setLength(nNumOfBytes >> 1);
 		int nSBufPos = 0;
 		for (; nNumOfBytes > 0; nNumOfBytes -= 2) {

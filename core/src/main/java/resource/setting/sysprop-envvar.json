@@ -463,5 +463,10 @@
         "sysprop": "lucee.allow.reflection",
         "envvar": "LUCEE_ALLOW_REFLECTION",
         "desc": "A boolean value that enables java reflection, default is false"
+    },
+    {
+        "sysprop": "lucee.fileupload.allow.mimetype.detection",
+        "envvar": "LUCEE_FILEUPLOAD_ALLOW_MIMETYPE_DETECTION",
+        "desc": "A boolean value that enables using tika to detect the mime type for unknown file uploads, default is false"
     }
 ]

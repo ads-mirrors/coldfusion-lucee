@@ -47,7 +47,7 @@ import lucee.runtime.interpreter.ref.literal.LBoolean;
 import lucee.runtime.interpreter.ref.literal.LFunctionValue;
 import lucee.runtime.interpreter.ref.literal.LNumber;
 import lucee.runtime.interpreter.ref.literal.LString;
-import lucee.runtime.interpreter.ref.literal.LStringBuffer;
+import lucee.runtime.interpreter.ref.literal.LStringBuilder;
 import lucee.runtime.interpreter.ref.literal.Literal;
 import lucee.runtime.interpreter.ref.op.And;
 import lucee.runtime.interpreter.ref.op.BigDiv;
@@ -1092,7 +1092,7 @@ public class CFMLExpressionInterpreter {
 
 		// Init Parameter
 		char quoter = cfml.getCurrentLower();
-		LStringBuffer str = new LStringBuffer();
+		LStringBuilder str = new LStringBuilder();
 		Ref value = null;
 
 		while (cfml.hasNext()) {

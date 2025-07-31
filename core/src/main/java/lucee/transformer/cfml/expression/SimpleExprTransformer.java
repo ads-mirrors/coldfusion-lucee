@@ -64,7 +64,7 @@ public final class SimpleExprTransformer implements ExprTransformer {
 		cfml.removeSpace();
 		char quoter = cfml.getCurrentLower();
 		if (quoter != '"' && quoter != '\'') return null;
-		StringBuffer str = new StringBuffer();
+		StringBuilder str = new StringBuilder();
 		boolean insideSpecial = false;
 
 		Position line = cfml.getPosition();
@@ -108,7 +108,7 @@ public final class SimpleExprTransformer implements ExprTransformer {
 	 * @throws TemplateException
 	 */
 	public Expression simple(Factory f, SourceCode cfml) throws TemplateException {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		Position line = cfml.getPosition();
 		while (cfml.isValidIndex()) {
 			if (cfml.isCurrent(' ') || cfml.isCurrent('>') || cfml.isCurrent("/>")) break;

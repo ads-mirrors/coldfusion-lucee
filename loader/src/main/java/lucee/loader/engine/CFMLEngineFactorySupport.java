@@ -87,7 +87,7 @@ public abstract class CFMLEngineFactorySupport {
 	 */
 	public static String toString(final InputStream is) throws IOException {
 		final BufferedReader br = new BufferedReader(new InputStreamReader(is));
-		final StringBuffer content = new StringBuffer();
+		final StringBuilder content = new StringBuilder();
 
 		String line = br.readLine();
 		if (line != null) {

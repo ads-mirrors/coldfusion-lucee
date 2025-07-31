@@ -698,7 +698,7 @@ public final class ASMUtil {
 
 	public static String createMD5(ASMProperty[] props) {
 
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < props.length; i++) {
 			sb.append("name:" + props[i].getName() + ";");
 			if (props[i] instanceof Property) {

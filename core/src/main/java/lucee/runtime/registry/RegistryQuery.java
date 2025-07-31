@@ -150,7 +150,7 @@ public final class RegistryQuery {
 	 */
 	private static RegistryEntry[] filter(String string, String branch, short type) throws RegistryException {
 		branch = ListUtil.trim(branch, "\\");
-		StringBuffer result = new StringBuffer();
+		StringBuilder result = new StringBuilder();
 		ArrayList array = new ArrayList();
 		String[] arr = string.split("\n");
 

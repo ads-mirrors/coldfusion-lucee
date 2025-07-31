@@ -43,11 +43,11 @@ public final class ZDelete implements ZStatement {
 
 	@Override
 	public String toString() {
-		StringBuffer stringbuffer = new StringBuffer("delete ");
-		if (where_ != null) stringbuffer.append("from ");
-		stringbuffer.append(table_);
-		if (where_ != null) stringbuffer.append(" where " + where_.toString());
-		return stringbuffer.toString();
+		StringBuilder sb = new StringBuilder("delete ");
+		if (where_ != null) sb.append("from ");
+		sb.append(table_);
+		if (where_ != null) sb.append(" where " + where_.toString());
+		return sb.toString();
 	}
 
 	String table_;

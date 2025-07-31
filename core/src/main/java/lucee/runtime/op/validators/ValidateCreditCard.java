@@ -159,7 +159,7 @@ public final class ValidateCreditCard {
 		if (strCreditCardNumber == null) return defaultValue;
 
 		// strip commas, spaces, + AND -
-		StringBuffer sb = new StringBuffer(strCreditCardNumber.length());
+		StringBuilder sb = new StringBuilder(strCreditCardNumber.length());
 		for (int i = 0; i < strCreditCardNumber.length(); i++) {
 			char c = strCreditCardNumber.charAt(i);
 			if (!StringUtil.isWhiteSpace(c) && c != ',' && c != '+' && c != '-') sb.append(c);

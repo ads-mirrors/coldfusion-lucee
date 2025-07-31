@@ -26,8 +26,8 @@ import lucee.runtime.cfx.QueryWrap;
 
 public final class DebugResponse implements Response {
 
-	private final StringBuffer write = new StringBuffer();
-	private final StringBuffer writeDebug = new StringBuffer();
+	private final StringBuilder write = new StringBuilder();
+	private final StringBuilder writeDebug = new StringBuilder();
 	private final Hashtable variables = new Hashtable();
 	private final Hashtable queries = new Hashtable();
 
@@ -121,7 +121,7 @@ public final class DebugResponse implements Response {
 
 	private String escapeString(final String string) {
 		final int len = string.length();
-		final StringBuffer sb = new StringBuffer(len);
+		final StringBuilder sb = new StringBuilder(len);
 		for (int i = 0; i < len; i++) {
 			final char c = string.charAt(i);
 			if (c == '\n') sb.append("\\n");

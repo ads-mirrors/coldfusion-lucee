@@ -19,6 +19,10 @@
 package lucee.runtime.functions.displayFormatting;
 
 import java.nio.charset.Charset;
+import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
+import java.security.Security;
+import java.util.ArrayList;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
@@ -26,12 +30,15 @@ import javax.crypto.spec.SecretKeySpec;
 
 import lucee.commons.digest.MD5;
 import lucee.commons.io.CharsetUtil;
+import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
+import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.Function;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
+import lucee.runtime.type.util.ListUtil;
 
 public final class HMAC implements Function {
 
@@ -59,15 +66,19 @@ public final class HMAC implements Function {
 
 		// algorithm
 		if (StringUtil.isEmpty(algorithm, true)) algorithm = "HmacMD5";
-
-		SecretKey sk = new SecretKeySpec(key, algorithm);
+		
 		try {
+			SecretKey sk = new SecretKeySpec(key, algorithm);
 			Mac mac = Mac.getInstance(algorithm);
 			mac.init(sk);
 			mac.reset();
 			mac.update(msg);
 			msg = mac.doFinal();
 			return MD5.stringify(msg).toUpperCase();
+		} catch (NoSuchAlgorithmException nsae) {
+			FunctionException fe = new FunctionException(pc, "HMAC", 1, "algorithm", "The alogrithm [" + algorithm + "] is not supported. Supported algorithms are [ " + getSupportedHMacAlgorithms() + " ]");
+			ExceptionUtil.initCauseEL(fe, nsae);
+			throw fe;
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);
@@ -80,4 +91,19 @@ public final class HMAC implements Function {
 		}
 		return Caster.toString(obj).getBytes(cs);
 	}
+
+	private static String getSupportedHMacAlgorithms() {
+		ArrayList<String> algorithms = new ArrayList<>();
+		for (Provider provider : Security.getProviders()) {
+			for (Provider.Service service : provider.getServices()) {
+				if ("Mac".equalsIgnoreCase(service.getType())) {
+					if (!service.getAlgorithm().contains("PBE")){
+						algorithms.add(service.getAlgorithm());
+					}
+				}
+			}
+		}
+		return ListUtil.toList(algorithms, ", ");
+	}
+
 }

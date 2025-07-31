@@ -5930,7 +5930,29 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<name>algorithm</name>
 			<type>string</type>
 			<required>Yes</required>
-			<description>The encryption algorithm for which to generate the key.</description>
+			<description>The encryption algorithm used to generate the key.
+
+The available algorithms (depending on your JVM) are:
+
+- HmacSHA3-224
+- HmacSHA384
+- HmacSHA512/224
+- HmacSHA512
+- HmacSHA512/256
+- HmacSHA3-512
+- HmacSHA3-256
+- HmacSHA3-384
+- HmacSHA224
+- ARCFOUR
+- Blowfish
+- HmacSHA256
+- HmacSHA1
+- AES
+- HmacMD5
+- DESede
+- DES
+- RC2
+- ChaCha20</description>
     	</argument>
 		<argument>
 			<name>keySize</name>
@@ -5957,11 +5979,12 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 Hashing algorithm used for generating key
 Example Values:
 - PBKDF2WithHmacSHA1
-- PBKDF2WithSHA1
-- PBKDF2WithSHA224
-- PBKDF2WithSHA256
-- PBKDF2WithSHA384
-- PBKDF2WithSHA512
+- PBKDF2WithHmacSHA384
+- PBKDF2WithHmacSHA512/256
+- PBKDF2WithHmacSHA256
+- PBKDF2WithHmacSHA512/224
+- PBKDF2WithHmacSHA224
+- PBKDF2WithHmacSHA512
 			</description>
     	</argument>
 		<argument>
@@ -7491,7 +7514,25 @@ You can find a list of all available timezones in the Lucee administrator (Setti
 			<type>string</type>
 			<required>no</required>
 			<default>HmacMD5</default>
-			<description>the algorithm used, default is "HmacMD5"</description>
+			<description>The encryption algorithm for which to generate the key, default is `HmacMD5`
+
+The available algorithms (depending on your JVM) are
+
+- HmacSHA512
+- HmacSHA3-384
+- HmacSHA384
+- HmacSHA3-512
+- HmacSHA512/256
+- HmacSHA3-224
+- HmacSHA512/224
+- HmacSHA3-256
+- HmacSHA256
+- SslMacMD5
+- HmacSHA224
+- SslMacSHA1
+- HmacSHA1
+- HmacMD5
+			</description>
 	    </argument>
 		<argument>
 			<name>encoding</name>

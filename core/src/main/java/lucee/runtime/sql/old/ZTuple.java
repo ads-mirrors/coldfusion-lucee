@@ -120,8 +120,8 @@ public final class ZTuple {
 
 	@Override
 	public String toString() {
-		StringBuffer stringbuffer = new StringBuffer();
-		stringbuffer.append("[");
+		StringBuilder sb = new StringBuilder();
+		sb.append("[");
 		if (attributes_.size() > 0) {
 			Object obj = attributes_.elementAt(0);
 			String s;
@@ -131,7 +131,7 @@ public final class ZTuple {
 			String s2;
 			if (obj2 == null) s2 = "(null)";
 			else s2 = obj2.toString();
-			stringbuffer.append(s + " = " + s2);
+			sb.append(s + " = " + s2);
 		}
 		for (int i = 1; i < attributes_.size(); i++) {
 			Object obj1 = attributes_.elementAt(i);
@@ -142,11 +142,11 @@ public final class ZTuple {
 			String s3;
 			if (obj3 == null) s3 = "(null)";
 			else s3 = obj3.toString();
-			stringbuffer.append(", " + s1 + " = " + s3);
+			sb.append(", " + s1 + " = " + s3);
 		}
 
-		stringbuffer.append("]");
-		return stringbuffer.toString();
+		sb.append("]");
+		return sb.toString();
 	}
 
 	private Vector attributes_;

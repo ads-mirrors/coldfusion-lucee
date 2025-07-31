@@ -353,20 +353,20 @@ public final class ZqlJJParser implements ZqlJJParserConstants {
 	}
 
 	public final String LockMode() throws ParseException {
-		StringBuffer stringbuffer = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		switch (jj_ntk != -1 ? jj_ntk : jj_ntk()) {
 		case 58: // ':'
 			jj_consume_token(58);
-			stringbuffer.append("ROW ");
+			sb.append("ROW ");
 			switch (jj_ntk != -1 ? jj_ntk : jj_ntk()) {
 			case 61: // '='
 				jj_consume_token(61);
-				stringbuffer.append("SHARE");
+				sb.append("SHARE");
 				break;
 
 			case 24: // '\030'
 				jj_consume_token(24);
-				stringbuffer.append("EXCLUSIVE");
+				sb.append("EXCLUSIVE");
 				break;
 
 			default:
@@ -374,24 +374,24 @@ public final class ZqlJJParser implements ZqlJJParserConstants {
 				jj_consume_token(-1);
 				throw new ParseException();
 			}
-			return stringbuffer.toString();
+			return sb.toString();
 
 		case 61: // '='
 			jj_consume_token(61);
-			stringbuffer.append("SHARE");
+			sb.append("SHARE");
 			switch (jj_ntk != -1 ? jj_ntk : jj_ntk()) {
 			case 58: // ':'
 			case 68: // 'D'
 				switch (jj_ntk != -1 ? jj_ntk : jj_ntk()) {
 				case 68: // 'D'
 					jj_consume_token(68);
-					stringbuffer.append(" UPDATE");
+					sb.append(" UPDATE");
 					break;
 
 				case 58: // ':'
 					jj_consume_token(58);
 					jj_consume_token(24);
-					stringbuffer.append(" ROW EXCLUSIVE");
+					sb.append(" ROW EXCLUSIVE");
 					break;
 
 				default:
@@ -405,7 +405,7 @@ public final class ZqlJJParser implements ZqlJJParserConstants {
 				jj_la1[16] = jj_gen;
 				break;
 			}
-			return stringbuffer.toString();
+			return sb.toString();
 
 		case 24: // '\030'
 			jj_consume_token(24);
@@ -588,21 +588,21 @@ public final class ZqlJJParser implements ZqlJJParserConstants {
 	}
 
 	public final String TableColumn() throws ParseException {
-		StringBuffer stringbuffer = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		String s = OracleObjectName();
-		stringbuffer.append(s);
+		sb.append(s);
 
 		switch (jj_ntk != -1 ? jj_ntk : jj_ntk()) {
 		case 93: // ']'
 			jj_consume_token(93);
 			String s1 = OracleObjectName();
 
-			stringbuffer.append("." + s1);
+			sb.append("." + s1);
 			switch (jj_ntk != -1 ? jj_ntk : jj_ntk()) {
 			case 93: // ']'
 				jj_consume_token(93);
 				String s2 = OracleObjectName();
-				stringbuffer.append("." + s2);
+				sb.append("." + s2);
 				break;
 
 			default:
@@ -615,7 +615,7 @@ public final class ZqlJJParser implements ZqlJJParserConstants {
 			jj_la1[27] = jj_gen;
 			break;
 		}
-		return stringbuffer.toString();
+		return sb.toString();
 	}
 
 	public final String OracleObjectName() throws ParseException {
@@ -680,13 +680,13 @@ public final class ZqlJJParser implements ZqlJJParserConstants {
 	}
 
 	public final String TableReference() throws ParseException {
-		StringBuffer stringbuffer = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		String s = OracleObjectName();
 
-		stringbuffer.append(s);
+		sb.append(s);
 		/*
 		 * changed by mic switch(jj_ntk != -1 ? jj_ntk : jj_ntk()) { case 93: // ']' jj_consume_token(93);
-		 * String s1 = OracleObjectName(); stringbuffer.append("." + s1); break;
+		 * String s1 = OracleObjectName(); sb.append("." + s1); break;
 		 * 
 		 * default: jj_la1[30] = jj_gen; break; }
 		 */
@@ -694,7 +694,7 @@ public final class ZqlJJParser implements ZqlJJParserConstants {
 			if ((jj_ntk != -1 ? jj_ntk : jj_ntk()) == 93) {
 				jj_consume_token(93);
 				String s1 = OracleObjectName();
-				stringbuffer.append("." + s1);
+				sb.append("." + s1);
 			}
 			else {
 				jj_la1[30] = jj_gen;
@@ -702,7 +702,7 @@ public final class ZqlJJParser implements ZqlJJParserConstants {
 			}
 		}
 
-		return stringbuffer.toString();
+		return sb.toString();
 	}
 
 	public final void NumOrID() throws ParseException {
@@ -948,7 +948,7 @@ public final class ZqlJJParser implements ZqlJJParserConstants {
 	}
 
 	public final String SelectAlias() throws ParseException {
-		StringBuffer stringbuffer = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		switch (jj_ntk != -1 ? jj_ntk : jj_ntk()) {
 		case 8: // '\b'
 			jj_consume_token(8);
@@ -960,7 +960,7 @@ public final class ZqlJJParser implements ZqlJJParserConstants {
 		}
 		label0: do {
 			Token token1 = jj_consume_token(82);
-			stringbuffer.append(token1.toString().trim() + " ");
+			sb.append(token1.toString().trim() + " ");
 			switch (jj_ntk != -1 ? jj_ntk : jj_ntk()) {
 			case 82: // 'R'
 				break;
@@ -971,7 +971,7 @@ public final class ZqlJJParser implements ZqlJJParserConstants {
 			}
 		}
 		while (true);
-		return stringbuffer.toString().trim();
+		return sb.toString().trim();
 	}
 
 	public final String SelectStar() throws ParseException {

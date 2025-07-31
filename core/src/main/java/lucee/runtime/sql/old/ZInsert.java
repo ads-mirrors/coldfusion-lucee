@@ -61,20 +61,20 @@ public final class ZInsert implements ZStatement {
 
 	@Override
 	public String toString() {
-		StringBuffer stringbuffer = new StringBuffer("insert into " + table_);
+		StringBuilder sb = new StringBuilder("insert into " + table_);
 		if (columns_ != null && columns_.size() > 0) {
-			stringbuffer.append("(" + columns_.elementAt(0));
+			sb.append("(" + columns_.elementAt(0));
 			for (int i = 1; i < columns_.size(); i++)
-				stringbuffer.append("," + columns_.elementAt(i));
+				sb.append("," + columns_.elementAt(i));
 
-			stringbuffer.append(")");
+			sb.append(")");
 		}
 		String s = valueSpec_.toString();
-		stringbuffer.append(" ");
-		if (getValues() != null) stringbuffer.append("values ");
-		if (s.startsWith("(")) stringbuffer.append(s);
-		else stringbuffer.append(" (" + s + ")");
-		return stringbuffer.toString();
+		sb.append(" ");
+		if (getValues() != null) sb.append("values ");
+		if (s.startsWith("(")) sb.append(s);
+		else sb.append(" (" + s + ")");
+		return sb.toString();
 	}
 
 	String table_;

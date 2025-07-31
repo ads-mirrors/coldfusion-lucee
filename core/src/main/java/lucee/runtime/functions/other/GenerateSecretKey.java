@@ -18,13 +18,21 @@
  **/
 package lucee.runtime.functions.other;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
+import java.security.Security;
+import java.util.ArrayList;
+
 import javax.crypto.KeyGenerator;
 
+import lucee.commons.lang.ExceptionUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.coder.Coder;
+import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.Function;
 import lucee.runtime.op.Caster;
+import lucee.runtime.type.util.ListUtil;
 
 /**
  * Generates a Secret Key
@@ -41,10 +49,28 @@ public final class GenerateSecretKey implements Function {
 			int kz = Caster.toIntValue(keySize);
 			if (kz > 0) keyGenerator.init(Caster.toIntValue(keySize));
 			return Coder.encode(Coder.ENCODING_BASE64, keyGenerator.generateKey().getEncoded());
+		} catch (NoSuchAlgorithmException nsae) {
+			FunctionException fe = new FunctionException(pc, "GenerateSecretKey", 1, "algorithm", "The alogrithm [" + algorithm + "] is not supported. Supported algorithms are [ " + getAvailableSecretKeyAlgorithms() + " ]");
+			ExceptionUtil.initCauseEL(fe, nsae);
+			throw fe;
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);
 		}
+	}
+
+	private static String getAvailableSecretKeyAlgorithms() {
+		ArrayList<String> algorithms = new ArrayList<>();
+		for (Provider provider : Security.getProviders()) {
+			for (Provider.Service service : provider.getServices()) {
+				if ("KeyGenerator".equalsIgnoreCase(service.getType())) {
+					if (!service.getAlgorithm().toLowerCase().contains("tls")){
+						algorithms.add(service.getAlgorithm()); // tls requires extra setup
+					}
+				}
+			}
+		}
+		return ListUtil.toList(algorithms, ", ");
 	}
 
 }

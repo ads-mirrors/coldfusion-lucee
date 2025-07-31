@@ -63,7 +63,7 @@ public final class CFImportTag extends CFTag {
 		// EXCEPTION
 		// message
 
-		StringBuffer msg = new StringBuffer("could not find template [");
+		StringBuilder msg = new StringBuilder("could not find template [");
 		msg.append(CustomTagUtil.getDisplayName(config, getAppendix()));
 		msg.append("] in the following directories [");
 		msg.append(strRealPathes.replace(File.pathSeparatorChar, ','));

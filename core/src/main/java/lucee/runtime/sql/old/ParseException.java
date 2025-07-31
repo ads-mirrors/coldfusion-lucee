@@ -76,7 +76,7 @@ public final class ParseException extends Exception {
 	}
 
 	protected String add_escapes(String s) {
-		StringBuffer stringbuffer = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < s.length(); i++) {
 			char c;
 			switch (s.charAt(i)) {
@@ -84,50 +84,50 @@ public final class ParseException extends Exception {
 				break;
 
 			case 8: // '\b'
-				stringbuffer.append("\\b");
+				sb.append("\\b");
 				break;
 
 			case 9: // '\t'
-				stringbuffer.append("\\t");
+				sb.append("\\t");
 				break;
 
 			case 10: // '\n'
-				stringbuffer.append("\\n");
+				sb.append("\\n");
 				break;
 
 			case 12: // '\f'
-				stringbuffer.append("\\f");
+				sb.append("\\f");
 				break;
 
 			case 13: // '\r'
-				stringbuffer.append("\\r");
+				sb.append("\\r");
 				break;
 
 			case 34: // '"'
-				stringbuffer.append("\\\"");
+				sb.append("\\\"");
 				break;
 
 			case 39: // '\''
-				stringbuffer.append("\\'");
+				sb.append("\\'");
 				break;
 
 			case 92: // '\\'
-				stringbuffer.append("\\\\");
+				sb.append("\\\\");
 				break;
 
 			default:
 				if ((c = s.charAt(i)) < ' ' || c > '~') {
 					String s1 = "0000" + Integer.toString(c, 16);
-					stringbuffer.append("\\u" + s1.substring(s1.length() - 4, s1.length()));
+					sb.append("\\u" + s1.substring(s1.length() - 4, s1.length()));
 				}
 				else {
-					stringbuffer.append(c);
+					sb.append(c);
 				}
 				break;
 			}
 		}
 
-		return stringbuffer.toString();
+		return sb.toString();
 	}
 
 	protected boolean specialConstructor;

@@ -268,7 +268,7 @@ final class Perl5Util {
 	}
 
 	private static String _escape(String str) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		int len = str.length();
 		char c;
 

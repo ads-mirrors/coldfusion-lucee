@@ -81,7 +81,7 @@ public final class TagLibFactory extends DefaultHandler {
 	private boolean insideAtt = false;
 
 	private String inside;
-	private StringBuffer content = new StringBuffer();
+	private StringBuilder content = new StringBuilder();
 	private TagLibTagScript script;
 	private Map<String, String> attributes;
 	private final Identification id;
@@ -212,7 +212,7 @@ public final class TagLibFactory extends DefaultHandler {
 	@Override
 	public void endElement(String uri, String name, String qName) {
 		setContent(content.toString().trim());
-		content = new StringBuffer();
+		content = new StringBuilder();
 		inside = "";
 		/*
 		 * if(tag!=null && tag.getName().equalsIgnoreCase("input")) {

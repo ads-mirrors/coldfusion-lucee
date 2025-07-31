@@ -385,7 +385,7 @@ public final class SecurityManagerImpl implements Cloneable, SecurityManager {
 
 	private String createExceptionMessage(Resource res, boolean localAllowed) {
 
-		StringBuffer sb = new StringBuffer(localAllowed && rootDirectory != null ? rootDirectory.getAbsolutePath() : "");
+		StringBuilder sb = new StringBuilder(localAllowed && rootDirectory != null ? rootDirectory.getAbsolutePath() : "");
 		if (customFileAccess != null) {
 			for (int i = 0; i < customFileAccess.length; i++) {
 				if (sb.length() > 0) sb.append(" | ");
@@ -393,7 +393,7 @@ public final class SecurityManagerImpl implements Cloneable, SecurityManager {
 			}
 		}
 
-		StringBuffer rtn = new StringBuffer("Can't access [");
+		StringBuilder rtn = new StringBuilder("Can't access [");
 		rtn.append(res.getAbsolutePath());
 		rtn.append("]");
 		if (sb.length() > 0) {

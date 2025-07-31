@@ -39,9 +39,9 @@ public final class ResourceExecutionLog extends ExecutionLogSupport {
 
 	private static int count = 1;
 	private Resource file;
-	private StringBuffer content;
+	private StringBuilder content;
 	private PageContext pc;
-	private StringBuffer header;
+	private StringBuilder header;
 	private ArrayList<String> pathes = new ArrayList<String>();
 	private long start;
 	private Resource dir;
@@ -53,7 +53,7 @@ public final class ResourceExecutionLog extends ExecutionLogSupport {
 		// header
 		HttpServletRequest req = pc.getHttpServletRequest();
 
-		header = new StringBuffer();
+		header = new StringBuilder();
 		createHeader(header, "context-path", req.getContextPath());
 		createHeader(header, "remote-user", req.getRemoteUser());
 		createHeader(header, "remote-addr", req.getRemoteAddr());
@@ -68,7 +68,7 @@ public final class ResourceExecutionLog extends ExecutionLogSupport {
 		createHeader(header, "unit", unitShortToString(unit));
 		createHeader(header, "min-time-nano", min + "");
 
-		content = new StringBuffer();
+		content = new StringBuilder();
 
 		// directory
 		String strDirectory = arguments.get("directory");
@@ -130,7 +130,7 @@ public final class ResourceExecutionLog extends ExecutionLogSupport {
 		}
 	}
 
-	private void createHeader(StringBuffer sb, String name, String value) {
+	private void createHeader(StringBuilder sb, String name, String value) {
 		sb.append(name);
 		sb.append(":");
 		sb.append(StringUtil.emptyIfNull(value));

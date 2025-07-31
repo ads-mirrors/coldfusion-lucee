@@ -325,7 +325,7 @@ public class TagLib implements Cloneable, Lib {
 	}
 
 	public String getHash() {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		Iterator<String> it = tags.keySet().iterator();
 		while (it.hasNext()) {
 			// "__filename"

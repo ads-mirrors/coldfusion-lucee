@@ -958,15 +958,16 @@ public final class VariableImpl extends ExpressionBase implements Variable {
 		}
 
 		// then check if an alias match
-		String alias = flfa.getAlias();
-		if (!StringUtil.isEmpty(alias)) {
-			// String[] arrAlias =
-			// lucee.runtime.type.List.toStringArray(lucee.runtime.type.List.trimItems(lucee.runtime.type.List.listToArrayRemoveEmpty(alias,
-			// ',')));
+		String[] aliases = flfa.getAliases();
+		if (!ArrayUtil.isEmpty(aliases)){
 			for (int i = 0; i < nargs.length; i++) {
-				if (names[i] != null && lucee.runtime.type.util.ListUtil.listFindNoCase(alias, names[i], ",") != -1) {
-					nargs[i].setValue(nargs[i].getRawValue(), flfa.getTypeAsString());
-					return new VT(nargs[i].getValue(), flfa.getTypeAsString(), i);
+				if (names[i] != null) {
+					for (String a : aliases) {
+						if (names[i].equalsIgnoreCase(a)) {
+							nargs[i].setValue(nargs[i].getRawValue(), flfa.getTypeAsString());
+							return new VT(nargs[i].getValue(), flfa.getTypeAsString(), i);
+						}
+					}
 				}
 			}
 		}

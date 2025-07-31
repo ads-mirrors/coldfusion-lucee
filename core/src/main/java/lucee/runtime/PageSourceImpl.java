@@ -671,7 +671,7 @@ public final class PageSourceImpl implements PageSource {
 		 * arr = ListUtil.toStringArray(ListUtil.listToArray(path, '/'), "");// path.split("/"); int tmpLen;
 		 * for (int i = count; i > 0; i--) { if (arr.length > i) { String tmp = '/' + list(arr, 0, i);
 		 * tmpLen = rootLen - tmp.length(); if (strRoot.lastIndexOf(tmp) == tmpLen && tmpLen >= 0) {
-		 * StringBuffer rtn = new StringBuffer(); while (i < count - i) { count--; rtn.append("../"); }
+		 * StringBuilder rtn = new StringBuilder(); while (i < count - i) { count--; rtn.append("../"); }
 		 * isOutSide.setValue(rtn.length() != 0); return (rtn.length() == 0 ? "/" : rtn.toString()) +
 		 * list(arr, i, arr.length); } } } }
 		 */
@@ -687,7 +687,7 @@ public final class PageSourceImpl implements PageSource {
 	 * @return String list
 	 */
 	private static String list(String[] arr, int from, int len) {
-		StringBuffer sb = new StringBuffer();
+		StringBuilder sb = new StringBuilder();
 		for (int i = from; i < len; i++) {
 			sb.append(arr[i]);
 			if (i + 1 != arr.length) sb.append('/');
@@ -889,7 +889,7 @@ public final class PageSourceImpl implements PageSource {
 		if (!mapping.hasArchive()) return IOUtil.toBufferedInputStream(getPhyscalFile().getInputStream());
 		else if (isLoad(LOAD_PHYSICAL)) return IOUtil.toBufferedInputStream(getPhyscalFile().getInputStream());
 		else if (isLoad(LOAD_ARCHIVE)) {
-			StringBuffer name = new StringBuffer(_getPackageName().replace('.', '/'));
+			StringBuilder name = new StringBuilder(_getPackageName().replace('.', '/'));
 			if (name.length() > 0) name.append("/");
 			name.append(getFileName());
 

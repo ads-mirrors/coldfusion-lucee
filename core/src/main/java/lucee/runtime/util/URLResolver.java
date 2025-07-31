@@ -99,7 +99,7 @@ public final class URLResolver {
 	 * @throws PageException
 	 */
 	public String transform(String html, URL url, boolean setBaseTag) throws PageException {
-		StringBuffer target = new StringBuffer();
+		StringBuilder target = new StringBuilder();
 		SourceCode cfml = new SourceCode(null, html, false);
 		while (!cfml.isAfterLast()) {
 			if (cfml.forwardIfCurrent('<')) {
@@ -134,7 +134,7 @@ public final class URLResolver {
 		}
 
 		if (index != -1) {
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			sb.append(html.substring(0, index));
 			String port = url.getPort() == -1 ? "" : ":" + url.getPort();
 			sb.append(prefix + "<base href=\"" + (url.getProtocol() + "://" + url.getHost() + port) + "\">" + postfix);
@@ -154,12 +154,12 @@ public final class URLResolver {
 	 * @param url absolute URL to Set at tag attribute
 	 * @throws MalformedURLException
 	 */
-	private void transformTag(StringBuffer target, SourceCode cfml, Tag tag, URL url) throws MalformedURLException {
+	private void transformTag(StringBuilder target, SourceCode cfml, Tag tag, URL url) throws MalformedURLException {
 		// TODO attribute inside other attribute
 
 		char quote = 0;
 		boolean inside = false;
-		StringBuffer value = new StringBuffer();
+		StringBuilder value = new StringBuilder();
 
 		while (!cfml.isAfterLast()) {
 			if (inside) {
@@ -198,7 +198,7 @@ public final class URLResolver {
 							cfml.removeSpace();
 
 							quote = cfml.getCurrent();
-							value = new StringBuffer();
+							value = new StringBuilder();
 							if (quote != '"' && quote != '\'') quote = 0;
 							else {
 								target.append(quote);
