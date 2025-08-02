@@ -24,6 +24,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 			var badDateFormats = [
 				{"format": "contains comma","example":                          "9/20/22, 12:34 PM"},
+				{"format": "bash ""$(date)"" add leading zero","example":       "Mon Mar  03 03:09:07 PDT 2025"},
 				{"format": "bash ""$(date)"" two spaces before day","example":  "Mon Mar  3 03:09:07 PDT 2025"},
 				{"format": "bash ""$(date)"" one digit day","example":          "Mon Mar 3 03:09:07 PDT 2025"},
 				{"format": "Oracle","example":                                  "20-SEP-22 12.34.00.000000 PM"},
