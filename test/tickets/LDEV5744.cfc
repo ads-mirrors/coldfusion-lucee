@@ -16,7 +16,6 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				{"format": "short string","example":                            "9/20/22 12:34 PM"},
 				{"format": "contains narrow no-break space","example":          "9/20/22 12:34#chr(8239)#PM"},
 				{"format": "bash ""$(date)"" two-digit day","example":          "Tue Sep 20 12:34:00 PDT 2022"},
-				{"format": "bash ""$(date)"" add leading zero","example":       "Mon Mar 03 03:09:07 PDT 2025"},
 				{"format": "JavaScript: new Date()","example":                  "Tue Sep 20 2022 12:34:00 GMT-0700 (Pacific Daylight Time)"},
 				{"format": "Long month name","example":                         "September 20, 2022 12:34 PM"},
 				{"format": "JDBC/SQL Timestamp","example":                      "{ts '2022-09-20 12:34:00'}"}
@@ -24,6 +23,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 			var badDateFormats = [
 				{"format": "contains comma","example":                          "9/20/22, 12:34 PM"},
+				{"format": "bash ""$(date)"" add leading zero","example":       "Mon Mar  03 03:09:07 PDT 2025"},
 				{"format": "bash ""$(date)"" two spaces before day","example":  "Mon Mar  3 03:09:07 PDT 2025"},
 				{"format": "bash ""$(date)"" one digit day","example":          "Mon Mar 3 03:09:07 PDT 2025"},
 				{"format": "Oracle","example":                                  "20-SEP-22 12.34.00.000000 PM"},
