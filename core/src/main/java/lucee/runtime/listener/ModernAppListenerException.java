@@ -177,11 +177,6 @@ public final class ModernAppListenerException extends PageException {
 	}
 
 	@Override
-	public Throwable getRootCause() {
-		return rootCause.getRootCause();
-	}
-
-	@Override
 	public StackTraceElement[] getStackTrace() {
 		return rootCause.getStackTrace();
 	}

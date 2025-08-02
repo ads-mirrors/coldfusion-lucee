@@ -58,14 +58,14 @@ public final class FormatTag extends BodyTagSupport {
 	private Date output_date = null;
 
 	/**
-	 * Method called at start of tag, always returns EVAL_BODY_TAG
+	 * Method called at start of tag, always returns EVAL_BODY_BUFFERED
 	 *
-	 * @return EVAL_BODY_TAG
+	 * @return EVAL_BODY_BUFFERED
 	 */
 	@Override
 	public final int doStartTag() throws PageException {
 		output_date = date;
-		return EVAL_BODY_TAG;
+		return EVAL_BODY_BUFFERED;
 	}
 
 	/**

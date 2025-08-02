@@ -50,8 +50,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.jsp.JspWriter;
-import jakarta.servlet.jsp.el.ExpressionEvaluator;
-import jakarta.servlet.jsp.el.VariableResolver;
 import jakarta.servlet.jsp.tagext.BodyContent;
 import jakarta.servlet.jsp.tagext.BodyTag;
 import jakarta.servlet.jsp.tagext.Tag;
@@ -4153,15 +4151,6 @@ public final class PageContextImpl extends PageContext {
 		if (flush) flush();
 	}
 
-	@Override
-	public ExpressionEvaluator getExpressionEvaluator() {
-		throw new RuntimeException("not supported!");
-	}
-
-	@Override
-	public VariableResolver getVariableResolver() {
-		throw new RuntimeException("not supported!");
-	}
 
 	@Override
 	public ELContext getELContext() {

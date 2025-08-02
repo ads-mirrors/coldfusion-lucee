@@ -682,16 +682,6 @@ public abstract class PageExceptionImpl extends PageException {
 	}
 
 	@Override
-	public Throwable getRootCause() {
-		Throwable cause = this;
-		Throwable temp;
-
-		while ((temp = cause.getCause()) != null)
-			cause = temp;
-		return cause;
-	}
-
-	@Override
 	public int getTracePointer() {
 		return tracePointer;
 	}
