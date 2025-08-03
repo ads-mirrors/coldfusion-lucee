@@ -1,4 +1,7 @@
 <cfscript>
+	/**
+	 * Admin layout is applied in the admin_layout.cfm template
+	 */
 
 	request.singleMode=getApplicationSettings().singleContext;
 	
