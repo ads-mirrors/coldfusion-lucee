@@ -309,32 +309,40 @@ public final class ConfigAdmin {
 		}
 	}
 
-	protected static synchronized void _storeAndReload(ConfigPro config)
+	protected static void _storeAndReload(ConfigPro config)
 			throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
-		ConfigAdmin admin = new ConfigAdmin(config, null, true);
-		admin._store();
-		admin._reload();
+		synchronized (config) {
+			ConfigAdmin admin = new ConfigAdmin(config, null, true);
+			admin._store();
+			admin._reload();
+		}
 	}
 
-	protected synchronized void _storeAndReload() throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
-		_store();
-		_reload();
+	protected void _storeAndReload() throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
+		synchronized (config) {
+			_store();
+			_reload();
+		}
 	}
 
-	public synchronized void storeAndReload() throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
-		checkWriteAccess();
-		_store();
-		_reload();
+	public void storeAndReload() throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
+		synchronized (config) {
+			checkWriteAccess();
+			_store();
+			_reload();
+		}
 	}
 
-	public synchronized void storeAndReload(boolean refreshScheduler)
+	public void storeAndReload(boolean refreshScheduler)
 			throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
-		checkWriteAccess();
-		_store();
-		_reload(refreshScheduler);
+		synchronized (config) {
+			checkWriteAccess();
+			_store();
+			_reload(refreshScheduler);
+		}
 	}
 
-	private synchronized void _cleanup() {
+	private void _cleanup() {
 		removeIf("allowCompression", ConfigImpl.DEFAULT_ALLOW_COMPRESSION);
 		removeIf("bufferTagBodyOutput", ConfigImpl.DEFAULT_BUFFER_TAG_BODY_OUTPUT);
 		removeIf("developMode", ConfigImpl.DEFAULT_DEVELOP_MODE);
@@ -349,44 +357,47 @@ public final class ConfigAdmin {
 
 	}
 
-	private synchronized void _store() throws ConverterException, IOException {
-		_cleanup();
-		JSONConverter json = new JSONConverter(true, CharsetUtil.UTF8, JSONDateFormat.PATTERN_CF, false);
-		String str = json.serialize(null, root, SerializationSettings.SERIALIZE_AS_ROW, true);
-		IOUtil.write(config.getConfigFile(), str, CharsetUtil.UTF8, false);
+	private void _store() throws ConverterException, IOException {
+		synchronized (config) {
+			_cleanup();
+			JSONConverter json = new JSONConverter(true, CharsetUtil.UTF8, JSONDateFormat.PATTERN_CF, false);
+			String str = json.serialize(null, root, SerializationSettings.SERIALIZE_AS_ROW, true);
+			IOUtil.write(config.getConfigFile(), str, CharsetUtil.UTF8, false);
+		}
 	}
 
-	private synchronized void _reload() throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException {
+	private void _reload() throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException {
 		_reload(false);
 	}
 
-	private synchronized void _reload(boolean refreshScheduler) throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException {
+	private void _reload(boolean refreshScheduler) throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException {
+		synchronized (config) {
+			// if(storeInMemoryData)XMLCaster.writeTo(doc,config.getConfigFile());
+			CFMLEngine engine = ConfigWebUtil.getEngine(config);
+			if (config instanceof ConfigServerImpl) {
 
-		// if(storeInMemoryData)XMLCaster.writeTo(doc,config.getConfigFile());
-		CFMLEngine engine = ConfigWebUtil.getEngine(config);
-		if (config instanceof ConfigServerImpl) {
+				ConfigServerImpl cs = (ConfigServerImpl) config;
+				ConfigServerFactory.reloadInstance(engine, cs, refreshScheduler);
+				ConfigWeb[] webs = cs.getConfigWebs();
+				for (ConfigWeb web: webs) {
+					ConfigWebFactory.reloadInstance(engine, (ConfigServerImpl) config, (ConfigWebImpl) web, true, refreshScheduler);
 
-			ConfigServerImpl cs = (ConfigServerImpl) config;
-			ConfigServerFactory.reloadInstance(engine, cs, refreshScheduler);
-			ConfigWeb[] webs = cs.getConfigWebs();
-			for (ConfigWeb web: webs) {
-				ConfigWebFactory.reloadInstance(engine, (ConfigServerImpl) config, (ConfigWebImpl) web, true, refreshScheduler);
-
+				}
 			}
-		}
-		else if (config instanceof ConfigWebImpl) {
-			ConfigServerImpl cs = ((ConfigWebImpl) config).getConfigServerImpl();
-			ConfigWebFactory.reloadInstance(engine, cs, (ConfigWebImpl) config, false, refreshScheduler);
-		}
-		else if (config instanceof SingleContextConfigWeb) {
-			if (true) throw new RuntimeException("important exception, please report to Lucee");
-			// TODO remove this this should never happening
-			aprint.ds();
-			SingleContextConfigWeb sccw = (SingleContextConfigWeb) config;
+			else if (config instanceof ConfigWebImpl) {
+				ConfigServerImpl cs = ((ConfigWebImpl) config).getConfigServerImpl();
+				ConfigWebFactory.reloadInstance(engine, cs, (ConfigWebImpl) config, false, refreshScheduler);
+			}
+			else if (config instanceof SingleContextConfigWeb) {
+				if (true) throw new RuntimeException("important exception, please report to Lucee");
+				// TODO remove this this should never happening
+				aprint.ds();
+				SingleContextConfigWeb sccw = (SingleContextConfigWeb) config;
 
-			ConfigServerImpl cs = sccw.getConfigServerImpl();
-			ConfigServerFactory.reloadInstance(engine, cs);
-			sccw.reload();
+				ConfigServerImpl cs = sccw.getConfigServerImpl();
+				ConfigServerFactory.reloadInstance(engine, cs);
+				sccw.reload();
+			}
 		}
 	}
 
