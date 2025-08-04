@@ -10648,7 +10648,7 @@ Use `LoadAISession()` to restore a serialized session.
 			latest:snapshot: Fetches the most recent snapshot version for each development cycle.</description>
 		</argument>
 		<return>
-			<type>query</type>
+			<type>array</type>
 		</return>
 	</function>
 	

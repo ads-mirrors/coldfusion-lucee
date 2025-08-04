@@ -1539,10 +1539,10 @@ public final class ConfigAdmin {
 	 * 
 	 * @throws PageException
 	 */
-	public void updateDataSource(String id, String bundleName, String bundleVersion, String name, String newName, ClassDefinition cd, String dsn, String username, String password, String host, String database, int port,
-			int connectionLimit, int idleTimeout, int liveTimeout, long metaCacheTimeout, boolean blob, boolean clob, int allow, boolean validate, boolean storage, String timezone,
-			Struct custom, String dbdriver, ParamSyntax paramSyntax, boolean literalTimestampWithTSOffset, boolean alwaysSetTimeout, boolean requestExclusive,
-			boolean alwaysResetConnections) throws PageException {
+	public void updateDataSource(String id, String bundleName, String bundleVersion, String name, String newName, ClassDefinition cd, String dsn, String username, String password,
+			String host, String database, int port, int connectionLimit, int idleTimeout, int liveTimeout, long metaCacheTimeout, boolean blob, boolean clob, int allow,
+			boolean validate, boolean storage, String timezone, Struct custom, String dbdriver, ParamSyntax paramSyntax, boolean literalTimestampWithTSOffset,
+			boolean alwaysSetTimeout, boolean requestExclusive, boolean alwaysResetConnections) throws PageException {
 
 		checkWriteAccess();
 		SecurityManager sm = config.getSecurityManager();
@@ -1587,7 +1587,7 @@ public final class ConfigAdmin {
 
 				if (!StringUtil.isEmpty(bundleName)) el.setEL(KeyConstants._bundleName, bundleName);
 
-        		if (!StringUtil.isEmpty(bundleVersion)) el.setEL(KeyConstants._bundleVersion, bundleVersion);
+				if (!StringUtil.isEmpty(bundleVersion)) el.setEL(KeyConstants._bundleVersion, bundleVersion);
 
 				el.setEL(KeyConstants._dsn, dsn);
 				el.setEL(KeyConstants._username, username);
@@ -1648,7 +1648,7 @@ public final class ConfigAdmin {
 		el.setEL("dsn", dsn);
 		if (!StringUtil.isEmpty(bundleName)) el.setEL(KeyConstants._bundleName, bundleName);
 
-        if (!StringUtil.isEmpty(bundleVersion)) el.setEL(KeyConstants._bundleVersion, bundleVersion);
+		if (!StringUtil.isEmpty(bundleVersion)) el.setEL(KeyConstants._bundleVersion, bundleVersion);
 
 		if (!StringUtil.isEmpty(id)) el.setEL(KeyConstants._id, id);
 		else if (el.containsKey(KeyConstants._id)) el.removeEL(KeyConstants._id);
@@ -4784,8 +4784,8 @@ public final class ConfigAdmin {
 		// MUST 7 rest all values set
 		try {
 			if (!force && _hasRHExtensionInstalled((ConfigPro) config, rhext.toExtensionDefinition()) != null) {
-				throw new ApplicationException(
-						"the extension " + rhext.getMetadata().getName() + " (id: " + rhext.getId() + ") in version " + rhext.getVersion() + " is already installed");
+
+				throw new AlreadyInstalledExtension(rhext);
 			}
 		}
 		catch (Exception e) {
@@ -6940,5 +6940,11 @@ public final class ConfigAdmin {
 		checkWriteAccess();
 		if (flushExistingData) root.clear();
 		StructUtil.merge(root, data);
+	}
+
+	public static class AlreadyInstalledExtension extends ApplicationException {
+		public AlreadyInstalledExtension(RHExtension ext) {
+			super("the extension " + ext.getMetadata().getName() + " (id: " + ext.getId() + ") in version " + ext.getVersion() + " is already installed");
+		}
 	}
 }

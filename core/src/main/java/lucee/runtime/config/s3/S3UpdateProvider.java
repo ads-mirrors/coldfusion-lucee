@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.TimeZone;
 
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Version;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -26,6 +27,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.Pair;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.net.http.HTTPResponse;
@@ -44,15 +46,15 @@ public final class S3UpdateProvider extends DefaultHandler {
 	private static final long MAX_AGE = 10000;
 
 	private static URL DEFAULT_PROVIDER_LIST = null;
-	private static URL[] DEFAULT_PROVIDER_DETAILS = null;
+	private static URL DEFAULT_PROVIDER_DETAIL = null;
 
 	private static URL defaultProviderList;
-	private static URL[] defaultProviderDetail;
+	private static URL defaultProviderDetail;
 
 	static {
 		try {
 			DEFAULT_PROVIDER_LIST = new URL("https://lucee-downloads.s3.amazonaws.com/");
-			DEFAULT_PROVIDER_DETAILS = new URL[] { new URL("https://cdn.lucee.org/"), DEFAULT_PROVIDER_LIST };
+			DEFAULT_PROVIDER_DETAIL = new URL("https://cdn.lucee.org/");
 		}
 		catch (Exception e) {
 		}
@@ -73,17 +75,17 @@ public final class S3UpdateProvider extends DefaultHandler {
 		return defaultProviderList;
 	}
 
-	public static URL[] getDefaultProviderDetail() {
+	public static URL getDefaultProviderDetail() {
 		if (defaultProviderDetail == null) {
 			String str = SystemUtil.getSystemPropOrEnvVar("lucee.s3.provider.detail", null);
 			if (!StringUtil.isEmpty(str, true)) {
 				try {
-					defaultProviderDetail = new URL[] { new URL(str.trim()) };
+					defaultProviderDetail = new URL(str.trim());
 				}
 				catch (Exception e) {
 				}
 			}
-			if (defaultProviderDetail == null) defaultProviderDetail = DEFAULT_PROVIDER_DETAILS;
+			if (defaultProviderDetail == null) defaultProviderDetail = DEFAULT_PROVIDER_DETAIL;
 		}
 		return defaultProviderDetail;
 	}
@@ -93,73 +95,64 @@ public final class S3UpdateProvider extends DefaultHandler {
 	private StringBuilder content = new StringBuilder();
 	private final URL url;
 	private boolean insideContents;
-	private Map<String, Element> elements = new LinkedHashMap<>();
-	private Element element;
+	private Map<Version, Element> elements = new LinkedHashMap<>();
+	private Artifact artifact;
 	private boolean isTruncated;
 	private String lastKey;
-	private String last3;
-	private String last3Key;
-	private String last3P;
-	private String last3PKey;
-	private URL[] details;
+	// private String last3PKey;
+	private final URL detail;
 
 	private static Map<String, Pair<Long, S3UpdateProvider>> readers = new HashMap<>();
 
-	private S3UpdateProvider(URL list, URL[] details) throws MalformedURLException {
+	private S3UpdateProvider(URL list, URL detail) throws MalformedURLException {
 
 		if (!list.toExternalForm().endsWith("/")) this.url = new URL(list.toExternalForm() + "/");
 		else this.url = list;
 
-		for (int i = 0; i < details.length; i++) {
-			if (!details[i].toExternalForm().endsWith("/")) details[i] = new URL(details[i].toExternalForm() + "/");
-		}
-		this.details = details;
+		if (!detail.toExternalForm().endsWith("/")) this.detail = new URL(detail.toExternalForm() + "/");
+		else this.detail = detail;
 	}
 
 	public static S3UpdateProvider getInstance() throws MalformedURLException {
 		return getInstance(getDefaultProviderList(), getDefaultProviderDetail());
 	}
 
-	public static S3UpdateProvider getInstance(URL list, URL[] details) throws MalformedURLException {
-		String key = toKey(list, details);
+	public static S3UpdateProvider getInstance(URL list, URL detail) throws MalformedURLException {
+		String key = toKey(list, detail);
 		Pair<Long, S3UpdateProvider> pair = readers.get(key);
 		if (pair != null && pair.getName().longValue() + MAX_AGE > System.currentTimeMillis()) {
 			return pair.getValue();
 		}
-		S3UpdateProvider reader = new S3UpdateProvider(list, details);
+		S3UpdateProvider reader = new S3UpdateProvider(list, detail);
 		readers.put(key, new Pair<Long, S3UpdateProvider>(System.currentTimeMillis(), reader));
 		return reader;
 	}
 
-	private static String toKey(URL list, URL[] details) {
-		StringBuilder sb = new StringBuilder().append(list.toExternalForm());
-		for (URL d: details) {
-			sb.append(';').append(d.toExternalForm());
-		}
-		return sb.toString();
+	private static String toKey(URL list, URL detail) {
+		return new StringBuilder().append(list.toExternalForm()).append(';').append(detail.toExternalForm()).toString();
 	}
 
 	public InputStream getCore(Version version) throws MalformedURLException, IOException, GeneralSecurityException, SAXException {
 		for (Element e: read()) {
 			if (version.equals(e.getVersion())) {
-				URL url = e.getLCO();
-				if (url != null) {
-					HTTPResponse rsp = HTTPEngine4Impl.get(url, null, null, MavenUpdateProvider.CONNECTION_TIMEOUT, true, null, null, null, null);
+				Artifact art = e.getLCO();
+				if (art != null) {
+					HTTPResponse rsp = HTTPEngine4Impl.get(art.getURL(), null, null, MavenUpdateProvider.CONNECTION_TIMEOUT, true, null, null, null, null);
 					if (rsp != null) {
 						int sc = rsp.getStatusCode();
 						if (sc >= 200 && sc < 300) return rsp.getContentAsStream();
 					}
 				}
 
-				url = e.getJAR();
-				if (url != null) {
-					HTTPResponse rsp = HTTPEngine4Impl.get(url, null, null, MavenUpdateProvider.CONNECTION_TIMEOUT, true, null, null, null, null);
+				art = e.getJAR();
+				if (art != null) {
+					HTTPResponse rsp = HTTPEngine4Impl.get(art.getURL(), null, null, MavenUpdateProvider.CONNECTION_TIMEOUT, true, null, null, null, null);
 					if (rsp != null) {
 						int sc = rsp.getStatusCode();
-						if (sc < 200 || sc >= 300) throw new IOException("unable to invoke [" + url + "], status code [" + sc + "]");
+						if (sc < 200 || sc >= 300) throw new IOException("unable to invoke [" + art + "], status code [" + sc + "]");
 					}
 					else {
-						throw new IOException("unable to invoke [" + url + "], no response.");
+						throw new IOException("unable to invoke [" + art + "], no response.");
 					}
 					return MavenUpdateProvider.getFileStreamFromZipStream(rsp.getContentAsStream());
 				}
@@ -172,10 +165,11 @@ public final class S3UpdateProvider extends DefaultHandler {
 		int count = 100;
 		URL url = null;
 
-		if (last3PKey != null) url = new URL(this.url.toExternalForm() + "?marker=" + last3PKey);
+		if (lastKey != null) url = new URL(this.url.toExternalForm() + "?marker=" + lastKey);
 
 		do {
 			if (url == null) url = isTruncated ? new URL(this.url.toExternalForm() + "?marker=" + this.lastKey) : this.url;
+			url = addPrefix(url);
 			HTTPResponse rsp = HTTPEngine4Impl.get(url, null, null, S3UpdateProvider.CONNECTION_TIMEOUT, true, null, null, null, null);
 			if (rsp != null) {
 				int sc = rsp.getStatusCode();
@@ -190,8 +184,6 @@ public final class S3UpdateProvider extends DefaultHandler {
 				init(new InputSource(r = IOUtil.getReader(rsp.getContentAsStream(), (Charset) null)));
 			}
 			finally {
-				last3P = null;
-				last3 = null;
 				url = null;
 				IOUtil.close(r);
 			}
@@ -212,6 +204,13 @@ public final class S3UpdateProvider extends DefaultHandler {
 		});
 
 		return list;
+	}
+
+	private static URL addPrefix(URL url) throws MalformedURLException {
+		String strURL = url.toExternalForm();
+		if (url.getQuery() != null) return new URL(strURL + "&prefix=org/lucee/lucee/");
+		return new URL(strURL + "?prefix=org/lucee/lucee/");
+
 	}
 
 	/**
@@ -237,7 +236,7 @@ public final class S3UpdateProvider extends DefaultHandler {
 		tree.add(qName);
 		if (tree.size() == 2 && "Contents".equals(name)) {
 			insideContents = true;
-			element = new Element(details);
+			artifact = new Artifact(detail);
 		}
 
 	}
@@ -248,35 +247,22 @@ public final class S3UpdateProvider extends DefaultHandler {
 
 		if (tree.size() == 2 && "Contents".equals(name)) {
 			insideContents = false;
-			if (element.validExtension()) {
-				Version v = element.getVersion();
-				if (v != null) {
-					Element existing = elements.get(v.toString());
-					if (existing != null) existing.addKey(element.keys.get(0));
-					else {
-						element.version = v;
-						elements.put(v.toString(), element);
-					}
+			if (artifact.type != null) {
+				Element existing = elements.get(artifact.getVersion());
+				if (existing == null) {
+					elements.put(artifact.getVersion(), existing = new Element());
 				}
+				existing.add(artifact);
 			}
 		}
 		else if (insideContents) {
 			if ("Key".equals(name)) {
-				lastKey = content.toString().trim();
-
-				element.addKey(lastKey);
-
-				if (element.getVersion() != null && (last3 == null || !last3.equals(element.getVersion().toString().substring(0, 6)))) {
-					last3P = last3;
-					last3PKey = last3Key;
-					last3 = element.getVersion().toString().substring(0, 6);
-					last3Key = lastKey;
-					// print.e(last3 + "->" + last3P);
-				}
+				artifact.init(content.toString().trim());
+				lastKey = artifact.raw;
 			}
-			else if ("LastModified".equals(name)) element.setLastModified(content.toString().trim());
-			else if ("ETag".equals(name)) element.setETag(content.toString().trim());
-			else if ("Size".equals(name)) element.setSize(content.toString().trim());
+			else if ("LastModified".equals(name)) artifact.lastModified = content.toString().trim();
+			else if ("ETag".equals(name)) artifact.ETag = content.toString().trim();
+			else if ("Size".equals(name)) artifact.size = content.toString().trim();
 		}
 
 		// meta data
@@ -297,127 +283,142 @@ public final class S3UpdateProvider extends DefaultHandler {
 	}
 
 	public static class Element {
-		private List<String> keys = new ArrayList<>();
-		private long size;
-		private String etag;
-		private DateTime lastMod;
+		private List<Artifact> artifacts = new ArrayList<>();
 		private Version version;
-		private URL[] details;
-		private URL lco;
-		private URL jar;
 
-		public Element(URL[] details) {
-			this.details = details;
+		public Element() {
 		}
 
-		public boolean validExtension() {
-			for (String k: keys) {
-				if (k.endsWith(".lco") || k.endsWith(".jar")) return true;
-			}
-			return false;
+		public void add(Artifact artifact) {
+			artifacts.add(artifact);
+			version = artifact.getVersion();
 		}
 
-		/*
-		 * <>4.5.3.020.lco</Key> <LastModified>2018-05-28T20:10:55.000Z</LastModified>
-		 * <ETag>"08e36e85b35f6f41380b6b013fc68b97"</ETag> <Size>9718200</Size>
-		 */
-		public void addKey(String key) {
-			keys.add(key);
-
-		}
-
-		public void setSize(String size) {
-			this.size = Caster.toLongValue(size, 0L);
-		}
-
-		public long getSize() {
-			return this.size;
-		}
-
-		public URL getJAR() {
-			if (jar == null) {
-				initFiles();
-			}
-			return jar;
-		}
-
-		public URL getLCO() {
-			if (lco == null) {
-				initFiles();
-			}
-			return lco;
-		}
-
-		private void initFiles() {
-			for (String k: keys) {
-				if (k.endsWith(".lco")) lco = validate(k);
-				else if (k.endsWith(".jar")) jar = validate(k);
-			}
-		}
-
-		private URL validate(String k) {
-			for (URL d: details) {
-				try {
-					URL url = new URL(d.toExternalForm() + k);
-
-					HTTPResponse rsp = HTTPEngine4Impl.head(url, null, null, MavenUpdateProvider.CONNECTION_TIMEOUT, true, null, null, null, null);
-					if (rsp != null) {
-						int sc = rsp.getStatusCode();
-						if (sc >= 200 && sc < 300) return url;
-					}
-				}
-				catch (Exception e) {
-
+		public Artifact getJAR() {
+			for (Artifact a: artifacts) {
+				if ("jar".equalsIgnoreCase(a.type) && a.classifier == null) {
+					return a;
 				}
 			}
 			return null;
 		}
 
-		public void setETag(String etag) {
-			this.etag = StringUtil.unwrap(etag);
+		public Artifact getLCO() {
+			for (Artifact a: artifacts) {
+				if ("lco".equalsIgnoreCase(a.type) && a.classifier == null) {
+					return a;
+				}
+			}
+			return null;
 		}
 
 		public String getETag() {
-			return etag;
-		}
-
-		public void setLastModified(String lm) {
-			this.lastMod = DateCaster.toDateAdvanced(lm, (TimeZone) null, null);
-			// 2023-10-20T10:03:41.000Z
-			// TODO
+			Artifact art = getJAR();
+			if (art != null) return art.ETag;
+			for (Artifact a: artifacts) {
+				return a.ETag;
+			}
+			return null;
 		}
 
 		public DateTime getLastModifed() {
-			return lastMod;
+			Artifact art = getJAR();
+			if (art != null) return art.getLastModifed();
+			for (Artifact a: artifacts) {
+				return a.getLastModifed();
+			}
+			return null;
 		}
 
-		public static Version toVersion(String version, Version defaultValue) {
-			String v;
-			if (version.startsWith("lucee-")) v = version.substring(6);
-			else v = version;
-
-			if (!v.endsWith(".jar") && !v.endsWith(".lco")) return defaultValue;
-			v = v.substring(0, v.length() - 4);
-			return OSGiUtil.toVersion(v, defaultValue);
+		public String getSize() {
+			Artifact art = getJAR();
+			if (art != null) return art.size;
+			for (Artifact a: artifacts) {
+				return a.size;
+			}
+			return null;
 		}
 
 		public Version getVersion() {
-			if (version == null) {
-				Version tmp;
-				for (String k: keys) {
-					tmp = toVersion(k, null);
-					if (tmp != null) {
-						version = tmp;
-						break;
+			return version;
+		}
+
+		public List<Artifact> getArtifacts() {
+			return artifacts;
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder("version:").append(getVersion()).append(';');
+
+			for (Artifact a: artifacts) {
+				sb.append(a.name).append(';');
+			}
+
+			return sb.toString();
+		}
+
+	}
+
+	public static class Artifact {
+		public String raw;
+		public Version version;
+		public String name;
+		public String size;
+		public String ETag;
+		public String lastModified;
+		public String type;
+		public String classifier;
+		private URL root;
+		private DateTime lastMod;
+
+		public Artifact(URL root) {
+			this.root = root;
+		}
+
+		public URL getURL() throws MalformedURLException {
+			return new URL(root + raw);
+		}
+
+		public Artifact init(String raw) {
+			this.raw = raw;
+			if (raw.startsWith("org/lucee/lucee/")) {
+				int index = raw.indexOf('/', 17);
+				if (index == -1) return null;
+				try {
+					this.version = OSGiUtil.toVersion(raw.substring(16, index));
+				}
+				catch (BundleException e) {
+					LogUtil.log("s3-update-provider", e);
+				}
+				this.name = raw.substring(index + 1);
+
+				if (name.startsWith("lucee-" + version)) {
+					index = name.lastIndexOf('.');
+					this.type = name.substring(index + 1);
+					int i;
+					if (index > (i = ("lucee-" + version).length())) {
+						classifier = name.substring(i + 1, index);
 					}
 				}
 			}
+			return this;
+		}
+
+		public Version getVersion() {
 			return version;
 		}
 
 		@Override
 		public String toString() {
-			return new StringBuilder().append("size:").append(size).append(";version:").append(getVersion()).append(";last-mod:").append(lastMod).toString();
+			return new StringBuilder().append("size:").append(size).append(";version:").append(getVersion()).append(";last-mod:").append(lastModified).toString();
+		}
+
+		public DateTime getLastModifed() {
+			if (lastMod == null) {
+				this.lastMod = DateCaster.toDateAdvanced(lastModified, (TimeZone) null, null);
+			}
+			return lastMod;
 		}
 	}
 }
