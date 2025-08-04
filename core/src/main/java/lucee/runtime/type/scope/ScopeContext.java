@@ -59,6 +59,7 @@ import lucee.runtime.type.scope.session.SessionFile;
 import lucee.runtime.type.scope.session.SessionMemory;
 import lucee.runtime.type.scope.storage.IKHandlerCache;
 import lucee.runtime.type.scope.storage.IKHandlerDatasource;
+import lucee.runtime.type.scope.storage.IKStorageScopeItem;
 import lucee.runtime.type.scope.storage.IKStorageScopeSupport;
 import lucee.runtime.type.scope.storage.MemoryScope;
 import lucee.runtime.type.scope.storage.StorageScope;
@@ -748,6 +749,18 @@ public final class ScopeContext {
 		}
 	}
 
+	/**
+	 * Determines if a storage scope contains user-defined content beyond system keys.
+	 * 
+	 * This method excludes internal system keys (cfid, cftoken, lastvisit, etc.) when determining if
+	 * the scope has meaningful content. Importantly, it INCLUDES keys that have been deleted from
+	 * storage but are still present in memory marked as deleted - these deleted keys are considered
+	 * "content" for merge decision purposes.
+	 * 
+	 * @param scope the session or client scope to check
+	 * @return true if scope contains user-defined content (including deleted keys), false if only
+	 *         system keys
+	 */
 	public static boolean hasContent(Scope scope) {
 		int size = scope.size();
 		if (size == 0) return false;
@@ -756,6 +769,16 @@ public final class ScopeContext {
 		return !(scope.containsKey(KeyConstants._cfid) && scope.containsKey(KeyConstants._cftoken) && scope.containsKey(KeyConstants._urltoken)
 				&& scope.containsKey(KeyConstants._timecreated) && scope.containsKey(KeyConstants._lastvisit)
 				&& (scope.getType() == Scope.SCOPE_CLIENT ? scope.containsKey(KeyConstants._hitcount) : scope.containsKey(KeyConstants._sessionid)));
+	}
+
+	public static boolean hasContent(Map<Key, IKStorageScopeItem> map, int type) {
+		int size = map.size();
+		if (size == 0) return false;
+		if (size > 7) return true;
+		if (size == 7 && !map.containsKey(KeyConstants._csrf_token)) return true;
+		return !(map.containsKey(KeyConstants._cfid) && map.containsKey(KeyConstants._cftoken) && map.containsKey(KeyConstants._urltoken)
+				&& map.containsKey(KeyConstants._timecreated) && map.containsKey(KeyConstants._lastvisit)
+				&& (type == Scope.SCOPE_CLIENT ? map.containsKey(KeyConstants._hitcount) : map.containsKey(KeyConstants._sessionid)));
 	}
 
 	/**
