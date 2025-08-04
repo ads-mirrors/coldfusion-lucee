@@ -537,6 +537,7 @@ public final class MavenUtil {
 						Resource tmp = pom.local(localRepo, type);
 						// found one in local maven
 						if (tmp.isFile()) {
+							res.getParentResource().mkdirs();
 							tmp.copyTo(res, false);
 							return res;
 						}
