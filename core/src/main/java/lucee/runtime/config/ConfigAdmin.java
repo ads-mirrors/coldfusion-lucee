@@ -351,9 +351,11 @@ public final class ConfigAdmin {
 
 	private synchronized void _store() throws ConverterException, IOException {
 		_cleanup();
-		JSONConverter json = new JSONConverter(true, CharsetUtil.UTF8, JSONDateFormat.PATTERN_CF, false);
-		String str = json.serialize(null, root, SerializationSettings.SERIALIZE_AS_ROW, true);
-		IOUtil.write(config.getConfigFile(), str, CharsetUtil.UTF8, false);
+		synchronized (SystemUtil.createToken("ConfigAdmin._store", config.getConfigFile().getAbsolutePath())) {
+			JSONConverter json = new JSONConverter(true, CharsetUtil.UTF8, JSONDateFormat.PATTERN_CF, false);
+			String str = json.serialize(null, root, SerializationSettings.SERIALIZE_AS_ROW, true);
+			IOUtil.write(config.getConfigFile(), str, CharsetUtil.UTF8, false);
+		}
 	}
 
 	private synchronized void _reload() throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException {
