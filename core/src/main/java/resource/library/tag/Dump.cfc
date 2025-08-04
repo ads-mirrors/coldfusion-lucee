@@ -436,50 +436,55 @@ Otherwise, the value, if specified, is treated as a filename to append the dump 
 
 		if (arguments.level == 0){
 
-			var colors = arguments.meta.colors[arguments.meta.colorId];
-
-			head&=('<style>' & variables.NEWLINE);
-			head&=('.-lucee-dump .disp-none { display: none; }' & variables.NEWLINE);
-			head&=('</style>' & variables.NEWLINE);
-			head&=('<script>' & variables.NEWLINE);
-			head&=('window.__Lucee = { initialized : false,
-				addEventListeners : function(selector, event, handler, useCapture){
-					useCapture = useCapture || false;
-					Array.prototype.forEach.call(
-						 document.querySelectorAll(selector)
-						,function(el, ix) {
-						  el.addEventListener(event, handler, useCapture);
-						}
-					);
+			if (isNull(Request.__Lucee_dump.headerWritten)) {	// write header script only once per request
+				head &= ('
+<style>
+	.-lucee-dump .d-none { display: none; }
+	.-lucee-dump .collapse-trigger { cursor: pointer; }
+</style>
+<script>
+	window.__Lucee = {
+		initialized: false,
+		addEventListeners: function(selector, event, handler, useCapture){
+			useCapture = useCapture || false;
+			Array.prototype.forEach.call(
+				document.querySelectorAll(selector)
+				,function(el, ix) {
+					el.addEventListener(event, handler, useCapture);
 				}
-				,getNextSiblings   : function(el){
-					var  orig = el
-						,result = [];
-					while (el && el.nodeType === Node.ELEMENT_NODE) {
-						if (el !== orig)
-							result.push(el);
-						el = el.nextElementSibling || el.nextSibling;
-					}
-					return result;
-				}
-				,onDocumentReady		   : function(){
-					var L = window.__Lucee;
-					if (L.initialized)
-						return;
-					L.addEventListeners(".collapse-trigger", "click", function(evt){
-						var tr = evt.target.closest("tr");
-						var siblings = L.getNextSiblings(tr);
-						siblings.forEach(function(el, ix){
-							el.classList.toggle("disp-none");
-						});
-					});
-					L.initialized = true;
-				}
+			);
+		},
+		getNextSiblings: function(el){
+			var orig = el, result = [];
+			while (el && el.nodeType === Node.ELEMENT_NODE) {
+				if (el !== orig)
+					result.push(el);
+				el = el.nextElementSibling || el.nextSibling;
 			}
-			' & variables.NEWLINE);
+			return result;
+		},
+		onDocumentReady: function(){
+			var L = window.__Lucee;
+			if (L.initialized)
+				return;
+			L.addEventListeners(".collapse-trigger", "click", function(evt) {
+				var tr = evt.target.closest("tr");
+				var siblings = L.getNextSiblings(tr);
+				siblings.forEach(function(el, ix){
+					el.classList.toggle("d-none");
+				});
+			});
+			L.initialized = true;
+		}
+	}
 
-			head&=('document.addEventListener("DOMContentLoaded", __Lucee.onDocumentReady);' & variables.NEWLINE);
-			head&=('</script>' & variables.NEWLINE);
+	document.addEventListener("DOMContentLoaded", __Lucee.onDocumentReady);
+</script>' & variables.NEWLINE);
+
+				Request.__Lucee_dump.headerWritten = true;
+			} // isNull(Request.__Lucee_dump.headerWritten)
+
+			var colors = arguments.meta.colors[arguments.meta.colorId];
 
 			// styles
 			var prefix="div###arguments.dumpID#";
@@ -496,12 +501,7 @@ Otherwise, the value, if specified, is treated as a filename to append the dump 
 				head&="#prefix# td.luceeH#variables.colorKeys[k]# {color:#fc#;border-color:#bc#;background-color:#v.highLightColor#;}"& NL;
 			}
 
-
-			/*loop collection="#arguments.cssColors#" item="local.key" {
-				head&="td.#key# {background-color:#arguments.cssColors[key]#;}"& NL;
-			}*/
 			head&=('</style>' & NL);
-
 		}
 
 		var rows = [];
@@ -516,8 +516,7 @@ Otherwise, the value, if specified, is treated as a filename to append the dump 
 				: '';
 
 			arrayAppend(rows, '<tr>');
-			arrayAppend(rows, '<td class="collapse-trigger luceeH#variables.colorKeys[arguments.meta.colorId]#" colspan="#columnCount#" style="cursor:pointer;">');
-
+			arrayAppend(rows, '<td class="collapse-trigger luceeH#variables.colorKeys[arguments.meta.colorId]#" colspan="#columnCount#">');
 			arrayAppend(rows, '<span>#arguments.meta.title##metaID#</span>');
 			arrayAppend(rows, comment & '</td>');
 			arrayAppend(rows, '</tr>');
@@ -531,10 +530,8 @@ Otherwise, the value, if specified, is treated as a filename to append the dump 
 
 			loop query=arguments.meta.data {
 				var c = 1;
-				// var nodeID = len(id) ? ' name="#id#"' : '';
-				var hidden = !arguments.expand && len(id) ? ' class="disp-none" ' : '';
+				var hidden = !arguments.expand && len(id) ? ' class="d-none" ' : '';
 
-				// arrayAppend(rows, '<tr#nodeID##hidden#>');
 				arrayAppend(rows, '<tr#hidden#>');
 
 				for (var col=1; col <= columnCount-1; col++) {
@@ -593,7 +590,6 @@ Otherwise, the value, if specified, is treated as a filename to append the dump 
 		//_dump(borderColor&"-"&colors.highLightColor);
 		var normalColor = "white";
 
-
 			if(arguments.level == 0){
 				// javascript
 				rtn&=('<script language="JavaScript" type="text/javascript">' & variables.NEWLINE);
@@ -627,7 +623,6 @@ Otherwise, the value, if specified, is treated as a filename to append the dump 
 					rtn&="#prefix# td.luceeH1#variables.colorKeys[k]# {background-color:#h1Color#;border-color:#borderColor#; color:white;cursor:pointer;}"& variables.NEWLINE;
 					rtn&="#prefix# td.luceeH2#variables.colorKeys[k]# {background-color:#h2Color#;border-color:#borderColor#; color:black;cursor:pointer;}"& variables.NEWLINE;
 				}
-
 
 				rtn&=('</style>' & variables.NEWLINE);
 			}
