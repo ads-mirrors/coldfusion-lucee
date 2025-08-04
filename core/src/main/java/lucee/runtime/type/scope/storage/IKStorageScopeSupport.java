@@ -99,6 +99,7 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 	private String storage;
 	private Struct tokens = new StructImpl(Struct.TYPE_SYNC, 4);
 	private long lastModified;
+	private final long lastModifiedAtInit;
 
 	private IKHandler handler;
 	private String appName;
@@ -124,10 +125,12 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 			}
 		}
 
+		// last modified
+		lastModifiedAtInit = this.lastModified = lastModified;
+
 		this.hitcount = (type == SCOPE_CLIENT) ? Caster.toIntValue(data.getOrDefault(KeyConstants._hitcount, ONE), 1) : 1;
 		this.strType = strType;
 		this.type = type;
-		this.lastModified = lastModified;
 		this.handler = handler;
 		this.appName = appName;
 		this.name = name;
@@ -206,24 +209,24 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 
 		// lastvisit=System.currentTimeMillis();
 		if (data0 == null) data0 = MapFactory.getConcurrentMap();
-		data0.put(KeyConstants._cfid, new IKStorageScopeItem(pc.getCFID()));
-		data0.put(KeyConstants._cftoken, new IKStorageScopeItem(pc.getCFToken()));
-		data0.put(KeyConstants._urltoken, new IKStorageScopeItem(pc.getURLToken()));
-		data0.put(KeyConstants._lastvisit, new IKStorageScopeItem(_lastvisit));
+		data0.put(KeyConstants._cfid, new IKStorageScopeItem(pc.getCFID(), lastModifiedAtInit()));
+		data0.put(KeyConstants._cftoken, new IKStorageScopeItem(pc.getCFToken(), lastModifiedAtInit()));
+		data0.put(KeyConstants._urltoken, new IKStorageScopeItem(pc.getURLToken(), lastModifiedAtInit()));
+		data0.put(KeyConstants._lastvisit, new IKStorageScopeItem(_lastvisit, lastModifiedAtInit()));
 		_lastvisit = new DateTimeImpl();
 		lastvisit = System.currentTimeMillis();
 
 		if (type == SCOPE_CLIENT) {
-			data0.put(KeyConstants._hitcount, new IKStorageScopeItem(Double.valueOf(hitcount++)));
+			data0.put(KeyConstants._hitcount, new IKStorageScopeItem(Double.valueOf(hitcount++), lastModifiedAtInit()));
 		}
 		else {
-			data0.put(KeyConstants._sessionid, new IKStorageScopeItem(pc.getApplicationContext().getName() + "_" + pc.getCFID() + "_" + pc.getCFToken()));
+			data0.put(KeyConstants._sessionid, new IKStorageScopeItem(pc.getApplicationContext().getName() + "_" + pc.getCFID() + "_" + pc.getCFToken(), lastModifiedAtInit()));
 		}
 		ApplicationContext ac = pc.getApplicationContext();
 		if (ac != null && ac.getSessionCluster() && isSessionStorage(pc)) {
-			data0.put(KeyConstants._csrf_token, new IKStorageScopeItem(this.tokens));
+			data0.put(KeyConstants._csrf_token, new IKStorageScopeItem(this.tokens, lastModifiedAtInit()));
 		}
-		data0.put(KeyConstants._timecreated, new IKStorageScopeItem(timecreated));
+		data0.put(KeyConstants._timecreated, new IKStorageScopeItem(timecreated, lastModifiedAtInit()));
 	}
 
 	public void resetEnv(PageContext pc) {
@@ -258,6 +261,10 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 		return lastModified;
 	}
 
+	public long lastModifiedAtInit() {
+		return lastModifiedAtInit;
+	}
+
 	@Override
 	public final void initialize(PageContext pc) {
 		// StorageScopes need only request initialisation no global init, they are not reused;
@@ -267,11 +274,11 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 	public void touchAfterRequest(PageContext pc) {
 
 		setTimeSpan(pc);
-		data0.put(KeyConstants._lastvisit, new IKStorageScopeItem(_lastvisit));
-		data0.put(KeyConstants._timecreated, new IKStorageScopeItem(timecreated));
+		data0.put(KeyConstants._lastvisit, new IKStorageScopeItem(_lastvisit, lastModifiedAtInit()));
+		data0.put(KeyConstants._timecreated, new IKStorageScopeItem(timecreated, lastModifiedAtInit()));
 
 		if (type == SCOPE_CLIENT) {
-			data0.put(KeyConstants._hitcount, new IKStorageScopeItem(Double.valueOf(hitcount)));
+			data0.put(KeyConstants._hitcount, new IKStorageScopeItem(Double.valueOf(hitcount), lastModifiedAtInit()));
 		}
 		ApplicationContext ac = pc.getApplicationContext();
 		if (ac != null && (this.tokens == null || this.tokens.isEmpty()) && ac.getSessionCluster() && isSessionStorage(pc)) {
@@ -391,7 +398,7 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 		IKStorageScopeItem existing = data0.get(key);
 		if (existing != null) {
 			hasChanges = true;
-			return existing.remove();
+			return existing.remove(lastModified = System.currentTimeMillis());
 		}
 		throw new ExpressionException("can't remove key [" + key.getString() + "] from map, key doesn't exist");
 	}
@@ -401,7 +408,7 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 		IKStorageScopeItem existing = data0.get(key);
 		if (existing != null) {
 			hasChanges = true;
-			return existing.remove();
+			return existing.remove(lastModified = System.currentTimeMillis());
 		}
 		return null;
 	}
@@ -409,13 +416,17 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 	@Override
 	public Object set(Key key, Object value) throws PageException {
 		hasChanges = true;
-		return data0.put(key, new IKStorageScopeItem(value));
+		IKStorageScopeItem val = data0.put(key, new IKStorageScopeItem(value));
+		lastModified = val.lastModified();
+		return val;
 	}
 
 	@Override
 	public Object setEL(Key key, Object value) {
 		hasChanges = true;
-		return data0.put(key, new IKStorageScopeItem(value));
+		IKStorageScopeItem val = data0.put(key, new IKStorageScopeItem(value));
+		lastModified = val.lastModified();
+		return val;
 	}
 
 	@Override
@@ -619,7 +630,7 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 		}
 	};
 
-	public static void merge(Map<Key, IKStorageScopeItem> local, Map<Key, IKStorageScopeItem> storage, Log log, int type) {
+	public static void merge(Map<Key, IKStorageScopeItem> local, Map<Key, IKStorageScopeItem> storage, Log log, int type, long storageLastModified) {
 		Iterator<Entry<Key, IKStorageScopeItem>> it = local.entrySet().iterator();
 		Entry<Key, IKStorageScopeItem> e;
 		IKStorageScopeItem storageItem;
@@ -627,6 +638,9 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 		while (it.hasNext()) {
 			e = it.next();
 			storageItem = storage.get(e.getKey());
+
+			// we ignore entries older than the storage
+			if (storageLastModified > e.getValue().lastModified()) continue;
 
 			// this entry not exist in the storage
 			if (storageItem == null) {
@@ -683,53 +697,39 @@ public abstract class IKStorageScopeSupport extends StructSupport implements Sto
 		return local;
 	}
 
-	public static Map<Key, IKStorageScopeItem> prepareToStore(Map<Key, IKStorageScopeItem> local, Object oStorage, long lastModified, Log log, int type) throws PageException {
-		// cached data changed in meantime
+	public static Map<Key, IKStorageScopeItem> prepareToStore(Map<Key, IKStorageScopeItem> local, Object oStorage, long lastModified, long lastModifiedAtInit, Log log, int type)
+			throws PageException {
+		long storageLastMod;
+		Map<Key, IKStorageScopeItem> storageData;
 		if (oStorage instanceof IKStorageValue) {
 			IKStorageValue storage = (IKStorageValue) oStorage;
-			if (storage.lastModified() > lastModified) {
-
-				if (LogUtil.doesInfo(log)) {
-					ScopeContext.info(log, "the " + (type == Scope.SCOPE_SESSION ? "session" : "client")
-							+ " scope in the storage is never than the one we loaded at the beginning of the request and modified, so we have to merge them.");
-				}
-				Map<Key, IKStorageScopeItem> trg = storage.getValue();
-				IKStorageScopeSupport.merge(local, trg, log, type);
-				return trg;
-			}
-			else {
-				if (LogUtil.doesInfo(log)) {
-					ScopeContext.info(log, "the " + (type == Scope.SCOPE_SESSION ? "session" : "client")
-							+ " scope in the storage is still the same, so we only need to remove keys marked for removal and store it.");
-				}
-
-				return IKStorageScopeSupport.cleanRemoved(local);
-			}
+			storageLastMod = storage.lastModified();
+			storageData = storage.getValue();
 		}
 		else if (oStorage instanceof byte[][]) {
 			byte[][] barrr = (byte[][]) oStorage;
-			if (IKStorageValue.toLong(barrr[1]) > lastModified) {
-				if (barrr[0] == null || barrr[0].length == 0) return local;
-				Map<Key, IKStorageScopeItem> trg = IKStorageValue.deserialize(barrr[0]);
-
-				if (LogUtil.doesInfo(log)) {
-					ScopeContext.info(log, "the " + (type == Scope.SCOPE_SESSION ? "session" : "client")
-							+ " scope in the storage is never than the one we loaded at the beginning of the request and modified, so we have to merge them.");
-				}
-
-				IKStorageScopeSupport.merge(local, trg, log, type);
-				return trg;
-			}
-			else {
-				if (LogUtil.doesInfo(log)) {
-					ScopeContext.info(log, "the " + (type == Scope.SCOPE_SESSION ? "session" : "client")
-							+ " scope in the storage is still the same, so we only need to remove keys marked for removal and store it.");
-				}
-				return IKStorageScopeSupport.cleanRemoved(local);
-
-			}
+			storageLastMod = IKStorageValue.toLong(barrr[1]);
+			if (barrr[0] == null || barrr[0].length == 0) return local;
+			storageData = IKStorageValue.deserialize(barrr[0]);
 		}
-		return local;
+		else {
+			return local;
+		}
+
+		// storage changed
+		if (storageLastMod > lastModifiedAtInit) {
+			if (LogUtil.doesInfo(log)) {
+				ScopeContext.info(log, "the " + (type == Scope.SCOPE_SESSION ? "session" : "client")
+						+ " scope in the storage has changed since we loaded it at the beginning of the request, so we have to sync it with the local data.");
+			}
+			merge(local, storageData, log, type, storageLastMod);
+			return storageData;
+		}
+
+		if (LogUtil.doesInfo(log)) {
+			ScopeContext.info(log, "the " + (type == Scope.SCOPE_SESSION ? "session" : "client") + " scope in the storage is not newer, so we simply store what we have here.");
+		}
+		return cleanRemoved(local);
 	}
 
 	@Override
