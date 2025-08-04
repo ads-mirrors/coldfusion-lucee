@@ -12,7 +12,6 @@ import lucee.loader.engine.CFMLEngine;
 import lucee.loader.engine.CFMLEngineFactory;
 import lucee.loader.util.Util;
 import lucee.runtime.exp.PageException;
-import lucee.runtime.interpreter.JSONExpressionInterpreter;
 import lucee.runtime.op.Caster;
 import lucee.runtime.type.Collection;
 import lucee.runtime.type.Collection.Key;
@@ -119,8 +118,7 @@ public final class CFConfigImport {
 				json = data;
 			}
 			else {
-				String raw = engine.getIOUtil().toString(file, charset);
-				json = cast.toStruct(new JSONExpressionInterpreter().interpret(null, raw));
+				json = ConfigFile.read(file, charset);
 			}
 
 			replacePlaceHolder(json, placeHolderData);

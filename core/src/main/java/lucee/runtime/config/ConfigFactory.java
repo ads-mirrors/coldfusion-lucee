@@ -31,7 +31,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import lucee.commons.digest.MD5;
-import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.FileUtil;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
@@ -44,13 +43,9 @@ import lucee.loader.engine.CFMLEngine;
 import lucee.runtime.config.XMLConfigReader.NameRule;
 import lucee.runtime.config.XMLConfigReader.ReadRule;
 import lucee.runtime.converter.ConverterException;
-import lucee.runtime.converter.JSONConverter;
-import lucee.runtime.converter.JSONDateFormat;
 import lucee.runtime.engine.InfoImpl;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.PageException;
-import lucee.runtime.interpreter.JSONExpressionInterpreter;
-import lucee.runtime.listener.SerializationSettings;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
 import lucee.runtime.osgi.OSGiUtil;
@@ -903,10 +898,7 @@ public abstract class ConfigFactory {
 		root = sort(root);
 
 		if (configFileNew != null) {
-			// store it as Json
-			JSONConverter json = new JSONConverter(true, CharsetUtil.UTF8, JSONDateFormat.PATTERN_CF, false);
-			String str = json.serialize(null, root, SerializationSettings.SERIALIZE_AS_ROW, true);
-			IOUtil.write(configFileNew, str, CharsetUtil.UTF8, false);
+			ConfigFile.write(configFileNew, root);
 		}
 		return root;
 	}
@@ -1013,7 +1005,7 @@ public abstract class ConfigFactory {
 			}
 		}
 		try {
-			return Caster.toStruct(new JSONExpressionInterpreter().interpret(null, IOUtil.toString(res, CharsetUtil.UTF8)));
+			return ConfigFile.read(res);
 			// data.set(KeyConstants._md5, Hash.md5(content));
 		}
 		catch (FileNotFoundException fnfe) {

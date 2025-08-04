@@ -796,13 +796,6 @@ public final class RHExtension implements Serializable {
 		return res;
 	}
 
-	/*
-	 * private static Struct getMetaData(Config config, String id, String version, Struct defaultValue)
-	 * { Resource file = getMetaDataFile(config, id, version); if (file.isFile()) { try { return
-	 * Caster.toStruct(new JSONExpressionInterpreter().interpret(null, IOUtil.toString(file,
-	 * CharsetUtil.UTF8))); } catch (Exception e) { } } return defaultValue; }
-	 */
-
 	public static Resource getMetaDataFile(Config config, String id, String version) {
 		String fileName = toHash(id, version, "obj");
 		return getExtensionInstalledDir(config).getRealResource(fileName);

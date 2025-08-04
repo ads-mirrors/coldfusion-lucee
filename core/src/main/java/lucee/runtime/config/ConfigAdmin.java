@@ -56,7 +56,6 @@ import org.xml.sax.SAXException;
 import com.allaire.cfx.CustomTag;
 
 import lucee.commons.digest.MD5;
-import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.FileUtil;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
@@ -95,8 +94,6 @@ import lucee.runtime.cfx.CFXTagException;
 import lucee.runtime.cfx.CFXTagPool;
 import lucee.runtime.config.maven.MavenUpdateProvider;
 import lucee.runtime.converter.ConverterException;
-import lucee.runtime.converter.JSONConverter;
-import lucee.runtime.converter.JSONDateFormat;
 import lucee.runtime.converter.WDDXConverter;
 import lucee.runtime.db.ClassDefinition;
 import lucee.runtime.db.DataSource;
@@ -116,7 +113,6 @@ import lucee.runtime.gateway.GatewayEngineImpl;
 import lucee.runtime.gateway.GatewayEntry;
 import lucee.runtime.gateway.GatewayEntryImpl;
 import lucee.runtime.listener.AppListenerUtil;
-import lucee.runtime.listener.SerializationSettings;
 import lucee.runtime.monitor.Monitor;
 import lucee.runtime.mvn.MavenUtil;
 import lucee.runtime.mvn.MavenUtil.GAVSO;
@@ -312,18 +308,18 @@ public final class ConfigAdmin {
 		admin._reload();
 	}
 
-	protected synchronized void _storeAndReload() throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
+	protected void _storeAndReload() throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
 		_store();
 		_reload();
 	}
 
-	public synchronized void storeAndReload() throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
+	public void storeAndReload() throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
 		checkWriteAccess();
 		_store();
 		_reload();
 	}
 
-	public synchronized void storeAndReload(boolean refreshScheduler)
+	public void storeAndReload(boolean refreshScheduler)
 			throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
 		checkWriteAccess();
 		_store();
@@ -344,18 +340,17 @@ public final class ConfigAdmin {
 		if (expected.equals(Caster.toBoolean(root.get(name, null), null))) root.removeEL(name);
 	}
 
-	private synchronized void _store() throws ConverterException, IOException {
+	private void _store() throws ConverterException, IOException {
 		_cleanup();
-		JSONConverter json = new JSONConverter(true, CharsetUtil.UTF8, JSONDateFormat.PATTERN_CF, false);
-		String str = json.serialize(null, root, SerializationSettings.SERIALIZE_AS_ROW, true);
-		IOUtil.write(config.getConfigFile(), str, CharsetUtil.UTF8, false);
+		ConfigFile.write(config.getConfigFile(), root);
+
 	}
 
-	private synchronized void _reload() throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException {
+	private void _reload() throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException {
 		_reload(false);
 	}
 
-	private synchronized void _reload(boolean refreshScheduler) throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException {
+	private void _reload(boolean refreshScheduler) throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException {
 
 		// if(storeInMemoryData)XMLCaster.writeTo(doc,config.getConfigFile());
 		CFMLEngine engine = ConfigUtil.getCFMLEngine(config);
