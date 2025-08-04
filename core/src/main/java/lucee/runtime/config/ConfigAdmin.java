@@ -311,7 +311,7 @@ public final class ConfigAdmin {
 
 	protected static void _storeAndReload(ConfigPro config)
 			throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
-		synchronized (config) {
+		synchronized (SystemUtil.createToken("ConfigFile", config.getConfigFile().getAbsolutePath())) {
 			ConfigAdmin admin = new ConfigAdmin(config, null, true);
 			admin._store();
 			admin._reload();
@@ -319,14 +319,14 @@ public final class ConfigAdmin {
 	}
 
 	protected void _storeAndReload() throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
-		synchronized (config) {
+		synchronized (SystemUtil.createToken("ConfigFile", config.getConfigFile().getAbsolutePath())) {
 			_store();
 			_reload();
 		}
 	}
 
 	public void storeAndReload() throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
-		synchronized (config) {
+		synchronized (SystemUtil.createToken("ConfigFile", config.getConfigFile().getAbsolutePath())) {
 			checkWriteAccess();
 			_store();
 			_reload();
@@ -335,7 +335,7 @@ public final class ConfigAdmin {
 
 	public void storeAndReload(boolean refreshScheduler)
 			throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
-		synchronized (config) {
+		synchronized (SystemUtil.createToken("ConfigFile", config.getConfigFile().getAbsolutePath())) {
 			checkWriteAccess();
 			_store();
 			_reload(refreshScheduler);
@@ -358,7 +358,7 @@ public final class ConfigAdmin {
 	}
 
 	private void _store() throws ConverterException, IOException {
-		synchronized (config) {
+		synchronized (SystemUtil.createToken("ConfigFile", config.getConfigFile().getAbsolutePath())) {
 			_cleanup();
 			JSONConverter json = new JSONConverter(true, CharsetUtil.UTF8, JSONDateFormat.PATTERN_CF, false);
 			String str = json.serialize(null, root, SerializationSettings.SERIALIZE_AS_ROW, true);
@@ -371,7 +371,7 @@ public final class ConfigAdmin {
 	}
 
 	private void _reload(boolean refreshScheduler) throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException {
-		synchronized (config) {
+		synchronized (SystemUtil.createToken("ConfigFile", config.getConfigFile().getAbsolutePath())) {
 			// if(storeInMemoryData)XMLCaster.writeTo(doc,config.getConfigFile());
 			CFMLEngine engine = ConfigWebUtil.getEngine(config);
 			if (config instanceof ConfigServerImpl) {
@@ -4197,7 +4197,6 @@ public final class ConfigAdmin {
 				ConfigWeb[] webs = ((ConfigServer) config).getConfigWebs();
 				for (ConfigWeb cw: webs) {
 					try {
-
 						merge(root, ConfigWebFactory.loadDocumentCreateIfFails(cw.getConfigFile(), "web"), EXCLUDE_LIST, ARRAY_INDEX);
 					}
 					catch (IOException e) {
@@ -4225,7 +4224,9 @@ public final class ConfigAdmin {
 			if (!keep) {
 				ConfigWeb[] webs = ((ConfigServer) config).getConfigWebs();
 				for (ConfigWeb cw: webs) {
-					cw.getConfigFile().delete();
+					synchronized (SystemUtil.createToken("ConfigFile", cw.getConfigFile().getAbsolutePath())) {
+						cw.getConfigFile().delete();
+					}
 				}
 			}
 		}

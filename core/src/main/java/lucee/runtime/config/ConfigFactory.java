@@ -961,10 +961,12 @@ public abstract class ConfigFactory {
 		root = sort(root);
 
 		if (configFileNew != null) {
-			// store it as Json
-			JSONConverter json = new JSONConverter(true, CharsetUtil.UTF8, JSONDateFormat.PATTERN_CF, false);
-			String str = json.serialize(null, root, SerializationSettings.SERIALIZE_AS_ROW, true);
-			IOUtil.write(configFileNew, str, CharsetUtil.UTF8, false);
+			synchronized (SystemUtil.createToken("ConfigFile", config.getConfigFile().getAbsolutePath())) {
+				// store it as Json
+				JSONConverter json = new JSONConverter(true, CharsetUtil.UTF8, JSONDateFormat.PATTERN_CF, false);
+				String str = json.serialize(null, root, SerializationSettings.SERIALIZE_AS_ROW, true);
+				IOUtil.write(configFileNew, str, CharsetUtil.UTF8, false);
+			}
 		}
 		return root;
 	}
@@ -1071,7 +1073,9 @@ public abstract class ConfigFactory {
 			}
 		}
 		try {
-			return Caster.toStruct(new JSONExpressionInterpreter().interpret(null, IOUtil.toString(res, CharsetUtil.UTF8)));
+			synchronized (SystemUtil.createToken("ConfigFile", res.getAbsolutePath())) {
+				return Caster.toStruct(new JSONExpressionInterpreter().interpret(null, IOUtil.toString(res, CharsetUtil.UTF8)));
+			}
 			// data.set(KeyConstants._md5, Hash.md5(content));
 		}
 		catch (FileNotFoundException fnfe) {
