@@ -10,6 +10,8 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.ContentType;
+import lucee.commons.lang.ClassException;
+import lucee.commons.lang.ClassUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.net.http.HTTPResponse;
 import lucee.loader.engine.CFMLEngineFactory;
@@ -27,6 +29,7 @@ import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.util.AI;
+import lucee.transformer.library.ClassDefinitionImpl;
 
 public final class AIUtil {
 
@@ -342,5 +345,13 @@ public final class AIUtil {
 			);
 		}
 		return conversations;
+	}
+
+	public static AIEngine getEngine(Class<? extends AIEngine> clazz, Struct properties) throws ClassException, PageException {
+		return ((AIEngine) ClassUtil.loadInstance(clazz)).init(new ClassDefinitionImpl<>(clazz), properties, null, null, null);
+	}
+
+	public static AISession createSession(AIEngine aie) throws PageException {
+		return aie.createSession(null, null, -1, -1D, aie.getConnectTimeout(), aie.getSocketTimeout());
 	}
 }
