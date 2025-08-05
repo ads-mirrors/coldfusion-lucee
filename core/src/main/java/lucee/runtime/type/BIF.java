@@ -26,7 +26,6 @@ import java.util.List;
 import lucee.commons.digest.Hash;
 import lucee.commons.lang.CFTypes;
 import lucee.commons.lang.ExceptionUtil;
-import lucee.commons.lang.StringUtil;
 import lucee.runtime.Component;
 import lucee.runtime.PageContext;
 import lucee.runtime.PageSource;
@@ -144,7 +143,7 @@ public final class BIF extends MemberSupport implements UDFPlus {
 			// match by alias
 			if (val == null) {
 				String[] aliases = arg.getAliases();
-				if (!ArrayUtil.isEmpty(aliases)){
+				if (!ArrayUtil.isEmpty(aliases)) {
 					for (int x = 0; x < aliases.length; x++) {
 						val = values.get(aliases[x], null);
 						if (val != null) break;

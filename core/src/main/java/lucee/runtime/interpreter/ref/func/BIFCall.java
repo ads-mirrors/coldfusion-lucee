@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import lucee.commons.lang.CFTypes;
-import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.FunctionException;
@@ -153,10 +152,10 @@ public final class BIFCall extends RefSupport implements Ref {
 
 		// then check if an alias match
 		String[] aliases = flfa.getAliases();
-		if (!ArrayUtil.isEmpty(aliases)){
+		if (!ArrayUtil.isEmpty(aliases)) {
 			for (int i = 0; i < names.length; i++) {
 				if (names[i] != null) {
-					for (String a : aliases) {
+					for (String a: aliases) {
 						if (names[i].equalsIgnoreCase(a)) {
 							return new VT(fvalues[i].getValue(), flfa.getTypeAsString(), i);
 						}
