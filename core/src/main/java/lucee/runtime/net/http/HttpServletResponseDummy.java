@@ -18,7 +18,6 @@
  **/
 package lucee.runtime.net.http;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -105,8 +104,7 @@ public final class HttpServletResponseDummy implements HttpServletResponse, Seri
 		this.sendRedirect(location, this.status, true);
 	}
 
-	@Override
-	public void sendRedirect(String location, int status, boolean clearBuffer) throws IOException {
+	public void sendRedirect(String location, int status, boolean clearBuffer) {
 		addHeader("location", location);
 		this.status = status;
 		if (clearBuffer) {

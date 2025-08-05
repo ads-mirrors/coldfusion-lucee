@@ -50,6 +50,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.jsp.JspWriter;
+import jakarta.servlet.jsp.el.ExpressionEvaluator;
+import jakarta.servlet.jsp.el.VariableResolver;
 import jakarta.servlet.jsp.tagext.BodyContent;
 import jakarta.servlet.jsp.tagext.BodyTag;
 import jakarta.servlet.jsp.tagext.Tag;
@@ -4151,7 +4153,6 @@ public final class PageContextImpl extends PageContext {
 		if (flush) flush();
 	}
 
-
 	@Override
 	public ELContext getELContext() {
 		throw new RuntimeException("not supported!");
@@ -4371,5 +4372,15 @@ public final class PageContextImpl extends PageContext {
 
 	public lucee.runtime.Component loadInline(String realPath, String inlineName) throws PageException {
 		return PageContextUtil.loadInline(this, realPath, inlineName);
+	}
+
+	// keep this for backward compatibility to jakarta 10 as long ExpressionEvaluator is not removed by future versions
+	public ExpressionEvaluator getExpressionEvaluator() {
+		throw new RuntimeException("not supported!");
+	}
+
+	// keep this for backward compatibility to jakarta 10 as long VariableResolver is not removed by future versions
+	public VariableResolver getVariableResolver() {
+		throw new RuntimeException("not supported!");
 	}
 }

@@ -50,13 +50,6 @@ public class HttpServletResponseJakarta extends ServletResponseJakarta implement
 		rsp.sendRedirect(location);
 	}
 
-	/**
-	 * @param location
-	 * @param status
-	 * @param clearBuffer
-	 * @throws IOException
-	 */
-	@Override
 	public void sendRedirect(String location, int status, boolean clearBuffer) throws IOException {
 		rsp.sendRedirect(location);
 		rsp.setStatus(status);

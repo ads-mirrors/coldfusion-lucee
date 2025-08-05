@@ -176,6 +176,11 @@ public final class ModernAppListenerException extends PageException {
 		return ((PageExceptionImpl) rootCause).getLine(config);
 	}
 
+	// keep this for backward compatibility to jakarta 10 RUNTIME
+	public Throwable getRootCause() {
+		return rootCause.getRootCause();
+	}
+
 	@Override
 	public StackTraceElement[] getStackTrace() {
 		return rootCause.getStackTrace();

@@ -681,6 +681,16 @@ public abstract class PageExceptionImpl extends PageException {
 		additional.setEL(key, StringUtil.toStringEmptyIfNull(value));
 	}
 
+	// keep this for backward compatibility to jakarta 10
+	public Throwable getRootCause() {
+		Throwable cause = this;
+		Throwable temp;
+
+		while ((temp = cause.getCause()) != null)
+			cause = temp;
+		return cause;
+	}
+
 	@Override
 	public int getTracePointer() {
 		return tracePointer;
