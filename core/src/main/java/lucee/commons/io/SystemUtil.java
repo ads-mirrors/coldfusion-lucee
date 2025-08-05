@@ -59,6 +59,7 @@ import java.util.zip.ZipInputStream;
 
 import org.apache.felix.framework.BundleWiringImpl.BundleClassLoader;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleReference;
 
 import com.jezhumble.javasysmon.CpuTimes;
@@ -279,8 +280,14 @@ public final class SystemUtil {
 					try {
 						loaderCL = OSGiUtil.getEmptyBundleClassLoader(null);
 					}
-					catch (IOException e) {
+					catch (IOException | BundleException e) {
 						throw new PageRuntimeException(e);
+					}
+					catch (RuntimeException re) {
+						if ((re.getMessage() + "").indexOf("Engine is not initialized") != -1) {
+							return CFMLEngineFactory.class.getClassLoader();
+						}
+						throw re;
 					}
 				}
 			}
@@ -1224,7 +1231,6 @@ public final class SystemUtil {
 				}
 			}
 		}
-
 		return loaderVersion;
 	}
 

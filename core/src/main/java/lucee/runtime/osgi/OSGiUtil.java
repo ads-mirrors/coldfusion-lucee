@@ -1317,11 +1317,12 @@ public final class OSGiUtil {
 			try {
 				list.add(new BundleDefinition(b));
 				set.add(b.getSymbolicName() + ":" + b.getVersion());
-			} catch( IllegalArgumentException iea ){
+			}
+			catch (IllegalArgumentException iea) {
 				list.add(new BundleDefinition(b.getLocation()));
 				set.add(b.getLocation());
 			}
-			
+
 		}
 		// is it in jar directory but not loaded
 		CFMLEngineFactory factory = ConfigUtil.getCFMLEngineFactory(ThreadLocalPageContext.getConfig());
@@ -2606,42 +2607,84 @@ public final class OSGiUtil {
 		return -1;
 	}
 
-	public static ClassLoader getEmptyBundleClassLoader(BundleContext bc) throws IOException {
+	public static ClassLoader getEmptyBundleClassLoader(BundleContext bc) throws IOException, BundleException {
 		if (emptyBundleClassLoader == null) {
 			synchronized (SystemUtil.createToken("OSGiUtil", "getEmptyBundleClassLoader")) {
 				if (emptyBundleClassLoader == null) {
-					if (bc == null) bc = CFMLEngineFactory.getInstance().getBundleContext();
+					CFMLEngine eng = CFMLEngineFactory.getInstance();
+					if (bc == null) bc = eng.getBundleContext();
 
-					// Create minimal bundle manifest
+					String strVersion = Caster.toString(SystemUtil.getLoaderVersion());
+					Version version = toVersion(strVersion);
+
+					// First, try to find existing bundle with same version
+					Bundle existingBundle = findExistingBundle(bc, "lucee.loader.bundle", version);
+					if (existingBundle != null) {
+						try {
+							if (existingBundle.getState() != Bundle.ACTIVE) {
+								existingBundle.start();
+							}
+							BundleWiring bundleWiring = existingBundle.adapt(BundleWiring.class);
+							emptyBundleClassLoader = bundleWiring.getClassLoader();
+							return emptyBundleClassLoader;
+						}
+						catch (BundleException be) {
+							// If we can't use existing bundle, uninstall it and create new one
+							try {
+								existingBundle.uninstall();
+							}
+							catch (BundleException ignored) {
+							}
+						}
+					}
+
+					// Clean up any old versions before creating new one
+					cleanupOldVersions(bc, "lucee.loader.bundle", version);
+
+					// Create new bundle if none exists or existing one failed
 					Manifest manifest = new Manifest();
 					Attributes mainAttributes = manifest.getMainAttributes();
 					mainAttributes.put(Attributes.Name.MANIFEST_VERSION, "1.0");
 					mainAttributes.putValue("Bundle-ManifestVersion", "2");
-					mainAttributes.putValue("Bundle-SymbolicName", "lucee.loader.bundle." + System.currentTimeMillis());
-					mainAttributes.putValue("Bundle-Version", "1.0.0");
+					mainAttributes.putValue("Bundle-SymbolicName", "lucee.loader.bundle");
+					mainAttributes.putValue("Bundle-Version", strVersion);
 
-					// Create empty JAR with just the manifest
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 					try (JarOutputStream jos = new JarOutputStream(baos, manifest)) {
-						// Don't add any entries - completely empty bundle
+						// Empty bundle
 					}
-					try {
-						// Install the empty bundle
-						Bundle emptyBundle = bc.installBundle("lucee-loader-bundle-" + System.currentTimeMillis(), new ByteArrayInputStream(baos.toByteArray()));
 
-						// Start it to get active classloader
-						emptyBundle.start();
-						BundleWiring bundleWiring = emptyBundle.adapt(BundleWiring.class);
-						emptyBundleClassLoader = bundleWiring.getClassLoader();
-					}
-					catch (BundleException be) {
-						throw ExceptionUtil.toIOException(be);
-					}
-					// Get the classloader with boot delegation
-
+					Bundle emptyBundle = bc.installBundle("lucee-loader-bundle", new ByteArrayInputStream(baos.toByteArray()));
+					emptyBundle.start();
+					BundleWiring bundleWiring = emptyBundle.adapt(BundleWiring.class);
+					emptyBundleClassLoader = bundleWiring.getClassLoader();
 				}
 			}
 		}
 		return emptyBundleClassLoader;
+	}
+
+	private static Bundle findExistingBundle(BundleContext bc, String symbolicName, Version version) {
+		Bundle[] bundles = bc.getBundles();
+		for (Bundle bundle: bundles) {
+			if (symbolicName.equals(bundle.getSymbolicName()) && bundle.getVersion().equals(version)) {
+				return bundle;
+			}
+		}
+		return null;
+	}
+
+	private static void cleanupOldVersions(BundleContext bc, String symbolicName, Version currentVersion) {
+		Bundle[] bundles = bc.getBundles();
+		for (Bundle bundle: bundles) {
+			if (symbolicName.equals(bundle.getSymbolicName()) && !bundle.getVersion().equals(currentVersion)) {
+				try {
+					bundle.uninstall();
+				}
+				catch (BundleException ignored) {
+					// Log but don't fail if cleanup fails
+				}
+			}
+		}
 	}
 }
