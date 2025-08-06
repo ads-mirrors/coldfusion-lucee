@@ -5125,25 +5125,26 @@ public final class ConfigWebFactory extends ConfigFactory {
 			}
 
 			// uninstall extensions no longer used
-			Resource[] installed = RHExtension.getExtensionInstalledDir(config).listResources(new ExtensionResourceFilter("lex"));
-			if (!changed && installed != null) { // we only clean up if we have no switch from multi to single
-				for (Resource r: installed) {
-					if (!installedFiles.contains(r)) {
-
-						// is maybe a diff version installed?
-						RHExtension ext = RHExtension.getInstance(config, r);
-						if (!installedIds.contains(ext.getId())) {
-							if (log != null) log.info("extension",
-									"Found the extension [" + ext + "] in the installed folder that is not present in the configuration in any version, so we will uninstall it");
-							ConfigAdmin._removeRHExtension(config, ext, null, true);
-							if (log != null) log.info("extension", "removed extension [" + ext + "]");
+			Boolean cleanupExtension = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.cleanup.extension", null), false);
+			if (cleanupExtension) {
+				Resource[] installed = RHExtension.getExtensionInstalledDir(config).listResources(new ExtensionResourceFilter("lex"));
+				if (!changed && installed != null) { // we only clean up if we have no switch from multi to single
+					for (Resource r: installed) {
+						if (!installedFiles.contains(r)) {
+							// is maybe a diff version installed?
+							RHExtension ext = RHExtension.getInstance(config, r);
+							if (!installedIds.contains(ext.getId())) {
+								if (log != null) log.info("extension", "Found the extension [" + ext
+										+ "] in the installed folder that is not present in the configuration in any version, so we will uninstall it");
+								ConfigAdmin._removeRHExtension(config, ext, null, true);
+								if (log != null) log.info("extension", "removed extension [" + ext + "]");
+							}
+							else {
+								if (log != null) log.info("extension", "Found the extension [" + ext
+										+ "] in the installed folder that is in a different version in the configuraton, so we delete that extension file.");
+								r.delete();
+							}
 						}
-						else {
-							if (log != null) log.info("extension", "Found the extension [" + ext
-									+ "] in the installed folder that is in a different version in the configuraton, so we delete that extension file.");
-							r.delete();
-						}
-
 					}
 				}
 			}
