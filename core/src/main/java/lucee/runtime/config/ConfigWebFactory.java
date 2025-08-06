@@ -70,7 +70,6 @@ import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.log.LoggerAndSourceData;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.ResourcesImpl;
-import lucee.commons.io.res.filter.ExtensionResourceFilter;
 import lucee.commons.io.res.type.cfml.CFMLResourceProvider;
 import lucee.commons.io.res.type.s3.DummyS3ResourceProvider;
 import lucee.commons.io.res.type.zip.ZipResourceProvider;
@@ -5030,29 +5029,6 @@ public final class ConfigWebFactory extends ConfigFactory {
 				}
 			}
 
-			// uninstall extensions no longer used
-			Resource[] installed = RHExtension.getExtensionInstalledDir(config).listResources(new ExtensionResourceFilter("lex"));
-			if (!changed && installed != null) {
-				for (Resource r: installed) {
-					if (!installedFiles.contains(r)) {
-
-						// is maybe a diff version installed?
-						RHExtension ext = new RHExtension(config, r);
-						if (!installedIds.contains(ext.getId())) {
-							if (log != null) log.info("extension",
-									"Found the extension [" + ext + "] in the installed folder that is not present in the configuration in any version, so we will uninstall it");
-							ConfigAdmin._removeRHExtension(config, ext, null, true);
-							if (log != null) log.info("extension", "removed extension [" + ext + "]");
-						}
-						else {
-							if (log != null) log.info("extension", "Found the extension [" + ext
-									+ "] in the installed folder that is in a different version in the configuraton, so we delete that extension file.");
-							r.delete();
-						}
-
-					}
-				}
-			}
 			// set
 			config.setExtensions(extensions.toArray(new RHExtension[extensions.size()]), md5);
 		}
