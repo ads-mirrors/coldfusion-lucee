@@ -79,15 +79,17 @@ public final class DeployHandler {
 
 			// check deploy directory
 			Resource[] children = dir.listResources(ALL_EXT);
-			Resource child;
 			String ext;
 			if (children.length > 0) {
 				ThreadQueue queue = config.getThreadQueue();
 				short prevMode = ThreadQueue.MODE_UNDEFINED;
 				if (queue != null) prevMode = queue.setMode(ThreadQueue.MODE_BLOCKING);
 				try {
-					for (int i = 0; i < children.length; i++) {
-						child = children[i];
+					for (Resource child: children) {
+						if (LogUtil.doesInfo(log)) {
+							log.log(Log.LEVEL_INFO, "deploy handler", "found [" + child.getAbsolutePath() + "] in deploy folder");
+						}
+
 						try {
 							// Lucee archives
 							ext = ResourceUtil.getExtension(child, null);
