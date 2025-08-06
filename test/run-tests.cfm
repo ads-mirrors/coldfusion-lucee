@@ -54,6 +54,7 @@ function mem(type) {
 	}
 	catch(e){}	// may exist from previous execution
 
+	systemOutput("Running tests with Java: #server.java.version#", true);
 	systemOutput("set password #dateTimeFormat(now())#", true);
 
 	// output deploy log
