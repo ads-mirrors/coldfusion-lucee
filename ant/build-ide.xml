@@ -13,6 +13,17 @@
         <echo level="info" message="Loader POM : ${loader.pom}" />
     </target>
 
+    <target name="lib-clean" depends="setup" description="Deletes JAR files from dev/lib">
+
+        <delete>
+            <fileset dir="${lib.dir}">
+                <include name="*.jar" />
+            </fileset>
+        </delete>
+
+        <echo level="info" message="Deleted JARs from ${lib.dir}" />
+    </target>
+
     <target name="lib-download" depends="setup" description="Downloads JAR files to dev/lib">
 
         <exec executable="mvn">
@@ -21,6 +32,8 @@
             <arg value="dependency:copy-dependencies" />
             <arg value="-DoutputDirectory=${lib.dir}" />
         </exec>
+
+        <echo level="info" message="Downloaded JARs to ${lib.dir}" />
     </target>
 
     <target name="ide-intellij" depends="lib-download" description="Adds IDE support for IntelliJ IDEA">
