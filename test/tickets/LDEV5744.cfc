@@ -21,11 +21,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				{"format": "bash ""$(date)"" one digit day","example":          "Mon Mar 3 03:09:07 PDT 2025"},
 				{"format": "JavaScript: new Date()","example":                  "Tue Sep 20 2022 12:34:00 GMT-0700 (Pacific Daylight Time)"},
 				{"format": "Long month name","example":                         "September 20, 2022 12:34 PM"},
-				{"format": "JDBC/SQL Timestamp","example":                      "{ts '2022-09-20 12:34:00'}"}
+				{"format": "JDBC/SQL Timestamp","example":                      "{ts '2022-09-20 12:34:00'}"},
+				{"format": "contains comma","example":                          "9/20/22, 12:34 PM"}
 			];
 
 			var badDateFormats = [
-				{"format": "contains comma","example":                          "9/20/22, 12:34 PM"},
 				{"format": "contains narrow no-break space","example":          "9/20/22 12:34#chr(8239)#PM"}, // java 17 plus, modern unicode
 				{"format": "Oracle","example":                                  "20-SEP-22 12.34.00.000000 PM"},
 				{"format": "Syslog","example":                                  "Sep 20 12:34:00"},
