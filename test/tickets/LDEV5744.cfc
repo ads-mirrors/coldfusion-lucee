@@ -22,7 +22,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				{"format": "JavaScript: new Date()","example":                  "Tue Sep 20 2022 12:34:00 GMT-0700 (Pacific Daylight Time)"},
 				{"format": "Long month name","example":                         "September 20, 2022 12:34 PM"},
 				{"format": "JDBC/SQL Timestamp","example":                      "{ts '2022-09-20 12:34:00'}"},
-				{"format": "contains comma","example":                          "9/20/22, 12:34 PM"}
+				{"format": "contains comma","example":                          "9/20/22, 12:34 PM", minJava: 11 }
 			];
 
 			var badDateFormats = [
@@ -37,8 +37,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					it(title="test date parsing (#test.example#) - #test.format#",
 							data={ test=test },
 							body=function( data ) {
-						var date = parseDateTime( data.test.example );
-						expect( isDate(date) ).toBeTrue();
+						if ( structKeyExists( data.test, "minJava" ) && getJavaVersion() >= data.test.minJava ) {
+							var date = parseDateTime( data.test.example );
+							expect( isDate(date) ).toBeTrue();
+						} else {
+							systemOutput(" skipping ( #data.test.format# ) due to java version", true);
+						}
 					});
 				});
 			}
@@ -57,4 +61,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 		});
 
 	}
+
+	private function getJavaVersion() {
+		var raw=server.java.version;
+		var arr=listToArray(raw,'.');
+		if(arr[1]==1) // version 1-9
+			return arr[2];
+		return arr[1];
+	}
+
 }
