@@ -955,7 +955,6 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 
 	@Override
 	public IdentificationServer getIdentification() {
-		id = null;
 		if (id == null) {
 			synchronized (SystemUtil.createToken("ConfigServerImpl", "id")) {
 				if (id == null) {
