@@ -86,6 +86,9 @@ public class DeployHandler {
 				try {
 					for (int i = 0; i < children.length; i++) {
 						child = children[i];
+						if (LogUtil.doesInfo(log)) {
+							log.log(Log.LEVEL_INFO, "deploy handler", "found [" + child.getAbsolutePath() + "] in deploy folder");
+						}
 						try {
 							// Lucee archives
 							ext = ResourceUtil.getExtension(child, null);
