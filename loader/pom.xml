@@ -85,6 +85,32 @@
             </plugins>
         </build>
     </profile>
+
+    <profile>
+      <id>github-packages</id>
+      <distributionManagement>
+          <repository>
+              <id>github</id>
+              <name>GitHub Packages</name>
+              <url>https://maven.pkg.github.com/lucee/lucee</url>
+          </repository>
+          <snapshotRepository>
+              <id>github</id>
+              <name>GitHub Packages</name>
+              <url>https://maven.pkg.github.com/lucee/lucee</url>
+          </snapshotRepository>
+      </distributionManagement>
+      <build>
+          <plugins>
+              <plugin>
+                  <groupId>org.apache.maven.plugins</groupId>
+                  <artifactId>maven-deploy-plugin</artifactId>
+                  <version>3.1.1</version>
+              </plugin>
+          </plugins>
+      </build>
+  </profile>
+
 </profiles>
 
 
@@ -92,14 +118,13 @@
       <plugins>
         <!-- publish to central maven -->
         <plugin>
-     <groupId>org.sonatype.plugins</groupId>
-     <artifactId>nexus-staging-maven-plugin</artifactId>
-          <version>1.6.13</version>
+          <groupId>org.sonatype.central</groupId>
+          <artifactId>central-publishing-maven-plugin</artifactId>
+          <version>0.8.0</version>
           <extensions>true</extensions>
           <configuration>
-            <serverId>ossrh</serverId>
-            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+            <publishingServerId>ossrh</publishingServerId>
+            <autoPublish>true</autoPublish>
           </configuration>
         </plugin>
 
@@ -701,7 +726,7 @@
     <tag>${project.version}</tag>
   </scm>
 
-  <distributionManagement>
+<!-- <distributionManagement>
     <repository>
     <id>ossrh</id>
     <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
@@ -710,6 +735,6 @@
       <id>ossrh</id>
       <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
-  </distributionManagement>
+  </distributionManagement>-->
 
 </project>
