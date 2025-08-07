@@ -5125,7 +5125,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			}
 
 			// uninstall extensions no longer used
-			Boolean cleanupExtension = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.cleanup.extension", null), false);
+			Boolean cleanupExtension = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.cleanup.extension", null), true);
 			if (cleanupExtension) {
 				Resource[] installed = RHExtension.getExtensionInstalledDir(config).listResources(new ExtensionResourceFilter("lex"));
 				if (!changed && installed != null) { // we only clean up if we have no switch from multi to single
