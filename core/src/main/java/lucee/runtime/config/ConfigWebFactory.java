@@ -4991,9 +4991,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 				id = Caster.toString(child.get(KeyConstants._id, null), null);
 				BundleInfo[] bfsq;
 				try {
-					String res = Caster.toString(child.get(KeyConstants._resource, null), null);
-					if (StringUtil.isEmpty(res)) res = Caster.toString(child.get(KeyConstants._path, null), null);
-					if (StringUtil.isEmpty(res)) res = Caster.toString(child.get(KeyConstants._url, null), null);
+					String res = getAttr(child, new String[] { "resource", "path", "url" });
 
 					if (StringUtil.isEmpty(id) && StringUtil.isEmpty(res)) continue;
 
