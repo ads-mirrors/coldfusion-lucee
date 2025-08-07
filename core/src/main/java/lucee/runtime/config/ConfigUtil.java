@@ -72,6 +72,7 @@ import lucee.runtime.op.Decision;
 import lucee.runtime.security.SecurityManager;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.ArrayImpl;
+import lucee.runtime.type.Collection;
 import lucee.runtime.type.Collection.Key;
 import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.Struct;
@@ -1041,6 +1042,13 @@ public final class ConfigUtil {
 	public static String getAsString(String name, Struct sct, String defaultValue) {
 		if (sct == null) return defaultValue;
 		Object obj = sct.get(KeyImpl.init(name), null);
+		if (obj == null) return defaultValue;
+		return Caster.toString(obj, defaultValue);
+	}
+
+	public static String getAsString(Collection.Key name, Struct sct, String defaultValue) {
+		if (sct == null) return defaultValue;
+		Object obj = sct.get(name, null);
 		if (obj == null) return defaultValue;
 		return Caster.toString(obj, defaultValue);
 	}

@@ -2868,7 +2868,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 					child = Caster.toStruct(it.next());
 					if (child == null) continue;
 					// component
-					String cfc = Caster.toString(child.get(KeyConstants._component, null), null);
+					String cfc = getAttr(child, KeyConstants._component);
 					if (!StringUtil.isEmpty(cfc, true)) {
 						// TODO start hook
 						continue;
@@ -3369,16 +3369,13 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 				while (it.hasNext()) {
 					child = Caster.toStruct(it.next(), null);
 					if (child == null) continue;
-					id = Caster.toString(child.get(KeyConstants._id, null), null);
+					id = getAttr(child, KeyConstants._id);
 					BundleInfo[] bfsq;
 					try {
-						String res = Caster.toString(child.get(KeyConstants._resource, null), null);
-						if (StringUtil.isEmpty(res)) res = Caster.toString(child.get(KeyConstants._path, null), null);
-						if (StringUtil.isEmpty(res)) res = Caster.toString(child.get(KeyConstants._url, null), null);
-
+						String res = getAttr(child, KeyConstants._resource, KeyConstants._path, KeyConstants._url);
 						if (StringUtil.isEmpty(id) && StringUtil.isEmpty(res)) continue;
 
-						rhe = RHExtension.installExtension(config, id, Caster.toString(child.get(KeyConstants._version, null), null), res, false);
+						rhe = RHExtension.installExtension(config, id, getAttr(child, KeyConstants._version), res, false);
 						// startBundles(config, rhe, firstLoad);
 						extensions.add(rhe);
 						// installedFiles.add(rhe.getExtensionFile());
@@ -3436,7 +3433,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 			 */
 
 			// uninstall extensions no longer used
-			Boolean cleanupExtension = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.cleanup.extension", null), false);
+			Boolean cleanupExtension = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.cleanup.extension", null), true);
 			if (cleanupExtension) {
 				Resource[] installed = RHExtension.getExtensionInstalledDir(config).listResources(new ExtensionResourceFilter("lex"));
 				if (installed != null) {
@@ -3521,7 +3518,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 						Map<String, String> child = Caster.toStringMap(childSct, null);
 						if (child == null) return null;
 
-						String id = Caster.toString(childSct.get(KeyConstants._id, null), null);
+						String id = getAttr(childSct, KeyConstants._id);
 						try {
 							return RHExtension.toExtensionDefinition(config, id, child);
 						}
@@ -3570,7 +3567,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 				child = Caster.toStringMap(childSct, null);
 
 				if (child == null) continue;
-				id = Caster.toString(childSct.get(KeyConstants._id, null), null);
+				id = getAttr(childSct, KeyConstants._id);
 
 				try {
 					extensions.add(RHExtension.toExtensionDefinition(config, id, child));
@@ -3837,7 +3834,15 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 			if (!StringUtil.isEmpty(v)) return ConfigUtil.replaceConfigPlaceHolder(v);
 		}
 		return null;
+	}
 
+	public static String getAttr(Struct data, lucee.runtime.type.Collection.Key... names) {
+		String v;
+		for (lucee.runtime.type.Collection.Key name: names) {
+			v = ConfigUtil.getAsString(name, data, null);
+			if (!StringUtil.isEmpty(v)) return ConfigUtil.replaceConfigPlaceHolder(v);
+		}
+		return null;
 	}
 
 	public static Resource getConfigFile(Resource configDir, boolean server) throws IOException {
