@@ -5082,18 +5082,16 @@ public final class ConfigWebFactory extends ConfigFactory {
 			while (it.hasNext()) {
 				child = Caster.toStruct(it.next(), null);
 				if (child == null) continue;
-				id = Caster.toString(child.get(KeyConstants._id, null), null);
+				id = getAttr(child, "id");
 				BundleInfo[] bfsq;
 				try {
-					String res = Caster.toString(child.get(KeyConstants._resource, null), null);
-					if (StringUtil.isEmpty(res)) res = Caster.toString(child.get(KeyConstants._path, null), null);
-					if (StringUtil.isEmpty(res)) res = Caster.toString(child.get(KeyConstants._url, null), null);
+					String res = getAttr(child, new String[] { "resource", "path", "url" });
 
 					if (StringUtil.isEmpty(id) && StringUtil.isEmpty(res)) continue;
 
 					// we force a new installation if we have switched from single to multi mode, because extension can
 					// act completely different if that is the case
-					rhe = RHExtension.installExtension(config, id, Caster.toString(child.get(KeyConstants._version, null), null), res, changed);
+					rhe = RHExtension.installExtension(config, id, getAttr(child, "version"), res, changed);
 					if (rhe.getStartBundles()) {
 						if (!firstLoad) {
 							rhe.deployBundles(config, true);
