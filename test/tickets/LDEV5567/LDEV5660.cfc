@@ -22,7 +22,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				var bp = new component {
 					import lucee.loader.engine.BundleProvider;
 					function getMappings(){
-						return BundleProvider::getMappings(getCoreJarFile());
+
+						var pc= getPageContext();
+						var bi=bundleInfo(pc);
+						var jf= new java.util.jar.JarFile(bi.location);
+						return BundleProvider::getMappings(jf);
 					}
 				};
 
@@ -35,9 +39,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 	}
 
 	private function getCoreJarFile() {
-		var pc= getPageContext();
-		var bi=bundleInfo(pc);
-		return new java.util.jar.JarFile(bi.location);
+		
 	}
 
 	private function checkOSGIBundlesMappings( mappings ){
