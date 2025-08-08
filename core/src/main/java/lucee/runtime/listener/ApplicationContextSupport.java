@@ -316,13 +316,25 @@ public abstract class ApplicationContextSupport implements ApplicationContext {
 
 			// appender
 			Struct sctApp = Caster.toStruct(v.get("appender", null), null);
-			ClassDefinition cdApp = ClassDefinitionImpl.toClassDefinitionImpl(sctApp, null, false, config.getIdentification());
-			if (!cdApp.isBundle()) cdApp = ((ConfigPro) config).getLogEngine().appenderClassDefintion(cdApp.getClassName());
+			ClassDefinition cdApp = null;
+			if (sctApp != null ){
+				cdApp = ClassDefinitionImpl.toClassDefinitionImpl(sctApp, null, false, config.getIdentification());
+				if (!cdApp.isBundle()) cdApp = ((ConfigPro) config).getLogEngine().appenderClassDefintion(cdApp.getClassName());
+			} else {
+				String appender = Caster.toString(v.get("appender", null), null);
+				if (appender != null) cdApp = ((ConfigPro) config).getLogEngine().appenderClassDefintion(appender);
+			}
 
 			// layout
 			Struct sctLay = Caster.toStruct(v.get("layout", null), null);
-			ClassDefinition cdLay = ClassDefinitionImpl.toClassDefinitionImpl(sctLay, null, false, config.getIdentification());
-			if (!cdLay.isBundle()) cdLay = ((ConfigPro) config).getLogEngine().appenderClassDefintion(cdLay.getClassName());
+			ClassDefinition cdLay = null;
+			if (sctLay != null){
+				cdLay = ClassDefinitionImpl.toClassDefinitionImpl(sctLay, null, false, config.getIdentification());
+				if (!cdLay.isBundle()) cdLay = ((ConfigPro) config).getLogEngine().layoutClassDefintion(cdLay.getClassName());
+			} else {
+				String layout = Caster.toString(v.get("layout", null), null);
+				if (layout != null) cdLay = ((ConfigPro) config).getLogEngine().layoutClassDefintion(layout);
+			}
 
 			if (cdApp != null && cdApp.hasClass()) {
 				// level
@@ -331,16 +343,21 @@ public abstract class ApplicationContextSupport implements ApplicationContext {
 				if (StringUtil.isEmpty(strLevel, true)) strLevel = Caster.toString(v.get("loglevel", null), null);
 				int level = LogUtil.toLevel(StringUtil.trim(strLevel, ""), Log.LEVEL_ERROR);
 
-				Struct sctAppArgs = Caster.toStruct(sctApp.get("arguments", null), null);
-				Struct sctLayArgs = Caster.toStruct(sctLay.get("arguments", null), null);
-
+				Struct sctAppArgs = null;
+				if (sctApp != null) sctAppArgs = Caster.toStruct(sctApp.get("arguments", null), null);
+				if (sctAppArgs == null) sctAppArgs = Caster.toStruct(v.get("appender-arguments", null), null);
+				if (sctAppArgs == null) sctAppArgs = Caster.toStruct(v.get("appenderArguments", null), null);
 				boolean readOnly = Caster.toBooleanValue(v.get("readonly", null), false);
 
 				// ignore when no appender/name is defined
 				if (!StringUtil.isEmpty(name)) {
-					Map<String, String> appArgs = toMap(sctAppArgs);
+					Map<String, String> appArgs = toMap(sctAppArgs); // TODO use ConfigWebFactory.toArguments()?
 					if (cdLay != null && cdLay.hasClass()) {
-						Map<String, String> layArgs = toMap(sctLayArgs);
+						Struct sctLayArgs = null;
+						if (sctLay != null) sctLayArgs = Caster.toStruct(sctLay.get("arguments", null), null);
+						if (sctLayArgs == null) sctLayArgs = Caster.toStruct(v.get("layout-arguments", null), null);
+						if (sctLayArgs == null) sctLayArgs = Caster.toStruct(v.get("layoutArguments", null), null);
+						Map<String, String> layArgs = toMap(sctLayArgs); // TODO use ConfigWebFactory.toArguments()?
 						las = addLogger(name, level, cdApp, appArgs, cdLay, layArgs, readOnly);
 					}
 					else las = addLogger(name, level, cdApp, appArgs, null, null, readOnly);
@@ -352,8 +369,9 @@ public abstract class ApplicationContextSupport implements ApplicationContext {
 	}
 
 	private static Map<String, String> toMap(Struct sct) {
+		Map<String, String> map = new ConcurrentHashMap<String, String>(); // TODO does this need to be concurrent??
+		if (sct == null) return map;
 		Iterator<Entry<Key, Object>> it = sct.entryIterator();
-		Map<String, String> map = new ConcurrentHashMap<String, String>();
 		Entry<Key, Object> e;
 		while (it.hasNext()) {
 			e = it.next();
