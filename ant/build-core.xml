@@ -606,11 +606,60 @@
 
     <listDirectory directory="${test}/lib" delimiter=":" returnvalue="test_jars"/>
     <echots message="execute testcases with java ${testJavaVersionExec}"/>
+
+
+
+
+      <!-- 
+      XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+        This is a temporary patch to ensure that the runtime runs on jakarta 11, 
+        as soon we switch to jakarta 11 this change get obsolete, 
+        until then it ensures our code base works with both
+      XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+      -->
+
+
+    <!-- Download Jakarta EE 11.0.0 JARs if they don't exist -->
+    <mkdir dir="${user.home}/.m2/repository/jakarta/platform/jakarta.jakartaee-api/11.0.0"/>
+    <mkdir dir="${user.home}/.m2/repository/jakarta/platform/jakarta.jakartaee-web-api/11.0.0"/>
+    
+    <get src="https://repo1.maven.org/maven2/jakarta/platform/jakarta.jakartaee-api/11.0.0/jakarta.jakartaee-api-11.0.0.jar"
+         dest="${user.home}/.m2/repository/jakarta/platform/jakarta.jakartaee-api/11.0.0/jakarta.jakartaee-api-11.0.0.jar"
+         skipexisting="true"/>
+    
+    <get src="https://repo1.maven.org/maven2/jakarta/platform/jakarta.jakartaee-web-api/11.0.0/jakarta.jakartaee-web-api-11.0.0.jar"
+         dest="${user.home}/.m2/repository/jakarta/platform/jakarta.jakartaee-web-api/11.0.0/jakarta.jakartaee-web-api-11.0.0.jar"
+         skipexisting="true"/>
+    
+    <!-- Replace Jakarta EE API versions for Java 17 compatibility -->
+    <loadresource property="runtime_classpath_updated">
+        <string value="${runtime_classpath}"/>
+        <filterchain>
+            <tokenfilter>
+                <stringtokenizer/>
+                <!-- Replace full path including directory and filename -->
+                <replaceregex pattern="jakarta/platform/jakarta\.jakartaee-api/10\.0\.0/jakarta\.jakartaee-api-10\.0\.0\.jar" 
+                             replace="jakarta/platform/jakarta.jakartaee-api/11.0.0/jakarta.jakartaee-api-11.0.0.jar" flags="g"/>
+                <replaceregex pattern="jakarta/platform/jakarta\.jakartaee-web-api/10\.0\.0/jakarta\.jakartaee-web-api-10\.0\.0\.jar" 
+                             replace="jakarta/platform/jakarta.jakartaee-web-api/11.0.0/jakarta.jakartaee-web-api-11.0.0.jar" flags="g"/>
+            </tokenfilter>
+        </filterchain>
+    </loadresource>
+    
+
+
+
+
+
+    
+    <echots message="runtime_classpath: ${runtime_classpath_updated}"/>
+   
+
     <!-- execute CFML testcases -->
     <java classname="org.apache.tools.ant.launch.Launcher" dir="${ant}" fork="true" failonerror="true" errorproperty="exc2" jvm="${testJavaVersionExec}">
       <classpath path="${java.class.path}">
           <pathelement location="${temp}/lucee.jar"/>
-          <pathelement path="${runtime_classpath}"/>
+          <pathelement path="${runtime_classpath_updated}"/>
           <pathelement path="${test_jars}"/>
       </classpath>
 

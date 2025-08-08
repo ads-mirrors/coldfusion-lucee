@@ -22,6 +22,28 @@
    |_|\___||___/\__|____/ \___/_/\_\
 
 ]]></echo>
+
+<!-- Display Java and Classpath Information -->
+<echots message="Java Version: ${java.version}"/>
+<echots message="Java Home: ${java.home}"/>
+<echots message="Java Vendor: ${java.vendor}"/>
+<echots message="Java Runtime: ${java.runtime.name} ${java.runtime.version}"/>
+
+<!-- Display Classpath (truncated for readability) -->
+<loadresource property="classpath.formatted">
+    <string value="${java.class.path}"/>
+    <filterchain>
+        <tokenfilter>
+            <replacestring from=":" to="${line.separator}  - "/>
+        </tokenfilter>
+    </filterchain>
+</loadresource>
+<echo level="info" message="Current Classpath:"/>
+<echo level="info" message="  - ${classpath.formatted}"/>
+
+
+
+
 <echots message="start TestBox testcases"/>
 
 <!-- TODO this is hard to debug, any errors, it just fails with zero feedback -->
