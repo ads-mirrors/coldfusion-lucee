@@ -18,11 +18,11 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 			// the method BundleProvider::getMappings() now need a `JarFile` as argument that points to the lucee core 
 			// and then loads the mappings from the same place as the test below, we can make this work, but maybe not worth the effort
 			// because it does the same
-			xit(title="checking bundles defined in the core manifest are all mapped in the LOADER BundleProvider", body = function( currentSpec ) {
+			it(title="checking bundles defined in the core manifest are all mapped in the LOADER BundleProvider", body = function( currentSpec ) {
 				var bp = new component {
 					import lucee.loader.engine.BundleProvider;
 					function getMappings(){
-						return BundleProvider::getMappings();
+						return BundleProvider::getMappings(getCoreJarFile());
 					}
 				};
 
@@ -32,6 +32,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 			});
 
 		});
+	}
+
+	private function getCoreJarFile() {
+		var pc= getPageContext();
+		var bi=bundleInfo(pc);
+		return new java.util.jar.JarFile(bi.location);
 	}
 
 	private function checkOSGIBundlesMappings( mappings ){
