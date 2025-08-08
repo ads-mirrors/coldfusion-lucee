@@ -62,7 +62,7 @@
 					</td>
 				</tr>
 				<cfif loginSettings.captcha>
-					<cfif extensionExists("B737ABC4-D43F-4D91-8E8E973E37C40D1B")>
+					<cfif extensionExists("B03E92E1-F2F3-4380-981922D0BDFEF2B8")>
 						<cfset cap=createRandomText(6)>
 						<cfset session.cap=cap>
 						<tr>

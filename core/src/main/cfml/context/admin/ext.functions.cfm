@@ -238,7 +238,7 @@
 			</cfif>
 			
 			<!--- is the image extension installed? --->
-			<cfif serversideDN && extensionExists("B737ABC4-D43F-4D91-8E8E973E37C40D1B")> 
+			<cfif serversideDN && extensionExists("B03E92E1-F2F3-4380-981922D0BDFEF2B8")> 
 				<cfif isImage(data)>
 					<cfset local.img=imageRead(data)>
 					<!--- shrink images if needed --->
