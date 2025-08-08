@@ -124,10 +124,10 @@ public class BundleLoader {
 			boolean always = "always".equalsIgnoreCase(doDownload);
 
 			// Add Required Bundles
-			final List<Bundle> bundles = addRequiredBundles(requiredBundles, availableBundles, always, engFac, bc);
+			final List<Bundle> bundles = addRequiredBundles(requiredBundles, availableBundles, jf, always, engFac, bc);
 
 			// Add Required Bundle Fragments
-			addRequiredBundles(requiredBundleFragments, availableBundles, always, engFac, bc);
+			addRequiredBundles(requiredBundleFragments, availableBundles, jf, always, engFac, bc);
 
 			// Add Lucee core Bundle
 			Bundle bundle = BundleUtil.addBundle(engFac, bc, rc, null);
@@ -154,8 +154,8 @@ public class BundleLoader {
 		}
 	}
 
-	public static List<Bundle> addRequiredBundles(Map<String, String> requiredBundles, Map<String, File> availableBundles, boolean always, CFMLEngineFactory engFac,
-			BundleContext bc) {
+	public static List<Bundle> addRequiredBundles(final Map<String, String> requiredBundles, final Map<String, File> availableBundles, final JarFile luceeCore, boolean always,
+			CFMLEngineFactory engFac, BundleContext bc) {
 		final List<Bundle> bundles = new ArrayList<>();
 		final List<Bundle> bundlesSync = Collections.synchronizedList(bundles);
 		Iterator<Entry<String, String>> it = requiredBundles.entrySet().iterator();
@@ -168,7 +168,7 @@ public class BundleLoader {
 					String id = e.getKey() + "|" + e.getValue();
 					File f = always ? null : availableBundles.get(id);
 					if (f == null) {
-						f = engFac.downloadBundle(e.getKey(), e.getValue(), null);
+						f = engFac.downloadBundle(e.getKey(), e.getValue(), null, luceeCore);
 					}
 					bundlesSync.add(BundleUtil.addBundle(engFac, bc, f, null));
 				}
@@ -477,5 +477,4 @@ public class BundleLoader {
 		if (bundle.getState() == Bundle.ACTIVE || bundle.getState() == Bundle.STARTING) BundleUtil.stop(bundle, false);
 
 	}
-
 }

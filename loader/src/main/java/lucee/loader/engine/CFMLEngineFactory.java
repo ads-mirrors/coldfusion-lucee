@@ -1019,6 +1019,10 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 	}
 
 	public File downloadBundle(final String symbolicName, final String symbolicVersion, Identification id) throws IOException {
+		return downloadBundle(symbolicName, symbolicVersion, id, null);
+	}
+
+	public File downloadBundle(final String symbolicName, final String symbolicVersion, Identification id, final JarFile luceeCore) throws IOException {
 
 		final File jarDir = getBundleDirectory();
 
@@ -1040,7 +1044,7 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 
 		URL updateUrl;
 		try {
-			updateUrl = BundleProvider.getInstance().getBundleAsURL(symbolicName, symbolicVersion);
+			updateUrl = BundleProvider.getInstance().getBundleAsURL(this, symbolicName, symbolicVersion, luceeCore);
 		}
 		catch (Exception e) {
 			throw new IOException("Failed to get an endpoint for the bundle  [" + symbolicName + ":" + symbolicVersion + "]", e);

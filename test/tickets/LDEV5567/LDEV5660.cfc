@@ -1,9 +1,11 @@
-component extends="org.lucee.cfml.test.LuceeTestCase" skip=true {
+component extends="org.lucee.cfml.test.LuceeTestCase" {
 	function run( testResults , testBox ) {
 
 		describe( title="Test case LDEV-5660", body=function() {
-
-			it(title="checking bundles defined in the core manifest are all mapped in the core BundleProvider", body = function( currentSpec ) {
+			// the method BundleProvider::getMappings() now need a `JarFile` as argument that points to the lucee core 
+			// and then loads the mappings from the same place as the test below, we can make this work, but maybe not worth the effort
+			// because it does the same
+			xit(title="checking bundles defined in the core manifest are all mapped in the core BundleProvider", body = function( currentSpec ) {
 				var bp = new component {
 					import lucee.runtime.config.s3.BundleProvider;
 					function getMappings(){
