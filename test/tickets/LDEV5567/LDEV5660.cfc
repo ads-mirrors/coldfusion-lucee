@@ -38,10 +38,6 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 		});
 	}
 
-	private function getCoreJarFile() {
-		
-	}
-
 	private function checkOSGIBundlesMappings( mappings ){
 		var mfPath = expandpath("../core/src/main/java/META-INF/MANIFEST.MF");
 		var manifestBundles = getBundlesFromManifest( mfPath );
