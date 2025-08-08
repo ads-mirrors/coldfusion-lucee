@@ -32,6 +32,7 @@ import lucee.runtime.exp.CatchBlock;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.exp.PageExceptionImpl;
 import lucee.runtime.op.Duplicator;
+import lucee.runtime.reflection.Reflector;
 import lucee.runtime.type.Collection;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.KeyConstants;
@@ -178,7 +179,17 @@ public final class ModernAppListenerException extends PageException {
 
 	// keep this for backward compatibility to jakarta 10 RUNTIME
 	public Throwable getRootCause() {
-		return rootCause.getRootCause();
+		try {
+			return (Throwable) Reflector.callMethod(rootCause, "getRootCause", new Object[] {});
+		}
+		catch (Exception e) {
+			Throwable cause = this;
+			Throwable temp;
+
+			while ((temp = cause.getCause()) != null)
+				cause = temp;
+			return cause;
+		}
 	}
 
 	@Override
