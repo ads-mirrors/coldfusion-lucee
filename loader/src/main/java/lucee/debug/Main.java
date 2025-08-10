@@ -25,27 +25,38 @@ public class Main {
 
 	public static void main(String[] args) throws Exception {
 
+		boolean isRunningInJar = false;
+		Class<Main> clazz = Main.class;
+		String binpath = clazz.getProtectionDomain().getCodeSource().getLocation().getPath();
 		String s;
 
-		s = Util.getSystemPropOrEnvVar(ARG_PROJECT_DIR, "");
-		if (s.isEmpty()) {
-			s = Paths.get("").toAbsolutePath().toString();
-			System.out.println(ARG_PROJECT_DIR + " is not set, using " + s);
-			System.setProperty(convertEnvVarToSysProp(ARG_PROJECT_DIR), s);
-		}
-		else {
-			System.out.println(ARG_PROJECT_DIR + " is set to " + s);
-		}
+		System.out.println("Lucee is running from binaries at " + binpath);
 
-		s = Util.getSystemPropOrEnvVar(ARG_CLASSES_DIR, "");
-		if (s.isEmpty()) {
-			s = Main.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-			s = Paths.get(s).getParent().toString();
-			System.out.println(ARG_CLASSES_DIR + " is not set, using " + s);
-			System.setProperty(convertEnvVarToSysProp(ARG_CLASSES_DIR), s);
+		try {
+			isRunningInJar = clazz.getClassLoader().getResource("").getProtocol().equals("jar");
 		}
-		else {
-			System.out.println(ARG_CLASSES_DIR + " is set to " + s);
+		catch (Exception ignored) {}
+
+		if (!isRunningInJar) {
+			s = Util.getSystemPropOrEnvVar(ARG_PROJECT_DIR, "");
+			if (s.isEmpty()) {
+				s = Paths.get("").toAbsolutePath().toString();
+				System.out.println(ARG_PROJECT_DIR + " is not set, using " + s);
+				System.setProperty(convertEnvVarToSysProp(ARG_PROJECT_DIR), s);
+			}
+			else {
+				System.out.println(ARG_PROJECT_DIR + " is set to " + s);
+			}
+
+			s = Util.getSystemPropOrEnvVar(ARG_CLASSES_DIR, "");
+			if (s.isEmpty()) {
+				s = Paths.get(binpath).getParent().toString();
+				System.out.println(ARG_CLASSES_DIR + " is not set, using " + s);
+				System.setProperty(convertEnvVarToSysProp(ARG_CLASSES_DIR), s);
+			}
+			else {
+				System.out.println(ARG_CLASSES_DIR + " is set to " + s);
+			}
 		}
 
 		s = Util.getSystemPropOrEnvVar(ARG_BASE, "");
