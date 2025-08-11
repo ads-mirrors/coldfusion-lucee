@@ -4895,13 +4895,13 @@ public final class ConfigAdmin {
 					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy context [" + realpath + "]");
 					updateContext(zis, realpath, false, false);
 				}
-				// web contextS
+				// web contextS (same as "context", exists for backward compatibility to old extensions)
 				boolean first;
 				if (!entry.isDirectory() && ((first = startsWith(path, type, "webcontexts")) || startsWith(path, type, "web.contexts"))
 						&& !StringUtil.startsWith(fileName(entry), '.')) {
 					realpath = path.substring(first ? 12 : 13);
-					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy webcontext [" + realpath + "]");
-					updateWebContexts(zis, realpath, false, false);
+					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy context [" + realpath + "]");
+					updateContext(zis, realpath, false, false);
 				}
 				// maven
 				if (!entry.isDirectory() && ((first = startsWith(path, type, "mvn")) || startsWith(path, type, "maven")) && !StringUtil.startsWith(fileName(entry), '.')) {
@@ -6107,35 +6107,12 @@ public final class ConfigAdmin {
 		}
 	}
 
-	Resource[] updateWebContexts(InputStream is, String realpath, boolean closeStream, boolean store) throws PageException, IOException, BundleException, ConverterException {
-		List<Resource> filesDeployed = new ArrayList<Resource>();
-
-		ConfigAdmin._updateWebContexts(config, is, realpath, closeStream, filesDeployed, store);
-
-		return filesDeployed.toArray(new Resource[filesDeployed.size()]);
-	}
-
 	void updateMaven(InputStream is, String realpath, boolean closeStream, boolean store, Log log) throws IOException {
 		Resource dir = config.getMavenDir();
 		Resource localFile = write(config.getMavenDir(), is, realpath, closeStream, false);
 		if (localFile != null) {
 			log.info("extension", "created file [" + localFile + "] provided by the extension");
 		}
-	}
-
-	private static void _updateWebContexts(Config config, InputStream is, String realpath, boolean closeStream, List<Resource> filesDeployed, boolean store)
-			throws PageException, IOException, BundleException, ConverterException {
-		if (!(config instanceof ConfigServer)) throw new ApplicationException("Invalid context, you can only call this method from server context");
-		ConfigServer cs = (ConfigServer) config;
-
-		Resource wcd = cs.getConfigDir().getRealResource("web-context-deployment");
-		Resource trg = wcd.getRealResource(realpath);
-		if (trg.exists()) trg.remove(true);
-		Resource p = trg.getParentResource();
-		if (!p.isDirectory()) p.createDirectory(true);
-		IOUtil.copy(is, trg.getOutputStream(false), closeStream, true);
-		filesDeployed.add(trg);
-		if (store) _storeAndReload((ConfigPro) config);
 	}
 
 	Resource[] updateConfigs(InputStream is, String realpath, boolean closeStream, boolean store) throws PageException, IOException, BundleException, ConverterException {
