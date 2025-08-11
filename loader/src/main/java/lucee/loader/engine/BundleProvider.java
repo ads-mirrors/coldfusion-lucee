@@ -423,8 +423,8 @@ public final class BundleProvider {
 		put(mappings, "xmlparserv2", new Info[0]);
 		put(mappings, "xmpcore", new Info[0]);
 		put(mappings, "zip4j", new Info("net.lingala.zip4j", "zip4j"));
-
 		put(mappings, "org.apache.felix.main", new Info("org.apache.felix", "org.apache.felix.framework"));
+		put(mappings, "org.lucee.janino", new Info("org.lucee", "janino"));
 		put(mappings, "org.lucee.janinocc", new Info("org.lucee", "janino-commons-compiler"));
 		put(mappings, "org.apache.commons.commons-fileupload", new Info("commons-fileupload", "commons-fileupload"));
 		put(mappings, "jakarta.activation-api", new Info("jakarta.activation-api", "jakarta.activation"));
@@ -444,6 +444,7 @@ public final class BundleProvider {
 		put(mappings, "com.sun.xml.bind.jaxb-impl", new Info("org.glassfish.jaxb", "jaxb-runtime"));
 		put(mappings, "org.lucee.commonmark", new Info("org.lucee", "commonmark"));
 		put(mappings, "org.lucee.argon2-jvm-nolibs", new Info("org.lucee", "argon2-jvm-nolibs"));
+		put(mappings, "com.github.mwiede.jsch", new Info("com.github.mwiede", "jsch"));
 	}
 
 	private static void put(Map<String, Info[]> mappings, String name, Info... value) {
