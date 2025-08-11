@@ -352,7 +352,7 @@ public abstract class ApplicationContextSupport implements ApplicationContext {
 						if (sctLayArgs == null) sctLayArgs = Caster.toStruct(v.get("layout-arguments", null), null);
 						if (sctLayArgs == null) sctLayArgs = Caster.toStruct(v.get("layoutArguments", null), null);
 						Map<String, String> layArgs = toMap(sctLayArgs); // TODO use ConfigWebFactory.toArguments()?
-						las = addLogger(name, level, cdApp, appArgs, cdLay, layArgs, readOnly);
+						las = addLogger(config, name, level, cdApp, appArgs, cdLay, layArgs, readOnly);
 					}
 					else las = addLogger(config, name, level, cdApp, appArgs, null, null, readOnly);
 
