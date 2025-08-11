@@ -862,8 +862,10 @@ public final class ConfigServerImpl extends ConfigImpl implements ConfigServer {
 		ConfigWeb[] webs = getConfigWebs();
 		try {
 			ConfigServerFactory.reloadInstance(engine, this);
+			boolean deployWebFiles = true;
 			for (ConfigWeb web: webs) {
-				ConfigWebFactory.reloadInstance(engine, this, (ConfigWebImpl) web, true, false);
+				ConfigWebFactory.reloadInstance(engine, this, (ConfigWebImpl) web, true, false, deployWebFiles);
+				deployWebFiles = false;
 			}
 
 		}

@@ -327,7 +327,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	}
 
 	public static ConfigWebPro newInstanceSingle(CFMLEngine engine, CFMLFactoryImpl factory, ConfigServerImpl configServer, Resource configDirWeb, ServletConfig servletConfig,
-			ConfigWebImpl existingToUpdate) throws PageException {
+			ConfigWebImpl existingToUpdate, boolean deployWebFiles) throws PageException {
 
 		Resource configDir = configServer.getConfigDir();
 
@@ -347,6 +347,19 @@ public final class ConfigWebFactory extends ConfigFactory {
 		// createContextFiles(configDir, servletConfig, doNew);
 		settings(configWeb, ThreadLocalPageContext.getLog(configWeb, "application"));
 		createContextFilesPost(configDir, configWeb, servletConfig, false, doNew);
+		if (deployWebFiles) {
+			try {
+				ConfigWebUtil.deployWebContext(configServer, configWeb, false);
+				ConfigWebUtil.deployWeb(configServer, configWeb, false);
+			}
+			catch (IOException e) {
+				throw Caster.toPageException(e);
+			}
+		}
+
+		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(configServer == null ? configWeb : configServer), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(),
+				"deploy web context");
+
 		((ThreadQueueImpl) configWeb.getThreadQueue()).setMode(configWeb.getQueueEnable() ? ThreadQueuePro.MODE_ENABLED : ThreadQueuePro.MODE_DISABLED);
 
 		// call web.cfc for this context
@@ -394,12 +407,17 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @throws FunctionLibException
 	 * @throws BundleException
 	 */ // MUST
-	public static void reloadInstance(CFMLEngine engine, ConfigServerImpl cs, ConfigWebImpl cwi, boolean force, boolean refreshScheduler)
+	public static void reloadInstance(CFMLEngine engine, ConfigServerImpl cs, ConfigWebImpl cwi, boolean force, boolean refreshScheduler, boolean deployWebFiles)
 			throws ClassException, PageException, IOException, TagLibException, FunctionLibException, BundleException {
-
 		boolean isSingle = cs.getAdminMode() == ConfigImpl.ADMINMODE_SINGLE;
 		boolean isWebSingle = cwi.isSingle();
 		if (isWebSingle) {
+
+			if (deployWebFiles) {
+				ConfigWebUtil.deployWebContext(cs, cwi, false);
+				ConfigWebUtil.deployWeb(cs, cwi, false);
+			}
+
 			// changed from single to multi
 			if (isSingle != isWebSingle) {
 				// Resource configDir, boolean isConfigDirACustomSetting,
@@ -433,7 +451,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 
 		// changed from multi to single
 		if (isSingle != isWebSingle) {
-			newInstanceSingle(engine, (CFMLFactoryImpl) cwi.getFactory(), cs, cwi.getWebConfigDir(), cwi.getServletConfig(), cwi);
+			newInstanceSingle(engine, (CFMLFactoryImpl) cwi.getFactory(), cs, cwi.getWebConfigDir(), cwi.getServletConfig(), cwi, true);
 			return;
 		}
 
@@ -483,6 +501,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(cs == null ? config : cs), Log.LEVEL_INFO, ConfigWebFactory.class.getName(), "start reading config");
 		ThreadLocalConfig.register(config);
 		boolean reload = false;
+
 		// load PW
 		try {
 

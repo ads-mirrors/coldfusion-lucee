@@ -55,7 +55,6 @@ import org.xml.sax.SAXException;
 
 import com.allaire.cfx.CustomTag;
 
-import lucee.aprint;
 import lucee.commons.digest.MD5;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.FileUtil;
@@ -375,25 +374,23 @@ public final class ConfigAdmin {
 			// if(storeInMemoryData)XMLCaster.writeTo(doc,config.getConfigFile());
 			CFMLEngine engine = ConfigWebUtil.getEngine(config);
 			if (config instanceof ConfigServerImpl) {
-
 				ConfigServerImpl cs = (ConfigServerImpl) config;
 				ConfigServerFactory.reloadInstance(engine, cs, refreshScheduler);
 				ConfigWeb[] webs = cs.getConfigWebs();
+				boolean deployWebFiles = true;
 				for (ConfigWeb web: webs) {
-					ConfigWebFactory.reloadInstance(engine, (ConfigServerImpl) config, (ConfigWebImpl) web, true, refreshScheduler);
-
+					ConfigWebFactory.reloadInstance(engine, (ConfigServerImpl) config, (ConfigWebImpl) web, true, refreshScheduler, deployWebFiles);
+					deployWebFiles = false;
 				}
 			}
 			else if (config instanceof ConfigWebImpl) {
 				ConfigServerImpl cs = ((ConfigWebImpl) config).getConfigServerImpl();
-				ConfigWebFactory.reloadInstance(engine, cs, (ConfigWebImpl) config, false, refreshScheduler);
+				ConfigWebFactory.reloadInstance(engine, cs, (ConfigWebImpl) config, false, refreshScheduler, true);
 			}
 			else if (config instanceof SingleContextConfigWeb) {
 				if (true) throw new RuntimeException("important exception, please report to Lucee");
 				// TODO remove this this should never happening
-				aprint.ds();
 				SingleContextConfigWeb sccw = (SingleContextConfigWeb) config;
-
 				ConfigServerImpl cs = sccw.getConfigServerImpl();
 				ConfigServerFactory.reloadInstance(engine, cs);
 				sccw.reload();
