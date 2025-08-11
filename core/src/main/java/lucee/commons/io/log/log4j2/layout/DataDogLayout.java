@@ -1,6 +1,7 @@
 package lucee.commons.io.log.log4j2.layout;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.format.DateTimeFormatter;
@@ -14,6 +15,7 @@ import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.log.log4j2.ContextualMessage;
 import lucee.commons.io.log.log4j2.LogAdapter;
+import lucee.commons.lang.ExceptionUtil;
 import lucee.loader.engine.CFMLEngine;
 import lucee.loader.engine.CFMLEngineFactory;
 import lucee.loader.util.Util;
@@ -203,11 +205,14 @@ public final class DataDogLayout extends AbstractStringLayout {
 		}
 		catch (Exception e) {
 			// we cannot send this to a logger, because that could cause an infiniti loop
+			IOException ioe = new IOException(
+					"Datadog classes not found - this is optional and does not affect application functionality. Logging will continue with placeholder TraceId/SpanId values (-1/-1). To enable Datadog tracing, add the datadog-trace-api JAR to the classpath.");
 			try {
-				LogUtil.logGlobal(CFMLEngineFactory.getInstance().getCFMLEngineFactory(), "datadog", e);
+				ExceptionUtil.initCauseEL(ioe, e);
+				LogUtil.logGlobal(CFMLEngineFactory.getInstance().getCFMLEngineFactory(), "datadog", ioe);
 			}
 			catch (Exception ee) {
-				e.printStackTrace();
+				ioe.printStackTrace();
 			}
 		}
 
