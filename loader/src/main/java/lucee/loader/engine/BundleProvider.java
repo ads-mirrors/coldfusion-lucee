@@ -201,6 +201,7 @@ public final class BundleProvider {
 
 		put(mappings, "org.apache.commons.email", new Info("org.apache.commons", "commons-email"));
 		put(mappings, "org.apache.commons.fileupload", new Info("commons-fileupload", "commons-fileupload"));
+		put(mappings, "org.apache.commons.commons-fileupload2-core", new Info("org.apache.commons", "commons-fileupload2-core"));
 		put(mappings, "org.apache.commons.httpclient", new Info("org.apache.httpcomponents", "httpclient"));
 		put(mappings, "org.apache.commons.httpcore", new Info("org.apache.httpcomponents", "httpcore"));
 		put(mappings, "org.apache.commons.httpmime", new Info("org.apache.httpcomponents", "httpmime"));
