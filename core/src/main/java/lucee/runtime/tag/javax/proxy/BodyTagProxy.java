@@ -3,7 +3,6 @@ package lucee.runtime.tag.javax.proxy;
 import jakarta.servlet.jsp.JspException;
 import jakarta.servlet.jsp.tagext.BodyContent;
 import jakarta.servlet.jsp.tagext.BodyTag;
-import lucee.print;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
@@ -19,7 +18,6 @@ public class BodyTagProxy extends TagProxy implements BodyTag {
 		if (obj == null) return null;
 		// BodyTag
 		if (Reflector.isInstaneOf(obj.getClass().getName(), "javax.servlet.jsp.tagext.BodyTag")) {
-			print.ds("BodyTagProxy:" + obj.getClass().getName());
 			return new BodyTagProxy(obj);
 		}
 
@@ -28,7 +26,6 @@ public class BodyTagProxy extends TagProxy implements BodyTag {
 
 	@Override
 	public int doAfterBody() throws JspException {
-		print.e("doAfterBody:" + getJavaxTag().getClass().getName());
 		return Caster.toIntValue(Reflector.callMethod(getJavaxTag(), "doAfterBody", new Object[] {}));
 	}
 

@@ -4,7 +4,6 @@ import jakarta.servlet.jsp.JspException;
 import jakarta.servlet.jsp.PageContext;
 import jakarta.servlet.jsp.tagext.DynamicAttributes;
 import jakarta.servlet.jsp.tagext.Tag;
-import lucee.print;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
@@ -28,12 +27,10 @@ public class TagProxy implements Tag, DynamicAttributes, lucee.runtime.ext.tag.D
 
 		// BodyTag
 		if (Reflector.isInstaneOf(obj.getClass().getName(), "javax.servlet.jsp.tagext.BodyTag")) {
-			print.ds("BodyTagProxy2:" + obj.getClass().getName());
 			return new BodyTagProxy(obj);
 		}
 		// Tag
 		if (Reflector.isInstaneOf(obj.getClass().getName(), "javax.servlet.jsp.tagext.Tag")) {
-			print.ds("TagProxy:" + obj.getClass().getName());
 			return new TagProxy(obj);
 		}
 		throw new ApplicationException("class [" + obj.getClass().getName() + "] cannot be loaded as a Tag ");
@@ -82,7 +79,6 @@ public class TagProxy implements Tag, DynamicAttributes, lucee.runtime.ext.tag.D
 
 	@Override
 	public void setDynamicAttribute(String uri, String localName, Object value) {
-		print.e("------ setDynamicAttribute(" + uri + "," + localName + "," + value + ") ------");
 		try {
 			Reflector.callMethod(getJavaxTag(), "set" + StringUtil.ucFirst(localName), new Object[] { value });
 		}
