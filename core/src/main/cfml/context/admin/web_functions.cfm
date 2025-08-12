@@ -412,4 +412,13 @@ function _byteFormatShort(numeric left,numeric right,string suffix){
 		return replace(arguments.input, "'", "''", "all");
 	}
 
+	function safeText (str){
+		if (isNull(request.hasESAPI))
+			request.hasESAPI = ExtensionExists( "37C61C0A-5D7E-4256-8572639BE0CF5838" );
+		if (request.hasESAPI)
+			return encodeForHtml(arguments.str);
+		else
+			return htmlEditFormat(arguments.str);
+	}
+
 </cfscript>

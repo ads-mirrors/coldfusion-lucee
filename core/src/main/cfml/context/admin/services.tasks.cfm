@@ -115,7 +115,9 @@
 </cftry>
 
 <!--- Redirtect to entry --->
-<cfif cgi.request_method EQ "POST" and error.message EQ "" and not isDefined('doNotRedirect')>
+<cfif cgi.request_method EQ "POST" 
+		and (error.message EQ "" and structcount(stVeritfyMessages) EQ 0)
+		and not isDefined('doNotRedirect')>
 	<cflocation url="#request.self#?action=#url.action#" addtoken="no">
 </cfif>
 
@@ -359,11 +361,6 @@
 	</cfformClassic>
 
 	
-	
-	
-	
-	
-	
 	<h2>#stText.remote.title#</h2>
 	
 		<cfset types=struct()>
@@ -378,11 +375,11 @@
 		<!--- show verify result --->
 		<cfloop collection="#stVeritfyMessages#" item="id">
 			<cfif stVeritfyMessages[id].label eq "OK">
-				<div class="message">Verified OK</div>
+				<div class="message">Verified OK [#id#]</div>
 			<cfelse>
 				<div class="error">
-					#stVeritfyMessages[id].label#:<br />
-					#stVeritfyMessages[id].message#
+					#stVeritfyMessages[id].label#: [#id#]<br />
+					#safeText(stVeritfyMessages[id].message)#
 				</div>
 			</cfif>
 		</cfloop>
@@ -471,7 +468,7 @@
 								<td>
 									<input type="checkbox" class="checkbox checkAll" id="checkAll" name="row_#tasks.currentrow#" value="#tasks.currentrow#">
 								</td>
-								<td class="tblContent#css#"><input type="hidden" name="id_#tasks.currentrow#" value="#tasks.id#">
+								<td class="tblContent#css#" title="#tasks.id#"><input type="hidden" name="id_#tasks.currentrow#" value="#tasks.id#">
 									#tasks.type#
 								</td>
 								<td class="tblContent#css#">#wrap(tasks.name,80)#</td>
