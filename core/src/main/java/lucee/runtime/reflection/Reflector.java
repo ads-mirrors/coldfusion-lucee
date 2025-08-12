@@ -817,6 +817,15 @@ public final class Reflector {
 		}
 	}
 
+	public static Object callMethodRE(Object obj, String methodName, Object[] args) {
+		try {
+			return callMethod(obj, KeyImpl.init(methodName), args, false);
+		}
+		catch (PageException pe) {
+			throw new PageRuntimeException(pe);
+		}
+	}
+
 	/**
 	 * calls a Method of an Object
 	 * 

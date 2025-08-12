@@ -461,8 +461,11 @@ public final class TagHelper {
 		// while (tag.doAfterBody()==BodyTag.EVAL_BODY_AGAIN);
 		adapter.loadLocal(currLocal);
 		if (interf) adapter.checkCast(Types.BODY_TAG);
-		ASMUtil.invoke(interf ? ASMUtil.INTERFACE : ASMUtil.VIRTUAL, adapter, currType, DO_AFTER_BODY);
-		// adapter.invokeVirtual(currType, DO_AFTER_BODY);
+
+		// Use BODY_TAG type for the invoke, not the original currType
+		Type invokeType = interf ? Types.BODY_TAG : currType;
+		ASMUtil.invoke(interf ? ASMUtil.INTERFACE : ASMUtil.VIRTUAL, adapter, invokeType, DO_AFTER_BODY);
+
 		adapter.push(IterationTag.EVAL_BODY_AGAIN);
 		adapter.visitJumpInsn(Opcodes.IF_ICMPEQ, beginDoWhile);
 	}

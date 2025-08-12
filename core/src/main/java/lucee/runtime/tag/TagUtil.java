@@ -167,7 +167,7 @@ public final class TagUtil {
 	}
 
 	public static void setAttribute(PageContext pc, Tag tag, String name, Object value) throws PageException {
-		setAttribute(pc, false, false, tag, name, value);
+		setAttribute(pc, true, false, tag, name, value);
 	}
 
 	public static void setAttribute(PageContext pc, boolean doDynamic, boolean silently, Tag tag, String name, Object value) throws PageException {

@@ -28,6 +28,7 @@ import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.config.Identification;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
+import lucee.runtime.tag.javax.proxy.TagProxy;
 import lucee.transformer.library.ClassDefinitionImpl;
 
 // TODO kann man nicht auf context ebene
@@ -92,7 +93,8 @@ public final class TagHandlerPool {
 
 	private Tag loadTag(String className, String tagBundleName, String tagBundleVersion, Identification id) throws PageException {
 		try {
-			return (Tag) ClassUtil.newInstance(new ClassDefinitionImpl(className, tagBundleName, tagBundleVersion, id).setVersionOnlyMattersWhenDownloading(true).getClazz());
+			return TagProxy.getInstance(
+					ClassUtil.newInstance(new ClassDefinitionImpl(className, tagBundleName, tagBundleVersion, id).setVersionOnlyMattersWhenDownloading(true).getClazz()));
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);
