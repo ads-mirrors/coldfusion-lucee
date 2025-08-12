@@ -52,6 +52,7 @@ import lucee.runtime.listener.JavaSettingsImpl;
 import lucee.runtime.op.Caster;
 import lucee.runtime.reflection.Reflector;
 import lucee.runtime.reflection.pairs.MethodInstance;
+import lucee.runtime.tag.javax.proxy.Proxy;
 import lucee.runtime.thread.SerializableCookie;
 import lucee.runtime.thread.ThreadUtil;
 import lucee.runtime.type.Collection;
@@ -167,11 +168,11 @@ public final class TagUtil {
 	}
 
 	public static void setAttribute(PageContext pc, Tag tag, String name, Object value) throws PageException {
-		setAttribute(pc, true, false, tag, name, value);
+		setAttribute(pc, false, false, tag, name, value);
 	}
 
 	public static void setAttribute(PageContext pc, boolean doDynamic, boolean silently, Tag tag, String name, Object value) throws PageException {
-
+		if (!doDynamic && tag instanceof Proxy) doDynamic = true;
 		MethodInstance setter = silently || doDynamic ? Reflector.getSetter(tag, name.toLowerCase(), value, null) : Reflector.getSetter(tag, name.toLowerCase(), value, false);
 
 		if (setter != null) {
@@ -187,7 +188,7 @@ public final class TagUtil {
 				throw Caster.toPageException(_e);
 			}
 		}
-		else if (doDynamic) {
+		else if (doDynamic && tag instanceof DynamicAttributes) {
 			DynamicAttributes da = (DynamicAttributes) tag;
 			da.setDynamicAttribute(null, name, value);
 		}

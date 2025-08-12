@@ -26,22 +26,22 @@ public class BodyTagProxy extends TagProxy implements BodyTag {
 
 	@Override
 	public int doAfterBody() throws JspException {
-		return Caster.toIntValue(Reflector.callMethod(getJavaxTag(), "doAfterBody", new Object[] {}));
+		return Caster.toIntValue(Reflector.callMethod(getJavaxObject(), "doAfterBody", new Object[] {}));
 	}
 
 	@Override
 	public void setBodyContent(BodyContent b) {
-		Reflector.callMethodRE(getJavaxTag(), "setBodyContent", new Object[] { BodyContentProxy.getInstance(b) });
+		Reflector.callMethodRE(getJavaxObject(), "setBodyContent", new Object[] { BodyContentProxy.getInstance(b) });
 	}
 
 	@Override
 	public void doInitBody() throws JspException {
-		Reflector.callMethod(getJavaxTag(), "doInitBody", new Object[] {});
+		Reflector.callMethod(getJavaxObject(), "doInitBody", new Object[] {});
 	}
 
 	public void hasBody(boolean hasBody) {
 		try {
-			Reflector.callMethod(getJavaxTag(), "hasBody", new Object[] { hasBody });
+			Reflector.callMethod(getJavaxObject(), "hasBody", new Object[] { hasBody });
 		}
 		catch (PageException e) {
 

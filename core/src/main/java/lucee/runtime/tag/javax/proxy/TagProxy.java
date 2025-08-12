@@ -12,7 +12,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.reflection.Reflector;
 import lucee.runtime.type.Collection.Key;
 
-public class TagProxy implements Tag, DynamicAttributes, lucee.runtime.ext.tag.DynamicAttributes {
+public class TagProxy implements Tag, DynamicAttributes, lucee.runtime.ext.tag.DynamicAttributes, Proxy {
 
 	private Object javaxTag;
 	private Tag parent;
@@ -47,13 +47,13 @@ public class TagProxy implements Tag, DynamicAttributes, lucee.runtime.ext.tag.D
 
 	@Override
 	public void setPageContext(PageContext pc) {
-		Reflector.callMethodRE(getJavaxTag(), "setPageContext", new Object[] { pc });
+		Reflector.callMethodRE(getJavaxObject(), "setPageContext", new Object[] { pc });
 	}
 
 	@Override
 	public void setParent(Tag tag) {
 		if (tag instanceof TagProxy) {
-			Reflector.callMethodRE(getJavaxTag(), "setParent", new Object[] { ((TagProxy) tag).getJavaxTag() });
+			Reflector.callMethodRE(getJavaxObject(), "setParent", new Object[] { ((TagProxy) tag).getJavaxObject() });
 		}
 		this.parent = tag;
 	}
@@ -62,25 +62,25 @@ public class TagProxy implements Tag, DynamicAttributes, lucee.runtime.ext.tag.D
 	public Tag getParent() {
 		if (parent != null) return parent;
 
-		Object objParent = Reflector.callMethodRE(getJavaxTag(), "getParent", new Object[] {});
+		Object objParent = Reflector.callMethodRE(getJavaxObject(), "getParent", new Object[] {});
 		if (objParent == null) return null;
 		return getInstanceRE(objParent);
 	}
 
 	@Override
 	public int doStartTag() throws JspException {
-		return Caster.toIntValue(Reflector.callMethod(getJavaxTag(), "doStartTag", new Object[] {}));
+		return Caster.toIntValue(Reflector.callMethod(getJavaxObject(), "doStartTag", new Object[] {}));
 	}
 
 	@Override
 	public int doEndTag() throws JspException {
-		return Caster.toIntValue(Reflector.callMethod(getJavaxTag(), "doEndTag", new Object[] {}));
+		return Caster.toIntValue(Reflector.callMethod(getJavaxObject(), "doEndTag", new Object[] {}));
 	}
 
 	@Override
 	public void setDynamicAttribute(String uri, String localName, Object value) {
 		try {
-			Reflector.callMethod(getJavaxTag(), "set" + StringUtil.ucFirst(localName), new Object[] { value });
+			Reflector.callMethod(getJavaxObject(), "set" + StringUtil.ucFirst(localName), new Object[] { value });
 		}
 		catch (PageException e) {
 			throw new PageRuntimeException(e);
@@ -94,10 +94,11 @@ public class TagProxy implements Tag, DynamicAttributes, lucee.runtime.ext.tag.D
 
 	@Override
 	public void release() {
-		Reflector.callMethodRE(getJavaxTag(), "release", new Object[] {});
+		Reflector.callMethodRE(getJavaxObject(), "release", new Object[] {});
 	}
 
-	public Object getJavaxTag() {
+	@Override
+	public Object getJavaxObject() {
 		return javaxTag;
 	}
 
