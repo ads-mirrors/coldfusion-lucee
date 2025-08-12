@@ -83,14 +83,7 @@
 
 	try {
 		if ( structKeyExists( updateData, "changelog" ) ){
-			hasESAPI = ExtensionExists( "37C61C0A-5D7E-4256-8572639BE0CF5838" );
-			function safeText (str){
-				if (hasESAPI)
-					return encodeForHtml(arguments.str);
-				else
-					return htmlEditFormat(arguments.str);
-			}
-
+			
 			changelog_versions = toVersionsSorted( updateData.changelog.keyArray() );
 			loop collection=#changelog_versions# key="cl_k" value="cl_tickets" {
 				cl_v = changelog_versions[cl_k];
