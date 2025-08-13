@@ -21,7 +21,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" skip=true {
 					</cfquery>
 
 					```
-				}).toThrow();
+				}).toThrow("", "", "column [bob] not found in query");
 
 			});
 
