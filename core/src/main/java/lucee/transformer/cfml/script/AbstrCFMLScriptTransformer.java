@@ -778,7 +778,6 @@ public abstract class AbstrCFMLScriptTransformer extends AbstrCFMLExprTransforme
 				}
 			}
 		}
-
 		// function name
 		String functionName = null;
 		for (int i = tokens.length - 1; i >= 0; i--) {
@@ -2218,7 +2217,8 @@ public abstract class AbstrCFMLScriptTransformer extends AbstrCFMLExprTransforme
 		if (access > -1 || _final) {
 			if (!(expr instanceof Assign)) {
 				data.srcCode.setPos(pos);
-				throw new TemplateException(data.srcCode, "invalid syntax, access modifier cannot be used in this context");
+				Position errPos = data.srcCode.getPosition();
+				throw new TemplateException(data.srcCode, "Invalid syntax found on line " + (errPos.line) + " at column " + (errPos.column) + ". Function name is missing.");
 			}
 			if (access > -1) {
 				((Assign) expr).setAccess(access);
