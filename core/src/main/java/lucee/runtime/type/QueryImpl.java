@@ -61,6 +61,8 @@ import lucee.commons.db.DBUtil;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.SystemUtil.TemplateLine;
+import lucee.commons.io.log.Log;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.loader.engine.CFMLEngineFactory;
@@ -122,6 +124,8 @@ public class QueryImpl implements Query, Objects, QueryResult {
 	public static final Collection.Key GENERATED_KEYS = KeyConstants._GENERATED_KEYS;
 	public static final Collection.Key GENERATEDKEYS = KeyConstants._GENERATEDKEYS;
 
+	private static final int luceeQueryResultThreshold;
+
 	private static boolean useMSSQLModern;
 
 	private boolean populating;
@@ -146,6 +150,7 @@ public class QueryImpl implements Query, Objects, QueryResult {
 
 	static {
 		useMSSQLModern = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.datasource.mssql.modern", null), false);
+		luceeQueryResultThreshold = Caster.toIntValue(SystemUtil.getSystemPropOrEnvVar("lucee.query.result.threshold", null), 0);
 	}
 
 	@Override
@@ -343,11 +348,28 @@ public class QueryImpl implements Query, Objects, QueryResult {
 				if (qry.columnNames == null) qry.columnNames = new Collection.Key[0];
 				if (qry.columns == null) qry.columns = new QueryColumnImpl[0];
 			}
+			if (luceeQueryResultThreshold > 0 && qry.getRecordcount() > luceeQueryResultThreshold) {
+				Log log = ThreadLocalPageContext.getLog(pc, "datasource");
+				if (LogUtil.doesWarn(log)) {
+					logThresholdReached(log, qry.exeTime, qry.getRecordcount(), qry.getColumncount(), qry.sql);
+				}
+			}
 		}
 		else {
 			qr.setExecutionTime(System.nanoTime() - start);
+			if (luceeQueryResultThreshold > 0 && qr.getRecordcount() > luceeQueryResultThreshold) {
+				Log log = ThreadLocalPageContext.getLog(pc, "datasource");
+				if (LogUtil.doesWarn(log)) {
+					logThresholdReached(log, qr.getExecutionTime(), qr.getRecordcount(), qr.getColumncount(), qr.getSql());
+				}
+			}
 		}
 
+	}
+
+	private static void logThresholdReached(Log log, long exeTime, int recordcount, int columncount, SQL sql) {
+		log.log(Log.LEVEL_WARN, "query", "Large query result detected: execution-time:" + Caster.toString(exeTime / 1000000d) + "ms, rows=" + recordcount + ", columns="
+				+ columncount + ", threshold=" + luceeQueryResultThreshold + ", query=" + sql + ", tagcontext=" + ExceptionUtil.getTagContextLine(new Throwable()));
 	}
 
 	private static void executeMSSQL(PageContext pc, DatasourceConnection dc, SQL sql, int maxrow, int fetchsize, TimeSpan timeout, boolean createUpdateData,
@@ -948,8 +970,9 @@ public class QueryImpl implements Query, Objects, QueryResult {
 			// must start with a letter and can be followed by
 			// letters numbers and underscores [_]. RegExp:[a-zA-Z][a-zA-Z0-9_]*",null,null,null);
 
-			if (testMap.contains(columnNames[i].getLowerString())) throw new DatabaseException("invalid parameter for query, ambiguous/duplicate column name [" + columnNames[i] + "]",
-					"columnNames: [" + ListUtil.arrayToListTrim(_toStringKeys(columnNames), ",") +"]", null, null);
+			if (testMap.contains(columnNames[i].getLowerString()))
+				throw new DatabaseException("invalid parameter for query, ambiguous/duplicate column name [" + columnNames[i] + "]",
+						"columnNames: [" + ListUtil.arrayToListTrim(_toStringKeys(columnNames), ",") + "]", null, null);
 			testMap.add(columnNames[i].getLowerString());
 		}
 	}
@@ -1153,7 +1176,7 @@ public class QueryImpl implements Query, Objects, QueryResult {
 	@Override
 	public int removeRow(int row) throws PageException {
 		// disconnectCache();
-		synchronized (this){
+		synchronized (this) {
 			for (int i = 0; i < columns.length; i++) {
 				columns[i].removeRow(row);
 			}
@@ -1201,7 +1224,7 @@ public class QueryImpl implements Query, Objects, QueryResult {
 	@Override
 	public QueryColumn removeColumnEL(Collection.Key key) {
 		// TODO should in that case not all method accessing columnNames,columns been locked down?
-		synchronized (this){
+		synchronized (this) {
 			int index = getIndexFromKey(key);
 			if (index != -1) {
 				int current = 0;
@@ -1527,7 +1550,7 @@ public class QueryImpl implements Query, Objects, QueryResult {
 
 	@Override
 	public int[] getTypes() {
-		synchronized (this){
+		synchronized (this) {
 			int[] types = new int[columns.length];
 			for (int i = 0; i < columns.length; i++) {
 				types[i] = columns[i].getType();
@@ -1538,7 +1561,7 @@ public class QueryImpl implements Query, Objects, QueryResult {
 
 	@Override
 	public Map<Collection.Key, String> getTypesAsMap() {
-		synchronized (this){
+		synchronized (this) {
 			Map<Collection.Key, String> map = new HashMap<Collection.Key, String>();
 			for (int i = 0; i < columns.length; i++) {
 				map.put(columnNames[i], columns[i].getTypeAsString());
@@ -1575,7 +1598,7 @@ public class QueryImpl implements Query, Objects, QueryResult {
 
 	@Override
 	public void rename(Collection.Key columnName, Collection.Key newColumnName) throws ExpressionException {
-		synchronized (this){
+		synchronized (this) {
 			int index = getIndexFromKey(columnName);
 			if (index == -1) {
 				throw new ExpressionException("Cannot rename Column [" + columnName.getString() + "] to [" + newColumnName.getString() + "], original column doesn't exist");
@@ -1764,7 +1787,7 @@ public class QueryImpl implements Query, Objects, QueryResult {
 	 */
 	public boolean cutRowsTo(int maxrows) {
 		// disconnectCache();
-		synchronized (this){
+		synchronized (this) {
 			if (maxrows > -1 && maxrows < getRecordcount()) {
 				for (int i = 0; i < columns.length; i++) {
 					QueryColumn column = columns[i];
@@ -1986,7 +2009,7 @@ public class QueryImpl implements Query, Objects, QueryResult {
 
 	@Override
 	public Array getMetaDataSimple() {
-		synchronized (this){
+		synchronized (this) {
 			Array cols = new ArrayImpl();
 			Struct column;
 			for (int i = 0; i < columns.length; i++) {
@@ -3344,7 +3367,7 @@ public class QueryImpl implements Query, Objects, QueryResult {
 
 	@Override
 	public void enableShowQueryUsage() {
-		synchronized (this){
+		synchronized (this) {
 			if (columns != null) for (int i = 0; i < columns.length; i++) {
 				columns[i] = columns[i]._toDebugColumn();
 			}
