@@ -453,5 +453,10 @@
         "sysprop": "lucee.fileupload.allow.mimetype.detection",
         "envvar": "LUCEE_FILEUPLOAD_ALLOW_MIMETYPE_DETECTION",
         "desc": "A boolean value that enables using tika to detect the mime type for unknown file uploads, default is false"
+    },
+    {
+        "sysprop": "lucee.query.result.threshold",
+        "envvar": "LUCEE_QUERY_RESULT_LOG_THRESHOLD",
+        "desc": "When set, when query result sets exceed this integer threshold, an warning is logged to the datasource log. Default is 0 which is disabled"
     }
 ]
