@@ -37,14 +37,6 @@
 	include template="ext.functions.cfm";
 	include template="services.update.functions.cfm";
 
-	hasESAPI = ExtensionExists( "37C61C0A-5D7E-4256-8572639BE0CF5838" );
-	function safeText (str){
-		if (hasESAPI)
-			return encodeForHtml(arguments.str);
-		else
-			return htmlEditFormat(arguments.str);
-	}
-	
 	hasOptions=false;
 
 	admin
