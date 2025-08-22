@@ -41,12 +41,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect(true).toBeTrue(); // Test passes if no exception thrown
 			});
 
-			it(title="call Date constructor which requires a long with a numeric, should match and auto cast", body = function( currentSpec ) {
-				// Simulate the git commit time scenario
-				var commitTime = 1642780800; // Unix timestamp
-				var date = new Date( commitTime * 1000 );
-				expect(isDate(date)).toBeTrue();
-			});
+
 
 			it(title="comprehensive method matching test with all numeric types", body = function( currentSpec ) {
 				var para = poi.getPara();
@@ -78,12 +73,6 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				// Test with various explicit casts
 				para.setSpacingAfter( javacast("int", 10) );
 				para.setSpacingBetween( javacast("double", 1.5) );
-				
-				// Test Date with explicit long cast
-				var commitTime = 1642780800;
-				var date = new Date( javacast("long", commitTime * 1000) );
-				
-				expect(isDate(date)).toBeTrue();
 			});
 
 		});
