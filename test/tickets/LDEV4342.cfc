@@ -18,7 +18,7 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" labels="redis" {
 					action="updateCacheConnection"
 					type="server"
 					password=server.SERVERADMINPASSWORD
-					class="lucee.extension.io.cache.redis.simple.RedisCache"
+					class="lucee.extension.io.cache.redis.RedisCache"
 					bundleName="redis.extension"
 					name="#cacheName#"
 					custom={

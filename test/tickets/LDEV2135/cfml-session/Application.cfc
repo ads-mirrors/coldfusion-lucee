@@ -13,7 +13,7 @@ component {
 	if (url.sessionStorage eq "redis" ){
 		variables.redis = server.getTestService( "redis" );
 		this.cache.connections[ "RedisSession" ] = {
-			class: 'lucee.extension.io.cache.redis.simple.RedisCache'
+			class: 'lucee.extension.io.cache.redis.RedisCache'
 			, bundleName: 'redis.extension'
 			, storage: true
 			, custom: {

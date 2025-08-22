@@ -304,9 +304,9 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" {
 
 				var import = {
 					"cacheClasses": [{
-						"class": "lucee.extension.io.cache.redis.simple.RedisCache",
+						"class": "lucee.extension.io.cache.redis.RedisCache",
 						"bundleName": "redis.extension",
-						"bundleVersion": "4.0.0.0-SNAPSHOT"
+						"bundleVersion": "4.0.0.0"
 					}]
 				};
 
