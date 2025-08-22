@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import jakarta.servlet.jsp.JspException;
 import jakarta.servlet.jsp.tagext.Tag;
 import lucee.commons.io.DevNullOutputStream;
 import lucee.commons.io.log.LogUtil;
@@ -191,6 +192,15 @@ public final class TagUtil {
 		else if (doDynamic && tag instanceof DynamicAttributes) {
 			DynamicAttributes da = (DynamicAttributes) tag;
 			da.setDynamicAttribute(null, name, value);
+		}
+		else if (doDynamic && tag instanceof jakarta.servlet.jsp.tagext.DynamicAttributes) {
+			jakarta.servlet.jsp.tagext.DynamicAttributes da = (jakarta.servlet.jsp.tagext.DynamicAttributes) tag;
+			try {
+				da.setDynamicAttribute(null, name, value);
+			}
+			catch (JspException e) {
+				throw Caster.toPageException(e);
+			}
 		}
 		else if (!silently) {
 			throw new ApplicationException("failed to call [" + name + "] on tag " + tag);

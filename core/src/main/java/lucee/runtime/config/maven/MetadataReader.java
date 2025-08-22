@@ -17,10 +17,12 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
+import lucee.commons.digest.HashUtil;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
+import lucee.commons.lang.StringUtil;
 import lucee.commons.net.http.HTTPResponse;
 import lucee.commons.net.http.httpclient.HTTPEngine4Impl;
 import lucee.runtime.config.maven.MavenUpdateProvider.Repository;
@@ -49,9 +51,35 @@ public final class MetadataReader extends DefaultHandler {
 		this.artifact = artifact;
 	}
 
+	public List<Version> read(String extensionFilter) throws IOException, GeneralSecurityException, SAXException {
+		if (StringUtil.isEmpty(extensionFilter, true)) return read();
+		// cache read
+		List<Version> versionsFromCache = readFromCache(extensionFilter);
+		if (versionsFromCache != null) {
+			return versionsFromCache;
+		}
+
+		List<Version> versions = new ArrayList<>();
+		URL url;
+		int count = 2;
+		for (Version v: read()) {
+			url = new URL(repository.url + group.replace('.', '/') + '/' + artifact + "/" + v + "/" + artifact + "-" + v + "." + extensionFilter);
+			// print.e(url);
+			HTTPResponse rsp = HTTPEngine4Impl.head(url, null, null, MavenUpdateProvider.CONNECTION_TIMEOUT, true, null, null, null, null);
+			if (rsp != null) {
+				int sc = rsp.getStatusCode();
+				if (sc >= 200 && sc < 300) versions.add(v);
+			}
+			// if at least count have no lex, we assume there is none
+			if (--count == 0) break;
+		}
+		storeToCache(versions, extensionFilter);
+		return versions;
+	}
+
 	public List<Version> read() throws IOException, GeneralSecurityException, SAXException {
 		// cache read
-		List<Version> versionsFromCache = readFromCache();
+		List<Version> versionsFromCache = readFromCache("");
 		if (versionsFromCache != null) {
 			return versionsFromCache;
 		}
@@ -63,7 +91,11 @@ public final class MetadataReader extends DefaultHandler {
 		HTTPResponse rsp = HTTPEngine4Impl.get(url, null, null, MavenUpdateProvider.CONNECTION_TIMEOUT, true, null, null, null, null);
 		if (rsp != null) {
 			int sc = rsp.getStatusCode();
-			if (sc < 200 || sc >= 300) throw new IOException("unable to invoke [" + repository.url + "], status code [" + sc + "]");
+			if (sc == 404) {
+				storeToCache(versions, "");
+				return versions;
+			}
+			if (sc < 200 || sc >= 300) throw new IOException("unable to invoke [" + url + "], status code [" + sc + "]");
 		}
 		else {
 			throw new IOException("unable to invoke [" + repository.url + "], no response.");
@@ -76,21 +108,22 @@ public final class MetadataReader extends DefaultHandler {
 		finally {
 			IOUtil.close(r);
 		}
-		storeToCache();
+		storeToCache(versions, "");
 		return versions;
 
 	}
 
-	private void storeToCache() {
+	private void storeToCache(List<Version> versions, String appendix) {
 		try {
-			Resource resLastmod = repository.cacheDirectory.getRealResource("lastmod");
-			Resource resVersions = repository.cacheDirectory.getRealResource("versions");
+			Resource resLastmod = repository.cacheDirectory.getRealResource(HashUtil.create64BitHashAsString(group + "_" + artifact + appendix + "_lastmod", Character.MAX_RADIX));
+			Resource resVersions = repository.cacheDirectory
+					.getRealResource(HashUtil.create64BitHashAsString(group + "_" + artifact + appendix + "_versions", Character.MAX_RADIX));
 			StringBuilder sb = new StringBuilder();
 			for (Version v: versions) {
 				sb.append(v.toString()).append(',');
 			}
 
-			IOUtil.write(resVersions, sb.toString().substring(0, sb.length() - 1), CharsetUtil.UTF8, false);
+			IOUtil.write(resVersions, sb.length() == 0 ? "" : sb.toString().substring(0, sb.length() - 1), CharsetUtil.UTF8, false);
 			IOUtil.write(resLastmod, Caster.toString(System.currentTimeMillis()), CharsetUtil.UTF8, false);
 		}
 		catch (Exception e) {
@@ -98,18 +131,21 @@ public final class MetadataReader extends DefaultHandler {
 		}
 	}
 
-	private List<Version> readFromCache() {
+	private List<Version> readFromCache(String appendix) {
 		try {
-			Resource resLastmod = repository.cacheDirectory.getRealResource("lastmod");
+			Resource resLastmod = repository.cacheDirectory.getRealResource(HashUtil.create64BitHashAsString(group + "_" + artifact + appendix + "_lastmod", Character.MAX_RADIX));
 			if (resLastmod.isFile()) {
 				long lastmod = repository.timeout == Repository.TIMEOUT_NEVER ? Repository.TIMEOUT_NEVER : Caster.toLongValue(IOUtil.toString(resLastmod, CharsetUtil.UTF8), 0L);
 				if (repository.timeout == Repository.TIMEOUT_NEVER || lastmod + repository.timeout > System.currentTimeMillis()) {
-					Resource resVersions = repository.cacheDirectory.getRealResource("versions");
+					Resource resVersions = repository.cacheDirectory
+							.getRealResource(HashUtil.create64BitHashAsString(group + "_" + artifact + appendix + "_versions", Character.MAX_RADIX));
 					String content = IOUtil.toString(resVersions, CharsetUtil.UTF8);
-					List<String> list = ListUtil.listToList(content, ',', true);
 					List<Version> versions = new ArrayList<>();
-					for (String v: list) {
-						versions.add(OSGiUtil.toVersion(v.trim()));
+					if (content.length() > 0) {
+						List<String> list = ListUtil.listToList(content, ',', true);
+						for (String v: list) {
+							versions.add(OSGiUtil.toVersion(v.trim()));
+						}
 					}
 					return versions;
 				}

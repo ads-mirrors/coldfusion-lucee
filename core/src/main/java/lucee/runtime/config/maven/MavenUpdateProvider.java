@@ -58,8 +58,8 @@ public final class MavenUpdateProvider {
 	private static Repository[] defaultRepositoryReleases;
 	private static Repository[] defaultRepositorySnapshots;
 
-	private String group;
-	private String artifact;
+	private final String group;
+	private final String artifact;
 	private Repository[] repoSnapshots;
 	private Repository[] repoReleases;
 	private List<Repository> repos;
@@ -108,7 +108,23 @@ public final class MavenUpdateProvider {
 		this.artifact = DEFAULT_ARTIFACT;
 	}
 
-	private List<Repository> merge(Repository[] left, Repository[] right) {
+	public MavenUpdateProvider(Repository[] repoSnapshots, Repository[] repoReleases, String group, String artifact) {
+		this.repoSnapshots = repoSnapshots;
+		this.repoReleases = repoReleases;
+		this.repos = merge(repoSnapshots, repoReleases);
+		this.group = group;
+		this.artifact = artifact;
+	}
+
+	public MavenUpdateProvider(String group, String artifact) {
+		this.repoSnapshots = getDefaultRepositorySnapshots();
+		this.repoReleases = getDefaultRepositoryReleases();
+		this.repos = merge(repoSnapshots, repoReleases);
+		this.group = group;
+		this.artifact = artifact;
+	}
+
+	static List<Repository> merge(Repository[] left, Repository[] right) {
 		List<Repository> list = new ArrayList<>();
 		for (Repository repo: left) {
 			list.add(repo);
@@ -120,23 +136,23 @@ public final class MavenUpdateProvider {
 		return list;
 	}
 
-	public MavenUpdateProvider(Repository[] repoSnapshots, Repository[] repoReleases, String group, String artifact) {
-		this.repoSnapshots = repoSnapshots;
-		this.repoReleases = repoReleases;
-		this.group = group;
-		this.artifact = artifact;
+	public List<Version> list() throws IOException, GeneralSecurityException, SAXException {
+		return list(null);
 	}
 
-	public List<Version> list() throws IOException, GeneralSecurityException, SAXException {
+	public List<Version> list(String extensionFilter) throws IOException, GeneralSecurityException, SAXException {
+
+		// URL url = new URL(repository.url + group.replace('.', '/') + '/' + artifact +
+		// "/maven-metadata.xml");
+
 		try {
 			MetadataReader mr;
 			Set<Version> versions = new HashSet<>();
 			for (Repository repo: repos) {
 				mr = new MetadataReader(repo, group, artifact);
-				for (Version v: mr.read()) {
+				for (Version v: mr.read(extensionFilter)) {
 					versions.add(v);
 				}
-
 			}
 
 			if (versions.size() > 0) {
