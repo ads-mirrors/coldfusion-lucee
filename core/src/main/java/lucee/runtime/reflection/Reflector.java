@@ -60,8 +60,6 @@ import lucee.runtime.op.Decision;
 import lucee.runtime.op.OpUtil;
 import lucee.runtime.reflection.pairs.ConstructorInstance;
 import lucee.runtime.reflection.pairs.MethodInstance;
-import lucee.runtime.reflection.storage.SoftMethodStorage;
-import lucee.runtime.reflection.storage.WeakConstructorStorage;
 import lucee.runtime.reflection.storage.WeakFieldStorage;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.Collection;
@@ -91,11 +89,7 @@ import lucee.transformer.dynamic.meta.Method;
  */
 public final class Reflector {
 
-	private static final Collection.Key SET_ACCESSIBLE = KeyConstants._setAccessible;
-
-	private static WeakConstructorStorage cStorage = new WeakConstructorStorage();
 	private static WeakFieldStorage fStorage = new WeakFieldStorage();
-	private static SoftMethodStorage mStorage = new SoftMethodStorage();
 
 	/**
 	 * check if Class is instanceof another Class
