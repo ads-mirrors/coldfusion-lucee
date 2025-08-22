@@ -61,6 +61,8 @@ import lucee.commons.db.DBUtil;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.SystemUtil.TemplateLine;
+import lucee.commons.io.log.Log;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.loader.engine.CFMLEngineFactory;
@@ -122,6 +124,8 @@ public final class QueryImpl implements Query, Objects, QueryResult {
 	public static final Collection.Key GENERATED_KEYS = KeyConstants._GENERATED_KEYS;
 	public static final Collection.Key GENERATEDKEYS = KeyConstants._GENERATEDKEYS;
 
+	private static final int luceeQueryResultThreshold;
+
 	private static boolean useMSSQLModern;
 
 	private boolean populating;
@@ -146,6 +150,7 @@ public final class QueryImpl implements Query, Objects, QueryResult {
 
 	static {
 		useMSSQLModern = Caster.toBooleanValue(SystemUtil.getSystemPropOrEnvVar("lucee.datasource.mssql.modern", null), false);
+		luceeQueryResultThreshold = Caster.toIntValue(SystemUtil.getSystemPropOrEnvVar("lucee.query.result.threshold", null), 0);
 	}
 
 	@Override
@@ -343,11 +348,28 @@ public final class QueryImpl implements Query, Objects, QueryResult {
 				if (qry.columnNames == null) qry.columnNames = new Collection.Key[0];
 				if (qry.columns == null) qry.columns = new QueryColumnImpl[0];
 			}
+			if (luceeQueryResultThreshold > 0 && qry.getRecordcount() > luceeQueryResultThreshold) {
+				Log log = ThreadLocalPageContext.getLog(pc, "datasource");
+				if (LogUtil.doesWarn(log)) {
+					logThresholdReached(log, qry.exeTime, qry.getRecordcount(), qry.getColumncount(), qry.sql);
+				}
+			}
 		}
 		else {
 			qr.setExecutionTime(System.nanoTime() - start);
+			if (luceeQueryResultThreshold > 0 && qr.getRecordcount() > luceeQueryResultThreshold) {
+				Log log = ThreadLocalPageContext.getLog(pc, "datasource");
+				if (LogUtil.doesWarn(log)) {
+					logThresholdReached(log, qr.getExecutionTime(), qr.getRecordcount(), qr.getColumncount(), qr.getSql());
+				}
+			}
 		}
 
+	}
+
+	private static void logThresholdReached(Log log, long exeTime, int recordcount, int columncount, SQL sql) {
+		log.log(Log.LEVEL_WARN, "query", "Large query result detected: execution-time:" + Caster.toString(exeTime / 1000000d) + "ms, rows=" + recordcount + ", columns="
+				+ columncount + ", threshold=" + luceeQueryResultThreshold + ", query=" + sql + ", tagcontext=" + ExceptionUtil.getTagContextLine(new Throwable()));
 	}
 
 	private static void executeMSSQL(PageContext pc, DatasourceConnection dc, SQL sql, int maxrow, int fetchsize, TimeSpan timeout, boolean createUpdateData,
