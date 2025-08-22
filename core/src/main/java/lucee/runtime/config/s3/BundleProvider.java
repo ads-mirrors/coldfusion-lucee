@@ -214,12 +214,13 @@ public final class BundleProvider extends DefaultHandler {
 		}
 	}
 
-	public URL getBundleAsURL(BundleDefinition bd, boolean includeS3) throws MalformedURLException, IOException {
+	public URL getBundleAsURL(final BundleDefinition bd, boolean includeS3) throws MalformedURLException, IOException {
 		URL url = null;
 
 		// MAVEN: looking for a matching mapping, so we can get from maven
 		List<Info> infos = mappings.get(bd.getName());
 		if (infos != null && infos.size() > 0) {
+
 			String v;
 			for (Info info: infos) {
 				if (!info.isMaven()) continue;
@@ -234,7 +235,7 @@ public final class BundleProvider extends DefaultHandler {
 			}
 
 		}
-		else {
+		else if (bd.getVersion() != null) {
 			String last = ListUtil.last(bd.getName(), '.');
 			url = validate(
 					new URL(getDefaultProviderDetailMvn(), bd.getName().replace('.', '/') + "/" + bd.getVersionAsString() + "/" + last + "-" + bd.getVersionAsString() + ".jar"),
@@ -251,11 +252,41 @@ public final class BundleProvider extends DefaultHandler {
 		// S3: we loop through all records and S3 and pick one
 		if (url == null) {
 			try {
-				for (Element e: read(false)) {
-					if (bd.equals(e.getBundleDefinition())) {
-						url = e.getJAR();
+				// specific version
+				if (bd.getVersion() != null) {
+					for (Element e: read(false)) {
+						if (bd.equals(e.getBundleDefinition())) {
+							url = e.getJAR();
+							if (url != null) return url;
+						}
+					}
+				}
+				// latest version
+				else {
+					Element latest = null, latestRelease = null;
+					for (Element e: read(false)) {
+
+						if (bd.getName().equals(e.getBundleDefinition().getName())) {
+							if (latest == null || OSGiUtil.isNewerThan(e.getBundleDefinition().getVersion(), latest.getBundleDefinition().getVersion())) {
+								latest = e;
+								if (!StringUtil.endsWithIgnoreCase(latest.getBundleDefinition().getVersionAsString(), "-SNAPSHOT")) {
+									latestRelease = latest;
+								}
+							}
+							// url = e.getJAR();
+							// if (url != null) return url;
+						}
+					}
+
+					if (latestRelease != null) {
+						url = latestRelease.getJAR();
 						if (url != null) return url;
 					}
+					else if (latest != null) {
+						url = latest.getJAR();
+						if (url != null) return url;
+					}
+
 				}
 			}
 			catch (Exception e) {

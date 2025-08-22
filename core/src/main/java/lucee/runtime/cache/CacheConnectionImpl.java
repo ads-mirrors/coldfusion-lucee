@@ -31,7 +31,6 @@ import lucee.commons.lang.ClassUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.runtime.config.Config;
 import lucee.runtime.db.ClassDefinition;
-import lucee.runtime.exp.PageRuntimeException;
 import lucee.runtime.op.Caster;
 import lucee.runtime.reflection.Reflector;
 import lucee.runtime.type.Collection.Key;
@@ -80,7 +79,7 @@ public final class CacheConnectionImpl implements CacheConnectionPlus {
 
 					}
 					catch (BundleException be) {
-						throw new PageRuntimeException(be);
+						throw ExceptionUtil.toIOException(be);
 					}
 					tmp.init(config, getName(), getCustom());
 					cache = tmp;

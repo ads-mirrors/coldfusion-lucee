@@ -442,7 +442,7 @@ public final class ScopeContext {
 			try {
 				return getCFScope(pc, false, Scope.SCOPE_SESSION) != null;
 			}
-			catch (PageException e) {
+			catch (Exception e) {
 				return false;
 			}
 		}

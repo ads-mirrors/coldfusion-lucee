@@ -1,6 +1,5 @@
 package lucee.runtime.type.scope.storage;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -116,7 +115,7 @@ public final class IKHandlerCache implements IKHandler {
 			if (!cc.isStorage()) throw new ApplicationException("storage usage for this cache is disabled, you can enable this in the Lucee administrator.");
 			return CacheUtil.getInstance(cc, ThreadLocalPageContext.getConfig(pc)); // cc.getInstance(config);
 		}
-		catch (IOException e) {
+		catch (Exception e) {
 			throw Caster.toPageException(e);
 		}
 	}
