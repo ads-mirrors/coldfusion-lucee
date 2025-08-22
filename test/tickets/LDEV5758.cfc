@@ -314,7 +314,7 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" {
 
 				expect( src.cacheClasses ).toHaveLength(2);
 				expect( src.cacheClasses[1].bundleVersion ).toBe( "2.10.0.36" );
-				expect( src.cacheClasses[2].bundleVersion ).toBe( "4.0.0.0-SNAPSHOT" );
+				expect( src.cacheClasses[2].bundleVersion ).toBe( "4.0.0.0" );
 			});
 		
 
