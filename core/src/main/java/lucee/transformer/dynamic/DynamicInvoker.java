@@ -10,12 +10,14 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -457,7 +459,7 @@ public final class DynamicInvoker {
 		}
 	}
 
-	public static void mainw(String[] argsw) throws Throwable {
+	public static void main(String[] argsw) throws Throwable {
 		System.setProperty("lucee.allow.reflection", "true");
 		Resource classes = ResourcesImpl.getFileResourceProvider().getResource("/Users/mic/tmp8/classes/");
 		ResourceUtil.deleteContent(classes, null);
@@ -469,6 +471,32 @@ public final class DynamicInvoker {
 			aprint.e(e.invokeStaticMethod(A.class, "x", new Object[] {}, true, true));
 			aprint.e(e.invokeStaticMethod(B.class, "x", new Object[] {}, true, true));
 
+		}
+
+		if (true) {
+			Test t = new Test();
+			e.invokeInstanceMethod(t, "setX", new Object[] { BigDecimal.valueOf(1) }, true, true);
+			e.invokeInstanceMethod(t, "setX", new Object[] { BigInteger.valueOf(1) }, true, true);
+			e.invokeInstanceMethod(t, "setX", new Object[] { Double.valueOf(1) }, true, true);
+			e.invokeInstanceMethod(t, "setX", new Object[] { "1" }, true, true);
+			e.invokeInstanceMethod(t, "setLong", new Object[] { "1" }, true, true);
+			e.invokeInstanceMethod(t, "setLong", new Object[] { 1 }, true, true);
+			e.invokeInstanceMethod(t, "setLong", new Object[] { (double) 1 }, true, true);
+			e.invokeInstanceMethod(t, "setLong", new Object[] { BigDecimal.valueOf(1) }, true, true);
+			e.invokeInstanceMethod(t, "setLong", new Object[] { BigInteger.valueOf(1) }, true, true);
+			e.invokeInstanceMethod(t, "setLong", new Object[] { (double) 1 }, true, true);
+
+			aprint.e(e.invokeConstructor(Date.class, new Object[] { (long) 1 }, true));
+			aprint.e(e.invokeConstructor(Date.class, new Object[] { (int) 1 }, true));
+			aprint.e(e.invokeConstructor(Date.class, new Object[] { (double) 1 }, true));
+			aprint.e(e.invokeConstructor(Date.class, new Object[] { BigDecimal.valueOf(1) }, true));
+			aprint.e(e.invokeConstructor(Date.class, new Object[] { BigInteger.valueOf(1) }, true));
+
+			// aprint.e(e.invokeConstructor(Date.class, new Object[] { "1" }, true));
+
+			// new Date( javacast( "long", lastModifiedCommit.getCommitTime() * 1000 ) )
+
+			return;
 		}
 
 		if (true) {
@@ -811,6 +839,26 @@ public final class DynamicInvoker {
 
 		public final void setSource(Object o) {
 
+		}
+
+		public final void setX(BigInteger bi) {
+			aprint.e("->BigInteger:" + bi);
+		}
+
+		public final void setX(BigDecimal bi) {
+			aprint.e("->BigDecimal:" + bi);
+		}
+
+		public final void setLong(long l) {
+			aprint.e("->long:" + l);
+		}
+
+		public final void setDouble(double d) {
+			aprint.e("->double:" + d);
+		}
+
+		public final void setDouble(int i) {
+			aprint.e("->int:" + i);
 		}
 
 		public final String testb(Boolean b1, boolean b2) {
