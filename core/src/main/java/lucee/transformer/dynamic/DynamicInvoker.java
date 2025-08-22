@@ -17,6 +17,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -480,6 +481,23 @@ public class DynamicInvoker {
 			e.invokeInstanceMethod(t, "setX", new Object[] { BigInteger.valueOf(1) }, true, true);
 			e.invokeInstanceMethod(t, "setX", new Object[] { Double.valueOf(1) }, true, true);
 			e.invokeInstanceMethod(t, "setX", new Object[] { "1" }, true, true);
+			e.invokeInstanceMethod(t, "setLong", new Object[] { "1" }, true, true);
+			e.invokeInstanceMethod(t, "setLong", new Object[] { 1 }, true, true);
+			e.invokeInstanceMethod(t, "setLong", new Object[] { (double) 1 }, true, true);
+			e.invokeInstanceMethod(t, "setLong", new Object[] { BigDecimal.valueOf(1) }, true, true);
+			e.invokeInstanceMethod(t, "setLong", new Object[] { BigInteger.valueOf(1) }, true, true);
+			e.invokeInstanceMethod(t, "setLong", new Object[] { (double) 1 }, true, true);
+
+			aprint.e(e.invokeConstructor(Date.class, new Object[] { (long) 1 }, true));
+			aprint.e(e.invokeConstructor(Date.class, new Object[] { (int) 1 }, true));
+			aprint.e(e.invokeConstructor(Date.class, new Object[] { (double) 1 }, true));
+			aprint.e(e.invokeConstructor(Date.class, new Object[] { BigDecimal.valueOf(1) }, true));
+			aprint.e(e.invokeConstructor(Date.class, new Object[] { BigInteger.valueOf(1) }, true));
+
+			// aprint.e(e.invokeConstructor(Date.class, new Object[] { "1" }, true));
+
+			// new Date( javacast( "long", lastModifiedCommit.getCommitTime() * 1000 ) )
+
 			return;
 		}
 
@@ -831,6 +849,10 @@ public class DynamicInvoker {
 
 		public final void setX(BigDecimal bi) {
 			aprint.e("->BigDecimal:" + bi);
+		}
+
+		public final void setLong(long l) {
+			aprint.e("->long:" + l);
 		}
 
 		public final void setDouble(double d) {
