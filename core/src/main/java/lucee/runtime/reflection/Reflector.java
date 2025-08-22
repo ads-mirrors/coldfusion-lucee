@@ -21,6 +21,8 @@ package lucee.runtime.reflection;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -410,7 +412,7 @@ public final class Reflector {
 		}
 
 		// java.lang.String
-		if (className.startsWith("java.lang.")) {
+		if (className.startsWith("java.")) {
 			if (trgClass == Boolean.class) return Caster.toBoolean(src);
 			if (trgClass == Integer.class) return Caster.toInteger(src);
 			if (trgClass == String.class) return Caster.toString(src);
@@ -419,6 +421,8 @@ public final class Reflector {
 			if (trgClass == Long.class) return Caster.toLong(src);
 			if (trgClass == Float.class) return Caster.toFloat(src);
 			if (trgClass == Double.class) return Caster.toDouble(src);
+			if (trgClass == BigDecimal.class) return Caster.toBigDecimal(src);
+			if (trgClass == BigInteger.class) return Caster.toBigInteger(src);
 			if (trgClass == Character.class) {
 				String str = Caster.toString(src, null);
 				if (str != null && str.length() == 1) return Character.valueOf(str.charAt(0));
