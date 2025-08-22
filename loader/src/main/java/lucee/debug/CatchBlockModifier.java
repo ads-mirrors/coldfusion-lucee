@@ -23,7 +23,8 @@ public class CatchBlockModifier {
 			try {
 				processFile(file);
 			}
-			catch (IOException e) { lucee.debug.CatchBlockModifier.log(e);
+			catch (IOException e) {
+				lucee.debug.CatchBlockModifier.log(e);
 				System.err.println("Error processing file:" + file);
 				e.printStackTrace();
 			}
@@ -49,7 +50,7 @@ public class CatchBlockModifier {
 
 		Matcher matcher = pattern.matcher(content);
 
-		StringBuilder newContent = new StringBuilder();
+		StringBuffer newContent = new StringBuffer();
 		int fileCount = 0;
 
 		while (matcher.find()) {
@@ -82,7 +83,8 @@ public class CatchBlockModifier {
 			writer.println((count++) + " -> " + t.getMessage());
 			t.printStackTrace(writer);
 		}
-		catch (IOException e) { lucee.debug.CatchBlockModifier.log(e);
+		catch (IOException e) {
+			lucee.debug.CatchBlockModifier.log(e);
 			// Fallback to console if file writing fails
 			System.err.println("Error writing to log file:");
 			e.printStackTrace();
