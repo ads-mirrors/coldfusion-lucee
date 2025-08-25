@@ -74,6 +74,40 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				para.setSpacingAfter( javacast("int", 10) );
 				para.setSpacingBetween( javacast("double", 1.5) );
 			});
+		});
+
+		describe( title="Test contructor matching java.util.Date and numeric values", body=function() {
+
+			var dateObj = new component {
+				import java.util.Date;
+				function createDateFromNum( num ) {
+					return new Date( arguments.num );
+				}
+			};
+
+			it(title="java.util.date should handle long", body = function( currentSpec ) {
+				var n = now();
+				var epoch = dateTimeFormat( n, "epochms" );
+				expect( dateObj.createDateFromNum( javacast("long", epoch ) ) ).toBe( n ); // long		
+			});
+
+			xit(title="java.util.date should match long constructor with int argument", body = function( currentSpec ) {
+				var n = now();
+				var epoch = dateTimeFormat( n, "epochms" );
+				expect( dateObj.createDateFromNum( javacast("int", epoch ) ) ).toBe( n ); // int
+			});
+
+			it(title="java.util.Date should accept string date", body = function( currentSpec ) {
+				var n = now();
+				var epoch = dateTimeFormat( n );
+				expect( dateObj.createDateFromNum( epoch ) ).toBe( n ); // java.lang.string
+			});
+			
+			xit(title="java.util.Date match Double arg to constructor with Long", body = function( currentSpec ) {
+				var n = now();
+				var epoch = dateTimeFormat( n, "epochms" ) * 1; // java.lang.Double
+				expect( dateObj.createDateFromNum( epoch ) ).toBe( n );
+			});
 
 		});
 	}
