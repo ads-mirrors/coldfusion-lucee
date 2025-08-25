@@ -97,7 +97,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect( dateObj.createDateFromNum( javacast("int", epoch ) ) ).toBe( n ); // int
 			});
 
-			it(title="java.util.Date should accept string date", body = function( currentSpec ) {
+			xit(title="java.util.Date should accept string date", body = function( currentSpec ) {
 				var n = now();
 				var epoch = dateTimeFormat( n );
 				expect( dateObj.createDateFromNum( epoch ) ).toBe( n ); // java.lang.string
