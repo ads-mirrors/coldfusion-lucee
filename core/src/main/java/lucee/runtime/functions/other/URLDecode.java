@@ -31,11 +31,11 @@ public final class URLDecode implements Function {
 	private static final long serialVersionUID = 2975351228540450405L;
 
 	public static String call(PageContext pc, String str) throws ExpressionException, Exception {
-		return call(pc, str, "utf-8");
+		return call(pc, str, "utf-8", true);
 	}
 
 	public static String call(PageContext pc, String str, String encoding) throws ExpressionException, Exception {
-		return call(pc, str, "utf-8", true);
+		return call(pc, str, encoding, true);
 	}
 
 	public static String call(PageContext pc, String str, String encoding, boolean strict) throws ExpressionException, Exception {
