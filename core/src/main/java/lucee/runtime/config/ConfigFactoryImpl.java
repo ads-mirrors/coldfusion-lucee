@@ -2867,12 +2867,6 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 				try {
 					child = Caster.toStruct(it.next());
 					if (child == null) continue;
-					// component
-					String cfc = getAttr(child, KeyConstants._component);
-					if (!StringUtil.isEmpty(cfc, true)) {
-						// TODO start hook
-						continue;
-					}
 
 					// class
 					ClassDefinition cd = getClassDefinition(child, "", config.getIdentification());
