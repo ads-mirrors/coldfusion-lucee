@@ -35,7 +35,7 @@ public final class URLDecode implements Function {
 	}
 
 	public static String call(PageContext pc, String str, String encoding) throws ExpressionException, Exception {
-		return call(pc, str, "utf-8", true);
+		return call(pc, str, encoding, true);
 	}
 
 	public static String call(PageContext pc, String str, String encoding, boolean strict) throws ExpressionException, Exception {
