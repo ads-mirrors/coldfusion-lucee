@@ -133,7 +133,7 @@ public final class _Execute extends PageContextThread {
 				else if (resultVariable != null){
 					Struct sct = new StructImpl();
 					sct.setEL(Caster.toKey("output"), result.getOutput());
-					sct.setEL(Caster.toKey("error"), result.getError());
+					sct.setEL(Caster.toKey("error"), Caster.toString(result.getError()));
 					sct.setEL(Caster.toKey("exitCode"), result.getExitCode());
 					pc.setVariable(resultVariable, sct);
 				}
@@ -144,7 +144,7 @@ public final class _Execute extends PageContextThread {
 				if (exitCodeVariable != null) pc.setVariable(exitCodeVariable, result.getExitCode());
 
 				if (errorFile != null) IOUtil.write(errorFile, result.getError(), SystemUtil.getCharset(), false);
-				if (errorVariable != null) pc.setVariable(errorVariable, result.getError());
+				if (errorVariable != null) pc.setVariable(errorVariable, Caster.toString(result.getError()));
 			}
 		}
 		catch (Exception ioe) {
