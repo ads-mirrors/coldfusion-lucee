@@ -15022,15 +15022,22 @@ For optimal results, ensure the input string contains valid URL encoding.
 			<name>string</name>
 			<type>string</type>
 			<required>Yes</required>
-		<description>URL-encoded string.</description>
-    </argument>
+			<description>URL-encoded string.</description>
+    	</argument>
 		<argument>
 			<name>charset</name>
 			<type>string</type>
 			<required>No</required>
 			<default>utf-8</default>
-		<description>The character encoding in which the string is encoded.</description>
-    </argument>
+			<description>The character encoding in which the string is encoded.</description>
+    	</argument>
+		<argument>
+			<name>strict</name>
+			<type>boolean</type>
+			<required>No</required>
+			<description>Default true, using the Apache Commons UrlDecoder which has better overall support for UTF-8 etc, but throws an exception on invalid encodings.
+			When false, it uses the older custom implementation which strips out invalid encodings.</description>
+		</argument>
 		<return>
 			<type>string</type>
 		</return>
