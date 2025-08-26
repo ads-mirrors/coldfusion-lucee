@@ -25,6 +25,7 @@ import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.PageContextThread;
+import lucee.runtime.op.Caster;
 import lucee.runtime.PageContext;
 
 /*
@@ -99,7 +100,7 @@ public final class _Execute extends PageContextThread {
 				}
 
 				if (errorFile != null) IOUtil.write(errorFile, result.getError(), SystemUtil.getCharset(), false);
-				if (errorVariable != null) pc.setVariable(errorVariable, result.getError());
+				if (errorVariable != null) pc.setVariable(errorVariable, Caster.toString(result.getError()));
 			}
 		}
 		catch (Exception ioe) {
