@@ -146,9 +146,10 @@ public class DataSourceUtil {
 		if (DataSourceUtil.isMySQL(dc)) return "LONGTEXT";
 		if (DataSourceUtil.isOracle(dc)) return "CLOB";
 		if (DataSourceUtil.isPostgres(dc)) return "TEXT";
+		if (DataSourceUtil.isMSSQL(dc)) return "VARCHAR(MAX)";
 
 		// default
-		return "NTEXT";
+		return "TEXT";
 	}
 
 }
