@@ -19,6 +19,7 @@ public class ConfigMerge {
 		MERGEABLE_ARRAYS.put("cacheClasses", "class");
 		MERGEABLE_ARRAYS.put("scheduledTasks", "name");
 		MERGEABLE_ARRAYS.put("dumpWriters", "name");
+		MERGEABLE_ARRAYS.put("debugTemplates", "id");
 		MERGEABLE_ARRAYS.put("rest.mapping", "virtual");
 	}
 
