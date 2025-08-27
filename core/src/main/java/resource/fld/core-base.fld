@@ -15649,7 +15649,7 @@ For optimal results, ensure the input string contains valid URL encoding.
 			<introduced>6.2.3.22</introduced>
 			<required>No</required>
 			<description>Default true, using the Apache Commons UrlDecoder which has better overall support for UTF-8 etc, but throws an exception on invalid encodings.
-			When false, it uses the older custom implementation which strips out invalid encodings.</description>
+			When false, it will attempt strict mode first, then fall back to the older custom implementation which strips out invalid encodings, if strict fails.</description>
 		</argument>
 		<return>
 			<type>string</type>
