@@ -58,13 +58,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				expect( trim( result.fileContent ) ).toBe("%");
 			});
 
-			it(title="checking URLDecode() function via internal request %25Lucee", body = function( currentSpec ) {
+			it(title="checking URLDecode() function via internal request %25Lucee rocks", body = function( currentSpec ) {
 				var uri = createURI( "/LDEV5560" );
 				var result =_InternalRequest(
 					template: "#uri#/ldev5560.cfm",
-					url: "strict=false&test=%25Lucee"
+					url: "strict=false&test=%25Lucee+rocks"
 				);
-				expect( trim( result.fileContent ) ).toBe("%Lucee");
+				expect( trim( result.fileContent ) ).toBe("%Lucee rocks");
 			});
 
 		});
