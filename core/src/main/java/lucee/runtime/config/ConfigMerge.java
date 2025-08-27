@@ -19,6 +19,7 @@ public class ConfigMerge {
 		MERGEABLE_ARRAYS.put("cacheClasses", "class");
 		MERGEABLE_ARRAYS.put("scheduledTasks", "name");
 		MERGEABLE_ARRAYS.put("dumpWriters", "name");
+		MERGEABLE_ARRAYS.put("rest.mapping", "virtual");
 	}
 
 	public static void merge(Collection a, Collection b) {
@@ -34,14 +35,14 @@ public class ConfigMerge {
 					mergeArrayByKey(a, (Array) incomingValue, mergeKey, MERGEABLE_ARRAYS.get(mergeKey));
 				} else {
 					Object existingValue = a.get(incomingKey, null);
-					mergeCollection((Collection) existingValue, (Collection) incomingValue);
+					mergeCollection(mergeKey, (Collection) existingValue, (Collection) incomingValue);
 					//a.setEL(incomingKey, incomingValue);
 				}
 			}
 			else if (incomingValue instanceof Collection) {
 				Object existingValue = a.get(incomingKey, null);
 				if (existingValue instanceof Collection) {
-					mergeCollection((Collection) existingValue, (Collection) incomingValue);
+					mergeCollection(incomingKey.getString(), (Collection) existingValue, (Collection) incomingValue);
 				} else {
 					a.setEL(incomingKey, incomingValue);
 				}
@@ -52,17 +53,25 @@ public class ConfigMerge {
 		}
 	}
 
-	private static void mergeCollection(Collection a, Collection b) {
+	private static void mergeCollection(String key, Collection a, Collection b) {
 		Iterator<Entry<Key, Object>> it = b.entryIterator();
 		while (it.hasNext()) {
 			Entry<Key, Object> e = it.next();
 			Object incomingValue = e.getValue();
 			Key incomingKey = e.getKey();
-
+			
+			if (incomingValue instanceof Array) {
+				// handle nested arrays
+				String nestedMergeKey = findCaseInsensitiveKey(MERGEABLE_ARRAYS, key + "." + incomingKey.toString() );
+				if (nestedMergeKey != null) {
+					mergeArrayByKey(a, (Array) incomingValue, incomingKey.toString(), MERGEABLE_ARRAYS.get(nestedMergeKey));
+					return;
+				}
+			}
 			if (incomingValue instanceof Collection) {
 				Object existingValue = a.get(incomingKey, null);
 				if (existingValue instanceof Collection) {
-					mergeCollection((Collection) existingValue, (Collection) incomingValue);
+					mergeCollection(incomingKey.getString(), (Collection) existingValue, (Collection) incomingValue);
 				} else {
 					a.setEL(incomingKey, incomingValue);
 				}
