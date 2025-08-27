@@ -206,7 +206,7 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" {
 
 		});
 
-	describe(title="LDEV-5758 test merging cfconfig.json - dumpWriters", body=function(){
+	 	describe(title="LDEV-5758 test merging cfconfig.json - dumpWriters", body=function(){
 
 			it(title = "check config import update", body = function ( currentSpec ){
 				var merger = _getMerger();
@@ -256,11 +256,10 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" {
 
 				merger.merge( src, import );
 
-				expect( src.dumpWriters ).toHaveLength( 2 );
+				expect( src.dumpWriters ).toHaveLength( 2, src.dumpWriters.toJson() );
 				expect( src.dumpWriters[1].name ).toBe( "html" );
 				expect( src.dumpWriters[2].name ).toBe( "text" );
 			});
-		
 
 		});
 
@@ -317,8 +316,198 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" {
 				expect( src.cacheClasses[2].bundleVersion ).toBe( "4.0.0.0-SNAPSHOT" );
 			});
 		
-
 		});
+
+		describe(title="LDEV-5774 test merging cfconfig.json - rest mappings", body=function(){
+
+			it(title = "check config import update", body = function ( currentSpec ){
+				var merger = _getMerger();
+
+				var src= {
+					"rest":{
+						"mapping":[
+							{
+								"virtual":"/simple",
+								"physical":"/home/simpleRest/",
+								"default":"false"
+							}
+						],
+						"list":"true"
+					}
+				};
+
+				var import = {
+					"rest":{
+						"mapping":[
+							{
+								"virtual":"/simple",
+								"physical":"/home/simpleRest2/",
+								"default":"false"
+							}
+						]
+					}
+				};
+
+				merger.merge( src, import );
+
+				expect( src.rest.mapping ).toHaveLength( 1, src.rest.toJson() );
+				expect( src.rest.mapping[1].physical ).toBe( "/home/simpleRest2/", src.rest.toJson() );
+				expect( src.rest.list ).toBeTrue();
+			});
+
+			it(title = "check config import append", body = function ( currentSpec ){
+				var merger = _getMerger();
+
+				var src= {
+					"rest":{
+						"mapping":[
+							{
+								"virtual":"/simple",
+								"physical":"/home/simpleRest/",
+								"default":"false"
+							}
+						],
+						"list":"true"
+					}
+				};
+
+				var import = {
+					"rest":{
+						"mapping":[
+							{
+								"virtual":"/simple2",
+								"physical":"/home/simpleRest2/",
+								"default":"false"
+							}
+						]
+					}
+				}
+
+				merger.merge( src, import );
+
+				expect( src.rest.mapping ).toHaveLength( 2, src.rest.toJson() );
+				expect( src.rest.mapping[1].virtual ).toBe( "/simple" );
+				expect( src.rest.mapping[2].virtual ).toBe( "/simple2" );
+				expect( src.rest.list ).toBeTrue();
+			});
+		
+		});
+
+		describe(title="LDEV-5774 test merging cfconfig.json - debugTemplates", body=function(){
+
+			it(title = "check config import update", body = function ( currentSpec ){
+				var merger = _getMerger();
+
+				var src= {
+					 "debugTemplates": [
+						{
+							"id": "ae74ea4e2e865ed3fd60c18a06e69c65",
+							"type": "lucee-modern",
+							"iprange": "*",
+							"label": "modern",
+							"path": "/lucee-server/admin/debug/Modern.cfc",
+							"fullname": "lucee.admin.debug.Modern",
+							"custom": {
+								"colorHighlight": "Enabled",
+								"general": "Enabled",
+								"expression": "Enabled",
+								"callStack": "Enabled",
+								"highlight": "250000",
+								"displayPercentages": "Enabled",
+								"minimal": "0",
+								"sessionSize": "100"
+							}
+						}
+					]
+				};
+
+				var import = {
+					"debugTemplates": [
+						{
+							"id": "ae74ea4e2e865ed3fd60c18a06e69c65",
+							"type": "lucee-modern",
+							"iprange": "*",
+							"label": "modern-updated",
+							"path": "/lucee-server/admin/debug/Modern.cfc",
+							"fullname": "lucee.admin.debug.Modern",
+							"custom": {
+								"colorHighlight": "Enabled",
+								"general": "Enabled",
+								"expression": "Enabled",
+								"callStack": "Enabled",
+								"highlight": "250000",
+								"displayPercentages": "Enabled",
+								"minimal": "0",
+								"sessionSize": "100"
+							}
+						}
+					]
+				};
+
+				merger.merge( src, import );
+
+				expect( src.debugTemplates ).toHaveLength( 1, src.debugTemplates.toJson() );
+				expect( src.debugTemplates[1].label ).toBe( "modern-updated", src.debugTemplates.toJson() );
+			});
+
+			it(title = "check config import append", body = function ( currentSpec ){
+				var merger = _getMerger();
+
+				var src= {
+					 "debugTemplates": [
+						{
+							"id": "ae74ea4e2e865ed3fd60c18a06e69c65",
+							"type": "lucee-modern",
+							"iprange": "*",
+							"label": "modern",
+							"path": "/lucee-server/admin/debug/Modern.cfc",
+							"fullname": "lucee.admin.debug.Modern",
+							"custom": {
+								"colorHighlight": "Enabled",
+								"general": "Enabled",
+								"expression": "Enabled",
+								"callStack": "Enabled",
+								"highlight": "250000",
+								"displayPercentages": "Enabled",
+								"minimal": "0",
+								"sessionSize": "100"
+							}
+						}
+					]
+				};
+
+				var import = {
+					"debugTemplates": [
+						{
+							"id": "ae74ea4e2e865ed3fd60c18a06e69123",
+							"type": "lucee-modern",
+							"iprange": "*",
+							"label": "modern-added",
+							"path": "/lucee-server/admin/debug/Modern.cfc",
+							"fullname": "lucee.admin.debug.Modern",
+							"custom": {
+								"colorHighlight": "Enabled",
+								"general": "Enabled",
+								"expression": "Enabled",
+								"callStack": "Enabled",
+								"highlight": "250000",
+								"displayPercentages": "Enabled",
+								"minimal": "0",
+								"sessionSize": "100"
+							}
+						}
+					]
+				};
+
+				merger.merge( src, import );
+
+				expect( src.debugTemplates ).toHaveLength( 2, src.debugTemplates.toJson() );
+				expect( src.debugTemplates[1].label ).toBe( "modern", src.debugTemplates.toJson() );
+				expect( src.debugTemplates[2].label ).toBe( "modern-added", src.debugTemplates.toJson() );
+			});
+		
+		});
+
 
 	}
 	

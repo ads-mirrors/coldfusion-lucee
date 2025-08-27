@@ -1,5 +1,5 @@
 
-component extends="org.lucee.cfml.test.LuceeTestCase"{
+component extends="org.lucee.cfml.test.LuceeTestCase" labels="currency" {
 	function run( testResults , testBox ) {
 		describe( title="Test suite for LSEuroCurrencyFormat()", body=function() {
 			beforeEach( function(){

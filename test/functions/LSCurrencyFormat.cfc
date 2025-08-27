@@ -1,4 +1,4 @@
-﻿component extends="org.lucee.cfml.test.LuceeTestCase" {
+﻿component extends="org.lucee.cfml.test.LuceeTestCase" labels="currency" {
 
 	function beforeAll(){
 		setLocale("en_us");

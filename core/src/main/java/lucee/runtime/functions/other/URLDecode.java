@@ -23,23 +23,34 @@ package lucee.runtime.functions.other;
 
 import lucee.commons.net.URLDecoder;
 import lucee.runtime.PageContext;
-import lucee.runtime.exp.ExpressionException;
+import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.function.Function;
 import lucee.runtime.op.Caster;
 
 public final class URLDecode implements Function {
 	private static final long serialVersionUID = 2975351228540450405L;
 
-	public static String call(PageContext pc, String str) throws ExpressionException, Exception {
+	public static String call(PageContext pc, String str) throws PageException {
 		return call(pc, str, "utf-8");
 	}
 
-	public static String call(PageContext pc, String str, String encoding) throws ExpressionException, Exception {
+	public static String call(PageContext pc, String str, String encoding) throws PageException {
+		return call(pc, str, encoding, true);
+	}
+
+	public static String call(PageContext pc, String str, String encoding, boolean strict) throws PageException {
 		try {
 			return URLDecoder.decode(str, encoding, true);
 		}
 		catch (Exception e) {
-			throw Caster.toPageException(e);
+			if (strict) throw Caster.toPageException(e);
+			// fall back on lax
+			try {
+				return URLDecoder.decodeLax(str, encoding, true);
+			}
+			catch (Exception le) {
+				throw Caster.toPageException(le);
+			}
 		}
 	}
 }

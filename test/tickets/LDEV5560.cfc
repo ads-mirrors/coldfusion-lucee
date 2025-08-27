@@ -1,18 +1,11 @@
 component extends="org.lucee.cfml.test.LuceeTestCase" {
 	function run( testResults , testBox ) {
 
-		describe( title="Test case LDEV-5560", body=function() {
+		describe( title="LDEV-5560 urlEncode strict=true (default)", body=function() {
 
 			it(title="checking URLDecode() function", body = function( currentSpec ) {
-				URLDecode( 'busbar+100a+100%25G' );
-			});
-
-			xit(title="checking URLDecode() function via internal request", body = function( currentSpec ) {
-				var uri = createURI( "/LDEV5560" );
-				var result =_InternalRequest(
-					template: "#uri#/ldev5560.cfm",
-					url: "test=busbar+100a+100%25G"
-				);
+				var str = URLDecode( 'busbar+100a+100%25G' );
+				expect( str ).toBe( 'busbar 100a 100%G' );
 			});
 
 			it(title="checking URLDecode() function via internal request %26", body = function( currentSpec ) {
@@ -21,14 +14,17 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					template: "#uri#/ldev5560.cfm",
 					url: "test=%26"
 				);
+				expect( trim( result.fileContent ) ).toBe( "&" );
 			});
 
-			xit(title="checking URLDecode() function via internal request %25", body = function( currentSpec ) {
+			it(title="checking URLDecode() function via internal request %25", body = function( currentSpec ) {
 				var uri = createURI( "/LDEV5560" );
-				var result =_InternalRequest(
-					template: "#uri#/ldev5560.cfm",
-					url: "test=%25"
-				);
+				expect( function(){
+					var result =_InternalRequest(
+						template: "#uri#/ldev5560.cfm",
+						url: "test=%25"
+					);
+				}).toThrow("", "Invalid URL encoding")
 			});
 
 			it(title="checking URLDecode() function via internal request %24", body = function( currentSpec ) {
@@ -37,8 +33,39 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					template: "#uri#/ldev5560.cfm",
 					url: "test=%24"
 				);
+				expect( trim( result.fileContent ) ).toBe( "$" );
 			});
 
+		});
+
+		describe( title="LDEV-5560 urlEncode strict=false", body=function() {
+			
+			it(title="checking URLDecode() function via internal request", body = function( currentSpec ) {
+				var uri = createURI( "/LDEV5560" );
+				var result =_InternalRequest(
+					template: "#uri#/ldev5560.cfm",
+					url: "strict=false&test=busbar+100a+100%25G"
+				);
+				expect( trim( result.fileContent ) ).toBe("busbar 100a 100%G");
+			});
+
+			it(title="checking URLDecode() function via internal request %25", body = function( currentSpec ) {
+				var uri = createURI( "/LDEV5560" );
+				var result =_InternalRequest(
+					template: "#uri#/ldev5560.cfm",
+					url: "strict=false&test=%25"
+				);
+				expect( trim( result.fileContent ) ).toBe("%");
+			});
+
+			it(title="checking URLDecode() function via internal request %25Lucee rocks", body = function( currentSpec ) {
+				var uri = createURI( "/LDEV5560" );
+				var result =_InternalRequest(
+					template: "#uri#/ldev5560.cfm",
+					url: "strict=false&test=%25Lucee+rocks"
+				);
+				expect( trim( result.fileContent ) ).toBe("%Lucee rocks");
+			});
 
 		});
 	}

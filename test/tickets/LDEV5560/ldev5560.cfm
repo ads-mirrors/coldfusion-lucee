@@ -1,4 +1,5 @@
 <cfscript>
 	param name="url.test";
-	echo(urlDecode(url.test));
+	param name="url.strict" default="true";
+	echo(urlDecode(string=url.test,strict=url.strict));
 </cfscript>
