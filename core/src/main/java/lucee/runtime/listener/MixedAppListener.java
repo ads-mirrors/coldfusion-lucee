@@ -29,6 +29,7 @@ import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.Constants;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.PageException;
+import lucee.runtime.rest.RestRequestListener;
 import lucee.runtime.type.Array;
 
 public final class MixedAppListener extends ModernAppListener {
@@ -36,7 +37,8 @@ public final class MixedAppListener extends ModernAppListener {
 	@Override
 	public void onRequest(PageContext pc, PageSource requestedPage, RequestListener rl) throws PageException {
 		RefBoolean isCFC = new RefBooleanImpl(false);
-		Page appP = getApplicationPage(pc, requestedPage, mode, isCFC);
+		boolean isRest = (rl instanceof RestRequestListener);
+		Page appP = getApplicationPage(pc, requestedPage, mode, isCFC, isRest);
 
 		if (isCFC.toBooleanValue()) _onRequest(pc, requestedPage, appP, rl);
 		else ClassicAppListener._onRequest(pc, requestedPage, appP, rl);
@@ -47,11 +49,13 @@ public final class MixedAppListener extends ModernAppListener {
 		return "mixed";
 	}
 
-	private static Page getApplicationPage(PageContext pc, PageSource requestedPage, int mode, RefBoolean isCFC) throws PageException {
+	private static Page getApplicationPage(PageContext pc, PageSource requestedPage, int mode, RefBoolean isCFC, boolean isRest) throws PageException {
 		PageSource ps;
 		Resource res = requestedPage.getPhyscalFile();
+		String dir = null;
 		if (res != null) {
-			ps = ((ConfigPro) pc.getConfig()).getApplicationPageSource(pc, res.getParent(), "Application.[cfc|cfm]", mode, isCFC);
+			dir = isRest ? res.getAbsolutePath() : res.getParent(); // REST requests don't have a file initially
+			ps = ((ConfigPro) pc.getConfig()).getApplicationPageSource(pc, dir, "Application.[cfc|cfm]", mode, isCFC);
 			if (ps != null) {
 				if (ps.exists()) return ps.loadPage(pc, false);
 			}
@@ -62,7 +66,7 @@ public final class MixedAppListener extends ModernAppListener {
 		else if (mode == ApplicationListener.MODE_CURRENT_OR_ROOT) p = getApplicationPageCurrOrRoot(pc, requestedPage, isCFC);
 		else if (mode == ApplicationListener.MODE_CURRENT) p = getApplicationPageCurrent(pc, requestedPage, isCFC);
 		else p = getApplicationPageRoot(pc, isCFC);
-		if (res != null && p != null) ((ConfigPro) pc.getConfig()).putApplicationPageSource(requestedPage.getPhyscalFile().getParent(), p.getPageSource(), "Application.[cfc|cfm]",
+		if (res != null && p != null) ((ConfigPro) pc.getConfig()).putApplicationPageSource(dir, p.getPageSource(), "Application.[cfc|cfm]",
 				mode, isCFC.toBooleanValue());
 
 		return p;

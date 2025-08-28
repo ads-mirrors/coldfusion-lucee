@@ -30,6 +30,7 @@ import lucee.runtime.config.Constants;
 import lucee.runtime.exp.MissingIncludeException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
+import lucee.runtime.rest.RestRequestListener;
 import lucee.runtime.type.UDF;
 import lucee.runtime.type.scope.Application;
 import lucee.runtime.type.scope.Session;
@@ -42,8 +43,8 @@ public final class ClassicAppListener extends AppListenerSupport {
 
 	@Override
 	public void onRequest(PageContext pc, PageSource requestedPage, RequestListener rl) throws PageException {
-
-		Page application = AppListenerUtil.getApplicationPage(pc, requestedPage, Constants.CFML_CLASSIC_APPLICATION_EVENT_HANDLER, mode, ApplicationListener.TYPE_CLASSIC);
+		boolean isRest = (rl instanceof RestRequestListener);
+		Page application = AppListenerUtil.getApplicationPage(pc, requestedPage, Constants.CFML_CLASSIC_APPLICATION_EVENT_HANDLER, mode, ApplicationListener.TYPE_CLASSIC, isRest);
 
 		_onRequest(pc, requestedPage, application, rl);
 	}
