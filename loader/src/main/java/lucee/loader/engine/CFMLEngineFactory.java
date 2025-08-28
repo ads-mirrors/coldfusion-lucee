@@ -806,16 +806,29 @@ public class CFMLEngineFactory extends CFMLEngineFactorySupport {
 		extend(config, "felix.service.urlhandlers", null, false);
 		extend(config, "felix.startlevel.bundle", null, false);
 
-		String proCount = Runtime.getRuntime().availableProcessors() + "";
-		extend(config, "felix.resolver.parallelism", proCount, false);
-		extend(config, "felix.systembundle.activators.start.parallelism", proCount, false);
+		int processors = Runtime.getRuntime().availableProcessors();
+		String parallelism = Math.max(4, processors * 2) + ""; // Use more threads
+		extend(config, "felix.resolver.parallelism", parallelism, false);
+		extend(config, "felix.resolver.parallel", "true", false); // Enable parallel resolution
+		extend(config, "felix.systembundle.activators.start.parallelism", parallelism, false);
 
 		// Skip waiting for service events to be delivered
 		extend(config, "felix.service.timeout", null, false);
 		extend(config, "felix.threading.timeout", null, false);
 
 		// Set framework start level immediately to final value
-		extend(config, "org.osgi.framework.startlevel.beginning", null, false);
+		extend(config, "org.osgi.framework.startlevel.beginning", "1", false); // Start at level 1 immediately
+		extend(config, "felix.startlevel.bundle", "1", false); // Default bundle start level 1
+		extend(config, "felix.auto.start.1", "", false); // Don't auto-start bundles at level 1
+
+		extend(config, "felix.auto.deploy.action", "install", false); // Don't auto-start, just install
+		extend(config, "felix.auto.deploy.start.level", "1", false); // Use start level 1
+		extend(config, "felix.cache.locking", "false", false); // Disable cache locking for speed
+
+		// Add specific timeout values instead of null:
+		extend(config, "felix.service.timeout", "1000", false); // 1 second max service wait
+		extend(config, "felix.threading.timeout", "5000", false); // 5 second thread timeout
+		extend(config, "felix.shutdown.timeout", "2000", false); // Fast shutdown
 
 		if (logger != null) config.put("felix.log.logger", logger);
 		// TODO felix.log.logger
