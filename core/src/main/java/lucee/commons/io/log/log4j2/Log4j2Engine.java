@@ -22,6 +22,7 @@ import org.apache.logging.log4j.core.layout.HtmlLayout;
 import org.apache.logging.log4j.core.layout.HtmlLayout.Builder;
 import org.apache.logging.log4j.core.layout.HtmlLayout.FontSize;
 import org.apache.logging.log4j.core.layout.PatternLayout;
+import org.apache.logging.log4j.core.util.NetUtils;
 import org.apache.logging.log4j.status.StatusLogger;
 import org.osgi.framework.Bundle;
 
@@ -44,8 +45,8 @@ import lucee.commons.lang.ClassUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.loader.util.Util;
 import lucee.runtime.config.Config;
-import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.config.ConfigUtil;
+import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.db.ClassDefinition;
 import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.ApplicationException;
@@ -665,5 +666,10 @@ public final class Log4j2Engine extends LogEngine {
 			if (Character.isUpperCase(str.charAt(i))) return true;
 		}
 		return false;
+	}
+
+	public static void prepare() {
+		// Force localhost resolution
+		NetUtils.getLocalHostname();
 	}
 }

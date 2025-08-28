@@ -67,6 +67,7 @@ import lucee.commons.io.SystemUtil;
 import lucee.commons.io.compress.CompressUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
+import lucee.commons.io.log.log4j2.Log4j2Engine;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.ResourceProvider;
 import lucee.commons.io.res.ResourcesImpl;
@@ -194,6 +195,31 @@ public final class CFMLEngineImpl implements CFMLEngine {
 		System.setProperty("org.apache.commons.logging.LogFactory", "org.apache.commons.logging.impl.LogFactoryImpl");
 		System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
 		System.setProperty("org.apache.commons.logging.simplelog.defaultlog", "warn");
+
+		// Log4j2 performance optimizations
+		System.setProperty("log4j2.hostName", "localhost"); // Prevents DNS lookup
+		System.setProperty("log4j2.disable.jmx", "true"); // Skip JMX
+		System.setProperty("log4j2.asyncLoggerConfigRingBufferSize", "262144"); // Larger buffer
+
+		// JVM Performance Optimizations
+		System.setProperty("sun.awt.noerasebackground", "true");
+		System.setProperty("sun.java2d.noddraw", "true");
+		System.setProperty("sun.java2d.d3d", "false");
+		System.setProperty("java.awt.headless", "true"); // Disable GUI components
+
+		// Network/DNS Optimizations
+		System.setProperty("sun.net.inetaddr.ttl", "300"); // Cache DNS for 5 mins
+		System.setProperty("sun.net.inetaddr.negative.ttl", "10"); // Cache failures for 10s
+
+		// Reflection/ClassLoading Optimizations
+		System.setProperty("sun.reflect.noInflation", "true"); // Skip reflection inflation
+		System.setProperty("sun.reflect.inflationThreshold", "0"); // Use generated accessors immediately
+
+		// Security Manager Optimizations (if not needed)
+		System.setProperty("java.security.manager", ""); // Disable security manager
+
+		// Disable reverse DNS lookups
+		System.setProperty("sun.net.useExclusiveBind", "false");
 	}
 
 	public static final PrintStream CONSOLE_ERR = System.err;
@@ -254,6 +280,15 @@ public final class CFMLEngineImpl implements CFMLEngine {
 				TagLibFactory.loadFromSystem(null);
 			}
 			catch (TagLibException e) {
+			}
+		}, true).start();
+
+		// Force localhost resolution early
+		ThreadUtil.getThread(() -> {
+			try {
+				Log4j2Engine.prepare();
+			}
+			catch (Exception e) {
 			}
 		}, true).start();
 
