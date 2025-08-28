@@ -92,9 +92,6 @@ public final class StringUtil {
 			if (c > highest) highest = c;
 		}
 		WHITESPACES = new boolean[highest + 1];
-		for (int i = 0; i < WHITESPACES.length; i++) {
-			WHITESPACES[i] = false;
-		}
 		for (char c: SPECIAL_WHITE_SPACE_CHARS) {
 			WHITESPACES[c] = true;
 		}
@@ -791,7 +788,7 @@ public final class StringUtil {
 	public static CharSequence _replace(String input, String find, String repl, boolean firstOnly, boolean ignoreCase, List<Pos> positions) {
 		int findLen = find.length();
 
-		if (findLen == 0 ) return input;
+		if (findLen == 0) return input;
 		if (input.length() == 0) return input;
 
 		// String scan = input;
@@ -806,7 +803,7 @@ public final class StringUtil {
 
 		String _find = null;
 		String _input = null;
-		if (ignoreCase){
+		if (ignoreCase) {
 			_find = find.toUpperCase();
 			_input = input.toUpperCase();
 			// LDEV-4018
