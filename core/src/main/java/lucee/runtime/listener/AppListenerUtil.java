@@ -98,10 +98,12 @@ public final class AppListenerUtil {
 	private static final TimeSpan FIVE_MINUTES = new TimeSpanImpl(0, 0, 5, 0);
 	private static final TimeSpan ONE_MINUTE = new TimeSpanImpl(0, 0, 1, 0);
 
-	public static Page getApplicationPage(PageContext pc, PageSource requestedPage, String filename, int mode, int type) throws PageException {
+	public static Page getApplicationPage(PageContext pc, PageSource requestedPage, String filename, int mode, int type, boolean isRest) throws PageException {
 		Resource res = requestedPage.getPhyscalFile();
+		String dir = null;
 		if (res != null) {
-			PageSource ps = ((ConfigPro) pc.getConfig()).getApplicationPageSource(pc, res.getParent(), filename, mode, null);
+			dir = isRest ? res.getAbsolutePath() : res.getParent(); // REST requests don't have a file initially
+			PageSource ps = ((ConfigPro) pc.getConfig()).getApplicationPageSource(pc, dir, filename, mode, null);
 			if (ps != null) {
 				if (ps.exists()) return ps.loadPage(pc, false, null);
 			}
@@ -112,7 +114,7 @@ public final class AppListenerUtil {
 		else p = getApplicationPageCurr2Root(pc, requestedPage, filename);
 
 		if (res != null && p != null)
-			((ConfigPro) pc.getConfig()).putApplicationPageSource(requestedPage.getPhyscalFile().getParent(), p.getPageSource(), filename, mode, isCFC(type));
+			((ConfigPro) pc.getConfig()).putApplicationPageSource(dir, p.getPageSource(), filename, mode, isCFC(type));
 		return p;
 	}
 

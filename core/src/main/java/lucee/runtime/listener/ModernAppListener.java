@@ -59,6 +59,7 @@ import lucee.runtime.op.Caster;
 import lucee.runtime.op.Decision;
 import lucee.runtime.op.Duplicator;
 import lucee.runtime.orm.ORMUtil;
+import lucee.runtime.rest.RestRequestListener;
 import lucee.runtime.thread.SerializableCookie;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.ArrayImpl;
@@ -96,7 +97,8 @@ public class ModernAppListener extends AppListenerSupport {
 	@Override
 	public void onRequest(PageContext pc, PageSource requestedPage, RequestListener rl) throws PageException {
 		// on requestStart
-		Page appPS = AppListenerUtil.getApplicationPage(pc, requestedPage, Constants.CFML_APPLICATION_EVENT_HANDLER, mode, ApplicationListener.TYPE_MODERN);
+		boolean isRest = (rl instanceof RestRequestListener);
+		Page appPS = AppListenerUtil.getApplicationPage(pc, requestedPage, Constants.CFML_APPLICATION_EVENT_HANDLER, mode, ApplicationListener.TYPE_MODERN, isRest);
 		_onRequest(pc, requestedPage, appPS, rl);
 	}
 
