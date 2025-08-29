@@ -257,62 +257,64 @@ public final class ClassUtil {
 	public static Class loadClass(PageContext pc, String className) throws ClassException {
 		Set<Throwable> exceptions = new HashSet<Throwable>();
 		Class clazz;
+		synchronized (SystemUtil.createToken("ClassUtil.loadClass", className)) {
 
-		if (pc instanceof PageContextImpl) {
-			clazz = _loadClass((PageContextImpl) pc, className, exceptions);
-			if (clazz != null) return clazz;
-		}
-		else {
-			clazz = classes.get(className);
-			if (clazz != null) return clazz;
-
-			// loader classloader
-			clazz = _loadClass(loaderCL, className, null, exceptions);
-			if (clazz != null) {
-				classes.put(className, clazz);
-				return clazz;
+			if (pc instanceof PageContextImpl) {
+				clazz = _loadClass((PageContextImpl) pc, className, exceptions);
+				if (clazz != null) return clazz;
 			}
+			else {
+				clazz = classes.get(className);
+				if (clazz != null) return clazz;
 
-			// core classloader
-			clazz = _loadClass(coreCL, className, null, exceptions);
-			if (clazz != null) {
-				classes.put(className, clazz);
-				return clazz;
-			}
-		}
-
-		// System ClassLoader
-		try {
-			clazz = Class.forName(className);
-		}
-		catch (ClassNotFoundException e) {
-			exceptions.add(e);
-		}
-
-		String msg = "cannot load class through its string name, because no definition for the class with the specified name [" + className + "] could be found";
-		if (exceptions.size() == 1) {
-			Throwable t = exceptions.iterator().next();
-			ClassException ce = new ClassException(msg);
-			ExceptionUtil.initCauseEL(ce, t);
-			throw ce;
-		}
-
-		else if (exceptions.size() > 1) {
-			Iterator<Throwable> it = exceptions.iterator();
-			Throwable t;
-			Throwable cause = null;
-			while (it.hasNext()) {
-				t = it.next();
-				if (cause != null) {
-					ExceptionUtil.initCauseEL(t, cause);
+				// loader classloader
+				clazz = _loadClass(loaderCL, className, null, exceptions);
+				if (clazz != null) {
+					classes.put(className, clazz);
+					return clazz;
 				}
-				cause = t;
+
+				// core classloader
+				clazz = _loadClass(coreCL, className, null, exceptions);
+				if (clazz != null) {
+					classes.put(className, clazz);
+					return clazz;
+				}
 			}
-			ClassException ce = new ClassException(msg + "; failed to load class with multiple classloaders, every cause in the stacktrace represents a classloader");
-			if (cause != null) ExceptionUtil.initCauseEL(ce, cause);
-			throw ce;
+
+			// System ClassLoader
+			try {
+				clazz = Class.forName(className);
+			}
+			catch (ClassNotFoundException e) {
+				exceptions.add(e);
+			}
+
+			String msg = "cannot load class through its string name, because no definition for the class with the specified name [" + className + "] could be found";
+			if (exceptions.size() == 1) {
+				Throwable t = exceptions.iterator().next();
+				ClassException ce = new ClassException(msg);
+				ExceptionUtil.initCauseEL(ce, t);
+				throw ce;
+			}
+
+			else if (exceptions.size() > 1) {
+				Iterator<Throwable> it = exceptions.iterator();
+				Throwable t;
+				Throwable cause = null;
+				while (it.hasNext()) {
+					t = it.next();
+					if (cause != null) {
+						ExceptionUtil.initCauseEL(t, cause);
+					}
+					cause = t;
+				}
+				ClassException ce = new ClassException(msg + "; failed to load class with multiple classloaders, every cause in the stacktrace represents a classloader");
+				if (cause != null) ExceptionUtil.initCauseEL(ce, cause);
+				throw ce;
+			}
+			throw new ClassException(msg);
 		}
-		throw new ClassException(msg);
 	}
 
 	private static Class _loadClass(PageContextImpl pc, String className, Set<Throwable> exceptions) throws ClassException {
@@ -335,30 +337,30 @@ public final class ClassUtil {
 	}
 
 	private static Class loadClass(ClassLoader cl, String className, Class defaultValue, Set<Throwable> exceptions) {
+		synchronized (SystemUtil.createToken("ClassUtil.loadClass2", className)) {
+			if (cl != null) {
+				Class clazz = _loadClass(ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(cl), className, defaultValue, exceptions);
+				if (clazz != null) return clazz;
+			}
 
-		if (cl != null) {
-			Class clazz = _loadClass(ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(cl), className, defaultValue, exceptions);
+			// MUST javasettings?
+
+			// OSGI env
+			Class clazz = _loadClass(new OSGiBasedClassLoading(), className, null, exceptions);
 			if (clazz != null) return clazz;
+
+			// core classloader
+			if (cl != SystemUtil.getCoreClassLoader()) {
+				clazz = _loadClass(ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(SystemUtil.getCoreClassLoader()), className, null, exceptions);
+				if (clazz != null) return clazz;
+			}
+
+			// loader classloader
+			if (cl != SystemUtil.getLoaderClassLoader()) {
+				clazz = _loadClass(ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(SystemUtil.getLoaderClassLoader()), className, null, exceptions);
+				if (clazz != null) return clazz;
+			}
 		}
-
-		// MUST javasettings?
-
-		// OSGI env
-		Class clazz = _loadClass(new OSGiBasedClassLoading(), className, null, exceptions);
-		if (clazz != null) return clazz;
-
-		// core classloader
-		if (cl != SystemUtil.getCoreClassLoader()) {
-			clazz = _loadClass(ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(SystemUtil.getCoreClassLoader()), className, null, exceptions);
-			if (clazz != null) return clazz;
-		}
-
-		// loader classloader
-		if (cl != SystemUtil.getLoaderClassLoader()) {
-			clazz = _loadClass(ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(SystemUtil.getLoaderClassLoader()), className, null, exceptions);
-			if (clazz != null) return clazz;
-		}
-
 		return defaultValue;
 	}
 
@@ -995,14 +997,18 @@ public final class ClassUtil {
 
 		public static ClassLoading getClassLoaderBasedClassLoading(ClassLoader cl) {
 			if (cl instanceof ClassLoading) return (ClassLoading) cl;
-			Reference<ClassLoading> ref = instances.get(cl.hashCode());
+
 			ClassLoading instance = null;
-			if (ref != null) {
-				instance = ref.get();
-				if (instance != null) return instance;
+
+			Reference<ClassLoading> ref = instances.get(cl.hashCode());
+			if (ref == null || (instance = ref.get()) == null) {
+				synchronized (SystemUtil.createToken("ClassLoaderBasedClassLoading", "hashCode:" + cl.hashCode())) {
+					if (ref == null || (instance = ref.get()) == null) {
+						instance = new ClassLoaderBasedClassLoading(cl);
+						instances.put(cl.hashCode(), new SoftReference<>(instance));
+					}
+				}
 			}
-			instance = new ClassLoaderBasedClassLoading(cl);
-			instances.put(cl.hashCode(), new SoftReference<>(instance));
 			return instance;
 		}
 
