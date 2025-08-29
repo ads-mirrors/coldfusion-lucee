@@ -129,6 +129,7 @@ public final class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 	private Mapping[] mappings;
 	private ComponentPathCache componentPathCache = new ComponentPathCache();
 	private Map<String, Log> logs = new ConcurrentHashMap<>();
+	private lucee.runtime.rest.Mapping[] restMappings;
 
 	public ConfigWebImpl(CFMLFactoryImpl factory, ConfigServerImpl cs, ServletConfig config) {
 		setInstance(factory, cs, config, false);
@@ -1807,7 +1808,45 @@ public final class ConfigWebImpl extends ConfigBase implements ConfigWebPro {
 
 	@Override
 	public lucee.runtime.rest.Mapping[] getRestMappings() {
-		return cs.getRestMappings();
+		if (restMappings == null) {
+			synchronized (SystemUtil.createToken("ConfigWebImpl", "getRestMappings")) {
+				if (restMappings == null) createRestMapping();
+			}
+		}
+		return restMappings;
+	}
+
+	@Override
+	public ConfigWebImpl resetRestMappings() {
+		if (restMappings != null) {
+			synchronized (SystemUtil.createToken("ConfigWebImpl", "getRestMappings")) {
+				if (restMappings != null) {
+					restMappings = null;
+					cs.resetRestMappings();
+				}
+			}
+		}
+		return this;
+	}
+
+	private void createRestMapping() {
+		Map<String, lucee.runtime.rest.Mapping> mappings = MapFactory.<String, lucee.runtime.rest.Mapping>getConcurrentMap();
+		lucee.runtime.rest.Mapping[] sm = cs.getRestMappings();
+		lucee.runtime.rest.Mapping tmp;
+		if (sm != null) {
+			for (int i = 0; i < sm.length; i++) {
+				try {
+					// if (!sm[i].isHidden()) {
+					tmp = sm[i].duplicate(this, Boolean.TRUE);
+					mappings.put(tmp.getVirtual(), tmp);
+					// }
+				}
+				catch (Exception e) {
+
+				}
+			}
+		}
+		this.restMappings = mappings.values().toArray(new lucee.runtime.rest.Mapping[mappings.size()]);
 	}
 
 	@Override

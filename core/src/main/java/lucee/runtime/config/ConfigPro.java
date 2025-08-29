@@ -418,6 +418,8 @@ public interface ConfigPro extends Config {
 
 	public ConfigPro resetMappings();
 
+	public ConfigPro resetRestMappings();
+
 	public boolean isLoggingLoaded();
 
 	public String getId();

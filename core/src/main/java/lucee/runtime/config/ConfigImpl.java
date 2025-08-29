@@ -1625,6 +1625,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		return restMappings;
 	}
 
+	@Override
 	public ConfigImpl resetRestMappings() {
 		if (restMappings != null) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getRestMappings")) {
