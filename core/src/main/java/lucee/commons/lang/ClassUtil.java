@@ -67,7 +67,7 @@ public final class ClassUtil {
 
 	private static ClassLoading coreCL = ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(SystemUtil.getCoreClassLoader());
 	private static ClassLoading loaderCL = ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(SystemUtil.getLoaderClassLoader());
-	private static Map<String, Class<?>> classes = new ConcurrentHashMap<>();
+	private static Map<String, Class<?>> lcClasses = new ConcurrentHashMap<>();
 
 	/**
 	 * @par()am className
@@ -232,13 +232,22 @@ public final class ClassUtil {
 		Class clazz = _loadClass(new OSGiBasedClassLoading(), className, null, null);
 		if (clazz != null) return clazz;
 
+		clazz = lcClasses.get(className);
+		if (clazz != null) return clazz;
+
 		// core classloader
 		clazz = _loadClass(ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(SystemUtil.getCoreClassLoader()), className, null, null);
-		if (clazz != null) return clazz;
+		if (clazz != null) {
+			lcClasses.put(className, clazz);
+			return clazz;
+		}
 
 		// loader classloader
 		clazz = _loadClass(ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(SystemUtil.getLoaderClassLoader()), className, null, null);
-		if (clazz != null) return clazz;
+		if (clazz != null) {
+			lcClasses.put(className, clazz);
+			return clazz;
+		}
 
 		return defaultValue;
 	}
@@ -257,64 +266,62 @@ public final class ClassUtil {
 	public static Class loadClass(PageContext pc, String className) throws ClassException {
 		Set<Throwable> exceptions = new HashSet<Throwable>();
 		Class clazz;
-		synchronized (SystemUtil.createToken("ClassUtil.loadClass", className)) {
 
-			if (pc instanceof PageContextImpl) {
-				clazz = _loadClass((PageContextImpl) pc, className, exceptions);
-				if (clazz != null) return clazz;
-			}
-			else {
-				clazz = classes.get(className);
-				if (clazz != null) return clazz;
-
-				// loader classloader
-				clazz = _loadClass(loaderCL, className, null, exceptions);
-				if (clazz != null) {
-					classes.put(className, clazz);
-					return clazz;
-				}
-
-				// core classloader
-				clazz = _loadClass(coreCL, className, null, exceptions);
-				if (clazz != null) {
-					classes.put(className, clazz);
-					return clazz;
-				}
-			}
-
-			// System ClassLoader
-			try {
-				clazz = Class.forName(className);
-			}
-			catch (ClassNotFoundException e) {
-				exceptions.add(e);
-			}
-
-			String msg = "cannot load class through its string name, because no definition for the class with the specified name [" + className + "] could be found";
-			if (exceptions.size() == 1) {
-				Throwable t = exceptions.iterator().next();
-				ClassException ce = new ClassException(msg);
-				ExceptionUtil.initCauseEL(ce, t);
-				throw ce;
-			}
-
-			else if (exceptions.size() > 1) {
-				Iterator<Throwable> it = exceptions.iterator();
-				Throwable t;
-				Throwable cause = null;
-				while (it.hasNext()) {
-					t = it.next();
-					if (cause != null) {
-						ExceptionUtil.initCauseEL(t, cause);
-					}
-					cause = t;
-				}
-				ClassException ce = new ClassException(msg + "; failed to load class with multiple classloaders, every cause in the stacktrace represents a classloader");
-				if (cause != null) ExceptionUtil.initCauseEL(ce, cause);
-				throw ce;
-			}
-			throw new ClassException(msg);
+		if (pc instanceof PageContextImpl) {
+			clazz = _loadClass((PageContextImpl) pc, className, exceptions);
+			if (clazz != null) return clazz;
 		}
+		else {
+			clazz = lcClasses.get(className);
+			if (clazz != null) return clazz;
+
+			// loader classloader
+			clazz = _loadClass(loaderCL, className, null, exceptions);
+			if (clazz != null) {
+				lcClasses.put(className, clazz);
+				return clazz;
+			}
+
+			// core classloader
+			clazz = _loadClass(coreCL, className, null, exceptions);
+			if (clazz != null) {
+				lcClasses.put(className, clazz);
+				return clazz;
+			}
+		}
+
+		// System ClassLoader
+		try {
+			clazz = Class.forName(className);
+		}
+		catch (ClassNotFoundException e) {
+			exceptions.add(e);
+		}
+
+		String msg = "cannot load class through its string name, because no definition for the class with the specified name [" + className + "] could be found";
+		if (exceptions.size() == 1) {
+			Throwable t = exceptions.iterator().next();
+			ClassException ce = new ClassException(msg);
+			ExceptionUtil.initCauseEL(ce, t);
+			throw ce;
+		}
+
+		else if (exceptions.size() > 1) {
+			Iterator<Throwable> it = exceptions.iterator();
+			Throwable t;
+			Throwable cause = null;
+			while (it.hasNext()) {
+				t = it.next();
+				if (cause != null) {
+					ExceptionUtil.initCauseEL(t, cause);
+				}
+				cause = t;
+			}
+			ClassException ce = new ClassException(msg + "; failed to load class with multiple classloaders, every cause in the stacktrace represents a classloader");
+			if (cause != null) ExceptionUtil.initCauseEL(ce, cause);
+			throw ce;
+		}
+		throw new ClassException(msg);
 	}
 
 	private static Class _loadClass(PageContextImpl pc, String className, Set<Throwable> exceptions) throws ClassException {
@@ -337,30 +344,39 @@ public final class ClassUtil {
 	}
 
 	private static Class loadClass(ClassLoader cl, String className, Class defaultValue, Set<Throwable> exceptions) {
-		synchronized (SystemUtil.createToken("ClassUtil.loadClass2", className)) {
-			if (cl != null) {
-				Class clazz = _loadClass(ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(cl), className, defaultValue, exceptions);
-				if (clazz != null) return clazz;
-			}
 
-			// MUST javasettings?
-
-			// OSGI env
-			Class clazz = _loadClass(new OSGiBasedClassLoading(), className, null, exceptions);
+		if (cl != null) {
+			Class clazz = _loadClass(ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(cl), className, defaultValue, exceptions);
 			if (clazz != null) return clazz;
+		}
 
-			// core classloader
-			if (cl != SystemUtil.getCoreClassLoader()) {
-				clazz = _loadClass(ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(SystemUtil.getCoreClassLoader()), className, null, exceptions);
-				if (clazz != null) return clazz;
-			}
+		// MUST javasettings?
 
-			// loader classloader
-			if (cl != SystemUtil.getLoaderClassLoader()) {
-				clazz = _loadClass(ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(SystemUtil.getLoaderClassLoader()), className, null, exceptions);
-				if (clazz != null) return clazz;
+		// OSGI env
+		Class clazz = _loadClass(new OSGiBasedClassLoading(), className, null, exceptions);
+		if (clazz != null) return clazz;
+
+		clazz = lcClasses.get(className);
+		if (clazz != null) return clazz;
+
+		// core classloader
+		if (cl != SystemUtil.getCoreClassLoader()) {
+			clazz = _loadClass(ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(SystemUtil.getCoreClassLoader()), className, null, exceptions);
+			if (clazz != null) {
+				lcClasses.put(className, clazz);
+				return clazz;
 			}
 		}
+
+		// loader classloader
+		if (cl != SystemUtil.getLoaderClassLoader()) {
+			clazz = _loadClass(ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(SystemUtil.getLoaderClassLoader()), className, null, exceptions);
+			if (clazz != null) {
+				lcClasses.put(className, clazz);
+				return clazz;
+			}
+		}
+
 		return defaultValue;
 	}
 
@@ -997,9 +1013,7 @@ public final class ClassUtil {
 
 		public static ClassLoading getClassLoaderBasedClassLoading(ClassLoader cl) {
 			if (cl instanceof ClassLoading) return (ClassLoading) cl;
-
 			ClassLoading instance = null;
-
 			Reference<ClassLoading> ref = instances.get(cl.hashCode());
 			if (ref == null || (instance = ref.get()) == null) {
 				synchronized (SystemUtil.createToken("ClassLoaderBasedClassLoading", "hashCode:" + cl.hashCode())) {
