@@ -29,6 +29,7 @@ on:
           - hibernate.extension
           - com.mysql.cj
           - com.microsoft.sqlserver.mssql-jdbc
+          - org.lucee.mssql
           - org.postgresql.postgresql
           - org.h2.h2
           - com.oracle.database.jdbc
