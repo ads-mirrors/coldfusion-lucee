@@ -75,25 +75,26 @@ async function run() {
       }
     });
     
-    // Test S3 connectivity and detect correct region
+    // Test S3 connectivity and detect correct region for both buckets
+    let sourceS3Client = s3Client;
+    let targetS3Client = s3Client;
+    
     try {
-      log('Testing S3 connectivity and detecting bucket region...');
-      await s3Client.send(new ListObjectsV2Command({
+      log('Testing S3 connectivity and detecting target bucket region...');
+      await targetS3Client.send(new ListObjectsV2Command({
         Bucket: targetBucket,
         MaxKeys: 1
       }));
-      log('✓ S3 connectivity successful');
+      log('✓ Target S3 connectivity successful');
     } catch (error) {
       if (error.name === 'PermanentRedirect') {
-        // Try to get the correct region
         try {
-          log('Bucket is in different region, detecting correct region...');
-          const locationResponse = await s3Client.send(new GetBucketLocationCommand({ Bucket: targetBucket }));
+          log('Target bucket is in different region, detecting correct region...');
+          const locationResponse = await targetS3Client.send(new GetBucketLocationCommand({ Bucket: targetBucket }));
           const correctRegion = locationResponse.LocationConstraint || 'us-east-1';
-          log(`✓ Detected bucket region: ${correctRegion}`);
+          log(`✓ Detected target bucket region: ${correctRegion}`);
           
-          // Create new client with correct region
-          s3Client = new S3Client({
+          targetS3Client = new S3Client({
             region: correctRegion,
             credentials: {
               accessKeyId,
@@ -101,17 +102,53 @@ async function run() {
             }
           });
           
-          // Test again with correct region
-          await s3Client.send(new ListObjectsV2Command({
+          await targetS3Client.send(new ListObjectsV2Command({
             Bucket: targetBucket,
             MaxKeys: 1
           }));
-          log('✓ S3 connectivity successful with correct region');
+          log('✓ Target S3 connectivity successful with correct region');
         } catch (regionError) {
-          throw new Error(`Failed to detect bucket region: ${regionError.name} - ${regionError.message}`);
+          throw new Error(`Failed to detect target bucket region: ${regionError.name} - ${regionError.message}`);
         }
       } else {
-        throw new Error(`S3 connectivity test failed: ${error.name} - ${error.message}. Check bucket name and credentials.`);
+        throw new Error(`Target S3 connectivity test failed: ${error.name} - ${error.message}. Check bucket name and credentials.`);
+      }
+    }
+
+    // Test source bucket connectivity and detect region
+    try {
+      log('Testing source bucket connectivity...');
+      await sourceS3Client.send(new ListObjectsV2Command({
+        Bucket: sourceBucket,
+        MaxKeys: 1
+      }));
+      log('✓ Source S3 connectivity successful');
+    } catch (error) {
+      if (error.name === 'PermanentRedirect') {
+        try {
+          log('Source bucket is in different region, detecting correct region...');
+          const locationResponse = await sourceS3Client.send(new GetBucketLocationCommand({ Bucket: sourceBucket }));
+          const correctRegion = locationResponse.LocationConstraint || 'us-east-1';
+          log(`✓ Detected source bucket region: ${correctRegion}`);
+          
+          sourceS3Client = new S3Client({
+            region: correctRegion,
+            credentials: {
+              accessKeyId,
+              secretAccessKey
+            }
+          });
+          
+          await sourceS3Client.send(new ListObjectsV2Command({
+            Bucket: sourceBucket,
+            MaxKeys: 1
+          }));
+          log('✓ Source S3 connectivity successful with correct region');
+        } catch (regionError) {
+          throw new Error(`Failed to detect source bucket region: ${regionError.name} - ${regionError.message}`);
+        }
+      } else {
+        throw new Error(`Source S3 connectivity test failed: ${error.name} - ${error.message}. Check bucket name and credentials.`);
       }
     }
 
@@ -130,7 +167,7 @@ async function run() {
       log(`${'='.repeat(60)}`);
 
       try {
-        const versionStats = await processExtensionVersion(s3Client, sourceBucket, targetBucket, sourceExtension, targetArtifactId, version, operation, dryRun);
+        const versionStats = await processExtensionVersion(sourceS3Client, targetS3Client, sourceBucket, targetBucket, sourceExtension, targetArtifactId, version, operation, dryRun);
         totalProcessed += versionStats.processed;
         totalMissing += versionStats.missing;
         totalSkipped += versionStats.skipped;
@@ -175,7 +212,7 @@ async function run() {
   }
 }
 
-async function processExtensionVersion(s3Client, sourceBucket, targetBucket, sourceExtension, targetArtifactId, version, operation, dryRun) {
+async function processExtensionVersion(sourceS3Client, targetS3Client, sourceBucket, targetBucket, sourceExtension, targetArtifactId, version, operation, dryRun) {
   log(`Starting processing for extension: ${sourceExtension}, version: ${version}`);
 
   // Define the source and target paths for the extension
@@ -190,7 +227,7 @@ async function processExtensionVersion(s3Client, sourceBucket, targetBucket, sou
   if (dryRun) {
     try {
       log(`Listing files in source S3 bucket ${sourceBucket} (matching pattern ${sourceExtension}*):`);
-      const listResponse = await s3Client.send(new ListObjectsV2Command({
+      const listResponse = await sourceS3Client.send(new ListObjectsV2Command({
         Bucket: sourceBucket,
         Prefix: sourceExtension,
         MaxKeys: 50
@@ -215,7 +252,7 @@ async function processExtensionVersion(s3Client, sourceBucket, targetBucket, sou
   let missingCount = 0;
 
   try {
-    const result = await processExtensionFile(s3Client, sourceBucket, targetBucket, sourceKey, targetKey, operation, dryRun);
+    const result = await processExtensionFile(sourceS3Client, targetS3Client, sourceBucket, targetBucket, sourceKey, targetKey, operation, dryRun);
     if (result.processed) {
       processedCount++;
       log(`  ✓ ${result.action}: ${sourceBucket}/${sourceKey} -> ${targetBucket}/${targetKey}`);
@@ -227,7 +264,7 @@ async function processExtensionVersion(s3Client, sourceBucket, targetBucket, sou
           let artifactTimestamp;
           
           try {
-            const headResponse = await s3Client.send(new HeadObjectCommand({
+            const headResponse = await targetS3Client.send(new HeadObjectCommand({
               Bucket: targetBucket,
               Key: targetKey
             }));
@@ -239,11 +276,11 @@ async function processExtensionVersion(s3Client, sourceBucket, targetBucket, sou
           }
           
           const versionMetadata = generateExtensionVersionMetadata(targetArtifactId, version, artifactTimestamp);
-          await uploadMetadata(s3Client, targetBucket, `org/lucee/${targetArtifactId}/${version}/maven-metadata.xml`, versionMetadata);
+          await uploadMetadata(targetS3Client, targetBucket, `org/lucee/${targetArtifactId}/${version}/maven-metadata.xml`, versionMetadata);
           log(`  ✓ Generated version-specific maven-metadata.xml for ${targetArtifactId} ${version}`);
           
           // Update parent maven-metadata.xml
-          await updateExtensionParentMetadata(s3Client, targetBucket, targetArtifactId, version, artifactTimestamp);
+          await updateExtensionParentMetadata(targetS3Client, targetBucket, targetArtifactId, version, artifactTimestamp);
           log(`  ✓ Updated parent maven-metadata.xml with version ${version}`);
         } catch (error) {
           errorCount++;
@@ -281,11 +318,11 @@ async function processExtensionVersion(s3Client, sourceBucket, targetBucket, sou
   };
 }
 
-async function processExtensionFile(s3Client, sourceBucket, targetBucket, sourceKey, targetKey, operation, dryRun) {
+async function processExtensionFile(sourceS3Client, targetS3Client, sourceBucket, targetBucket, sourceKey, targetKey, operation, dryRun) {
   // Check if source file exists
   try {
     log(`Checking if source file exists: ${sourceBucket}/${sourceKey}`);
-    await s3Client.send(new HeadObjectCommand({
+    await sourceS3Client.send(new HeadObjectCommand({
       Bucket: sourceBucket,
       Key: sourceKey
     }));
@@ -304,7 +341,7 @@ async function processExtensionFile(s3Client, sourceBucket, targetBucket, source
   // Check if target file already exists
   try {
     log(`Checking if target file already exists: ${targetBucket}/${targetKey}`);
-    await s3Client.send(new HeadObjectCommand({
+    await targetS3Client.send(new HeadObjectCommand({
       Bucket: targetBucket,
       Key: targetKey
     }));
@@ -328,7 +365,7 @@ async function processExtensionFile(s3Client, sourceBucket, targetBucket, source
   try {
     // Copy file from source bucket to target bucket
     log(`Copying ${sourceBucket}/${sourceKey} to ${targetBucket}/${targetKey}`);
-    await s3Client.send(new CopyObjectCommand({
+    await targetS3Client.send(new CopyObjectCommand({
       Bucket: targetBucket,
       CopySource: `${sourceBucket}/${sourceKey}`,
       Key: targetKey,
@@ -338,7 +375,7 @@ async function processExtensionFile(s3Client, sourceBucket, targetBucket, source
     // Delete original file if operation is 'move'
     if (operation === 'move') {
       log(`Deleting original file: ${sourceBucket}/${sourceKey}`);
-      await s3Client.send(new DeleteObjectCommand({
+      await sourceS3Client.send(new DeleteObjectCommand({
         Bucket: sourceBucket,
         Key: sourceKey
       }));
