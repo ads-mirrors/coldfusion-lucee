@@ -254,6 +254,10 @@ public final class OSGiUtil {
 	}
 
 	public static Version toVersion(String version, Version defaultValue) {
+		return toVersion(version, true, defaultValue);
+	}
+
+	public static Version toVersion(String version, boolean restrictive, Version defaultValue) {
 		if (StringUtil.isEmpty(version)) return defaultValue;
 		// String[] arr = ListUtil.listToStringArray(version, '.');
 		String[] arr;
@@ -292,14 +296,30 @@ public final class OSGiUtil {
 			qualifier = arr[3];
 		}
 
-		if (major == null || minor == null || micro == null) return defaultValue;
+		if (major == null || minor == null || micro == null) {
+			if (!restrictive) {
+				try {
+					return new Version(version);
+				}
+				catch (IllegalArgumentException e) {
+				}
+			}
+			return defaultValue;
+		}
 
 		if (qualifier == null) return new Version(major, minor, micro);
 		return new Version(major, minor, micro, qualifier);
 	}
 
 	public static Version toVersion(String version) throws BundleException {
-		Version v = toVersion(version, null);
+		Version v = toVersion(version, true, null);
+		if (v != null) return v;
+		throw new BundleException(
+				"Given version [" + version + "] is invalid, a valid version is following this pattern <major-number>.<minor-number>.<micro-number>[.<qualifier>]");
+	}
+
+	public static Version toVersion(String version, boolean restrictive) throws BundleException {
+		Version v = toVersion(version, restrictive, null);
 		if (v != null) return v;
 		throw new BundleException(
 				"Given version [" + version + "] is invalid, a valid version is following this pattern <major-number>.<minor-number>.<micro-number>[.<qualifier>]");

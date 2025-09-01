@@ -42,8 +42,6 @@ public final class MavenUpdateProvider {
 	private static final Repository[] DEFAULT_REPOSITORY_SNAPSHOTS = new Repository[] {
 			// new last 90 days
 			new Repository("Sonatype Repositry for Snapshots (last 90 days)", "https://central.sonatype.com/repository/maven-snapshots/", Repository.TIMEOUT_5MINUTES)
-			// versions provided by Lucee
-			, new Repository("Lucee Maven repository", "https://cdn.lucee.org/", Repository.TIMEOUT_1HOUR)
 			// old up to version 7.0.0.275-SNAPSHOT
 			, new Repository("Old Sonatype Repositry for Snapshots", "https://oss.sonatype.org/content/repositories/snapshots/", Repository.TIMEOUT_NEVER)
 
@@ -52,17 +50,23 @@ public final class MavenUpdateProvider {
 	private static final Repository[] DEFAULT_REPOSITORY_RELEASES = new Repository[] {
 			new Repository("Maven Release Repository", "https://repo1.maven.org/maven2/", Repository.TIMEOUT_1HOUR) };
 
+	private static final Repository[] DEFAULT_REPOSITORY_MIXED = new Repository[] {
+			// versions provided by Lucee
+			new Repository("Lucee Maven repository", "https://cdn.lucee.org/", Repository.TIMEOUT_1HOUR) };
+
 	public static final String DEFAULT_GROUP = "org.lucee";
 	public static final String DEFAULT_ARTIFACT = "lucee";
 
 	private static Repository[] defaultRepositoryReleases;
 	private static Repository[] defaultRepositorySnapshots;
+	private static Repository[] defaultRepositoryMixed;
 
 	private final String group;
 	private final String artifact;
-	private Repository[] repoSnapshots;
-	private Repository[] repoReleases;
-	private List<Repository> repos;
+	private final Repository[] repoSnapshots;
+	private final Repository[] repoReleases;
+	private final Repository[] repoMixed;
+	private final List<Repository> repos;
 
 	public static Repository[] getDefaultRepositoryReleases() {
 		if (defaultRepositoryReleases == null) {
@@ -76,6 +80,13 @@ public final class MavenUpdateProvider {
 			defaultRepositorySnapshots = readReposFromEnvVar("lucee.mvn.repo.snapshots", DEFAULT_REPOSITORY_SNAPSHOTS);
 		}
 		return defaultRepositorySnapshots;
+	}
+
+	public static Repository[] getDefaultRepositoryMixed() {
+		if (defaultRepositoryMixed == null) {
+			defaultRepositoryMixed = readReposFromEnvVar("lucee.mvn.repo.snapshots", DEFAULT_REPOSITORY_MIXED);
+		}
+		return defaultRepositoryMixed;
 	}
 
 	private static Repository[] readReposFromEnvVar(String envVarName, Repository[] defaultValue) {
@@ -103,15 +114,17 @@ public final class MavenUpdateProvider {
 	public MavenUpdateProvider() {
 		this.repoSnapshots = getDefaultRepositorySnapshots();
 		this.repoReleases = getDefaultRepositoryReleases();
-		this.repos = merge(repoSnapshots, repoReleases);
+		this.repoMixed = getDefaultRepositoryMixed();
+		this.repos = merge(repoSnapshots, repoReleases, repoMixed);
 		this.group = DEFAULT_GROUP;
 		this.artifact = DEFAULT_ARTIFACT;
 	}
 
-	public MavenUpdateProvider(Repository[] repoSnapshots, Repository[] repoReleases, String group, String artifact) {
+	public MavenUpdateProvider(Repository[] repoSnapshots, Repository[] repoReleases, Repository[] repoMixed, String group, String artifact) {
 		this.repoSnapshots = repoSnapshots;
 		this.repoReleases = repoReleases;
-		this.repos = merge(repoSnapshots, repoReleases);
+		this.repoMixed = repoMixed;
+		this.repos = merge(repoSnapshots, repoReleases, repoMixed);
 		this.group = group;
 		this.artifact = artifact;
 	}
@@ -119,7 +132,8 @@ public final class MavenUpdateProvider {
 	public MavenUpdateProvider(String group, String artifact) {
 		this.repoSnapshots = getDefaultRepositorySnapshots();
 		this.repoReleases = getDefaultRepositoryReleases();
-		this.repos = merge(repoSnapshots, repoReleases);
+		this.repoMixed = getDefaultRepositoryMixed();
+		this.repos = merge(repoSnapshots, repoReleases, repoMixed);
 		this.group = group;
 		this.artifact = artifact;
 	}
@@ -136,21 +150,28 @@ public final class MavenUpdateProvider {
 		return list;
 	}
 
-	public List<Version> list() throws IOException, GeneralSecurityException, SAXException {
-		return list(null);
+	static List<Repository> merge(Repository[] left, Repository[] middle, Repository[] right) {
+		List<Repository> list = new ArrayList<>();
+		for (Repository repo: left) {
+			list.add(repo);
+		}
+		for (Repository repo: middle) {
+			list.add(repo);
+		}
+		for (Repository repo: right) {
+			list.add(repo);
+		}
+
+		return list;
 	}
 
-	public List<Version> list(String extensionFilter) throws IOException, GeneralSecurityException, SAXException {
-
-		// URL url = new URL(repository.url + group.replace('.', '/') + '/' + artifact +
-		// "/maven-metadata.xml");
-
+	public List<Version> list() throws IOException, GeneralSecurityException, SAXException {
 		try {
 			MetadataReader mr;
 			Set<Version> versions = new HashSet<>();
 			for (Repository repo: repos) {
 				mr = new MetadataReader(repo, group, artifact);
-				for (Version v: mr.read(extensionFilter)) {
+				for (Version v: mr.read()) {
 					versions.add(v);
 				}
 			}
@@ -171,7 +192,7 @@ public final class MavenUpdateProvider {
 
 	public InputStream getCore(Version version) throws IOException, GeneralSecurityException, SAXException, PageException {
 
-		Map<String, Object> data = detail(version);
+		Map<String, Object> data = detail(version, "jar", true);
 		String strURL = Caster.toString(data.get("lco"), null);
 		if (!StringUtil.isEmpty(strURL)) {
 			// JAR
@@ -186,7 +207,7 @@ public final class MavenUpdateProvider {
 	}
 
 	public InputStream getLoader(Version version) throws IOException, GeneralSecurityException, SAXException, PageException {
-		Map<String, Object> data = detail(version);
+		Map<String, Object> data = detail(version, "jar", true);
 		String strURL = Caster.toString(data.get("jar"), null);
 		if (StringUtil.isEmpty(strURL)) throw new IOException("no jar for [" + version + "] found.");
 
@@ -211,12 +232,16 @@ public final class MavenUpdateProvider {
 	 * mup.detail(OSGiUtil.toVersion("6.1.0.719-SNAPSHOT")); print.e(map); }
 	 */
 
-	public Map<String, Object> detail(Version version) throws IOException, GeneralSecurityException, SAXException, PageException {
+	public Map<String, Object> detail(Version version, String requiredArtifactExtension, boolean throwException)
+			throws IOException, GeneralSecurityException, SAXException, PageException {
 		// SNAPSHOT - snapshot have a more complicated structure, ebcause there can be udaptes/multiple
 		// versions
-		boolean isSnap = version.getQualifier().endsWith("-SNAPSHOT");
-		Repository[] repos = isSnap ? repoSnapshots : repoReleases;
 
+		boolean isSnap = version.getQualifier().endsWith("-SNAPSHOT");
+		List<Repository> repos = isSnap ? merge(repoSnapshots, repoMixed) : merge(repoReleases, repoMixed);
+
+		if (requiredArtifactExtension == null) requiredArtifactExtension = "jar";
+		else requiredArtifactExtension = requiredArtifactExtension.toLowerCase();
 		try {
 			// direct access
 			{
@@ -230,16 +255,15 @@ public final class MavenUpdateProvider {
 					// read from maven-metadata.xml, snapshots mostly use that pattern
 					if (isSnap) {
 						RepoReader repoReader = new RepoReader(repo.url, group, artifact, version);
-						Map<String, Object> result = repoReader.read();
+						Map<String, Object> result = repoReader.read(requiredArtifactExtension);
 						if (result != null) {
 							return result;
 						}
 					}
-
-					// read jar
+					// read main
 					{
-						URL urlJar = new URL(repo.url + g + "/" + a + "/" + v + "/" + a + "-" + v + ".jar");
-						HTTPResponse rsp = HTTPEngine4Impl.head(urlJar, null, null, MavenUpdateProvider.CONNECTION_TIMEOUT, true, null, null, null, null);
+						URL urlMain = new URL(repo.url + g + "/" + a + "/" + v + "/" + a + "-" + v + "." + requiredArtifactExtension);
+						HTTPResponse rsp = HTTPEngine4Impl.head(urlMain, null, null, MavenUpdateProvider.CONNECTION_TIMEOUT, true, null, null, null, null);
 
 						if (validSatusCode(rsp)) {
 							Map<String, Object> result = new LinkedHashMap<>();
@@ -248,7 +272,7 @@ public final class MavenUpdateProvider {
 								if ("Last-Modified".equals(h.getName())) result.put("lastModified", DateCaster.toDateAdvanced(h.getValue(), null));
 							}
 
-							result.put("jar", urlJar.toExternalForm());
+							result.put(requiredArtifactExtension, urlMain.toExternalForm());
 
 							// optional
 							// pom
@@ -278,10 +302,21 @@ public final class MavenUpdateProvider {
 		catch (UnknownHostException uhe) {
 			throw new IOException("cannot reach maven server", uhe);
 		}
-		throw new IOException("could not find detail info for version [" + version + "] in the following repositories [" + toList(repos) + "]");
+		if (throwException) throw new IOException("could not find the artifact [" + requiredArtifactExtension + "] for [" + group + ":" + artifact + ":" + version
+				+ "] in the following repositories [" + toList(repos) + "]");
+		return null;
 	}
 
 	private String toList(Repository[] repos) {
+		StringBuilder sb = new StringBuilder();
+		for (Repository r: repos) {
+			if (sb.length() > 0) sb.append(", ");
+			sb.append(r.url);
+		}
+		return sb.toString();
+	}
+
+	private String toList(List<Repository> repos) {
 		StringBuilder sb = new StringBuilder();
 		for (Repository r: repos) {
 			if (sb.length() > 0) sb.append(", ");
@@ -313,6 +348,7 @@ public final class MavenUpdateProvider {
 		public static final long TIMEOUT_1HOUR = 60 * 60 * 1000;
 		public static final long TIMEOUT_NEVER = Long.MAX_VALUE;
 		public static final long TIMEOUT_5MINUTES = 60 * 5 * 1000;
+		public static final long TIMEOUT_5SECONDS = 5 * 1000;
 
 		private static Resource cacheRootDirectory;
 
@@ -340,5 +376,4 @@ public final class MavenUpdateProvider {
 			cacheDirectory.mkdirs();
 		}
 	}
-
 }

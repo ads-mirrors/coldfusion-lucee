@@ -116,6 +116,7 @@ public final class HTTPUtil {
 	}
 
 	public static URL toURL(String strUrl, short encodeOption, URL defaultValue) {
+		if (StringUtil.isEmpty(strUrl, true)) return defaultValue;
 		try {
 			return toURL(strUrl, -1, encodeOption);
 		}

@@ -6,12 +6,11 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import lucee.print;
+import lucee.commons.lang.StringUtil;
 
 public class HtmlDirectoryScraper {
 
@@ -75,34 +74,42 @@ public class HtmlDirectoryScraper {
 	 */
 	private String fetchUrl(String url) throws IOException, InterruptedException {
 		HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).timeout(Duration.ofSeconds(30)).header("User-Agent", "HTML-Directory-Scraper/1.0").build();
-
+		int statusCode = 0;
 		HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
-
 		if (response.statusCode() != 200) {
-			if (response.statusCode() == 404) return null;
-			print.e(response.headers());
-			throw new IOException("HTTP " + response.statusCode() + " for URL: " + url);
+			if (response.statusCode() != 404) statusCode = response.statusCode();
 		}
-		return response.body();
+
+		// if has /index.html
+		String body = response != null ? response.body() : null;
+		if (StringUtil.isEmpty(body, true) && url.endsWith("/")) {
+			request = HttpRequest.newBuilder().uri(URI.create(url + "index.html")).timeout(Duration.ofSeconds(30)).header("User-Agent", "HTML-Directory-Scraper/1.0").build();
+
+			response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+			if (response.statusCode() != 200) {
+				if (response.statusCode() == 404) return null;
+				throw new IOException("HTTP " + response.statusCode() + " for URL: " + url);
+			}
+			body = response != null ? response.body() : null;
+			return StringUtil.isEmpty(body, true) ? null : body;
+		}
+
+		if (statusCode > 0) {
+			throw new IOException("HTTP " + statusCode + " for URL: " + url);
+		}
+		return body;
 	}
 
 	// Example usage
-	public static void main(String[] args) {
-		HtmlDirectoryScraper scraper = new HtmlDirectoryScraper();
-		String url = "https://repo1.maven.org/maven2/org/lucee/";
-
-		try {
-			Set<String> subfolders = new HashSet<>();
-			scraper.getSubfolderLinks(url, subfolders);
-
-			System.out.println("Found " + subfolders.size() + " subfolders:");
-			for (String folder: subfolders) {
-				System.out.println("  " + folder);
-			}
-
-		}
-		catch (Exception e) {
-			System.err.println("Error: " + e.getMessage());
-		}
-	}
+	/*
+	 * public static void main(String[] args) { HtmlDirectoryScraper scraper = new
+	 * HtmlDirectoryScraper(); String url = "https://repo1.maven.org/maven2/org/lucee/";
+	 * 
+	 * try { Set<String> subfolders = new HashSet<>(); scraper.getSubfolderLinks(url, subfolders);
+	 * 
+	 * System.out.println("Found " + subfolders.size() + " subfolders:"); for (String folder:
+	 * subfolders) { System.out.println("  " + folder); }
+	 * 
+	 * } catch (Exception e) { System.err.println("Error: " + e.getMessage()); } }
+	 */
 }

@@ -10652,6 +10652,30 @@ Use `LoadAISession()` to restore a serialized session.
 		</return>
 	</function>
 	
+		<!-- LuceeExtension -->
+	<function>
+		<name>LuceeExtension</name>
+		<status>hidden</status>
+		<class>lucee.runtime.functions.system.LuceeExtension</class>
+		<description>List all Lucee extensions</description>
+		<argument>
+			<name>artifact</name>
+			<alias>artifactid</alias>
+			<type>string</type>
+			<required>No</required>
+			<description></description>
+		</argument>
+		<argument>
+			<name>version</name>
+			<type>string</type>
+			<required>No</required>
+			<description></description>
+		</argument>
+		<return>
+			<type>any</type>
+		</return>
+	</function>
+	
 	<!-- metaphone -->
 	<function>
 		<name>metaphone</name>

@@ -5,6 +5,10 @@ import java.io.Reader;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -32,6 +36,8 @@ import lucee.transformer.library.function.FunctionLibException;
 
 public final class RepoReader extends DefaultHandler {
 
+	private static DateTimeFormatter MVN_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd.HHmmss");
+
 	private XMLReader xmlReader;
 	private Stack<String> tree = new Stack<>();
 	private StringBuilder content = new StringBuilder();
@@ -54,7 +60,10 @@ public final class RepoReader extends DefaultHandler {
 		this.key = repo + ":" + group + ":" + artifact + ":" + version;
 	}
 
-	public Map<String, Object> read() throws IOException, GeneralSecurityException, SAXException {
+	public Map<String, Object> read(String requiredArtifactExtension) throws IOException, GeneralSecurityException, SAXException {
+		if (requiredArtifactExtension == null) requiredArtifactExtension = "jar";
+		else requiredArtifactExtension = requiredArtifactExtension.toLowerCase();
+
 		String g = group.replace('.', '/');
 		String a = artifact.replace('.', '/');
 		String v = version.toString();
@@ -71,7 +80,6 @@ public final class RepoReader extends DefaultHandler {
 		else {
 			return null;
 		}
-
 		Reader r = null;
 		try {
 
@@ -82,13 +90,25 @@ public final class RepoReader extends DefaultHandler {
 		}
 		Map<String, Object> res = new LinkedHashMap<>();
 		String key;
+		Object lastModified = null;
 		for (Entry<String, Map<String, Object>> e: artifacts.entrySet()) {
 			key = Caster.toString(e.getValue().get("classifier"), null);
 			if (StringUtil.isEmpty(key, true)) key = Caster.toString(e.getValue().get("extension"), null);
 			if (StringUtil.isEmpty(key, true)) key = e.getKey();
 			res.put(key, e.getValue().get("url"));
+			if (lastModified == null) {
+				Object tmp = e.getValue().get("lastModified");
+				if (tmp != null) {
+					lastModified = tmp;
+				}
+			}
 		}
-		return res;
+
+		if (res.containsKey(requiredArtifactExtension)) {
+			if (lastModified != null) res.put("lastModified", lastModified);
+			return res;
+		}
+		return null;
 
 	}
 
@@ -173,4 +193,8 @@ public final class RepoReader extends DefaultHandler {
 		content.append(ch, start, length);
 	}
 
+	public static Date parseTimestamp(String timestamp) {
+		LocalDateTime localDateTime = LocalDateTime.parse(timestamp, MVN_DATE_FORMATTER);
+		return Date.from(localDateTime.atZone(ZoneOffset.UTC).toInstant());
+	}
 }

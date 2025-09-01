@@ -22,7 +22,6 @@ import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
-import lucee.commons.lang.StringUtil;
 import lucee.commons.net.http.HTTPResponse;
 import lucee.commons.net.http.httpclient.HTTPEngine4Impl;
 import lucee.runtime.config.maven.MavenUpdateProvider.Repository;
@@ -35,6 +34,7 @@ import lucee.transformer.library.function.FunctionLibException;
 
 public final class MetadataReader extends DefaultHandler {
 
+	private static final boolean DEBUG = false;
 	private XMLReader xmlReader;
 	private Stack<String> tree = new Stack<>();
 	private StringBuilder content = new StringBuilder();
@@ -51,31 +51,22 @@ public final class MetadataReader extends DefaultHandler {
 		this.artifact = artifact;
 	}
 
-	public List<Version> read(String extensionFilter) throws IOException, GeneralSecurityException, SAXException {
-		if (StringUtil.isEmpty(extensionFilter, true)) return read();
-		// cache read
-		List<Version> versionsFromCache = readFromCache(extensionFilter);
-		if (versionsFromCache != null) {
-			return versionsFromCache;
-		}
-
-		List<Version> versions = new ArrayList<>();
-		URL url;
-		int count = 2;
-		for (Version v: read()) {
-			url = new URL(repository.url + group.replace('.', '/') + '/' + artifact + "/" + v + "/" + artifact + "-" + v + "." + extensionFilter);
-			// print.e(url);
-			HTTPResponse rsp = HTTPEngine4Impl.head(url, null, null, MavenUpdateProvider.CONNECTION_TIMEOUT, true, null, null, null, null);
-			if (rsp != null) {
-				int sc = rsp.getStatusCode();
-				if (sc >= 200 && sc < 300) versions.add(v);
-			}
-			// if at least count have no lex, we assume there is none
-			if (--count == 0) break;
-		}
-		storeToCache(versions, extensionFilter);
-		return versions;
-	}
+	/*
+	 * public List<Version> read(String extensionFilter) throws IOException, GeneralSecurityException,
+	 * SAXException { if (StringUtil.isEmpty(extensionFilter, true)) return read(); // cache read
+	 * List<Version> versionsFromCache = readFromCache(extensionFilter); if (versionsFromCache != null)
+	 * { return versionsFromCache; }
+	 * 
+	 * List<Version> versions = new ArrayList<>(); URL url; int count = 2; for (Version v: read()) {
+	 * 
+	 * url = new URL(repository.url + group.replace('.', '/') + '/' + artifact + "/" + v + "/" +
+	 * artifact + "-" + v + "." + extensionFilter);
+	 * 
+	 * HTTPResponse rsp = HTTPEngine4Impl.head(url, null, null, MavenUpdateProvider.CONNECTION_TIMEOUT,
+	 * true, null, null, null, null); if (rsp != null) { int sc = rsp.getStatusCode(); if (sc >= 200 &&
+	 * sc < 300) { versions.add(v); } } // if at least count have no lex, we assume there is none if
+	 * (--count == 0) break; } storeToCache(versions, extensionFilter); return versions; }
+	 */
 
 	public List<Version> read() throws IOException, GeneralSecurityException, SAXException {
 		// cache read
@@ -132,6 +123,7 @@ public final class MetadataReader extends DefaultHandler {
 	}
 
 	private List<Version> readFromCache(String appendix) {
+		if (DEBUG) return null;
 		try {
 			Resource resLastmod = repository.cacheDirectory.getRealResource(HashUtil.create64BitHashAsString(group + "_" + artifact + appendix + "_lastmod", Character.MAX_RADIX));
 			if (resLastmod.isFile()) {
@@ -188,7 +180,7 @@ public final class MetadataReader extends DefaultHandler {
 		if (insideVersion) {
 			insideVersion = false;
 			try {
-				versions.add(OSGiUtil.toVersion(content.toString().trim()));
+				versions.add(OSGiUtil.toVersion(content.toString().trim(), false));
 			}
 			catch (BundleException e) {
 				LogUtil.log("MavenReader", e);
