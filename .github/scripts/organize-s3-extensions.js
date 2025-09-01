@@ -185,6 +185,19 @@ async function run() {
       }
     }
 
+    // Generate directory listing HTML if any files were processed
+    if (!dryRun && totalProcessed > 0) {
+      try {
+        await generateDirectoryListing(targetS3Client, targetBucket);
+        log('✓ Generated HTML directory listing for org/lucee');
+      } catch (error) {
+        totalErrors++;
+        logError(`✗ Failed to generate directory listing: ${error.message}`);
+      }
+    } else if (dryRun) {
+      log('[DRY RUN] Would generate HTML directory listing for org/lucee');
+    }
+
     // Overall summary
     log(`\n${'='.repeat(60)}`);
     log('OVERALL SUMMARY');
@@ -514,6 +527,110 @@ ${versionsXml}
     <lastUpdated>${timestamp}</lastUpdated>
   </versioning>
 </metadata>`;
+}
+
+async function generateDirectoryListing(s3Client, bucket) {
+  const orgLuceePrefix = 'org/lucee/';
+  
+  // Get all directories under org/lucee/
+  const listResponse = await s3Client.send(new ListObjectsV2Command({
+    Bucket: bucket,
+    Prefix: orgLuceePrefix,
+    Delimiter: '/'
+  }));
+  
+  if (!listResponse.CommonPrefixes || listResponse.CommonPrefixes.length === 0) {
+    log('No artifacts found under org/lucee/, skipping directory listing generation');
+    return;
+  }
+  
+  // Extract artifact names and their last modified dates
+  const artifacts = [];
+  
+  for (const prefix of listResponse.CommonPrefixes) {
+    const artifactName = prefix.Prefix.replace(orgLuceePrefix, '').replace('/', '');
+    
+    // Get the latest file in this artifact directory to determine last modified date
+    const artifactListResponse = await s3Client.send(new ListObjectsV2Command({
+      Bucket: bucket,
+      Prefix: prefix.Prefix,
+      MaxKeys: 1000
+    }));
+    
+    let latestDate = new Date(0); // Start with epoch
+    
+    if (artifactListResponse.Contents && artifactListResponse.Contents.length > 0) {
+      for (const obj of artifactListResponse.Contents) {
+        if (obj.LastModified && obj.LastModified > latestDate) {
+          latestDate = obj.LastModified;
+        }
+      }
+    }
+    
+    artifacts.push({
+      name: artifactName,
+      lastModified: latestDate
+    });
+  }
+  
+  // Sort artifacts alphabetically
+  artifacts.sort((a, b) => a.name.localeCompare(b.name));
+  
+  // Generate HTML content
+  const html = generateDirectoryListingHtml(artifacts);
+  
+  // Upload the HTML file
+  await s3Client.send(new PutObjectCommand({
+    Bucket: bucket,
+    Key: 'org/lucee/index.html',
+    Body: html,
+    ContentType: 'text/html'
+  }));
+  
+  log(`Generated directory listing with ${artifacts.length} artifacts`);
+}
+
+function generateDirectoryListingHtml(artifacts) {
+  const formatDate = (date) => {
+    if (date.getTime() === 0) return '                   -';
+    return date.toISOString().slice(0, 16).replace('T', ' ');
+  };
+  
+  const artifactLinks = artifacts.map(artifact => {
+    const paddedName = (artifact.name + '/').padEnd(50);
+    const formattedDate = formatDate(artifact.lastModified);
+    
+    return `<a href="${artifact.name}/" title="${artifact.name}/">${paddedName}</a>                     ${formattedDate}         -      `;
+  }).join('\n');
+  
+  return `<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Central Repository: org/lucee</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+body {
+  background: #fff;
+}
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>org/lucee</h1>
+  </header>
+  <hr/>
+  <main>
+    <pre id="contents">
+<a href="../">../</a>
+${artifactLinks}
+    </pre>
+  </main>
+  <hr/>
+</body>
+
+</html>`;
 }
 
 // Run the script
