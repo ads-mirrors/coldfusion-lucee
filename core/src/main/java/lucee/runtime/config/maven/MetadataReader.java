@@ -127,8 +127,9 @@ public final class MetadataReader extends DefaultHandler {
 		try {
 			Resource resLastmod = repository.cacheDirectory.getRealResource(HashUtil.create64BitHashAsString(group + "_" + artifact + appendix + "_lastmod", Character.MAX_RADIX));
 			if (resLastmod.isFile()) {
-				long lastmod = repository.timeout == Repository.TIMEOUT_NEVER ? Repository.TIMEOUT_NEVER : Caster.toLongValue(IOUtil.toString(resLastmod, CharsetUtil.UTF8), 0L);
-				if (repository.timeout == Repository.TIMEOUT_NEVER || lastmod + repository.timeout > System.currentTimeMillis()) {
+				long lastmod = repository.timeoutList == Repository.TIMEOUT_NEVER ? Repository.TIMEOUT_NEVER
+						: Caster.toLongValue(IOUtil.toString(resLastmod, CharsetUtil.UTF8), 0L);
+				if (repository.timeoutList == Repository.TIMEOUT_NEVER || lastmod + repository.timeoutList > System.currentTimeMillis()) {
 					Resource resVersions = repository.cacheDirectory
 							.getRealResource(HashUtil.create64BitHashAsString(group + "_" + artifact + appendix + "_versions", Character.MAX_RADIX));
 					String content = IOUtil.toString(resVersions, CharsetUtil.UTF8);

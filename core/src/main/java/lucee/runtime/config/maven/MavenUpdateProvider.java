@@ -1,5 +1,6 @@
 package lucee.runtime.config.maven;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,18 +23,32 @@ import org.osgi.framework.Version;
 import org.xml.sax.SAXException;
 
 import lucee.commons.digest.HashUtil;
+import lucee.commons.io.CharsetUtil;
+import lucee.commons.io.DevNullOutputStream;
+import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.net.http.HTTPResponse;
 import lucee.commons.net.http.Header;
 import lucee.commons.net.http.httpclient.HTTPEngine4Impl;
 import lucee.loader.engine.CFMLEngineFactory;
+import lucee.runtime.PageContext;
+import lucee.runtime.converter.ConverterException;
+import lucee.runtime.converter.JSONConverter;
+import lucee.runtime.converter.JSONDateFormat;
+import lucee.runtime.engine.ThreadLocalPageContext;
 import lucee.runtime.exp.PageException;
+import lucee.runtime.exp.PageServletException;
+import lucee.runtime.interpreter.JSONExpressionInterpreter;
+import lucee.runtime.listener.SerializationSettings;
 import lucee.runtime.op.Caster;
 import lucee.runtime.op.date.DateCaster;
 import lucee.runtime.osgi.OSGiUtil;
+import lucee.runtime.thread.SerializableCookie;
 import lucee.runtime.type.util.ListUtil;
+import lucee.runtime.util.PageContextUtil;
 
 public final class MavenUpdateProvider {
 
@@ -41,18 +56,19 @@ public final class MavenUpdateProvider {
 
 	private static final Repository[] DEFAULT_REPOSITORY_SNAPSHOTS = new Repository[] {
 			// new last 90 days
-			new Repository("Sonatype Repositry for Snapshots (last 90 days)", "https://central.sonatype.com/repository/maven-snapshots/", Repository.TIMEOUT_5MINUTES)
+			new Repository("Sonatype Repositry for Snapshots (last 90 days)", "https://central.sonatype.com/repository/maven-snapshots/", Repository.TIMEOUT_15MINUTES,
+					Repository.TIMEOUT_NEVER)
 			// old up to version 7.0.0.275-SNAPSHOT
-			, new Repository("Old Sonatype Repositry for Snapshots", "https://oss.sonatype.org/content/repositories/snapshots/", Repository.TIMEOUT_NEVER)
+			, new Repository("Old Sonatype Repositry for Snapshots", "https://oss.sonatype.org/content/repositories/snapshots/", Repository.TIMEOUT_NEVER, Repository.TIMEOUT_NEVER)
 
 	};
 
 	private static final Repository[] DEFAULT_REPOSITORY_RELEASES = new Repository[] {
-			new Repository("Maven Release Repository", "https://repo1.maven.org/maven2/", Repository.TIMEOUT_1HOUR) };
+			new Repository("Maven Release Repository", "https://repo1.maven.org/maven2/", Repository.TIMEOUT_1HOUR, Repository.TIMEOUT_NEVER) };
 
 	private static final Repository[] DEFAULT_REPOSITORY_MIXED = new Repository[] {
 			// versions provided by Lucee
-			new Repository("Lucee Maven repository", "https://cdn.lucee.org/", Repository.TIMEOUT_1HOUR) };
+			new Repository("Lucee Maven repository", "https://cdn.lucee.org/", Repository.TIMEOUT_1HOUR, Repository.TIMEOUT_NEVER) };
 
 	public static final String DEFAULT_GROUP = "org.lucee";
 	public static final String DEFAULT_ARTIFACT = "lucee";
@@ -97,7 +113,7 @@ public final class MavenUpdateProvider {
 			List<Repository> repos = new ArrayList<>();
 			for (String s: raw) {
 				try {
-					repos.add(new Repository(null, new URL(s).toExternalForm(), Repository.TIMEOUT_5MINUTES));
+					repos.add(new Repository(null, new URL(s).toExternalForm(), Repository.TIMEOUT_5MINUTES, Repository.TIMEOUT_NEVER));
 				}
 				catch (Exception e) {
 				}
@@ -242,6 +258,7 @@ public final class MavenUpdateProvider {
 
 		if (requiredArtifactExtension == null) requiredArtifactExtension = "jar";
 		else requiredArtifactExtension = requiredArtifactExtension.toLowerCase();
+
 		try {
 			// direct access
 			{
@@ -250,13 +267,24 @@ public final class MavenUpdateProvider {
 				String a = artifact.replace('.', '/');
 				String v = version.toString();
 
-				for (Repository repo: repos) {
+				// check caches
+				{
+					Map<String, Object> result;
+					for (Repository repo: repos) {
+						result = readFromCache(repo);
+						if (result != null) {
+							return result;
+						}
+					}
+				}
 
+				for (Repository repo: repos) {
 					// read from maven-metadata.xml, snapshots mostly use that pattern
 					if (isSnap) {
 						RepoReader repoReader = new RepoReader(repo.url, group, artifact, version);
 						Map<String, Object> result = repoReader.read(requiredArtifactExtension);
 						if (result != null) {
+							storeToCache(repo, result);
 							return result;
 						}
 					}
@@ -291,7 +319,7 @@ public final class MavenUpdateProvider {
 									result.put("lco", url.toExternalForm());
 								}
 							}
-
+							storeToCache(repo, result);
 							return result;
 						}
 					}
@@ -304,6 +332,43 @@ public final class MavenUpdateProvider {
 		}
 		if (throwException) throw new IOException("could not find the artifact [" + requiredArtifactExtension + "] for [" + group + ":" + artifact + ":" + version
 				+ "] in the following repositories [" + toList(repos) + "]");
+		return null;
+	}
+
+	private void storeToCache(Repository repository, Map<String, Object> detail) {
+		try {
+			Resource resLastmod = repository.cacheDirectory.getRealResource("detail_" + HashUtil.create64BitHashAsString(group + "_lastmod", Character.MAX_RADIX));
+			Resource resVersions = repository.cacheDirectory.getRealResource("detail_" + HashUtil.create64BitHashAsString(group + "_versions", Character.MAX_RADIX));
+
+			String content = fromMapToJsonString(detail, true);
+
+			IOUtil.write(resVersions, StringUtil.isEmpty(content, true) ? "" : content.trim(), CharsetUtil.UTF8, false);
+			IOUtil.write(resLastmod, Caster.toString(System.currentTimeMillis()), CharsetUtil.UTF8, false);
+		}
+		catch (Exception e) {
+			LogUtil.log("MetadataReader", e);
+		}
+	}
+
+	private Map<String, Object> readFromCache(Repository repository) {
+		try {
+			Resource resLastmod = repository.cacheDirectory.getRealResource("detail_" + HashUtil.create64BitHashAsString(group + "_lastmod", Character.MAX_RADIX));
+			if (resLastmod.isFile()) {
+				long lastmod = repository.timeoutDetail == Repository.TIMEOUT_NEVER ? Repository.TIMEOUT_NEVER
+						: Caster.toLongValue(IOUtil.toString(resLastmod, CharsetUtil.UTF8), 0L);
+				if (repository.timeoutDetail == Repository.TIMEOUT_NEVER || lastmod + repository.timeoutDetail > System.currentTimeMillis()) {
+					Resource resVersions = repository.cacheDirectory.getRealResource("detail_" + HashUtil.create64BitHashAsString(group + "_versions", Character.MAX_RADIX));
+					String content = IOUtil.toString(resVersions, CharsetUtil.UTF8);
+					if (content.length() > 0) {
+						return fromJsonStringToMap(content);
+					}
+					return null;
+				}
+			}
+		}
+		catch (Exception e) {
+			// LogUtil.log("MetadataReader", e);
+		}
 		return null;
 	}
 
@@ -343,18 +408,46 @@ public final class MavenUpdateProvider {
 		throw new FileNotFoundException("core/core.lco not found in zip");
 	}
 
+	private static String fromMapToJsonString(Map<String, Object> detail, boolean compact) throws PageException {
+		JSONConverter json = new JSONConverter(true, CharsetUtil.UTF8, JSONDateFormat.PATTERN_CF, compact);
+		try {
+			return json.serialize(null, detail, SerializationSettings.SERIALIZE_AS_COLUMN, null);
+		}
+		catch (ConverterException e) {
+			throw Caster.toPageException(e);
+		}
+	}
+
+	private static Map<String, Object> fromJsonStringToMap(String str) throws PageException {
+		PageContext pc = ThreadLocalPageContext.get(true);
+		if (pc == null) {
+			try {
+				pc = PageContextUtil.getPageContext(null, null, new File("."), "localhost", "/", "", SerializableCookie.COOKIES0, null, null, null,
+						DevNullOutputStream.DEV_NULL_OUTPUT_STREAM, false, 100000, false);
+			}
+			catch (PageServletException e) {
+				throw Caster.toPageException(e);
+			}
+		}
+
+		return Caster.toMap(new JSONExpressionInterpreter(false, JSONExpressionInterpreter.FORMAT_JSON5).interpret(pc, str));
+	}
+
 	public final static class Repository {
 
 		public static final long TIMEOUT_1HOUR = 60 * 60 * 1000;
 		public static final long TIMEOUT_NEVER = Long.MAX_VALUE;
 		public static final long TIMEOUT_5MINUTES = 60 * 5 * 1000;
+		public static final long TIMEOUT_10MINUTES = 60 * 10 * 1000;
+		public static final long TIMEOUT_15MINUTES = 60 * 15 * 1000;
 		public static final long TIMEOUT_5SECONDS = 5 * 1000;
 
 		private static Resource cacheRootDirectory;
 
 		public final String label;
 		public final String url;
-		public final long timeout;
+		public final long timeoutList;
+		public final long timeoutDetail;
 		public final Resource cacheDirectory;
 
 		static {
@@ -366,11 +459,12 @@ public final class MavenUpdateProvider {
 			}
 		}
 
-		public Repository(String label, String url, long timeout) {
+		public Repository(String label, String url, long timeoutList, long timeoutDetail) {
 			if (!url.endsWith("/")) url += "/";
 			this.label = label;
 			this.url = url;
-			this.timeout = timeout;
+			this.timeoutList = timeoutList;
+			this.timeoutDetail = timeoutDetail;
 
 			cacheDirectory = cacheRootDirectory.getRealResource("mvn/cache/" + HashUtil.create64BitHashAsString(url, Character.MAX_RADIX) + "/");
 			cacheDirectory.mkdirs();
