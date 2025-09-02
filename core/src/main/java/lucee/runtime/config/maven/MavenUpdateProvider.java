@@ -271,7 +271,7 @@ public final class MavenUpdateProvider {
 				{
 					Map<String, Object> result;
 					for (Repository repo: repos) {
-						result = readFromCache(repo);
+						result = readFromCache(repo, artifact);
 						if (result != null) {
 							return result;
 						}
@@ -284,7 +284,7 @@ public final class MavenUpdateProvider {
 						RepoReader repoReader = new RepoReader(repo.url, group, artifact, version);
 						Map<String, Object> result = repoReader.read(requiredArtifactExtension);
 						if (result != null) {
-							storeToCache(repo, result);
+							storeToCache(repo, artifact, result);
 							return result;
 						}
 					}
@@ -319,7 +319,7 @@ public final class MavenUpdateProvider {
 									result.put("lco", url.toExternalForm());
 								}
 							}
-							storeToCache(repo, result);
+							storeToCache(repo, artifact, result);
 							return result;
 						}
 					}
@@ -335,10 +335,11 @@ public final class MavenUpdateProvider {
 		return null;
 	}
 
-	private void storeToCache(Repository repository, Map<String, Object> detail) {
+	private void storeToCache(Repository repository, String artifact, Map<String, Object> detail) {
 		try {
-			Resource resLastmod = repository.cacheDirectory.getRealResource("detail_" + HashUtil.create64BitHashAsString(group + "_lastmod", Character.MAX_RADIX));
-			Resource resVersions = repository.cacheDirectory.getRealResource("detail_" + HashUtil.create64BitHashAsString(group + "_versions", Character.MAX_RADIX));
+			Resource resLastmod = repository.cacheDirectory.getRealResource("detail_" + HashUtil.create64BitHashAsString(group + "_" + artifact + "_lastmod", Character.MAX_RADIX));
+			Resource resVersions = repository.cacheDirectory
+					.getRealResource("detail_" + HashUtil.create64BitHashAsString(group + "_" + artifact + "_versions", Character.MAX_RADIX));
 
 			String content = fromMapToJsonString(detail, true);
 
@@ -350,14 +351,15 @@ public final class MavenUpdateProvider {
 		}
 	}
 
-	private Map<String, Object> readFromCache(Repository repository) {
+	private Map<String, Object> readFromCache(Repository repository, String artifact) {
 		try {
-			Resource resLastmod = repository.cacheDirectory.getRealResource("detail_" + HashUtil.create64BitHashAsString(group + "_lastmod", Character.MAX_RADIX));
+			Resource resLastmod = repository.cacheDirectory.getRealResource("detail_" + HashUtil.create64BitHashAsString(group + "_" + artifact + "_lastmod", Character.MAX_RADIX));
 			if (resLastmod.isFile()) {
 				long lastmod = repository.timeoutDetail == Repository.TIMEOUT_NEVER ? Repository.TIMEOUT_NEVER
 						: Caster.toLongValue(IOUtil.toString(resLastmod, CharsetUtil.UTF8), 0L);
 				if (repository.timeoutDetail == Repository.TIMEOUT_NEVER || lastmod + repository.timeoutDetail > System.currentTimeMillis()) {
-					Resource resVersions = repository.cacheDirectory.getRealResource("detail_" + HashUtil.create64BitHashAsString(group + "_versions", Character.MAX_RADIX));
+					Resource resVersions = repository.cacheDirectory
+							.getRealResource("detail_" + HashUtil.create64BitHashAsString(group + "_" + artifact + "_versions", Character.MAX_RADIX));
 					String content = IOUtil.toString(resVersions, CharsetUtil.UTF8);
 					if (content.length() > 0) {
 						return fromJsonStringToMap(content);

@@ -24,12 +24,16 @@ import lucee.print;
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.IOUtil;
+import lucee.commons.io.SystemUtil;
+import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.net.HTTPUtil;
+import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.maven.MavenUpdateProvider.Repository;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
+import lucee.runtime.mvn.POM;
 import lucee.runtime.op.Caster;
 import lucee.runtime.osgi.OSGiUtil;
 import lucee.runtime.tag.Http;
@@ -216,6 +220,26 @@ public class ExtensionProvider {
 		return mup.list();
 	}
 
+	public Version last(String artifact) throws IOException, GeneralSecurityException, SAXException {
+		Version last = null;
+		Version lastRel = null;
+
+		for (Version v: list(artifact)) {
+			if (v.toString().toUpperCase().endsWith("-SNAPSHOT")) {
+				if (lastRel == null || OSGiUtil.compare(lastRel, v) < 0) {
+					lastRel = v;
+				}
+			}
+
+			if (last == null || OSGiUtil.compare(last, v) < 0) {
+				last = v;
+			}
+
+		}
+
+		return lastRel != null ? lastRel : last;
+	}
+
 	public Map<String, Object> detail(String artifact, Version version) throws PageException, IOException, GeneralSecurityException, SAXException {
 		MavenUpdateProvider mup;
 		mup = new MavenUpdateProvider(this.repoSnapshots, this.repoReleases, this.repoMixed, this.group, artifact);
@@ -223,6 +247,30 @@ public class ExtensionProvider {
 
 		if (detail != null) return detail;
 		throw new ApplicationException("there is no endpoint for [" + this.group + ":" + artifact + ":" + version + "]");
+	}
+
+	public Resource getPOM(ConfigPro config, String artifact, Version version) throws IOException, PageException, GeneralSecurityException, SAXException {
+		Log log = LogUtil.getLog(config, "mvn", "application");
+		Resource local;
+		try {
+			POM pom = POM.getInstance(config.getMavenDir(), this.group, artifact, version.toString(), POM.SCOPES_FOR_RUNTIME, log);
+			local = pom.getArtifact("lex");
+		}
+		catch (Exception e) {
+			print.e(e);
+			// Lucee repo does not always follow the maven rules a 100%, so we simply check for the file itself
+			local = POM.local(config.getMavenDir(), this.group, artifact, version.toString(), "lex");
+		}
+
+		if (!local.isFile()) {
+			synchronized (SystemUtil.createToken("ExtensionProvider", "getPOM:" + group + ":" + artifact)) {
+				if (!local.isFile()) {
+					local.getParentResource().mkdirs();
+					IOUtil.copy(get(artifact, version), local, true);
+				}
+			}
+		}
+		return local;
 	}
 
 	public Map<String, Object> detail(String artifact, Version version, Map<String, Object> defaultValue) {
@@ -443,4 +491,5 @@ public class ExtensionProvider {
 
 		// print.e(mup.list());
 	}
+
 }

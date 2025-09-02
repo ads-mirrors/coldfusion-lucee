@@ -3010,6 +3010,7 @@ public final class KeyConstants {
 	public static final Key _osgi = init("osgi");
 	public static final Key _mvn = init("mvn");
 	public static final Key _groupId = init("groupId");
+	public static final Key _artifact = init("artifact");
 	public static final Key _artifactId = init("artifactId");
 	public static final Key _answer = init("answer");
 	public static final Key _contents = init("contents");

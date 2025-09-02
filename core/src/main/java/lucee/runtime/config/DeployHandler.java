@@ -325,6 +325,16 @@ public final class DeployHandler {
 			else LogUtil.log("extension", e);
 		}
 
+		// we do have a local copy
+		Resource local = ed.getSource(null);
+		if (local != null) {
+			if (log != null) log.info("extension", "Installing extension [" + ed + "] from provided file");
+
+			RHExtension _ext = ConfigAdmin._updateRHExtension((ConfigPro) config, local, filter, reload, force, RHExtension.ACTION_COPY);
+			installDone.setValue(true);
+			return _ext;
+		}
+
 		// check if a local extension is matching our id
 		Iterator<ExtensionDefintion> it = getLocalExtensions(config, false).iterator();
 		ExtensionDefintion ext = null, tmp;

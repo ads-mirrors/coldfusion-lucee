@@ -478,6 +478,10 @@ public final class POM {
 	}
 
 	Resource local(Resource dir, String extension) {
+		return local(dir, groupId, artifactId, version, extension);
+	}
+
+	public static Resource local(Resource dir, String groupId, String artifactId, String version, String extension) {
 		Resource parent = dir.getRealResource(groupId.replace('.', '/') + "/" + artifactId + "/" + version + "/");
 		if (!parent.isDirectory()) parent.mkdirs();
 		return parent.getRealResource(artifactId + "-" + version + "." + extension);

@@ -5,7 +5,9 @@ import java.util.Map.Entry;
 
 import org.osgi.framework.Version;
 
+import lucee.commons.io.res.Resource;
 import lucee.runtime.PageContext;
+import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.maven.ExtensionProvider;
 import lucee.runtime.exp.FunctionException;
 import lucee.runtime.exp.PageException;
@@ -16,6 +18,7 @@ import lucee.runtime.type.Array;
 import lucee.runtime.type.ArrayImpl;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
+import lucee.runtime.type.util.KeyConstants;
 
 public final class LuceeExtension extends BIF {
 
@@ -44,11 +47,20 @@ public final class LuceeExtension extends BIF {
 			}
 			// detail to a specific extension
 			else if (args.length == 2) {
+				String artifactId = Caster.toString(args[0]);
+				Version version = OSGiUtil.toVersion(Caster.toString(args[1]));
+
+				// detail
 				Struct sct = new StructImpl();
-				Map<String, Object> data = ep.detail(Caster.toString(args[0]), OSGiUtil.toVersion(Caster.toString(args[1])));
+				Map<String, Object> data = ep.detail(artifactId, version);
 				for (Entry<String, Object> e: data.entrySet()) {
 					sct.set(Caster.toKey(e.getKey()), e.getValue());
 				}
+
+				// local resource
+				Resource local = ep.getPOM((ConfigPro) pc.getConfig(), artifactId, version);
+				sct.set(KeyConstants._local, local.getAbsolutePath());
+
 				return sct;
 			}
 			else {
