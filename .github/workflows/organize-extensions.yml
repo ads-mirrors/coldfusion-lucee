@@ -70,6 +70,10 @@ on:
         description: 'Extension version(s) to organize (e.g., 8.0.29 or 8.0.29,8.0.30,8.0.31)'
         required: true
         type: string
+      pom_url:
+        description: 'Optional: URL to pom.xml file (e.g., https://raw.githubusercontent.com/lucee/extension-jdbc-mysql/master/pom.xml)'
+        required: false
+        type: string
       operation:
         description: 'Copy or move files'
         required: true
@@ -116,4 +120,4 @@ jobs:
         INPUT_S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY_DOWNLOAD }}
         INPUT_S3_BUCKET: 'lucee-downloads'
         INPUT_SOURCE_BUCKET: 'extension-downloads'
-        INPUT_S3_REGION: 'us-east-1'
+        INPUT_POM_URL: ${{ inputs.pom_url }}

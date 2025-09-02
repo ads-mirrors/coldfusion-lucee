@@ -28,6 +28,7 @@ async function run() {
     const sourceExtension = process.env.INPUT_SOURCE_EXTENSION;
     const targetArtifactId = process.env.INPUT_TARGET_ARTIFACT_ID;
     const versionsInput = process.env.INPUT_VERSIONS;
+    const pomUrl = process.env.INPUT_POM_URL;
     const operation = process.env.INPUT_OPERATION || 'move';
     const dryRun = process.env.INPUT_DRY_RUN === 'true';
     const accessKeyId = process.env.INPUT_S3_ACCESS_KEY;
@@ -39,6 +40,7 @@ async function run() {
     log(`Source extension: "${sourceExtension}"`);
     log(`Target artifact ID: "${targetArtifactId}"`);
     log(`Versions input: "${versionsInput}"`);
+    log(`POM URL: "${pomUrl || 'Not provided'}"`);
 
     if (!sourceExtension || sourceExtension.trim() === '') {
       throw new Error('Source extension is required and cannot be empty');
@@ -75,25 +77,26 @@ async function run() {
       }
     });
     
-    // Test S3 connectivity and detect correct region
+    // Test S3 connectivity and detect correct region for both buckets
+    let sourceS3Client = s3Client;
+    let targetS3Client = s3Client;
+    
     try {
-      log('Testing S3 connectivity and detecting bucket region...');
-      await s3Client.send(new ListObjectsV2Command({
+      log('Testing S3 connectivity and detecting target bucket region...');
+      await targetS3Client.send(new ListObjectsV2Command({
         Bucket: targetBucket,
         MaxKeys: 1
       }));
-      log('✓ S3 connectivity successful');
+      log('✓ Target S3 connectivity successful');
     } catch (error) {
       if (error.name === 'PermanentRedirect') {
-        // Try to get the correct region
         try {
-          log('Bucket is in different region, detecting correct region...');
-          const locationResponse = await s3Client.send(new GetBucketLocationCommand({ Bucket: targetBucket }));
+          log('Target bucket is in different region, detecting correct region...');
+          const locationResponse = await targetS3Client.send(new GetBucketLocationCommand({ Bucket: targetBucket }));
           const correctRegion = locationResponse.LocationConstraint || 'us-east-1';
-          log(`✓ Detected bucket region: ${correctRegion}`);
+          log(`✓ Detected target bucket region: ${correctRegion}`);
           
-          // Create new client with correct region
-          s3Client = new S3Client({
+          targetS3Client = new S3Client({
             region: correctRegion,
             credentials: {
               accessKeyId,
@@ -101,17 +104,53 @@ async function run() {
             }
           });
           
-          // Test again with correct region
-          await s3Client.send(new ListObjectsV2Command({
+          await targetS3Client.send(new ListObjectsV2Command({
             Bucket: targetBucket,
             MaxKeys: 1
           }));
-          log('✓ S3 connectivity successful with correct region');
+          log('✓ Target S3 connectivity successful with correct region');
         } catch (regionError) {
-          throw new Error(`Failed to detect bucket region: ${regionError.name} - ${regionError.message}`);
+          throw new Error(`Failed to detect target bucket region: ${regionError.name} - ${regionError.message}`);
         }
       } else {
-        throw new Error(`S3 connectivity test failed: ${error.name} - ${error.message}. Check bucket name and credentials.`);
+        throw new Error(`Target S3 connectivity test failed: ${error.name} - ${error.message}. Check bucket name and credentials.`);
+      }
+    }
+
+    // Test source bucket connectivity and detect region
+    try {
+      log('Testing source bucket connectivity...');
+      await sourceS3Client.send(new ListObjectsV2Command({
+        Bucket: sourceBucket,
+        MaxKeys: 1
+      }));
+      log('✓ Source S3 connectivity successful');
+    } catch (error) {
+      if (error.name === 'PermanentRedirect') {
+        try {
+          log('Source bucket is in different region, detecting correct region...');
+          const locationResponse = await sourceS3Client.send(new GetBucketLocationCommand({ Bucket: sourceBucket }));
+          const correctRegion = locationResponse.LocationConstraint || 'us-east-1';
+          log(`✓ Detected source bucket region: ${correctRegion}`);
+          
+          sourceS3Client = new S3Client({
+            region: correctRegion,
+            credentials: {
+              accessKeyId,
+              secretAccessKey
+            }
+          });
+          
+          await sourceS3Client.send(new ListObjectsV2Command({
+            Bucket: sourceBucket,
+            MaxKeys: 1
+          }));
+          log('✓ Source S3 connectivity successful with correct region');
+        } catch (regionError) {
+          throw new Error(`Failed to detect source bucket region: ${regionError.name} - ${regionError.message}`);
+        }
+      } else {
+        throw new Error(`Source S3 connectivity test failed: ${error.name} - ${error.message}. Check bucket name and credentials.`);
       }
     }
 
@@ -130,7 +169,7 @@ async function run() {
       log(`${'='.repeat(60)}`);
 
       try {
-        const versionStats = await processExtensionVersion(s3Client, sourceBucket, targetBucket, sourceExtension, targetArtifactId, version, operation, dryRun);
+        const versionStats = await processExtensionVersion(sourceS3Client, targetS3Client, sourceBucket, targetBucket, sourceExtension, targetArtifactId, version, operation, dryRun, pomUrl);
         totalProcessed += versionStats.processed;
         totalMissing += versionStats.missing;
         totalSkipped += versionStats.skipped;
@@ -146,6 +185,19 @@ async function run() {
         totalErrors++;
         logError(`❌ Version ${version} failed: ${error.message}`);
       }
+    }
+
+    // Generate directory listing HTML if any files were processed
+    if (!dryRun && totalProcessed > 0) {
+      try {
+        await generateDirectoryListing(targetS3Client, targetBucket);
+        log('✓ Generated HTML directory listing for org/lucee');
+      } catch (error) {
+        totalErrors++;
+        logError(`✗ Failed to generate directory listing: ${error.message}`);
+      }
+    } else if (dryRun) {
+      log('[DRY RUN] Would generate HTML directory listing for org/lucee');
     }
 
     // Overall summary
@@ -175,7 +227,7 @@ async function run() {
   }
 }
 
-async function processExtensionVersion(s3Client, sourceBucket, targetBucket, sourceExtension, targetArtifactId, version, operation, dryRun) {
+async function processExtensionVersion(sourceS3Client, targetS3Client, sourceBucket, targetBucket, sourceExtension, targetArtifactId, version, operation, dryRun, pomUrl) {
   log(`Starting processing for extension: ${sourceExtension}, version: ${version}`);
 
   // Define the source and target paths for the extension
@@ -190,7 +242,7 @@ async function processExtensionVersion(s3Client, sourceBucket, targetBucket, sou
   if (dryRun) {
     try {
       log(`Listing files in source S3 bucket ${sourceBucket} (matching pattern ${sourceExtension}*):`);
-      const listResponse = await s3Client.send(new ListObjectsV2Command({
+      const listResponse = await sourceS3Client.send(new ListObjectsV2Command({
         Bucket: sourceBucket,
         Prefix: sourceExtension,
         MaxKeys: 50
@@ -215,7 +267,7 @@ async function processExtensionVersion(s3Client, sourceBucket, targetBucket, sou
   let missingCount = 0;
 
   try {
-    const result = await processExtensionFile(s3Client, sourceBucket, targetBucket, sourceKey, targetKey, operation, dryRun);
+    const result = await processExtensionFile(sourceS3Client, targetS3Client, sourceBucket, targetBucket, sourceKey, targetKey, operation, dryRun);
     if (result.processed) {
       processedCount++;
       log(`  ✓ ${result.action}: ${sourceBucket}/${sourceKey} -> ${targetBucket}/${targetKey}`);
@@ -227,7 +279,7 @@ async function processExtensionVersion(s3Client, sourceBucket, targetBucket, sou
           let artifactTimestamp;
           
           try {
-            const headResponse = await s3Client.send(new HeadObjectCommand({
+            const headResponse = await targetS3Client.send(new HeadObjectCommand({
               Bucket: targetBucket,
               Key: targetKey
             }));
@@ -239,18 +291,32 @@ async function processExtensionVersion(s3Client, sourceBucket, targetBucket, sou
           }
           
           const versionMetadata = generateExtensionVersionMetadata(targetArtifactId, version, artifactTimestamp);
-          await uploadMetadata(s3Client, targetBucket, `org/lucee/${targetArtifactId}/${version}/maven-metadata.xml`, versionMetadata);
+          await uploadMetadata(targetS3Client, targetBucket, `org/lucee/${targetArtifactId}/${version}/maven-metadata.xml`, versionMetadata);
           log(`  ✓ Generated version-specific maven-metadata.xml for ${targetArtifactId} ${version}`);
           
           // Update parent maven-metadata.xml
-          await updateExtensionParentMetadata(s3Client, targetBucket, targetArtifactId, version, artifactTimestamp);
+          await updateExtensionParentMetadata(targetS3Client, targetBucket, targetArtifactId, version, artifactTimestamp);
           log(`  ✓ Updated parent maven-metadata.xml with version ${version}`);
+          
+          // Generate and upload POM file if URL is provided
+          if (pomUrl && pomUrl.trim() !== '') {
+            try {
+              await generateAndUploadPom(targetS3Client, targetBucket, targetArtifactId, version, pomUrl);
+              log(`  ✓ Generated and uploaded POM file for ${targetArtifactId} ${version}`);
+            } catch (pomError) {
+              errorCount++;
+              logError(`  ✗ Failed to generate POM file: ${pomError.message}`);
+            }
+          }
         } catch (error) {
           errorCount++;
           logError(`  ✗ Failed to generate metadata: ${error.message}`);
         }
       } else {
         log(`  [DRY RUN] Would generate maven-metadata.xml files for ${targetArtifactId} ${version}`);
+        if (pomUrl && pomUrl.trim() !== '') {
+          log(`  [DRY RUN] Would generate POM file from ${pomUrl}`);
+        }
       }
     } else {
       if (result.reason === 'source file not found') {
@@ -281,11 +347,11 @@ async function processExtensionVersion(s3Client, sourceBucket, targetBucket, sou
   };
 }
 
-async function processExtensionFile(s3Client, sourceBucket, targetBucket, sourceKey, targetKey, operation, dryRun) {
+async function processExtensionFile(sourceS3Client, targetS3Client, sourceBucket, targetBucket, sourceKey, targetKey, operation, dryRun) {
   // Check if source file exists
   try {
     log(`Checking if source file exists: ${sourceBucket}/${sourceKey}`);
-    await s3Client.send(new HeadObjectCommand({
+    await sourceS3Client.send(new HeadObjectCommand({
       Bucket: sourceBucket,
       Key: sourceKey
     }));
@@ -304,7 +370,7 @@ async function processExtensionFile(s3Client, sourceBucket, targetBucket, source
   // Check if target file already exists
   try {
     log(`Checking if target file already exists: ${targetBucket}/${targetKey}`);
-    await s3Client.send(new HeadObjectCommand({
+    await targetS3Client.send(new HeadObjectCommand({
       Bucket: targetBucket,
       Key: targetKey
     }));
@@ -328,7 +394,7 @@ async function processExtensionFile(s3Client, sourceBucket, targetBucket, source
   try {
     // Copy file from source bucket to target bucket
     log(`Copying ${sourceBucket}/${sourceKey} to ${targetBucket}/${targetKey}`);
-    await s3Client.send(new CopyObjectCommand({
+    await targetS3Client.send(new CopyObjectCommand({
       Bucket: targetBucket,
       CopySource: `${sourceBucket}/${sourceKey}`,
       Key: targetKey,
@@ -338,7 +404,7 @@ async function processExtensionFile(s3Client, sourceBucket, targetBucket, source
     // Delete original file if operation is 'move'
     if (operation === 'move') {
       log(`Deleting original file: ${sourceBucket}/${sourceKey}`);
-      await s3Client.send(new DeleteObjectCommand({
+      await sourceS3Client.send(new DeleteObjectCommand({
         Bucket: sourceBucket,
         Key: sourceKey
       }));
@@ -428,6 +494,46 @@ async function updateExtensionParentMetadata(s3Client, bucket, artifactId, newVe
   await uploadMetadata(s3Client, bucket, metadataKey, updatedMetadata);
 }
 
+async function generateAndUploadPom(s3Client, bucket, artifactId, version, pomUrl) {
+  log(`Fetching POM from ${pomUrl}`);
+  
+  // Fetch the POM content from the URL
+  const response = await fetch(pomUrl);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch POM from ${pomUrl}: ${response.status} ${response.statusText}`);
+  }
+  
+  let pomContent = await response.text();
+  
+  // Update the version in the POM content
+  // Replace the version tag in the root project element
+  const versionRegex = /<project[^>]*>[\s\S]*?<version>([^<]+)<\/version>/;
+  const match = pomContent.match(versionRegex);
+  
+  if (match) {
+    const currentVersion = match[1];
+    log(`Updating POM version from ${currentVersion} to ${version}`);
+    pomContent = pomContent.replace(
+      /<version>[^<]+<\/version>/,
+      `<version>${version}</version>`
+    );
+  } else {
+    logWarning('Could not find version tag in POM, uploading as-is');
+  }
+  
+  // Upload the POM file
+  const pomKey = `org/lucee/${artifactId}/${version}/${artifactId}-${version}.pom`;
+  
+  await s3Client.send(new PutObjectCommand({
+    Bucket: bucket,
+    Key: pomKey,
+    Body: pomContent,
+    ContentType: 'application/xml'
+  }));
+  
+  log(`Uploaded POM to ${pomKey}`);
+}
+
 function addVersionToExtensionMetadata(existingXml, newVersion, timestamp) {
   // Extract existing versions from the XML
   const versionRegex = /<version>([^<]+)<\/version>/g;
@@ -477,6 +583,110 @@ ${versionsXml}
     <lastUpdated>${timestamp}</lastUpdated>
   </versioning>
 </metadata>`;
+}
+
+async function generateDirectoryListing(s3Client, bucket) {
+  const orgLuceePrefix = 'org/lucee/';
+  
+  // Get all directories under org/lucee/
+  const listResponse = await s3Client.send(new ListObjectsV2Command({
+    Bucket: bucket,
+    Prefix: orgLuceePrefix,
+    Delimiter: '/'
+  }));
+  
+  if (!listResponse.CommonPrefixes || listResponse.CommonPrefixes.length === 0) {
+    log('No artifacts found under org/lucee/, skipping directory listing generation');
+    return;
+  }
+  
+  // Extract artifact names and their last modified dates
+  const artifacts = [];
+  
+  for (const prefix of listResponse.CommonPrefixes) {
+    const artifactName = prefix.Prefix.replace(orgLuceePrefix, '').replace('/', '');
+    
+    // Get the latest file in this artifact directory to determine last modified date
+    const artifactListResponse = await s3Client.send(new ListObjectsV2Command({
+      Bucket: bucket,
+      Prefix: prefix.Prefix,
+      MaxKeys: 1000
+    }));
+    
+    let latestDate = new Date(0); // Start with epoch
+    
+    if (artifactListResponse.Contents && artifactListResponse.Contents.length > 0) {
+      for (const obj of artifactListResponse.Contents) {
+        if (obj.LastModified && obj.LastModified > latestDate) {
+          latestDate = obj.LastModified;
+        }
+      }
+    }
+    
+    artifacts.push({
+      name: artifactName,
+      lastModified: latestDate
+    });
+  }
+  
+  // Sort artifacts alphabetically
+  artifacts.sort((a, b) => a.name.localeCompare(b.name));
+  
+  // Generate HTML content
+  const html = generateDirectoryListingHtml(artifacts);
+  
+  // Upload the HTML file
+  await s3Client.send(new PutObjectCommand({
+    Bucket: bucket,
+    Key: 'org/lucee/index.html',
+    Body: html,
+    ContentType: 'text/html'
+  }));
+  
+  log(`Generated directory listing with ${artifacts.length} artifacts`);
+}
+
+function generateDirectoryListingHtml(artifacts) {
+  const formatDate = (date) => {
+    if (date.getTime() === 0) return '                   -';
+    return date.toISOString().slice(0, 16).replace('T', ' ');
+  };
+  
+  const artifactLinks = artifacts.map(artifact => {
+    const paddedName = (artifact.name + '/').padEnd(50);
+    const formattedDate = formatDate(artifact.lastModified);
+    
+    return `<a href="${artifact.name}/" title="${artifact.name}/">${paddedName}</a>                     ${formattedDate}         -      `;
+  }).join('\n');
+  
+  return `<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Central Repository: org/lucee</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+body {
+  background: #fff;
+}
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>org/lucee</h1>
+  </header>
+  <hr/>
+  <main>
+    <pre id="contents">
+<a href="../">../</a>
+${artifactLinks}
+    </pre>
+  </main>
+  <hr/>
+</body>
+
+</html>`;
 }
 
 // Run the script
