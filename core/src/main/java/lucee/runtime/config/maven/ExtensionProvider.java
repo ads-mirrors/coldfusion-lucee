@@ -151,10 +151,14 @@ public class ExtensionProvider {
 	}
 
 	public String toArtifact(String uuid) throws PageException, IOException, InterruptedException, GeneralSecurityException, SAXException {
+		return toArtifact(uuid, true);
+	}
+
+	public String toArtifact(String uuid, boolean investigate) throws PageException, IOException, InterruptedException, GeneralSecurityException, SAXException {
 		uuid = uuid.toUpperCase().trim();
 		String artifact = uuidMapping.get(uuid);
 		if (artifact != null) return artifact;
-		return extractArtifactByUUID(uuid);
+		return investigate ? extractArtifactByUUID(uuid) : null;
 	}
 
 	public List<String> list() throws IOException, InterruptedException {
