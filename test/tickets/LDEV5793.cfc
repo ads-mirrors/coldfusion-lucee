@@ -162,93 +162,93 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 	// Test functions for left < right scenario
 	private function testEQ_LT (){
-		var	left = '996012564777658757';
+		var	left =  '996012564777658757';
 		var right = '996012564777658758';
 		return (left eq right);
 	}
 
 	private function testLT_LT (){
-		var	left = '996012564777658757';
+		var	left =  '996012564777658757';
 		var right = '996012564777658758';
 		return (left lt right);
 	}
 
 	private function testLTE_LT (){
-		var	left = '996012564777658757';
+		var	left =  '996012564777658757';
 		var right = '996012564777658758';
 		return (left lte right);
 	}
 
 	private function testGT_LT (){
-		var	left = '996012564777658757';
+		var	left =  '996012564777658757';
 		var right = '996012564777658758';
 		return (left gt right);
 	}
 
 	private function testGTE_LT (){
-		var	left = '996012564777658757';
+		var	left =  '996012564777658757';
 		var right = '996012564777658758';
 		return (left gte right);
 	}
 
-	// Test functions for left = right scenario
+	// Test functions for left =  right scenario
 	private function testEQ_EQ (){
-		var	left = '996012564777658757';
+		var	left =  '996012564777658757';
 		var right = '996012564777658757';
 		return (left eq right);
 	}
 
 	private function testLT_EQ (){
-		var	left = '996012564777658757';
+		var	left =  '996012564777658757';
 		var right = '996012564777658757';
 		return (left lt right);
 	}
 
 	private function testLTE_EQ (){
-		var	left = '996012564777658757';
+		var	left =  '996012564777658757';
 		var right = '996012564777658757';
 		return (left lte right);
 	}
 
 	private function testGT_EQ (){
-		var	left = '996012564777658757';
+		var	left =  '996012564777658757';
 		var right = '996012564777658757';
 		return (left gt right);
 	}
 
 	private function testGTE_EQ (){
-		var	left = '996012564777658757';
+		var	left =  '996012564777658757';
 		var right = '996012564777658757';
 		return (left gte right);
 	}
 
 	// Test functions for left > right scenario
 	private function testEQ_GT (){
-		var	left = '996012564777658758';
+		var	left =  '996012564777658758';
 		var right = '996012564777658757';
 		return (left eq right);
 	}
 
 	private function testLT_GT (){
-		var	left = '996012564777658758';
+		var	left =  '996012564777658758';
 		var right = '996012564777658757';
 		return (left lt right);
 	}
 
 	private function testLTE_GT (){
-		var	left = '996012564777658758';
+		var	left =  '996012564777658758';
 		var right = '996012564777658757';
 		return (left lte right);
 	}
 
 	private function testGT_GT (){
-		var	left = '996012564777658758';
+		var	left =  '996012564777658758';
 		var right = '996012564777658757';
 		return (left gt right);
 	}
 
 	private function testGTE_GT (){
-		var	left = '996012564777658758';
+		var	left =  '996012564777658758';
 		var right = '996012564777658757';
 		return (left gte right);
 	}
