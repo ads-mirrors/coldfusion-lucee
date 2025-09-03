@@ -163,11 +163,14 @@ component {
 
 			"REDIS_SERVER": "localhost",
 			// "REDIS_PORT": 6379 // DON'T COMMIT
-			"LDAP_SERVER": "localhost"
+			"LDAP_SERVER": "localhost",
 			// "LDAP_USERNAME":
 			// "LDAP_PASSWORD":
 			// "LDAP_PORT":  10389 // DON't COMMMIT
 			// "LDAP_BASE_DN": "dc=example"
+
+			"HTTPBIN_SERVER": "localhost"
+			//"HTTPBIN_PORT": 8081
 
 		};
 	}
@@ -175,7 +178,7 @@ component {
 	public void function loadServiceConfig() localmode=true {
 		systemOutput( "", true) ;
 		systemOutput("-------------- Test Services ------------", true );
-		services = ListToArray("oracle,MySQL,MSsql,postgres,h2,mongoDb,smtp,pop,imap,s3,s3_custom,s3_google,s3_backblaze,ftp,sftp,memcached,redis,ldap");
+		services = ListToArray("oracle,MySQL,MSsql,postgres,h2,mongoDb,smtp,pop,imap,s3,s3_custom,s3_google,s3_backblaze,ftp,sftp,memcached,redis,ldap,httpbin");
 		// can take a while, so we check them them in parallel
 
 		services.each( function( service ) localmode=true {
@@ -243,6 +246,9 @@ component {
 							break;
 						case "ldap":
 							verify = verifyLDAP(cfg);
+							break;
+						case "httpbin":
+							verify = verifyHttpbin(cfg);
 							break;
 						default:
 							verify = verifyDatasource(cfg);
@@ -486,6 +492,19 @@ component {
 		throw "not configured";
 	}
 
+	public function verifyHttpbin ( httpbin ) localmode=true {
+		if ( structCount( httpbin ) eq 2 ){
+			var baseUrl = "http://#httpbin.server#:#httpbin.port#";
+			
+			// Test basic connectivity with /status/200 endpoint
+			cfhttp(url="#baseUrl#/status/200", method="GET", timeout="2", throwOnError=true);			// Test JSON response with /json endpoint
+			cfhttp(url="#baseUrl#/json", method="GET", timeout="2", throwOnError=true);
+
+			return "HTTPBin service verified at #baseUrl#";
+		}
+		throw "not configured";
+	}
+
 	public function addSupportFunctions() {
 		server._getTempDir = function ( string prefix="" ) localmode=true{
 			if ( len( arguments.prefix ) eq 0 ) {
@@ -713,6 +732,17 @@ component {
 				ldap = server._getSystemPropOrEnvVars( "SERVER, PORT, PORT_SECURE, USERNAME, PASSWORD, BASE_DN", "LDAP_" );
 				if ( ldap.count() eq 6 ){
 					return ldap;
+				}
+				break;
+			case "httpbin":
+				httpbin = server._getSystemPropOrEnvVars( "SERVER, PORT", "HTTPBIN_" );
+				if ( httpbin.count() eq 2 ){
+					return httpbin;
+				} else {
+					return {
+						server: "httpbin.org",
+						port: 80
+					};
 				}
 				break;
 			default:
