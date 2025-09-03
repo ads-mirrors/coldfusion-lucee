@@ -796,6 +796,13 @@ public final class RHExtension implements Serializable {
 		return res;
 	}
 
+	public static Resource getExtensionInstalledFile(Config config, String id, String version, Resource defaultValue) {
+		String fileName = toHash(id, version, "lex");
+		Resource res = getExtensionInstalledDir(config).getRealResource(fileName);
+		if (!res.exists()) return defaultValue;
+		return res;
+	}
+
 	public static Resource getMetaDataFile(Config config, String id, String version) {
 		String fileName = toHash(id, version, "obj");
 		return getExtensionInstalledDir(config).getRealResource(fileName);
