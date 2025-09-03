@@ -355,7 +355,7 @@ public abstract class ComponentPageImpl extends ComponentPage {
 
 					// no rest path
 					if (httpMethodMatches && StringUtil.isEmpty(restPath)) {
-						if (ArrayUtil.isEmpty(subPath)) {
+						if (ArrayUtil.isEmpty(subPath) || udf.getFunctionName().equalsIgnoreCase(subPath[0])) {
 							bestC = best(consumes, result.getContentType());
 							bestP = best(produces, result.getAccept());
 							if (bestC == null) status = 405;
