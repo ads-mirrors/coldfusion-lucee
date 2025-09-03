@@ -157,45 +157,7 @@ component {
 						systemOutput( "WARNING: suiteStat for [#bundle.name#] was empty?", true );
 					} else {
 						loop array=local.specStats item="local.specStat" {
-							if ( !isNull( specStat.failMessage ) && len( trim( specStat.failMessage ) ) ) {
-
-								var failedTestCase = {
-									 type       : "Failed"
-									,bundle     : bundle.name
-									,testCase   : specStat.name
-									,errMessage : specStat.failMessage
-									,cfmlStackTrace : []
-									,stackTrace : ""
-								};
-								if ( structKeyExists( specStat.error, "stackTrace" ) )
-									failedTestCase.stackTrace = specStat.error.stackTrace;
-
-								failedTestCases.append( failedTestCase );
-
-								systemOutput( NL & specStat.name );
-								systemOutput( NL & TAB & "Failed: " & specStat.failMessage, true );
-
-								if ( !isNull( specStat.failOrigin ) && !isEmpty( specStat.failOrigin ) ){
-
-									var rawStackTrace = specStat.failOrigin;
-									var testboxPath = getDirectoryFromPath( rawStackTrace[1].template );
-
-									//systemOutput(TAB & TAB & "at", true);
-
-									loop array=rawStackTrace item="local.st" index="local.i" {
-
-										if ( !st.template.hasPrefix( testboxPath ) ){
-											if ( local.i eq 1 or st.template does not contain "testbox" ){
-												var frame = st.template & ":" & st.line;
-												failedTestCase.cfmlStackTrace.append( frame );
-												systemOutput( TAB & frame, true );
-											}
-										}
-									}
-								}
-								systemOutput( NL );
-							} // if !isNull
-
+							
 							if ( !isNull( specStat.error ) && !isEmpty( specStat.error ) ){
 
 								var failedTestCase = {
@@ -246,6 +208,43 @@ component {
 
 							//	systemOutput(NL & serialize(specStat.error), true);
 
+							} else if ( !isNull( specStat.failMessage ) && len( trim( specStat.failMessage ) ) ) {
+
+								var failedTestCase = {
+									 type       : "Failed"
+									,bundle     : bundle.name
+									,testCase   : specStat.name
+									,errMessage : specStat.failMessage
+									,cfmlStackTrace : []
+									,stackTrace : ""
+								};
+								if ( structKeyExists( specStat.error, "stackTrace" ) )
+									failedTestCase.stackTrace = specStat.error.stackTrace;
+
+								failedTestCases.append( failedTestCase );
+
+								systemOutput( NL & specStat.name );
+								systemOutput( NL & TAB & "Failed: " & specStat.failMessage, true );
+
+								if ( !isNull( specStat.failOrigin ) && !isEmpty( specStat.failOrigin ) ){
+
+									var rawStackTrace = specStat.failOrigin;
+									var testboxPath = getDirectoryFromPath( rawStackTrace[1].template );
+
+									//systemOutput(TAB & TAB & "at", true);
+
+									loop array=rawStackTrace item="local.st" index="local.i" {
+
+										if ( !st.template.hasPrefix( testboxPath ) ){
+											if ( local.i eq 1 or st.template does not contain "testbox" ){
+												var frame = st.template & ":" & st.line;
+												failedTestCase.cfmlStackTrace.append( frame );
+												systemOutput( TAB & frame, true );
+											}
+										}
+									}
+								}
+								systemOutput( NL );
 							} // if !isNull
 						}
 					}
