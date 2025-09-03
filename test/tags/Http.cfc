@@ -16,10 +16,18 @@
  */
 component extends="org.lucee.cfml.test.LuceeTestCase" labels="http" {
 
-	variables.updateProvider =  server.getTestService("updateProvider").url;
+	variables.updateProvider = server.getTestService("updateProvider").url;
+	variables.httpbin = server.getTestService("httpbin");
+
+	function beforeAll() {
+		// Skip httpbin tests if service is not available
+		variables.hasHttpbin = structCount(variables.httpbin) > 0;
+	}
 
 	function testConnectionTimeout() {
-		http url="https://httpbin.org/delay/1" result="local.res";
+		if (!variables.hasHttpbin) return;
+		
+		http url="http://#variables.httpbin.server#:#variables.httpbin.port#/delay/1" result="local.res";
 		expect( res.status_code ).toBe(  200 );
 		
 		http url="https://lucee.org" connectionTimeout=createTimespan(0,0,0,0,1) result="local.res";
@@ -27,16 +35,20 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="http" {
 	}
 
 	function testSocketTimeout() {
-		http url="https://httpbin.org/delay/1" result="local.res";
+		if (!variables.hasHttpbin) return;
+		
+		http url="http://#variables.httpbin.server#:#variables.httpbin.port#/delay/1" result="local.res";
 		expect( res.status_code ).toBe(  200 );
 		
-		http url="https://httpbin.org/delay/1" sockettimeout=createTimespan(0,0,0,0,1) result="local.res";
+		http url="http://#variables.httpbin.server#:#variables.httpbin.port#/delay/1" sockettimeout=createTimespan(0,0,0,0,1) result="local.res";
 		expect( res.status_code ).toBe(  408 );
 	}
 
 	function testTimeout() {
-  		http url="https://httpbin.org/delay/10" timeout=createTimespan(0,0,0,0,1) result="local.res";
-  		expect( res.status_code ).toBe(  408 );
+		if (!variables.hasHttpbin) return;
+		
+		  http url="http://#variables.httpbin.server#:#variables.httpbin.port#/delay/10" timeout=createTimespan(0,0,0,0,1) result="local.res";
+		  expect( res.status_code ).toBe(  408 );
 	}
 
 	public function testHTTP() localmode="true"{
@@ -119,6 +131,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="http" {
 		// SystemOutput("", true);
 		// SystemOutput("CFHTTP is using [#tlsReport.tls_version#] (jvm default)", true);
 	}
+	
 	public void function testCachedHttpRequest(){
 		http url="#variables.updateProvider#/rest/update/provider/echoGet" result="local.res" method="get" cachedWithin="request"{
 			httpparam name="susi" value="Sorglos";
