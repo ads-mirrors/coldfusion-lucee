@@ -139,6 +139,7 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 	ComponentProperties properties;
 	private Map<Key, Member> _data;
 	private Map<Key, UDF> _udfs;
+	private Boolean isRestEnabled = null;
 
 	ComponentImpl top = this;
 	ComponentImpl base;
@@ -304,6 +305,7 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 			trg.properties = properties.duplicate();
 			trg.isInit = isInit;
 			trg.absFin = absFin;
+			trg.isRestEnabled = this.isRestEnabled;
 
 			// importDefintions
 			trg.importDefintions = importDefintions;
@@ -315,14 +317,16 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 				trg.base = base._duplicate(deepCopy, false);
 
 				trg._data = trg.base._data;
-				trg._udfs = duplicateUTFMap(this, trg, _udfs, new HashMap<Key, UDF>(trg.base._udfs));
+				Map<Key, UDF> baseMap = isRestEnabled ? new LinkedHashMap<Key, UDF>(trg.base._udfs) : new HashMap<Key, UDF>(trg.base._udfs);
+				trg._udfs = duplicateUTFMap(this, trg, _udfs, baseMap);
 
 				if (useShadow) trg.scope = new ComponentScopeShadow(trg, (ComponentScopeShadow) trg.base.scope, false);
 			}
 			else {
 				// clone data member, ignore udfs for the moment
 				trg._data = duplicateDataMember(trg, _data, new HashMap<Key, Member>(), deepCopy);
-				trg._udfs = duplicateUTFMap(this, trg, _udfs, new HashMap<Key, UDF>());
+				Map<Key, UDF> newMap = isRestEnabled ? new LinkedHashMap<Key, UDF>() : new HashMap<Key, UDF>();
+				trg._udfs = duplicateUTFMap(this, trg, _udfs, newMap);
 
 				if (useShadow) {
 					ComponentScopeShadow css = (ComponentScopeShadow) scope;
@@ -459,13 +463,14 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 		}
 		hasInit = componentPage.hasInit();
 
+		isRestEnabled = properties.meta != null && Caster.toBooleanValue(properties.meta.get("rest", Boolean.FALSE), false);
+
 		if (base != null) {
 			this.dataMemberDefaultAccess = base.dataMemberDefaultAccess;
 			this._static = new StaticScope(base._static, this, componentPage, dataMemberDefaultAccess);
-			// this._triggerDataMember=base._triggerDataMember;
 			this.absFin = base.absFin;
 			_data = base._data;
-			_udfs = new HashMap<Key, UDF>(base._udfs);
+			_udfs = isRestEnabled ? new LinkedHashMap<Key, UDF>(base._udfs) : new HashMap<Key, UDF>(base._udfs);
 			setTop(this, base);
 			if (hasInit != ComponentUtil.HAS_INIT_TRUE) {
 				hasInit = base.hasInit();
@@ -476,7 +481,7 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 			this._static = new StaticScope(null, this, componentPage, dataMemberDefaultAccess);
 			// TODO get per CFC setting
 			// this._triggerDataMember=pageContext.getConfig().getTriggerComponentDataMember();
-			_udfs = new HashMap<Key, UDF>();
+			_udfs = isRestEnabled ? new LinkedHashMap<Key, UDF>() : new HashMap<Key, UDF>();
 			_data = MapFactory.getConcurrentMap();
 		}
 		// implements
@@ -954,7 +959,32 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 
 	@Override
 	public Iterator<Entry<Key, Object>> entryIterator(int access) {
+		if (isRestEnabled != null && isRestEnabled.booleanValue()) {
+			return new ComponentEntryIterator(this, keysPreservingOrder(access), access);
+		}
 		return new ComponentEntryIterator(this, keys(access), access);
+	}
+
+	private Collection.Key[] keysPreservingOrder(int access) {
+		if (_udfs.isEmpty() && _data.isEmpty()) {
+			return new Collection.Key[0];
+		}
+		
+		List<Key> orderedKeys = new ArrayList<Key>(_udfs.size() + _data.size());
+		
+		for (Entry<Key, UDF> entry : _udfs.entrySet()) {
+			if (entry.getValue().getAccess() <= access) {
+				orderedKeys.add(entry.getKey());
+			}
+		}
+		for (Entry<Key, Member> entry : _data.entrySet()) {
+			Member member = entry.getValue();
+			if (member.getAccess() <= access && !(member instanceof UDF)) {
+				orderedKeys.add(entry.getKey());
+			}
+		}
+		
+		return orderedKeys.toArray(new Collection.Key[orderedKeys.size()]);
 	}
 
 	@Override
@@ -2540,6 +2570,7 @@ public final class ComponentImpl extends StructSupport implements Externalizable
 		this._udfs = other._udfs;
 		setOwner(_udfs);
 		setOwner(_data);
+		this.isRestEnabled = other.isRestEnabled;
 		this.afterConstructor = other.afterConstructor;
 		this.base = other.base;
 		// this.componentPage=other.componentPage;
