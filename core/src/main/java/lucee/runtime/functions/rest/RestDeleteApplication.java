@@ -52,7 +52,7 @@ public final class RestDeleteApplication {
 				if (RestUtil.isMatch(pc, mapping, dir)) {
 					admin.removeRestMapping(mapping.getVirtual());
 					admin.storeAndReload();
-					ConfigUtil.getConfigServerImpl(config).resetRestMappings();
+					config.resetRestMappings();
 				}
 			}
 		}

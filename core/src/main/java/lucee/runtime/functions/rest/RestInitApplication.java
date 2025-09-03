@@ -88,7 +88,7 @@ public final class RestInitApplication {
 			ConfigAdmin admin = ConfigAdmin.newInstance(pc.getConfig(), webAdminPassword);
 			admin.updateRestMapping(virtual, dir.getAbsolutePath(), defaultMapping);
 			admin.storeAndReload();
-			ConfigUtil.getConfigServerImpl(pc.getConfig()).resetRestMappings();
+			((ConfigWebPro) pc.getConfig()).resetRestMappings();
 		}
 		catch (Exception e) {
 			throw Caster.toPageException(e);
