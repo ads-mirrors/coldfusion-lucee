@@ -20,9 +20,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 	function testListLast(){
 
 
-		assertEquals("a,c,d",ListDeleteAt('a,b,c,d',2));
-		assertEquals(",,a,b,d,,",ListDeleteAt(',,a,b,c,d,,',3));
-		assertEquals(",,b,c,d,,",ListDeleteAt(',,a,b,c,d,,',3,',',true));
+		assertEquals("a,c,d",       ListDeleteAt('a,b,c,d',2));
+		assertEquals(",,a,b,d,,",   ListDeleteAt(',,a,b,c,d,,',3));
+		assertEquals(",,b,c,d,,",   ListDeleteAt(',,a,b,c,d,,',3,',',true));
+		assertEquals(",a,b,d,,",    ListDeleteAt(',a,b,c,d,,',3,',',false));
 
 	}
 }
