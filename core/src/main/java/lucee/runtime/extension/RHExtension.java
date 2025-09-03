@@ -885,6 +885,13 @@ public class RHExtension implements Serializable {
 		return res;
 	}
 
+	public static Resource getExtensionInstalledFile(Config config, String id, String version, Resource defaultValue) {
+		String fileName = toHash(id, version, "lex");
+		Resource res = getExtensionInstalledDir(config).getRealResource(fileName);
+		if (!res.exists()) return defaultValue;
+		return res;
+	}
+
 	private Struct getMetaData(Config config, String id, String version, Struct defaultValue) throws PageException, IOException {
 		Resource file = getMetaDataFile(config, id, version);
 		if (file.isFile()) return Caster.toStruct(new JSONExpressionInterpreter().interpret(null, IOUtil.toString(file, CharsetUtil.UTF8)));

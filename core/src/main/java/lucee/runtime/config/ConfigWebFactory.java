@@ -593,9 +593,13 @@ public final class ConfigWebFactory extends ConfigFactory {
 		if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(cs == null ? config : cs), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded filesystem");
 
 		if (!essentialOnly) {
-			_loadExtensionBundles(cs, config, root, log);
+			boolean madeInstallation = _loadExtensionBundles(cs, config, root, log);
 			if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(cs == null ? config : cs), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(), "loaded extension");
-
+			if (madeInstallation) {
+				_loadFilesystem(cs, config, root, doNew, log);
+				if (LOG) LogUtil.logGlobal(ThreadLocalPageContext.getConfig(cs == null ? config : cs), Log.LEVEL_DEBUG, ConfigWebFactory.class.getName(),
+						"loaded filesystem again after installing extensions");
+			}
 		}
 		else {
 			_loadExtensionDefinition(cs, config, root, log);
@@ -5061,7 +5065,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 	 * @param doc
 	 * @param log
 	 */
-	private static void _loadExtensionBundles(ConfigServerImpl cs, ConfigImpl config, Struct root, Log log) {
+	private static boolean _loadExtensionBundles(ConfigServerImpl cs, ConfigImpl config, Struct root, Log log) {
 		Log deployLog = config.getLog("deploy");
 		if (deployLog != null) log = deployLog;
 		try {
@@ -5073,7 +5077,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			String md5 = CollectionUtil.md5(children);
 			if (!changed) {
 				if (md5.equals(config.getExtensionsMD5())) {
-					return;
+					return false;
 				}
 			}
 
@@ -5172,6 +5176,7 @@ public final class ConfigWebFactory extends ConfigFactory {
 			ExceptionUtil.rethrowIfNecessary(t);
 			log(config, log, t);
 		}
+		return true;
 	}
 
 	private static void _loadExtensionDefinition(ConfigServerImpl cs, ConfigImpl config, Struct root, Log log) {

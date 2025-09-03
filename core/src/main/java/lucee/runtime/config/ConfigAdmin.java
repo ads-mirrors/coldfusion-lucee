@@ -93,7 +93,6 @@ import lucee.runtime.cache.CacheConnection;
 import lucee.runtime.cache.CacheUtil;
 import lucee.runtime.cfx.CFXTagException;
 import lucee.runtime.cfx.CFXTagPool;
-import lucee.runtime.config.ConfigMerge;
 import lucee.runtime.config.maven.MavenUpdateProvider;
 import lucee.runtime.converter.ConverterException;
 import lucee.runtime.converter.JSONConverter;
@@ -154,7 +153,6 @@ import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.type.util.ComponentUtil;
 import lucee.runtime.type.util.KeyConstants;
 import lucee.runtime.type.util.ListUtil;
-import lucee.runtime.type.util.StructUtil;
 import lucee.runtime.type.util.UDFUtil;
 import lucee.transformer.library.ClassDefinitionImpl;
 import lucee.transformer.library.function.FunctionLibException;
@@ -4829,17 +4827,18 @@ public final class ConfigAdmin {
 		Log logger = ThreadLocalPageContext.getLog(ci, "deploy");
 		String type = ci instanceof ConfigWeb ? "web" : "server";
 		// load already installed previous version and uninstall the parts no longer needed
-		RHExtension existingRH = getRHExtension(ci, rhext.getId(), null);
-		if (existingRH != null) {
-			// same version
-			if (existingRH.getVersion().compareTo(rhext.getVersion()) == 0) {
-				removeRHExtension(config, existingRH, rhext, false);
-			}
-			else {
+		String installedVersion = getInstalledExtensionVersion(ci, rhext.getId(), null);
+
+		if (installedVersion != null && installedVersion.compareTo(rhext.getVersion()) != 0) {
+			try {
+				RHExtension existingRH = RHExtension.getInstance(config, rhext.getId(), installedVersion);
 				removeRHExtension(config, existingRH, rhext, true);
 			}
-
+			catch (Exception e) {
+				logger.error("extension", e);
+			}
 		}
+
 		// INSTALL
 		try {
 
@@ -4877,13 +4876,13 @@ public final class ConfigAdmin {
 
 				// flds
 				if (!entry.isDirectory() && startsWith(path, type, "flds") && (StringUtil.endsWithIgnoreCase(path, ".fld") || StringUtil.endsWithIgnoreCase(path, ".fldx"))) {
-					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy fld [" + fileName + "]");
+					logger.log(Log.LEVEL_INFO, "extension", "Deploy fld [" + fileName + "]");
 					updateFLD(zis, fileName, false);
 					reloadNecessary = true;
 				}
 				// tlds
 				if (!entry.isDirectory() && startsWith(path, type, "tlds") && (StringUtil.endsWithIgnoreCase(path, ".tld") || StringUtil.endsWithIgnoreCase(path, ".tldx"))) {
-					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy tld/tldx [" + fileName + "]");
+					logger.log(Log.LEVEL_INFO, "extension", "Deploy tld/tldx [" + fileName + "]");
 					updateTLD(zis, fileName, false);
 					reloadNecessary = true;
 				}
@@ -4891,7 +4890,7 @@ public final class ConfigAdmin {
 				// tags
 				if (!entry.isDirectory() && startsWith(path, type, "tags")) {
 					String sub = subFolder(entry);
-					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy tag [" + sub + "]");
+					logger.log(Log.LEVEL_INFO, "extension", "Deploy tag [" + sub + "]");
 					updateTag(zis, sub, false);
 					// clearTags=true;
 					reloadNecessary = true;
@@ -4900,7 +4899,7 @@ public final class ConfigAdmin {
 				// functions
 				if (!entry.isDirectory() && startsWith(path, type, "functions")) {
 					String sub = subFolder(entry);
-					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy function [" + sub + "]");
+					logger.log(Log.LEVEL_INFO, "extension", "Deploy function [" + sub + "]");
 					updateFunction(zis, sub, false);
 					// clearFunction=true;
 					reloadNecessary = true;
@@ -4909,7 +4908,7 @@ public final class ConfigAdmin {
 				// mappings
 				if (!entry.isDirectory() && (startsWith(path, type, "archives") || startsWith(path, type, "mappings"))) {
 					String sub = subFolder(entry);
-					logger.log(Log.LEVEL_DEBUG, "extension", "deploy mapping " + sub);
+					logger.log(Log.LEVEL_INFO, "extension", "deploy mapping " + sub);
 					updateArchive(zis, sub, false);
 					reloadNecessary = true;
 					// clearFunction=true;
@@ -4919,7 +4918,7 @@ public final class ConfigAdmin {
 				if (!entry.isDirectory() && (startsWith(path, type, "event-gateways") || startsWith(path, type, "eventGateways"))
 						&& (StringUtil.endsWithIgnoreCase(path, "." + Constants.getCFMLComponentExtension()))) {
 					String sub = subFolder(entry);
-					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy event-gateway [" + sub + "]");
+					logger.log(Log.LEVEL_INFO, "extension", "Deploy event-gateway [" + sub + "]");
 					updateEventGateway(zis, sub, false);
 				}
 
@@ -4927,7 +4926,7 @@ public final class ConfigAdmin {
 				String realpath;
 				if (!entry.isDirectory() && startsWith(path, type, "context") && !StringUtil.startsWith(fileName(entry), '.')) {
 					realpath = path.substring(8);
-					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy context [" + realpath + "]");
+					logger.log(Log.LEVEL_INFO, "extension", "Deploy context [" + realpath + "]");
 					updateContext(zis, realpath, false, false);
 				}
 				// web contextS
@@ -4935,13 +4934,13 @@ public final class ConfigAdmin {
 				if (!entry.isDirectory() && ((first = startsWith(path, type, "webcontexts")) || startsWith(path, type, "web.contexts"))
 						&& !StringUtil.startsWith(fileName(entry), '.')) {
 					realpath = path.substring(first ? 12 : 13);
-					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy webcontext [" + realpath + "]");
+					logger.log(Log.LEVEL_INFO, "extension", "Deploy webcontext [" + realpath + "]");
 					updateWebContexts(zis, realpath, false, false);
 				}
 				// maven
 				if (!entry.isDirectory() && ((first = startsWith(path, type, "mvn")) || startsWith(path, type, "maven")) && !StringUtil.startsWith(fileName(entry), '.')) {
 					realpath = path.substring(first ? 4 : 6);
-					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy maven library bundled with extension [" + realpath + "]");
+					logger.log(Log.LEVEL_INFO, "extension", "Deploy maven library bundled with extension [" + realpath + "]");
 					updateMaven(zis, realpath, false, false, logger);
 				}
 				// applications
@@ -4953,19 +4952,19 @@ public final class ConfigAdmin {
 					else index = 4; // web
 
 					realpath = path.substring(index);
-					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy application [" + realpath + "]");
+					logger.log(Log.LEVEL_INFO, "extension", "Deploy application [" + realpath + "]");
 					updateApplication(zis, realpath, false);
 				}
 				// configs
 				if (!entry.isDirectory() && (startsWith(path, type, "config")) && !StringUtil.startsWith(fileName(entry), '.')) {
 					realpath = path.substring(7);
-					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy config [" + realpath + "]");
+					logger.log(Log.LEVEL_INFO, "extension", "Deploy config [" + realpath + "]");
 					updateConfigs(zis, realpath, false, false);
 				}
 				// components
 				if (!entry.isDirectory() && (startsWith(path, type, "components")) && !StringUtil.startsWith(fileName(entry), '.')) {
 					realpath = path.substring(11);
-					logger.log(Log.LEVEL_DEBUG, "extension", "Deploy component [" + realpath + "]");
+					logger.log(Log.LEVEL_INFO, "extension", "Deploy component [" + realpath + "]");
 					updateComponent(zis, realpath, false, false);
 				}
 
@@ -6677,7 +6676,7 @@ public final class ConfigAdmin {
 		return list.toArray(new BundleDefinition[list.size()]);
 	}
 
-	private RHExtension getRHExtension(final ConfigPro config, final String id, final RHExtension defaultValue) {
+	private String getInstalledExtensionVersion(final ConfigPro config, final String id, final String defaultValue) {
 		Array children = ConfigWebUtil.getAsArray("extensions", root);
 
 		if (children != null) {
@@ -6690,12 +6689,12 @@ public final class ConfigAdmin {
 				String _id = Caster.toString(tmp.get(KeyConstants._id, null), null);
 				if (!id.equals(_id)) continue;
 
-				try {
-					return RHExtension.getInstance(config, _id, Caster.toString(tmp.get(KeyConstants._version), null));
-				}
-				catch (Exception e) {
-					return defaultValue;
-				}
+				String _version = Caster.toString(tmp.get(KeyConstants._version, null), null);
+				if (_version == null) continue;
+
+				Resource res = RHExtension.getExtensionInstalledFile(config, _id, _version, null);
+				if (res != null) return _version;
+
 			}
 		}
 		return defaultValue;
