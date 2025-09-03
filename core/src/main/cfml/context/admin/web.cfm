@@ -427,7 +427,7 @@
 				}
 				if (isActive) {
 					hasActiveItem = true;
-					current.label = stNavi.label & ' - ' & stCld.label;
+					current.label = stCld.label & ' - ' & stNavi.label;
 				}
 
 				if (!toBool(stCld,"hidden") && (!isRestricted || toBool(stCld,"display"))) {
