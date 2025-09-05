@@ -101,7 +101,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 			it(title="java.util.Date should accept string date", body = function( currentSpec ) {
 				// string constructor does NOT accept a numeric string
-				expect( dateObj.createDateFromNum( "January 1, 1970 00:16:40 UTC" ) ).toBe( n ); // java.lang.string
+				expect( dateObj.createDateFromNum( "January 1, 1970 00:16:40 UTC" ) ).toBe( utcPlusOffset ); // java.lang.string
 			});
 			
 			it(title="java.util.Date match Double arg to constructor with Long", body = function( currentSpec ) {
