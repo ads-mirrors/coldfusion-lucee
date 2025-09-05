@@ -23,6 +23,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 			};
 
+
 			it(title="call method which requires a BigInteger with a numeric, should match and auto cast", body = function( currentSpec ) {
 				// This should auto-cast numeric to BigInteger
 				poi.getPara().setNumID( 1 );
@@ -73,6 +74,38 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				// Test with various explicit casts
 				para.setSpacingAfter( javacast("int", 10) );
 				para.setSpacingBetween( javacast("double", 1.5) );
+			});
+		});
+
+		describe( title="Test contructor matching java.util.Date and numeric values", body=function() {
+
+			var dateObj = new component {
+				import java.util.Date;
+				function createDateFromNum( num ) {
+					return new Date( arguments.num );
+				}
+			};
+
+
+			var utc=createDateTime(1970,1,1,0,0,0,0,"UTC");
+			var offset=1000000;
+			var utcPlusOffset=dateAdd("l",offset,utc);
+
+			it(title="java.util.Date should handle long", body = function( currentSpec ) {
+				expect( dateObj.createDateFromNum( javacast("long", offset ) ) ).toBe( utcPlusOffset ); // long		
+			});
+
+			it(title="java.util.Date should match long constructor with int argument", body = function( currentSpec ) {
+				expect( dateObj.createDateFromNum( javacast("int", offset ) ) ).toBe( utcPlusOffset ); // int
+			});
+
+			it(title="java.util.Date should accept string date", body = function( currentSpec ) {
+				// string constructor does NOT accept a numeric string
+				expect( dateObj.createDateFromNum( "January 1, 1970 00:16:40 UTC" ) ).toBe( n ); // java.lang.string
+			});
+			
+			it(title="java.util.Date match Double arg to constructor with Long", body = function( currentSpec ) {
+				expect( dateObj.createDateFromNum( offset ) ).toBe( utcPlusOffset );
 			});
 
 		});
