@@ -69,7 +69,7 @@ class ConstructorDynamic extends FunctionMemberDynamic implements Constructor {
 
 	@Override
 	public Object newInstance(Object... args) throws IOException {
-		ConstructorInstance ci = Reflector.getConstructorInstance(getDeclaringClass(), args, true);
+		ConstructorInstance ci = Reflector.getConstructorInstance(getDeclaringClass(), args, false);
 		try {
 			return ci.invoke();
 		}

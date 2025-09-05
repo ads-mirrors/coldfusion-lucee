@@ -346,20 +346,22 @@ public final class ClassUtil {
 	private static Class loadClass(ClassLoader cl, String className, Class defaultValue, Set<Throwable> exceptions) {
 
 		if (cl != null) {
+			// Classloader specific (CANNOT be cached, because the cache is not for classloader specific
+			// classes)
 			Class clazz = _loadClass(ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(cl), className, defaultValue, exceptions);
 			if (clazz != null) return clazz;
 		}
 
 		// MUST javasettings?
 
-		// OSGI env
+		// OSGI (CANNOT be cached, because the cache is specific to a OSGi bundle available)
 		Class clazz = _loadClass(new OSGiBasedClassLoading(), className, null, exceptions);
 		if (clazz != null) return clazz;
 
 		clazz = lcClasses.get(className);
 		if (clazz != null) return clazz;
 
-		// core classloader
+		// core classloader (can be cached because the core is global)
 		if (cl != SystemUtil.getCoreClassLoader()) {
 			clazz = _loadClass(ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(SystemUtil.getCoreClassLoader()), className, null, exceptions);
 			if (clazz != null) {
@@ -368,7 +370,7 @@ public final class ClassUtil {
 			}
 		}
 
-		// loader classloader
+		// loader classloader (can be cached because the loader is global)
 		if (cl != SystemUtil.getLoaderClassLoader()) {
 			clazz = _loadClass(ClassLoaderBasedClassLoading.getClassLoaderBasedClassLoading(SystemUtil.getLoaderClassLoader()), className, null, exceptions);
 			if (clazz != null) {
@@ -508,7 +510,7 @@ public final class ClassUtil {
 	 */
 	public static Object loadInstance(Class clazz) throws ClassException {
 		try {
-			return Reflector.getConstructorInstance(clazz, EMPTY_OBJ, true).invoke();
+			return Reflector.getConstructorInstance(clazz, EMPTY_OBJ, false).invoke();
 		}
 		catch (InstantiationException e) {
 			ClassException ce = new ClassException("the specified class object [" + clazz.getName() + "()] cannot be instantiated");
@@ -585,7 +587,7 @@ public final class ClassUtil {
 		if (args == null || args.length == 0) return loadInstance(clazz);
 
 		try {
-			return Reflector.getConstructorInstance(clazz, args, true).invoke();
+			return Reflector.getConstructorInstance(clazz, args, false).invoke();
 		}
 		catch (SecurityException e) {
 			ClassException ce = new ClassException("there is a security violation (thrown by security manager)");
@@ -648,7 +650,7 @@ public final class ClassUtil {
 	public static Object loadInstance(Class clazz, Object[] args, Object defaultValue) {
 		if (args == null || args.length == 0) return loadInstance(clazz, defaultValue);
 		try {
-			return Reflector.getConstructorInstance(clazz, args, true).invoke();
+			return Reflector.getConstructorInstance(clazz, args, false).invoke();
 
 		}
 		catch (Throwable t) {
@@ -1092,7 +1094,7 @@ public final class ClassUtil {
 
 	public static Object newInstance(Class clazz)
 			throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, PageException {
-		return Reflector.getConstructorInstance(clazz, EMPTY_OBJ, true).invoke();
+		return Reflector.getConstructorInstance(clazz, EMPTY_OBJ, false).invoke();
 	}
 
 	/*
