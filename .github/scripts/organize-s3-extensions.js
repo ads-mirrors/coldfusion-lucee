@@ -28,6 +28,7 @@ async function run() {
     const sourceExtension = process.env.INPUT_SOURCE_EXTENSION;
     const targetArtifactId = process.env.INPUT_TARGET_ARTIFACT_ID;
     const versionsInput = process.env.INPUT_VERSIONS;
+    const pomUrl = process.env.INPUT_POM_URL;
     const operation = process.env.INPUT_OPERATION || 'move';
     const dryRun = process.env.INPUT_DRY_RUN === 'true';
     const accessKeyId = process.env.INPUT_S3_ACCESS_KEY;
@@ -39,6 +40,7 @@ async function run() {
     log(`Source extension: "${sourceExtension}"`);
     log(`Target artifact ID: "${targetArtifactId}"`);
     log(`Versions input: "${versionsInput}"`);
+    log(`POM URL: "${pomUrl || 'Not provided'}"`);
 
     if (!sourceExtension || sourceExtension.trim() === '') {
       throw new Error('Source extension is required and cannot be empty');
@@ -167,7 +169,7 @@ async function run() {
       log(`${'='.repeat(60)}`);
 
       try {
-        const versionStats = await processExtensionVersion(sourceS3Client, targetS3Client, sourceBucket, targetBucket, sourceExtension, targetArtifactId, version, operation, dryRun);
+        const versionStats = await processExtensionVersion(sourceS3Client, targetS3Client, sourceBucket, targetBucket, sourceExtension, targetArtifactId, version, operation, dryRun, pomUrl);
         totalProcessed += versionStats.processed;
         totalMissing += versionStats.missing;
         totalSkipped += versionStats.skipped;
@@ -225,7 +227,7 @@ async function run() {
   }
 }
 
-async function processExtensionVersion(sourceS3Client, targetS3Client, sourceBucket, targetBucket, sourceExtension, targetArtifactId, version, operation, dryRun) {
+async function processExtensionVersion(sourceS3Client, targetS3Client, sourceBucket, targetBucket, sourceExtension, targetArtifactId, version, operation, dryRun, pomUrl) {
   log(`Starting processing for extension: ${sourceExtension}, version: ${version}`);
 
   // Define the source and target paths for the extension
@@ -295,12 +297,26 @@ async function processExtensionVersion(sourceS3Client, targetS3Client, sourceBuc
           // Update parent maven-metadata.xml
           await updateExtensionParentMetadata(targetS3Client, targetBucket, targetArtifactId, version, artifactTimestamp);
           log(`  ✓ Updated parent maven-metadata.xml with version ${version}`);
+          
+          // Generate and upload POM file if URL is provided
+          if (pomUrl && pomUrl.trim() !== '') {
+            try {
+              await generateAndUploadPom(targetS3Client, targetBucket, targetArtifactId, version, pomUrl);
+              log(`  ✓ Generated and uploaded POM file for ${targetArtifactId} ${version}`);
+            } catch (pomError) {
+              errorCount++;
+              logError(`  ✗ Failed to generate POM file: ${pomError.message}`);
+            }
+          }
         } catch (error) {
           errorCount++;
           logError(`  ✗ Failed to generate metadata: ${error.message}`);
         }
       } else {
         log(`  [DRY RUN] Would generate maven-metadata.xml files for ${targetArtifactId} ${version}`);
+        if (pomUrl && pomUrl.trim() !== '') {
+          log(`  [DRY RUN] Would generate POM file from ${pomUrl}`);
+        }
       }
     } else {
       if (result.reason === 'source file not found') {
@@ -476,6 +492,46 @@ async function updateExtensionParentMetadata(s3Client, bucket, artifactId, newVe
   }
 
   await uploadMetadata(s3Client, bucket, metadataKey, updatedMetadata);
+}
+
+async function generateAndUploadPom(s3Client, bucket, artifactId, version, pomUrl) {
+  log(`Fetching POM from ${pomUrl}`);
+  
+  // Fetch the POM content from the URL
+  const response = await fetch(pomUrl);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch POM from ${pomUrl}: ${response.status} ${response.statusText}`);
+  }
+  
+  let pomContent = await response.text();
+  
+  // Update the version in the POM content
+  // Replace the version tag in the root project element
+  const versionRegex = /<project[^>]*>[\s\S]*?<version>([^<]+)<\/version>/;
+  const match = pomContent.match(versionRegex);
+  
+  if (match) {
+    const currentVersion = match[1];
+    log(`Updating POM version from ${currentVersion} to ${version}`);
+    pomContent = pomContent.replace(
+      /<version>[^<]+<\/version>/,
+      `<version>${version}</version>`
+    );
+  } else {
+    logWarning('Could not find version tag in POM, uploading as-is');
+  }
+  
+  // Upload the POM file
+  const pomKey = `org/lucee/${artifactId}/${version}/${artifactId}-${version}.pom`;
+  
+  await s3Client.send(new PutObjectCommand({
+    Bucket: bucket,
+    Key: pomKey,
+    Body: pomContent,
+    ContentType: 'application/xml'
+  }));
+  
+  log(`Uploaded POM to ${pomKey}`);
 }
 
 function addVersionToExtensionMetadata(existingXml, newVersion, timestamp) {
