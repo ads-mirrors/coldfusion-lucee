@@ -76,9 +76,8 @@ public final class _Execute extends PageContextThread {
 	 * @param exitCodeVariable
 	 * @param timeout
 	 */
-	public _Execute(PageContext pageContext, Object monitor, String[] commands, Resource outputfile, String variable, Resource errorFile,
-			String errorVariable, String directory, Struct environment, String resultVariable, 
-			String exitCodeVariable, UDF onProgress, UDF onError, long timeout) {
+	public _Execute(PageContext pageContext, Object monitor, String[] commands, Resource outputfile, String variable, Resource errorFile, String errorVariable, String directory,
+			Struct environment, String resultVariable, String exitCodeVariable, UDF onProgress, UDF onError, long timeout) {
 		super(pageContext);
 		this.monitor = monitor;
 		this.commands = commands;
@@ -113,24 +112,24 @@ public final class _Execute extends PageContextThread {
 		try {
 			CommandResult result;
 			boolean redirectErrorStream = false;
-			if (onProgress != null ){
+			if (onProgress != null) {
 				UDFProcessListener progress = new UDFProcessListener(pc, onProgress);
 				UDFProcessListener error = null;
-				if (onError != null ) error = new UDFProcessListener(pc, onError);
+				if (onError != null) error = new UDFProcessListener(pc, onError);
 				else redirectErrorStream = true;
 				process = Command.createProcess(pc, commands, directory, environment, redirectErrorStream);
 				result = Command.execute(pc, process, timeout, progress, error);
-			} else {
+			}
+			else {
 				process = Command.createProcess(pc, commands, directory, environment, redirectErrorStream);
 				result = Command.execute(process);
 			}
-			
+
 			String rst = result.getOutput();
 			finished = true;
 			if (!aborted) {
-				if (outputfile == null && variable == null
-						&& resultVariable == null && exitCodeVariable == null) pc.write(rst);
-				else if (resultVariable != null){
+				if (outputfile == null && variable == null && resultVariable == null && exitCodeVariable == null) pc.write(rst);
+				else if (resultVariable != null) {
 					Struct sct = new StructImpl();
 					sct.setEL(Caster.toKey("output"), result.getOutput());
 					sct.setEL(Caster.toKey("error"), Caster.toString(result.getError()));
@@ -155,14 +154,17 @@ public final class _Execute extends PageContextThread {
 
 	/**
 	 * define that execution is aborted
+	 * 
 	 * @param terminateProcess
 	 */
 	public void abort(boolean terminateProcess) {
 		aborted = true;
 		if (terminateProcess) process.destroy();
 	}
+
 	/**
 	 * has an exception occured
+	 * 
 	 * @return exception statuss
 	 */
 	public boolean hasException() {
@@ -171,6 +173,7 @@ public final class _Execute extends PageContextThread {
 
 	/**
 	 * has the execution finished
+	 * 
 	 * @return has finished
 	 */
 
