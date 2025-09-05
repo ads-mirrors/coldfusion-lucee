@@ -23,6 +23,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 			};
 
+
 			it(title="call method which requires a BigInteger with a numeric, should match and auto cast", body = function( currentSpec ) {
 				// This should auto-cast numeric to BigInteger
 				poi.getPara().setNumID( 1 );
@@ -85,28 +86,26 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 				}
 			};
 
-			it(title="java.util.date should handle long", body = function( currentSpec ) {
-				var n = now();
-				var epoch = dateTimeFormat( n, "epochms" );
-				expect( dateObj.createDateFromNum( javacast("long", epoch ) ) ).toBe( n ); // long		
+
+			var utc=createDateTime(1970,1,1,0,0,0,0,"UTC");
+			var offset=1000000;
+			var utcPlusOffset=dateAdd("l",offset,utc);
+
+			it(title="java.util.Date should handle long", body = function( currentSpec ) {
+				expect( dateObj.createDateFromNum( javacast("long", offset ) ) ).toBe( utcPlusOffset ); // long		
 			});
 
-			xit(title="java.util.date should match long constructor with int argument", body = function( currentSpec ) {
-				var n = now();
-				var epoch = dateTimeFormat( n, "epochms" );
-				expect( dateObj.createDateFromNum( javacast("int", epoch ) ) ).toBe( n ); // int
+			it(title="java.util.Date should match long constructor with int argument", body = function( currentSpec ) {
+				expect( dateObj.createDateFromNum( javacast("int", offset ) ) ).toBe( utcPlusOffset ); // int
 			});
 
-			xit(title="java.util.Date should accept string date", body = function( currentSpec ) {
-				var n = now();
-				var epoch = dateTimeFormat( n );
-				expect( dateObj.createDateFromNum( epoch ) ).toBe( n ); // java.lang.string
+			it(title="java.util.Date should accept string date", body = function( currentSpec ) {
+				// string constructor does NOT accept a numeric string
+				expect( dateObj.createDateFromNum( "January 1, 1970 00:16:40 UTC" ) ).toBe( utcPlusOffset ); // java.lang.string
 			});
 			
-			xit(title="java.util.Date match Double arg to constructor with Long", body = function( currentSpec ) {
-				var n = now();
-				var epoch = dateTimeFormat( n, "epochms" ) * 1; // java.lang.Double
-				expect( dateObj.createDateFromNum( epoch ) ).toBe( n );
+			it(title="java.util.Date match Double arg to constructor with Long", body = function( currentSpec ) {
+				expect( dateObj.createDateFromNum( offset ) ).toBe( utcPlusOffset );
 			});
 
 		});
