@@ -94,7 +94,7 @@ public final class ResourceExecutionLog extends ExecutionLogSupport {
 		}
 		file = dir.getRealResource((pc.getId()) + "-" + CreateUUID.call(pc) + ".exl");
 		file.createNewFile();
-		start = System.currentTimeMillis();
+		start = System.nanoTime();
 	}
 
 	private static Resource getTemp(PageContext pc) {
@@ -106,9 +106,9 @@ public final class ResourceExecutionLog extends ExecutionLogSupport {
 
 	@Override
 	protected void _release() {
-
 		// execution time
-		createHeader(header, "execution-time", Caster.toString(System.currentTimeMillis() - start));
+		long executionTime = System.nanoTime() - start;
+		createHeader(header, "execution-time", Caster.toString(convertTime(executionTime, unit)));
 		header.append("\n");
 
 		// path
@@ -139,9 +139,7 @@ public final class ResourceExecutionLog extends ExecutionLogSupport {
 
 	@Override
 	protected void _log(int startPos, int endPos, long startTime, long endTime) {
-		long diff = endTime - startTime;
-		if (unit == UNIT_MICRO) diff /= 1000;
-		else if (unit == UNIT_MILLI) diff /= 1000000;
+		long diff = convertTime(endTime - startTime, unit);
 
 		content.append(path(pc.getCurrentPageSource().getDisplayPath()));
 		content.append("\t");
