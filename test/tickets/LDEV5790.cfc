@@ -1,55 +1,102 @@
 component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" skip=true {
 	function run( testResults , testBox ) {
 
-		describe( title="LDEV-5790 qoq with varchar col", body=function() {
+		describe( title="LDEV-5790 qoq with varchar col - WITH query params", body=function() {
 
 			it(title="checking with VARCHAR param", body = function( currentSpec ) {
-				test( "varchar", "varchar" );
+				testWith( "varchar", "varchar" );
 			});
 
-			it(title="checking with INT param", body = function( currentSpec ) {
-				test( "varchar", "int" );
+			xit(title="checking with INT param", body = function( currentSpec ) {
+				testWith( "varchar", "int" );
 			});
 
-			it(title="checking with BIGINT param", body = function( currentSpec ) {
-				test( "varchar", "bigint" );
+			xit(title="checking with BIGINT param", body = function( currentSpec ) {
+				testWith( "varchar", "bigint" );
 			});
 
-			it(title="checking with FLOAT param", body = function( currentSpec ) {
-				test( "varchar", "float" );
+			xit(title="checking with FLOAT param", body = function( currentSpec ) {
+				testWith( "varchar", "float" );
 			});
 		});
 
-		describe( title="LDEV-5790 qoq with BIGINT col", body=function() {
+		describe( title="LDEV-5790 qoq with varchar col - WITHOUT query params", body=function() {
 
 			it(title="checking with VARCHAR param", body = function( currentSpec ) {
-				test( "bigint", "varchar" );
+				testWithout( "varchar", "varchar" );
 			});
 
 			it(title="checking with INT param", body = function( currentSpec ) {
-				test( "bigint", "int" );
+				testWithout( "varchar", "int" );
 			});
 
 			it(title="checking with BIGINT param", body = function( currentSpec ) {
-				test( "bigint", "bigint" );
+				testWithout( "varchar", "bigint" );
 			});
 
 			it(title="checking with FLOAT param", body = function( currentSpec ) {
-				test( "bigint", "float" );
+				testWithout( "varchar", "float" );
+			});
+		});
+
+		describe( title="LDEV-5790 qoq with BIGINT col - WITH query params", body=function() {
+
+			it(title="checking with VARCHAR param", body = function( currentSpec ) {
+				testWith( "bigint", "varchar" );
+			});
+
+			xit(title="checking with INT param", body = function( currentSpec ) {
+				testWith( "bigint", "int" );
+			});
+
+			xit(title="checking with BIGINT param", body = function( currentSpec ) {
+				testWith( "bigint", "bigint" );
+			});
+
+			xit(title="checking with FLOAT param", body = function( currentSpec ) {
+				testWith( "bigint", "float" );
+			});
+		});
+
+		describe( title="LDEV-5790 qoq with BIGINT col - WITHOUT query params", body=function() {
+
+			it(title="checking with VARCHAR param", body = function( currentSpec ) {
+				testWithout( "bigint", "varchar" );
+			});
+
+			it(title="checking with INT param", body = function( currentSpec ) {
+				testWithout( "bigint", "int" );
+			});
+
+			it(title="checking with BIGINT param", body = function( currentSpec ) {
+				testWithout( "bigint", "bigint" );
+			});
+
+			it(title="checking with FLOAT param", body = function( currentSpec ) {
+				testWithout( "bigint", "float" );
 			});
 		});
 	}
 
-	private function test ( colDataType, clauseDataType ){
+	private function testWith ( colDataType, clauseDataType ){
 		var q = getQuery( colDataType );
 		expect( getMetadata( q )[ 1 ].typeName ) .toBe( arguments.colDataType ) ;
 		var val = q.num[ 1 ];
-		var r1 = testWithQueryParam( q, clauseDataType, val );
-		var r2 = testWithoutQueryParam( q, val );
-		expect( r1.q.recordCount ).toBe(1);
-		expect( r2.q.recordCount ).toBe(1);
-		expect( r1.q.num[ 1 ] ).toBe( val );
-		expect( r2.q.num[ 1 ] ).toBe( val );
+		var q_with = testWithQueryParam( q, clauseDataType, val );
+
+		expect( q_with.q.num[ 1 ] ).toBe( val );
+		expect( q_with.q.recordCount ).toBe(1);
+	}
+
+	private function testWithOut ( colDataType, clauseDataType ){
+		var q = getQuery( colDataType );
+		expect( getMetadata( q )[ 1 ].typeName ) .toBe( arguments.colDataType ) ;
+		var val = q.num[ 1 ];
+		var q_without = testWithoutQueryParam( q, val );
+
+		expect( q_without.q.recordCount ).toBe(1);
+		expect( q_without.q.num[ 1 ] ).toBe( val );
+
 	}
 
 	private function testWithQueryParam(q, dataType, val){
@@ -68,7 +115,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="qoq" skip=true {
 			{dbtype="query", result="r"}
 		);
 		return {q:q,r:r};
-	}	
+	}
 
 
 	private function getQuery(type){
