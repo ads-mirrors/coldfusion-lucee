@@ -134,12 +134,12 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 	}
 
 	public static CombinedClassLoader getRPCClassLoader(Config c, BundleClassLoader bcl, boolean reload) throws IOException {
-		return new CombinedClassLoader(getRPCClassLoader(c, null, bcl, SystemUtil.getLoaderClassLoader(), reload),
+		return CombinedClassLoader.getInstance(getRPCClassLoader(c, null, bcl, SystemUtil.getLoaderClassLoader(), reload),
 				getRPCClassLoader(c, null, bcl, SystemUtil.getCoreClassLoader(), reload));
 	}
 
 	public static CombinedClassLoader getRPCClassLoader(Config c, JavaSettings js, boolean reload) throws IOException {
-		return new CombinedClassLoader(getRPCClassLoader(c, js, null, SystemUtil.getLoaderClassLoader(), reload),
+		return CombinedClassLoader.getInstance(getRPCClassLoader(c, js, null, SystemUtil.getLoaderClassLoader(), reload),
 				getRPCClassLoader(c, js, null, SystemUtil.getCoreClassLoader(), reload));
 	}
 

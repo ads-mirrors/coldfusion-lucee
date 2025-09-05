@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.ClassLoaderDefault;
@@ -20,8 +21,18 @@ public final class CombinedClassLoader extends ClassLoader implements ClassLoade
 
 	private final PhysicalClassLoader core;
 	private final PhysicalClassLoader loader;
+	private static final int MAX_SIZE = 10000;
+	private static Map<String, CombinedClassLoader> instances = new ConcurrentHashMap<>();
 
-	public CombinedClassLoader(PhysicalClassLoader loader, PhysicalClassLoader core) {
+	public static CombinedClassLoader getInstance(PhysicalClassLoader loader, PhysicalClassLoader core) {
+		if (instances.size() > MAX_SIZE) {
+			instances.clear();
+		}
+		return instances.computeIfAbsent(loader.id + ":" + core.id, k -> new CombinedClassLoader(loader, core));
+
+	}
+
+	private CombinedClassLoader(PhysicalClassLoader loader, PhysicalClassLoader core) {
 		super(null); // null means it doesn't have a parent itself
 		this.core = core;
 		this.loader = loader;
