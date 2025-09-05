@@ -128,6 +128,12 @@ public abstract class ExecutionLogSupport implements ExecutionLog {
 		return "ns";
 	}
 
+	protected long convertTime(long timeInNanos, int targetUnit) {
+		if (targetUnit == UNIT_MICRO) return timeInNanos / 1000;
+		else if (targetUnit == UNIT_MILLI) return timeInNanos / 1000000;
+		return timeInNanos; // UNIT_NANO
+	}
+
 	private final static class Pair {
 		private final long time;
 		private final int pos;

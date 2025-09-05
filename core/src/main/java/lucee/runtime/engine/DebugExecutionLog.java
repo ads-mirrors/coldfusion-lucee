@@ -41,9 +41,7 @@ public final class DebugExecutionLog extends ExecutionLogSupport {
 		PageSource ps = pc.getCurrentPageSource(null);
 		if (ps == null) return;
 		
-		long diff = endTime - startTime;
-		if (unit == UNIT_MICRO) diff /= 1000;
-		else if (unit == UNIT_MILLI) diff /= 1000000;
+		long diff = convertTime(endTime - startTime, unit);
 
 		DebugEntry de = pc.getDebugger().getEntry(pc, ps, startPos, endPos);
 		de.updateExeTime((int) diff);
