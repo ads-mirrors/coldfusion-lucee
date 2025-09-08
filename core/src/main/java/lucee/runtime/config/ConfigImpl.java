@@ -491,7 +491,7 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 		if (compileType == -1) {
 			synchronized (SystemUtil.createToken("ConfigImpl", "getCompileType")) {
 				if (compileType == -1) {
-					ConfigFactoryImpl.loadJava(this, root, RECOMPILE_NEVER);
+					compileType = ConfigFactoryImpl.loadJava(this, root, RECOMPILE_NEVER);
 				}
 			}
 		}
@@ -2458,7 +2458,9 @@ public abstract class ConfigImpl extends ConfigBase implements ConfigPro {
 						else if (strDmda.equals("private")) componentDataMemberDefaultAccess = Component.ACCESS_PRIVATE;
 						else componentDataMemberDefaultAccess = Component.ACCESS_PUBLIC;
 					}
-
+					else {
+						componentDataMemberDefaultAccess = Component.ACCESS_PUBLIC;
+					}
 				}
 			}
 		}
