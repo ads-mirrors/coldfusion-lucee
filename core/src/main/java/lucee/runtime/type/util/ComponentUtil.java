@@ -94,8 +94,8 @@ import lucee.runtime.type.UDF;
 import lucee.runtime.type.UDFPropertiesBase;
 import lucee.runtime.type.dt.DateTime;
 import lucee.transformer.bytecode.BytecodeContext;
-import lucee.transformer.bytecode.PageImpl;
 import lucee.transformer.bytecode.ConstrBytecodeContext;
+import lucee.transformer.bytecode.PageImpl;
 import lucee.transformer.bytecode.util.ASMProperty;
 import lucee.transformer.bytecode.util.ASMPropertyImpl;
 import lucee.transformer.bytecode.util.ASMUtil;
@@ -411,11 +411,11 @@ public final class ComponentUtil {
 			throws PageException, IOException, ClassNotFoundException {
 		String real = className.replace('.', '/');
 
-		PhysicalClassLoader cl;
-		if (pc == null) cl = (PhysicalClassLoader) secondChanceConfig.getRPCClassLoader(false);
-		else cl = (PhysicalClassLoader) ((PageContextImpl) pc).getRPCClassLoader();
+		ClassLoader cl;
+		if (pc == null) cl = secondChanceConfig.getRPCClassLoader(false);
+		else cl = ((PageContextImpl) pc).getRPCClassLoader();
 
-		Resource rootDir = cl.getDirectory();
+		Resource rootDir = ((DirectoryProvider) cl).getDirectory();
 		Resource classFile = rootDir.getRealResource(real.concat(".class"));
 
 		if (classFile.exists()) {
@@ -438,8 +438,8 @@ public final class ComponentUtil {
 		ResourceUtil.touch(classFile);
 		IOUtil.copy(new ByteArrayInputStream(barr), classFile, true);
 
-		if (pc == null) cl = (PhysicalClassLoader) secondChanceConfig.getRPCClassLoader(exist);
-		else cl = (PhysicalClassLoader) ((PageContextImpl) pc).getRPCClassLoader(exist);
+		if (pc == null) cl = secondChanceConfig.getRPCClassLoader(exist);
+		else cl = ((PageContextImpl) pc).getRPCClassLoader(exist);
 
 		return cl.loadClass(className);
 
@@ -464,7 +464,7 @@ public final class ComponentUtil {
 		}
 	}
 
-	private static Class _getComponentPropertiesClass(PageContext pc, ClassLoader clw, Component component, boolean axisType)
+	private static Class _getComponentPropertiesClass(PageContext pc, ClassLoader cl, Component component, boolean axisType)
 			throws PageException, IOException, ClassNotFoundException {
 		ASMProperty[] props = ASMUtil.toASMProperties(component.getProperties(false, true, false, false));
 
@@ -485,20 +485,19 @@ public final class ComponentUtil {
 		if (classFile.lastModified() >= classFileOriginal.lastModified()) {
 			try {
 				Class clazz = null;
-				if (clw != null) clazz = ClassUtil.loadClass(clw, className, null);
-				if (clazz != null) clazz = rpc.loadClass(className);
+				if (cl != null) clazz = ClassUtil.loadClass(cl, className, null);
+				if (clazz == null) clazz = rpc.loadClass(className);
 				if (clazz != null && !hasChangesOfChildren(classFile.lastModified(), clazz)) return clazz;// ClassUtil.loadInstance(clazz);
 			}
 			catch (Throwable t) {
 				ExceptionUtil.rethrowIfNecessary(t);
 			}
 		}
-
 		// extends
 		String strExt = component.getExtends();
 		Class<?> ext = Object.class;
 		if (!StringUtil.isEmpty(strExt, true)) {
-			ext = Caster.cfTypeToClass(pc, clw, strExt);
+			ext = Caster.cfTypeToClass(pc, cl, strExt);
 		}
 		//
 		// create file
@@ -507,12 +506,11 @@ public final class ComponentUtil {
 		IOUtil.copy(new ByteArrayInputStream(barr), classFile, true);
 
 		Class clazz = null;
-		if (clw != null) {
-			clazz = ClassUtil.loadClass(clw, className, null);
+		if (cl != null) {
+			clazz = ClassUtil.loadClass(cl, className, null);
 			if (clazz != null) return clazz;
 		}
-
-		ClassLoader cl = ((PageContextImpl) pc).getRPCClassLoader(true);
+		cl = ((PageContextImpl) pc).getRPCClassLoader(true);
 		return cl.loadClass(className); // ClassUtil.loadInstance(cl.loadClass(className));
 	}
 

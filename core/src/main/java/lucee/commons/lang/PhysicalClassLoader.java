@@ -75,7 +75,7 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 
 	private static Map<String, PhysicalClassLoader> classLoaders = new ConcurrentHashMap<>();
 
-	private Resource directory;
+	private final Resource directory;
 	private ConfigPro config;
 	private final ClassLoader addionalClassLoader;
 	private final Collection<Resource> resources;
@@ -134,21 +134,25 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 	}
 
 	public static CombinedClassLoader getRPCClassLoader(Config c, BundleClassLoader bcl, boolean reload) throws IOException {
-		return CombinedClassLoader.getInstance(getRPCClassLoader(c, null, bcl, SystemUtil.getLoaderClassLoader(), reload),
-				getRPCClassLoader(c, null, bcl, SystemUtil.getCoreClassLoader(), reload));
+		return CombinedClassLoader.getInstance(getRPCClassLoader(c, null, bcl, SystemUtil.getCoreClassLoader(), reload),
+				getRPCClassLoader(c, null, bcl, SystemUtil.getLoaderClassLoader(), reload));
 	}
 
 	public static CombinedClassLoader getRPCClassLoader(Config c, JavaSettings js, boolean reload) throws IOException {
-		return CombinedClassLoader.getInstance(getRPCClassLoader(c, js, null, SystemUtil.getLoaderClassLoader(), reload),
-				getRPCClassLoader(c, js, null, SystemUtil.getCoreClassLoader(), reload));
+		return CombinedClassLoader.getInstance(getRPCClassLoader(c, js, null, SystemUtil.getCoreClassLoader(), reload),
+				getRPCClassLoader(c, js, null, SystemUtil.getLoaderClassLoader(), reload));
 	}
 
 	private static PhysicalClassLoader getRPCClassLoader(Config c, JavaSettings js, BundleClassLoader bcl, ClassLoader parent, boolean reload) throws IOException {
 		String key = js == null ? "orphan" : ((JavaSettingsImpl) js).id();
 
 		if (parent == null) parent = SystemUtil.getCoreClassLoader();
-		if (parent instanceof PhysicalClassLoader) key += ":" + ((PhysicalClassLoader) parent).id;
-		else key += ":" + parent.getClass().getName() + parent.hashCode();
+		if (parent instanceof PhysicalClassLoader) {
+			key += ":" + ((PhysicalClassLoader) parent).id;
+		}
+		else {
+			key += ":" + parent.getClass().getName() + parent.hashCode();
+		}
 
 		if (bcl != null) {
 			key += ":" + bcl;
@@ -156,7 +160,6 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 		key = HashUtil.create64BitHashAsString(key);
 
 		PhysicalClassLoader rpccl = reload ? null : classLoaders.get(key);
-
 		if (rpccl == null) {
 			synchronized (SystemUtil.createToken("PhysicalClassLoader", key)) {
 				rpccl = reload ? null : classLoaders.get(key);
@@ -198,13 +201,7 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 		if (!directory.canRead()) throw new IOException("Access denied to [" + directory + "] directory");
 		this.directory = directory;
 		this.rpc = rpc;
-
 		id = key;
-		/*
-		 * StringBuilder sb = new StringBuilder(); sb.append(directory); if (resources != null) { for
-		 * (Resource r: resources) { sb.append(';').append(r); } } id =
-		 * HashUtil.create64BitHashAsString(sb.toString());
-		 */
 	}
 
 	public String getBirthplace() {
@@ -323,11 +320,6 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 
 	@Override
 	protected Class<?> findClass(String name) throws ClassNotFoundException {
-		/*
-		 * ClassNotFoundException cnfe = null; try { return super.findClass(name); } catch
-		 * (ClassNotFoundException e) { cnfe = e; }
-		 */
-
 		if (super.findResource(name.replace('.', '/').concat(".class")) != null) {
 			return super.findClass(name);
 		}
@@ -350,7 +342,6 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 				// if (cnfe != null) throw cnfe;
 				throw new ClassNotFoundException("Class [" + name + "] is invalid or doesn't exist");
 			}
-
 			return _loadClass(name, read(name), false);
 		}
 	}
