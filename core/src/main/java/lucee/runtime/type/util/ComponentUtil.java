@@ -475,14 +475,14 @@ public final class ComponentUtil {
 		ClassLoader rpc = ((PageContextImpl) pc).getRPCClassLoader();
 
 		Resource classFile = ((DirectoryProvider) rpc).getDirectory().getRealResource(real.concat(".class"));
-
 		// get component class information
 		String classNameOriginal = component.getPageSource().getClassName();
 		String realOriginal = classNameOriginal.replace('.', '/');
 		Resource classFileOriginal = mapping.getClassRootDirectory().getRealResource(realOriginal.concat(".class"));
 
+		long classFileLastModified = classFile.lastModified();
 		// load existing class when pojo is still newer than component class file
-		if (classFile.lastModified() >= classFileOriginal.lastModified()) {
+		if (classFileLastModified >= classFileOriginal.lastModified()) {
 			try {
 				Class clazz = null;
 				if (cl != null) clazz = ClassUtil.loadClass(cl, className, null);
@@ -510,7 +510,7 @@ public final class ComponentUtil {
 			clazz = ClassUtil.loadClass(cl, className, null);
 			if (clazz != null) return clazz;
 		}
-		cl = ((PageContextImpl) pc).getRPCClassLoader(true);
+		cl = ((PageContextImpl) pc).getRPCClassLoader(classFileLastModified > 0);
 		return cl.loadClass(className); // ClassUtil.loadInstance(cl.loadClass(className));
 	}
 

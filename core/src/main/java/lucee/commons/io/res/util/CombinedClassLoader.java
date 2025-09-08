@@ -24,10 +24,17 @@ public final class CombinedClassLoader extends ClassLoader implements ClassLoade
 	private static final int MAX_SIZE = 10000;
 	private static Map<String, CombinedClassLoader> instances = new ConcurrentHashMap<>();
 
-	public static CombinedClassLoader getInstance(PhysicalClassLoader loader, PhysicalClassLoader core) {
+	public static CombinedClassLoader getInstance(PhysicalClassLoader loader, PhysicalClassLoader core, boolean flush) {
 		if (instances.size() > MAX_SIZE) {
 			instances.clear();
 		}
+
+		if (flush) {
+			CombinedClassLoader newInstance = new CombinedClassLoader(loader, core);
+			instances.put(loader.id + ":" + core.id, newInstance);
+			return newInstance;
+		}
+
 		return instances.computeIfAbsent(loader.id + ":" + core.id, k -> new CombinedClassLoader(loader, core));
 
 	}

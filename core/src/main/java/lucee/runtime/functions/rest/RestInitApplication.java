@@ -23,7 +23,6 @@ import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.cache.CacheUtil;
 import lucee.runtime.config.ConfigAdmin;
-import lucee.runtime.config.ConfigUtil;
 import lucee.runtime.config.ConfigWebPro;
 import lucee.runtime.config.Password;
 import lucee.runtime.exp.PageException;
