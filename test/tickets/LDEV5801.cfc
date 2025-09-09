@@ -287,7 +287,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="jdbc" {
 	}
 
 	private function isPostgresNotAvailable() {
-		return false;//structCount(variables.postgres) == 0;
+		return structCount(variables.postgres?:{}) == 0;
 	}
 
 }

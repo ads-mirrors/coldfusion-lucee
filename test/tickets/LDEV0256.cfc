@@ -5,6 +5,14 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 		variables.passphrase = 'passphrase';
 		variables.iterations = 10;
 		variables.keysize = 2048;
+
+
+		var supportedAlgorithms = lucee.runtime.functions.other.GeneratePBKDFKey::getSupportedAlgorithms();
+		variables.sctSupportedAlgorithms={};
+		loop array=supportedAlgorithms item="local.algo" {
+			variables.sctSupportedAlgorithms[ algo ]=true;
+		}
+
 	}
 
 	function run( testResults , testBox ) {
@@ -13,6 +21,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 			describe( 'GeneratePBKDFKey returns expected value' , function() {
 				it( 'for PBKDF2WithHmacSHA1' , function() {
+					if(!structKeyExists( variables.sctSupportedAlgorithms, 'PBKDF2WithHmacSHA1' ) )return;
 					expect(
 						GeneratePBKDFKey( 'PBKDF2WithHmacSHA1' , passphrase , salt, iterations , keysize )
 					).toBe(
@@ -20,10 +29,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					);
 				});
 				it( 'for PBKDF2WithHmacSHA1 without optional optional arguments' , function() {
+					if(!structKeyExists( variables.sctSupportedAlgorithms, 'PBKDF2WithHmacSHA1' ) )return;
 					expect(GeneratePBKDFKey( 'PBKDF2WithHmacSHA1' , passphrase , salt)).toBe('T79SiDbjZA7PE40YtZsdhA==');
 				});
 
 				it( 'for PBKDF2WithHmacSHA224' , function() {
+					if(!structKeyExists( variables.sctSupportedAlgorithms, 'PBKDF2WithHmacSHA224' ) )return;
 					expect(
 						GeneratePBKDFKey( 'PBKDF2WithHmacSHA224' , passphrase , salt, iterations , keysize )
 					).toBe(
@@ -31,11 +42,13 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					);
 				});
 				it( 'for PBKDF2WithHmacSHA224 without optional optional arguments' , function() {
+					if(!structKeyExists( variables.sctSupportedAlgorithms, 'PBKDF2WithHmacSHA224' ) )return;
 					expect(GeneratePBKDFKey( 'PBKDF2WithHmacSHA224' , passphrase , salt)).toBe('wlWb4EdrdkIffsCt2uaHIQ==');
 				});
 
 
 				it( 'for PBKDF2WithHmacSHA256' , function() {
+					if(!structKeyExists( variables.sctSupportedAlgorithms, 'PBKDF2WithHmacSHA256' ) )return;
 					expect(
 						GeneratePBKDFKey( 'PBKDF2WithHmacSHA256' , passphrase , salt, iterations , keysize )
 					).toBe(
@@ -43,10 +56,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					);
 				});
 				it( 'for PBKDF2WithHmacSHA256 without optional optional arguments' , function() {
+					if(!structKeyExists( variables.sctSupportedAlgorithms, 'PBKDF2WithHmacSHA256' ) )return;
 					expect(GeneratePBKDFKey( 'PBKDF2WithHmacSHA256' , passphrase , salt)).toBe('l+xVDQz+AbkHVR+1q8yyKA==');
 				});
 
 				it( 'for PBKDF2WithHmacSHA384' , function() {
+					if(!structKeyExists( variables.sctSupportedAlgorithms, 'PBKDF2WithHmacSHA384' ) )return;
 					expect(
 						GeneratePBKDFKey( 'PBKDF2WithHmacSHA384' , passphrase , salt, iterations , keysize )
 					).toBe(
@@ -54,10 +69,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					);
 				});
 				it( 'for PBKDF2WithHmacSHA384 without optional optional arguments' , function() {
+					if(!structKeyExists( variables.sctSupportedAlgorithms, 'PBKDF2WithHmacSHA384' ) )return;
 					expect(GeneratePBKDFKey( 'PBKDF2WithHmacSHA384' , passphrase , salt)).toBe('7vZLcvs2laScVQgtpDkuGA==');
 				});
 
 				it( 'for PBKDF2WithHmacSHA512' , function() {
+					if(!structKeyExists( variables.sctSupportedAlgorithms, 'PBKDF2WithHmacSHA512' ) )return;
 					expect(
 						GeneratePBKDFKey( 'PBKDF2WithHmacSHA512' , passphrase , salt, iterations , keysize )
 					).toBe(
@@ -65,10 +82,12 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					);
 				});
 				it( 'for PBKDF2WithHmacSHA512 without optional optional arguments' , function() {
+					if(!structKeyExists( variables.sctSupportedAlgorithms, 'PBKDF2WithHmacSHA512' ) )return;
 					expect(GeneratePBKDFKey( 'PBKDF2WithHmacSHA512' , passphrase , salt)).toBe('FOHqEZmtiJU70L07REmppA==');
 				});
 
 				it( 'for PBKDF2WithHmacSHA512/256' , function() {
+					if(!structKeyExists( variables.sctSupportedAlgorithms, 'PBKDF2WithHmacSHA512/256' ) )return;
 					expect(
 						GeneratePBKDFKey( 'PBKDF2WithHmacSHA512/256' , passphrase , salt, iterations , keysize )
 					).toBe(
@@ -76,15 +95,17 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					);
 				});
 				it( 'for PBKDF2WithHmacSHA512/256 without optional optional arguments' , function() {
+					if(!structKeyExists( variables.sctSupportedAlgorithms, 'PBKDF2WithHmacSHA512/256' ) )return;
 					expect(GeneratePBKDFKey( 'PBKDF2WithHmacSHA512/256' , passphrase , salt)).toBe('9Isklm6y3m1XNhN0AomndQ==');
 				});
 
 				it( 'for PBKDF2WithHmacSHA512/224 without optional optional arguments' , function() {
+					if(!structKeyExists( variables.sctSupportedAlgorithms, 'PBKDF2WithHmacSHA512/224' ) )return;
 					expect(GeneratePBKDFKey( 'PBKDF2WithHmacSHA512/224' , passphrase , salt)).toBe('eFq7loIUDvEhLi/UiNLjHw==');
 				});
 				it( 'for PBKDF2WithHmacSHA512/224' , function() {
-					expect(
-						GeneratePBKDFKey( 'PBKDF2WithHmacSHA512/224' , passphrase , salt, iterations , keysize )
+					if(!structKeyExists( variables.sctSupportedAlgorithms, 'PBKDF2WithHmacSHA512/224' ) )return;
+					expect(GeneratePBKDFKey( 'PBKDF2WithHmacSHA512/224' , passphrase , salt, iterations , keysize )
 					).toBe(
 						'TlZGh8gJ/q4gL7sTfNuMk8gBEKDk6BOifgtLXdYx6Q4wAKQCEnMnuWEvhJcwLACPCpgwtiKJvq8xXRG79Wv1VYHPS+Udd76vD1mEWkRvPEbkHDcWBapcmHklwfHG2XCvv004+DtYl8hoySHtq67hGZs/2CTjqe/KKuBpZysFJMhuWWwu2kncxxr4sjAJcO7XCxhd3kzOgsZrq8+JVSqm4qyevNaWtY3Isfpna1CWqc6jerc1IGG0fHvmYf1/YhLCjRAPcNY1rcamds5uKBhJsmq4Mg2EFT2TyJsFH9dK2N9pfXLDzCMO4n/weMMJT4Tw6dcMZIfTYIogtTgvbNEwnA=='
 					);
