@@ -19,8 +19,8 @@
 package lucee.runtime.functions.other;
 
 import java.security.NoSuchAlgorithmException;
-import java.security.Security;
 import java.security.Provider;
+import java.security.Security;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 
@@ -52,8 +52,8 @@ public final class GeneratePBKDFKey extends BIF {
 		// algo
 		if (StringUtil.isEmpty(algorithm)) throw new FunctionException(pc, "GeneratePBKDFKey", 1, "algorithm", "Argument [algorithm] is empty.");
 		algorithm = algorithm.trim();
-		if (!StringUtil.startsWithIgnoreCase(algorithm, "PBK"))
-			throw new FunctionException(pc, "GeneratePBKDFKey", 1, "algorithm", "The alogrithm [" + algorithm + "] is not supported. Supported algorithms are [ " + getSupportedAlgorithms() + " ]");
+		if (!StringUtil.startsWithIgnoreCase(algorithm, "PBK")) throw new FunctionException(pc, "GeneratePBKDFKey", 1, "algorithm",
+				"The alogrithm [" + algorithm + "] is not supported. Supported algorithms are [ " + getSupportedAlgorithmsAsList() + " ]");
 
 		// TODO add provider to support addional keys by addin a provider that is supporting it
 		SecretKeyFactory key = null;
@@ -61,8 +61,8 @@ public final class GeneratePBKDFKey extends BIF {
 			key = SecretKeyFactory.getInstance(algorithm);
 		}
 		catch (NoSuchAlgorithmException e) {
-			if (!algorithm.equalsIgnoreCase("PBKDF2WithHmacSHA1"))
-				throw new FunctionException(pc, "GeneratePBKDFKey", 1, "algorithm", "The alogrithm [" + algorithm + "] is not supported. Supported algorithms are [ " + getSupportedAlgorithms() + " ]");
+			if (!algorithm.equalsIgnoreCase("PBKDF2WithHmacSHA1")) throw new FunctionException(pc, "GeneratePBKDFKey", 1, "algorithm",
+					"The alogrithm [" + algorithm + "] is not supported. Supported algorithms are [ " + getSupportedAlgorithmsAsList() + " ]");
 			throw Caster.toPageException(e);
 		}
 
@@ -85,14 +85,18 @@ public final class GeneratePBKDFKey extends BIF {
 		throw new FunctionException(pc, "GeneratePBKDFKey", 3, 5, args.length);
 	}
 
-	private static String getSupportedAlgorithms() {
+	private static String getSupportedAlgorithmsAsList() {
+		return ListUtil.toList(getSupportedAlgorithms(), ", ");
+	}
+
+	public static ArrayList<String> getSupportedAlgorithms() {
 		ArrayList<String> algorithms = new ArrayList<>();
-		for (Provider provider : Security.getProviders()) {
-			for (Provider.Service service : provider.getServices()) {
+		for (Provider provider: Security.getProviders()) {
+			for (Provider.Service service: provider.getServices()) {
 				String algorithm = service.getAlgorithm();
 				if (algorithm.startsWith("PBK")) algorithms.add(algorithm);
 			}
 		}
-		return ListUtil.toList(algorithms, ", ");
+		return algorithms;
 	}
 }
