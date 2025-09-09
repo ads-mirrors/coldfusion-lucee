@@ -43,7 +43,6 @@ import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.type.file.FileResource;
-import lucee.commons.io.res.util.CombinedClassLoader;
 import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.ClassUtil.ClassLoading;
 import lucee.runtime.PageSourcePool;
@@ -133,14 +132,19 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 		return rpccl;
 	}
 
-	public static CombinedClassLoader getRPCClassLoader(Config c, BundleClassLoader bcl, boolean reload) throws IOException {
-		return CombinedClassLoader.getInstance(getRPCClassLoader(c, null, bcl, SystemUtil.getCoreClassLoader(), reload),
-				getRPCClassLoader(c, null, bcl, SystemUtil.getLoaderClassLoader(), reload), reload);
+	public static PhysicalClassLoader getRPCClassLoader(Config c, BundleClassLoader bcl, boolean reload) throws IOException {
+		return getRPCClassLoader(c, null, bcl, SystemUtil.getCoreClassLoader(), reload);
+		// return CombinedClassLoader.getInstance(getRPCClassLoader(c, null, bcl,
+		// SystemUtil.getLoaderClassLoader(), reload),
+		// getRPCClassLoader(c, null, bcl, SystemUtil.getCoreClassLoader(), reload), reload);
 	}
 
-	public static CombinedClassLoader getRPCClassLoader(Config c, JavaSettings js, boolean reload) throws IOException {
-		return CombinedClassLoader.getInstance(getRPCClassLoader(c, js, null, SystemUtil.getCoreClassLoader(), reload),
-				getRPCClassLoader(c, js, null, SystemUtil.getLoaderClassLoader(), reload), reload);
+	public static PhysicalClassLoader getRPCClassLoader(Config c, JavaSettings js, boolean reload) throws IOException {
+		return getRPCClassLoader(c, js, null, SystemUtil.getCoreClassLoader(), reload);
+
+		// return CombinedClassLoader.getInstance(getRPCClassLoader(c, js, null,
+		// SystemUtil.getLoaderClassLoader(), reload),
+		// getRPCClassLoader(c, js, null, SystemUtil.getCoreClassLoader(), reload), reload);
 	}
 
 	private static PhysicalClassLoader getRPCClassLoader(Config c, JavaSettings js, BundleClassLoader bcl, ClassLoader parent, boolean reload) throws IOException {
@@ -233,12 +237,22 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 
 	@Override
 	public Class<?> loadClass(String name, boolean resolve, Class<?> defaultValue) {
-		return loadClass(name, resolve, true, defaultValue);
+		try {
+			return loadClass(name, resolve, true);
+		}
+		catch (ClassNotFoundException e) {
+			return defaultValue;
+		}
 	}
 
 	@Override
 	public Class<?> loadClass(String className, Class defaultValue) {
-		return loadClass(className, false, true, defaultValue);
+		try {
+			return loadClass(className, false, true);
+		}
+		catch (ClassNotFoundException e) {
+			return defaultValue;
+		}
 	}
 
 	@Override
@@ -254,57 +268,70 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 		}
 	}
 
-	private Class<?> loadClass(String name, boolean resolve, boolean loadFromFS, Class<?> defaultValue) {
+	private Class<?> loadClass(String name, boolean resolve, boolean loadFromFS) throws ClassNotFoundException {
 		// First, check if the class has already been loaded
 		Class<?> c = findLoadedClass(name);
-		if (c == null) {
-			synchronized (SystemUtil.createToken("PhysicalClassLoader:load", name)) {
-				c = findLoadedClass(name);
-				if (c == null) {
-					ClassLoader pcl = getParent();
-					if (pcl instanceof ClassLoaderDefault) {
-						c = ((ClassLoaderDefault) pcl).loadClass(name, resolve, null);
-					}
-					else {
-						try {
-							c = super.loadClass(name, resolve);
-						}
-						catch (Exception e) {
-						}
-					}
+		if (c != null) {
+			if (resolve) resolveClass(c);
+			return c;
+		}
 
-					if (c == null && addionalClassLoader != null) {
-						try {
-							c = addionalClassLoader.loadClass(name);
-						}
-						catch (Exception e) {
-						}
-					}
+		synchronized (getClassLoadingLock(name)) {
+			// Check again after acquiring lock
+			c = findLoadedClass(name);
+			if (c != null) {
+				if (resolve) resolveClass(c);
+				return c;
+			}
 
-					if (c == null) {
-						if (loadFromFS) {
-							try {
-								c = findClass(name);
-							}
-							catch (ClassNotFoundException e) {
-								return defaultValue;
-							}
-						}
-						else return defaultValue;
+			// Check additional classloader first (if any)
+			if (addionalClassLoader != null) {
+				try {
+					c = addionalClassLoader.loadClass(name);
+					if (resolve) resolveClass(c);
+					return c;
+				}
+				catch (ClassNotFoundException e) {
+					// Continue to next strategy
+				}
+			}
+
+			// Try resources FIRST (Maven libraries override core)
+			try {
+				c = super.findClass(name); // This searches the URL resources
+				if (resolve) resolveClass(c);
+				return c;
+			}
+			catch (ClassNotFoundException e1) {
+				// Resources didn't have it, try parent (core classloader)
+				ClassLoader parent = getParent();
+				if (parent != null) {
+					try {
+						c = parent.loadClass(name);
+						if (resolve) resolveClass(c);
+						return c;
 					}
+					catch (ClassNotFoundException e2) {
+						// Continue to filesystem
+					}
+				}
+
+				// Finally try filesystem directory
+				if (loadFromFS) {
+					try {
+						c = findClass(name); // Your custom findClass for directory
+						if (resolve) resolveClass(c);
+						return c;
+					}
+					catch (ClassNotFoundException e3) {
+						throw new ClassNotFoundException(name);
+					}
+				}
+				else {
+					throw new ClassNotFoundException(name);
 				}
 			}
 		}
-		if (resolve) resolveClass(c);
-		return c;
-	}
-
-	private Class<?> loadClass(String name, boolean resolve, boolean loadFromFS) throws ClassNotFoundException {
-		Class<?> c = loadClass(name, resolve, loadFromFS, null);
-		if (c == null) {
-			throw new ClassNotFoundException(name);
-		}
-		return c;
 	}
 
 	@Override
@@ -320,10 +347,6 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 
 	@Override
 	protected Class<?> findClass(String name) throws ClassNotFoundException {
-		if (super.findResource(name.replace('.', '/').concat(".class")) != null) {
-			return super.findClass(name);
-		}
-
 		if (addionalClassLoader != null) {
 			// boolean true in case it returns TRUE or null
 			if (!Boolean.FALSE.equals(isClassAvailable(addionalClassLoader, name))) {
@@ -334,6 +357,10 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 					LogUtil.trace("physical-classloader", e);
 				}
 			}
+		}
+
+		if (super.findResource(name.replace('.', '/').concat(".class")) != null) {
+			return super.findClass(name);
 		}
 
 		synchronized (SystemUtil.createToken("PhysicalClassLoader:load", name)) {
