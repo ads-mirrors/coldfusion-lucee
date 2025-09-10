@@ -27,6 +27,34 @@ The Lucee code base was forked from the Railo Server Project (Version 4.2) in Ja
 - Build usually is run with Java 21
 - All artifacts are compiled to bytecode targeting Java 11
 
+## Lucee Ant Script Runner
+
+Lucee Ant Script Runner allows you to run Lucee CFML scripts headless (without a web server) from the command line or CI/CD pipelines.  
+It is ideal for automation, testing, and running scripts with custom Lucee builds.
+
+**Requirements:**  
+- You must have a local copy of the [script-runner repository](https://github.com/lucee/script-runner) checked out.  
+  If you do not have it, please clone it first.  
+  > **Tip:** The script-runner directory may already exist in the parent directory of this repo.
+
+- To use a custom Lucee JAR, first build it by running:
+  ```sh
+  ant fast
+  ```
+  in the `/loader` directory of this repo.  
+  The resulting JAR will be found in `loader/target` and its filename will include the version (e.g., `lucee-7.0.0.1.jar`).
+
+**Example usage:**
+```sh
+ant -buildfile="..\script-runner\build.xml" -DluceeJar="loader\target\lucee-7.0.0.1.jar" -Dwebroot="D:\work\yourproject" -Dexecute="test.cfm"
+```
+
+- `-DluceeJar` points to your custom-built Lucee JAR in `loader/target`.
+- `-Dwebroot` is your project directory.
+- `-Dexecute` is the script to run (relative to webroot).
+
+See [script-runner README](../script-runner/README.md) for full details and troubleshooting.
+
 ## Contribution Workflow
 
 - Before starting work, consider filing a proposal on the mailing list.

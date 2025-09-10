@@ -586,8 +586,8 @@
 </target>
 
 <target name="__extract_testbox" if="testcases">
-    <echots message="getting and unzip testbox"/>
-    <!-- now we need to get the testbox source -->
+    <echots message="extracting cached testbox"/>
+    <!-- extract testbox from cache -->
     <copy 
 			file="${cache}/testbox-${testboxVersion}.zip" 
 			todir="${temp}"/>
