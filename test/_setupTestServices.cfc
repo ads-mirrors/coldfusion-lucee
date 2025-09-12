@@ -292,7 +292,9 @@ component {
 			service = server.test_services[ s ];
 			if ( !service.valid and structKeyExists( service, "stacktrace" ) ){
 				ArrayAppend( failed, "-> Service [ #s# ] #chr( 9 )# threw" );
-				for ( st in service.stacktrace ) {
+				// Trim the stacktrace to stop after _setupTestServices.cfc
+				trimmedStack = new test._testRunner().trimJavaStackTrace( ArrayToList( service.stacktrace, chr(10) ), "_setupTestServices.cfc" );
+				for ( st in trimmedStack ) {
 					ArrayAppend( failed, st );
 				}
 			}

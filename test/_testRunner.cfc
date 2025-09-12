@@ -314,35 +314,56 @@ Begin Stack Trace
 }
 
 	// strips off the stack trace to exclude testbox and back to the first .cfc call in the stack
-	public static array function trimJavaStackTrace( required string st ){
+	public static array function trimJavaStackTrace( required string st, string trimToFile="" ){
 		local.tab = chr( 9 );
 		local.stack = [];
-		local.i = find( "/testbox/", arguments.st );
-		if ( request.testDebug ?: false || i eq 0 ){ // dump it all out
+		
+		if ( request.testDebug ?: false ){ // dump it all out
 			arrayAppend( stack, TAB & arguments.st );
 			return stack;
 		}
-		local.tmp = mid( arguments.st, 1, i ); // strip out anything after testbox
-		local.tmp2 = reverse( local.tmp );
-		local.i = find( ":cfc.", local.tmp2 ); // find the first cfc line
-		if ( local.i gt 0 ){
-			local.i = len( local.tmp )-i;
-			local.j = find( ")", local.tmp, local.i ); // find the end of the line
-			if ( local.j > 0 )
-				local.tmp = mid( local.tmp, 1, local.j );
-		}
-		arrayAppend( stack, TAB & local.tmp );
-
-		if ( arrayLen( stack ) == 0 || len( trim( ArrayToList( stack, "" ) ) == 0 ) ){
-			// filtered stack was empty, return the whole stack
-			return [ TAB & arguments.st ];
+		
+		local.lines = listToArray( arguments.st, chr(10) );
+		
+		for ( local.i = 1; local.i <= arrayLen( local.lines ); local.i++ ) {
+			local.line = trim( local.lines[ local.i ] );
+			if ( len( local.line ) == 0 ) continue;
+			
+			// Skip testbox framework lines but include everything else
+			if ( find( "/testbox/", local.line ) > 0 ) {
+				continue;
+			}
+			
+			arrayAppend( stack, TAB & local.line );
+			
+			// Check if we should stop at a specific file or use default logic
+			if ( len( arguments.trimToFile ) > 0 ) {
+				// Stop after finding the specified file
+				if ( find( arguments.trimToFile, local.line ) > 0 ) {
+					break;
+				}
+			} else {
+				// Default behavior: stop after test code with a few extra lines
+				if ( find( "/test/", local.line ) > 0 ) {
+					for ( local.j = local.i + 1; local.j <= min( local.i + 3, arrayLen( local.lines ) ); local.j++ ) {
+						local.nextLine = trim( local.lines[ local.j ] );
+						if ( len( local.nextLine ) > 0 && find( "/testbox/", local.nextLine ) == 0 ) {
+							arrayAppend( stack, TAB & local.nextLine );
+						} else {
+							break;
+						}
+					}
+					break;
+				}
+			}
 		}
 		
-		local.firstCausedBy = find( "Caused by:", arguments.st );
-		if ( firstCausedBy gt 0 ) {
-			arrayAppend( stack, TAB & TAB & TAB & "... omitted verbose (ant / pagecontext / testbox) default stacktraces ... " );
-			arrayAppend( stack, mid( arguments.st, firstCausedBy) );
+		// Always include "Caused by" section
+		local.causedByPos = find( "Caused by:", arguments.st );
+		if ( local.causedByPos > 0 ) {
+			arrayAppend( stack, mid( arguments.st, local.causedByPos ) );
 		}
+		
 		return stack;
 	}
 

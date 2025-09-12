@@ -433,28 +433,27 @@ try {
 	arrayAppend( results, "-> Failures: #result.getTotalFail()#");
 	arrayAppend( results, "-> Errors:   #result.getTotalError()#");
 	arrayAppend( results, "-> JUnitReport: #JUnitReportFile#");
+	arrayAppend( results, "" ); // Add blank line after JUnit report
+	
+	// Add failed services after JUnit report
+	failedServices = new test._setupTestServices().reportServiceFailed();
+	if ( len( failedServices ) gt 0 ){
+		for ( failure in failedServices ){
+			arrayAppend( results, failure );
+		}
+		arrayAppend( results, "" ); // Add blank line after service failures
+	}
 
 	servicesReport = new test._setupTestServices().reportServiceSkipped();
 	for ( service in servicesReport ){
 		arrayAppend( results, service );
 	}
 	arrayAppend( results_md, "" );
-	loop array=results item="summary"{
-		systemOutput( summary, true );
+	// Don't output results here - will be output later after all items are added
+	for ( summary in results ) {
 		arrayAppend( results_md, summary );
 	}
 	arrayAppend( results_md, "" );
-
-	failedServices = new test._setupTestServices().reportServiceFailed();
-	if ( len( failedServices ) gt 0 ){
-		systemOutput( "", true );
-		loop array=failedServices item="failure"{
-			systemOutput( failure, true );
-			arrayAppend( results_md, failure );
-		}
-		systemOutput( "", true );
-		arrayAppend( results_md, "" );
-	}
 	
 	if ( structKeyExists( server.system.environment, "GITHUB_STEP_SUMMARY" ) ){
 		github_commit_base_href=  "/" & server.system.environment.GITHUB_REPOSITORY
@@ -511,6 +510,8 @@ try {
 			//systemOutput( server.system.environment.GITHUB_STEP_SUMMARY, true );
 			fileWrite( server.system.environment.GITHUB_STEP_SUMMARY, ArrayToList( results_md, NL ) );
 		}
+		// Also write markdown to local file for debugging
+		fileWrite( ExpandPath( "/test" ) & "/reports/test-results-markdown.md", ArrayToList( results_md, NL ) );
 		/*
 		loop collection=server.system.environment key="p" value="v" {
 			if ( p contains "GITHUB_")
@@ -521,28 +522,30 @@ try {
 	}
 
 	if ( ( result.getTotalFail() + result.getTotalError() ) > 0 ) {
-		throw "TestBox could not successfully execute all testcases: #result.getTotalFail()# tests failed; #result.getTotalError()# tests errored.";
+		systemOutput( "TestBox could not successfully execute all testcases: #result.getTotalFail()# tests failed; #result.getTotalError()# tests errored.", true, true );
+		createObject( "java", "java.lang.System" ).exit( 1 );
 	}
 
 	if ( ( result.getTotalError() + result.getTotalFail() + result.getTotalPass() ) eq 0 ){
 		systemOutput( "", true );
-		systemOutput( "ERROR: No tests were run", true );
+		systemOutput( "ERROR: No tests were run", true, true );
 		systemOutput( "", true );
-		throw "ERROR: No tests were run";
+		createObject( "java", "java.lang.System" ).exit( 1 );
 	}
 
 	if ( len( new test._setupTestServices().reportServiceFailed() ) gt 0 
 			&& new test._setupTestServices().failOnConfiguredServiceError() ) {
-		throw "ERROR: test service(s) failed";
+		// systemOutput( "ERROR: test service(s) failed", true, true );
+		createObject( "java", "java.lang.System" ).exit( 1 );
 	}
 
 } catch( e ){
 	systemOutput( "-------------------------------------------------------", true );
 	// systemOutput( "Testcase failed:", true );
-	systemOutput( e.message, true );
-	systemOutput( ReReplace( Serialize( e.stacktrace ), "[\r\n]\s*([\r\n]|\Z)", Chr( 10 ) , "ALL" ), true ); // avoid too much whitespace from dump
+	systemOutput( e.message, true, true );
+	systemOutput( ReReplace( Serialize( e.stacktrace ), "[\r\n]\s*([\r\n]|\Z)", Chr( 10 ) , "ALL" ), true, true ); // avoid too much whitespace from dump
 	systemOutput( "-------------------------------------------------------", true );
-	rethrow;
+	createObject( "java", "java.lang.System" ).exit( 1 );
 }
 
 } // if (execute)
