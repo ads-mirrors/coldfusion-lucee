@@ -55,6 +55,7 @@ import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.listener.JavaSettings;
 import lucee.runtime.listener.JavaSettingsImpl;
 import lucee.runtime.listener.SerializationSettings;
+import lucee.runtime.osgi.OSGiUtil;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.StructImpl;
 import lucee.runtime.type.util.KeyConstants;
@@ -296,14 +297,10 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 				}
 			}
 
-			// Try resources FIRST (Maven libraries override core)
-			try {
-				c = super.findClass(name); // This searches the URL resources
-				if (resolve) resolveClass(c);
-				return c;
-			}
-			catch (ClassNotFoundException e1) {
-				// Resources didn't have it, try parent (core classloader)
+			boolean isBootDelegated = OSGiUtil.isClassInBootelegation(name);
+
+			// For classes in boot delegation list, always delegate to parent first
+			if (isBootDelegated) {
 				ClassLoader parent = getParent();
 				if (parent != null) {
 					try {
@@ -311,25 +308,47 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 						if (resolve) resolveClass(c);
 						return c;
 					}
-					catch (ClassNotFoundException e2) {
-						// Continue to filesystem
+					catch (ClassNotFoundException e) {
+						// Fall through to resources
+					}
+				}
+			}
+
+			// Try resources (Maven libraries override core, but respect boot delegation)
+			try {
+				c = super.findClass(name);
+				if (resolve) resolveClass(c);
+				return c;
+			}
+			catch (ClassNotFoundException e1) {
+				// Resources didn't have it, try parent if not already tried
+				if (!isBootDelegated) {
+					ClassLoader parent = getParent();
+					if (parent != null) {
+						try {
+							c = parent.loadClass(name);
+							if (resolve) resolveClass(c);
+							return c;
+						}
+						catch (ClassNotFoundException e2) {
+							// Continue to filesystem
+						}
 					}
 				}
 
 				// Finally try filesystem directory
 				if (loadFromFS) {
-					try {
-						c = findClass(name); // Your custom findClass for directory
-						if (resolve) resolveClass(c);
-						return c;
-					}
-					catch (ClassNotFoundException e3) {
-						throw new ClassNotFoundException(name);
+					synchronized (SystemUtil.createToken("PhysicalClassLoader:load", name)) {
+						Resource res = directory.getRealResource(name.replace('.', '/').concat(".class"));
+						if (res.isFile()) {
+							c = _loadClass(name, read(name), false);
+							if (resolve) resolveClass(c);
+							return c;
+						}
 					}
 				}
-				else {
-					throw new ClassNotFoundException(name);
-				}
+
+				throw new ClassNotFoundException(name);
 			}
 		}
 	}

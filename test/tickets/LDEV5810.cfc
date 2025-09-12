@@ -1,4 +1,4 @@
-component extends="org.lucee.cfml.test.LuceeTestCase" skip=true {
+component extends="org.lucee.cfml.test.LuceeTestCase" {
 
 	function run( testResults, textbox ) {
 		describe("LDEV-5810: Batik SVG transcoding fails with Java module access error", function() {
@@ -53,10 +53,15 @@ component extends="org.lucee.cfml.test.LuceeTestCase" skip=true {
 					}
 				};
 				
+				svgRenderer.render(svgPath, pngPath);
 				// This should work without throwing Java module access errors
 				expect(function() {
 					svgRenderer.render(svgPath, pngPath);
 				}).notToThrow();
+
+				//Failed: The incoming function DID throw an exception of type [java.lang.ClassCastException] with message [class com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl cannot be cast to class javax.xml.parsers.SAXParserFactory (com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl is in module java.xml of loader 'bootstrap'; javax.xml.parsers.SAXParserFactory is in unnamed module of loader lucee.commons.lang.PhysicalClassLoader @472196b3)] detail []
+
+
 				
 				// Verify PNG was created
 				expect(fileExists(pngPath)).toBeTrue("PNG file should be created");
