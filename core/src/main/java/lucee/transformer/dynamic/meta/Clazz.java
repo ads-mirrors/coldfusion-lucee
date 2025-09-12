@@ -19,6 +19,7 @@ import lucee.commons.lang.Pair;
 import lucee.commons.lang.types.RefInteger;
 import lucee.commons.lang.types.RefIntegerImpl;
 import lucee.runtime.exp.PageException;
+import lucee.runtime.java.JavaObject;
 import lucee.runtime.op.Caster;
 import lucee.runtime.reflection.Reflector;
 import lucee.transformer.bytecode.util.ASMUtil;
@@ -322,7 +323,12 @@ public abstract class Clazz implements Serializable {
 			if ((args.length == fm.getArgumentCount()) && (nameCaseSensitive ? methodName.equals(fm.getName()) : methodName.equalsIgnoreCase(fm.getName()))) {
 				parameterTypes = fm.getArgumentClasses();
 				for (int y = 0; y < parameterTypes.length; y++) {
-					if (!Reflector.toReferenceClass(parameterTypes[y]).isAssignableFrom(args[y] == null ? Object.class : args[y].getClass())) continue outer;
+					if (args[y] == null) {
+						if (parameterTypes[y].isPrimitive()) continue outer;
+					}
+					else if (!Reflector.toReferenceClass(parameterTypes[y]).isAssignableFrom(args[y].getClass())) {
+						continue outer;
+					}
 				}
 				return fm;
 			}
@@ -334,8 +340,17 @@ public abstract class Clazz implements Serializable {
 		// cache
 		StringBuilder sb = new StringBuilder(100).append(methodName).append(';'); // append(id()).
 		for (Object arg: args) {
-			sb.append((arg == null ? Object.class : arg.getClass()).getName()).append(';');
+			if (arg == null) {
+				sb.append("java.lang.Object").append(';');
+			}
+			else if (arg instanceof JavaObject) {
+				sb.append(((JavaObject) arg).getClazz().getName()).append(';');
+			}
+			else {
+				sb.append(arg.getClass().getName()).append(';');
+			}
 		}
+
 		String key = sb.toString();
 
 		// get match from cache
@@ -344,18 +359,19 @@ public abstract class Clazz implements Serializable {
 			if (sr != null) {
 				Pair<Method, Boolean> p = sr.get();
 				if (p != null) {
-					// print.e("used cached match(" + p.getValue() + "):" + key + ":" + cachedMethods.size());
-					// convert arguments
-					if (p.getValue()) {
-						Class[] trgArgs = p.getName().getArgumentClasses();
-						for (int x = 0; x < trgArgs.length; x++) {
-							if (args[x] != null) {
-								// we can ignore a fail here, because this was done before, otherwisse it would not be in the cache
-								args[x] = Reflector.convert(args[x], Reflector.toReferenceClass(trgArgs[x]), nirvana, null);
+					try {
+						if (p.getValue()) {
+							Class[] trgArgs = p.getName().getArgumentClasses();
+							for (int x = 0; x < trgArgs.length; x++) {
+								if (args[x] != null) {
+									args[x] = Reflector.convert(args[x], Reflector.toReferenceClass(trgArgs[x]), nirvana);
+								}
 							}
 						}
+						return p.getName();
 					}
-					return p.getName();
+					catch (PageException pe) {
+					}
 				}
 			}
 		}
@@ -393,8 +409,12 @@ public abstract class Clazz implements Serializable {
 					args[x] = newArgs[x];
 				}
 			}
-			if (cachedMethods == null) cachedMethods = new ConcurrentHashMap<>();
-			cachedMethods.put(key, new SoftReference<Pair<Method, Boolean>>(new Pair<Method, Boolean>(result.getName(), Boolean.TRUE)));
+			// we only cache classes using fix classloaders
+			ClassLoader cl = clazz.getClassLoader();
+			if (cl == null || cl == SystemUtil.getCoreClassLoader() || cl == SystemUtil.getLoaderClassLoader()) {
+				if (cachedMethods == null) cachedMethods = new ConcurrentHashMap<>();
+				cachedMethods.put(key, new SoftReference<Pair<Method, Boolean>>(new Pair<Method, Boolean>(result.getName(), Boolean.TRUE)));
+			}
 			return result.getName();
 		}
 		return defaultValue;
