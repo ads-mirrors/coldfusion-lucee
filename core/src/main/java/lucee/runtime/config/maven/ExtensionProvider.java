@@ -97,8 +97,8 @@ public class ExtensionProvider {
 		uuidMapping.put("83062C18-FA1F-4647-815BB663BCF98AC0", "sentry-extension");
 		uuidMapping.put("287B6309-9D31-8865-EA453D209B13882B", "socket-server-extension");
 		uuidMapping.put("947C02B0-7AE4-4054-938A8E059DD7625A", "tasks-extension");
-		uuidMapping.put("websocket-extension", "3F9DFF32-B555-449D-B0EB5DB723044045");
-		uuidMapping.put("websocket-client-extension", "058215B3-5544-4392-A187A1649EB5CA90");
+		uuidMapping.put("3F9DFF32-B555-449D-B0EB5DB723044045", "websocket-extension");
+		uuidMapping.put("058215B3-5544-4392-A187A1649EB5CA90", "websocket-client-extension");
 
 	}
 
@@ -459,6 +459,18 @@ public class ExtensionProvider {
 		List<String> list = ep.list();
 		print.e("list-artifacts:" + (System.currentTimeMillis() - start));
 		print.e(list);
+
+		{
+			List<Version> versions = ep.list("axis-extension");
+			print.e("list-versions:" + (System.currentTimeMillis() - start));
+			print.e(versions);
+
+			for (Version v: versions) {
+				Map<String, Object> detail = ep.detail("axis-extension", v);
+				print.e(v + ":");
+				print.e(detail);
+			}
+		}
 
 		start = System.currentTimeMillis();
 		List<Version> versions = ep.list("mysql-jdbc-extension");
