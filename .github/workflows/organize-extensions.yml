@@ -8,33 +8,33 @@ on:
         required: true
         type: choice
         options:
-          - redis-extension
-          - org.lucee.exasol
-          - websocket-extension
-          - sentry-extension
-          - s3-extension
           - administrator-extension
+          - argon2-extension
+          - chart-extension
+          - com.microsoft.sqlserver.mssql-jdbc
+          - com.mysql.cj
+          - com.oracle.database.jdbc
+          - compress-extension
+          - ec2-extension
+          - ehcache-extension
           - esapi-extension
           - git-extension
-          - chart-extension
-          - ehcache-extension
-          - ec2-extension
-          - argon2-extension
-          - image-extension
-          - compress-extension
-          - org.lucee.axis.extension
-          - quartz-extension
-          - lucene-search-extension
-          - pdf-extension
           - hibernate.extension
-          - com.mysql.cj
-          - com.microsoft.sqlserver.mssql-jdbc
+          - image-extension
+          - lucene-search-extension
+          - org.lucee.axis.extension
+          - org.lucee.exasol
           - org.lucee.mssql
           - org.postgresql.postgresql
           - org.h2.h2
-          - com.oracle.database.jdbc
-          - redis.clients.jedis
           - org.mongodb.mongo-java-driver
+          - quartz-extension
+          - pdf-extension
+          - redis-extension
+          - redis.clients.jedis
+          - sentry-extension
+          - s3-extension
+          - websocket-extension
         default: com.mysql.cj
       target_artifact_id:
         description: 'Target artifact ID'
@@ -43,6 +43,7 @@ on:
         options:
           - administrator-extension
           - ajax-extension
+          - axis-extension
           - argon2-extension
           - chart-extension
           - documentation-extension
