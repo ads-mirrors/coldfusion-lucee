@@ -47,6 +47,7 @@ on:
           - axis-extension
           - argon2-extension
           - chart-extension
+          - compress-extension
           - documentation-extension
           - ec2-extension
           - ehcache-extension
