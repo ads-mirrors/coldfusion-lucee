@@ -4885,7 +4885,7 @@ Lucee uses the number of characters in the file.</description>
 			<name>default</name>
 			<required>false</required>
 			<rtexprvalue>true</rtexprvalue>
-			<description>Sets the initial value for the property when an instance of the component is created. Can be any valid CFML value appropriate for the property's type.</description>
+			<description>Sets the initial value for the property when an instance of the component is created. Can be any valid CFML value appropriate for the property's type. Lucee 7 allows complex values and preserves types.</description>
 		</attribute>
 		<attribute>
 			<type>string</type>

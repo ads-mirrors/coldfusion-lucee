@@ -8,6 +8,6 @@ component {
 
 	property name="i";
 	property name="j" type="number";
-	property name="k" type="number" default="val";
+	property name="k" type="number" default="123";
 
 }

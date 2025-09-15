@@ -25,7 +25,7 @@
 				expect(props.i.type).toBe('any');
 				expect(props.j.type).toBe('number');
 				expect(props.k.type).toBe('number');
-				expect(props.k.default).toBe('val');
+				expect(props.k.default).toBe('123');
 			});
 
 		});
