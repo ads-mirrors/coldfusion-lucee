@@ -150,15 +150,40 @@ public class ExtensionProvider {
 		return subfolders;
 	}
 
-	public String toArtifact(String uuid) throws PageException, IOException, InterruptedException, GeneralSecurityException, SAXException {
+	public String getGroup() {
+		return group;
+	}
+
+	public String toArtifact(String uuid) throws PageException {
 		return toArtifact(uuid, true);
 	}
 
-	public String toArtifact(String uuid, boolean investigate) throws PageException, IOException, InterruptedException, GeneralSecurityException, SAXException {
+	public String toArtifactSimple(String uuid) {
+		return uuidMapping.get(uuid.toUpperCase().trim());
+	}
+
+	public String toArtifact(String uuid, boolean investigate) throws PageException {
 		uuid = uuid.toUpperCase().trim();
 		String artifact = uuidMapping.get(uuid);
 		if (artifact != null) return artifact;
-		return investigate ? extractArtifactByUUID(uuid) : null;
+		if (investigate) {
+			try {
+				return extractArtifactByUUID(uuid);
+			}
+			catch (Exception e) {
+				throw Caster.toPageException(e);
+			}
+		}
+		return null;
+	}
+
+	public String toArtifact(String uuid, boolean investigate, String defaultValue) {
+		try {
+			return toArtifact(uuid, investigate);
+		}
+		catch (Exception e) {
+			return defaultValue;
+		}
 	}
 
 	public List<String> list() throws IOException, InterruptedException {
@@ -443,10 +468,16 @@ public class ExtensionProvider {
 	}
 
 	public static void main(String[] args) throws Exception {
-
+		// TODO remove
 		ExtensionProvider ep = new ExtensionProvider(new Repository[] {}, new Repository[] {},
 				new Repository[] { new Repository("Maven Release Repository", "https://cdn.lucee.org/", Repository.TIMEOUT_5SECONDS, Repository.TIMEOUT_5SECONDS) }, "org.lucee");
 		ep = new ExtensionProvider();
+
+		// org.lucee:h2-jdbc-extension:2.1.214.0001L
+		print.e(ep.list("org.lucee:h2-jdbc-extension"));
+		print.e(ep.list("lucene-search-extension"));
+
+		if (true) return;
 
 		long start = System.currentTimeMillis();
 		String art = ep.toArtifact("99A4EF8D-F2FD-40C8-8FB8C2E67A4EEEB6");

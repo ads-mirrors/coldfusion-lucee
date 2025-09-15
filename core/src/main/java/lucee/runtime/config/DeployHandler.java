@@ -26,6 +26,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.osgi.framework.Version;
+
 import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
@@ -45,6 +47,7 @@ import lucee.commons.net.http.Header;
 import lucee.commons.net.http.httpclient.HTTPEngine4Impl;
 import lucee.commons.net.http.httpclient.HeaderImpl;
 import lucee.runtime.config.ConfigAdmin.AlreadyInstalledExtension;
+import lucee.runtime.config.maven.ExtensionProvider;
 import lucee.runtime.engine.CFMLEngineImpl;
 import lucee.runtime.engine.ThreadQueue;
 import lucee.runtime.exp.ApplicationException;
@@ -56,6 +59,7 @@ import lucee.runtime.functions.conversion.DeserializeJSON;
 import lucee.runtime.functions.system.IsZipFile;
 import lucee.runtime.net.http.ReqRspUtil;
 import lucee.runtime.op.Caster;
+import lucee.runtime.osgi.OSGiUtil;
 import lucee.runtime.type.Struct;
 import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.type.util.KeyConstants;
@@ -466,8 +470,67 @@ public final class DeployHandler {
 		return null;
 	}
 
-	public static Resource downloadExtension(Config config, ExtensionDefintion ed, Log log, boolean throwOnError) throws ApplicationException {
+	private static Resource downloadExtensionFromMaven(ExtensionDefintion ed, boolean investigate, boolean throwOnError, Log log) throws PageException {
+		try {
+			// get extension from Maven
+			ExtensionProvider ep = new ExtensionProvider();
 
+			String artifact = ed.getArtifactId();
+
+			// translate UUID to artifact
+			if (StringUtil.isEmpty(artifact, true)) {
+				artifact = ep.toArtifact(ed.getId(), investigate);
+				if (LogUtil.doesDebug(log) && artifact != null) {
+					log.debug("main", "resolved extension id [" + ed.getId() + "] to artifact [" + artifact + "]");
+				}
+			}
+			if (artifact == null) return null;
+
+			Version version;
+			// get latest version when no version is defined
+			if (StringUtil.isEmpty(ed.getVersion(), true)) {
+				version = ep.last(artifact);
+				if (LogUtil.doesDebug(log) && version != null) {
+					log.debug("main", "get latest version[" + version + "] for artifact [" + artifact + "]");
+				}
+			}
+			else {
+				version = OSGiUtil.toVersion(ed.getVersion(), false);
+				if (LogUtil.doesDebug(log) && version != null) {
+					log.debug("main", "use defined [" + version + "] for artifact [" + artifact + "]");
+				}
+			}
+			if (version == null) return null;
+
+			Resource res = SystemUtil.getTempDirectory().getRealResource(ep.getGroup() + "-" + artifact + "-" + version + ".lex");
+			ResourceUtil.touch(res);
+			IOUtil.copy(ep.get(artifact, version), res, true);
+			return res;
+		}
+		catch (Exception e) {
+			if (throwOnError) throw Caster.toPageException(e);
+			else if (LogUtil.doesWarn(log)) {
+				log.log(Log.LEVEL_WARN, "main", e);
+			}
+			return null;
+		}
+	}
+
+	public static Resource downloadExtension(Config config, ExtensionDefintion ed, Log log, boolean throwOnError) throws ApplicationException {
+		// get extension from Maven
+		// TODO set investigate to true and log as warning if it fallback to old behaviour
+		{
+			try {
+				Resource res = downloadExtensionFromMaven(ed, false, false, log);
+				if (res != null) return res;
+			}
+			catch (PageException e) {
+				// should not happen
+				log.error("main", e);
+			}
+		}
+
+		// classic extension provider via Rest service
 		String coreVersion = ConfigUtil.getCFMLEngine(config).getInfo().getVersion().toString();
 		Identification id = config.getIdentification();
 		String apiKey = id == null ? null : id.getApiKey();

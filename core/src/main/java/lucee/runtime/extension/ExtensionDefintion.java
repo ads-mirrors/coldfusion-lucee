@@ -48,6 +48,14 @@ public final class ExtensionDefintion {
 		return id;
 	}
 
+	public String getGroupId() {
+		return null; // TODO
+	}
+
+	public String getArtifactId() {
+		return null; // TODO
+	}
+
 	public String getSymbolicName() {
 		String sn = params.get("symbolic-name");
 		if (StringUtil.isEmpty(sn, true)) return getId();
