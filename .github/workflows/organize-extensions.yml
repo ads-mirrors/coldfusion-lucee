@@ -25,6 +25,7 @@ on:
           - hibernate-orm
           - image-extension
           - lucee.extension.couchbase
+          - lucee.image.extension
           - lucene-search-extension
           - org.lucee.axis.extension
           - org.lucee.exasol
