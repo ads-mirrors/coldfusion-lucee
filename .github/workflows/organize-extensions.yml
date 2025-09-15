@@ -22,6 +22,7 @@ on:
           - git-extension
           - hibernate.extension
           - image-extension
+          - lucee.extension.couchbase
           - lucene-search-extension
           - org.lucee.axis.extension
           - org.lucee.exasol
@@ -48,6 +49,7 @@ on:
           - argon2-extension
           - chart-extension
           - compress-extension
+          - couchbase-extension
           - documentation-extension
           - ec2-extension
           - ehcache-extension
