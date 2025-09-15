@@ -72,6 +72,7 @@ on:
           - mssql-jdbc-extension
           - mysql-jdbc-extension
           - postgresql-jdbc-extension
+          - pdf-extension
           - quartz-extension
           - redis-extension
           - s3-extension
