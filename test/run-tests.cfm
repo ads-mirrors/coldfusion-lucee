@@ -1,4 +1,5 @@
 <cfscript>
+
 /*thread {
 	try {
 		Thread=createObject("java","java.lang.Thread");
@@ -196,6 +197,12 @@ try {
 	systemOutput( "set admin password #dateTimeFormat(now())#", true );
 
 	systemOutput("-------------- Test Filters and Labels", true);
+
+
+	// Option to hide Java stack traces in infally summary output
+	param name="testHideJavaStack" default="false";
+	if (len(testHideJavaStack) eq 0) testHideJavaStack = false;
+	request.testHideJavaStack = testHideJavaStack;
 
 	param name="testFilter" default="";
 	request.testFilter = testFilter;
@@ -485,7 +492,8 @@ try {
 				}
 			}
 
-			if ( !isEmpty( el.StackTrace ) ){
+			// Hide Java stack traces in both summary and per-test output if requested
+			if ( !isEmpty( el.StackTrace ) && !request.testHideJavaStack ){
 				arrayAppend( results_md, "" );
 				arrayAppend( results, NL );
 				arrStack = test._testRunner::trimJavaStackTrace( el.StackTrace );

@@ -200,10 +200,12 @@ component {
 									*/
 								}
 								if ( !isNull( specStat.error.StackTrace ) && !isEmpty( specStat.error.StackTrace ) ){
-									systemOutput( TAB & specStat.error.type, true );
-									// printStackTrace( specStat.error.StackTrace );
-									systemOutput( TAB & specStat.error.StackTrace, true );
-									systemOutput( NL );
+									if (!request.keyExists("testHideJavaStack") || !request.testHideJavaStack) {
+										systemOutput( TAB & specStat.error.type, true );
+										// printStackTrace( specStat.error.StackTrace );
+										systemOutput( TAB & specStat.error.StackTrace, true );
+										systemOutput( NL );
+									}
 								}
 
 							//	systemOutput(NL & serialize(specStat.error), true);
