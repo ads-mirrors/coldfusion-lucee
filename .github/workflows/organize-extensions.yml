@@ -18,6 +18,7 @@ on:
           - compress-extension
           - ec2-extension
           - ehcache-extension
+          - extension-memcached
           - esapi-extension
           - form-extension
           - git-extension
@@ -28,6 +29,7 @@ on:
           - lucee.image.extension
           - lucene-search
           - lucene-search-extension
+          - memcached-extension
           - org.lucee.axis.extension
           - org.lucee.exasol
           - org.lucee.mssql
