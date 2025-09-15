@@ -10,6 +10,7 @@ on:
         options:
           - administrator-extension
           - argon2-extension
+          - ajax.extension
           - chart-extension
           - com.microsoft.sqlserver.mssql-jdbc
           - com.mysql.cj
