@@ -63,6 +63,7 @@ on:
           - hibernate-extension
           - image-extension
           - kinesis-extension
+          - lucene-search-extension
           - memcached-extension
           - mongodb-extension
           - mssql-jdbc-extension
