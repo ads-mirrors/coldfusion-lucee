@@ -30,6 +30,7 @@ on:
           - lucene-search
           - lucene-search-extension
           - memcached-extension
+          - mongodb-extension
           - org.lucee.axis.extension
           - org.lucee.exasol
           - org.lucee.mssql
