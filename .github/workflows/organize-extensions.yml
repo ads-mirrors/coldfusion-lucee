@@ -22,6 +22,7 @@ on:
           - form-extension
           - git-extension
           - hibernate.extension
+          - hibernate-orm
           - image-extension
           - lucee.extension.couchbase
           - lucene-search-extension
