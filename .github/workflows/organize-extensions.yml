@@ -19,6 +19,7 @@ on:
           - ec2-extension
           - ehcache-extension
           - esapi-extension
+          - form-extension
           - git-extension
           - hibernate.extension
           - image-extension
@@ -54,6 +55,7 @@ on:
           - ec2-extension
           - ehcache-extension
           - esapi-extension
+          - form-extension
           - git-extension
           - hibernate-extension
           - image-extension
