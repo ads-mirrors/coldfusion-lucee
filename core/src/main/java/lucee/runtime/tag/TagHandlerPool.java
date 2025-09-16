@@ -27,7 +27,6 @@ import javax.servlet.jsp.tagext.Tag;
 import lucee.commons.lang.ClassUtil;
 import lucee.runtime.config.ConfigWeb;
 import lucee.runtime.config.Identification;
-import lucee.runtime.exp.ExpressionException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.op.Caster;
 import lucee.transformer.library.ClassDefinitionImpl;
@@ -57,10 +56,7 @@ public final class TagHandlerPool {
 	 */
 	public Tag use(String className, String tagBundleName, String tagBundleVersion, Identification id) throws PageException {
 		Queue<Tag> queue = getQueue(toId(className, tagBundleName, tagBundleVersion));
-		Tag tag = null;
-		synchronized (queue) {
-			tag = queue.poll();
-		}
+		Tag tag = queue.poll();
 		if (tag != null) return tag;
 		return loadTag(className, tagBundleName, tagBundleVersion, id);
 	}
@@ -73,17 +69,13 @@ public final class TagHandlerPool {
 	public void reuse(Tag tag) {
 		tag.release();
 		Queue<Tag> queue = getQueue(tag.getClass().getName());
-		synchronized (queue) {
-			queue.add(tag);
-		}
+		queue.add(tag);
 	}
 
 	public void reuse(Tag tag, String bundleName, String bundleVersion) {
 		tag.release();
 		Queue<Tag> queue = getQueue(toId(tag.getClass().getName(), bundleName, bundleVersion));
-		synchronized (queue) {
-			queue.add(tag);
-		}
+		queue.add(tag);
 	}
 
 	private String toId(String className, String tagBundleName, String tagBundleVersion) {
@@ -102,13 +94,7 @@ public final class TagHandlerPool {
 	}
 
 	private Queue<Tag> getQueue(String id) {
-		Queue<Tag> queue = map.get(id);// doing get before, do avoid constructing ConcurrentLinkedQueue Object all the time
-		if (queue != null) return queue;
-		Queue<Tag> nq, oq;
-		oq = map.putIfAbsent(id, nq = new ConcurrentLinkedQueue<Tag>());
-		if (oq != null) return oq;
-		return nq;
-
+		return map.computeIfAbsent(id, k -> new ConcurrentLinkedQueue<Tag>());
 	}
 
 	public void reset() {
