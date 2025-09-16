@@ -27,7 +27,6 @@ import lucee.commons.io.res.util.ResourceUtil;
 import lucee.runtime.Mapping;
 import lucee.runtime.MappingImpl;
 import lucee.runtime.PageContext;
-import lucee.runtime.PageContextImpl;
 import lucee.runtime.PageSource;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
@@ -38,9 +37,9 @@ import lucee.runtime.type.util.ListUtil;
 
 public class CustomTagUtil {
 
-	public static InitFile loadInitFile(PageContext pc, String name) throws PageException {
+	public static InitFile loadInitFile(PageContext pc, PageSource current, String name) throws PageException {
 
-		InitFile initFile = loadInitFile(pc, name, null);
+		InitFile initFile = loadInitFile(pc, current, name, null);
 		if (initFile != null) {
 			return initFile;
 		}
@@ -53,7 +52,7 @@ public class CustomTagUtil {
 
 		if (config.doLocalCustomTag()) {
 
-			dirs.add(ResourceUtil.getResource(pc, pc.getCurrentPageSource()).getParent());
+			dirs.add(ResourceUtil.getResource(pc, (current != null ? current : pc.getCurrentPageSource())).getParent());
 		}
 
 		Mapping[] actms = pc.getApplicationContext().getCustomTagMappings();
@@ -92,7 +91,7 @@ public class CustomTagUtil {
 		throw new ExpressionException(msg.toString());
 	}
 
-	public static InitFile loadInitFile(PageContext pc, String name, InitFile defaultValue) throws PageException {
+	public static InitFile loadInitFile(PageContext pc, PageSource current, String name, InitFile defaultValue) throws PageException {
 		ConfigPro config = (ConfigPro) pc.getConfig();
 		String[] filenames = getFileNames(config, name);
 		boolean doCache = config.useCTPathCache();
@@ -100,6 +99,7 @@ public class CustomTagUtil {
 		boolean doCustomTagDeepSearch = config.doCustomTagDeepSearch();
 		PageSource ps = null;
 		InitFile initFile;
+		if (current == null) current = pc.getCurrentPageSource();
 
 		// CACHE
 		// check local
@@ -109,7 +109,7 @@ public class CustomTagUtil {
 
 		if (doCache) {
 			if (pc.getConfig().doLocalCustomTag()) {
-				localCacheName = pc.getCurrentPageSource().getDisplayPath().replace('\\', '/');
+				localCacheName = current.getDisplayPath().replace('\\', '/');
 				localCacheName = "local:" + localCacheName.substring(0, localCacheName.lastIndexOf('/') + 1).concat(name);
 				initFile = config.getCTInitFile(pc, localCacheName);
 				if (initFile != null) return initFile;
@@ -132,10 +132,11 @@ public class CustomTagUtil {
 		// search local
 		if (pc.getConfig().doLocalCustomTag()) {
 			for (int i = 0; i < filenames.length; i++) {
-				PageSource[] arr = ((PageContextImpl) pc).getRelativePageSources(filenames[i]);
+				ps = current.getRealPage(filenames[i]);
+				// PageSource[] arr = ((PageContextImpl) pc).getRelativePageSources(filenames[i]);
 				// ps=pc.getRelativePageSource(filenames[i]);
-				ps = MappingImpl.isOK(arr);
-				if (ps != null) {
+				// ps = MappingImpl.isOK(arr);
+				if (MappingImpl.isOK(ps)) {
 					initFile = new InitFile(pc, ps, filenames[i]);
 					if (doCache) config.putCTInitFile(localCacheName, initFile);
 					return initFile;
