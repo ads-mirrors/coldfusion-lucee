@@ -1,7 +1,7 @@
 component extends="org.lucee.cfml.test.LuceeTestCase" displayname="LDEV5792" {
 
 	function run(testResults, textbox) {
-		xdescribe(title="LDEV-5792 Dynamic Custom Tag Attribute NPE (repo)", body=function(){
+		describe(title="LDEV-5792 Dynamic Custom Tag Attribute NPE (repo)", body=function(){
 			it(title="function call as custom tag attribute throws error", body=function(currentSpec){
 				var result = runExample("ldev5792_simple.cfm");
 				   // Expect the correct output after bug is fixed
