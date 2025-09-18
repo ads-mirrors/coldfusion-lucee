@@ -114,6 +114,8 @@ public class CFTag extends BodyTagTryCatchFinallyImpl implements DynamicAttribut
 	 * Field <code>source</code>
 	 */
 	protected InitFile source;
+	private PageSource current;
+
 	private String appendix;
 
 	private Component cfc = null;
@@ -139,9 +141,21 @@ public class CFTag extends BodyTagTryCatchFinallyImpl implements DynamicAttribut
 	}
 
 	@Override
+	public void setPageContext(PageContext pageContext) {
+		this.current = pageContext.getCurrentPageSource();
+		super.setPageContext(pageContext);
+	}
+
+	@Override
+	public void setPageContext(javax.servlet.jsp.PageContext pageContext) {
+		this.current = ((PageContext) pageContext).getCurrentPageSource();
+		super.setPageContext(pageContext);
+	}
+
+	@Override
 	public void release() {
 		super.release();
-
+		this.current = null;
 		hasBody = false;
 		// filename=null;
 
@@ -223,7 +237,7 @@ public class CFTag extends BodyTagTryCatchFinallyImpl implements DynamicAttribut
 	}
 
 	public InitFile initFile(PageContext pageContext) throws PageException {
-		return CustomTagUtil.loadInitFile(pageContext, appendix);
+		return CustomTagUtil.loadInitFile(pageContext, current, appendix);
 	}
 
 	private int cfmlStartTag() throws PageException {
@@ -712,6 +726,7 @@ public class CFTag extends BodyTagTryCatchFinallyImpl implements DynamicAttribut
 	}
 
 	public boolean isCFCBasedCustomTag() {
+		Component cfc = getComponent();
 		return getSource().isCFC();
 	}
 
