@@ -147,7 +147,7 @@ public class CFTag extends BodyTagTryCatchFinallyImpl implements DynamicAttribut
 	}
 
 	@Override
-	public void setPageContext(javax.servlet.jsp.PageContext pageContext) {
+	public void setPageContext(jakarta.servlet.jsp.PageContext pageContext) {
 		this.current = ((PageContext) pageContext).getCurrentPageSource();
 		super.setPageContext(pageContext);
 	}
