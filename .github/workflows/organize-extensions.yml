@@ -8,33 +8,42 @@ on:
         required: true
         type: choice
         options:
-          - redis-extension
-          - org.lucee.exasol
-          - websocket-extension
-          - sentry-extension
-          - s3-extension
           - administrator-extension
-          - esapi-extension
-          - git-extension
-          - chart-extension
-          - ehcache-extension
-          - ec2-extension
           - argon2-extension
-          - image-extension
-          - compress-extension
-          - org.lucee.axis.extension
-          - quartz-extension
-          - lucene-search-extension
-          - pdf-extension
-          - hibernate.extension
-          - com.mysql.cj
+          - ajax.extension
+          - chart-extension
           - com.microsoft.sqlserver.mssql-jdbc
+          - com.mysql.cj
+          - com.oracle.database.jdbc
+          - compress-extension
+          - ec2-extension
+          - ehcache-extension
+          - extension-memcached
+          - esapi-extension
+          - form-extension
+          - git-extension
+          - hibernate.extension
+          - hibernate-orm
+          - image-extension
+          - lucee.extension.couchbase
+          - lucee.image.extension
+          - lucene-search
+          - lucene-search-extension
+          - memcached-extension
+          - mongodb-extension
+          - org.lucee.axis.extension
+          - org.lucee.exasol
           - org.lucee.mssql
           - org.postgresql.postgresql
           - org.h2.h2
-          - com.oracle.database.jdbc
-          - redis.clients.jedis
           - org.mongodb.mongo-java-driver
+          - quartz-extension
+          - pdf-extension
+          - redis.extension
+          - redis.clients.jedis
+          - sentry-extension
+          - s3-extension
+          - websocket-extension
         default: com.mysql.cj
       target_artifact_id:
         description: 'Target artifact ID'
@@ -43,21 +52,27 @@ on:
         options:
           - administrator-extension
           - ajax-extension
+          - axis-extension
           - argon2-extension
           - chart-extension
+          - compress-extension
+          - couchbase-extension
           - documentation-extension
           - ec2-extension
           - ehcache-extension
           - esapi-extension
+          - form-extension
           - git-extension
           - hibernate-extension
           - image-extension
           - kinesis-extension
+          - lucene-search-extension
           - memcached-extension
           - mongodb-extension
           - mssql-jdbc-extension
           - mysql-jdbc-extension
           - postgresql-jdbc-extension
+          - pdf-extension
           - quartz-extension
           - redis-extension
           - s3-extension
