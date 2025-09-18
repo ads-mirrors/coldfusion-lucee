@@ -796,22 +796,29 @@ public final class OpUtil {
 	 * @return
 	 */
 	public static boolean eeq(PageContext pc, Object left, Object right) {
-		// same object is a match
+		// Same object reference is always equal
 		if (left == right) return true;
 
-		// not same type not a match
-		if (!Caster.toTypeName(left).equals(Caster.toTypeName(right))) return false;
+		// Handle null cases explicitly
+		if (left == null) return right == null;
+		if (right == null) return false;
 
-		// simple vales - left and right have the same type
-		if (left instanceof String) return ((String) left).equalsIgnoreCase((String) right);
-		else if (left instanceof Number) return (left).equals(right);
-		else if (left instanceof Boolean) return ((Boolean) left).equals(right);
-		else if (left instanceof Date) return ((Date) left).equals(right);
-		else if (left instanceof Locale) return ((Locale) left).equals(right);
-		else if (left instanceof TimeZone) return (left).equals(right);
-		else if (left instanceof Character) return ((Character) left).equals(right);
-		else if (left instanceof Calendar) return ((Calendar) left).equals(right);
-
+		// Handle CFML types with value-based equality
+		if (left instanceof String && right instanceof String) {
+			return ((String) left).equalsIgnoreCase((String) right);
+		}
+		else if (left instanceof Number && right instanceof Number) {
+			return compare(pc, (Number) left, (Number) right) == 0;
+		}
+		else if (left instanceof Boolean && right instanceof Boolean) { // You missed this one!
+			return ((Boolean) left).equals(right);
+		}
+		else if (left instanceof Date && right instanceof Date) {
+			return ((Date) left).equals(right);
+		}
+		else if (left instanceof Calendar && right instanceof Calendar) {
+			return ((Calendar) left).equals(right);
+		}
 		return left == right;
 	}
 
