@@ -1809,4 +1809,11 @@ public final class ResourceUtil {
 		return toFile(res).toPath();
 	}
 
+	/**
+	 * checks if to resources have the same scheme
+	 */
+	public static boolean sameScheme(Resource res1, Resource res2, boolean defaultValue) {
+		if (res1 == null || res2 == null) return defaultValue;
+		return StringUtil.emptyIfNull(res1.getResourceProvider().getScheme()).equals(StringUtil.emptyIfNull(res2.getResourceProvider().getScheme()));
+	}
 }
