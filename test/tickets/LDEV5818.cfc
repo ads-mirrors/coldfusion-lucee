@@ -1,4 +1,4 @@
-component extends="org.lucee.cfml.test.LuceeTestCase" labels="mysql" skip=true {
+component extends="org.lucee.cfml.test.LuceeTestCase" labels="mysql" {
 
 	function run( testResults , testBox ) {
 
