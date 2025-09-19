@@ -1,7 +1,7 @@
 component extends = "org.lucee.cfml.test.LuceeTestCase" {
 	function run( testResults , testBox ) {
 		describe( title = "LDEV-5816 Test for CFPROPRTY Behavior with types and defaults", body = function() {
-			it( "LDEV-5816: default values which are the wrong type should throw an error", function() {
+			xit( "LDEV-5816: default values which are the wrong type should throw an error", function() {
 				expect( function() {
 					var cfc = new component accessors="true" {
 						property name="arr" type="numeric" default="#[1,2,3]#";
@@ -11,7 +11,7 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" {
 				}).toThrow();
 			});
 
-			it( "LDEV-5816: default values which are the wrong type should throw an error", function() {
+			xit( "LDEV-5816: default values which are the wrong type should throw an error", function() {
 				expect( function() {
 					var cfc = new component accessors="true" {
 						property name="arr" type="array" default="123";
@@ -41,7 +41,7 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" {
 				expect( cfc.getUser().getAge() ).toBe( 25 );
 			});
 
-			it( "LDEV-5816: default values with wrong CFC type should throw an error", function() {
+			xit( "LDEV-5816: default values with wrong CFC type should throw an error", function() {
 				expect( function() {
 					var cfc = new component accessors="true" {
 						property name="user" type="LDEV5816.User" default="not a user object";

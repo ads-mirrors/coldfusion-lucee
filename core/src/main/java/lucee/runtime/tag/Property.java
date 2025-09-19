@@ -156,6 +156,12 @@ public final class Property extends TagImpl implements DynamicAttributes {
 	}
 
 	@Override
+	public int doEndTag() {
+		return EVAL_PAGE;
+	}
+	/*
+	unfortunately, this validation breaks frameworks that set default to a value that does not match the type
+
 	public int doEndTag() throws PageException {
 		// Validate default value against type if type is not 'any'
 		String type = property.getType();
@@ -171,4 +177,5 @@ public final class Property extends TagImpl implements DynamicAttributes {
 		
 		return EVAL_PAGE;
 	}
+	*/
 }
