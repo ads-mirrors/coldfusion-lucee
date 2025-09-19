@@ -24,11 +24,9 @@ import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
 import lucee.runtime.ext.tag.DynamicAttributes;
 import lucee.runtime.ext.tag.TagImpl;
-import lucee.runtime.op.Decision;
 import lucee.runtime.type.Collection;
 import lucee.runtime.type.KeyImpl;
 import lucee.runtime.type.util.KeyConstants;
-import lucee.commons.lang.StringUtil;
 
 /**
  * Defines components as complex types that are used for web services authoring. The attributes of
@@ -160,22 +158,17 @@ public final class Property extends TagImpl implements DynamicAttributes {
 		return EVAL_PAGE;
 	}
 	/*
-	unfortunately, this validation breaks frameworks that set default to a value that does not match the type
-
-	public int doEndTag() throws PageException {
-		// Validate default value against type if type is not 'any'
-		String type = property.getType();
-		Object defaultValue = property.getDefaultAsObject();
-		
-		if (!StringUtil.isEmpty(type, true) && !"any".equalsIgnoreCase(type) && defaultValue != null) {
-			if (!Decision.isCastableTo(type, defaultValue, true, true, -1)) {
-				throw new ApplicationException(
-					"Default value for property [" + property.getName() + "] is not compatible with type [" + type + "]"
-				);
-			}
-		}
-		
-		return EVAL_PAGE;
-	}
-	*/
+	 * unfortunately, this validation breaks frameworks that set default to a value that does not match
+	 * the type
+	 * 
+	 * public int doEndTag() throws PageException { // Validate default value against type if type is
+	 * not 'any' String type = property.getType(); Object defaultValue = property.getDefaultAsObject();
+	 * 
+	 * if (!StringUtil.isEmpty(type, true) && !"any".equalsIgnoreCase(type) && defaultValue != null) {
+	 * if (!Decision.isCastableTo(type, defaultValue, true, true, -1)) { throw new ApplicationException(
+	 * "Default value for property [" + property.getName() + "] is not compatible with type [" + type +
+	 * "]" ); } }
+	 * 
+	 * return EVAL_PAGE; }
+	 */
 }
