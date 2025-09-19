@@ -1,4 +1,4 @@
-component extends="org.lucee.cfml.test.LuceeTestCase" displayname="LDEV5305" skip=true {
+component extends="org.lucee.cfml.test.LuceeTestCase" displayname="LDEV5305" {
 
 	function beforeAll(){
 		variables.randomTestFiles = [];
