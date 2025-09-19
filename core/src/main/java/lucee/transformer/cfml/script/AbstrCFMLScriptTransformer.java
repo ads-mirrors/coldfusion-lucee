@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.ClassException;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
@@ -1644,7 +1645,15 @@ public abstract class AbstrCFMLScriptTransformer extends AbstrCFMLExprTransforme
 		Position line = data.srcCode.getPosition();
 
 		TagLibTag tlt = CFMLTransformer.getTLT(data.srcCode, "property", data.config.getIdentification());
-		Tag property = new TagOther(data.factory, line, null);
+		Tag property;
+		try {
+			property = tlt.getTag(data.factory, line, null);
+		}
+		catch (Exception e) {
+			// Fall back to TagOther if TTT instantiation fails
+			LogUtil.warn("template", new TemplateException(data.srcCode, "Failed to instantiate TagLibTag for 'property', falling back to TagOther."));
+			property = new TagOther(data.factory, line, null);
+		}
 		addMetaData(data, property, IGNORE_LIST_PROPERTY);
 
 		boolean hasName = false, hasType = false;
