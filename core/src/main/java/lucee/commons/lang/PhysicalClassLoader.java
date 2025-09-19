@@ -338,7 +338,7 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 
 				// Finally try filesystem directory
 				if (loadFromFS) {
-					synchronized (SystemUtil.createToken("PhysicalClassLoader:load", name)) {
+					synchronized (getClassLoadingLock(name)) {
 						Resource res = directory.getRealResource(name.replace('.', '/').concat(".class"));
 						if (res.isFile()) {
 							c = _loadClass(name, read(name), false);
@@ -355,10 +355,8 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 
 	@Override
 	public Class<?> loadClass(String name, byte[] barr) throws UnmodifiableClassException {
-		// Class<?> clazz = null;
-		Class<?> clazz = findLoadedClass(name);
-
-		synchronized (SystemUtil.createToken("PhysicalClassLoader:load", name)) {
+		synchronized (getClassLoadingLock(name)) {
+			Class<?> clazz = findLoadedClass(name);
 			if (clazz == null) return _loadClass(name, barr, false);
 			return rename(clazz, barr);
 		}
@@ -382,7 +380,7 @@ public final class PhysicalClassLoader extends URLClassLoader implements Extenda
 			return super.findClass(name);
 		}
 
-		synchronized (SystemUtil.createToken("PhysicalClassLoader:load", name)) {
+		synchronized (getClassLoadingLock(name)) {
 			Resource res = directory.getRealResource(name.replace('.', '/').concat(".class"));
 			if (!res.isFile()) {
 				// if (cnfe != null) throw cnfe;
