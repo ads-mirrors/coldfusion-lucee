@@ -22,6 +22,7 @@ import java.io.Serializable;
 
 import lucee.runtime.config.Config;
 import lucee.runtime.exp.PageException;
+import lucee.runtime.spooler.listener.SpoolerTaskListener;
 import lucee.runtime.type.Array;
 import lucee.runtime.type.Struct;
 
@@ -99,5 +100,9 @@ public interface SpoolerTask extends Serializable {
 	public long getCreation();
 
 	public void setLastExecution(long lastExecution);
+
+	default SpoolerTaskListener getSpoolerTaskListener() {
+		return null;
+	}
 
 }
