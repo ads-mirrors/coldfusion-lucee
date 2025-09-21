@@ -220,6 +220,11 @@ public final class PropertyImpl extends MemberSupport implements Property, ASMPr
 		if (!StringUtil.isEmpty(type, true)) sct.setEL(KeyConstants._type, type);
 		if (_default != null) sct.setEL(KeyConstants._default, _default);
 
+		// only include 'required' if explicitly set (legacy behavior)
+		if (metadata != null && metadata.containsKey(KeyConstants._required)) {
+			sct.setEL(KeyConstants._required, required);
+		}
+
 		// dyn attributes
 
 		StructUtil.copy(dynAttrs, sct, true);

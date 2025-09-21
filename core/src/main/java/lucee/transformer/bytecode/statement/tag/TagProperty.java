@@ -120,6 +120,9 @@ public final class TagProperty extends TagBase {
 					dynamicAttrs.add(attr);
 				}
 			}
+
+			Type structType = Types.STRUCT_IMPL;
+			Method setELMethod = new Method("setEL", Types.OBJECT, new Type[] {Types.STRING, Types.OBJECT});
 			adapter.loadArg(0);
 
 			if (name != null) {
@@ -169,22 +172,30 @@ public final class TagProperty extends TagBase {
 
 			adapter.push(getter);
 
-			if (!dynamicAttrs.isEmpty()) {
-				adapter.newInstance(Types.STRUCT_IMPL);
+			if (!dynamicAttrs.isEmpty() || (tag.getAttributes().containsKey("required") && tag.getAttribute("required") != null)) {
+				adapter.newInstance(structType);
 				adapter.dup();
-				adapter.invokeConstructor(Types.STRUCT_IMPL, new Method("<init>", Type.VOID_TYPE, new Type[] {}));
+				adapter.invokeConstructor(structType, new Method("<init>", Type.VOID_TYPE, new Type[] {}));
 
 				for (Attribute dynAttr : dynamicAttrs) {
 					adapter.dup();
 					adapter.push(dynAttr.getName());
 					dynAttr.getValue().writeOut(bc, Expression.MODE_REF);
-					adapter.invokeInterface(Types.STRUCT, new Method("setEL", Types.OBJECT, new Type[] {Types.STRING, Types.OBJECT}));
+					adapter.invokeInterface(Types.STRUCT, setELMethod);
+					adapter.pop();
+				}
+
+				// Only add required if explicitly set
+				if (tag.getAttributes().containsKey("required") && tag.getAttribute("required") != null) {
+					adapter.dup();
+					adapter.push("required");
+					adapter.push(required ? "yes" : "no");
+					adapter.invokeInterface(Types.STRUCT, setELMethod);
 					adapter.pop();
 				}
 
 				adapter.invokeStatic(Type.getType("Llucee/runtime/type/util/ComponentUtil;"), REGISTER_PROPERTY_WITH_DYNAMIC);
-			}
-			else {
+			} else {
 				adapter.invokeStatic(Type.getType("Llucee/runtime/type/util/ComponentUtil;"), REGISTER_PROPERTY);
 			}
 
