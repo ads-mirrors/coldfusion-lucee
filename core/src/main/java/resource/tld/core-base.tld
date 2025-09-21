@@ -4853,8 +4853,8 @@ Lucee uses the number of characters in the file.</description>
 		<name>property</name>
 		<tag-class>lucee.runtime.tag.Property</tag-class>
 		<tte-class>lucee.transformer.cfml.evaluator.impl.Property</tte-class>
+		<ttt-class>lucee.transformer.bytecode.statement.tag.TagProperty</ttt-class>
 		<att-default-value></att-default-value>
-		<!-- ttt-class>lucee.transformer.bytecode.statement.tag.TagProperty</ttt-class -->
 		<body-content>empty</body-content>
 		<body-rtexprvalue>false</body-rtexprvalue>
 		<description>Defines properties within components that can be used for web services, ORM mapping, and accessor method generation. Properties are exposed as component metadata and follow component inheritance rules.</description>

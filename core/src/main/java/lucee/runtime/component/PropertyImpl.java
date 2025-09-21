@@ -218,6 +218,7 @@ public final class PropertyImpl extends MemberSupport implements Property, ASMPr
 		if (!StringUtil.isEmpty(hint, true)) sct.setEL(KeyConstants._hint, hint);
 		if (!StringUtil.isEmpty(displayname, true)) sct.setEL(KeyConstants._displayname, displayname);
 		if (!StringUtil.isEmpty(type, true)) sct.setEL(KeyConstants._type, type);
+		if (_default != null) sct.setEL(KeyConstants._default, _default);
 
 		// dyn attributes
 

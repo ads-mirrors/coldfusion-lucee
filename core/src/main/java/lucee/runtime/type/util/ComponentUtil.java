@@ -50,6 +50,7 @@ import lucee.commons.lang.StringUtil;
 import lucee.commons.lang.types.RefBoolean;
 import lucee.runtime.Component;
 import lucee.runtime.ComponentImpl;
+import lucee.runtime.ComponentScope;
 import lucee.runtime.ComponentSpecificAccess;
 import lucee.runtime.Mapping;
 import lucee.runtime.Page;
@@ -1100,6 +1101,52 @@ public final class ComponentUtil {
 
 		}
 		return defaultValue;
+	}
+
+	/**
+	 * Optimized property registration that bypasses tag lifecycle overhead
+	 *
+	 * @param pc PageContext
+	 * @param name property name
+	 * @param type property type
+	 * @param defaultValue default value
+	 * @param access access level
+	 * @param hint property hint
+	 * @param displayname display name
+	 * @param required is required
+	 * @param setter has setter
+	 * @param getter has getter
+	 * @throws PageException
+	 */
+	public static void registerProperty(PageContext pc, String name, String type, Object defaultValue, String access, String hint, String displayname,
+			boolean required, boolean setter, boolean getter) throws PageException {
+		registerProperty(pc, name, type, defaultValue, access, hint, displayname, required, setter, getter, null);
+	}
+
+	public static void registerProperty(PageContext pc, String name, String type, Object defaultValue, String access, String hint, String displayname,
+			boolean required, boolean setter, boolean getter, lucee.runtime.type.Struct dynamicAttributes) throws PageException {
+		if (pc.variablesScope() instanceof ComponentScope) {
+			Component comp = ((ComponentScope) pc.variablesScope()).getComponent();
+			lucee.runtime.component.PropertyImpl property = new lucee.runtime.component.PropertyImpl();
+
+			property.setName(name);
+			if (type != null) property.setType(type);
+			if (defaultValue != null) property.setDefault(defaultValue);
+			if (access != null) property.setAccess(access);
+			if (hint != null) property.setHint(hint);
+			if (displayname != null) property.setDisplayname(displayname);
+			property.setRequired(required);
+			property.setSetter(setter);
+			property.setGetter(getter);
+
+			// Handle dynamic attributes
+			if (dynamicAttributes != null) {
+				lucee.runtime.type.util.StructUtil.copy(dynamicAttributes, property.getDynamicAttributes(), true);
+			}
+
+			comp.setProperty(property);
+			property.setOwnerName(comp.getAbsName());
+		}
 	}
 
 }

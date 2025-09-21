@@ -28,6 +28,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.NoSuchElementException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1164,26 +1165,30 @@ public final class PageContextImpl extends PageContext {
 
 	@Override
 	public PageSource getCurrentPageSource() {
-		if (pathList.isEmpty()) {
+		try {
+			return pathList.getLast();
+		}
+		catch (NoSuchElementException e) {
 			if (parent != null && parent != this && parent.isInitialized()) { // second comparision should not be necesary, just in case ...
 				return parent.getCurrentPageSource();
 			}
 			else if (caller != null) return caller;
 			return null;
 		}
-		return pathList.getLast();
 	}
 
 	@Override
 	public PageSource getCurrentPageSource(PageSource defaultvalue) {
-		if (pathList.isEmpty()) {
+		try {
+			return pathList.getLast();
+		}
+		catch (NoSuchElementException e) {
 			if (parent != null && parent != this && parent.isInitialized()) { // second comparision should not be necesary, just in case ...
 				return parent.getCurrentPageSource(defaultvalue);
 			}
 			else if (caller != null) return caller;
 			return defaultvalue;
 		}
-		return pathList.getLast();
 	}
 
 	/**
@@ -3454,7 +3459,7 @@ public final class PageContextImpl extends PageContext {
 	}
 
 	public UDF[] getUDFs() {
-		return udfs.toArray(new UDF[udfs.size()]);
+		return udfs.toArray(new UDF[0]);
 	}
 
 	public void addUDF(UDF udf) {
