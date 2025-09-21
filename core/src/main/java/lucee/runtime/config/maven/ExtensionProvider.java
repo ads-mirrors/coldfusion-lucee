@@ -42,6 +42,10 @@ import lucee.runtime.type.util.ListUtil;
 
 public class ExtensionProvider {
 
+	public static final int CONNECTION_TIMEOUT = 50000;
+	public static final int READ_TIMEOUT_HEAD = 5000;
+	public static final int READ_TIMEOUT_GET = 20000;
+
 	private static final String EXTENSION_EXTENSION = "lex";
 
 	private static final Map<String, String> uuidMapping = new HashMap<>();
@@ -320,12 +324,13 @@ public class ExtensionProvider {
 		Map<String, Object> detail = detail(artifact, version);
 		if (detail != null) {
 			URL url = HTTPUtil.toURL(Caster.toString(detail.get(EXTENSION_EXTENSION), null), Http.ENCODED_NO, null);
+			LogUtil.log(Log.LEVEL_INFO, "deploy", "Fetching extension from " + url);
 			if (url != null) {
 				URLConnection connection = url.openConnection();
 
 				// Set reasonable timeouts
-				connection.setConnectTimeout(5000); // 5 seconds
-				connection.setReadTimeout(60000); // 60 seconds
+				connection.setConnectTimeout(CONNECTION_TIMEOUT);
+				connection.setReadTimeout(READ_TIMEOUT_GET);
 
 				// Set a user agent to avoid blocks
 				connection.setRequestProperty("User-Agent", "Lucee Extension Provider 1.0");
@@ -340,13 +345,14 @@ public class ExtensionProvider {
 		Map<String, Object> detail = detail(artifact, version, null);
 		if (detail != null) {
 			URL url = HTTPUtil.toURL(Caster.toString(detail.get(EXTENSION_EXTENSION), null), Http.ENCODED_NO, null);
+			LogUtil.log(Log.LEVEL_INFO, "deploy", "Fetching extension from " + url);
 			if (url != null) {
 				try {
 					URLConnection connection = url.openConnection();
 
 					// Set reasonable timeouts
-					connection.setConnectTimeout(5000); // 5 seconds
-					connection.setReadTimeout(60000); // 60 seconds
+					connection.setConnectTimeout(CONNECTION_TIMEOUT);
+					connection.setReadTimeout(READ_TIMEOUT_GET);
 
 					// Set a user agent to avoid blocks
 					connection.setRequestProperty("User-Agent", "Lucee Extension Provider 1.0");
@@ -354,6 +360,7 @@ public class ExtensionProvider {
 					return connection.getInputStream();
 				}
 				catch (Exception e) {
+					LogUtil.log(Log.LEVEL_ERROR, "deploy", new Exception("Error fetching extension from " + url, e));
 				}
 			}
 		}
