@@ -1142,12 +1142,13 @@ public final class ComponentUtil {
 
 			// Handle dynamic attributes
 			if (dynamicAttributes != null) {
-				property.setDynamicAttributes(dynamicAttributes);
+				StructUtil.copy(dynamicAttributes, property.getDynamicAttributes(), true);
 			}
 
 			comp.setProperty(property);
 			property.setOwnerName(comp.getAbsName());
 		}
 	}
+
 
 }

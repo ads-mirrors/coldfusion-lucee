@@ -145,6 +145,33 @@ function run(testResults, testBox) {
 			expect(prop.type).toBeWithCase("string");
 		});
 	});
+	describe("LDEV-5821 singularName accessor generation regression", function() {
+		var cfc = new component persistent="true" accessors="true" {
+			property name="fruits" singularName="fruit" fieldtype="one-to-many" cfc="FruitEntity" fkcolumn="basketId" cascade="all" lazy="false" fetch="join";
+		};
+
+		it("should generate addFruit method from singularName attribute", function() {
+			expect(structKeyExists(cfc, "addFruit")).toBeTrue("addFruit method should be generated from singularName='fruit'");
+		});
+
+		it("should generate hasFruit method from singularName attribute", function() {
+			expect(structKeyExists(cfc, "hasFruit")).toBeTrue("hasFruit method should be generated from singularName='fruit'");
+		});
+
+		it("should generate removeFruit method from singularName attribute", function() {
+			expect(structKeyExists(cfc, "removeFruit")).toBeTrue("removeFruit method should be generated from singularName='fruit'");
+		});
+
+		it("should include singularName in property metadata", function() {
+			var meta = getMetaData(cfc);
+			var props = meta.properties;
+			var fruitsIdx = props.find(function(p){return p.name=="fruits";});
+			expect(fruitsIdx).toBeGT(0, "Property 'fruits' not found");
+			var fruits = props[fruitsIdx];
+			expect(structKeyExists(fruits, "singularname")).toBeTrue("singularName should be in property metadata");
+			expect(fruits.singularname).toBeWithCase("fruit");
+		});
+	});
 }
 
 }
