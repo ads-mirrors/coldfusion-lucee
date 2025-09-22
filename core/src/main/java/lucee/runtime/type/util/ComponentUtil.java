@@ -61,6 +61,7 @@ import lucee.runtime.PageSourceImpl;
 import lucee.runtime.component.AbstractFinal.UDFB;
 import lucee.runtime.component.ImportDefintion;
 import lucee.runtime.component.Property;
+import lucee.runtime.component.PropertyImpl;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.ConfigWebPro;
@@ -1124,10 +1125,10 @@ public final class ComponentUtil {
 	}
 
 	public static void registerProperty(PageContext pc, String name, String type, Object defaultValue, String access, String hint, String displayname,
-			boolean required, boolean setter, boolean getter, lucee.runtime.type.Struct dynamicAttributes) throws PageException {
+			boolean required, boolean setter, boolean getter, Struct dynamicAttributes) throws PageException {
 		if (pc.variablesScope() instanceof ComponentScope) {
 			Component comp = ((ComponentScope) pc.variablesScope()).getComponent();
-			lucee.runtime.component.PropertyImpl property = new lucee.runtime.component.PropertyImpl();
+			PropertyImpl property = new PropertyImpl();
 
 			property.setName(name);
 			if (type != null) property.setType(type);
@@ -1141,7 +1142,7 @@ public final class ComponentUtil {
 
 			// Handle dynamic attributes
 			if (dynamicAttributes != null) {
-				lucee.runtime.type.util.StructUtil.copy(dynamicAttributes, property.getDynamicAttributes(), true);
+				property.setDynamicAttributes(dynamicAttributes);
 			}
 
 			comp.setProperty(property);

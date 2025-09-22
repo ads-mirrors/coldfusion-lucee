@@ -232,6 +232,10 @@ public final class PropertyImpl extends MemberSupport implements Property, ASMPr
 		return sct;
 	}
 
+	public void setDynamicAttributes(Struct dynAttrs) {
+		this.dynAttrs = dynAttrs;
+	}
+
 	@Override
 	public Struct getDynamicAttributes() {
 		return dynAttrs;
