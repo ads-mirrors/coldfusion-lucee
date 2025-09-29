@@ -76,6 +76,15 @@ public final class Call extends ExpressionBase implements Func {
 		super.dump(sct);
 		sct.setEL(KeyConstants._type, "CallExpression");
 
+		// Check if this is a built-in function call
+		// The expression could be a Variable with a BIF as its first member
+		if (expr instanceof VariableImpl) {
+			VariableImpl var = (VariableImpl) expr;
+			if (var.getFirstMember() instanceof BIF) {
+				sct.setEL("isBuiltIn", Boolean.TRUE);
+			}
+		}
+
 		Struct callee = new StructImpl(Struct.TYPE_LINKED);
 		sct.setEL("callee", callee);
 		expr.dump(callee);

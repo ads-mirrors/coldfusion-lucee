@@ -1136,6 +1136,11 @@ public final class VariableImpl extends ExpressionBase implements Variable {
 				// Function call
 				newNode.setEL(KeyConstants._type, "CallExpression");
 
+				// Check if this is a built-in function call
+				if (member instanceof BIF) {
+					newNode.setEL("isBuiltIn", Boolean.TRUE);
+				}
+
 				// Set callee to current chain (or base identifier)
 				if (current == null) {
 					// First element - base identifier
