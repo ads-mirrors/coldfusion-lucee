@@ -193,6 +193,16 @@ public abstract class TagBase extends StatementBase implements Tag {
 	public void dump(Struct sct) {
 		super.dump(sct);
 		sct.setEL(KeyConstants._type, "CFMLTag");
+
+		// Check if this is a built-in tag
+		// Custom tags have name="_" with an appendix (cf_tagname) or custom namespace
+		boolean isCustomTag = ("_".equals(tagLibTag.getName()) && appendix != null) ||
+		                      !"cf".equals(tagLibTag.getTagLib().getNameSpace());
+
+		if (!isCustomTag && tagLibTag != null && tagLibTag.getTagLib() != null && tagLibTag.getTagLib().isCore()) {
+			sct.setEL("isBuiltIn", Boolean.TRUE);
+		}
+
 		sct.setEL(KeyConstants._name, tagLibTag.getName());
 		sct.setEL(KeyConstants._nameSpace, tagLibTag.getTagLib().getNameSpace());
 		sct.setEL(KeyConstants._nameSpaceSeparator, tagLibTag.getTagLib().getNameSpaceSeparator());

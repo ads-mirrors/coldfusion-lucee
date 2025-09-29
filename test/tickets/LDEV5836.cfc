@@ -3,7 +3,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 	function beforeAll() {
 		// Set up test artifact directory using current template path
 		variables.testDir = getDirectoryFromPath(getCurrentTemplatePath()) & "LDEV5836";
-		variables.debug = true;
+		variables.debug = false;
+		logger("Test artifacts directory: " & variables.testDir);
 
 		// Clean up previous test artifacts before running tests
 		if (directoryExists(variables.testDir)) {
@@ -16,21 +17,21 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 		}
 	};
 
-	// Clean up after all tests (disabled during dev)
-	function xafterAll() {
+	// Clean up after all tests
+	function afterAll() {
 		// only Remove ast json files from test artifact directory
-		if (directoryExists(variables.testDir)) {
+		if (!variables.debug && directoryExists(variables.testDir)) {
 			var astFiles = directoryList(variables.testDir, false, "name", "*.json");
 			for (var file in astFiles) {
 				fileDelete(variables.testDir & "/" & file);
-			}			
+			}
 		}
 	}
 
 	function run(testResults, testBox) {
 		describe("LDEV-5836 - AST should distinguish between BIFs and UDFs", function() {
 
-			
+
 			it("should mark built-in functions with isBuiltIn=true in AST", function() {
 				// Use static test artifact file
 				var testFile = variables.testDir & "/test-bifs.cfm";
@@ -128,6 +129,47 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 					}
 				}
 			});
+
+			it("should handle custom tags correctly", function() {
+				// Use static test artifact file
+				var testFile = variables.testDir & "/test-customtags.cfm";
+
+				var ast = astFromPath(testFile);
+
+				// Write the AST to JSON file
+				fileWrite(variables.testDir & "/customtags-ast.json", serializeJSON(ast));
+
+				var callExpressions = findNodes(ast, "CallExpression");
+
+				// Find all CFMLTag nodes
+				var cfmlTags = findNodes(ast, "CFMLTag");
+
+				// Debug output
+				logger("=== Custom Tags Test ===");
+				logger("Found " & callExpressions.len() & " CallExpressions");
+				logger("Found " & cfmlTags.len() & " CFMLTag nodes");
+				fileWrite(variables.testDir & "/customtags-call-expressions.json", serializeJSON(callExpressions));
+				fileWrite(variables.testDir & "/customtags-cfmltags.json", serializeJSON(cfmlTags));
+
+				// Check that built-in tags have isBuiltIn=true
+				for (var tag in cfmlTags) {
+					if (structKeyExists(tag, "fullname")) {
+						var fullname = tag.fullname;
+						logger("Checking tag: " & fullname & ", isBuiltIn: " & (tag.isBuiltIn ?: "not set"));
+
+						// Built-in tags should have isBuiltIn=true
+						if (fullname == "cfmodule" || fullname == "cfsavecontent" || fullname == "cfloop" ||
+						    fullname == "cfscript" || fullname == "cfimport" || fullname == "cfinclude" ||
+						    fullname == "cfset") {
+							expect(tag.isBuiltIn ?: false).toBe(true, fullname & " should be marked as built-in");
+						}
+						// Custom tags should NOT have isBuiltIn
+						else if (left(fullname, 3) == "cf_" || find(":", fullname) > 0) {
+							expect(tag.isBuiltIn ?: false).toBe(false, fullname & " should not be marked as built-in");
+						}
+					}
+				}
+			});
 		});
 	}
 
@@ -146,7 +188,7 @@ component extends="org.lucee.cfml.test.LuceeTestCase" {
 	private array function findNodes(required struct node, required string type) {
 		var results = [];
 
-		if (structKeyExists(node, "type") && node.type == arguments.type) {
+		if (structKeyExists(node, "type") && isSimpleValue(node.type) && node.type == arguments.type) {
 			results.append(node);
 		}
 
