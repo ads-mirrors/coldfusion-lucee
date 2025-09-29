@@ -82,7 +82,7 @@ component {
 			}
 
 			if ( len( bundles ) eq 0 ){
-				SystemOutput( "Error no tests found to run, aborting", true );
+				SystemOutput( "Error no tests found to run, aborting", true, true );
 				throw "Error no tests found to run, aborting";
 			}
 
