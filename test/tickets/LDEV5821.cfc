@@ -106,7 +106,7 @@ function run(testResults, testBox) {
 		});
 	});
 	describe("LDEV-5821 property metadata with inheritance", function() {
-		var cfc = new LDEV5821Child();
+		var cfc = new LDEV5821.LDEV5821Child();
 		var meta = getMetaData(cfc);
 		var props = meta.properties;
 		/*
