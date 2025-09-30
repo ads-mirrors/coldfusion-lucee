@@ -220,6 +220,16 @@ try {
 	else
 		systemOutput( NL & 'Running all tests, to run a subset of test(s) by FILENAME, use the parameter -DtestFilter="image,orm,etc"', true );
 
+	param name="testExcludeDefault" default="";
+	request.testExcludeDefault = testExcludeDefault;
+	if ( len( trim( request.testExcludeDefault ) ) eq 0){
+		request.testExcludeDefault = server._getSystemPropOrEnvVars( "testExcludeDefault", "", false);
+		if ( structCount( request.testExcludeDefault ) )
+			request.testExcludeDefault = request.testExcludeDefault.testExcludeDefault;
+		else
+			request.testExcludeDefault="false";
+	}
+
 	param name="testLabels" default="";
 	request.testLabels = testLabels;
 	if ( len( trim( request.testLabels ) ) eq 0){

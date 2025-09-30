@@ -61,7 +61,13 @@ component {
 				testDebug: request.testDebug,
 				testSuiteExtends: request.testSuiteExtends
 			};
-			var bundles = getBundles( "/test", request.testFolder, testConfig );
+
+			if ( request.testExcludeDefault ) {
+				systemOutput( "Excluding default tests: testExcludeDefault was true", true );
+				bundles = [];
+			} else {
+				bundles = getBundles( "/test", request.testFolder, testConfig );
+			}
 			//SystemOutput( bundles, true);
 			var additionalBundles = [];
 			if ( len( request.testAdditional ) ){
