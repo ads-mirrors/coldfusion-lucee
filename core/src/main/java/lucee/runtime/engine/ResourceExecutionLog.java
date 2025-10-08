@@ -19,8 +19,11 @@
 package lucee.runtime.engine;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -30,6 +33,7 @@ import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.util.ResourceUtil;
+import lucee.commons.io.SystemUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.functions.other.CreateUUID;
@@ -37,14 +41,23 @@ import lucee.runtime.op.Caster;
 
 public final class ResourceExecutionLog extends ExecutionLogSupport {
 
-	private static int count = 1;
 	private Resource file;
+	private Resource tmpFile;
 	private StringBuilder content;
 	private PageContext pc;
 	private StringBuilder header;
 	private ArrayList<String> pathes = new ArrayList<String>();
+	private HashMap<String, Integer> pathIndex = new HashMap<String, Integer>();
 	private long start;
 	private Resource dir;
+	private static final int DEFAULT_FLUSH_THRESHOLD = 100000; // 100K chars (~200KB)
+	private static final int FLUSH_THRESHOLD = getFlushThreshold();
+
+	private static int getFlushThreshold() {
+		Integer threshold = Caster.toInteger(SystemUtil.getSystemPropOrEnvVar("lucee.execution.log.flush.threshold", null), null);
+		if (threshold == null || threshold <= 0) return DEFAULT_FLUSH_THRESHOLD;
+		return threshold;
+	}
 
 	@Override
 	protected void _init(PageContext pc, Map<String, String> arguments) {
@@ -68,7 +81,7 @@ public final class ResourceExecutionLog extends ExecutionLogSupport {
 		createHeader(header, "unit", unitShortToString(unit));
 		createHeader(header, "min-time-nano", min + "");
 
-		content = new StringBuilder();
+		content = new StringBuilder(FLUSH_THRESHOLD);
 
 		// directory
 		String strDirectory = arguments.get("directory");
@@ -93,7 +106,7 @@ public final class ResourceExecutionLog extends ExecutionLogSupport {
 			}
 		}
 		file = dir.getRealResource((pc.getId()) + "-" + CreateUUID.call(pc) + ".exl");
-		file.createNewFile();
+		tmpFile = dir.getRealResource(file.getName() + ".tmp");
 		start = System.nanoTime();
 	}
 
@@ -106,6 +119,9 @@ public final class ResourceExecutionLog extends ExecutionLogSupport {
 
 	@Override
 	protected void _release() {
+		// Flush any remaining content
+		flushContent();
+
 		// execution time
 		long executionTime = System.nanoTime() - start;
 		createHeader(header, "execution-time", Caster.toString(convertTime(executionTime, unit)));
@@ -122,8 +138,26 @@ public final class ResourceExecutionLog extends ExecutionLogSupport {
 			sb.append("\n");
 		}
 		sb.append("\n");
+
+		// Write header and paths to final file, then append data from tmp file
 		try {
-			IOUtil.write(file, header + sb.toString() + content.toString(), (Charset) null, false);
+			IOUtil.write(file, header.toString() + sb.toString(), (Charset) null, false);
+			// Append data from tmp file if it exists
+			if (tmpFile != null && tmpFile.exists()) {
+				InputStream is = null;
+				OutputStream os = null;
+				try {
+					is = tmpFile.getInputStream();
+					os = file.getOutputStream(true);
+					IOUtil.copy(is, os, true, true);
+				}
+				catch (IOException ioe) {
+					IOUtil.closeEL(is);
+					IOUtil.closeEL(os);
+					throw ioe;
+				}
+				ResourceUtil.removeEL(tmpFile, true);
+			}
 		}
 		catch (IOException ioe) {
 			err(pc, ioe);
@@ -149,15 +183,32 @@ public final class ResourceExecutionLog extends ExecutionLogSupport {
 		content.append("\t");
 		content.append(diff);
 		content.append("\n");
+
+		// Flush content to file if it gets too large
+		if (content.length() > FLUSH_THRESHOLD) {
+			flushContent();
+		}
 	}
 
 	private int path(String path) {
-		int index = pathes.indexOf(path);
-		if (index == -1) {
+		Integer index = pathIndex.get(path);
+		if (index == null) {
+			index = pathes.size();
 			pathes.add(path);
-			return pathes.size() - 1;
+			pathIndex.put(path, index);
 		}
 		return index;
+	}
+
+	private void flushContent() {
+		if (content.length() == 0) return;
+		try {
+			IOUtil.write(tmpFile, content.toString(), (Charset) null, true);
+			content.setLength(0); // Clear the buffer
+		}
+		catch (IOException ioe) {
+			err(pc, ioe);
+		}
 	}
 
 	private void err(PageContext pc, String msg) {
