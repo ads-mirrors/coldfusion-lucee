@@ -33,7 +33,6 @@ import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.util.ResourceUtil;
-import lucee.commons.io.SystemUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.functions.other.CreateUUID;
@@ -50,14 +49,8 @@ public final class ResourceExecutionLog extends ExecutionLogSupport {
 	private HashMap<String, Integer> pathIndex = new HashMap<String, Integer>();
 	private long start;
 	private Resource dir;
-	private static final int DEFAULT_FLUSH_THRESHOLD = 100000; // 100K chars (~200KB)
-	private static final int FLUSH_THRESHOLD = getFlushThreshold();
-
-	private static int getFlushThreshold() {
-		Integer threshold = Caster.toInteger(SystemUtil.getSystemPropOrEnvVar("lucee.execution.log.flush.threshold", null), null);
-		if (threshold == null || threshold <= 0) return DEFAULT_FLUSH_THRESHOLD;
-		return threshold;
-	}
+	private static final int DEFAULT_BUFFER_SIZE = 100000; // 100K chars (~200KB)
+	private int bufferSize = DEFAULT_BUFFER_SIZE;
 
 	@Override
 	protected void _init(PageContext pc, Map<String, String> arguments) {
@@ -81,7 +74,16 @@ public final class ResourceExecutionLog extends ExecutionLogSupport {
 		createHeader(header, "unit", unitShortToString(unit));
 		createHeader(header, "min-time-nano", min + "");
 
-		content = new StringBuilder(FLUSH_THRESHOLD);
+		// buffer-size
+		String strBufferSize = arguments.get("buffer-size");
+		if (!StringUtil.isEmpty(strBufferSize)) {
+			Integer size = Caster.toInteger(strBufferSize, null);
+			if (size != null && size > 0) {
+				bufferSize = size;
+			}
+		}
+
+		content = new StringBuilder(bufferSize);
 
 		// directory
 		String strDirectory = arguments.get("directory");
@@ -185,7 +187,7 @@ public final class ResourceExecutionLog extends ExecutionLogSupport {
 		content.append("\n");
 
 		// Flush content to file if it gets too large
-		if (content.length() > FLUSH_THRESHOLD) {
+		if (content.length() > bufferSize) {
 			flushContent();
 		}
 	}
