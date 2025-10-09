@@ -473,10 +473,5 @@
         "sysprop": "lucee.base.config",
         "envvar": "LUCEE_BASE_CONFIG",
         "desc": "Specifies a path to an alternate location for your .CFConfig.json file."
-    },
-    {
-        "sysprop": "lucee.execution.log.flush.threshold",
-        "envvar": "LUCEE_EXECUTION_LOG_FLUSH_THRESHOLD",
-        "desc": "Numeric value for the execution log flush threshold in characters. Controls how often execution log data is flushed to disk to prevent out of memory errors. Default is 100000 (100K characters, ~200KB). Lower values flush more frequently but increase IO overhead, higher values reduce IO but use more memory. Values <= 0 will use the default."
     }
 ]

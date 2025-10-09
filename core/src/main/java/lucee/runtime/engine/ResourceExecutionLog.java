@@ -108,7 +108,9 @@ public final class ResourceExecutionLog extends ExecutionLogSupport {
 			}
 		}
 		file = dir.getRealResource((pc.getId()) + "-" + CreateUUID.call(pc) + ".exl");
-		tmpFile = dir.getRealResource(file.getName() + ".tmp");
+		// Always use local temp for buffer file
+		Resource localTemp = getTemp(pc);
+		tmpFile = localTemp.getRealResource(file.getName() + ".tmp");
 		start = System.nanoTime();
 	}
 
