@@ -473,5 +473,10 @@
         "sysprop": "lucee.base.config",
         "envvar": "LUCEE_BASE_CONFIG",
         "desc": "Specifies a path to an alternate location for your .CFConfig.json file."
+    },
+    {
+        "sysprop": "lucee.tag.populate.localscope",
+        "envvar": "LUCEE_TAG_POPULATE_LOCALSCOPE",
+        "desc": "Boolean value that controls whether tags like cflock and cfquery populate their default result variables to local scope when inside a function. Default is true (variables go to local scope). Set to false to restore pre-LDEV-5416 behavior where variables go to variables scope."
     }
 ]
