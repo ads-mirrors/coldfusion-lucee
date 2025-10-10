@@ -129,17 +129,15 @@ public final class FormatUtil {
 
 			new Pattern("EEE MMM dd HH:mm:ss z yyyy", FORMAT_TYPE_DATE_TIME),
 
-			new Pattern("EE, dd-MMM-yyyy HH:mm:ss zz", FORMAT_TYPE_DATE_TIME),
+			new Pattern("EE, dd-MMM-yyyy H:mm:ss zz", FORMAT_TYPE_DATE_TIME),
 
-			new Pattern("EE, dd MMM yyyy HH:mm:ss zz", FORMAT_TYPE_DATE_TIME),
+			new Pattern("EE, dd MMM yyyy H:mm:ss zz", FORMAT_TYPE_DATE_TIME),
 
-			new Pattern("EEE d, MMM yyyy HH:mm:ss zz", FORMAT_TYPE_DATE_TIME),
+			new Pattern("EEE d, MMM yyyy H:mm:ss zz", FORMAT_TYPE_DATE_TIME),
 
-			new Pattern("EEE, dd MMM yyyy HH:mm:ss Z", FORMAT_TYPE_DATE_TIME),
+			new Pattern("EEE, d MMM yyyy H:mm:ss Z", FORMAT_TYPE_DATE_TIME),
 
-			new Pattern("EEE, MMM dd, yyyy HH:mm:ssZ", FORMAT_TYPE_DATE_TIME),
-
-			new Pattern("EEE, dd MMM yyyy HH:mm:ss Z", FORMAT_TYPE_DATE_TIME),
+			new Pattern("EEE, MMM dd, yyyy H:mm:ssZ", FORMAT_TYPE_DATE_TIME),
 
 			new Pattern("EEEE, MMMM d, yyyy, h:mm:ss a z", FORMAT_TYPE_DATE_TIME),
 
@@ -159,7 +157,7 @@ public final class FormatUtil {
 
 			new Pattern("H:mm:ss a z", FORMAT_TYPE_TIME)
 
-	};//
+	};
 
 	private static final Map<String, SoftReference<FormatterWrapper>> dateTimeFormatter = new ConcurrentHashMap<>();
 	public static final boolean debug = false;

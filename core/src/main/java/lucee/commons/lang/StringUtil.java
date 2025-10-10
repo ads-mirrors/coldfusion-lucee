@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 
 import lucee.runtime.PageContext;
 import lucee.runtime.exp.PageException;
@@ -99,6 +100,7 @@ public final class StringUtil {
 
 	private static char[] QUOTE_8220 = new char[] { (char) 226, (char) 8364, (char) 339 };
 	private static char[] QUOTE_8221 = new char[] { (char) 226, (char) 8364, (char) 65533 };
+	private static final Pattern SPACES = Pattern.compile("\\s+");
 
 	private static final char[] SURROGATE_CHARACTERS_RANGE = new char[] { (char) 55296, (char) 57343 };
 
@@ -1558,5 +1560,28 @@ public final class StringUtil {
 
 	public static boolean isCompatibleWith(String value, Charset cs) {
 		return value.equals(new String(value.getBytes(cs), cs));
+	}
+
+	public static String normalize(String str) {
+		int len = str.length();
+		char c;
+		char[] carr = null;
+		for (int i = 0; i < len; i++) {
+			c = str.charAt(i);
+			if (' ' != c && isWhiteSpace(c)) {
+				if (carr == null) carr = str.toCharArray();
+				carr[i] = ' ';
+			}
+		}
+		if (carr != null) str = String.valueOf(carr);
+
+		for (int i = 0; i < len; i++) {
+			c = str.charAt(i);
+			if (' ' == c) {
+				if (carr == null) carr = str.toCharArray();
+
+			}
+		}
+		return SPACES.matcher(str).replaceAll(" ");
 	}
 }

@@ -1,4 +1,4 @@
-component extends="org.lucee.cfml.test.LuceeTestCase" labels="date" skip=true {
+component extends="org.lucee.cfml.test.LuceeTestCase" labels="date" {
 
 	function run( testResults, testBox ) {
 		describe( "Test case for LDEV-5842: Handle malformed HTTP date headers with single-digit hours", function() {
@@ -43,7 +43,31 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="date" skip=true {
 				expect( hour( result ) ).toBe( 20 );
 			});
 
+			it( title="parseDateTime should handle single-digit hours from Maven metadata", body=function( currentSpec ) {
+				// Maven metadata files sometimes generate dates without leading zeros
+				var dateStr = "Mon, 03 Mar 2025 7:45:12 GMT";
+				var result = parseDateTime( dateStr );
+
+				expect( isDate( result ) ).toBeTrue();
+				expect( dateFormat( result, "yyyy-mm-dd" ) ).toBe( "2025-03-03" );
+				expect( hour( result ) ).toBe( 7 );
+				expect( minute( result ) ).toBe( 45 );
+				expect( second( result ) ).toBe( 12 );
+			});
+
+			it( title="parseDateTime should handle dates with Unicode non-breaking space (U+00A0)", body=function( currentSpec ) {
+				// Some systems use non-breaking spaces instead of regular spaces
+				// The character between "2025" and "6:30:00" is U+00A0 (non-breaking space)
+				var dateStr = "Tue, 15 Apr 2025" & chr(160) & "6:30:00 GMT";
+				var result = parseDateTime( dateStr );
+
+				expect( isDate( result ) ).toBeTrue();
+				expect( dateFormat( result, "yyyy-mm-dd" ) ).toBe( "2025-04-15" );
+				expect( hour( result ) ).toBe( 6 );
+				expect( minute( result ) ).toBe( 30 );
+				expect( second( result ) ).toBe( 0 );
+			});
+
 		});
 	}
-
 }
