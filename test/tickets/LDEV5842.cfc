@@ -8,8 +8,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="date" {
 				var result = parseDateTime( dateStr );
 
 				expect( isDate( result ) ).toBeTrue();
-				expect( dateFormat( result, "yyyy-mm-dd" ) ).toBe( "2025-09-13" );
-				expect( hour( result ) ).toBe( 9 );
+				expect( dateFormat( result, "yyyy-mm-dd", "UTC" ) ).toBe( "2025-09-13" );
+				expect( hour( result, "UTC") ).toBe( 9 );
 			});
 
 			it( title="parseDateTime should handle malformed HTTP headers with single-digit hours", body=function( currentSpec ) {
@@ -19,10 +19,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="date" {
 				var result = parseDateTime( dateStr );
 
 				expect( isDate( result ) ).toBeTrue();
-				expect( dateFormat( result, "yyyy-mm-dd" ) ).toBe( "2025-09-13" );
-				expect( hour( result ) ).toBe( 9 );
-				expect( minute( result ) ).toBe( 29 );
-				expect( second( result ) ).toBe( 31 );
+				expect( dateFormat( result, "yyyy-mm-dd", "UTC" ) ).toBe( "2025-09-13" );
+				expect( hour( result, "UTC" ) ).toBe( 9 );
+				expect( minute( result, "UTC" ) ).toBe( 29 );
+				expect( second( result, "UTC" ) ).toBe( 31 );
 			});
 
 			it( title="parseDateTime should handle single-digit hours without extra space", body=function( currentSpec ) {
@@ -30,8 +30,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="date" {
 				var result = parseDateTime( dateStr );
 
 				expect( isDate( result ) ).toBeTrue();
-				expect( dateFormat( result, "yyyy-mm-dd" ) ).toBe( "2024-01-05" );
-				expect( hour( result ) ).toBe( 8 );
+				expect( dateFormat( result, "yyyy-mm-dd", "UTC" ) ).toBe( "2024-01-05" );
+				expect( hour( result, "UTC" ) ).toBe( 8 );
 			});
 
 			it( title="parseDateTime should handle standard RFC 1123 dates", body=function( currentSpec ) {
@@ -39,8 +39,8 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="date" {
 				var result = parseDateTime( dateStr );
 
 				expect( isDate( result ) ).toBeTrue();
-				expect( dateFormat( result, "yyyy-mm-dd" ) ).toBe( "2024-06-20" );
-				expect( hour( result ) ).toBe( 20 );
+				expect( dateFormat( result, "yyyy-mm-dd", "UTC" ) ).toBe( "2024-06-20" );
+				expect( hour( result, "UTC" ) ).toBe( 20 );
 			});
 
 			it( title="parseDateTime should handle single-digit hours from Maven metadata", body=function( currentSpec ) {
@@ -49,10 +49,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="date" {
 				var result = parseDateTime( dateStr );
 
 				expect( isDate( result ) ).toBeTrue();
-				expect( dateFormat( result, "yyyy-mm-dd" ) ).toBe( "2025-03-03" );
-				expect( hour( result ) ).toBe( 7 );
-				expect( minute( result ) ).toBe( 45 );
-				expect( second( result ) ).toBe( 12 );
+				expect( dateFormat( result, "yyyy-mm-dd", "UTC" ) ).toBe( "2025-03-03" );
+				expect( hour( result, "UTC" ) ).toBe( 7 );
+				expect( minute( result, "UTC" ) ).toBe( 45 );
+				expect( second( result, "UTC" ) ).toBe( 12 );
 			});
 
 			it( title="parseDateTime should handle dates with Unicode non-breaking space (U+00A0)", body=function( currentSpec ) {
@@ -62,10 +62,10 @@ component extends="org.lucee.cfml.test.LuceeTestCase" labels="date" {
 				var result = parseDateTime( dateStr );
 
 				expect( isDate( result ) ).toBeTrue();
-				expect( dateFormat( result, "yyyy-mm-dd" ) ).toBe( "2025-04-15" );
-				expect( hour( result ) ).toBe( 6 );
-				expect( minute( result ) ).toBe( 30 );
-				expect( second( result ) ).toBe( 0 );
+				expect( dateFormat( result, "yyyy-mm-dd", "UTC" ) ).toBe( "2025-04-15" );
+				expect( hour( result, "UTC" ) ).toBe( 6 );
+				expect( minute( result, "UTC" ) ).toBe( 30 );
+				expect( second( result, "UTC" ) ).toBe( 0 );
 			});
 
 		});
