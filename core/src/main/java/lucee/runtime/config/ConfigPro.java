@@ -292,9 +292,9 @@ public interface ConfigPro extends Config {
 
 	public ORMEngine resetORMEngine(PageContext pc, boolean force) throws PageException;
 
-	public boolean isMailSendPartial();
+	public boolean isMailSendPartial(); // used in mail extension
 
-	public boolean isUserset();
+	public boolean isUserset();// used in mail extension
 
 	public CharSet getResourceCharSet();
 

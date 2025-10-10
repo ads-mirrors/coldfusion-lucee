@@ -29,6 +29,7 @@ public interface ActionMonitorCollector {
 
 	public void log(PageContext pc, String type, String label, long executionTime, Object data);
 
+	// used in mail extension
 	public void log(ConfigWeb config, String type, String label, long executionTime, Object data);
 
 	public ActionMonitor getActionMonitor(String name);
