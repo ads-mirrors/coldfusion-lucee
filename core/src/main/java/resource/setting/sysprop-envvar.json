@@ -295,7 +295,7 @@
 		"sysprop": "lucee.extensions",
 		"envvar": "LUCEE_EXTENSIONS",
 		"desc": "Defines a comma-separated list of Lucee extensions to install when starting up. The current list of installed extensions is available via the Lucee admin. This can be a simple list of IDs, then whatever the latest version(s) will be installed (SNAPSHOT or STABLE). It's recommended to always specify the exact version for consistent results",
-		"category": "osgi",
+		"category": "extensions",
 		"type": "string",
 		"default": null
 	},
@@ -303,7 +303,7 @@
 		"sysprop": "lucee.extensions.install",
 		"envvar": "LUCEE_EXTENSIONS_INSTALL",
 		"desc": "A boolean value to enable/disable the installation of extensions",
-		"category": "osgi",
+		"category": "extensions",
 		"type": "boolean",
 		"default": true
 	},
@@ -313,6 +313,7 @@
 		"desc": "Boolean value that enables using Tika to detect the mime type for unknown file uploads",
 		"category": "security",
 		"tags": [ "cffile" ],
+		"functions": [ "fileUpload", "fileUploadAll" ],
 		"type": "boolean",
 		"introduced": "7.0.0.312",
 		"default": true
@@ -557,6 +558,7 @@
 		"desc": "Let's say you have the following code: `<cfinclude template=\"/foo/bar/index.cfm\">` And you have the following mappings defined: `/foo/bar` and `/foo`. Then Lucee will look for `/index.cfm` in `/foo/bar` and for `/bar/index.cfm` in `/foo` and invoke the first `index.cfm` it finds, which could be in both mappings. If this setting is set to `true`, Lucee will only check `/foo/bar` for `index.cfm`",
 		"category": "application",
 		"tags": [ "cfinclude" ],
+		"functions": [ "expandPath" ],
 		"type": "boolean",
 		"default": true
 	},
@@ -810,10 +812,10 @@
 	{
 		"sysprop": "lucee.security.limitEvaluation",
 		"envvar": "LUCEE_SECURITY_LIMITEVALUATION",
-		"desc": "Disable evaluating expressions when accessing scopes, Lucee 7 defaults to enabling this setting for security reasons. A boolean value. If enabled, limits variable evaluation in functions/tags. If enabled, you cannot use expressions within [ ] like this: susi[getVariableName()]. This affects the following functions: IsDefined, structGet, empty and the following tags: savecontent attribute `variable`",
+		"desc": "Disable evaluating expressions when accessing scopes, Lucee 7 defaults to enabling this setting for security reasons. A boolean value. If enabled, limits variable evaluation in functions/tags. If enabled, you cannot use expressions within [ ] like this: susi[getVariableName()]. This affects the following functions: IsDefined, structGet, structSort (when using pathToSubElement), empty and the following tags: savecontent attribute `variable`",
 		"category": "security",
 		"tags": [ "cfsavecontent" ],
-		"functions": [ "isDefined", "structGet", "empty" ],
+		"functions": [ "isDefined", "structGet", "structSort", "empty" ],
 		"type": "boolean",
 		"defaultSince": "7.0",
 		"default": "false (Lucee 6), true (Lucee 7)"
@@ -824,6 +826,7 @@
 		"desc": "Controls whether unknown CFML session cookies are automatically rotated. When `false`, unknown session cookies will not be rotated",
 		"category": "session",
 		"type": "boolean",
+		"functions": [ "sessionRotate" ],
 		"default": true
 	},
 	{
@@ -879,7 +882,7 @@
 	{
 		"sysprop": "lucee.tag.populate.localscope",
 		"envvar": "LUCEE_TAG_POPULATE_LOCALSCOPE",
-		"desc": "Controls whether tags like cflock and cfquery populate their default result variables to local scope when inside a function. When `true`, variables go to local scope. When `false`, restores pre-LDEV-5416 behavior where variables go to variables scope",
+		"desc": "Controls whether tags like cflock and cfquery populate their default result variables to local scope when inside a function. When `true`, variables go to local scope. When `false`, restores pre LDEV-5416 behavior where variables go to variables scope",
 		"category": "compiler",
 		"tags": [ "cflock", "cfquery", "cffile", "cfthread" ],
 		"type": "boolean",
@@ -935,6 +938,7 @@
 		"desc": "Alias for lucee.type.checking, enables or disables type checking for user-defined functions",
 		"category": "compiler",
 		"type": "boolean",
+		"tags": [ "cffunction" ],
 		"default": null
 	},
 	{
@@ -943,6 +947,7 @@
 		"desc": "Default block list for the tag cffile action=`upload`. A comma-separated list of extensions that are allowed when uploading files via forms",
 		"category": "security",
 		"tags": [ "cffile" ],
+		"functions": [ "fileUpload", "fileUploadAll" ],
 		"type": "string",
 		"default": null
 	},

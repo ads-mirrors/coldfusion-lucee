@@ -56,7 +56,8 @@ Primary functional category. Must be ONE of:
 - `charset` - Character encoding
 - `deployment` - Installation and configuration
 - `mail` - Email settings
-- `osgi` - Extensions and Maven
+- `osgi` - Maven / OSGI
+- `extensions` - Extensions
 
 #### `tags` (array of strings)
 Array of related CFML tags (without `<>` brackets).
@@ -64,7 +65,8 @@ Array of related CFML tags (without `<>` brackets).
 Examples:
 - `["cfquery", "cfqueryparam"]`
 - `["cflock"]`
-- `[]` (empty if no related tags)
+
+Omit if empty
 
 #### `functions` (array of strings)
 Array of related CFML functions.
@@ -72,7 +74,8 @@ Array of related CFML functions.
 Examples:
 - `["queryExecute", "queryNew"]`
 - `["isDefined", "structKeyExists"]`
-- `[]` (empty if no related functions)
+
+Omit if empty
 
 #### `type` (string)
 The CFML data type expected for this property value. Must be ONE of:
