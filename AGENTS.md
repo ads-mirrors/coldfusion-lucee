@@ -93,11 +93,14 @@ If your change affects a documented feature, please also submit a pull request t
 
 ## Testing
 
+[Testing Guidelines](test/README.md)
+
 - CFML Tests are written using TestBox [TestBox](https://testbox.ortusbooks.com/)
 - All CFML tests should extend `org.lucee.cfml.test.LuceeTestCase`
 - CFML tests should not use Java unless absolutely required, prefer CFML functionality.
 - Tests should cleanup after themselves and any temporary files should be created under the directory returned from `getTempDirectory()`
 - Test framework code, specifically files in the root of the `/test` directory should be compatible with Lucee 5.4, therefore, do not use newer cfml functionality.
+
 
 ## Security
 
