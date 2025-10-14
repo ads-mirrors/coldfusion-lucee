@@ -68,6 +68,7 @@ import lucee.runtime.type.util.ListUtil;
 public final class DeployHandler {
 
 	private static final ResourceFilter ALL_EXT = new ExtensionResourceFilter(new String[] { ".lex", ".lar", ".lco", ".json" });
+	private static final boolean USE_MAVEN_EXTENSION_PROVIDER = false;
 
 	/**
 	 * deploys all files found
@@ -524,7 +525,7 @@ public final class DeployHandler {
 	public static Resource downloadExtension(Config config, ExtensionDefintion ed, Log log, boolean throwOnError) throws ApplicationException {
 		// get extension from Maven
 		// TODO set investigate to true and log as warning if it fallback to old behaviour
-		{
+		if (USE_MAVEN_EXTENSION_PROVIDER) {
 			try {
 				Resource res = downloadExtensionFromMaven(ed, false, false, log);
 				if (res != null) return res;
