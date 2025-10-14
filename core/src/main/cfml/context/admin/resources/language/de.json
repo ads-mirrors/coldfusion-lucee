@@ -1141,6 +1141,8 @@
 			"createcol": "Collection erstellen",
 			"description": "Hier können Sie Search Collections verwalten, erstellen, indexieren und löschen. Standardmässig verwendet Lucee LUCENE als Suchengine.",
 			"directorypath": "Verzeichnispfad",
+			"extensionmissing": "Die Lucee Search-Erweiterung ist erforderlich, um diese Funktionalität zu nutzen.",
+			"extensionmissinglink": "Lucee Search-Erweiterung installieren",
 			"directorypathmissing": "Bitte geben Sie einen Wert für den zu indexierenden Pfad an.",
 			"external": "Extern",
 			"fileextensions": "Dateierweiterungen",

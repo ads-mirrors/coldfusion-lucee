@@ -1159,6 +1159,8 @@
       "createcol": "Create collection",
       "description": "Here you can manage, create, populate and delete search collections. By default, Lucee uses Apache Lucene as the search engine.\u003cbr/\u003e\u003cbr/\u003e",
       "directorypath": "Directory path",
+      "extensionmissing": "The Lucee Search extension is required to use this functionality.",
+      "extensionmissinglink": "Install the Lucee Search extension",
       "directorypathmissing": "Please enter a path to be indexed",
       "external": "External",
       "fileextensions": "File extensions",
