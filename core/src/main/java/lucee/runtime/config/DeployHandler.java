@@ -489,6 +489,11 @@ public final class DeployHandler {
 			Version version;
 			// get latest version when no version is defined
 			if (StringUtil.isEmpty(ed.getVersion(), true)) {
+				// find out the last version still needs some investigated effort, maybe we will improve on that in
+				// the future.
+				if (!investigate) {
+					return null;
+				}
 				version = ep.last(artifact);
 				if (LogUtil.doesDebug(log) && version != null) {
 					log.debug("main", "get latest version[" + version + "] for artifact [" + artifact + "]");
