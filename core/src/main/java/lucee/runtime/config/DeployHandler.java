@@ -68,6 +68,7 @@ import lucee.runtime.type.util.ListUtil;
 public final class DeployHandler {
 
 	private static final ResourceFilter ALL_EXT = new ExtensionResourceFilter(new String[] { ".lex", ".lar", ".lco", ".json" });
+	private static final boolean USE_MAVEN_EXTENSION_PROVIDER = true;
 
 	/**
 	 * deploys all files found
@@ -491,9 +492,6 @@ public final class DeployHandler {
 			if (StringUtil.isEmpty(ed.getVersion(), true)) {
 				// find out the last version still needs some investigated effort, maybe we will improve on that in
 				// the future.
-				if (!investigate) {
-					return null;
-				}
 				version = ep.last(artifact);
 				if (LogUtil.doesDebug(log) && version != null) {
 					log.debug("main", "get latest version[" + version + "] for artifact [" + artifact + "]");
@@ -524,7 +522,7 @@ public final class DeployHandler {
 	public static Resource downloadExtension(Config config, ExtensionDefintion ed, Log log, boolean throwOnError) throws ApplicationException {
 		// get extension from Maven
 		// TODO set investigate to true and log as warning if it fallback to old behaviour
-		{
+		if (USE_MAVEN_EXTENSION_PROVIDER) {
 			try {
 				Resource res = downloadExtensionFromMaven(ed, false, false, log);
 				if (res != null) return res;
