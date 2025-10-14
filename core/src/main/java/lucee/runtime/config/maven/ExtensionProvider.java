@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
@@ -20,7 +21,7 @@ import java.util.zip.ZipInputStream;
 import org.osgi.framework.Version;
 import org.xml.sax.SAXException;
 
-import lucee.print;
+import lucee.aprint;
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.CharsetUtil;
 import lucee.commons.io.IOUtil;
@@ -28,6 +29,7 @@ import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
+import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.net.HTTPUtil;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.maven.MavenUpdateProvider.Repository;
@@ -37,14 +39,11 @@ import lucee.runtime.mvn.POM;
 import lucee.runtime.op.Caster;
 import lucee.runtime.osgi.OSGiUtil;
 import lucee.runtime.tag.Http;
+import lucee.runtime.thread.ThreadUtil;
 import lucee.runtime.type.util.ArrayUtil;
 import lucee.runtime.type.util.ListUtil;
 
 public class ExtensionProvider {
-
-	public static final int CONNECTION_TIMEOUT = 50000;
-	public static final int READ_TIMEOUT_HEAD = 5000;
-	public static final int READ_TIMEOUT_GET = 20000;
 
 	private static final String EXTENSION_EXTENSION = "lex";
 
@@ -121,7 +120,7 @@ public class ExtensionProvider {
 	}
 
 	public ExtensionProvider(String group) {
-		this.repoSnapshots = MavenUpdateProvider.getDefaultRepositorySnapshots();
+		this.repoSnapshots = MavenUpdateProvider.getDefaultRepositorySnapshotsExtension();
 		this.repoReleases = MavenUpdateProvider.getDefaultRepositoryReleases();
 		this.repoMixed = MavenUpdateProvider.getDefaultRepositoryMixed();
 		this.repos = MavenUpdateProvider.merge(repoSnapshots, repoReleases, repoMixed);
@@ -129,27 +128,94 @@ public class ExtensionProvider {
 	}
 
 	public ExtensionProvider() {
-		this.repoSnapshots = MavenUpdateProvider.getDefaultRepositorySnapshots();
+		this.repoSnapshots = MavenUpdateProvider.getDefaultRepositorySnapshotsExtension();
 		this.repoReleases = MavenUpdateProvider.getDefaultRepositoryReleases();
 		this.repoMixed = MavenUpdateProvider.getDefaultRepositoryMixed();
 		this.repos = MavenUpdateProvider.merge(repoSnapshots, repoReleases, repoMixed);
 		this.group = MavenUpdateProvider.DEFAULT_GROUP;
 	}
 
-	private Set<String> listAllProjects() throws IOException, InterruptedException {
+	private ExtensionProvider disableCache() {
+		// repo
+		List<Repository> repo = new ArrayList<>();
+		for (Repository r: repoSnapshots) {
+			repo.add((Repository) r.clone());
+		}
+		// snap
+		List<Repository> snap = new ArrayList<>();
+		for (Repository r: repoSnapshots) {
+			snap.add((Repository) r.clone());
+		}
+		// mixed
+		List<Repository> mixed = new ArrayList<>();
+		for (Repository r: repoMixed) {
+			mixed.add((Repository) r.clone());
+		}
+
+		// TODO Auto-generated method stub
+		return new ExtensionProvider(
+
+				repo.toArray(new Repository[repo.size()]),
+
+				snap.toArray(new Repository[snap.size()]),
+
+				mixed.toArray(new Repository[mixed.size()]),
+
+				group
+
+		);
+	}
+
+	/*
+	 * private Set<String> listAllProjectsOld() throws IOException, InterruptedException {
+	 * HtmlDirectoryScraper scraper = new HtmlDirectoryScraper(); String strURL; Set<String> subfolders
+	 * = new HashSet<>(), tmp;
+	 * 
+	 * for (Repository r: repos) { strURL = (r.url.endsWith("/") ? r.url : (r.url + "/")) +
+	 * group.replace('.', '/') + "/"; tmp = readFromCache(r); if (tmp == null) { tmp = new HashSet<>();
+	 * print.e("-->" + strURL); scraper.getSubfolderLinks(strURL, tmp); } copy(tmp, subfolders);
+	 * storeToCache(r, tmp); } return subfolders; }
+	 */
+
+	private Set<String> listAllProjects() throws InterruptedException, IOException {
 		HtmlDirectoryScraper scraper = new HtmlDirectoryScraper();
-		String strURL;
-		Set<String> subfolders = new HashSet<>(), tmp;
+		Set<String> subfolders = new HashSet<>();
+		List<Thread> threads = new ArrayList<>();
+		Stack<Exception> exceptions = new Stack<Exception>();
 
 		for (Repository r: repos) {
-			strURL = (r.url.endsWith("/") ? r.url : (r.url + "/")) + group.replace('.', '/') + "/";
-			tmp = readFromCache(r);
-			if (tmp == null) {
-				tmp = new HashSet<>();
-				scraper.getSubfolderLinks(strURL, tmp);
-			}
-			copy(tmp, subfolders);
-			storeToCache(r, tmp);
+			Thread thread = ThreadUtil.getThread(() -> {
+				try {
+					String strURL = (r.url.endsWith("/") ? r.url : (r.url + "/")) + group.replace('.', '/') + "/";
+					Set<String> tmp = readFromCache(r);
+					if (tmp == null) {
+						tmp = new HashSet<>();
+						scraper.getSubfolderLinks(strURL, tmp);
+					}
+					copy(tmp, subfolders);
+					storeToCache(r, tmp);
+				}
+				catch (InterruptedException e) {
+					exceptions.add(e);
+				}
+				catch (IOException e) {
+					exceptions.add(e);
+				}
+			}, true);
+			thread.start();
+			threads.add(thread);
+		}
+
+		// handle exceptions
+		if (exceptions.size() > 0) {
+			Exception e = exceptions.pop();
+			if (e instanceof InterruptedException) throw (InterruptedException) e;
+			throw ExceptionUtil.toIOException(e);
+		}
+
+		// Join all threads
+		for (Thread thread: threads) {
+			thread.join();
 		}
 		return subfolders;
 	}
@@ -190,7 +256,7 @@ public class ExtensionProvider {
 		}
 	}
 
-	public List<String> list() throws IOException, InterruptedException {
+	public List<String> list() throws InterruptedException, IOException {
 		List<String> artifacts = new ArrayList<>();
 		for (String artifact: listAllProjects()) {
 			if (artifact.endsWith("-extension")) artifacts.add(artifact);
@@ -248,12 +314,12 @@ public class ExtensionProvider {
 		}
 	}
 
-	public List<Version> list(String artifact) throws IOException, GeneralSecurityException, SAXException {
+	public List<Version> list(String artifact) throws IOException, GeneralSecurityException, SAXException, InterruptedException {
 		MavenUpdateProvider mup = new MavenUpdateProvider(this.repoSnapshots, this.repoReleases, this.repoMixed, this.group, artifact);
 		return mup.list();
 	}
 
-	public Version last(String artifact) throws IOException, GeneralSecurityException, SAXException {
+	public Version last(String artifact) throws IOException, GeneralSecurityException, SAXException, InterruptedException {
 		Version last = null;
 		Version lastRel = null;
 
@@ -290,7 +356,6 @@ public class ExtensionProvider {
 			local = pom.getArtifact("lex");
 		}
 		catch (Exception e) {
-			print.e(e);
 			// Lucee repo does not always follow the maven rules a 100%, so we simply check for the file itself
 			local = POM.local(config.getMavenDir(), this.group, artifact, version.toString(), "lex");
 		}
@@ -324,13 +389,12 @@ public class ExtensionProvider {
 		Map<String, Object> detail = detail(artifact, version);
 		if (detail != null) {
 			URL url = HTTPUtil.toURL(Caster.toString(detail.get(EXTENSION_EXTENSION), null), Http.ENCODED_NO, null);
-			LogUtil.log(Log.LEVEL_INFO, "deploy", "Fetching extension from " + url);
 			if (url != null) {
 				URLConnection connection = url.openConnection();
 
 				// Set reasonable timeouts
-				connection.setConnectTimeout(CONNECTION_TIMEOUT);
-				connection.setReadTimeout(READ_TIMEOUT_GET);
+				connection.setConnectTimeout(5000); // 5 seconds
+				connection.setReadTimeout(60000); // 60 seconds
 
 				// Set a user agent to avoid blocks
 				connection.setRequestProperty("User-Agent", "Lucee Extension Provider 1.0");
@@ -345,14 +409,13 @@ public class ExtensionProvider {
 		Map<String, Object> detail = detail(artifact, version, null);
 		if (detail != null) {
 			URL url = HTTPUtil.toURL(Caster.toString(detail.get(EXTENSION_EXTENSION), null), Http.ENCODED_NO, null);
-			LogUtil.log(Log.LEVEL_INFO, "deploy", "Fetching extension from " + url);
 			if (url != null) {
 				try {
 					URLConnection connection = url.openConnection();
 
 					// Set reasonable timeouts
-					connection.setConnectTimeout(CONNECTION_TIMEOUT);
-					connection.setReadTimeout(READ_TIMEOUT_GET);
+					connection.setConnectTimeout(5000); // 5 seconds
+					connection.setReadTimeout(60000); // 60 seconds
 
 					// Set a user agent to avoid blocks
 					connection.setRequestProperty("User-Agent", "Lucee Extension Provider 1.0");
@@ -360,7 +423,6 @@ public class ExtensionProvider {
 					return connection.getInputStream();
 				}
 				catch (Exception e) {
-					LogUtil.log(Log.LEVEL_ERROR, "deploy", new Exception("Error fetching extension from " + url, e));
 				}
 			}
 		}
@@ -478,53 +540,63 @@ public class ExtensionProvider {
 		// TODO remove
 		ExtensionProvider ep = new ExtensionProvider(new Repository[] {}, new Repository[] {},
 				new Repository[] { new Repository("Maven Release Repository", "https://cdn.lucee.org/", Repository.TIMEOUT_5SECONDS, Repository.TIMEOUT_5SECONDS) }, "org.lucee");
-		ep = new ExtensionProvider();
-
-		// org.lucee:h2-jdbc-extension:2.1.214.0001L
-		print.e(ep.list("org.lucee:h2-jdbc-extension"));
-		print.e(ep.list("lucene-search-extension"));
-
-		if (true) return;
+		ep = new ExtensionProvider().disableCache();
 
 		long start = System.currentTimeMillis();
+		// org.lucee:h2-jdbc-extension:2.1.214.0001L
+		aprint.e(ep.list());
+		aprint.e("list-all-extensions:" + (System.currentTimeMillis() - start));
+		start = System.currentTimeMillis();
+		aprint.e(ep.list("redis-extension"));
+		// print.e(ep.list("lucene-search-extension"));
+		aprint.e("list-redis:" + (System.currentTimeMillis() - start));
+		{
+			start = System.currentTimeMillis();
+			Map<String, Object> detail = ep.detail("redis-extension", OSGiUtil.toVersion("3.0.0.56-SNAPSHOT"));
+			aprint.e("detail:" + (System.currentTimeMillis() - start));
+			aprint.e(detail);
+		}
+		if (true) return;
+
+		start = System.currentTimeMillis();
 		String art = ep.toArtifact("99A4EF8D-F2FD-40C8-8FB8C2E67A4EEEB6");
-		print.e("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-		print.e("art:" + (System.currentTimeMillis() - start));
-		print.e(art);
-		print.e("");
+		aprint.e("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+		aprint.e("art:" + (System.currentTimeMillis() - start));
+		aprint.e(art);
+		aprint.e("");
 
 		start = System.currentTimeMillis();
 		List<String> list = ep.list();
-		print.e("list-artifacts:" + (System.currentTimeMillis() - start));
-		print.e(list);
+		aprint.e("list-artifacts:" + (System.currentTimeMillis() - start));
+		aprint.e(list);
 
 		{
 			List<Version> versions = ep.list("axis-extension");
-			print.e("list-versions:" + (System.currentTimeMillis() - start));
-			print.e(versions);
+			aprint.e("list-versions:" + (System.currentTimeMillis() - start));
+			aprint.e(versions);
 
 			for (Version v: versions) {
 				Map<String, Object> detail = ep.detail("axis-extension", v);
-				print.e(v + ":");
-				print.e(detail);
+				aprint.e(v + ":");
+				aprint.e(detail);
 			}
 		}
 
 		start = System.currentTimeMillis();
 		List<Version> versions = ep.list("mysql-jdbc-extension");
-		print.e("list-versions:" + (System.currentTimeMillis() - start));
-		print.e(versions);
+		aprint.e("list-versions:" + (System.currentTimeMillis() - start));
+		aprint.e(versions);
 
 		start = System.currentTimeMillis();
 		Map<String, Object> detail = ep.detail("mssql-jdbc-extension", OSGiUtil.toVersion("6.5.4"));
-		print.e("detail:" + (System.currentTimeMillis() - start));
-		print.e(detail);
+		aprint.e("detail:" + (System.currentTimeMillis() - start));
+		aprint.e(detail);
 
 		start = System.currentTimeMillis();
 		InputStream is = ep.get("mysql-jdbc-extension", versions.get(versions.size() - 1));
 		byte[] bytes = IOUtil.toBytes(is);
-		print.e("get:" + (System.currentTimeMillis() - start));
-		print.e(bytes.length);
+		aprint.e("get:" + (System.currentTimeMillis() - start));
+		aprint.e(bytes.length);
 
 		// read all projects
 
@@ -545,5 +617,4 @@ public class ExtensionProvider {
 
 		// print.e(mup.list());
 	}
-
 }
