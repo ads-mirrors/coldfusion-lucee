@@ -3079,7 +3079,8 @@ public final class ConfigAdmin {
 	}
 
 	void _updateMonitorEnabled(boolean updateMonitorEnabled) {
-		root.setEL("monitorEnable", Caster.toString(updateMonitorEnabled));
+		Struct monitoring = ConfigWebUtil.getAsStruct("monitoring", root);
+		monitoring.setEL(KeyConstants._enabled, updateMonitorEnabled);
 	}
 
 	public void updateScriptProtect(String strScriptProtect) throws SecurityException {
@@ -4334,16 +4335,17 @@ public final class ConfigAdmin {
 
 	void _updateMonitor(ClassDefinition cd, String type, String name, boolean logEnabled) throws PageException {
 		stopMonitor(ConfigWebUtil.toMonitorType(type, Monitor.TYPE_INTERVAL), name);
+		Struct parent = ConfigWebUtil.getAsStruct("monitoring", root);
+		Array children = ConfigWebUtil.getAsArray("monitor", parent);
 
-		Struct children = ConfigWebUtil.getAsStruct("monitors", root);
-		Key[] keys = children.keys();
 		Struct monitor = null;
 		// Update
-		for (Key key: keys) {
-			Struct el = Caster.toStruct(children.get(key, null), null);
+		Iterator<Object> it = children.valueIterator();
+		while (it.hasNext()) {
+			Struct el = Caster.toStruct(it.next(), null);
 			if (el == null) continue;
 
-			String _name = key.getString();
+			String _name = Caster.toString(el.get(KeyConstants._name, null), null);
 			if (_name != null && _name.equalsIgnoreCase(name)) {
 				monitor = el;
 				break;
@@ -4353,7 +4355,7 @@ public final class ConfigAdmin {
 		// Insert
 		if (monitor == null) {
 			monitor = new StructImpl(Struct.TYPE_LINKED);
-			children.setEL(name, monitor);
+			children.appendEL(monitor);
 		}
 		setClass(monitor, null, "", cd);
 		monitor.setEL("type", type);
@@ -4480,14 +4482,25 @@ public final class ConfigAdmin {
 
 		stopMonitor(ConfigWebUtil.toMonitorType(type, Monitor.TYPE_INTERVAL), name);
 
-		Array children = ConfigWebUtil.getAsArray("monitors", root);
-		Key[] keys = children.keys();
-		for (Key key: keys) {
-			String _name = key.getString();
+		Struct parent = ConfigWebUtil.getAsStruct("monitoring", root);
+		Array children = ConfigWebUtil.getAsArray("monitor", parent);
+
+		Iterator<Entry<Key, Object>> it = children.entryIterator();
+		Entry<Key, Object> entry;
+		Key keyToRemove = null;
+		while (it.hasNext()) {
+			entry = it.next();
+			Struct el = Caster.toStruct(entry.getValue(), null);
+			if (el == null) continue;
+
+			String _name = Caster.toString(el.get(KeyConstants._name, null), null);
 			if (_name != null && _name.equalsIgnoreCase(name)) {
-				children.removeEL(key);
+				keyToRemove = entry.getKey();
+				break;
 			}
 		}
+
+		if (keyToRemove != null) children.removeEL(keyToRemove);
 	}
 
 	public void removeCacheHandler(String id) {
