@@ -34,8 +34,9 @@ import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.StringUtil;
+import lucee.loader.engine.CFMLEngineFactory;
 import lucee.runtime.PageContext;
-import lucee.runtime.functions.other.CreateUUID;
+import lucee.runtime.PageContextImpl;
 import lucee.runtime.op.Caster;
 
 public final class ResourceExecutionLog extends ExecutionLogSupport {
@@ -51,6 +52,7 @@ public final class ResourceExecutionLog extends ExecutionLogSupport {
 	private Resource dir;
 	private static final int DEFAULT_BUFFER_SIZE = 100000; // 100K chars (~200KB)
 	private int bufferSize = DEFAULT_BUFFER_SIZE;
+	private static final long SERVER_START_TIME = CFMLEngineFactory.getInstance().uptime();
 
 	@Override
 	protected void _init(PageContext pc, Map<String, String> arguments) {
@@ -107,7 +109,7 @@ public final class ResourceExecutionLog extends ExecutionLogSupport {
 				}
 			}
 		}
-		file = dir.getRealResource((pc.getId()) + "-" + CreateUUID.call(pc) + ".exl");
+		file = dir.getRealResource((((PageContextImpl) pc).getRequestId()) + "-" + pc.getId() + "-" + SERVER_START_TIME + ".exl");
 		// Always use local temp for buffer file
 		Resource localTemp = getTemp(pc);
 		tmpFile = localTemp.getRealResource(file.getName() + ".tmp");
