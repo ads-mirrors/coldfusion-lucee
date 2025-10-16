@@ -136,28 +136,28 @@ public class ExtensionProvider {
 	}
 
 	private ExtensionProvider disableCache() {
-		// repo
-		List<Repository> repo = new ArrayList<>();
-		for (Repository r: repoSnapshots) {
-			repo.add((Repository) r.clone());
-		}
 		// snap
 		List<Repository> snap = new ArrayList<>();
 		for (Repository r: repoSnapshots) {
-			snap.add((Repository) r.clone());
+			snap.add(new Repository(r.label, r.url, Repository.TIMEOUT_ZERO, Repository.TIMEOUT_ZERO, r.cacheDirectory));
+		}
+		// releases
+		List<Repository> releases = new ArrayList<>();
+		for (Repository r: repoReleases) {
+			releases.add(new Repository(r.label, r.url, Repository.TIMEOUT_ZERO, Repository.TIMEOUT_ZERO, r.cacheDirectory));
 		}
 		// mixed
 		List<Repository> mixed = new ArrayList<>();
 		for (Repository r: repoMixed) {
-			mixed.add((Repository) r.clone());
+			mixed.add(new Repository(r.label, r.url, Repository.TIMEOUT_ZERO, Repository.TIMEOUT_ZERO, r.cacheDirectory));
 		}
 
 		// TODO Auto-generated method stub
 		return new ExtensionProvider(
 
-				repo.toArray(new Repository[repo.size()]),
-
 				snap.toArray(new Repository[snap.size()]),
+
+				releases.toArray(new Repository[releases.size()]),
 
 				mixed.toArray(new Repository[mixed.size()]),
 
@@ -178,11 +178,9 @@ public class ExtensionProvider {
 	 */
 
 	private Set<String> listAllProjects() throws InterruptedException, IOException {
-		HtmlDirectoryScraper scraper = new HtmlDirectoryScraper();
 		Set<String> subfolders = new HashSet<>();
 		List<Thread> threads = new ArrayList<>();
 		Stack<Exception> exceptions = new Stack<Exception>();
-
 		for (Repository r: repos) {
 			Thread thread = ThreadUtil.getThread(() -> {
 				try {
@@ -190,7 +188,7 @@ public class ExtensionProvider {
 					Set<String> tmp = readFromCache(r);
 					if (tmp == null) {
 						tmp = new HashSet<>();
-						scraper.getSubfolderLinks(strURL, tmp);
+						new HtmlDirectoryScraper().getSubfolderLinks(strURL, tmp);
 					}
 					copy(tmp, subfolders);
 					storeToCache(r, tmp);
@@ -201,6 +199,7 @@ public class ExtensionProvider {
 				catch (IOException e) {
 					exceptions.add(e);
 				}
+
 			}, true);
 			thread.start();
 			threads.add(thread);
@@ -540,16 +539,21 @@ public class ExtensionProvider {
 		// TODO remove
 		ExtensionProvider ep = new ExtensionProvider(new Repository[] {}, new Repository[] {},
 				new Repository[] { new Repository("Maven Release Repository", "https://cdn.lucee.org/", Repository.TIMEOUT_5SECONDS, Repository.TIMEOUT_5SECONDS) }, "org.lucee");
-		ep = new ExtensionProvider().disableCache();
+		ep = new ExtensionProvider();
 
 		long start = System.currentTimeMillis();
 		// org.lucee:h2-jdbc-extension:2.1.214.0001L
-		aprint.e(ep.list());
+		ep.list();
 		aprint.e("list-all-extensions:" + (System.currentTimeMillis() - start));
+
 		start = System.currentTimeMillis();
-		aprint.e(ep.list("redis-extension"));
-		// print.e(ep.list("lucene-search-extension"));
+		ep.list("redis-extension");
 		aprint.e("list-redis:" + (System.currentTimeMillis() - start));
+
+		start = System.currentTimeMillis();
+		aprint.e(ep.list("lucene-search-extension"));
+		aprint.e("lucene-search-extension:" + (System.currentTimeMillis() - start));
+
 		{
 			start = System.currentTimeMillis();
 			Map<String, Object> detail = ep.detail("redis-extension", OSGiUtil.toVersion("3.0.0.56-SNAPSHOT"));
