@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
 import java.util.jar.Attributes;
@@ -31,10 +32,14 @@ import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.net.HTTPUtil;
+import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.maven.MavenUpdateProvider.Repository;
 import lucee.runtime.exp.ApplicationException;
 import lucee.runtime.exp.PageException;
+import lucee.runtime.extension.ExtensionDefintion;
+import lucee.runtime.extension.RHExtension;
+import lucee.runtime.mvn.MavenUtil.GAVSO;
 import lucee.runtime.mvn.POM;
 import lucee.runtime.op.Caster;
 import lucee.runtime.osgi.OSGiUtil;
@@ -255,6 +260,53 @@ public class ExtensionProvider {
 		}
 	}
 
+	public ExtensionDefintion toExtensionDefintion(Config config, GAVSO gavso, boolean investigate) {
+		String uuid = null;
+		if (group.equals(MavenUpdateProvider.DEFAULT_GROUP)) {
+			for (Entry<String, String> e: uuidMapping.entrySet()) {
+				if (e.getValue().equals(gavso.a)) {
+					uuid = e.getKey();
+				}
+			}
+			if (uuid != null) {
+				ExtensionDefintion ed = new ExtensionDefintion();
+				ed.setId(uuid);
+				ed.setGAVSO(gavso);
+
+				return ed;
+			}
+		}
+
+		if (investigate) {
+			try {
+				Version version;
+				if (gavso.v == null) {
+					version = last(gavso.a);
+				}
+				else {
+					version = OSGiUtil.toVersion(gavso.v);
+				}
+
+				Resource res = getResource((ConfigPro) config, gavso.a, version);
+				return RHExtension.getInstance(config, res, null).toExtensionDefinition();
+			}
+			catch (Exception e) {
+				LogUtil.log("mvn", e);
+			}
+
+		}
+		return null;
+	}
+
+	public ExtensionDefintion toExtensionDefintion(Config config, GAVSO gavso, boolean investigate, ExtensionDefintion defaultValue) {
+		try {
+			return toExtensionDefintion(config, gavso, investigate);
+		}
+		catch (Exception e) {
+			return defaultValue;
+		}
+	}
+
 	public List<String> list() throws InterruptedException, IOException {
 		List<String> artifacts = new ArrayList<>();
 		for (String artifact: listAllProjects()) {
@@ -347,7 +399,7 @@ public class ExtensionProvider {
 		throw new ApplicationException("there is no endpoint for [" + this.group + ":" + artifact + ":" + version + "]");
 	}
 
-	public Resource getPOM(ConfigPro config, String artifact, Version version) throws IOException, PageException, GeneralSecurityException, SAXException {
+	public Resource getResource(ConfigPro config, String artifact, Version version) throws IOException, PageException, GeneralSecurityException, SAXException {
 		Log log = LogUtil.getLog(config, "mvn", "application");
 		Resource local;
 		try {
@@ -384,7 +436,7 @@ public class ExtensionProvider {
 		return defaultValue;
 	}
 
-	public InputStream get(String artifact, Version version) throws PageException, IOException, GeneralSecurityException, SAXException {
+	private InputStream get(String artifact, Version version) throws PageException, IOException, GeneralSecurityException, SAXException {
 		Map<String, Object> detail = detail(artifact, version);
 		if (detail != null) {
 			URL url = HTTPUtil.toURL(Caster.toString(detail.get(EXTENSION_EXTENSION), null), Http.ENCODED_NO, null);
@@ -404,7 +456,7 @@ public class ExtensionProvider {
 		throw new ApplicationException("there is no [" + EXTENSION_EXTENSION + "] artifact for [" + this.group + ":" + artifact + ":" + version + "]");
 	}
 
-	public InputStream get(String artifact, Version version, InputStream defaultValue) {
+	private InputStream get(String artifact, Version version, InputStream defaultValue) {
 		Map<String, Object> detail = detail(artifact, version, null);
 		if (detail != null) {
 			URL url = HTTPUtil.toURL(Caster.toString(detail.get(EXTENSION_EXTENSION), null), Http.ENCODED_NO, null);
@@ -543,12 +595,12 @@ public class ExtensionProvider {
 
 		long start = System.currentTimeMillis();
 		// org.lucee:h2-jdbc-extension:2.1.214.0001L
-		ep.list();
+		aprint.e(ep.list());
 		aprint.e("list-all-extensions:" + (System.currentTimeMillis() - start));
 
 		start = System.currentTimeMillis();
-		ep.list("redis-extension");
-		aprint.e("list-redis:" + (System.currentTimeMillis() - start));
+		aprint.e(ep.list("ehcache-extension"));
+		aprint.e("ehcache-extension:" + (System.currentTimeMillis() - start));
 
 		start = System.currentTimeMillis();
 		aprint.e(ep.list("lucene-search-extension"));
@@ -559,6 +611,9 @@ public class ExtensionProvider {
 			Map<String, Object> detail = ep.detail("redis-extension", OSGiUtil.toVersion("3.0.0.56-SNAPSHOT"));
 			aprint.e("detail:" + (System.currentTimeMillis() - start));
 			aprint.e(detail);
+
+			ep.get("redis-extension", OSGiUtil.toVersion("3.0.0.56-SNAPSHOT"));
+
 		}
 		if (true) return;
 
