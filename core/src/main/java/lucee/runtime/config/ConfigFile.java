@@ -53,7 +53,7 @@ public class ConfigFile {
 	private static void _write(Resource configFile, Struct root) throws IOException, ConverterException {
 		JSONConverter json = new JSONConverter(true, CharsetUtil.UTF8, JSONDateFormat.PATTERN_CF, false);
 		String str = json.serialize(null, root, SerializationSettings.SERIALIZE_AS_ROW, true);
-		IOUtil.write(configFile, str, CharsetUtil.UTF8, false);
+		IOUtil.write(configFile, str, CharsetUtil.UTF8, false, true);
 
 	}
 
