@@ -360,7 +360,7 @@ public final class ConfigAdmin {
 			_cleanup();
 			JSONConverter json = new JSONConverter(true, CharsetUtil.UTF8, JSONDateFormat.PATTERN_CF, false);
 			String str = json.serialize(null, root, SerializationSettings.SERIALIZE_AS_ROW, true);
-			IOUtil.write(config.getConfigFile(), str, CharsetUtil.UTF8, false);
+			IOUtil.write(config.getConfigFile(), str, CharsetUtil.UTF8, false, true);
 		}
 	}
 
