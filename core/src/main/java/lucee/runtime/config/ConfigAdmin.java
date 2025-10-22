@@ -4870,7 +4870,7 @@ public final class ConfigAdmin {
 				if (!entry.isDirectory() && startsWith(path, type, "functions")) {
 					String sub = subFolder(entry);
 					logger.log(Log.LEVEL_INFO, "extension", "Deploy function [" + sub + "]");
-					print.e(new Throwable("temporary!!!"));
+					print.ds((Thread.currentThread().getName() + " temporary!!!"));
 					updateFunction(zis, sub, false);
 					filter.add("resetFLDs");
 					reloadNecessary = true;

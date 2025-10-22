@@ -1121,9 +1121,8 @@ public final class OSGiUtil {
 
 			List<Resource> children = listFiles(dir, addional, JAR_EXT_FILTER);
 
-			print.e("xxxxxxxxxxxxx " + bundleRange + " xxxxxxxxxxxxxx");
-			print.e(dir.list());
-			print.e(children);
+			print.ds(Thread.currentThread().getName() + " xxxxxxxxxxxxx " + bundleRange + " xxxxxxxxxxxxxx");
+
 			// now we check all jar files
 			{
 
