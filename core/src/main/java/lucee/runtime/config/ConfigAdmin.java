@@ -55,6 +55,7 @@ import org.xml.sax.SAXException;
 
 import com.allaire.cfx.CustomTag;
 
+import lucee.print;
 import lucee.commons.digest.MD5;
 import lucee.commons.io.FileUtil;
 import lucee.commons.io.IOUtil;
@@ -4869,6 +4870,7 @@ public final class ConfigAdmin {
 				if (!entry.isDirectory() && startsWith(path, type, "functions")) {
 					String sub = subFolder(entry);
 					logger.log(Log.LEVEL_INFO, "extension", "Deploy function [" + sub + "]");
+					print.e(new Throwable("temporary!!!"));
 					updateFunction(zis, sub, false);
 					filter.add("resetFLDs");
 					reloadNecessary = true;
