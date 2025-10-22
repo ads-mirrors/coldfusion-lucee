@@ -725,8 +725,10 @@ public final class OSGiUtil {
 		Bundle[] bundles = bc.getBundles();
 		StringBuilder versionsFound = new StringBuilder();
 		Bundle match = null;
+		print.e(">>>> " + bundleRange);
 		for (boolean versionMatters: arrVersionMatters) {
 			for (Bundle b: bundles) {
+				print.e("> " + b.getSymbolicName() + ":" + b.getVersion());
 				if (bundleRange.getName().equalsIgnoreCase(b.getSymbolicName())) {
 					if (bundleRange.getVersionRange() == null || bundleRange.getVersionRange().isEmpty() || !versionMatters
 							|| bundleRange.getVersionRange().isWithin(b.getVersion())) {
@@ -757,33 +759,43 @@ public final class OSGiUtil {
 
 		print.e("sssssssssssss " + bundleRange);
 		if (bf != null) {
-			print.ds("bf.isBundle(): " + bf.isBundle());
-			print.ds("bundlesThreadLocal.get().contains(toString(bf)): " + bundlesThreadLocal.get().contains(toString(bf)));
+			print.e("bf.isBundle(): " + bf.isBundle());
+			print.e("bundlesThreadLocal.get().contains(toString(bf)): " + bundlesThreadLocal.get().contains(toString(bf)));
+			if (bundlesThreadLocal.get().contains(toString(bf))) {
+				for (Bundle b: bc.getBundles()) {
+					print.e("- " + b.getSymbolicName() + ":" + b.getVersion());
+				}
+			}
 		}
 
 		print.ds("bundlefile: " + bf);
-		if (bf != null && bf.isBundle() && !bundlesThreadLocal.get().contains(toString(bf))) {
-			Bundle b = null;
-			try {
-				b = _loadBundle(bc, bf);
-			}
-			catch (IOException e) {
-				print.e(e);
-				LogUtil.log(ThreadLocalPageContext.get(), OSGiUtil.class.getName(), e);
-			}
-			if (b != null) {
-				if (startIfNecessary) {
-					try {
-						startIfNecessary(b);
-					}
-					catch (BundleException be) {
-						print.e(be);
-						throw new StartFailedException(be, b);
-					}
+		if (bf != null && bf.isBundle()) {
+			if (!bundlesThreadLocal.get().contains(toString(bf))) {
+
+				Bundle b = null;
+				try {
+					b = _loadBundle(bc, bf);
 				}
-				return b;
+				catch (IOException e) {
+					print.e(e);
+					LogUtil.log(ThreadLocalPageContext.get(), OSGiUtil.class.getName(), e);
+				}
+				if (b != null) {
+					if (startIfNecessary) {
+						try {
+							startIfNecessary(b);
+						}
+						catch (BundleException be) {
+							print.e(be);
+							throw new StartFailedException(be, b);
+						}
+					}
+					return b;
+				}
 			}
 		}
+
+		// if (bundlesThreadLocal.get().contains(bn)) {
 
 		// if not found try to download
 		if (downloadIfNecessary) {
