@@ -57,6 +57,7 @@ import org.osgi.resource.Requirement;
 
 import jakarta.servlet.Servlet;
 import jakarta.servlet.jsp.JspException;
+import lucee.print;
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.FileUtil;
 import lucee.commons.io.IOUtil;
@@ -1120,6 +1121,9 @@ public final class OSGiUtil {
 
 			List<Resource> children = listFiles(dir, addional, JAR_EXT_FILTER);
 
+			print.e("xxxxxxxxxxxxx " + bundleRange + " xxxxxxxxxxxxxx");
+			print.e(dir.list());
+			print.e(children);
 			// now we check all jar files
 			{
 
