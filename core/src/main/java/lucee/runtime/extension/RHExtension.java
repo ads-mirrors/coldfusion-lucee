@@ -1357,26 +1357,28 @@ public final class RHExtension implements Serializable {
 			if (!"id".equalsIgnoreCase(name)) ed.setParam(name, entry.getValue().trim());
 			if ("path".equalsIgnoreCase(name) || "url".equalsIgnoreCase(name) || "resource".equalsIgnoreCase(name)) {
 				res = ResourceUtil.toResourceExisting(config, entry.getValue().trim(), null);
+				if (res != null && res.isFile()) {
+					ed.setSource(config, res);
+					if (ed.getId() == null) {
 
-				if (ed.getId() == null && res != null && res.isFile()) {
-
-					Resource trgDir = config.getLocalExtensionProviderDirectory();
-					Resource trg = trgDir.getRealResource(res.getName());
-					if (!res.equals(trg) && !trg.isFile()) {
-						try {
-							IOUtil.copy(res, trg);
+						Resource trgDir = config.getLocalExtensionProviderDirectory();
+						Resource trg = trgDir.getRealResource(res.getName());
+						if (!res.equals(trg) && !trg.isFile()) {
+							try {
+								IOUtil.copy(res, trg);
+							}
+							catch (IOException e) {
+								e.printStackTrace();
+							}
 						}
-						catch (IOException e) {
+						if (!trg.isFile()) continue;
+
+						try {
+							return getInstance(config, trg).toExtensionDefinition();
+						}
+						catch (Exception e) {
 							e.printStackTrace();
 						}
-					}
-					if (!trg.isFile()) continue;
-
-					try {
-						return getInstance(config, trg).toExtensionDefinition();
-					}
-					catch (Exception e) {
-						e.printStackTrace();
 					}
 				}
 			}
