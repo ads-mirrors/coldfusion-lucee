@@ -28,10 +28,8 @@ import java.io.UnsupportedEncodingException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -77,6 +75,7 @@ import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.net.HTTPUtil;
 import lucee.commons.net.IPRange;
+import lucee.commons.net.http.HTTPDownloader;
 import lucee.commons.net.URLEncoder;
 import lucee.commons.net.http.HTTPEngine;
 import lucee.commons.net.http.HTTPResponse;
@@ -165,6 +164,10 @@ public final class ConfigAdmin {
 	private final Struct root;
 	private Password password;
 	private boolean optionalPW;
+
+	private static final int DOWNLOAD_CONNECT_TIMEOUT = 10000; // 10 seconds
+	private static final int DOWNLOAD_READ_TIMEOUT = 60000; // 60 seconds
+	private static final String DOWNLOAD_USER_AGENT = "Lucee";
 
 	static {
 		// exclude list
@@ -3817,80 +3820,33 @@ public final class ConfigAdmin {
 		final File patchDir = factory.getPatchDirectory();
 		final File newLucee = new File(patchDir, version + (".lco"));
 
-		int code;
-		HttpURLConnection conn;
-		try {
-			conn = (HttpURLConnection) updateUrl.openConnection();
-			conn.setRequestMethod("GET");
-			conn.setConnectTimeout(10000);
-			conn.connect();
-			code = conn.getResponseCode();
-		}
-		catch (final UnknownHostException e) {
-			// log.error("Admin", e);
-			throw e;
-		}
-
-		// the update provider is not providing a download for this
-		if (code != 200) {
-
-			int count = 0;
-			final int max = 5;
-			// the update provider can also provide a different (final) location for this
-			while ((code == 301 || code == 302) && (count++ < max)) {
-				String location = conn.getHeaderField("Location");
-				// just in case we check invalid names
-				if (location == null) location = conn.getHeaderField("location");
-				if (location == null) location = conn.getHeaderField("LOCATION");
-				if (location == null) break;
-				// System. out.println("download redirected:" + location); // MUST remove
-
-				conn.disconnect();
-				URL url = new URL(location);
-				try {
-					conn = (HttpURLConnection) url.openConnection();
-					conn.setRequestMethod("GET");
-					conn.setConnectTimeout(10000);
-					conn.connect();
-					code = conn.getResponseCode();
-				}
-				catch (final UnknownHostException e) {
-					// log.error("Admin", e);
-					throw e;
-				}
-			}
-
-			// no download available!
-			if (code != 200) {
-				final String msg = "Lucee Core download failed (response status:" + code + ") the core for version [" + version.toString() + "] from " + updateUrl
-						+ ", please download it manually and copy to [" + patchDir + "]";
-				// log.debug("Admin", msg);
-				conn.disconnect();
-				throw new IOException(msg);
-			}
-		}
-
 		// copy it to local directory
 		if (newLucee.createNewFile()) {
-			IOUtil.copy((InputStream) conn.getContent(), new FileOutputStream(newLucee), false, true);
-			conn.disconnect();
+			try {
+				HTTPDownloader.downloadToFile(
+					updateUrl,
+					newLucee,
+					DOWNLOAD_CONNECT_TIMEOUT,
+					DOWNLOAD_READ_TIMEOUT,
+					DOWNLOAD_USER_AGENT
+				);
 
-			// when it is a loader extract the core from it
-			File tmp = CFMLEngineFactory.extractCoreIfLoader(newLucee);
-			if (tmp != null) {
-				// System .out.println("extract core from loader"); // MUST remove
-				// log.debug("Admin", "extract core from loader");
-
-				newLucee.delete();
-				tmp.renameTo(newLucee);
-				tmp.delete();
-				// System. out.println("exist?" + newLucee.exists()); // MUST remove
-
+				// when it is a loader extract the core from it
+				File tmp = CFMLEngineFactory.extractCoreIfLoader(newLucee);
+				if (tmp != null) {
+					newLucee.delete();
+					tmp.renameTo(newLucee);
+					tmp.delete();
+				}
+			}
+			catch (GeneralSecurityException e) {
+				throw new IOException("Lucee Core download failed from " + updateUrl + ", please download it manually and copy to [" + patchDir + "]", e);
+			}
+			catch (IOException e) {
+				throw e;
 			}
 		}
 		else {
-			conn.disconnect();
-			// log.debug("Admin","File for new Version already exists, won't copy new one");
 			return null;
 		}
 		return newLucee;
