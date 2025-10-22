@@ -345,7 +345,6 @@ public final class DeployHandler {
 		ExtensionDefintion ext = null, tmp;
 
 		if (log != null) {
-			log.error("extension", new Throwable("temporary: " + ed));
 			log.info("extension", "installing the extension " + ed);
 		}
 		while (it.hasNext()) {
