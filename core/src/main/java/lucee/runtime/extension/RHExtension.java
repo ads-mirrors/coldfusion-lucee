@@ -273,7 +273,7 @@ public final class RHExtension implements Serializable {
 		}
 	}
 
-	public static RHExtension installExtension(ConfigPro config, String id, String version, String resource, boolean force) throws PageException, IOException {
+	public static RHExtension installExtension(ConfigPro config, String id, String version, Resource resource, boolean force) throws PageException, IOException {
 
 		// get installed res
 		Resource res = StringUtil.isEmpty(version) ? null : getExtensionInstalledFile(config, id, version, false);
@@ -281,8 +281,9 @@ public final class RHExtension implements Serializable {
 		ResetFilter filter = new ResetFilter();
 		if (!installed) {
 			try {
-				if (!StringUtil.isEmpty(resource) && (res = ResourceUtil.toResourceExisting(config, resource, null)) != null) {
-					return DeployHandler.deployExtension(config, new ExtensionDefintion(id, version).setSource(config, res), filter, null, false, true, true, new RefBooleanImpl());
+				if (resource != null) {
+					return DeployHandler.deployExtension(config, new ExtensionDefintion(id, version).setSource(config, resource), filter, null, false, true, true,
+							new RefBooleanImpl());
 				}
 				else if (!StringUtil.isEmpty(id)) {
 					return DeployHandler.deployExtension(config, new ExtensionDefintion(id, version), filter, null, false, true, true, new RefBooleanImpl()); // MUSTT

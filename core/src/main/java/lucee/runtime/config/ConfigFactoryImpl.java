@@ -3366,8 +3366,21 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 					id = getAttr(child, KeyConstants._id);
 					BundleInfo[] bfsq;
 					try {
-						String res = getAttr(child, KeyConstants._resource, KeyConstants._path, KeyConstants._url);
-						if (StringUtil.isEmpty(id) && StringUtil.isEmpty(res)) continue;
+						String strRes = getAttr(child, KeyConstants._resource, KeyConstants._path, KeyConstants._url);
+						if (StringUtil.isEmpty(id) && StringUtil.isEmpty(strRes)) continue;
+
+						Resource res = null;
+						if (!StringUtil.isEmpty(strRes, true)) {
+							res = ResourceUtil.toResourceExisting(config, strRes, null);
+							if (res == null) {
+								if (!StringUtil.isEmpty(id, true)) {
+									log(config, Log.LEVEL_ERROR, "the resource [" + strRes + "] from the extension [" + id + "] cannot be resolved");
+								}
+								else {
+									log(config, Log.LEVEL_ERROR, "the extension resource [" + strRes + "] cannot be resolved");
+								}
+							}
+						}
 
 						rhe = RHExtension.installExtension(config, id, getAttr(child, KeyConstants._version), res, false);
 						// startBundles(config, rhe, firstLoad);
