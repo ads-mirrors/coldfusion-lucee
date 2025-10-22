@@ -762,6 +762,8 @@ public final class OSGiUtil {
 			print.e("bf.isBundle(): " + bf.isBundle());
 			print.e("bundlesThreadLocal.get().contains(toString(bf)): " + bundlesThreadLocal.get().contains(toString(bf)));
 			if (bundlesThreadLocal.get().contains(toString(bf))) {
+				SystemUtil.sleep(1000);
+				print.e("aaaaaaaaa " + bundleRange);
 				for (Bundle b: bc.getBundles()) {
 					print.e("- " + b.getSymbolicName() + ":" + b.getVersion());
 				}
