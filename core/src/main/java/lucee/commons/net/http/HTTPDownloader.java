@@ -70,6 +70,48 @@ public final class HTTPDownloader {
 	}
 
 	/**
+	 * Simple container for client and context
+	 */
+	private static class ClientContext {
+		final CloseableHttpClient client;
+		final HttpContext context;
+
+		ClientContext( CloseableHttpClient client, HttpContext context ) {
+			this.client = client;
+			this.context = context;
+		}
+	}
+
+	/**
+	 * Setup HttpClientBuilder with proxy, credentials, and request config.
+	 * Shared by get(), head(), and exists() methods to avoid code duplication.
+	 */
+	private static ClientContext buildHttpClient( URL url, String username, String password, long connectTimeout, long readTimeout,
+			HttpClientBuilder builder, org.apache.http.client.methods.HttpUriRequest request ) {
+
+		// Get proxy from Config (already validated in getProxyData)
+		ProxyData proxy = getProxyData( url.getHost() );
+
+		// Build RequestConfig with separate connection and socket timeouts
+		RequestConfig requestConfig = buildRequestConfig( connectTimeout, readTimeout );
+		builder.setDefaultRequestConfig( requestConfig );
+
+		// Set credentials if provided
+		HttpHost httpHost = new HttpHost( url.getHost(), url.getPort() );
+		HttpContext context = HTTPEngine4Impl.setCredentials( builder, httpHost, username, password, false );
+
+		// Set proxy on builder and request
+		HTTPEngine4Impl.setProxy( url.getHost(), builder, request, proxy );
+
+		// Build client
+		CloseableHttpClient client = builder.build();
+
+		// Return both client and context
+		if (context == null) context = new HttpClientContext();
+		return new ClientContext( client, context );
+	}
+
+	/**
 	 * Simple GET request with default timeouts (10s connect, 60s read)
 	 *
 	 * @param url URL to download from
@@ -125,21 +167,31 @@ public final class HTTPDownloader {
 	 */
 	public static InputStream get( URL url, String username, String password, long connectTimeout, long readTimeout, String userAgent )
 			throws IOException, GeneralSecurityException {
+		return get( url, username, password, connectTimeout, readTimeout, userAgent, Log.LEVEL_DEBUG );
+	}
+
+	/**
+	 * GET request with full options including log level control
+	 *
+	 * @param url URL to download from
+	 * @param username HTTP Basic Auth username (can be null)
+	 * @param password HTTP Basic Auth password (can be null)
+	 * @param connectTimeout Connection timeout in milliseconds
+	 * @param readTimeout Read timeout in milliseconds
+	 * @param userAgent User-Agent header (can be null, defaults to "Lucee")
+	 * @param logLevel Log level for success messages (Log.LEVEL_TRACE for minimal logging, Log.LEVEL_DEBUG for visibility)
+	 * @return InputStream of the response content
+	 * @throws IOException if download fails
+	 * @throws GeneralSecurityException if SSL/TLS fails
+	 */
+	public static InputStream get( URL url, String username, String password, long connectTimeout, long readTimeout, String userAgent, int logLevel )
+			throws IOException, GeneralSecurityException {
 
 		long start = System.currentTimeMillis();
-		CloseableHttpClient client = null;
 
 		try {
-			// Get proxy from Config (validate before building client)
-			ProxyData proxy = getProxyData( url.getHost() );
-			proxy = ProxyDataImpl.validate( proxy, url.getHost() );
-
 			// Get configured HttpClientBuilder (with connection pooling, true = use pooling)
 			HttpClientBuilder builder = HTTPEngine4Impl.getHttpClientBuilder( true, null, null, "true" );
-
-			// Build RequestConfig with separate connection and socket timeouts (like Http.java)
-			RequestConfig requestConfig = buildRequestConfig( connectTimeout, readTimeout );
-			builder.setDefaultRequestConfig( requestConfig );
 
 			// Create HTTP GET request
 			HttpGet request = new HttpGet( url.toString() );
@@ -150,30 +202,17 @@ public final class HTTPDownloader {
 				request.setHeader( "User-Agent", DEFAULT_USER_AGENT );
 			}
 
-			// Set credentials if provided
-			HttpHost httpHost = new HttpHost( url.getHost(), url.getPort() );
-			HttpContext context = HTTPEngine4Impl.setCredentials( builder, httpHost, username, password, false );
+			// Setup client with proxy, credentials, and timeouts
+			ClientContext cc = buildHttpClient( url, username, password, connectTimeout, readTimeout, builder, request );
 
-			// Set proxy on builder and request
-			HTTPEngine4Impl.setProxy( url.getHost(), builder, request, proxy );
-
-			// Build client and execute
-			client = builder.build();
-			if (context == null) context = new HttpClientContext();
-
-			HTTPResponse rsp = new HTTPResponse4Impl( url, context, request, client.execute( request, context ) );
-
-			if (rsp == null) {
-				throw new IOException( "No response from [" + url + "]" );
-			}
-
+			HTTPResponse rsp = new HTTPResponse4Impl( url, cc.context, request, cc.client.execute( request, cc.context ) );
 			int statusCode = rsp.getStatusCode();
 			if (statusCode < 200 || statusCode >= 300) {
 				throw new IOException( "Failed to download from [" + url + "], status code: " + statusCode );
 			}
 
 			long duration = System.currentTimeMillis() - start;
-			LogUtil.log( Log.LEVEL_DEBUG, "download", "Downloaded from [" + url + "] in " + duration + "ms" );
+			LogUtil.log( logLevel, "download", "Downloaded from [" + url + "] in " + duration + "ms" );
 
 			return rsp.getContentAsStream();
 		}
@@ -184,6 +223,42 @@ public final class HTTPDownloader {
 		catch (Exception e) {
 			// Log the original exception, then wrap and throw
 			throw new IOException( "Failed to download from [" + url + "]: " + e.getMessage(), e );
+		}
+	}
+
+	/**
+	 * HEAD request returning full HTTPResponse
+	 *
+	 * @param url URL to check
+	 * @param connectTimeout Connection timeout in milliseconds
+	 * @param readTimeout Read timeout in milliseconds
+	 * @param logLevel Log level for messages (Log.LEVEL_TRACE for minimal logging, Log.LEVEL_DEBUG for visibility)
+	 * @return HTTPResponse object, or null if request fails
+	 */
+	public static HTTPResponse head( URL url, long connectTimeout, long readTimeout, int logLevel ) {
+		long start = System.currentTimeMillis();
+
+		try {
+			// Get configured HttpClientBuilder (with connection pooling, true = use pooling)
+			HttpClientBuilder builder = HTTPEngine4Impl.getHttpClientBuilder( true, null, null, "true" );
+
+			// Create HTTP HEAD request
+			HttpHead request = new HttpHead( url.toString() );
+			request.setHeader( "User-Agent", DEFAULT_USER_AGENT );
+
+			// Setup client with proxy, credentials, and timeouts
+			ClientContext cc = buildHttpClient( url, null, null, connectTimeout, readTimeout, builder, request );
+
+			HTTPResponse rsp = new HTTPResponse4Impl( url, cc.context, request, cc.client.execute( request, cc.context ) );
+
+			long duration = System.currentTimeMillis() - start;
+			LogUtil.log( logLevel, "download", "HEAD request to [" + url + "] returned status code: " + rsp.getStatusCode() + " in " + duration + "ms" );
+
+			return rsp;
+		}
+		catch (Exception e) {
+			LogUtil.log( Log.LEVEL_ERROR, "download", e );
+			return null;
 		}
 	}
 
@@ -206,41 +281,18 @@ public final class HTTPDownloader {
 	 * @return true if URL exists (200-299 status code), false otherwise
 	 */
 	public static boolean exists( URL url, long connectTimeout, long readTimeout ) {
-		CloseableHttpClient client = null;
-
 		try {
-			// Get proxy from Config (validate before building client)
-			ProxyData proxy = getProxyData( url.getHost() );
-			proxy = ProxyDataImpl.validate( proxy, url.getHost() );
-
 			// Get configured HttpClientBuilder (with connection pooling, true = use pooling)
 			HttpClientBuilder builder = HTTPEngine4Impl.getHttpClientBuilder( true, null, null, "true" );
-
-			// Build RequestConfig with separate connection and socket timeouts
-			RequestConfig requestConfig = buildRequestConfig( connectTimeout, readTimeout );
-			builder.setDefaultRequestConfig( requestConfig );
 
 			// Create HTTP HEAD request
 			HttpHead request = new HttpHead( url.toString() );
 			request.setHeader( "User-Agent", DEFAULT_USER_AGENT );
 
-			// Set credentials (none for exists check)
-			HttpHost httpHost = new HttpHost( url.getHost(), url.getPort() );
-			HttpContext context = HTTPEngine4Impl.setCredentials( builder, httpHost, null, null, false );
+			// Setup client with proxy, credentials, and timeouts
+			ClientContext cc = buildHttpClient( url, null, null, connectTimeout, readTimeout, builder, request );
 
-			// Set proxy on builder and request
-			HTTPEngine4Impl.setProxy( url.getHost(), builder, request, proxy );
-
-			// Build client and execute
-			client = builder.build();
-			if (context == null) context = new HttpClientContext();
-
-			HTTPResponse rsp = new HTTPResponse4Impl( url, context, request, client.execute( request, context ) );
-
-			if (rsp == null) {
-				LogUtil.log( Log.LEVEL_DEBUG, "download", "HEAD request to [" + url + "] returned null response" );
-				return false;
-			}
+			HTTPResponse rsp = new HTTPResponse4Impl( url, cc.context, request, cc.client.execute( request, cc.context ) );
 
 			int statusCode = rsp.getStatusCode();
 			boolean exists = statusCode >= 200 && statusCode < 300;
@@ -252,7 +304,7 @@ public final class HTTPDownloader {
 			return exists;
 		}
 		catch (Exception e) {
-			LogUtil.log( Log.LEVEL_DEBUG, "download", e );
+			LogUtil.log( Log.LEVEL_ERROR, "download", e );
 			return false;
 		}
 	}

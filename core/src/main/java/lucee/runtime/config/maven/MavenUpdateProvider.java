@@ -31,6 +31,7 @@ import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.StringUtil;
+import lucee.commons.net.http.HTTPDownloader;
 import lucee.commons.net.http.HTTPResponse;
 import lucee.commons.net.http.Header;
 import lucee.commons.net.http.httpclient.HTTPEngine4Impl;
@@ -49,7 +50,8 @@ import lucee.runtime.type.util.ListUtil;
 
 public final class MavenUpdateProvider {
 
-	public static final int CONNECTION_TIMEOUT = 10000;
+	public static final int CONNECTION_TIMEOUT = 10000; // 10 seconds - for establishing connection
+	public static final int READ_TIMEOUT = 60000; // 60 seconds - for reading response data
 
 	// new last 90 days
 	private static final Repository DEFAULT_REPOSITORY_SONATYPE_LAST90 = new Repository("Sonatype Repositry for Snapshots (last 90 days)",
@@ -267,13 +269,8 @@ public final class MavenUpdateProvider {
 		Map<String, Object> data = detail(version, "jar", true);
 		String strURL = Caster.toString(data.get("lco"), null);
 		if (!StringUtil.isEmpty(strURL)) {
-			// JAR
-			HTTPResponse rsp = HTTPEngine4Impl.get(new URL(strURL), null, null, MavenUpdateProvider.CONNECTION_TIMEOUT, true, null, null, null, null);
-			if (rsp != null) {
-				int sc = rsp.getStatusCode();
-				if (sc >= 200 && sc < 300) return rsp.getContentAsStream();
-			}
-
+			// Use HTTPDownloader with DEBUG logging for Maven operations
+			return HTTPDownloader.get( new URL( strURL ), null, null, CONNECTION_TIMEOUT, READ_TIMEOUT, null, Log.LEVEL_TRACE );
 		}
 		return getFileStreamFromZipStream(getLoader(version));
 	}
@@ -283,17 +280,8 @@ public final class MavenUpdateProvider {
 		String strURL = Caster.toString(data.get("jar"), null);
 		if (StringUtil.isEmpty(strURL)) throw new IOException("no jar for [" + version + "] found.");
 
-		// JAR
-		HTTPResponse rsp = HTTPEngine4Impl.get(new URL(strURL), null, null, MavenUpdateProvider.CONNECTION_TIMEOUT, true, null, null, null, null);
-		if (rsp != null) {
-			int sc = rsp.getStatusCode();
-			if (sc < 200 || sc >= 300) throw new IOException("unable to invoke [" + strURL + "], status code [" + sc + "]");
-		}
-		else {
-			throw new IOException("unable to invoke [" + strURL + "], no response.");
-		}
-
-		return rsp.getContentAsStream();
+		// Use HTTPDownloader with DEBUG logging for Maven operations
+		return HTTPDownloader.get( new URL( strURL ), null, null, CONNECTION_TIMEOUT, READ_TIMEOUT, null, Log.LEVEL_TRACE );
 	}
 
 	/*
@@ -346,7 +334,7 @@ public final class MavenUpdateProvider {
 					// read main
 					{
 						URL urlMain = new URL(repo.url + g + "/" + a + "/" + v + "/" + a + "-" + v + "." + requiredArtifactExtension);
-						HTTPResponse rsp = HTTPEngine4Impl.head(urlMain, null, null, MavenUpdateProvider.CONNECTION_TIMEOUT, true, null, null, null, null);
+						HTTPResponse rsp = HTTPDownloader.head( urlMain, CONNECTION_TIMEOUT, CONNECTION_TIMEOUT, Log.LEVEL_TRACE );
 						if (validSatusCode(rsp)) {
 							Map<String, Object> result = new LinkedHashMap<>();
 							Header[] headers = rsp.getAllHeaders();
@@ -360,7 +348,7 @@ public final class MavenUpdateProvider {
 							// pom
 							{
 								URL url = new URL(repo.url + g + "/" + a + "/" + v + "/" + a + "-" + v + ".pom");
-								rsp = HTTPEngine4Impl.head(url, null, null, MavenUpdateProvider.CONNECTION_TIMEOUT, true, null, null, null, null);
+								rsp = HTTPDownloader.head( url, CONNECTION_TIMEOUT, CONNECTION_TIMEOUT, Log.LEVEL_TRACE );
 								if (validSatusCode(rsp)) {
 									result.put("pom", url.toExternalForm());
 								}
@@ -368,7 +356,7 @@ public final class MavenUpdateProvider {
 							// lco
 							{
 								URL url = new URL(repo.url + g + "/" + a + "/" + v + "/" + a + "-" + v + ".lco");
-								rsp = HTTPEngine4Impl.head(url, null, null, MavenUpdateProvider.CONNECTION_TIMEOUT, true, null, null, null, null);
+								rsp = HTTPDownloader.head( url, CONNECTION_TIMEOUT, CONNECTION_TIMEOUT, Log.LEVEL_TRACE );
 								if (validSatusCode(rsp)) {
 									result.put("lco", url.toExternalForm());
 								}
