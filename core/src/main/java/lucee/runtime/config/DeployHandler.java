@@ -344,7 +344,10 @@ public final class DeployHandler {
 		Iterator<ExtensionDefintion> it = getLocalExtensions(config, false).iterator();
 		ExtensionDefintion ext = null, tmp;
 
-		if (log != null) log.info("extension", "installing the extension " + ed);
+		if (log != null) {
+			log.error("extension", new Throwable("temporary: " + ed));
+			log.info("extension", "installing the extension " + ed);
+		}
 		while (it.hasNext()) {
 			tmp = it.next();
 			if (ed.equals(tmp)) {
