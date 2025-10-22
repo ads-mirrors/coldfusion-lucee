@@ -754,12 +754,21 @@ public final class OSGiUtil {
 		// is it in jar directory but not loaded
 		BundleFile bf = _getBundleFile(factory, bundleRange, addional, versionsFound);
 		if (versionOnlyMattersForDownload && (bf == null || !bf.isBundle())) bf = _getBundleFile(factory, bundleRange.getName(), null, addional, versionsFound);
+
+		print.e("sssssssssssss " + bundleRange);
+		if (bf != null) {
+			print.ds("bf.isBundle(): " + bf.isBundle());
+			print.ds("bundlesThreadLocal.get().contains(toString(bf)): " + bundlesThreadLocal.get().contains(toString(bf)));
+		}
+
+		print.ds("bundlefile: " + bf);
 		if (bf != null && bf.isBundle() && !bundlesThreadLocal.get().contains(toString(bf))) {
 			Bundle b = null;
 			try {
 				b = _loadBundle(bc, bf);
 			}
 			catch (IOException e) {
+				print.e(e);
 				LogUtil.log(ThreadLocalPageContext.get(), OSGiUtil.class.getName(), e);
 			}
 			if (b != null) {
@@ -768,6 +777,7 @@ public final class OSGiUtil {
 						startIfNecessary(b);
 					}
 					catch (BundleException be) {
+						print.e(be);
 						throw new StartFailedException(be, b);
 					}
 				}
