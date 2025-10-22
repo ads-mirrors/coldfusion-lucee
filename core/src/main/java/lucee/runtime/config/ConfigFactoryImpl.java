@@ -3380,6 +3380,14 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 									log(config, Log.LEVEL_ERROR, "the extension resource [" + strRes + "] cannot be resolved");
 								}
 							}
+							else {
+								if (!StringUtil.isEmpty(id, true)) {
+									log(config, Log.LEVEL_INFO, "the resource [" + strRes + "] from the extension [" + id + "] is valid");
+								}
+								else {
+									log(config, Log.LEVEL_INFO, "the extension resource [" + strRes + "] is valid");
+								}
+							}
 						}
 
 						rhe = RHExtension.installExtension(config, id, getAttr(child, KeyConstants._version), res, false);
