@@ -1498,7 +1498,8 @@ public final class OSGiUtil {
 
 		synchronized (SystemUtil.createToken(bundle.getSymbolicName(), bundle.getVersion().toString())) {
 			if (bundle.getState() != Bundle.ACTIVE) {
-				Bundle result = _start(bundle, parents);
+
+				Bundle result = parents == null ? start(bundle) : _start(bundle, parents);
 				return result;
 			}
 			return bundle;
