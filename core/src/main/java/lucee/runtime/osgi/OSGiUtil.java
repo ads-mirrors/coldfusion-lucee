@@ -57,7 +57,6 @@ import org.osgi.resource.Requirement;
 
 import jakarta.servlet.Servlet;
 import jakarta.servlet.jsp.JspException;
-import lucee.print;
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.FileUtil;
 import lucee.commons.io.IOUtil;
@@ -725,10 +724,8 @@ public final class OSGiUtil {
 		Bundle[] bundles = bc.getBundles();
 		StringBuilder versionsFound = new StringBuilder();
 		Bundle match = null;
-		print.e(">>>> " + bundleRange);
 		for (boolean versionMatters: arrVersionMatters) {
 			for (Bundle b: bundles) {
-				print.e("> " + b.getSymbolicName() + ":" + b.getVersion());
 				if (bundleRange.getName().equalsIgnoreCase(b.getSymbolicName())) {
 					if (bundleRange.getVersionRange() == null || bundleRange.getVersionRange().isEmpty() || !versionMatters
 							|| bundleRange.getVersionRange().isWithin(b.getVersion())) {
@@ -756,44 +753,24 @@ public final class OSGiUtil {
 		// is it in jar directory but not loaded
 		BundleFile bf = _getBundleFile(factory, bundleRange, addional, versionsFound);
 		if (versionOnlyMattersForDownload && (bf == null || !bf.isBundle())) bf = _getBundleFile(factory, bundleRange.getName(), null, addional, versionsFound);
-
-		print.e("sssssssssssss " + bundleRange);
-		if (bf != null) {
-			print.e("bf.isBundle(): " + bf.isBundle());
-			print.e("bundlesThreadLocal.get().contains(toString(bf)): " + bundlesThreadLocal.get().contains(toString(bf)));
-			if (bundlesThreadLocal.get().contains(toString(bf))) {
-				SystemUtil.sleep(1000);
-				print.e("aaaaaaaaa " + bundleRange);
-				for (Bundle b: bc.getBundles()) {
-					print.e("- " + b.getSymbolicName() + ":" + b.getVersion());
-				}
+		if (bf != null && bf.isBundle() && !bundlesThreadLocal.get().contains(toString(bf))) {
+			Bundle b = null;
+			try {
+				b = _loadBundle(bc, bf);
 			}
-		}
-
-		print.ds("bundlefile: " + bf);
-		if (bf != null && bf.isBundle()) {
-			if (!bundlesThreadLocal.get().contains(toString(bf))) {
-
-				Bundle b = null;
-				try {
-					b = _loadBundle(bc, bf);
-				}
-				catch (IOException e) {
-					print.e(e);
-					LogUtil.log(ThreadLocalPageContext.get(), OSGiUtil.class.getName(), e);
-				}
-				if (b != null) {
-					if (startIfNecessary) {
-						try {
-							startIfNecessary(b);
-						}
-						catch (BundleException be) {
-							print.e(be);
-							throw new StartFailedException(be, b);
-						}
+			catch (IOException e) {
+				LogUtil.log(ThreadLocalPageContext.get(), OSGiUtil.class.getName(), e);
+			}
+			if (b != null) {
+				if (startIfNecessary) {
+					try {
+						startIfNecessary(b);
 					}
-					return b;
+					catch (BundleException be) {
+						throw new StartFailedException(be, b);
+					}
 				}
+				return b;
 			}
 		}
 
@@ -1144,8 +1121,6 @@ public final class OSGiUtil {
 			}
 
 			List<Resource> children = listFiles(dir, addional, JAR_EXT_FILTER);
-
-			print.ds(Thread.currentThread().getName() + " xxxxxxxxxxxxx " + bundleRange + " xxxxxxxxxxxxxx");
 
 			// now we check all jar files
 			{
@@ -1507,6 +1482,7 @@ public final class OSGiUtil {
 	}
 
 	public static Bundle start(Bundle bundle) throws BundleException {
+		if (bundle == null) return bundle;
 		try {
 			return _start(bundle, null);
 		}
