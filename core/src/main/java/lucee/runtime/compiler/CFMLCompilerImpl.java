@@ -84,8 +84,9 @@ public final class CFMLCompilerImpl implements CFMLCompiler {
 
 		BytecodeFactory factory = BytecodeFactory.getInstance(config);
 		// , cwi.getFLDs()
+
 		PageImpl page = ((PageImpl) cfmlTransformer.transform(factory, config, sc, config.getTLDs(), config.getFLDs(), System.currentTimeMillis(), config.getDotNotationUpperCase(),
-				false, ignoreScopes, false, false, false));
+				false, ignoreScopes, false, false, false, true));
 		Struct sct = new StructImpl(Struct.TYPE_LINKED);
 		page.dump(sct);
 		return sct;
@@ -124,7 +125,7 @@ public final class CFMLCompilerImpl implements CFMLCompiler {
 		try {
 			page = sc == null ? ((PageImpl) cfmlTransformer.transform(factory, config, ps, tld, fld, returnValue, ignoreScopes))
 					: ((PageImpl) cfmlTransformer.transform(factory, config, sc, tld, fld, System.currentTimeMillis(), config.getDotNotationUpperCase(), returnValue, ignoreScopes,
-							false, false, false));
+							false, false, false, false));
 			page.setSplitIfNecessary(false);
 
 			// StructImpl sct = new StructImpl(Struct.TYPE_LINKED);

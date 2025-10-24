@@ -438,12 +438,20 @@ public class TagLib implements Cloneable, Lib {
 				script = tag.getScript();
 				if (script != null && script.getType() != TagLibTagScript.TYPE_NONE) {
 					tags.add(tag);
-					// print.o(tag.getName()+":"+tag.getScript().getType());
 				}
 			}
 			scriptTags = tags.toArray(new TagLibTag[tags.size()]);
 		}
 		return scriptTags;
+	}
+
+	public TagLibTag createUnknownTagHandler(String name) {
+		TagLibTag unknownTagHandler = new TagLibTag(this);
+		unknownTagHandler.setAttributeType(TagLibTag.ATTRIBUTE_TYPE_DYNAMIC);
+		unknownTagHandler.setName(name);
+		unknownTagHandler.setMin(0);
+		unknownTagHandler.setMax(Integer.MAX_VALUE);
+		return unknownTagHandler;
 	}
 
 }
