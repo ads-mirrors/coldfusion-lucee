@@ -76,6 +76,50 @@ component extends = "org.lucee.cfml.test.LuceeTestCase" {
 				);
 			});
 
+			it( title = 'test unknown tag self-closing without slash', body = function( currentSpec ) {
+				var result = astFromString('<cfUnknown susi="1">');
+				assertEquals("Program", result.type);
+				assertTrue(arrayLen(result.body) > 0);
+				assertEquals("CFMLTag", result.body[1].type);
+				assertEquals("unknown", result.body[1].name);
+				assertEquals("cf", result.body[1].nameSpace);
+				assertEquals("cfUnknown", result.body[1].fullname);
+				assertEquals(1, arrayLen(result.body[1].attributes));
+				assertEquals("susi", result.body[1].attributes[1].name);
+			});
+
+			it( title = 'test unknown tag self-closing with slash', body = function( currentSpec ) {
+				var result = astFromString('<cfUnknown susi="1"/>');
+				assertEquals("Program", result.type);
+				assertTrue(arrayLen(result.body) > 0);
+				assertEquals("CFMLTag", result.body[1].type);
+				assertEquals("unknown", result.body[1].name);
+				assertEquals("cf", result.body[1].nameSpace);
+				assertEquals("cfUnknown", result.body[1].fullname);
+				assertEquals(1, arrayLen(result.body[1].attributes));
+				assertEquals("susi", result.body[1].attributes[1].name);
+			});
+
+			it( title = 'test unknown tag with body content', body = function( currentSpec ) {
+				var result = astFromString('<cfUnknown susi="1">ddd</cfUnknown>');
+				assertEquals("Program", result.type);
+				assertTrue(arrayLen(result.body) > 0);
+				assertEquals("CFMLTag", result.body[1].type);
+				assertEquals("unknown", result.body[1].name);
+				assertEquals("cf", result.body[1].nameSpace);
+				assertEquals("cfUnknown", result.body[1].fullname);
+				assertEquals(1, arrayLen(result.body[1].attributes));
+				assertEquals("susi", result.body[1].attributes[1].name);
+				assertTrue(structKeyExists(result.body[1], "body"));
+			});
+
+			it( title = 'test unknown tag with string content', body = function( currentSpec ) {
+				var result = astFromString('<cfscript>writeOutput("<cfUnknown susi=\"1\">ddd</cfUnknown>");</cfscript>');
+				assertEquals("Program", result.type);
+				assertTrue(arrayLen(result.body) > 0);
+				assertEquals("CFMLTag", result.body[1].type);
+				assertEquals("script", result.body[1].name);
+			});
 			
 		});
 	}
