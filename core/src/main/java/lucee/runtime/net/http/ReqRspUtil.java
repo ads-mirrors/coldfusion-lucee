@@ -166,13 +166,34 @@ public final class ReqRspUtil {
 				String val;
 				while (values.hasMoreElements()) {
 					val = values.nextElement();
-					String[] arr = lucee.runtime.type.util.ListUtil.listToStringArray(val, ';'), tmp;
+					int len = val.length();
+					int start = 0;
 					Cookie c;
-					for (int i = 0; i < arr.length; i++) {
-						tmp = lucee.runtime.type.util.ListUtil.listToStringArray(arr[i], '=');
-						if (tmp.length > 0) {
-							c = ReqRspUtil.toCookie(dec(tmp[0], charset.name(), false), tmp.length > 1 ? dec(tmp[1], charset.name(), false) : "", null);
-							if (c != null) map.put(c.getName().toUpperCase(), c);
+
+					for (int i = 0; i < len; i++) {
+						char ch = val.charAt(i);
+						if (ch == ';' || i == len - 1) {
+							int end = (ch == ';') ? i : len;
+							String pair = val.substring(start, end).trim();
+							if (pair.length() > 0) {
+								int equalsIndex = pair.indexOf('=');
+								String name, value;
+								if (equalsIndex > 0) {
+									name = pair.substring(0, equalsIndex);
+									value = pair.substring(equalsIndex + 1);
+								}
+								else if (equalsIndex == 0) {
+									start = i + 1;
+									continue;
+								}
+								else {
+									name = pair;
+									value = "";
+								}
+								c = ReqRspUtil.toCookie(dec(name, charset.name(), false), dec(value, charset.name(), false), null);
+								if (c != null) map.put(c.getName().toUpperCase(), c);
+							}
+							start = i + 1;
 						}
 					}
 				}
