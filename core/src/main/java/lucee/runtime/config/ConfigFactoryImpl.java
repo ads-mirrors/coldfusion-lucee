@@ -207,7 +207,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 	private static final int DEFAULT_MAX_CONNECTION = 100;
 	public static final String DEFAULT_LOCATION = Constants.DEFAULT_UPDATE_URL.toExternalForm();
 	public static final ClassDefinition<DummyORMEngine> DUMMY_ORM_ENGINE = new ClassDefinitionImpl<DummyORMEngine>(DummyORMEngine.class);
-	public static final String[] CONFIG_FILE_NAMES = new String[] { ".CFConfig.json", "config.json" };
+
 	private static String forceLogAppender = SystemUtil.getSystemPropOrEnvVar("lucee.logging.force.appender", null);
 	private static String forceLogLevel = SystemUtil.getSystemPropOrEnvVar("lucee.logging.force.level", null);
 
@@ -322,7 +322,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 				else {
 					LogUtil.logGlobal(ThreadLocalPageContext.getConfig(), Log.LEVEL_INFO, ConfigFactoryImpl.class.getName(),
 							"create new server context json config file [" + configFileNew + "]");
-					createConfigFile("server", configFileNew);
+					ConfigFile.createConfigFile("server", configFileNew);
 					hasConfigNew = true;
 				}
 			}
@@ -503,7 +503,7 @@ public final class ConfigFactoryImpl extends ConfigFactory {
 		return rtn;
 	}
 
-	private static Struct reload(Struct root, ConfigImpl config, ConfigServerImpl cs) throws PageException, IOException, ConverterException {
+	private static Struct reload(Struct root, ConfigImpl config, ConfigServerImpl cs) throws IOException, ConverterException {
 		// store as json
 
 		root = ConfigFile.reload(config.getConfigFile(), root);

@@ -292,7 +292,7 @@ public final class ConfigAdmin {
 		// reload
 		try {
 			ConfigAdmin admin = ConfigAdmin.newInstance(ci, null);
-			admin._reload();
+			admin.storeAndReload(false, false, true, false);
 			LogUtil.log(ThreadLocalPageContext.getConfig(config), Log.LEVEL_INFO, "deploy", ConfigAdmin.class.getName(), "reloaded the configuration [" + file + "] automatically");
 		}
 		catch (Throwable t) {
@@ -300,29 +300,32 @@ public final class ConfigAdmin {
 		}
 	}
 
-	protected static synchronized void _storeAndReload(ConfigPro config)
+	protected static void _storeAndReload(ConfigPro config)
 			throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
 		ConfigAdmin admin = new ConfigAdmin(config, null, true);
-		admin._store();
-		admin._reload();
+		admin.storeAndReload(false, true, true, false);
 	}
 
 	protected void _storeAndReload() throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
-		_store();
-		_reload();
+		storeAndReload(false, true, true, false);
 	}
 
 	public void storeAndReload() throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
-		checkWriteAccess();
-		_store();
-		_reload();
+		storeAndReload(true, true, true, false);
+	}
+
+	public void storeAndReload(boolean checkWriteAccess, boolean store, boolean reload, boolean refreshSchedulerWhenReload)
+			throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
+		if (!checkWriteAccess && !store && !reload) return;
+		if (checkWriteAccess) checkWriteAccess();
+		if (store) _store();
+		if (reload) _reload(refreshSchedulerWhenReload);
+
 	}
 
 	public void storeAndReload(boolean refreshScheduler)
 			throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException, ConverterException {
-		checkWriteAccess();
-		_store();
-		_reload(refreshScheduler);
+		storeAndReload(true, true, true, refreshScheduler);
 	}
 
 	private synchronized void _cleanup() {
@@ -343,10 +346,6 @@ public final class ConfigAdmin {
 		_cleanup();
 		ConfigFile.write(config.getConfigFile(), root);
 
-	}
-
-	private void _reload() throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException {
-		_reload(false);
 	}
 
 	private void _reload(boolean refreshScheduler) throws PageException, ClassException, IOException, TagLibException, FunctionLibException, BundleException {
@@ -566,34 +565,33 @@ public final class ConfigAdmin {
 		ConfigAdmin admin = new ConfigAdmin(config, null, true);
 		admin._updateMapping(virtual, physical, archive, primary, inspect, inspectTemplateIntervalSlow, inspectTemplateIntervalFast, toplevel, listenerMode, listenerType,
 				listenerSingleton, readonly);
-		admin._store();
+		admin.storeAndReload(false, true, false, false);
 		ConfigUtil.getConfigWebIfPossible(config).resetMappings();
-		if (reload) admin._reload();
+		admin.storeAndReload(false, false, reload, false);
 	}
 
 	protected static void updateComponentMapping(ConfigPro config, String virtual, String physical, String archive, String primary, short inspect, int inspectTemplateIntervalSlow,
 			int inspectTemplateIntervalFast, boolean reload) throws IOException, PageException, BundleException, ConverterException {
 		ConfigAdmin admin = new ConfigAdmin(config, null, true);
 		admin._updateComponentMapping(virtual, physical, archive, primary, inspect, inspectTemplateIntervalSlow, inspectTemplateIntervalFast);
-		admin._store();
+		admin.storeAndReload(false, true, false, false);
 		ConfigUtil.getConfigServerImpl(config).resetComponentMappings();
-		if (reload) admin._reload();
+		admin.storeAndReload(false, false, reload, false);
 	}
 
 	protected static void updateCustomTagMapping(ConfigPro config, String virtual, String physical, String archive, String primary, short inspect, int inspectTemplateIntervalSlow,
 			int inspectTemplateIntervalFast, boolean reload) throws IOException, PageException, BundleException, ConverterException {
 		ConfigAdmin admin = new ConfigAdmin(config, null, true);
 		admin._updateCustomTag(virtual, physical, archive, primary, inspect, inspectTemplateIntervalSlow, inspectTemplateIntervalFast);
-		admin._store();
+		admin.storeAndReload(false, true, false, false);
 		ConfigUtil.getConfigServerImpl(config).resetCustomTagMappings();
-		if (reload) admin._reload();
+		admin.storeAndReload(false, false, reload, false);
 	}
 
 	public static Array updateScheduledTask(ConfigPro config, ScheduleTask task, boolean reload) throws IOException, PageException, BundleException, ConverterException {
 		ConfigAdmin admin = new ConfigAdmin(config, null);
 		admin._updateScheduledTask(task);
-		admin._store();
-		if (reload) admin._reload();
+		admin.storeAndReload(false, true, reload, false);
 		return admin._getScheduledTasks();
 	}
 
@@ -664,15 +662,13 @@ public final class ConfigAdmin {
 		}
 		data.setEL("paused", pause);
 
-		admin._store();
-		if (reload) admin._reload();
+		admin.storeAndReload(false, true, reload, false);
 	}
 
 	public static void removeScheduledTask(ConfigPro config, String name, boolean reload) throws PageException, IOException, ConverterException, BundleException {
 		ConfigAdmin admin = new ConfigAdmin(config, null);
 		admin._removeScheduledTask(name);
-		admin._store();
-		if (reload) admin._reload();
+		admin.storeAndReload(false, true, reload, false);
 	}
 
 	/**
@@ -1683,9 +1679,7 @@ public final class ConfigAdmin {
 	protected static void removeJDBCDriver(ConfigPro config, ClassDefinition cd, boolean reload) throws IOException, PageException, BundleException, ConverterException {
 		ConfigAdmin admin = new ConfigAdmin(config, null, true);
 		admin._removeJDBCDriver(cd);
-		admin._store(); // store is necessary, otherwise it get lost
-
-		if (reload) admin._reload();
+		admin.storeAndReload(false, true, reload, false);
 	}
 
 	private void _removeJDBCDriver(ClassDefinition cd) throws PageException {
@@ -1957,9 +1951,9 @@ public final class ConfigAdmin {
 	protected static void removeSearchEngine(ConfigPro config, boolean reload) throws IOException, PageException, BundleException, ConverterException {
 		ConfigAdmin admin = new ConfigAdmin(config, null, true);
 		admin._removeSearchEngine();
-		admin._store();
+		admin.storeAndReload(false, true, false, false);
 		ConfigUtil.getConfigServerImpl(config).resetSearchEngineClassDefinition().resetSearchEngineDirectory();
-		if (reload) admin._reload();
+		admin.storeAndReload(false, false, reload, false);
 	}
 
 	private void _removeSearchEngine() {
@@ -1989,9 +1983,9 @@ public final class ConfigAdmin {
 	protected static void removeORMEngine(ConfigPro config, boolean reload) throws IOException, PageException, BundleException, ConverterException {
 		ConfigAdmin admin = new ConfigAdmin(config, null, true);
 		admin._removeORMEngine();
-		admin._store();
+		admin.storeAndReload(false, true, false, false);
 		ConfigUtil.getConfigServerImpl(config).resetORMEngineClassDefintion().resetORMConfig();
-		if (reload) admin._reload();
+		admin.storeAndReload(false, false, reload, false);
 	}
 
 	private void _removeORMEngine() {
@@ -4305,9 +4299,9 @@ public final class ConfigAdmin {
 	protected static void removeCacheHandler(ConfigPro config, String id, boolean reload) throws IOException, PageException, BundleException, ConverterException {
 		ConfigAdmin admin = new ConfigAdmin(config, null, true);
 		admin._removeCacheHandler(id);
-		admin._store();
+		admin.storeAndReload(false, true, false, false);
 		ConfigUtil.getConfigServerImpl(config).resetCacheHandlers();
-		if (reload) admin._reload();
+		admin.storeAndReload(false, false, reload, false);
 	}
 
 	private void _removeCache(ClassDefinition cd) {
@@ -4577,8 +4571,7 @@ public final class ConfigAdmin {
 		try {
 			ConfigAdmin admin = new ConfigAdmin(config, null);
 			admin.updateArchive(config, arc);
-			admin._store();
-			if (reload) admin._reload();
+			admin.storeAndReload(false, true, reload, false);
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
@@ -5276,10 +5269,8 @@ public final class ConfigAdmin {
 			// reload
 			// if(reloadNecessary){
 			reloadNecessary = true;
-			if (reload && reloadNecessary) {
-				_storeAndReload();
-			}
-			else _store();
+			storeAndReload(false, true, reload && reloadNecessary, false);
+
 		}
 		catch (Throwable t) {
 			ExceptionUtil.rethrowIfNecessary(t);
