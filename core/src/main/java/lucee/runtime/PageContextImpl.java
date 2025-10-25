@@ -752,7 +752,8 @@ public final class PageContextImpl extends PageContext {
 		if (!hasFamily) {
 			pathList.clear();
 			includePathList.clear();
-			udfs.clear();
+			// Only clear UDF stack if empty - active UDFs will clean themselves up
+			if (udfs.isEmpty()) udfs.clear();
 		}
 		executionTime = 0;
 
