@@ -749,7 +749,7 @@ public final class PageContextImpl extends PageContext {
 		if (!hasFamily) {
 			pathList.clear();
 			includePathList.clear();
-			udfs.clear();
+			if (udfs.isEmpty()) udfs.clear();
 		}
 		executionTime = 0;
 
