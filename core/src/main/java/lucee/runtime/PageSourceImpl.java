@@ -282,6 +282,9 @@ public final class PageSourceImpl implements PageSource {
 			return page;
 		}
 		catch (Exception e) {
+			if (mapping.getLog() != null) {
+				mapping.getLog().error( "page-source", "Failed to load [" + getDisplayPath() + "] from archive [" + getArchiveClass() + "]", e );
+			}
 			return defaultValue;
 		}
 	}
