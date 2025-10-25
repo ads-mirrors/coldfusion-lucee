@@ -3916,6 +3916,10 @@ public final class PageContextImpl extends PageContext {
 		if (execLog != null) execLog.end(position, id);
 	}
 
+	public ExecutionLog getExecutionLog() {
+		return execLog;
+	}
+
 	@Override
 	public ORMSession getORMSession(boolean create) throws PageException {
 		if (ormSession == null || !ormSession.isValid()) {
