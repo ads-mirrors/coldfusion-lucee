@@ -48,6 +48,7 @@ public final class URLDataSource2 implements DataSource {
 	 */
 	@Override
 	public String getContentType() {
+		// TODO LDEV-5122: Consider refactoring to use HTTPEngine4Impl.head() for connection pooling
 		URLConnection connection = null;
 		try {
 			connection = url.openConnection();

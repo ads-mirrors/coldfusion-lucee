@@ -3,7 +3,6 @@ package lucee.runtime.config.maven;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.net.URLConnection;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,6 +31,7 @@ import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.net.HTTPUtil;
+import lucee.commons.net.http.HTTPDownloader;
 import lucee.runtime.config.Config;
 import lucee.runtime.config.ConfigPro;
 import lucee.runtime.config.maven.MavenUpdateProvider.Repository;
@@ -51,6 +51,10 @@ import lucee.runtime.type.util.ListUtil;
 public class ExtensionProvider {
 
 	private static final String EXTENSION_EXTENSION = "lex";
+
+	private static final int DOWNLOAD_CONNECT_TIMEOUT = 5000; // 5 seconds
+	private static final int DOWNLOAD_READ_TIMEOUT = 60000; // 60 seconds
+	private static final String DOWNLOAD_USER_AGENT = "Lucee Extension Provider 1.0";
 
 	private static final Map<String, String> uuidMapping = new HashMap<>();
 	static {
@@ -441,16 +445,12 @@ public class ExtensionProvider {
 		if (detail != null) {
 			URL url = HTTPUtil.toURL(Caster.toString(detail.get(EXTENSION_EXTENSION), null), Http.ENCODED_NO, null);
 			if (url != null) {
-				URLConnection connection = url.openConnection();
-
-				// Set reasonable timeouts
-				connection.setConnectTimeout(5000); // 5 seconds
-				connection.setReadTimeout(60000); // 60 seconds
-
-				// Set a user agent to avoid blocks
-				connection.setRequestProperty("User-Agent", "Lucee Extension Provider 1.0");
-
-				return connection.getInputStream();
+				return HTTPDownloader.get(
+					url,
+					DOWNLOAD_CONNECT_TIMEOUT,
+					DOWNLOAD_READ_TIMEOUT,
+					DOWNLOAD_USER_AGENT
+				);
 			}
 		}
 		throw new ApplicationException("there is no [" + EXTENSION_EXTENSION + "] artifact for [" + this.group + ":" + artifact + ":" + version + "]");
@@ -462,16 +462,12 @@ public class ExtensionProvider {
 			URL url = HTTPUtil.toURL(Caster.toString(detail.get(EXTENSION_EXTENSION), null), Http.ENCODED_NO, null);
 			if (url != null) {
 				try {
-					URLConnection connection = url.openConnection();
-
-					// Set reasonable timeouts
-					connection.setConnectTimeout(5000); // 5 seconds
-					connection.setReadTimeout(60000); // 60 seconds
-
-					// Set a user agent to avoid blocks
-					connection.setRequestProperty("User-Agent", "Lucee Extension Provider 1.0");
-
-					return connection.getInputStream();
+					return HTTPDownloader.get(
+						url,
+						DOWNLOAD_CONNECT_TIMEOUT,
+						DOWNLOAD_READ_TIMEOUT,
+						DOWNLOAD_USER_AGENT
+					);
 				}
 				catch (Exception e) {
 				}
