@@ -1,7 +1,7 @@
 <cfcomponent extends="org.lucee.cfml.test.LuceeTestCase">
 	<cfscript>
 		function beforeAll() {
-			variables.httpbin = getTestService("httpbin");
+			variables.httpbin = server.getTestService("httpbin");
 		}
 
 		function run( testResults , testBox ) {
