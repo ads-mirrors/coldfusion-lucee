@@ -195,6 +195,9 @@ component {
 						case "ldap":
 							verify = verifyLDAP(cfg);
 							break;
+						case "httpbin":
+							verify = verifyHTTPBin(cfg);
+							break;
 						default:
 							verify = verifyDatasource(cfg);
 							break;
