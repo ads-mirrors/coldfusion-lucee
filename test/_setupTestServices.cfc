@@ -144,7 +144,8 @@ component {
 
 			"REDIS_SERVER": "localhost",
 			// "REDIS_PORT": 6379 // DON'T COMMIT
-			
+			"HTTPBIN_SERVER": "localhost"
+			//"HTTPBIN_PORT": 8081
 		};
 	}
 
@@ -152,7 +153,7 @@ component {
 		systemOutput( "", true) ;
 		systemOutput("-------------- Test Services ------------", true );
 
-		loop list="MySQL,MSsql,postgres,h2,oracle,mongoDb,smtp,pop,imap,s3,ftp,sftp,memcached,redis,ldap" item="service" {
+		loop list="MySQL,MSsql,postgres,h2,oracle,mongoDb,smtp,pop,imap,s3,ftp,sftp,memcached,redis,ldap,httpbin" item="service" {
 			cfg = server.getTestService( service=service, verify=true );
 			server.test_services[ service ]= {
 				valid: false,
@@ -369,6 +370,20 @@ component {
 			filter="(objectClass=inetOrgPerson)",
 			attributes="cn" );
 		return "configured";
+	}
+
+
+	public function verifyHttpbin ( httpbin ) localmode=true {
+		if ( structCount( httpbin ) eq 2 ){
+			var baseUrl = "http://#httpbin.server#:#httpbin.port#";
+			
+			// Test basic connectivity with /status/200 endpoint
+			cfhttp(url="#baseUrl#/status/200", method="GET", timeout="2", throwOnError=true);			// Test JSON response with /json endpoint
+			cfhttp(url="#baseUrl#/json", method="GET", timeout="2", throwOnError=true);
+
+			return "HTTPBin service verified at #baseUrl#";
+		}
+		throw "not configured";
 	}
 
 	public function addSupportFunctions() {
@@ -592,6 +607,17 @@ component {
 					return ldap;
 				}
 				break;
+			case "httpbin":
+				httpbin = server._getSystemPropOrEnvVars( "SERVER, PORT", "HTTPBIN_" );
+				if ( httpbin.count() eq 2 ){
+					return httpbin;
+				} else {
+					return {
+						server: "httpbin.org",
+						port: 80
+					};
+				}
+				break;
 			default:
 				break;
 		}
@@ -599,6 +625,8 @@ component {
 		SystemOutput( "Warning test service: [ #arguments.service# ] is not configured", true );
 		return {};
 	}
+
+
 
 	function getDefaultBundleVersion( bundleName, fallbackVersion ) cachedWithin="request" {
 		var bundles = server.getBundleVersions();

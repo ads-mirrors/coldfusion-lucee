@@ -1,11 +1,15 @@
 <cfcomponent extends="org.lucee.cfml.test.LuceeTestCase">
 	<cfscript>
+		function beforeAll() {
+			variables.httpbin = getTestService("httpbin");
+		}
+
 		function run( testResults , testBox ) {
 			describe( "Test suite for LDEV-407", function() {
 				it(title="checking http() function with timeout attribute on request", body = function( currentSpec ) {
 					try {
 						var httpResponse = new http()
-						.setUrl("http://httpbin.org/delay/3")
+						.setUrl("http://#variables.httpbin.server#:#variables.httpbin.port#/delay/3")
 						.setTimeout(1)
 						.setThrowOnError(true)
 						.send()
@@ -18,6 +22,9 @@
 				});
 
 				it(title="checking cfhttp tag with timeout attribute on request", body = function( currentSpec ) {
+					if ( structCount( variables.httpbin ) == 0 ){
+						return;
+					}
 					var httpResponse = cfhttptag();
 					expect(httpResponse).toBe("408 Request Time-out");
 				});
@@ -31,7 +38,7 @@
 	<cffunction name="cfhttptag" access="private" returntype="Any">
 		<cfset result = "">
 		<cftry>
-			<cfhttp url="http://httpbin.org/delay/3" throwonerror="true" timeout="1">
+			<cfhttp url="http://#variables.httpbin.server#:#variables.httpbin.port#/delay/3" throwonerror="true" timeout="1">
 			</cfhttp>
 			<cfcatch type="any">
 				<cfset result = cfcatch.message>
