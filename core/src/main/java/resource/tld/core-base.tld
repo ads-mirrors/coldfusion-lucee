@@ -559,6 +559,14 @@ A return value from the CreateTimeSpan function, for example, "#CreateTimeSpan(0
 			<status>unimplemented</status>
 			<description>Indicates whether the component acts as a mapped superclass. A mapped superclass serves as a base class for other components to extend but does not itself represent a database entity.</description>
 		</attribute>
+		<attribute>
+			<type>string</type>
+			<name>initMethod</name>
+			<required>false</required>
+			<rtexprvalue>true</rtexprvalue>
+			<status>unimplemented</status>
+			<description>Specifies the name of the initialization method to call when the component is instantiated using the `new` operator. If not specified, the default `init()` method is called.</description>
+		</attribute>
 	</tag>
 	
 	
