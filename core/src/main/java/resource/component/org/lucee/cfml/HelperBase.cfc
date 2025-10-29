@@ -161,11 +161,13 @@
 
 			<!--- cfmail --->
 			<cfcase value="mail">
+				<cfthrow message="not supported in 7.1 OOTB"
 				<cfset local.body = "">
 				<cfif StructKeyExists(tagAttributes, "body")>
 					<cfset local.body = tagAttributes.body>
 					<cfset Structdelete(tagAttributes, "body")>
 				</cfif>
+				/*
 				<cfmail attributeCollection="#tagAttributes#">#body#<!---
 				---><cfloop array="#tagParams#" index="local.param"><!---
                         ---><cfmailparam attributeCollection="#param#"><!---
@@ -180,7 +182,7 @@
                         ---><cfmailpart attributeCollection="#part#">#partbody#</cfmailpart><!---
                     ---></cfloop><!---
 				---></cfmail>
-
+				*/
 				<cfreturn this/>
 			</cfcase>
 
