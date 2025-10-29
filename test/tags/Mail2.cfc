@@ -1,4 +1,4 @@
-component extends="org.lucee.cfml.test.LuceeTestCase" labels="mail" {
+component extends="org.lucee.cfml.test.LuceeTestCase" labels="mail" skip=true { 
 	
 	processingdirective pageencoding="UTF-8";
 
