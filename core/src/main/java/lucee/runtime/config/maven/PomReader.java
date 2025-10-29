@@ -19,11 +19,6 @@ import lucee.commons.io.IOUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.net.http.HTTPDownloader;
-import lucee.commons.net.http.HTTPResponse;
-import lucee.commons.net.http.Header;
-import lucee.commons.net.http.httpclient.HTTPEngine4Impl;
-import lucee.runtime.exp.PageException;
-import lucee.runtime.op.date.DateCaster;
 import lucee.runtime.text.xml.XMLUtil;
 import lucee.transformer.library.function.FunctionLibEntityResolver;
 import lucee.transformer.library.function.FunctionLibException;
@@ -40,12 +35,13 @@ public final class PomReader extends DefaultHandler {
 		this.url = url;
 	}
 
-	public Map<String, Object> read() throws IOException, GeneralSecurityException, SAXException, PageException {
+	public Map<String, Object> read() throws IOException, GeneralSecurityException, SAXException {
 
 		// Use HTTPDownloader with DEBUG logging for Maven POM reads
 		Reader r = null;
 		try {
-			r = IOUtil.getReader( HTTPDownloader.get( url, null, null, MavenUpdateProvider.CONNECTION_TIMEOUT, MavenUpdateProvider.READ_TIMEOUT, null, Log.LEVEL_TRACE ), (Charset) null );
+			r = IOUtil.getReader(HTTPDownloader.get(url, null, null, MavenUpdateProvider.CONNECTION_TIMEOUT, MavenUpdateProvider.READ_TIMEOUT, null, Log.LEVEL_TRACE),
+					(Charset) null);
 			init(new InputSource(r));
 		}
 		finally {

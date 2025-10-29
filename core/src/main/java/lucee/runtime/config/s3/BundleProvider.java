@@ -46,12 +46,9 @@ import lucee.commons.io.IOUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
 import lucee.commons.io.log.LogUtil;
-import lucee.commons.io.res.Resource;
-import lucee.commons.io.res.util.ResourceUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.Pair;
 import lucee.commons.lang.StringUtil;
-import lucee.commons.net.HTTPUtil;
 import lucee.commons.net.http.HTTPDownloader;
 import lucee.commons.net.http.HTTPResponse;
 import lucee.commons.net.http.httpclient.HTTPEngine4Impl;
@@ -346,21 +343,17 @@ public final class BundleProvider extends DefaultHandler {
 				"Downloading bundle [" + bd.getName() + ":" + bd.getVersionAsString() + "] from " + updateUrl + " and copying to " + jar);
 
 		try {
-			HTTPDownloader.downloadToFile(
-				updateUrl,
-				jar,
-				DOWNLOAD_CONNECT_TIMEOUT,
-				DOWNLOAD_READ_TIMEOUT,
-				DOWNLOAD_USER_AGENT
-			);
+			HTTPDownloader.downloadToFile(updateUrl, jar, DOWNLOAD_CONNECT_TIMEOUT, DOWNLOAD_READ_TIMEOUT, DOWNLOAD_USER_AGENT);
 			return jar;
 		}
 		catch (GeneralSecurityException e) {
-			throw new IOException("Failed to download the bundle for [" + bd.getName() + "] in version [" + bd.getVersionAsString() + "] from [" + updateUrl + "], please download manually and copy to [" + jarDir + "]", e);
+			throw new IOException("Failed to download the bundle for [" + bd.getName() + "] in version [" + bd.getVersionAsString() + "] from [" + updateUrl
+					+ "], please download manually and copy to [" + jarDir + "]", e);
 		}
 		catch (IOException e) {
 			// Add context and rethrow
-			throw new IOException("Failed to download the bundle for [" + bd.getName() + "] in version [" + bd.getVersionAsString() + "] from [" + updateUrl + "], please download manually and copy to [" + jarDir + "]", e);
+			throw new IOException("Failed to download the bundle for [" + bd.getName() + "] in version [" + bd.getVersionAsString() + "] from [" + updateUrl
+					+ "], please download manually and copy to [" + jarDir + "]", e);
 		}
 		/*
 		 * } else { throw new IOException("File ["+jar.getName()+"] already exists, won't copy new one"); }
@@ -582,7 +575,7 @@ public final class BundleProvider extends DefaultHandler {
 	}
 
 	public static URL validate(URL url, URL defaultValue) {
-		if (HTTPDownloader.exists( url, DOWNLOAD_CONNECT_TIMEOUT, DOWNLOAD_HEAD_READ_TIMEOUT )) {
+		if (HTTPDownloader.exists(url, DOWNLOAD_CONNECT_TIMEOUT, DOWNLOAD_HEAD_READ_TIMEOUT)) {
 			return url;
 		}
 		return defaultValue;

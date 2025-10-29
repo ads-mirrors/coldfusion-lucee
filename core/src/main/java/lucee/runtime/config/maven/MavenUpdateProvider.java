@@ -34,7 +34,6 @@ import lucee.commons.lang.StringUtil;
 import lucee.commons.net.http.HTTPDownloader;
 import lucee.commons.net.http.HTTPResponse;
 import lucee.commons.net.http.Header;
-import lucee.commons.net.http.httpclient.HTTPEngine4Impl;
 import lucee.loader.engine.CFMLEngineFactory;
 import lucee.runtime.converter.ConverterException;
 import lucee.runtime.converter.JSONConverter;
@@ -270,7 +269,7 @@ public final class MavenUpdateProvider {
 		String strURL = Caster.toString(data.get("lco"), null);
 		if (!StringUtil.isEmpty(strURL)) {
 			// Use HTTPDownloader with DEBUG logging for Maven operations
-			return HTTPDownloader.get( new URL( strURL ), null, null, CONNECTION_TIMEOUT, READ_TIMEOUT, null, Log.LEVEL_TRACE );
+			return HTTPDownloader.get(new URL(strURL), null, null, CONNECTION_TIMEOUT, READ_TIMEOUT, null, Log.LEVEL_TRACE);
 		}
 		return getFileStreamFromZipStream(getLoader(version));
 	}
@@ -281,7 +280,7 @@ public final class MavenUpdateProvider {
 		if (StringUtil.isEmpty(strURL)) throw new IOException("no jar for [" + version + "] found.");
 
 		// Use HTTPDownloader with DEBUG logging for Maven operations
-		return HTTPDownloader.get( new URL( strURL ), null, null, CONNECTION_TIMEOUT, READ_TIMEOUT, null, Log.LEVEL_TRACE );
+		return HTTPDownloader.get(new URL(strURL), null, null, CONNECTION_TIMEOUT, READ_TIMEOUT, null, Log.LEVEL_TRACE);
 	}
 
 	/*
@@ -334,7 +333,7 @@ public final class MavenUpdateProvider {
 					// read main
 					{
 						URL urlMain = new URL(repo.url + g + "/" + a + "/" + v + "/" + a + "-" + v + "." + requiredArtifactExtension);
-						HTTPResponse rsp = HTTPDownloader.head( urlMain, CONNECTION_TIMEOUT, CONNECTION_TIMEOUT, Log.LEVEL_TRACE );
+						HTTPResponse rsp = HTTPDownloader.head(urlMain, CONNECTION_TIMEOUT, CONNECTION_TIMEOUT, Log.LEVEL_TRACE);
 						if (validSatusCode(rsp)) {
 							Map<String, Object> result = new LinkedHashMap<>();
 							Header[] headers = rsp.getAllHeaders();
@@ -348,7 +347,7 @@ public final class MavenUpdateProvider {
 							// pom
 							{
 								URL url = new URL(repo.url + g + "/" + a + "/" + v + "/" + a + "-" + v + ".pom");
-								rsp = HTTPDownloader.head( url, CONNECTION_TIMEOUT, CONNECTION_TIMEOUT, Log.LEVEL_TRACE );
+								rsp = HTTPDownloader.head(url, CONNECTION_TIMEOUT, CONNECTION_TIMEOUT, Log.LEVEL_TRACE);
 								if (validSatusCode(rsp)) {
 									result.put("pom", url.toExternalForm());
 								}
@@ -356,7 +355,7 @@ public final class MavenUpdateProvider {
 							// lco
 							{
 								URL url = new URL(repo.url + g + "/" + a + "/" + v + "/" + a + "-" + v + ".lco");
-								rsp = HTTPDownloader.head( url, CONNECTION_TIMEOUT, CONNECTION_TIMEOUT, Log.LEVEL_TRACE );
+								rsp = HTTPDownloader.head(url, CONNECTION_TIMEOUT, CONNECTION_TIMEOUT, Log.LEVEL_TRACE);
 								if (validSatusCode(rsp)) {
 									result.put("lco", url.toExternalForm());
 								}

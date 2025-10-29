@@ -28,7 +28,6 @@ import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.runtime.PageContext;
 import lucee.runtime.PageContextImpl;
-import lucee.runtime.config.ConfigPro;
 import lucee.runtime.engine.ExecutionLog;
 import lucee.runtime.engine.ExecutionLogSupport;
 import lucee.runtime.engine.ThreadLocalPageContext;
@@ -84,7 +83,7 @@ public final class UDFCaller2<P> implements Callable<Data<P>> {
 			this.pc = ThreadUtil.clonePageContext(parent, baos, false, false, false);
 
 			// Capture spawn offset for execution log
-			PageContextImpl pci = (PageContextImpl) this.pc;
+			PageContextImpl pci = this.pc;
 			ExecutionLog execLog = pci.getExecutionLog();
 			if (execLog != null && execLog instanceof ExecutionLogSupport) {
 				PageContextImpl parentPci = (PageContextImpl) parent;

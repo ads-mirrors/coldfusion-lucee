@@ -17,13 +17,12 @@ import org.xml.sax.SAXException;
 import lucee.commons.digest.HashUtil;
 import lucee.commons.io.SystemUtil;
 import lucee.commons.io.log.Log;
-import lucee.commons.io.log.LogUtil;
 import lucee.commons.io.res.Resource;
-import lucee.commons.net.http.HTTPDownloader;
 import lucee.commons.lang.ExceptionUtil;
 import lucee.commons.lang.Pair;
 import lucee.commons.lang.SerializableObject;
 import lucee.commons.lang.StringUtil;
+import lucee.commons.net.http.HTTPDownloader;
 import lucee.commons.tree.TreeNode;
 import lucee.runtime.mvn.POMReader.Dependency;
 import lucee.runtime.op.Caster;
@@ -508,7 +507,7 @@ public final class POM {
 			try {
 				url = new URL(r.getUrl() + scriptName);
 
-				if (HTTPDownloader.exists( url, CONNECTION_TIMEOUT, READ_TIMEOUT_HEAD )) {
+				if (HTTPDownloader.exists(url, CONNECTION_TIMEOUT, READ_TIMEOUT_HEAD)) {
 					return url;
 				}
 

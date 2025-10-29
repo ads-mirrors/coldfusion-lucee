@@ -25,8 +25,6 @@ import java.net.URL;
 import org.osgi.framework.Bundle;
 
 import lucee.commons.io.IOUtil;
-import lucee.commons.io.log.Log;
-import lucee.commons.io.log.LogUtil;
 import lucee.commons.lang.StringUtil;
 import lucee.commons.net.http.HTTPDownloader;
 import lucee.runtime.type.util.ListUtil;
@@ -65,9 +63,7 @@ public final class JDBCDriver {
 
 		BufferedReader br = null;
 		try {
-			br = new BufferedReader(new InputStreamReader(
-				HTTPDownloader.get( url )
-			));
+			br = new BufferedReader(new InputStreamReader(HTTPDownloader.get(url)));
 			String content = IOUtil.toString(br);
 			return ListUtil.first(content, " \n\t");
 		}
